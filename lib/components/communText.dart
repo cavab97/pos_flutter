@@ -35,4 +35,36 @@ class CommunFun {
       ),
     );
   }
+
+  static searchBar(onChange) {
+    TextField(
+      keyboardType: TextInputType.text,
+      decoration: InputDecoration(
+        prefixIcon: Padding(
+          padding: EdgeInsets.only(left: 25, right: 25),
+          child: Icon(
+            Icons.search,
+            color: Colors.deepOrange,
+            size: 40,
+          ),
+        ),
+        hintText: "Search product here...",
+        hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(50),
+          borderSide: BorderSide(
+            width: 0,
+            style: BorderStyle.none,
+          ),
+        ),
+        filled: true,
+        contentPadding: EdgeInsets.only(top: 25, bottom: 25),
+        fillColor: Colors.white,
+      ),
+      style: TextStyle(color: Colors.black, fontSize: 25.0),
+      onChanged: (e) {
+        print(e);
+      },
+    );
+  }
 }

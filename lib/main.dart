@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'cashierApp',
       theme: appTheme(),
-      initialRoute: '/',
+      initialRoute: '/Dashboard',
       routes: routes,
     );
   }
