@@ -1,8 +1,8 @@
-
 import 'package:flutter/widgets.dart';
 import 'package:mcncashier/screens/Home.dart';
+import 'package:mcncashier/screens/Login.dart';
 
 final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-  "/": (BuildContext context) => MyHomePage(),
-  // "/ExScreen2": (BuildContext context) => ExScreen2(),
+  "/": (BuildContext context) => LoginPage(),
+  "/Login": (BuildContext context) => LoginPage(),
 };
