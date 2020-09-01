@@ -106,8 +106,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: MediaQuery.of(context).size.width,
                 child: CommunFun.roundedButton("LOGIN", () {
                   // TODO : LOGIN API
-                  print("Teart");
-                  
+                  Navigator.pushNamed(context, '/Dashboard'); // Goto next page
                 }),
               )
             ],

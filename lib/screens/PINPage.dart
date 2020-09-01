@@ -17,7 +17,6 @@ class _PINPageState extends State<PINPage> {
 
   @override
   Widget build(BuildContext context) {
-    var myPass = [1, 2, 3, 4];
     return Scaffold(
         body: Center(
             child: Container(
