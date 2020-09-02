@@ -11,7 +11,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextEditingController emailAddress = new TextEditingController();
   TextEditingController password = new TextEditingController();
- 
+
   @override
   void initState() {
     super.initState();
@@ -108,8 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: MediaQuery.of(context).size.width,
                 child: CommunFun.roundedButton("LOGIN", () {
                   // TODO : LOGIN API
-                  Navigator.pushNamed(context, '/Dashboard'); // Goto next page
-                  
+                  Navigator.pushNamed(context, '/PINPage'); // Goto next page
                 }),
               )
             ],

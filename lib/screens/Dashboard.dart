@@ -215,7 +215,7 @@ class _DashboradPageState extends State<DashboradPage> {
                               ),
                               Container(
                                 height: 50,
-                                width: MediaQuery.of(context).size.width / 3,
+                                width: MediaQuery.of(context).size.width / 3.5,
                                 child: TextField(
                                   keyboardType: TextInputType.text,
                                   decoration: InputDecoration(
