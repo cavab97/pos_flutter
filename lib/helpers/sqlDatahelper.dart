@@ -37,11 +37,12 @@ class DatabaseHelper {
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path + "/" + databaseName;
 
-    if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
-      _database = await openDatabase(path, version: 1, onCreate: _createDb);
-    } else {
-      print("already exit\(path)" + path);
-    }
+    // if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
+    _database = await openDatabase(path, version: 1, onCreate: _createDb);
+    // } else {
+    //   _database = await openDatabase(path, version: 1, onCreate: _onOpen;
+    //   print("already exit\(path)" + path);
+    // }
     return _database;
   }
 

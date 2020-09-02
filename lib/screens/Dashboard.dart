@@ -129,12 +129,12 @@ class _DashboradPageState extends State<DashboradPage> {
     return Scaffold(
         key: scaffoldKey,
         drawer: drawerWidget(),
-        body: Container(
-            margin: EdgeInsets.only(top: 30),
+        body: SafeArea(
+          child: Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
             child: Table(
-              border: TableBorder.all(color: Colors.white, width: 1),
+              border: TableBorder.all(color: Colors.white, width: 0.6),
               columnWidths: {
                 0: FractionColumnWidth(.6),
                 1: FractionColumnWidth(.3),
@@ -170,7 +170,9 @@ class _DashboradPageState extends State<DashboradPage> {
                   )),
                 ]),
               ],
-            )));
+            ),
+          ),
+        ));
   }
 
   Widget drawerWidget() {
@@ -260,7 +262,7 @@ class _DashboradPageState extends State<DashboradPage> {
             RaisedButton(
               padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
               onPressed: () {
-                 Navigator.pushNamed(context, '/TansactionsPage');
+                Navigator.pushNamed(context, '/TansactionsPage');
               },
               child: Row(
                 children: <Widget>[
@@ -324,7 +326,7 @@ class _DashboradPageState extends State<DashboradPage> {
                           height: 250,
                           child: Center())),
                   Container(
-                    margin: EdgeInsets.only(top:190),
+                    margin: EdgeInsets.only(top: 190),
                     width: MediaQuery.of(context).size.width,
                     // height: 90,
                     decoration: BoxDecoration(

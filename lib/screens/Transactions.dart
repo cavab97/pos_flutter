@@ -18,119 +18,119 @@ class _TransactionsPageState extends State<TransactionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: transactionsDrawer(),
-      body: Container(
-        margin: EdgeInsets.only(top: 30),
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: Table(
-          columnWidths: {
-            0: FractionColumnWidth(.3),
-            1: FractionColumnWidth(.6),
-          },
-          children: [
-            TableRow(children: [
-              TableCell(
-                  child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height,
-                      color: Colors.white,
-                      child: ListView(
-                        padding: EdgeInsets.all(20),
-                        children: <Widget>[
-                          Text("Transaction",
-                              style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[800])),
-                          transationsSearchBox(),
-                          SizedBox(
-                            height: 15,
-                          ),
-                          Text("Wednesday, August 19",
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blueGrey[900])),
-                          searchTransationList()
-                        ],
-                      ))),
-              TableCell(
-                child: Center(
-                  child: Container(
-                    width: MediaQuery.of(context).size.width / 2,
-                    margin: EdgeInsets.only(top: 30),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            "Wen,August 19 09:53 PM",
-                            style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).primaryColor),
-                          ),
-                          SizedBox(
-                            height: 50,
-                          ),
-                          Text(
-                            "13.00",
-                            style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).accentColor),
-                          ),
-                          SizedBox(
-                            height: 30,
-                          ),
-                          Text(
-                            "00000000 - Processed by OKDEE OKEY PROCESSED FORM",
-                            style: TextStyle(
-                                fontSize: 23,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).primaryColor),
-                          ),
-                          SizedBox(
-                            height: 30,
-                          ),
-                          Container(
-                            height: 70,
-                            width: MediaQuery.of(context).size.width / 2,
-                            child: Center(
-                              child: Text(
-                                "Aaron Young",
+        drawer: transactionsDrawer(),
+        body: SafeArea(
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: Table(
+              columnWidths: {
+                0: FractionColumnWidth(.3),
+                1: FractionColumnWidth(.6),
+              },
+              children: [
+                TableRow(children: [
+                  TableCell(
+                      child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                          color: Colors.white,
+                          child: ListView(
+                            padding: EdgeInsets.all(20),
+                            children: <Widget>[
+                              Text("Transaction",
+                                  style: TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[800])),
+                              transationsSearchBox(),
+                              SizedBox(
+                                height: 15,
+                              ),
+                              Text("Wednesday, August 19",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blueGrey[900])),
+                              searchTransationList()
+                            ],
+                          ))),
+                  TableCell(
+                    child: Center(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width / 2,
+                        margin: EdgeInsets.only(top: 30),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Text(
+                                "Wen,August 19 09:53 PM",
                                 style: TextStyle(
-                                    fontSize: 23,
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                              SizedBox(
+                                height: 50,
+                              ),
+                              Text(
+                                "13.00",
+                                style: TextStyle(
+                                    fontSize: 28,
                                     fontWeight: FontWeight.bold,
                                     color: Theme.of(context).accentColor),
                               ),
-                            ),
-                            color: Colors.grey[900].withOpacity(0.4),
+                              SizedBox(
+                                height: 30,
+                              ),
+                              Text(
+                                "00000000 - Processed by OKDEE OKEY PROCESSED FORM",
+                                style: TextStyle(
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                              SizedBox(
+                                height: 30,
+                              ),
+                              Container(
+                                height: 70,
+                                width: MediaQuery.of(context).size.width / 2,
+                                child: Center(
+                                  child: Text(
+                                    "Aaron Young",
+                                    style: TextStyle(
+                                        fontSize: 23,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context).accentColor),
+                                  ),
+                                ),
+                                color: Colors.grey[900].withOpacity(0.4),
+                              ),
+                              productList(),
+                              SizedBox(
+                                height: 30,
+                              ),
+                              totalAmountValues(),
+                              SizedBox(
+                                height: 30,
+                              ),
+                              cancelButton(() {
+                                Navigator.of(context).pop();
+                              }),
+                            ],
                           ),
-                          productList(),
-                          SizedBox(
-                            height: 30,
-                          ),
-                          totalAmountValues(),
-                          SizedBox(
-                            height: 30,
-                          ),
-                          cancelButton(() {
-                            Navigator.of(context).pop();
-                          }),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            ]),
-          ],
-        ),
-      ),
-    );
+                ]),
+              ],
+            ),
+          ),
+        ));
   }
 
   transactionsDrawer() {
