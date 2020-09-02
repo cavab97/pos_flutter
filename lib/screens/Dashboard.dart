@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/helpers/sqlDatahelper.dart';
 
 class DashboradPage extends StatefulWidget {
   DashboradPage({Key key}) : super(key: key);
@@ -8,15 +9,175 @@ class DashboradPage extends StatefulWidget {
 }
 
 class _DashboradPageState extends State<DashboradPage> {
+  DatabaseHelper databaseHelper = DatabaseHelper();
   @override
   void initState() {
     super.initState();
+    databaseHelper.initializeDatabase();
+    //  getData();
+  }
+
+  getData() async {
+    var data = await databaseHelper.getlocalData();
+    print(data);
   }
 
   @override
   Widget build(BuildContext context) {
+    final cartTable = Table(
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        border: TableBorder(
+            horizontalInside: BorderSide(
+                width: 1, color: Colors.grey, style: BorderStyle.solid)),
+        children: [
+          TableRow(decoration: BoxDecoration(color: Colors.white), children: [
+            Padding(
+                padding: EdgeInsets.only(left: 10, top: 20, bottom: 20),
+                child: Text(
+                  "Name",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                )),
+            Padding(
+              padding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
+              child: Text("Qty", style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: 10, top: 20, bottom: 20),
+              child: Text("Ammount",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            )
+          ]),
+          TableRow(children: [
+            Padding(
+                padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
+                child: Text("item 1")),
+            Padding(
+                padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
+                child: Text("5.00")),
+            Padding(
+                padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
+                child: Text("35.00")),
+          ]),
+          TableRow(children: [
+            Padding(
+                padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
+                child: Text("item 1")),
+            Padding(
+                padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
+                child: Text("5.00")),
+            Padding(
+                padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
+                child: Text("35.00")),
+          ]),
+        ]);
+    final totalPriceTable = Table(
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        border: TableBorder(
+            horizontalInside: BorderSide(
+                width: 1, color: Colors.grey, style: BorderStyle.solid)),
+        children: [
+          TableRow(children: [
+            Padding(
+              padding: EdgeInsets.only(top: 10, bottom: 10),
+              child: Text("SUB TOTAL"),
+            ),
+            Padding(
+                padding: EdgeInsets.only(top: 10, bottom: 10),
+                child: Text("00:00")),
+          ]),
+          TableRow(children: [
+            Padding(
+                padding: EdgeInsets.only(top: 10, bottom: 10),
+                child: Text("Discount")),
+            Padding(
+                padding: EdgeInsets.only(top: 10, bottom: 10),
+                child: Text("00:00")),
+          ]),
+          TableRow(children: [
+            Padding(
+                padding: EdgeInsets.only(top: 10, bottom: 10),
+                child: Text("TAX")),
+            Padding(
+                padding: EdgeInsets.only(top: 10, bottom: 10),
+                child: Text("00:00")),
+          ]),
+          TableRow(children: [
+            Padding(
+                padding: EdgeInsets.only(top: 10, bottom: 10),
+                child: Text("GRAND TOTAL")),
+            Padding(
+                padding: EdgeInsets.only(top: 10, bottom: 10),
+                child: Text("150.00")),
+          ]),
+        ]);
+    final _tabs = TabBar(
+      indicatorSize: TabBarIndicatorSize.label,
+      unselectedLabelColor: Colors.white,
+      labelColor: Colors.white,
+      indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(12), color: Colors.deepOrange),
+      labelStyle: TextStyle(fontSize: 16),
+      tabs: [
+        Tab(
+          child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                "CRAB BEE",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              )),
+        ),
+        Tab(
+          child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                "COFFI",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              )),
+        ),
+        Tab(
+          child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                "TEA",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              )),
+        ),
+        Tab(
+          child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                "LAMKDS",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              )),
+        ),
+        Tab(
+          child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                "TEXT",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              )),
+        )
+      ],
+    );
     return Scaffold(
         body: Container(
+            margin: EdgeInsets.only(top: 30),
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
             child: Table(
@@ -145,95 +306,7 @@ class _DashboradPageState extends State<DashboradPage> {
                             color: Colors.black38,
                             padding: EdgeInsets.all(10),
                             child: DefaultTabController(
-                              initialIndex: 0,
-                              length: 5,
-                              child: TabBar(
-                                indicatorSize: TabBarIndicatorSize.label,
-                                unselectedLabelColor: Colors.white,
-                                labelColor: Colors.white,
-                                indicator: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    color: Colors.deepOrange),
-                                labelStyle: TextStyle(fontSize: 16),
-                                tabs: [
-                                  Tab(
-                                    child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 15),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                        ),
-                                        child: Text(
-                                          "TEXT",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold),
-                                        )),
-                                  ),
-                                  Tab(
-                                    child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 12),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                        ),
-                                        child: Text(
-                                          "TEXT",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold),
-                                        )),
-                                  ),
-                                  Tab(
-                                    child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 12),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                        ),
-                                        child: Text(
-                                          "TEXT",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold),
-                                        )),
-                                  ),
-                                  Tab(
-                                    child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 12),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                        ),
-                                        child: Text(
-                                          "TEXT",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold),
-                                        )),
-                                  ),
-                                  Tab(
-                                    child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 12),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                        ),
-                                        child: Text(
-                                          "TEXT",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold),
-                                        )),
-                                  )
-                                ],
-                              ),
-                            ),
+                                initialIndex: 0, length: 5, child: _tabs),
                           ),
                           Container(
                             height: MediaQuery.of(context).size.height,
@@ -244,27 +317,30 @@ class _DashboradPageState extends State<DashboradPage> {
                                 return InkWell(
                                   onTap: () {},
                                   child: Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                          width: 1, color: Color(0xFFDEDFDF)),
-                                    ),
+                                    // decoration: BoxDecoration(
+                                    //   border: Border.all(
+                                    //       width: 1, color: Color(0xFFDEDFDF)),
+                                    // ),
                                     margin: EdgeInsets.all(5),
                                     child: Stack(
                                       alignment: AlignmentDirectional.topCenter,
                                       children: <Widget>[
                                         Hero(
-                                            tag: 1,
+                                            tag: index,
                                             child: Container(
-                                              color: Colors.greenAccent,
-                                              width: MediaQuery.of(context)
-                                                  .size
-                                                  .width,
-                                              height: 200,
-                                              child: Image.asset(
-                                                "assets/photo-1504674900247-0877df9cc836.jfif",
-                                                fit: BoxFit.contain,
-                                              ),
-                                            )),
+                                                decoration: new BoxDecoration(
+                                                  color: Colors.greenAccent,
+                                                  image: new DecorationImage(
+                                                    image: new ExactAssetImage(
+                                                        'assets/photo-1504674900247-0877df9cc836.jfif'),
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                                width: MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                                height: 250,
+                                                child: Center())),
                                         Container(
                                           margin: EdgeInsets.only(top: 150),
                                           width:
@@ -320,51 +396,25 @@ class _DashboradPageState extends State<DashboradPage> {
                           child: Column(
                             children: <Widget>[
                               Container(
-                                color: Colors.grey[300],
-                                child: Table(children: [
-                                  TableRow(
-                                      decoration:
-                                          BoxDecoration(color: Colors.white),
-                                      children: [
-                                        Padding(
-                                            padding: EdgeInsets.only(
-                                                left: 10, top: 20, bottom: 20),
-                                            child: Text(
-                                              "Name",
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            )),
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              left: 20, top: 20, bottom: 20),
-                                          child: Text("Qty",
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold)),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              left: 10, top: 20, bottom: 20),
-                                          child: Text("Ammount",
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold)),
-                                        )
-                                      ]),
-                                  TableRow(children: [
-                                    Text("item 1"),
-                                    Text("item 2"),
-                                    Text("item 2"),
-                                  ]),
-                                  TableRow(children: [
-                                    Text("item 3"),
-                                    Text("item 4"),
-                                    Text("item 4"),
-                                  ]),
-                                ]),
-                              ),
+                                  height:
+                                      MediaQuery.of(context).size.height / 1.4,
+                                  color: Colors.grey[300],
+                                  padding: EdgeInsets.all(10),
+                                  child: Stack(
+                                    children: <Widget>[
+                                      cartTable,
+                                      Positioned(
+                                          bottom: 0,
+                                          left: 0,
+                                          right: 0,
+                                          child:
+                                              Container(child: totalPriceTable))
+                                    ],
+                                  )),
                             ],
                           )),
                       Container(
-                          height: 80,
+                          height: 70,
                           width: 320,
                           child: CommunFun.roundedButton("PAY", () {}))
                     ],

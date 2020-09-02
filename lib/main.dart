@@ -15,11 +15,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+  
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'cashierApp',
       theme: appTheme(),
-      initialRoute: '/PinEnter',
+      initialRoute: '/Login',
       routes: routes,
     );
   }

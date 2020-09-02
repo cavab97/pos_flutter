@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/helpers/sqlDatahelper.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -10,6 +11,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextEditingController emailAddress = new TextEditingController();
   TextEditingController password = new TextEditingController();
+ 
   @override
   void initState() {
     super.initState();
@@ -107,6 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: CommunFun.roundedButton("LOGIN", () {
                   // TODO : LOGIN API
                   Navigator.pushNamed(context, '/Dashboard'); // Goto next page
+                  
                 }),
               )
             ],
