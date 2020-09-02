@@ -8,5 +8,6 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   "/Login": (BuildContext context) => LoginPage(),
   "/PINPage": (BuildContext context) => PINPage(),
   "/Dashboard": (BuildContext context) => DashboradPage(),
-    "/OpningAmmount": (BuildContext context) => OpeningAmmountPage(),
+  "/OpningAmmount": (BuildContext context) => OpeningAmmountPage(),
+  "/PinEnter": (BuildContext context) => PINPage(),
 };
