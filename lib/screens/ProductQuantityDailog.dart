@@ -20,35 +20,75 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       titlePadding: EdgeInsets.all(0),
-      title: Container(
-        padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-        height: 70,
-        color: Colors.black,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text("YMSFDF FOOD TSD", style: TextStyle(color: Colors.white)),
-            addbutton(context)
-          ],
-        ),
+      title: Stack(
+        overflow: Overflow.visible,
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
+            height: 70,
+            color: Colors.black,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text("YMSFDF FOOD TSD", style: TextStyle(color: Colors.white)),
+                addbutton(context)
+              ],
+            ),
+          ),
+          closeButton(context),
+        ],
       ),
       content: mainContent(),
       actions: <Widget>[
-        Container(
-          // color: Colors.indigo,
-          width: MediaQuery.of(context).size.width,
-          child: Column(children: <Widget>[
-            CommunFun.divider(),
-            Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  buttonContainer(),
-                ]),
-          ]),
-        ),
+        Stack(
+          children: <Widget>[
+            Positioned(
+                bottom: 10,
+                right: 30,
+                child: Text("500.00",
+                    style: TextStyle(
+                        color: Colors.deepOrange,
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold))),
+            Container(
+              // color: Colors.indigo,
+              width: MediaQuery.of(context).size.width,
+              child: Column(children: <Widget>[
+                CommunFun.divider(),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      buttonContainer(),
+                    ]),
+              ]),
+            ),
+          ],
+        )
       ],
     );
+  }
+
+  Widget closeButton(context) {
+    return Positioned(
+        top: -30,
+        right: -20,
+        child: GestureDetector(
+          onTap: () {
+            Navigator.of(context).pop();
+          },
+          child: Container(
+            width: 50.0,
+            height: 50.0,
+            decoration: BoxDecoration(
+                color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+            child: Icon(
+              Icons.clear,
+              color: Colors.white,
+              size: 30,
+            ),
+          ),
+        ));
   }
 
   Widget buttonContainer() {
