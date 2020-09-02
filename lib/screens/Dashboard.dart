@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 
 class DashboradPage extends StatefulWidget {
@@ -28,7 +29,7 @@ class _DashboradPageState extends State<DashboradPage> {
 
   openDrawer() {
     if (isDrawerOpen) {
-      Navigator.of(context).pop();
+      // Navigator.of(context).pop();
     } else {
       scaffoldKey.currentState.openDrawer();
     }
@@ -43,6 +44,16 @@ class _DashboradPageState extends State<DashboradPage> {
         context: context,
         builder: (BuildContext context) {
           return ProductQuantityDailog(
+            title: "test",
+          );
+        });
+  }
+
+  openSendReceiptPop() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return InvoiceReceiptDailog(
             title: "test",
           );
         });
@@ -117,7 +128,7 @@ class _DashboradPageState extends State<DashboradPage> {
     );
     return Scaffold(
         key: scaffoldKey,
-        drawer: Drawer(child: Container(color: Colors.white)),
+        drawer: drawerWidget(),
         body: Container(
             margin: EdgeInsets.only(top: 30),
             width: MediaQuery.of(context).size.width,
@@ -162,6 +173,10 @@ class _DashboradPageState extends State<DashboradPage> {
             )));
   }
 
+  Widget drawerWidget() {
+    return Drawer(child: Container(color: Colors.white, child: Text("Text")));
+  }
+
   Widget tableHeader1() {
     return Container(
       height: 80,
@@ -193,7 +208,7 @@ class _DashboradPageState extends State<DashboradPage> {
           ),
           Container(
             height: 50,
-            width: MediaQuery.of(context).size.width / 3.5,
+            width: MediaQuery.of(context).size.width / 3.8,
             child: TextField(
               keyboardType: TextInputType.text,
               decoration: InputDecoration(
@@ -244,7 +259,9 @@ class _DashboradPageState extends State<DashboradPage> {
             ),
             RaisedButton(
               padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-              onPressed: () {},
+              onPressed: () {
+                 Navigator.pushNamed(context, '/TansactionsPage');
+              },
               child: Row(
                 children: <Widget>[
                   Icon(
@@ -271,10 +288,16 @@ class _DashboradPageState extends State<DashboradPage> {
   }
 
   Widget porductsList() {
+    var size = MediaQuery.of(context).size;
+
+    /*24 is for notification bar on Android*/
+    final double itemHeight = (size.height - kToolbarHeight - 24) / 2;
+    final double itemWidth = size.width / 4.2;
     return Container(
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
       child: GridView.count(
+        childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
         children: List.generate(50, (index) {
           return InkWell(
@@ -282,10 +305,6 @@ class _DashboradPageState extends State<DashboradPage> {
               showQuantityDailog();
             },
             child: Container(
-              // decoration: BoxDecoration(
-              //   border: Border.all(
-              //       width: 1, color: Color(0xFFDEDFDF)),
-              // ),
               margin: EdgeInsets.all(5),
               child: Stack(
                 alignment: AlignmentDirectional.topCenter,
@@ -305,7 +324,7 @@ class _DashboradPageState extends State<DashboradPage> {
                           height: 250,
                           child: Center())),
                   Container(
-                    margin: EdgeInsets.only(top: 150),
+                    margin: EdgeInsets.only(top:190),
                     width: MediaQuery.of(context).size.width,
                     // height: 90,
                     decoration: BoxDecoration(
@@ -323,7 +342,7 @@ class _DashboradPageState extends State<DashboradPage> {
                     ),
                   ),
                   Positioned(
-                      top: 130,
+                      top: 170,
                       left: 0,
                       child: Container(
                           color: Colors.deepOrange,
@@ -345,7 +364,7 @@ class _DashboradPageState extends State<DashboradPage> {
         height: 70,
         width: 320,
         child: CommunFun.roundedButton("PAY", () {
-          Navigator.pushNamed(context, '/PINPage');
+          openSendReceiptPop();
         }));
   }
 
