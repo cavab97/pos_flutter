@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mcncashier/components/StringFile.dart';
-import 'package:mcncashier/components/communText.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 
 class PINPage extends StatefulWidget {
   PINPage({Key key}) : super(key: key);
@@ -29,8 +26,8 @@ class _PINPageState extends State<PINPage> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30.0),
-                ),
+                    borderRadius: BorderRadius.circular(30.0),
+                    color: Colors.white),
                 width: MediaQuery.of(context).size.width / 1.2,
                 height: MediaQuery.of(context).size.height / 1.2,
                 child: Row(
@@ -67,7 +64,7 @@ Widget imageview(context) {
               image: AssetImage("assets/bg.jpg"), fit: BoxFit.cover)),
       child: Center(
         child: Text(
-          'Set Full Screen Background Image in Flutter',
+          '',
           textAlign: TextAlign.center,
           style: TextStyle(
               color: Colors.brown, fontSize: 25, fontWeight: FontWeight.bold),
@@ -102,7 +99,7 @@ Widget getNumbers(context) {
       child: Column(
         children: <Widget>[
           SizedBox(
-            height: 10,
+            height: 20,
           ),
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -113,7 +110,7 @@ Widget getNumbers(context) {
                 )
               ]),
           SizedBox(
-            height: 15,
+            height: 20,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -194,7 +191,10 @@ Widget getNumbers(context) {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Text("Clear",
-                    style: TextStyle(color: Colors.deepOrange, fontSize: 25))
+                    style: TextStyle(
+                        color: Colors.deepOrange,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w600))
               ])
         ],
       ),

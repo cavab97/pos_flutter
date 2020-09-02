@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 
 class DashboradPage extends StatefulWidget {
   DashboradPage({Key key}) : super(key: key);
@@ -20,6 +21,16 @@ class _DashboradPageState extends State<DashboradPage> {
   getData() async {
     var data = await databaseHelper.getlocalData();
     print(data);
+  }
+
+  showQuantityDailog() async {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return ProductQuantityDailog(
+            title: "test",
+          );
+        });
   }
 
   @override
@@ -315,7 +326,9 @@ class _DashboradPageState extends State<DashboradPage> {
                               crossAxisCount: 4,
                               children: List.generate(50, (index) {
                                 return InkWell(
-                                  onTap: () {},
+                                  onTap: () {
+                                    showQuantityDailog();
+                                  },
                                   child: Container(
                                     // decoration: BoxDecoration(
                                     //   border: Border.all(
