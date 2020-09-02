@@ -1,3 +1,5 @@
+import 'package:mcncashier/helpers/GetTableData.dart';
+import 'package:mcncashier/helpers/Tables.dart';
 import 'package:mcncashier/models/todo.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
@@ -13,9 +15,10 @@ class DatabaseHelper {
   String colTitle = 'title';
   String colDescription = 'description';
   String colDate = 'date';
-
+  String databaseName = "MCN_POS.db";
   DatabaseHelper._createInstance();
-
+  CreateTables createTablehelper = CreateTables();
+  TableData tableDataHelper = TableData();
   factory DatabaseHelper() {
     if (_databaseHelper == null) {
       _databaseHelper = DatabaseHelper
@@ -31,39 +34,32 @@ class DatabaseHelper {
   }
 
   Future<Database> initializeDatabase() async {
-    // Get the directory path for both Android and iOS to store database.
     Directory directory = await getApplicationDocumentsDirectory();
-    String path = directory.path + 'MCN_pos.db';
+    String path = directory.path + "/" + databaseName;
 
-    // Open/create the database at a given path
-    var todosDatabase =
-        await openDatabase(path, version: 1, onCreate: _createDb);
-    return todosDatabase;
+    if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
+      _database = await openDatabase(path, version: 1, onCreate: _createDb);
+    } else {
+      print("already exit\(path)" + path);
+    }
+    return _database;
   }
 
   void _createDb(Database db, int newVersion) async {
-    await db.execute(
-        'CREATE TABLE $todoTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colTitle TEXT, '
-        '$colDescription TEXT, $colDate TEXT)');
+    var data = await createTablehelper.createTable(db);
+    print(data);
   }
 
-  Future<List<Map<String, dynamic>>> getTodoMapList() async {
+  Future<int> getlocalData() async {
     Database db = await this.database;
-
-    var result = await db.query(todoTable, orderBy: '$colTitle ASC');
+    var result = await tableDataHelper.getRoleData(db);
     return result;
   }
 
-  Future<int> insertTodo(Todo todo) async {
-    Database db = await this.database;
-    var result = await db.insert(todoTable, todo.toMap());
-    return result;
-  }
-
-  Future<int> updateTodo(Todo todo) async {
-    var db = await this.database;
-    var result = await db.update(todoTable, todo.toMap(),
-        where: '$colId = ?', whereArgs: [todo.id]);
-    return result;
-  }
+  // Future<int> updateTodo(Todo todo) async {
+  //   var db = await this.database;
+  //   var result = await db.update(todoTable, todo.toMap(),
+  //       where: '$colId = ?', whereArgs: [todo.id]);
+  //   return result;
+  // }
 }

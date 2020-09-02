@@ -8,6 +8,17 @@ class CommunFun {
             color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold));
   }
 
+  static divider() {
+    return Padding(
+      padding: EdgeInsets.only(top: 0, left: 20, right: 20, bottom: 15),
+      child: Divider(
+        height: 1,
+        thickness: 1.0,
+        color: Colors.grey[300],
+      ),
+    );
+  }
+
   static forgotPasswordText(context) {
     return Container(
       width: MediaQuery.of(context).size.width,
