@@ -4,6 +4,7 @@ import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:mcncashier/services/teminalkey.dart' as repo;
 
 class TerminalKeyPage extends StatefulWidget {
+  //Terminal key page
   TerminalKeyPage({Key key}) : super(key: key);
   @override
   _TerminalKeyPageState createState() => _TerminalKeyPageState();
@@ -15,6 +16,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
   var errormessage = "";
   bool isValidatekey = true;
   bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -22,6 +24,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
   }
 
   validateFields() async {
+    // validate Fields
     if (terminalKey.text == "" || terminalKey.text.length == 0) {
       setState(() {
         errormessage = "Please enter terminal key.";
@@ -34,44 +37,45 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
   }
 
   setTerminalkey() async {
-    var isValid = await validateFields();
-    var deviceinfo = await CommunFun.deviceInfo();
     Navigator.pushNamed(context, '/Login');
-    TemimalKey terminal = new TemimalKey();
-    if (isValid) {
-      setState(() {
-        isLoading = true;
-      });
-      terminal.terminalKey = terminalKey.text;
-      terminal.deviceid = deviceinfo.id;
-      // await repo.sendTerminalKey(terminal).then((value) async {
-      //   print(value);
-      //   if (value != null && value.status == 200) {
-      //     Navigator.pushNamed(context, '/Login');
-      //   } else {
-      //     scaffoldKey.currentState.showSnackBar(SnackBar(
-      //       content: Text(value.message),
-      //     ));
-      //   }
-      // }).catchError((e) {
-      //   print(e);
-      //   scaffoldKey.currentState.showSnackBar(SnackBar(
-      //     content: Text(e.message),
-      //   ));
-      //   setState(() {
-      //     isLoading = false;
-      //   });
-      // }).whenComplete(() {
-      //   setState(() {
-      //     isLoading = false;
-      //   });
-      // });
-    }
+    // var isValid = await validateFields(); // validate fields
+    // var deviceinfo = await CommunFun.deviceInfo();
+    // TemimalKey terminal = new TemimalKey();
+    // if (isValid) {
+    //   setState(() {
+    //     isLoading = true;
+    //   });
+    //   terminal.terminalKey = terminalKey.text;
+    //   terminal.deviceid = deviceinfo.id;
+    //   await repo.sendTerminalKey(terminal).then((value) async {
+    //     print(value);
+    //     if (value != null && value.status == 200) {
+    //       Navigator.pushNamed(context, '/Login');
+    //     } else {
+    //       scaffoldKey.currentState.showSnackBar(SnackBar(
+    //         content: Text(value.message),
+    //       ));
+    //     }
+    //   }).catchError((e) {
+    //     print(e);
+    //     scaffoldKey.currentState.showSnackBar(SnackBar(
+    //       content: Text(e.message),
+    //     ));
+    //     setState(() {
+    //       isLoading = false;
+    //     });
+    //   }).whenComplete(() {
+    //     setState(() {
+    //       isLoading = false;
+    //     });
+    //   });
+    // }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        //  main part of the page
         body: Center(
       child: Container(
         width: MediaQuery.of(context).size.width / 1.8,
@@ -81,9 +85,11 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              loginlogo(),
+              loginlogo(), // Login logo
               SizedBox(height: 80),
-              emailInput((e) {
+              //
+              terminalKeyInput((e) {
+                // Key input
                 print("on changes");
                 if (e.length > 0) {
                   setState(() {
@@ -96,6 +102,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
               isLoading
                   ? CommunFun.loader(context)
                   : Container(
+                      // Key add button
                       width: MediaQuery.of(context).size.width,
                       child: CommunFun.roundedButton("Set Teminal Key", () {
                         setTerminalkey();
@@ -118,7 +125,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
     );
   }
 
-  Widget emailInput(Function onChange) {
+  Widget terminalKeyInput(Function onChange) {
     return TextField(
       controller: terminalKey,
       keyboardType: TextInputType.text,

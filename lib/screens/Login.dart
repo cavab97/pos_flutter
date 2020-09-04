@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/user.dart' as repo;
 
 class LoginPage extends StatefulWidget {
+  // LOGIN Page
   LoginPage({Key key}) : super(key: key);
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -13,10 +15,12 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController emailAddress = new TextEditingController();
   TextEditingController userPin = new TextEditingController();
   GlobalKey<ScaffoldState> scaffoldKey;
+
   var errormessage = "";
   bool isValidateEmail = true;
   bool isValidatePassword = true;
   bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -26,13 +30,13 @@ class _LoginPageState extends State<LoginPage> {
   validateFields() async {
     if (emailAddress.text == "" || emailAddress.text.length == 0) {
       setState(() {
-        errormessage = "Please enter email address.";
+        errormessage = Strings.username_validation_msg;
         isValidateEmail = false;
       });
       return false;
     } else if (userPin.text == "" || userPin.text.length == 0) {
       setState(() {
-        errormessage = "Please enter PIN.";
+        errormessage = Strings.userPin_validation_msg;
         isValidatePassword = false;
       });
       return false;
@@ -42,9 +46,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   sendlogin() async {
-    var isValid = await validateFields();
-    var deviceinfo = await CommunFun.deviceInfo();
+    // Login click fun
     Navigator.pushNamed(context, '/PINPage');
+    // var isValid = await validateFields(); // check validation
+    // var deviceinfo = await CommunFun.deviceInfo();
     // if (isValid) {
     //   setState(() {
     //     isLoading = true;
@@ -87,62 +92,68 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: scaffoldKey,
         body: Center(
-      child: Container(
-        width: MediaQuery.of(context).size.width / 1.8,
-        padding: EdgeInsets.only(left: 30, right: 30),
-        child: new SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              loginlogo(),
-              SizedBox(height: 40),
-              CommunFun.loginText(),
-              SizedBox(height: 50),
-              emailInput((e) {
-                print("on changes");
-                if (e.length > 0) {
-                  setState(() {
-                    errormessage = "";
-                    isValidateEmail = true;
-                  });
-                }
-              }),
-              SizedBox(height: 50),
-              passwordInput((e) {
-                setState(() {
-                  errormessage = "";
-                  isValidatePassword = true;
-                });
-              }),
-              SizedBox(height: 50),
-              GestureDetector(
-                onTap: () {
-                  // TODO : goto Forgot password
-                },
-                child: CommunFun.forgotPasswordText(context),
+          // Login main part
+          child: Container(
+            width: MediaQuery.of(context).size.width / 1.8,
+            padding: EdgeInsets.only(left: 30, right: 30),
+            child: new SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  loginlogo(), // logo
+                  SizedBox(height: 40),
+                  CommunFun.loginText(),
+                  SizedBox(height: 50),
+                  // username input
+                  emailInput((e) {
+                    print("on changes");
+                    if (e.length > 0) {
+                      setState(() {
+                        errormessage = "";
+                        isValidateEmail = true;
+                      });
+                    }
+                  }),
+                  SizedBox(height: 50),
+                  // password input
+                  passwordInput((e) {
+                    setState(() {
+                      errormessage = "";
+                      isValidatePassword = true;
+                    });
+                  }),
+                  SizedBox(height: 50),
+                  GestureDetector(
+                    // forgot password btn
+                    onTap: () {
+                      // TODO : goto Forgot password
+                    },
+                    child: CommunFun.forgotPasswordText(context),
+                  ),
+                  SizedBox(height: 50),
+                  isLoading
+                      ? CommunFun.loader(context)
+                      : Container(
+                          // Login button
+                          width: MediaQuery.of(context).size.width,
+                          child: CommunFun.roundedButton("LOGIN", () {
+                            // LOGIN API
+                            sendlogin();
+                          }),
+                        )
+                ],
               ),
-              SizedBox(height: 50),
-              isLoading
-                  ? CommunFun.loader(context)
-                  : Container(
-                      width: MediaQuery.of(context).size.width,
-                      child: CommunFun.roundedButton("LOGIN", () {
-                        // TODO : LOGIN API
-                        //Navigator.pushNamed(context, '/PINPage'); // Goto next page
-                        sendlogin();
-                      }),
-                    )
-            ],
+            ),
           ),
-        ),
-      ),
-    ));
+        ));
   }
 
   Widget loginlogo() {
     return SizedBox(
+      // login logo
       height: 110.0,
       child: Image.asset(
         "assets/headerlogo.png",
@@ -153,6 +164,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget emailInput(Function onChange) {
     return TextField(
+      // username input
       controller: emailAddress,
       keyboardType: TextInputType.text,
       decoration: InputDecoration(
@@ -166,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         errorText: !isValidateEmail ? errormessage : null,
         errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
-        hintText: "Username",
+        hintText: Strings.username_hint,
         hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50),
@@ -186,6 +198,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget passwordInput(Function onChange) {
     return TextField(
+      // User pin input
       controller: userPin,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
@@ -199,7 +212,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         errorText: !isValidatePassword ? errormessage : null,
         errorStyle: TextStyle(color: Colors.red),
-        hintText: "Pin",
+        hintText: Strings.pin_hint,
         hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50),

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 
 class InvoiceReceiptDailog extends StatefulWidget {
-  InvoiceReceiptDailog({Key key, this.title}) : super(key: key);
-
-  final String title;
+  InvoiceReceiptDailog({Key key}) : super(key: key);
 
   @override
   _InvoiceReceiptDailogState createState() => _InvoiceReceiptDailogState();
@@ -33,7 +32,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("INVOICE RECEIPT",
+                Text(Strings.invoice_reciept.toUpperCase(),
                     style: TextStyle(fontSize: 30, color: Colors.white)),
               ],
             ),

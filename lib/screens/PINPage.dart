@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class PINPage extends StatefulWidget {
+  // PIN Enter PAGE
   PINPage({Key key}) : super(key: key);
 
   @override
@@ -13,6 +14,7 @@ class _PINPageState extends State<PINPage> {
     return Scaffold(
         body: Center(
       child: Container(
+        //page background image
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         decoration: BoxDecoration(
@@ -30,9 +32,11 @@ class _PINPageState extends State<PINPage> {
               width: MediaQuery.of(context).size.width / 1.2,
               height: MediaQuery.of(context).size.height / 1.2,
               child: Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[imageview(context), getNumbers(context)],
+                children: <Widget>[
+                  imageview(context), // Part 1 image with logo
+                  getNumbers(context) // Part 2  Muber keypade
+                ],
               ),
             ),
           ],
@@ -45,7 +49,6 @@ class _PINPageState extends State<PINPage> {
 Widget imageview(context) {
   return Container(
       width: MediaQuery.of(context).size.width / 2.9,
-      //constraints: BoxConstraints.expand(),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
               bottomLeft: Radius.circular(30), topLeft: Radius.circular(30)),
@@ -80,7 +83,7 @@ Widget _button(String number, Function() f) {
   );
 }
 
-Widget getNumbers(context) {
+Widget getNumbers(context) {   // Numbers buttons
   var pinNumber = "";
 
   addINPin(val) {

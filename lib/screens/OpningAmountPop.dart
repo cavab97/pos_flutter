@@ -1,39 +1,22 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
-import 'package:mcncashier/components/colors.dart';
 
 class OpeningAmmountPage extends StatefulWidget {
-  OpeningAmmountPage({Key key, this.title}) : super(key: key);
-
-  final String title;
+  // Opning ammount popup
+  OpeningAmmountPage({Key key}) : super(key: key);
 
   @override
   _OpeningAmmountPageState createState() => _OpeningAmmountPageState();
 }
+
 class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
   @override
   Widget build(BuildContext context) {
-/*
-    return new Scaffold(
-        appBar: new AppBar(
-          title: new Text('Example 01'),
-        ),
-        body: new Padding(
-            padding: const EdgeInsets.only(top: 12.0),
-            child: new StaggeredGridView.count(
-              crossAxisCount: 4,
-              staggeredTiles: _staggeredTiles,
-              children: _tiles,
-              mainAxisSpacing: 4.0,
-              crossAxisSpacing: 4.0,
-              padding: const EdgeInsets.all(4.0),
-            )));
-*/
-
     return AlertDialog(
       titlePadding: EdgeInsets.all(0),
       title: Stack(
+        // popup header
         overflow: Overflow.visible,
         children: <Widget>[
           Container(
@@ -49,10 +32,10 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
               ],
             ),
           ),
-          closeButton(context),
+          closeButton(context), //popup close btn
         ],
       ),
-      content: mainContent(), 
+      content: mainContent(), // Popup body contents
     );
   }
 
@@ -82,11 +65,11 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
     return SingleChildScrollView(
         child: Column(
       children: [
-        getAmount(),
+        getAmount(), // dynamic enter ammount
         SizedBox(
           height: 20,
         ),
-        getNumbers(context)
+        getNumbers(context), // numbers buttons
       ],
     ));
   }
@@ -103,7 +86,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         minWidth: 120.0,
         child: Text(number,
             textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize:55.0)),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 55.0)),
         textColor: Colors.black,
         color: Colors.white,
         onPressed: f,
@@ -241,44 +224,6 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
           ],
         ),
       ),
-    );
-  }
-
-  BoxDecoration myBoxDecoration() {
-    return BoxDecoration(
-        border: Border.all(color: Colors.black),
-        color: Colors.white,
-        borderRadius: BorderRadius.all(Radius.circular(5.0)));
-  }
-
-  TextStyle buildInputTextStyle(
-      {String fontFamily = 'Raleway',
-      Color color = colorInput,
-      double fontSize = 32.0,
-      FontWeight fontWeight = FontWeight.w500}) {
-    return TextStyle(
-        fontFamily: fontFamily,
-        color: color,
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        fontStyle: FontStyle.normal);
-  }
-
-  Container buildVerticalLine() {
-    bool isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
-    return Container(
-      width: 1.0,
-      height: MediaQuery.of(context).size.width / 4,
-      color: isDark ? colorDarkLine : colorLine,
-    );
-  }
-
-  Container buildHorizontalLine() {
-    bool isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: 1.0,
-      color: isDark ? colorDarkLine : colorLine,
     );
   }
 }

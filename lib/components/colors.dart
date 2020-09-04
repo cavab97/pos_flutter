@@ -1,5 +1,11 @@
 import 'dart:ui';
 
+
+
+// Dart screen Color
+const Color dask_sky = Color(0xFF434449);
+
+
 //light
 const Color colorLine = Color(0xfff2f2f2);
 const Color colorInput = Color(0xff9C9C9C);

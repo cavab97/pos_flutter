@@ -5,9 +5,9 @@ ThemeData appTheme() {
     fontFamily: "Roboto",
     primaryColor: Colors.white,
     accentColor: Colors.deepOrange,
-    hintColor: Colors.white,
-    dividerColor: Colors.white,
-    buttonColor: Colors.white,
+    hintColor: Colors.grey,
+    dividerColor: Colors.grey,
+    buttonColor: Colors.deepOrange,
     scaffoldBackgroundColor: Color(0xFF434449),
     canvasColor: Colors.black,
   );

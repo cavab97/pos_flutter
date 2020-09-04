@@ -1,19 +1,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:device_info/device_info.dart';
-import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mcncashier/components/StringFile.dart';
 
 class CommunFun {
   static loginText() {
-    return Text("YOU CAN ENTER YOUR USERNAME & PASSWORD HERE",
+    return Text(Strings.login_text,
         style: TextStyle(
             color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold));
   }
 
   static divider() {
+    // Simple divider
     return Padding(
       padding: EdgeInsets.only(top: 0, left: 20, right: 20, bottom: 15),
       child: Divider(
@@ -25,17 +26,19 @@ class CommunFun {
   }
 
   static forgotPasswordText(context) {
+    // forgot password text
     return Container(
       width: MediaQuery.of(context).size.width,
       alignment: Alignment.centerRight,
       child: Text(
-        "Forgot password?",
+        Strings.forgot_password,
         style: TextStyle(color: Colors.blue, fontSize: 22),
       ),
     );
   }
 
   static roundedButton(text, _onPress) {
+    //round button like Login button
     return RaisedButton(
       padding: EdgeInsets.only(top: 20, bottom: 20),
       onPressed: _onPress,
@@ -53,6 +56,7 @@ class CommunFun {
   }
 
   static searchBar(onChange) {
+    // search input
     TextField(
       keyboardType: TextInputType.text,
       decoration: InputDecoration(
@@ -85,6 +89,7 @@ class CommunFun {
   }
 
   static deviceInfo() {
+    // Device Info
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     var deviceData;
     try {
@@ -102,6 +107,7 @@ class CommunFun {
   }
 
   static loader(context) {
+    // basic Loader
     return Center(
       child: Container(
         height: 70.0,
@@ -114,4 +120,6 @@ class CommunFun {
       ),
     );
   }
+
+ 
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
@@ -6,6 +7,7 @@ import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 
 class DashboradPage extends StatefulWidget {
+  // main Product list page
   DashboradPage({Key key}) : super(key: key);
   @override
   _DashboradPageState createState() => _DashboradPageState();
@@ -15,171 +17,118 @@ class _DashboradPageState extends State<DashboradPage> {
   DatabaseHelper databaseHelper = DatabaseHelper();
   GlobalKey<ScaffoldState> scaffoldKey;
   bool isDrawerOpen = false;
+  var tabsList = [
+    {"id": 1, "name": "Drinks"},
+    {"id": 2, "name": "Coffee"},
+    {"id": 3, "name": "Ice cream"},
+    {"id": 4, "name": "Snacks"},
+    {"id": 5, "name": "Cake"},
+    {"id": 6, "name": "Desserts"},
+    {"id": 7, "name": "Salads"},
+  ];
+  var productList = [
+    {
+      'index': 0,
+      'name': "Daniels Salazar fd sd",
+      'picture': "assets/image1.jfif",
+      'price': "500.00"
+    },
+    {
+      'index': 2,
+      'name': "Contreras Reesenjnc jn",
+      'picture': "assets/image2.jfif",
+      'price': "500.00"
+    },
+    {
+      'index': 3,
+      'name': "Moody Cabrera sdfds ",
+      'picture': "assets/image3.jfif",
+      'price': "500.00"
+    },
+    {
+      'index': 4,
+      'name': "Moody Cabrera sdfs ",
+      'picture': "assets/image4.jpg",
+      'price': "500.00"
+    },
+    {
+      'index': 5,
+      'name': "Moody Cabrera",
+      'picture': "assets/image5.webp",
+      'price': "500.00"
+    }
+  ];
+
   @override
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
-    databaseHelper.initializeDatabase();
+    databaseHelper.initializeDatabase(); // Initialize database first time here
   }
 
   openOpningAmmountPop() {
     showDialog(
+        // Opning Ammount Popup
         context: context,
         builder: (BuildContext context) {
-          return OpeningAmmountPage(
-            title: "test",
-          );
+          return OpeningAmmountPage();
         });
   }
-  // getData() async {
-  //   var data = await databaseHelper.getlocalData();
-  //   print(data);
-  // }
 
   openDrawer() {
+    // Drawer Open close event
     if (isDrawerOpen) {
       // Navigator.of(context).pop();
     } else {
       scaffoldKey.currentState.openDrawer();
     }
-
     setState(() {
       isDrawerOpen = !isDrawerOpen;
     });
   }
 
   showQuantityDailog() async {
+    // Increase Decrease Quantity popup
     showDialog(
         context: context,
         builder: (BuildContext context) {
-          return ProductQuantityDailog(
-            title: "test",
-          );
+          return ProductQuantityDailog();
         });
   }
 
   openSendReceiptPop() {
+    // Send receipt Popup
     showDialog(
         context: context,
         builder: (BuildContext context) {
-          return InvoiceReceiptDailog(
-            title: "test",
-          );
+          return InvoiceReceiptDailog();
         });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Categrory Tabs
     final _tabs = TabBar(
-      indicatorSize: TabBarIndicatorSize.label,
-      unselectedLabelColor: Colors.white,
-      labelColor: Colors.white,
-      isScrollable: true,
-      indicator: BoxDecoration(
-          borderRadius: BorderRadius.circular(12), color: Colors.deepOrange),
-      labelStyle: TextStyle(fontSize: 16),
-      tabs: [
-        Tab(
-          child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Text(
-                "CRAB BEE",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              )),
-        ),
-        Tab(
-          child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Text(
-                "CRAB BEE",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              )),
-        ),
-        Tab(
-          child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Text(
-                "CRAB BEE",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              )),
-        ),
-        Tab(
-          child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Text(
-                "CRAB BEE",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              )),
-        ),
-        Tab(
-          child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Text(
-                "CRAB BEE",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              )),
-        ),
-        Tab(
-          child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Text(
-                "COFFI",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              )),
-        ),
-        Tab(
-          child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Text(
-                "TEA",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              )),
-        ),
-        Tab(
-          child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Text(
-                "LAMKDS",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              )),
-        ),
-        Tab(
-          child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Text(
-                "TEXT",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              )),
-        )
-      ],
-    );
+        indicatorSize: TabBarIndicatorSize.label,
+        unselectedLabelColor: Colors.white,
+        labelColor: Colors.white,
+        isScrollable: true,
+        indicator: BoxDecoration(
+            borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
+        labelStyle: TextStyle(fontSize: 16),
+        tabs: tabsList.map((category) {
+          return Tab(
+            child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 15),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  category["name"].toString().toUpperCase(),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                )),
+          );
+        }).toList());
     return Scaffold(
         key: scaffoldKey,
         drawer: drawerWidget(),
@@ -202,16 +151,16 @@ class _DashboradPageState extends State<DashboradPage> {
                   TableCell(
                     child: Container(
                       padding: EdgeInsets.all(10),
-                      // height: MediaQuery.of(context).size.height,
-                      // color: Colors.green,
                       child: Column(
                         children: <Widget>[
                           Container(
                             height: 65,
-                            color: Colors.black38,
+                            color: Colors.black26,
                             padding: EdgeInsets.all(10),
                             child: DefaultTabController(
-                                initialIndex: 0, length: 9, child: _tabs),
+                                initialIndex: 0,
+                                length: tabsList.length,
+                                child: _tabs),
                           ),
                           porductsList(),
                         ],
@@ -220,7 +169,15 @@ class _DashboradPageState extends State<DashboradPage> {
                   ),
                   TableCell(
                       child: Column(
-                    children: <Widget>[cartITems(), paybutton(context)],
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      cartITems(),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      paybutton(context)
+                    ],
                   )),
                 ]),
               ],
@@ -234,6 +191,7 @@ class _DashboradPageState extends State<DashboradPage> {
   }
 
   Widget tableHeader1() {
+    // products Header part 1
     return Container(
       height: 80,
       padding: EdgeInsets.only(left: 10, right: 10),
@@ -276,7 +234,7 @@ class _DashboradPageState extends State<DashboradPage> {
                     size: 40,
                   ),
                 ),
-                hintText: "Search product here...",
+                hintText: Strings.search_bar_text,
                 hintStyle: TextStyle(fontSize: 18.0, color: Colors.black),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(50),
@@ -301,6 +259,7 @@ class _DashboradPageState extends State<DashboradPage> {
   }
 
   Widget tableHeader2() {
+    // products Header part 2
     return Container(
         padding: EdgeInsets.only(left: 10, right: 20),
         height: 80,
@@ -326,7 +285,7 @@ class _DashboradPageState extends State<DashboradPage> {
                     size: 30,
                   ),
                   SizedBox(width: 5),
-                  Text("Add Customer",
+                  Text(Strings.btn_Add_customer,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -344,6 +303,7 @@ class _DashboradPageState extends State<DashboradPage> {
   }
 
   Widget porductsList() {
+    // products List
     var size = MediaQuery.of(context).size;
 
     /*24 is for notification bar on Android*/
@@ -355,7 +315,7 @@ class _DashboradPageState extends State<DashboradPage> {
       child: GridView.count(
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
-        children: List.generate(50, (index) {
+        children: productList.map((product) {
           return InkWell(
             onTap: () {
               showQuantityDailog();
@@ -366,13 +326,12 @@ class _DashboradPageState extends State<DashboradPage> {
                 alignment: AlignmentDirectional.topCenter,
                 children: <Widget>[
                   Hero(
-                      tag: index,
+                      tag: product["index"],
                       child: Container(
                           decoration: new BoxDecoration(
                             color: Colors.greenAccent,
                             image: new DecorationImage(
-                              image: new ExactAssetImage(
-                                  'assets/photo-1504674900247-0877df9cc836.jfif'),
+                              image: ExactAssetImage(product["picture"]),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -384,48 +343,57 @@ class _DashboradPageState extends State<DashboradPage> {
                     width: MediaQuery.of(context).size.width,
                     // height: 90,
                     decoration: BoxDecoration(
-                      color: Colors.grey,
+                      color: Colors.grey[600],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Text(
-                          "UMZX TJD FJDFK FJD",
-                          style: TextStyle(fontSize: 14, color: Colors.white),
+                          product["name"].toString().toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white),
                         ),
                       ],
                     ),
                   ),
                   Positioned(
-                      top: 170,
+                      top: 163,
                       left: 0,
                       child: Container(
+                          padding: EdgeInsets.all(5),
                           color: Colors.deepOrange,
                           child: Text(
-                            "Rs500",
-                            style: TextStyle(color: Colors.white, fontSize: 15),
+                            product["price"],
+                            style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                color: Colors.white,
+                                fontSize: 15),
                           )))
                 ],
               ),
             ),
           );
-        }),
+        }).toList(),
       ),
     );
   }
 
   Widget paybutton(context) {
+    // Payment button
     return Container(
         height: 70,
         width: 320,
         child: CommunFun.roundedButton("PAY", () {
-          //openSendReceiptPop();
           openOpningAmmountPop();
         }));
   }
 
   Widget cartITems() {
+    // selected item list and total price calculations
     final cartTable = Table(
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         border: TableBorder(
@@ -436,17 +404,31 @@ class _DashboradPageState extends State<DashboradPage> {
             Padding(
                 padding: EdgeInsets.only(left: 10, top: 20, bottom: 20),
                 child: Text(
-                  "Name",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  Strings.header_name,
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.blue[900]),
                 )),
             Padding(
               padding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
-              child: Text("Qty", style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(
+                Strings.qty,
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.blue[900]),
+              ),
             ),
             Padding(
               padding: EdgeInsets.only(left: 10, top: 20, bottom: 20),
-              child: Text("Ammount",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(
+                Strings.amount,
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.blue[900]),
+              ),
             )
           ]),
           TableRow(children: [
@@ -481,40 +463,82 @@ class _DashboradPageState extends State<DashboradPage> {
           TableRow(children: [
             Padding(
               padding: EdgeInsets.only(top: 10, bottom: 10),
-              child: Text("SUB TOTAL"),
+              child: Text(
+                Strings.sub_total.toUpperCase(),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.blue[900]),
+              ),
             ),
             Padding(
                 padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("00:00")),
+                child: Text(
+                  "00:00",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700, color: Colors.blue[900]),
+                )),
           ]),
           TableRow(children: [
             Padding(
                 padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("Discount")),
+                child: Text(
+                  Strings.discount.toUpperCase(),
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).accentColor),
+                )),
             Padding(
                 padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("00:00")),
+                child: Text(
+                  "00:00",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).accentColor),
+                )),
           ]),
           TableRow(children: [
             Padding(
                 padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("TAX")),
+                child: Text(
+                  Strings.tax.toUpperCase(),
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.blue[900]),
+                )),
             Padding(
                 padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("00:00")),
+                child: Text(
+                  "00:00",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700, color: Colors.blue[900]),
+                )),
           ]),
           TableRow(children: [
             Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("GRAND TOTAL")),
+              padding: EdgeInsets.only(top: 10, bottom: 10),
+              child: Text(
+                Strings.grand_total,
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.blue[900]),
+              ),
+            ),
             Padding(
                 padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("150.00")),
+                child: Text(
+                  "150.00",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700, color: Colors.blue[900]),
+                )),
           ]),
         ]);
 
     return Container(
-        height: MediaQuery.of(context).size.height / 1.3,
+        //height: MediaQuery.of(context).size.height / 1.3,
         width: MediaQuery.of(context).size.width,
         padding: EdgeInsets.all(12),
         child: Column(

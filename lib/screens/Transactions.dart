@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 
 class TransactionsPage extends StatefulWidget {
+  // Transactions list
   TransactionsPage({Key key, this.title}) : super(key: key);
   final String title;
 
@@ -18,7 +20,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: transactionsDrawer(),
+        drawer: transactionsDrawer(), // page Drawer
         body: SafeArea(
           child: Container(
             width: MediaQuery.of(context).size.width,
@@ -31,6 +33,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               children: [
                 TableRow(children: [
                   TableCell(
+                      // Part 1 white
                       child: Container(
                           width: MediaQuery.of(context).size.width,
                           height: MediaQuery.of(context).size.height,
@@ -56,6 +59,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             ],
                           ))),
                   TableCell(
+                    // Part 2 transactions list
                     child: Center(
                       child: SingleChildScrollView(
                         child: Container(
@@ -191,7 +195,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             Padding(
               padding: EdgeInsets.only(top: 10, bottom: 10),
               child: Text(
-                "SUB TOTAL",
+                Strings.sub_total.toUpperCase(),
                 style: TextStyle(fontSize: 20, color: Colors.grey),
               ),
             ),
@@ -231,7 +235,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
       onPressed: _onPress,
       child: Text(
-        "Cancel Transaction",
+        Strings.cancel_tansaction,
         style: TextStyle(color: Colors.white, fontSize: 25),
       ),
       color: Colors.deepOrange,

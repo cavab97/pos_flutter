@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
-  ProductQuantityDailog({Key key, this.title}) : super(key: key);
-
-  final String title;
+  // quantity Dailog
+  ProductQuantityDailog({Key key}) : super(key: key);
 
   @override
   _ProductQuantityDailogState createState() => _ProductQuantityDailogState();
@@ -35,11 +34,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               ],
             ),
           ),
-          closeButton(context),
+          closeButton(context), // close button
         ],
       ),
-      content: mainContent(),
+      content: mainContent(), //main part of the popup
       actions: <Widget>[
+        // Button div + - buttons
         Stack(
           children: <Widget>[
             Positioned(
@@ -51,7 +51,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                         fontSize: 30,
                         fontWeight: FontWeight.bold))),
             Container(
-              // color: Colors.indigo,
               width: MediaQuery.of(context).size.width / 1.4,
               child: Column(children: <Widget>[
                 CommunFun.divider(),
@@ -168,6 +167,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   Widget addbutton(context) {
+    // Add button header rounded
     return RaisedButton(
       padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
       onPressed: () {},
