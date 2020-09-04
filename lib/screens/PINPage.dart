@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mcncashier/components/StringFile.dart';
-import 'package:mcncashier/components/communText.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 
 class PINPage extends StatefulWidget {
   PINPage({Key key}) : super(key: key);
