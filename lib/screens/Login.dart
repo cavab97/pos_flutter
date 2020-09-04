@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
-import 'package:mcncashier/helpers/sqlDatahelper.dart';
+
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);

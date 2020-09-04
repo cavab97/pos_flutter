@@ -36,13 +36,14 @@ class DatabaseHelper {
   Future<Database> initializeDatabase() async {
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path + "/" + databaseName;
-
+    print(path);
     // if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
     _database = await openDatabase(path, version: 1, onCreate: _createDb);
     // } else {
     //   _database = await openDatabase(path, version: 1, onCreate: _onOpen;
     //   print("already exit\(path)" + path);
     // }
+    getlocalData();
     return _database;
   }
 

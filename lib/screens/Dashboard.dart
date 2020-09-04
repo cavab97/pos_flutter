@@ -19,13 +19,12 @@ class _DashboradPageState extends State<DashboradPage> {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
     databaseHelper.initializeDatabase();
-    //  getData();
   }
 
-  getData() async {
-    var data = await databaseHelper.getlocalData();
-    print(data);
-  }
+  // getData() async {
+  //   var data = await databaseHelper.getlocalData();
+  //   print(data);
+  // }
 
   openDrawer() {
     if (isDrawerOpen) {
