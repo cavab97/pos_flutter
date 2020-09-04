@@ -72,7 +72,7 @@ Widget _button(String number, Function() f) {
       height: 90.0,
       child: Text(number,
           textAlign: TextAlign.center,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24.0)),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30.0)),
       textColor: Colors.black,
       color: Colors.grey[100],
       onPressed: f,
@@ -81,6 +81,13 @@ Widget _button(String number, Function() f) {
 }
 
 Widget getNumbers(context) {
+  var pinNumber = "";
+
+  addINPin(val) {
+    pinNumber += pinNumber + val;
+    print(pinNumber);
+  }
+
   return Center(
     child: Container(
       width: MediaQuery.of(context).size.width / 2.8,
@@ -105,22 +112,22 @@ Widget getNumbers(context) {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Icon(
-                Icons.check_circle,
+                Icons.check_circle_outline,
                 color: Colors.deepOrange,
                 size: 40,
               ),
               Icon(
-                Icons.check_circle,
+                Icons.check_circle_outline,
                 color: Colors.deepOrange,
                 size: 40,
               ),
               Icon(
-                Icons.check_circle,
+                Icons.check_circle_outline,
                 color: Colors.deepOrange,
                 size: 40,
               ),
               Icon(
-                Icons.check_circle,
+                Icons.check_circle_outline,
                 color: Colors.deepOrange,
                 size: 40,
               ),
@@ -132,9 +139,15 @@ Widget getNumbers(context) {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              _button("1", () {}), // using custom widget _button
-              _button("2", () {}),
-              _button("3", () {}),
+              _button("1", () {
+                addINPin("1");
+              }), // using custom widget _button
+              _button("2", () {
+                addINPin("2");
+              }),
+              _button("3", () {
+                addINPin("3");
+              }),
             ],
           ),
           SizedBox(
@@ -143,9 +156,15 @@ Widget getNumbers(context) {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              _button("1", () {}), // using custom widget _button
-              _button("2", () {}),
-              _button("3", () {}),
+              _button("4", () {
+                addINPin("4");
+              }), // using custom widget _button
+              _button("5", () {
+                addINPin("5");
+              }),
+              _button("6", () {
+                addINPin("6");
+              }),
             ],
           ),
           SizedBox(
@@ -154,9 +173,15 @@ Widget getNumbers(context) {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              _button("1", () {}), // using custom widget _button
-              _button("2", () {}),
-              _button("3", () {}),
+              _button("7", () {
+                addINPin("7");
+              }), // using custom widget _button
+              _button("8", () {
+                addINPin("8");
+              }),
+              _button("9", () {
+                addINPin("9");
+              }),
             ],
           ),
           SizedBox(
@@ -168,7 +193,9 @@ Widget getNumbers(context) {
               _button("Clock\nIN", () {
                 Navigator.pushNamed(context, '/Dashboard');
               }),
-              _button("0", () {}),
+              _button("0", () {
+                addINPin("0");
+              }),
               _button("Clock\nOUT", () {}),
             ],
           ),

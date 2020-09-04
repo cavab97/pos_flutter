@@ -1,5 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:device_info/device_info.dart';
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CommunFun {
   static loginText() {
@@ -76,6 +81,37 @@ class CommunFun {
       onChanged: (e) {
         print(e);
       },
+    );
+  }
+
+  static deviceInfo() {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    var deviceData;
+    try {
+      if (Platform.isAndroid) {
+        deviceData = deviceInfo.androidInfo;
+      } else if (Platform.isIOS) {
+        deviceData = deviceInfo.iosInfo;
+      }
+    } on PlatformException {
+      deviceData = <String, dynamic>{
+        'Error:': 'Failed to get platform version.'
+      };
+    }
+    return deviceData;
+  }
+
+  static loader(context) {
+    return Center(
+      child: Container(
+        height: 70.0,
+        width: 70.0,
+        child: CircularProgressIndicator(
+          backgroundColor: Colors.white,
+          valueColor:
+              AlwaysStoppedAnimation<Color>(Theme.of(context).accentColor),
+        ),
+      ),
     );
   }
 }

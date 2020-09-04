@@ -106,7 +106,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
           closeButton(context),
         ],
       ),
-      content: mainContent(),
+      content: mainContent(), 
     );
   }
 
@@ -157,7 +157,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         minWidth: 120.0,
         child: Text(number,
             textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 35.0)),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize:55.0)),
         textColor: Colors.black,
         color: Colors.white,
         onPressed: f,
@@ -253,7 +253,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 30.0)),
+                                          fontSize: 55.0)),
                                   textColor: Colors.black,
                                   color: Colors.white,
                                   onPressed: () {},

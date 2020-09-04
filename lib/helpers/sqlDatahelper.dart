@@ -1,6 +1,6 @@
 import 'package:mcncashier/helpers/GetTableData.dart';
 import 'package:mcncashier/helpers/Tables.dart';
-import 'package:mcncashier/models/todo.dart';
+import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'dart:io';
