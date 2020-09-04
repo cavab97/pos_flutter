@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 ThemeData appTheme() {
   return ThemeData(
+    fontFamily: "Roboto",
     primaryColor: Colors.white,
-    accentColor: Colors.orange,
+    accentColor: Colors.deepOrange,
     hintColor: Colors.white,
     dividerColor: Colors.white,
     buttonColor: Colors.white,

@@ -4,8 +4,7 @@ import 'package:mcncashier/routes.dart';
 import 'package:mcncashier/theme/theme.dart';
 
 void main() async {
-  // await SystemChrome.setPreferredOrientations(
-  // [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+ 
   runApp(MyApp());
 }
 
