@@ -52,7 +52,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                         fontWeight: FontWeight.bold))),
             Container(
               // color: Colors.indigo,
-              width: MediaQuery.of(context).size.width,
+              width: MediaQuery.of(context).size.width / 1.4,
               child: Column(children: <Widget>[
                 CommunFun.divider(),
                 Row(
@@ -106,7 +106,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   Widget mainContent() {
     return Container(
       height: MediaQuery.of(context).size.height / 3,
-      width: MediaQuery.of(context).size.width / 1.4,
+      width: MediaQuery.of(context).size.width / 2.8,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,

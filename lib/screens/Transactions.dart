@@ -57,10 +57,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           ))),
                   TableCell(
                     child: Center(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width / 2,
-                        margin: EdgeInsets.only(top: 30),
-                        child: SingleChildScrollView(
+                      child: SingleChildScrollView(
+                        child: Container(
+                          width: MediaQuery.of(context).size.width / 2,
+                          margin: EdgeInsets.only(top: 5),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -73,7 +73,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     color: Theme.of(context).primaryColor),
                               ),
                               SizedBox(
-                                height: 50,
+                                height: 30,
                               ),
                               Text(
                                 "13.00",
@@ -88,7 +88,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               Text(
                                 "00000000 - Processed by OKDEE OKEY PROCESSED FORM",
                                 style: TextStyle(
-                                    fontSize: 23,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                     color: Theme.of(context).primaryColor),
                               ),
@@ -96,7 +96,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                 height: 30,
                               ),
                               Container(
-                                height: 70,
+                                height: 50,
                                 width: MediaQuery.of(context).size.width / 2,
                                 child: Center(
                                   child: Text(

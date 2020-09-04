@@ -52,7 +52,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
           closeButton(context),
         ],
       ),
-      content: mainContent(),
+      content: mainContent(), 
     );
   }
 
@@ -79,25 +79,33 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
   }
 
   Widget mainContent() {
-    return Column(
-      children: [getAmount(), getNumbers(context)],
-    );
+    return SingleChildScrollView(
+        child: Column(
+      children: [
+        getAmount(),
+        SizedBox(
+          height: 20,
+        ),
+        getNumbers(context)
+      ],
+    ));
   }
 
   Widget _button(String number, Function() f) {
     // Creating a method of return type Widget with number and function f as a parameter
     return Padding(
-      padding: EdgeInsets.all(5),
+      padding: EdgeInsets.only(top: 10, bottom: 10),
       child: MaterialButton(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
-            side: BorderSide(color: Colors.grey)),
-        height: 90.0,
+            side: BorderSide(color: Colors.black, width: 3.0)),
+        height: 100.0,
+        minWidth: 120.0,
         child: Text(number,
             textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24.0)),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize:55.0)),
         textColor: Colors.black,
-        color: Colors.grey[100],
+        color: Colors.white,
         onPressed: f,
       ),
     );
@@ -112,7 +120,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         children: <Widget>[
           Text("00.00",
               style: TextStyle(
-                  fontSize: 50,
+                  fontSize: 90,
                   color: Colors.black,
                   fontWeight: FontWeight.bold)),
         ],
@@ -147,62 +155,83 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                 _button(".", () {}),
               ],
             ),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Padding(
-                          padding: EdgeInsets.all(10),
-                          child: _button("7", () {})),
-                      // using custom widget button
-                      Padding(
-                          padding: EdgeInsets.all(10),
-                          child: _button("8", () {})),
-                      Padding(
-                          padding: EdgeInsets.all(10),
-                          child: _button("9", () {})),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Padding(
+                              padding: EdgeInsets.only(right: 30, top: 10),
+                              child: _button("7", () {})),
+                          // using custom widget button
+                          Padding(
+                              padding: EdgeInsets.only(right: 30, top: 10),
+                              child: _button("8", () {})),
+                          Padding(
+                              padding: EdgeInsets.only(right: 30, top: 10),
+                              child: _button("9", () {})),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          Padding(
+                              padding: EdgeInsets.only(right: 30, top: 10),
+                              child: _button("0", () {})),
+                          Padding(
+                              padding: EdgeInsets.only(right: 30, top: 10),
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 10),
+                                child: MaterialButton(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18.0),
+                                      side: BorderSide(
+                                          color: Colors.black, width: 3.0)),
+                                  height: 100.0,
+                                  minWidth: 270.0,
+                                  child: Text("00".toUpperCase(),
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 55.0)),
+                                  textColor: Colors.black,
+                                  color: Colors.white,
+                                  onPressed: () {},
+                                ),
+                              )),
+                        ],
+                      ),
                     ],
                   ),
-                  Row(
-                    //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
+                  Column(
+                    children: [
                       Padding(
-                          padding: EdgeInsets.all(10),
-                          child: _button("0", () {})),
-                      Padding(
-                          padding: EdgeInsets.all(10),
-                          child: _button("00", () {})),
-                      Padding(
-                          padding: EdgeInsets.all(10),
-                          child: _button(".", () {})),
+                        padding: EdgeInsets.only(left: 5, top: 10),
+                        child: MaterialButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18.0),
+                              side:
+                                  BorderSide(color: Colors.black, width: 3.0)),
+                          height: 235.0,
+                          minWidth: 120.0,
+                          child: Text("enter".toUpperCase(),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 30.0)),
+                          textColor: Colors.black,
+                          color: Colors.white,
+                          onPressed: () {},
+                        ),
+                      )
                     ],
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(5),
-                    child: MaterialButton(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                          side: BorderSide(color: Colors.grey)),
-                      height: 200.0,
-                      child: Text("enter".toUpperCase(),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18.0)),
-                      textColor: Colors.black,
-                      color: Colors.grey[100],
-                      onPressed: () {},
-                    ),
                   )
-                ],
-              )
-            ]),
+                ]),
             SizedBox(
               height: 10,
             ),

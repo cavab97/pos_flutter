@@ -7,6 +7,16 @@ class CreateTables {
     datatables = db.execute(
         "CREATE TABLE role (role_id	 INTEGER ,role_name TEXT,uuid TEXT ,role_status INTEGER," +
             "role_updated_at	TEXT,role_updated_by INTEGER);");
+    db.transaction((txn) async {
+      int id1 = await txn.rawInsert(
+          'INSERT INTO role(role_id, role_name, uuid,role_status,role_updated_at,role_updated_by)' +
+              'VALUES(1, "test","tetstsfsdf" ,0,"20-12-2020 11:44:32",1)');
+      print('inserted1: $id1');
+      int id2 = await txn.rawInsert(
+          'INSERT INTO role(role_id, role_name, uuid,role_status,role_updated_at,role_updated_by)' +
+              'VALUES(2, "test", "dfsdfsdfsdf",1,"20-12-2020 11:44:32",2)');
+      print('inserted2: $id2');
+    });
 
     // // module table
     datatables = db.execute(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
+import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 
 class DashboradPage extends StatefulWidget {
@@ -19,13 +20,22 @@ class _DashboradPageState extends State<DashboradPage> {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
     databaseHelper.initializeDatabase();
-    //  getData();
+    
   }
 
-  getData() async {
-    var data = await databaseHelper.getlocalData();
-    print(data);
+  openOpningAmmountPop() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return OpeningAmmountPage(
+            title: "test",
+          );
+        });
   }
+  // getData() async {
+  //   var data = await databaseHelper.getlocalData();
+  //   print(data);
+  // }
 
   openDrawer() {
     if (isDrawerOpen) {
@@ -366,7 +376,8 @@ class _DashboradPageState extends State<DashboradPage> {
         height: 70,
         width: 320,
         child: CommunFun.roundedButton("PAY", () {
-          openSendReceiptPop();
+          //openSendReceiptPop();
+          openOpningAmmountPop();
         }));
   }
 
