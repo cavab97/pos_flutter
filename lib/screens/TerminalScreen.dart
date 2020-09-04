@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
-import 'package:mcncashier/services/teminalkey.dart' as repository;
+import 'package:mcncashier/models/TerminalKey.dart';
+import 'package:mcncashier/services/teminalkey.dart' as repo;
 
 class TerminalKeyPage extends StatefulWidget {
   TerminalKeyPage({Key key}) : super(key: key);
@@ -35,13 +36,14 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
   setTerminalkey() async {
     var isValid = await validateFields();
     var deviceinfo = await CommunFun.deviceInfo();
+    TemimalKey terminal = new TemimalKey();
     if (isValid) {
       setState(() {
         isLoading = true;
       });
-      var terkey = terminalKey.text;
-      var deviceid = deviceinfo.id;
-      await repository.setTerminal(terkey, deviceid).then((value) async {
+      terminal.terminalKey = terminalKey.text;
+      terminal.deviceid = deviceinfo.id;
+      await repo.sendTerminalKey(terminal).then((value) async {
         print(value);
         if (value != null && value.status == 200) {
           Navigator.pushNamed(context, '/Login');

@@ -28,7 +28,7 @@ class _LoginPageState extends State<LoginPage> {
       return false;
     } else if (password.text == "" || password.text.length == 0) {
       setState(() {
-        errormessage = "Please enter password.";
+        errormessage = "Please enter PIN.";
         isValidatePassword = false;
       });
       return false;
@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+        body: Center(
       child: Container(
         width: MediaQuery.of(context).size.width / 1.8,
         padding: EdgeInsets.only(left: 30, right: 30),
@@ -139,7 +139,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         errorText: !isValidateEmail ? errormessage : null,
         errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
-        hintText: "Email",
+        hintText: "Username",
         hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50),
@@ -172,7 +172,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         errorText: !isValidatePassword ? errormessage : null,
         errorStyle: TextStyle(color: Colors.red),
-        hintText: "Password",
+        hintText: "Pin",
         hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50),
@@ -185,7 +185,7 @@ class _LoginPageState extends State<LoginPage> {
         contentPadding: EdgeInsets.only(top: 25, bottom: 25),
         fillColor: Colors.white,
       ),
-      obscureText: true,
+      //obscureText: true,
       style: TextStyle(color: Colors.black, fontSize: 25.0),
       onChanged: onChange,
     );
