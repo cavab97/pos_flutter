@@ -20,7 +20,6 @@ class _DashboradPageState extends State<DashboradPage> {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
     databaseHelper.initializeDatabase();
-    
   }
 
   openOpningAmmountPop() {
@@ -75,10 +74,55 @@ class _DashboradPageState extends State<DashboradPage> {
       indicatorSize: TabBarIndicatorSize.label,
       unselectedLabelColor: Colors.white,
       labelColor: Colors.white,
+      isScrollable: true,
       indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(12), color: Colors.deepOrange),
       labelStyle: TextStyle(fontSize: 16),
       tabs: [
+        Tab(
+          child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                "CRAB BEE",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              )),
+        ),
+        Tab(
+          child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                "CRAB BEE",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              )),
+        ),
+        Tab(
+          child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                "CRAB BEE",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              )),
+        ),
+        Tab(
+          child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Text(
+                "CRAB BEE",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              )),
+        ),
         Tab(
           child: Container(
               padding: EdgeInsets.symmetric(horizontal: 15),
@@ -167,7 +211,7 @@ class _DashboradPageState extends State<DashboradPage> {
                             color: Colors.black38,
                             padding: EdgeInsets.all(10),
                             child: DefaultTabController(
-                                initialIndex: 0, length: 5, child: _tabs),
+                                initialIndex: 0, length: 9, child: _tabs),
                           ),
                           porductsList(),
                         ],

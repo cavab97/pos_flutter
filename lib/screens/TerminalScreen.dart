@@ -36,6 +36,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
   setTerminalkey() async {
     var isValid = await validateFields();
     var deviceinfo = await CommunFun.deviceInfo();
+    Navigator.pushNamed(context, '/Login');
     TemimalKey terminal = new TemimalKey();
     if (isValid) {
       setState(() {
@@ -43,29 +44,28 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
       });
       terminal.terminalKey = terminalKey.text;
       terminal.deviceid = deviceinfo.id;
-      await repo.sendTerminalKey(terminal).then((value) async {
-        print(value);
-        if (value != null && value.status == 200) {
-          Navigator.pushNamed(context, '/Login');
-        } else {
-          scaffoldKey.currentState.showSnackBar(SnackBar(
-            content: Text(value.message),
-          ));
-        }
-      }).catchError((e) {
-        print(e);
-        scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text(e.message),
-        ));
-      }).whenComplete(() {
-        setState(() {
-          isLoading = false;
-        });
-      });
-      Navigator.pushNamed(context, '/Login');
-      setState(() {
-        isLoading = false;
-      });
+      // await repo.sendTerminalKey(terminal).then((value) async {
+      //   print(value);
+      //   if (value != null && value.status == 200) {
+      //     Navigator.pushNamed(context, '/Login');
+      //   } else {
+      //     scaffoldKey.currentState.showSnackBar(SnackBar(
+      //       content: Text(value.message),
+      //     ));
+      //   }
+      // }).catchError((e) {
+      //   print(e);
+      //   scaffoldKey.currentState.showSnackBar(SnackBar(
+      //     content: Text(e.message),
+      //   ));
+      //   setState(() {
+      //     isLoading = false;
+      //   });
+      // }).whenComplete(() {
+      //   setState(() {
+      //     isLoading = false;
+      //   });
+      // });
     }
   }
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/services/user.dart' as repo;
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -9,7 +11,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   TextEditingController emailAddress = new TextEditingController();
-  TextEditingController password = new TextEditingController();
+  TextEditingController userPin = new TextEditingController();
+  GlobalKey<ScaffoldState> scaffoldKey;
   var errormessage = "";
   bool isValidateEmail = true;
   bool isValidatePassword = true;
@@ -17,6 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    this.scaffoldKey = new GlobalKey<ScaffoldState>();
   }
 
   validateFields() async {
@@ -26,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
         isValidateEmail = false;
       });
       return false;
-    } else if (password.text == "" || password.text.length == 0) {
+    } else if (userPin.text == "" || userPin.text.length == 0) {
       setState(() {
         errormessage = "Please enter PIN.";
         isValidatePassword = false;
@@ -40,23 +44,44 @@ class _LoginPageState extends State<LoginPage> {
   sendlogin() async {
     var isValid = await validateFields();
     var deviceinfo = await CommunFun.deviceInfo();
-    if (isValid) {
-      setState(() {
-        isLoading = true;
-      });
-      var email = emailAddress.text;
-      var password = emailAddress.text;
-      var deviceType = deviceinfo.type;
-      var deviceToken = deviceinfo.androidId;
-      var device_id = deviceinfo.id;
-
-      ///TODO : API call
-      ///
-      Navigator.pushNamed(context, '/PINPage');
-      setState(() {
-        isLoading = false;
-      });
-    }
+    Navigator.pushNamed(context, '/PINPage');
+    // if (isValid) {
+    //   setState(() {
+    //     isLoading = true;
+    //   });
+    //   User user = new User();
+    //   user.name = emailAddress.text;
+    //   user.userPin = int.parse(userPin.text);
+    //   user.deviceType = deviceinfo.type;
+    //   user.deviceToken = deviceinfo.androidId;
+    //   user.deviceId = deviceinfo.id;
+    //   user.terminalId = "1";
+    //   await repo.login(user).then((value) async {
+    //     print(value);
+    //     if (value != null && value.status == 200) {
+    //       Navigator.pushNamed(context, '/PINPage');
+    //     } else {
+    //       setState(() {
+    //         isLoading = false;
+    //       });
+    //       scaffoldKey.currentState.showSnackBar(SnackBar(
+    //         content: Text(value.message),
+    //       ));
+    //     }
+    //   }).catchError((e) {
+    //     setState(() {
+    //       isLoading = false;
+    //     });
+    //     print(e);
+    //     scaffoldKey.currentState.showSnackBar(SnackBar(
+    //       content: Text(e.message),
+    //     ));
+    //   }).whenComplete(() {
+    //     setState(() {
+    //       isLoading = false;
+    //     });
+    //   });
+    // }
   }
 
   @override
@@ -99,14 +124,16 @@ class _LoginPageState extends State<LoginPage> {
                 child: CommunFun.forgotPasswordText(context),
               ),
               SizedBox(height: 50),
-              Container(
-                width: MediaQuery.of(context).size.width,
-                child: CommunFun.roundedButton("LOGIN", () {
-                  // TODO : LOGIN API
-                  //Navigator.pushNamed(context, '/PINPage'); // Goto next page
-                  sendlogin();
-                }),
-              )
+              isLoading
+                  ? CommunFun.loader(context)
+                  : Container(
+                      width: MediaQuery.of(context).size.width,
+                      child: CommunFun.roundedButton("LOGIN", () {
+                        // TODO : LOGIN API
+                        //Navigator.pushNamed(context, '/PINPage'); // Goto next page
+                        sendlogin();
+                      }),
+                    )
             ],
           ),
         ),
@@ -132,7 +159,7 @@ class _LoginPageState extends State<LoginPage> {
         prefixIcon: Padding(
           padding: EdgeInsets.only(left: 25, right: 25),
           child: Icon(
-            Icons.mail_outline,
+            Icons.perm_identity,
             color: Colors.black,
             size: 40,
           ),
@@ -159,8 +186,8 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget passwordInput(Function onChange) {
     return TextField(
-      controller: password,
-      keyboardType: TextInputType.text,
+      controller: userPin,
+      keyboardType: TextInputType.number,
       decoration: InputDecoration(
         prefixIcon: Padding(
           padding: EdgeInsets.only(left: 20, right: 20),
