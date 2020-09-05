@@ -11,6 +11,7 @@ class OpeningAmmountPage extends StatefulWidget {
 }
 
 class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
+  String currentNumber = "00";
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -37,6 +38,19 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
       ),
       content: mainContent(), // Popup body contents
     );
+  }
+
+  backspaceClick() {
+    var currentnumber = currentNumber;
+  }
+
+  numberClick(val) {
+    // add  value in prev value
+    var currentnumber = currentNumber;
+    currentnumber += val;
+    setState(() {
+      currentNumber = currentnumber;
+    });
   }
 
   Widget closeButton(context) {
@@ -94,6 +108,28 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
     );
   }
 
+  Widget _backbutton(Function() f) {
+    // Creating a method of return type Widget with number and function f as a parameter
+    return Padding(
+      padding: EdgeInsets.only(top: 10, bottom: 10),
+      child: MaterialButton(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18.0),
+            side: BorderSide(color: Colors.black, width: 3.0)),
+        height: 100.0,
+        minWidth: 120.0,
+        child: Icon(
+          Icons.backspace,
+          color: Colors.black,
+          size: 40,
+        ),
+        textColor: Colors.black,
+        color: Colors.white,
+        onPressed: f,
+      ),
+    );
+  }
+
   Widget getAmount() {
     return Container(
       padding: EdgeInsets.only(left: 30, right: 30, bottom: 10),
@@ -101,7 +137,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text("00.00",
+          Text(currentNumber,
               style: TextStyle(
                   fontSize: 90,
                   color: Colors.black,
@@ -120,10 +156,18 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _button("1", () {}), // using custom widget button
-                _button("2", () {}),
-                _button("3", () {}),
-                _button("<-", () {}),
+                _button("1", () {
+                  numberClick('1');
+                }), // using custom widget button
+                _button("2", () {
+                  numberClick('2');
+                }),
+                _button("3", () {
+                  numberClick('3');
+                }),
+                _backbutton(() {
+                  backspaceClick();
+                }),
               ],
             ),
             SizedBox(
@@ -132,10 +176,18 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _button("4", () {}), // using custom widget button
-                _button("5", () {}),
-                _button("6", () {}),
-                _button(".", () {}),
+                _button("4", () {
+                  numberClick('4');
+                }), // using custom widget button
+                _button("5", () {
+                  numberClick('5');
+                }),
+                _button("6", () {
+                  numberClick('6');
+                }),
+                _button(".", () {
+                  numberClick('.');
+                }),
               ],
             ),
             Row(
@@ -151,14 +203,20 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                         children: [
                           Padding(
                               padding: EdgeInsets.only(right: 30, top: 10),
-                              child: _button("7", () {})),
+                              child: _button("7", () {
+                                numberClick('7');
+                              })),
                           // using custom widget button
                           Padding(
                               padding: EdgeInsets.only(right: 30, top: 10),
-                              child: _button("8", () {})),
+                              child: _button("8", () {
+                                numberClick('8');
+                              })),
                           Padding(
                               padding: EdgeInsets.only(right: 30, top: 10),
-                              child: _button("9", () {})),
+                              child: _button("9", () {
+                                numberClick('9');
+                              })),
                         ],
                       ),
                       Row(
@@ -166,7 +224,9 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                         children: <Widget>[
                           Padding(
                               padding: EdgeInsets.only(right: 30, top: 10),
-                              child: _button("0", () {})),
+                              child: _button("0", () {
+                                numberClick('0');
+                              })),
                           Padding(
                               padding: EdgeInsets.only(right: 30, top: 10),
                               child: Padding(
@@ -185,7 +245,9 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                                           fontSize: 55.0)),
                                   textColor: Colors.black,
                                   color: Colors.white,
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    numberClick('00');
+                                  },
                                 ),
                               )),
                         ],

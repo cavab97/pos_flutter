@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
 
   sendlogin() async {
     // Login click fun
-    Navigator.pushNamed(context, '/PINPage');
+    // Navigator.pushNamed(context, '/PINPage');
     var isValid = await validateFields(); // check validation
     var deviceinfo = await CommunFun.deviceInfo();
     if (isValid) {
