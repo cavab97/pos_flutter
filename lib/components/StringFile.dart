@@ -19,5 +19,6 @@ class Strings {
   static String search_bar_text = "Search product here...";
   static String btn_Add_customer = "Add Customer";
   static String pin_Number = "PIN Number";
-  static String pin_validation_message = "Please enter your PIN number";
+  static String pin_validation_message = "Please enter your PIN number.";
+  static String logout = "LOGOUT";
 }

@@ -59,7 +59,6 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
   }
 
   numberClick(val) {
-
     // add  value in prev value
     if (currentNumber.length <= 8) {
       var currentnumber = currentNumber;
@@ -304,7 +303,9 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                                   fontWeight: FontWeight.bold, fontSize: 30.0)),
                           textColor: Colors.black,
                           color: Colors.white,
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
                         ),
                       )
                     ],

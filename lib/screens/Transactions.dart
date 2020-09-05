@@ -12,6 +12,39 @@ class TransactionsPage extends StatefulWidget {
 }
 
 class _TransactionsPageState extends State<TransactionsPage> {
+  var productsList = [
+    {
+      'index': 0,
+      'name': "Daniels Salazar fd sd",
+      'picture': "assets/image1.jfif",
+      'price': "500.00"
+    },
+    {
+      'index': 2,
+      'name': "Contreras Reesenjnc jn",
+      'picture': "assets/image2.jfif",
+      'price': "500.00"
+    },
+    {
+      'index': 3,
+      'name': "Moody Cabrera sdfds ",
+      'picture': "assets/image3.jfif",
+      'price': "500.00"
+    },
+    {
+      'index': 4,
+      'name': "Moody Cabrera sdfs ",
+      'picture': "assets/photo-1504674900247-0877df9cc836.jfif",
+      'price': "500.00"
+    },
+    {
+      'index': 5,
+      'name': "Moody Cabrera",
+      'picture': "assets/image5.webp",
+      'price': "500.00"
+    }
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -192,41 +225,110 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 width: 1, color: Colors.grey, style: BorderStyle.solid)),
         children: [
           TableRow(children: [
-            Padding(
-              padding: EdgeInsets.only(top: 10, bottom: 10),
-              child: Text(
-                Strings.sub_total.toUpperCase(),
-                style: TextStyle(fontSize: 20, color: Colors.grey),
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    Strings.sub_total.toUpperCase(),
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey),
+                  ),
+                  Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      child: Text(
+                        "00:00",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700, color: Colors.grey),
+                      )),
+                ],
               ),
             ),
-            Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("00:00",
-                    style: TextStyle(
-                        fontSize: 20, color: Theme.of(context).accentColor))),
           ]),
           TableRow(children: [
-            Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("TAX",
-                    style: TextStyle(fontSize: 20, color: Colors.grey))),
-            Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("00:00",
-                    style: TextStyle(
-                        fontSize: 20, color: Theme.of(context).accentColor))),
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      child: Text(
+                        Strings.discount.toUpperCase(),
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).accentColor),
+                      )),
+                  Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      child: Text(
+                        "00:00",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).accentColor),
+                      )),
+                ],
+              ),
+            ),
           ]),
           TableRow(children: [
-            Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("GRAND TOTAL",
-                    style: TextStyle(fontSize: 20, color: Colors.grey))),
-            Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("00:00",
-                    style: TextStyle(
-                        fontSize: 20, color: Theme.of(context).accentColor))),
-          ])
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      child: Text(
+                        Strings.tax.toUpperCase(),
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.grey),
+                      )),
+                  Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      child: Text(
+                        "00:00",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.grey),
+                      )),
+                ],
+              ),
+            ),
+          ]),
+          TableRow(children: [
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: 10,
+                    ),
+                    child: Text(
+                      Strings.grand_total,
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.grey),
+                    ),
+                  ),
+                  Padding(
+                      padding: EdgeInsets.only(
+                        top: 10,
+                      ),
+                      child: Text(
+                        "150.00",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700, color: Colors.grey),
+                      )),
+                ],
+              ),
+            ),
+          ]),
         ]);
   }
 
@@ -248,140 +350,70 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget productList() {
     return Container(
+      height: MediaQuery.of(context).size.height / 2.6,
       width: MediaQuery.of(context).size.width / 2,
-      child: Column(children: <Widget>[
-        InkWell(
-            onTap: () {},
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Hero(
-                    tag: 1,
-                    child: Container(
-                      height: 100,
-                      width: 130,
-                      decoration: new BoxDecoration(
-                        color: Colors.greenAccent,
-                        image: new DecorationImage(
-                          image: new ExactAssetImage(
-                              'assets/photo-1504674900247-0877df9cc836.jfif'),
-                          fit: BoxFit.cover,
+      child: SingleChildScrollView(
+        child: Column(
+            children: productsList.map((product) {
+          return InkWell(
+              onTap: () {},
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Hero(
+                      tag: product["index"],
+                      child: Container(
+                        height: 100,
+                        width: 130,
+                        decoration: new BoxDecoration(
+                          color: Colors.greenAccent,
+                          image: new DecorationImage(
+                            image: new ExactAssetImage(product["picture"]),
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 15),
-                  Flexible(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text("YMZX BBQ SPICY",
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      color: Theme.of(context).primaryColor)),
-                              // SizedBox(height: 3),
-                              // Text(
-                              //   widget.favorite.product.store.name,
-                              //   overflow: TextOverflow.fade,
-                              //   softWrap: false,
-                              //   style: Theme.of(context).textTheme.caption,
-                              // ),
-                            ],
+                    SizedBox(width: 15),
+                    Flexible(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(product["name"].toString().toUpperCase(),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        color: Theme.of(context).primaryColor)),
+                              ],
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        Text("7.00",
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Theme.of(context).primaryColor)),
-                        SizedBox(width: 80),
-                        Text("7.00",
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Theme.of(context).accentColor)),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            )),
-        CommunFun.divider(),
-        InkWell(
-            onTap: () {},
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Hero(
-                    tag: 2,
-                    child: Container(
-                      height: 100,
-                      width: 130,
-                      decoration: new BoxDecoration(
-                        color: Colors.greenAccent,
-                        image: new DecorationImage(
-                          image: new ExactAssetImage(
-                              'assets/photo-1504674900247-0877df9cc836.jfif'),
-                          fit: BoxFit.cover,
-                        ),
+                          SizedBox(
+                            width: 8,
+                          ),
+                          Text(product["price"],
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  color: Theme.of(context).primaryColor)),
+                          SizedBox(width: 80),
+                          Text(product["price"],
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  color: Theme.of(context).accentColor)),
+                        ],
                       ),
-                    ),
-                  ),
-                  SizedBox(width: 15),
-                  Flexible(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text("YMZX BBQ SPICY",
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      color: Theme.of(context).primaryColor)),
-                              // SizedBox(height: 3),
-                              // Text(
-                              //   widget.favorite.product.store.name,
-                              //   overflow: TextOverflow.fade,
-                              //   softWrap: false,
-                              //   style: Theme.of(context).textTheme.caption,
-                              // ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        Text("7.00",
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Theme.of(context).primaryColor)),
-                        SizedBox(width: 80),
-                        Text("7.00",
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Theme.of(context).accentColor)),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            )),
-      ]),
+                    )
+                  ],
+                ),
+              ));
+        }).toList()),
+      ),
     );
   }
 
