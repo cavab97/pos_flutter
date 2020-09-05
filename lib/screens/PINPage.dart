@@ -112,7 +112,8 @@ class _PINPageState extends State<PINPage> {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
             side: BorderSide(color: Colors.grey)),
-        height: 90.0,
+        height: MediaQuery.of(context).size.height / 8.7,
+        minWidth: MediaQuery.of(context).size.width / 9.9,
         child: Text(number,
             textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30.0)),

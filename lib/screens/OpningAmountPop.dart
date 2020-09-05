@@ -12,6 +12,7 @@ class OpeningAmmountPage extends StatefulWidget {
 
 class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
   String currentNumber = "00";
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -41,16 +42,35 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
   }
 
   backspaceClick() {
-    var currentnumber = currentNumber;
+    if (currentNumber != "00" && currentNumber != "0") {
+      var currentnumber = currentNumber;
+      if (currentnumber != null && currentnumber.length > 0) {
+        currentnumber = currentnumber.substring(0, currentnumber.length - 1);
+        if (currentnumber.length == 0) {
+          currentnumber = "00";
+        }
+        setState(() {
+          currentNumber = currentnumber;
+        });
+      } else {
+        currentNumber = "00";
+      }
+    }
   }
 
   numberClick(val) {
+
     // add  value in prev value
-    var currentnumber = currentNumber;
-    currentnumber += val;
-    setState(() {
-      currentNumber = currentnumber;
-    });
+    if (currentNumber.length <= 8) {
+      var currentnumber = currentNumber;
+      if (currentnumber == "00") {
+        currentnumber = "";
+      }
+      currentnumber += val;
+      setState(() {
+        currentNumber = currentnumber;
+      });
+    }
   }
 
   Widget closeButton(context) {
@@ -81,7 +101,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
       children: [
         getAmount(), // dynamic enter ammount
         SizedBox(
-          height: 20,
+          height: 10,
         ),
         getNumbers(context), // numbers buttons
       ],
@@ -142,6 +162,19 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                   fontSize: 90,
                   color: Colors.black,
                   fontWeight: FontWeight.bold)),
+          /*Flexible(
+            child: RichText(
+              overflow: TextOverflow.ellipsis,
+              strutStyle:
+                  StrutStyle(fontSize: 90.0, fontWeight: FontWeight.bold),
+              text: TextSpan(
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 90,
+                      fontWeight: FontWeight.bold),
+                  text: currentNumber),
+            ),*/
+          // )
         ],
       ),
     );
@@ -186,7 +219,9 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                   numberClick('6');
                 }),
                 _button(".", () {
-                  numberClick('.');
+                  if (!currentNumber.contains(".")) {
+                    numberClick('.');
+                  }
                 }),
               ],
             ),

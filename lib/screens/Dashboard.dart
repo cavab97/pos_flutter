@@ -362,18 +362,19 @@ class _DashboradPageState extends State<DashboradPage> {
                     ),
                   ),
                   Positioned(
-                      top: 163,
+                      top: itemHeight / 2 - 30,
                       left: 0,
                       child: Container(
+                        height: 30,
                           padding: EdgeInsets.all(5),
                           color: Colors.deepOrange,
-                          child: Text(
+                          child: Center(child: Text(
                             product["price"],
                             style: TextStyle(
                                 fontWeight: FontWeight.w400,
                                 color: Colors.white,
                                 fontSize: 15),
-                          )))
+                          ),),),)
                 ],
               ),
             ),
