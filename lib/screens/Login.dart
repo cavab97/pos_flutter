@@ -6,7 +6,8 @@ import 'package:mcncashier/services/user.dart' as repo;
 
 class LoginPage extends StatefulWidget {
   // LOGIN Page
-  LoginPage({Key key}) : super(key: key);
+  LoginPage({Key key, this.terminalId}) : super(key: key);
+  final String terminalId;
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -48,52 +49,53 @@ class _LoginPageState extends State<LoginPage> {
   sendlogin() async {
     // Login click fun
     Navigator.pushNamed(context, '/PINPage');
-    // var isValid = await validateFields(); // check validation
-    // var deviceinfo = await CommunFun.deviceInfo();
-    // if (isValid) {
-    //   setState(() {
-    //     isLoading = true;
-    //   });
-    //   User user = new User();
-    //   user.name = emailAddress.text;
-    //   user.userPin = int.parse(userPin.text);
-    //   user.deviceType = deviceinfo.type;
-    //   user.deviceToken = deviceinfo.androidId;
-    //   user.deviceId = deviceinfo.id;
-    //   user.terminalId = "1";
-    //   await repo.login(user).then((value) async {
-    //     print(value);
-    //     if (value != null && value.status == 200) {
-    //       Navigator.pushNamed(context, '/PINPage');
-    //     } else {
-    //       setState(() {
-    //         isLoading = false;
-    //       });
-    //       scaffoldKey.currentState.showSnackBar(SnackBar(
-    //         content: Text(value.message),
-    //       ));
-    //     }
-    //   }).catchError((e) {
-    //     setState(() {
-    //       isLoading = false;
-    //     });
-    //     print(e);
-    //     scaffoldKey.currentState.showSnackBar(SnackBar(
-    //       content: Text(e.message),
-    //     ));
-    //   }).whenComplete(() {
-    //     setState(() {
-    //       isLoading = false;
-    //     });
-    //   });
-    // }
+    var isValid = await validateFields(); // check validation
+    var deviceinfo = await CommunFun.deviceInfo();
+    if (isValid) {
+      setState(() {
+        isLoading = true;
+      });
+      User user = new User();
+      user.name = emailAddress.text;
+      user.userPin = int.parse(userPin.text);
+      user.deviceType = deviceinfo.type;
+      user.deviceToken = deviceinfo.androidId;
+      user.deviceId = deviceinfo.id;
+      user.terminalId = widget.terminalId;
+      await repo.login(user).then((value) async {
+        print(value);
+        if (value != null && value.status == 200) {
+          Navigator.pushNamed(context, '/PINPage');
+        } else {
+          setState(() {
+            isLoading = false;
+          });
+          scaffoldKey.currentState.showSnackBar(SnackBar(
+            content: Text(value.message),
+          ));
+        }
+      }).catchError((e) {
+        setState(() {
+          isLoading = false;
+        });
+        print(e);
+        scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text(e.message),
+        ));
+      }).whenComplete(() {
+        setState(() {
+          isLoading = false;
+        });
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        key: scaffoldKey,
-        body: Center(
+      key: scaffoldKey,
+      body: SafeArea(
+        child: Center(
           // Login main part
           child: Container(
             width: MediaQuery.of(context).size.width / 1.8,
@@ -148,7 +150,9 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   Widget loginlogo() {

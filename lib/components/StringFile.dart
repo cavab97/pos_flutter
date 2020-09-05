@@ -18,4 +18,5 @@ class Strings {
   static String grand_total = "GRAND TOTAL";
   static String search_bar_text = "Search product here...";
   static String btn_Add_customer ="Add Customer";
+  static String pin_Number= "PIN Number";
 }

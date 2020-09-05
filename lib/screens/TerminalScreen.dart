@@ -11,7 +11,8 @@ class TerminalKeyPage extends StatefulWidget {
 }
 
 class _TerminalKeyPageState extends State<TerminalKeyPage> {
-  TextEditingController terminalKey = new TextEditingController();
+  TextEditingController terminalKey =
+      new TextEditingController(text: "LqOtOWvFn5dVJINHESOwxyWSfQ7YDAh2");
   GlobalKey<ScaffoldState> scaffoldKey;
   var errormessage = "";
   bool isValidatekey = true;
@@ -37,82 +38,85 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
   }
 
   setTerminalkey() async {
-    Navigator.pushNamed(context, '/Login');
-    // var isValid = await validateFields(); // validate fields
-    // var deviceinfo = await CommunFun.deviceInfo();
-    // TemimalKey terminal = new TemimalKey();
-    // if (isValid) {
-    //   setState(() {
-    //     isLoading = true;
-    //   });
-    //   terminal.terminalKey = terminalKey.text;
-    //   terminal.deviceid = deviceinfo.id;
-    //   await repo.sendTerminalKey(terminal).then((value) async {
-    //     print(value);
-    //     if (value != null && value.status == 200) {
-    //       Navigator.pushNamed(context, '/Login');
-    //     } else {
-    //       scaffoldKey.currentState.showSnackBar(SnackBar(
-    //         content: Text(value.message),
-    //       ));
-    //     }
-    //   }).catchError((e) {
-    //     print(e);
-    //     scaffoldKey.currentState.showSnackBar(SnackBar(
-    //       content: Text(e.message),
-    //     ));
-    //     setState(() {
-    //       isLoading = false;
-    //     });
-    //   }).whenComplete(() {
-    //     setState(() {
-    //       isLoading = false;
-    //     });
-    //   });
-    // }
+    //Navigator.pushNamed(context, '/Login');
+    var isValid = await validateFields(); // validate fields
+    var deviceinfo = await CommunFun.deviceInfo();
+    TemimalKey terminal = new TemimalKey();
+    if (isValid) {
+      setState(() {
+        isLoading = true;
+      });
+      terminal.terminalKey = terminalKey.text;
+      terminal.deviceid = deviceinfo.id;
+      await repo.sendTerminalKey(terminal).then((value) async {
+        print(value);
+        if (value != null && value.status == 200) {
+          Navigator.pushNamed(context, '/Login',
+              arguments: {"terminalId": value.terminalId});
+        } else {
+          scaffoldKey.currentState.showSnackBar(SnackBar(
+            content: Text(value.message),
+          ));
+        }
+      }).catchError((e) {
+        print(e);
+        scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text(e.message),
+        ));
+        setState(() {
+          isLoading = false;
+        });
+      }).whenComplete(() {
+        setState(() {
+          isLoading = false;
+        });
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        //  main part of the page
-        body: Center(
-      child: Container(
-        width: MediaQuery.of(context).size.width / 1.8,
-        padding: EdgeInsets.only(left: 30, right: 30),
-        child: new SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              loginlogo(), // Login logo
-              SizedBox(height: 80),
-              //
-              terminalKeyInput((e) {
-                // Key input
-                print("on changes");
-                if (e.length > 0) {
-                  setState(() {
-                    errormessage = "";
-                    isValidatekey = true;
-                  });
-                }
-              }),
-              SizedBox(height: 50),
-              isLoading
-                  ? CommunFun.loader(context)
-                  : Container(
-                      // Key add button
-                      width: MediaQuery.of(context).size.width,
-                      child: CommunFun.roundedButton("Set Teminal Key", () {
-                        setTerminalkey();
-                      }),
-                    )
-            ],
+      //  main part of the page
+      body: SafeArea(
+        child: Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width / 1.7,
+            child: new SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  loginlogo(), // Login logo
+                  SizedBox(height: 80),
+                  //
+                  terminalKeyInput((e) {
+                    // Key input
+                    print("on changes");
+                    if (e.length > 0) {
+                      setState(() {
+                        errormessage = "";
+                        isValidatekey = true;
+                      });
+                    }
+                  }),
+                  SizedBox(height: 50),
+                  isLoading
+                      ? CommunFun.loader(context)
+                      : Container(
+                          // Key add button
+                          width: MediaQuery.of(context).size.width,
+                          child: CommunFun.roundedButton("Set Teminal Key", () {
+                            setTerminalkey();
+                          }),
+                        )
+                ],
+              ),
+            ),
           ),
         ),
       ),
-    ));
+    );
   }
 
   Widget loginlogo() {
