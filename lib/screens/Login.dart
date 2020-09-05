@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/User.dart';
@@ -26,6 +27,11 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
+    KeyboardVisibilityNotification().addNewListener(
+      onHide: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+    );
   }
 
   validateFields() async {
@@ -61,19 +67,10 @@ class _LoginPageState extends State<LoginPage> {
       user.deviceType = deviceinfo.type;
       user.deviceToken = deviceinfo.androidId;
       user.deviceId = deviceinfo.id;
-      user.terminalId = widget.terminalId;
+      user.terminalId = "1"; //widget.terminalId;
       await repo.login(user).then((value) async {
         print(value);
-        if (value != null && value.status == 200) {
-          Navigator.pushNamed(context, '/PINPage');
-        } else {
-          setState(() {
-            isLoading = false;
-          });
-          scaffoldKey.currentState.showSnackBar(SnackBar(
-            content: Text(value.message),
-          ));
-        }
+        Navigator.pushNamed(context, '/PINPage');
       }).catchError((e) {
         setState(() {
           isLoading = false;

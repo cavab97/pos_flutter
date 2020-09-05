@@ -321,6 +321,7 @@ class _DashboradPageState extends State<DashboradPage> {
               showQuantityDailog();
             },
             child: Container(
+              height: itemHeight,
               margin: EdgeInsets.all(5),
               child: Stack(
                 alignment: AlignmentDirectional.topCenter,
@@ -336,12 +337,12 @@ class _DashboradPageState extends State<DashboradPage> {
                             ),
                           ),
                           width: MediaQuery.of(context).size.width,
-                          height: 250,
+                          height: itemHeight / 2,
                           child: Center())),
                   Container(
-                    margin: EdgeInsets.only(top: 190),
+                    margin: EdgeInsets.only(top: itemHeight / 2),
                     width: MediaQuery.of(context).size.width,
-                    // height: 90,
+                    //height: itemHeight / 5,
                     decoration: BoxDecoration(
                       color: Colors.grey[600],
                     ),

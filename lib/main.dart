@@ -14,11 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
-    KeyboardVisibilityNotification().addNewListener(
-      onHide: () {
-        FocusScope.of(context).requestFocus(new FocusNode());
-      },
-    );
+    
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'cashierApp',
