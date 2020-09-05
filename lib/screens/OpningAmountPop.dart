@@ -112,7 +112,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
     return Padding(
       padding: EdgeInsets.only(top: 10, bottom: 10),
       child: MaterialButton(
-        shape: RoundedRectangleBorder(
+                shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
             side: BorderSide(color: Colors.black, width: 3.0)),
         height: MediaQuery.of(context).size.height / 8.8,

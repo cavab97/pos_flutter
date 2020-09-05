@@ -425,7 +425,7 @@ class _DashboradPageState extends State<DashboradPage> {
     return Container(
         height: 70,
         width: 320,
-        child: CommunFun.roundedButton("PAY", () {
+        child: CommunFun.roundedButton(Strings.title_pay, () {
           openOpningAmmountPop();
         }));
   }
