@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:mcncashier/services/teminalkey.dart' as repo;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TerminalKeyPage extends StatefulWidget {
   //Terminal key page
@@ -13,6 +14,7 @@ class TerminalKeyPage extends StatefulWidget {
 class _TerminalKeyPageState extends State<TerminalKeyPage> {
   TextEditingController terminalKey =
       new TextEditingController(text: "LqOtOWvFn5dVJINHESOwxyWSfQ7YDAh2");
+
   GlobalKey<ScaffoldState> scaffoldKey;
   var errormessage = "";
   bool isValidatekey = true;
@@ -51,6 +53,8 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
       await repo.sendTerminalKey(terminal).then((value) async {
         print(value);
         if (value != null && value.status == 200) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString('TerminalKey', value.terminalId.toString());
           Navigator.pushNamed(context, '/Login',
               arguments: {"terminalId": value.terminalId});
         } else {

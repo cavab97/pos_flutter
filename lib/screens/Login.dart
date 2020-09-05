@@ -4,6 +4,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/user.dart' as repo;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   // LOGIN Page
@@ -62,12 +63,14 @@ class _LoginPageState extends State<LoginPage> {
         isLoading = true;
       });
       User user = new User();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      var terkey = prefs.getString('TerminalKey');
       user.name = emailAddress.text;
       user.userPin = int.parse(userPin.text);
       user.deviceType = deviceinfo.type;
       user.deviceToken = deviceinfo.androidId;
       user.deviceId = deviceinfo.id;
-      user.terminalId = "1"; //widget.terminalId;
+      user.terminalId = terkey != null ? terkey : '1'; //widget.terminalId;
       await repo.login(user).then((value) async {
         print(value);
         Navigator.pushNamed(context, '/PINPage');
