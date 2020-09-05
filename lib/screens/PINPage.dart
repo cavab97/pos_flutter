@@ -11,6 +11,16 @@ class PINPage extends StatefulWidget {
 
 class _PINPageState extends State<PINPage> {
   var pinNumber = "";
+  GlobalKey<ScaffoldState> scaffoldKey;
+
+    @override
+  void initState() {
+    super.initState();
+    this.scaffoldKey = new GlobalKey<ScaffoldState>();
+    
+  }
+
+
 
   addINPin(val) {
     if (pinNumber.length < 4) {
@@ -33,6 +43,10 @@ class _PINPageState extends State<PINPage> {
     if (pinNumber.length >= 4) {
       //TODO : API CALL for clockin
       Navigator.pushNamed(context, '/Dashboard');
+    }else{
+      scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text(Strings.pin_validation_message),
+        ));
     }
   }
 
@@ -255,4 +269,7 @@ class _PINPageState extends State<PINPage> {
       ),
     );
   }
+}
+
+class KeyboardVisibilityNotification {
 }

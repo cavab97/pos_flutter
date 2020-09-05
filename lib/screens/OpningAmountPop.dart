@@ -116,8 +116,8 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
             side: BorderSide(color: Colors.black, width: 3.0)),
-        height: 100.0,
-        minWidth: 120.0,
+        height: MediaQuery.of(context).size.height / 8.8,
+        minWidth: MediaQuery.of(context).size.width / 9.8,
         child: Text(number,
             textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 55.0)),
@@ -237,18 +237,18 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           Padding(
-                              padding: EdgeInsets.only(right: 30, top: 10),
+                              padding: EdgeInsets.only(right: 25, top: 10),
                               child: _button("7", () {
                                 numberClick('7');
                               })),
                           // using custom widget button
                           Padding(
-                              padding: EdgeInsets.only(right: 30, top: 10),
+                              padding: EdgeInsets.only(right: 25, top: 10),
                               child: _button("8", () {
                                 numberClick('8');
                               })),
                           Padding(
-                              padding: EdgeInsets.only(right: 30, top: 10),
+                              padding: EdgeInsets.only(right: 25, top: 10),
                               child: _button("9", () {
                                 numberClick('9');
                               })),
@@ -263,28 +263,26 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                                 numberClick('0');
                               })),
                           Padding(
-                              padding: EdgeInsets.only(right: 30, top: 10),
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 10),
-                                child: MaterialButton(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(18.0),
-                                      side: BorderSide(
-                                          color: Colors.black, width: 3.0)),
-                                  height: 100.0,
-                                  minWidth: 270.0,
-                                  child: Text("00".toUpperCase(),
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 55.0)),
-                                  textColor: Colors.black,
-                                  color: Colors.white,
-                                  onPressed: () {
-                                    numberClick('00');
-                                  },
-                                ),
-                              )),
+                            padding: EdgeInsets.only(right: 30, top: 10),
+                            child: MaterialButton(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18.0),
+                                  side: BorderSide(
+                                      color: Colors.black, width: 3.0)),
+                              height: MediaQuery.of(context).size.height / 8.8,
+                              minWidth: MediaQuery.of(context).size.width / 4.6,
+                              child: Text("00".toUpperCase(),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 55.0)),
+                              textColor: Colors.black,
+                              color: Colors.white,
+                              onPressed: () {
+                                numberClick('00');
+                              },
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -292,14 +290,14 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                   Column(
                     children: [
                       Padding(
-                        padding: EdgeInsets.only(left: 5, top: 10),
+                        padding: EdgeInsets.only(left: 5, right: 5, top: 10),
                         child: MaterialButton(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18.0),
                               side:
                                   BorderSide(color: Colors.black, width: 3.0)),
-                          height: 235.0,
-                          minWidth: 120.0,
+                          height: MediaQuery.of(context).size.height / 3.9,
+                          minWidth: MediaQuery.of(context).size.width / 9.9,
                           child: Text("enter".toUpperCase(),
                               textAlign: TextAlign.center,
                               style: TextStyle(

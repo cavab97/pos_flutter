@@ -5,7 +5,7 @@ import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:http/http.dart' as http;
 import 'package:mcncashier/models/User.dart';
 
-Future<TemimalKey> login(User user) async {
+Future<User> login(User user) async {
   print(user);
   try {
     Uri url = Uri.parse(Configrations.base_URL + Configrations.login);
@@ -29,13 +29,13 @@ Future<TemimalKey> login(User user) async {
     );
     print(response);
     var data = json.decode(response.body);
-    if (data.status == 200) {
-      return TemimalKey.fromJson(json.decode(response.body)['data']);
+    if (data["status"] == 200) {
+      return User.fromJson(data["data"]);
     } else {
-      return TemimalKey.fromJson({});
+      return User.fromJson({});
     }
   } catch (e) {
     print(e);
-    return TemimalKey.fromJson({});
+    return User.fromJson({});
   }
 }
