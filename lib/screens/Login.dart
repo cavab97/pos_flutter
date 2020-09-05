@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/user.dart' as repo;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +12,7 @@ class LoginPage extends StatefulWidget {
   // LOGIN Page
   LoginPage({Key key, this.terminalId}) : super(key: key);
   final String terminalId;
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -63,8 +66,9 @@ class _LoginPageState extends State<LoginPage> {
         isLoading = true;
       });
       User user = new User();
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      var terkey = prefs.getString('TerminalKey');
+
+      var terkey = Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+
       user.name = emailAddress.text;
       user.userPin = int.parse(userPin.text);
       user.deviceType = deviceinfo.type;

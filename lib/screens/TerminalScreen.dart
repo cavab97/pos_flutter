@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:mcncashier/services/teminalkey.dart' as repo;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class TerminalKeyPage extends StatefulWidget {
   //Terminal key page
   TerminalKeyPage({Key key}) : super(key: key);
+
   @override
   _TerminalKeyPageState createState() => _TerminalKeyPageState();
 }
@@ -53,8 +56,9 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
       await repo.sendTerminalKey(terminal).then((value) async {
         print(value);
         if (value != null && value.status == 200) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.setString('TerminalKey', value.terminalId.toString());
+          Preferences.setStringToSF(
+              Constant.TERMINAL_KEY, value.terminalId.toString());
+
           Navigator.pushNamed(context, '/Login',
               arguments: {"terminalId": value.terminalId});
         } else {
