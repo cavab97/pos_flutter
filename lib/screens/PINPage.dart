@@ -13,18 +13,27 @@ class _PINPageState extends State<PINPage> {
   var pinNumber = "";
 
   addINPin(val) {
-    var currentpinNumber = pinNumber;
-    currentpinNumber += currentpinNumber + val;
-    print(currentpinNumber);
-    setState(() {
-      pinNumber = currentpinNumber;
-    });
+    if (pinNumber.length < 4) {
+      var currentpinNumber = pinNumber;
+      currentpinNumber += val;
+      print(currentpinNumber);
+      setState(() {
+        pinNumber = currentpinNumber;
+      });
+    }
   }
 
   clearPin() {
     setState(() {
       pinNumber = "";
     });
+  }
+
+  clockInwithPIN() {
+    if (pinNumber.length >= 4) {
+      //TODO : API CALL for clockin
+      Navigator.pushNamed(context, '/Dashboard');
+    }
   }
 
   @override
@@ -215,7 +224,7 @@ class _PINPageState extends State<PINPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   _button("Clock\nIN", () {
-                    Navigator.pushNamed(context, '/Dashboard');
+                    clockInwithPIN();
                   }),
                   _button("0", () {
                     addINPin("0");
