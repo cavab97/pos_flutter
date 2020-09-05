@@ -48,8 +48,8 @@ class _LoginPageState extends State<LoginPage> {
 
   sendlogin() async {
     // Login click fun
-    // Navigator.pushNamed(context, '/PINPage');
-    var isValid = await validateFields(); // check validation
+    Navigator.pushNamed(context, '/PINPage');
+    /*var isValid = await validateFields(); // check validation
     var deviceinfo = await CommunFun.deviceInfo();
     if (isValid) {
       setState(() {
@@ -61,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
       user.deviceType = deviceinfo.type;
       user.deviceToken = deviceinfo.androidId;
       user.deviceId = deviceinfo.id;
-      user.terminalId = widget.terminalId;
+      user.terminalId = '1'; //widget.terminalId;
       await repo.login(user).then((value) async {
         print(value);
         if (value != null && value.status == 200) {
@@ -87,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
           isLoading = false;
         });
       });
-    }
+    }*/
   }
 
   @override
