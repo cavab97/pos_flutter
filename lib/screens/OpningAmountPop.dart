@@ -101,7 +101,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
       children: [
         getAmount(), // dynamic enter ammount
         SizedBox(
-          height: 20,
+          height: 10,
         ),
         getNumbers(context), // numbers buttons
       ],
