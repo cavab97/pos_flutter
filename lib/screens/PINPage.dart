@@ -13,14 +13,11 @@ class _PINPageState extends State<PINPage> {
   var pinNumber = "";
   GlobalKey<ScaffoldState> scaffoldKey;
 
-    @override
+  @override
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
-    
   }
-
-
 
   addINPin(val) {
     if (pinNumber.length < 4) {
@@ -43,47 +40,48 @@ class _PINPageState extends State<PINPage> {
     if (pinNumber.length >= 4) {
       //TODO : API CALL for clockin
       Navigator.pushNamed(context, '/Dashboard');
-    }else{
+    } else {
       scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text(Strings.pin_validation_message),
-        ));
+        content: Text(Strings.pin_validation_message),
+      ));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        key: scaffoldKey,
         body: Center(
-      child: Container(
-        //page background image
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage("assets/bg.jpg"), fit: BoxFit.cover),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30.0),
-                  color: Colors.white),
-              width: MediaQuery.of(context).size.width / 1.2,
-              height: MediaQuery.of(context).size.height / 1.2,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  imageview(context), // Part 1 image with logo
-                  getNumbers(context) // Part 2  Muber keypade
-                ],
-              ),
+          child: Container(
+            //page background image
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage("assets/bg.jpg"), fit: BoxFit.cover),
             ),
-          ],
-        ),
-      ),
-    ));
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30.0),
+                      color: Colors.white),
+                  width: MediaQuery.of(context).size.width / 1.2,
+                  height: MediaQuery.of(context).size.height / 1.2,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      imageview(context), // Part 1 image with logo
+                      getNumbers(context) // Part 2  Muber keypade
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ));
   }
 
   Widget imageview(context) {
@@ -272,5 +270,4 @@ class _PINPageState extends State<PINPage> {
   }
 }
 
-class KeyboardVisibilityNotification {
-}
+class KeyboardVisibilityNotification {}

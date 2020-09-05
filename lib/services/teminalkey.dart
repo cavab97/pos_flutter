@@ -5,7 +5,6 @@ import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:http/http.dart' as http;
 
 Future<TemimalKey> sendTerminalKey(TemimalKey terminal) async {
-  print(terminal);
   try {
     Uri url = Uri.parse(Configrations.base_URL + Configrations.terminalKey);
     print("url");

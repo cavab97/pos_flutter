@@ -41,13 +41,13 @@ class _DashboradPageState extends State<DashboradPage> {
     },
     {
       'index': 3,
-      'name': "Moody Cabrera sdfds ",
+      'name': "Moody Cabrera sdfds",
       'picture': "assets/image3.jfif",
       'price': "500.00"
     },
     {
       'index': 4,
-      'name': "Moody Cabrera sdfs ",
+      'name': "Moody Cabrera sdfs",
       'picture': "assets/photo-1504674900247-0877df9cc836.jfif",
       'price': "500.00"
     },
@@ -187,7 +187,37 @@ class _DashboradPageState extends State<DashboradPage> {
   }
 
   Widget drawerWidget() {
-    return Drawer(child: Container(color: Colors.white, child: Text("Text")));
+    return Drawer(
+      child: Container(
+        padding: EdgeInsets.only(top: 30),
+        color: Colors.white,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            RaisedButton(
+              padding:
+                  EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
+              onPressed: () {
+                Navigator.pushNamed(context, '/TerminalKeyPage');
+              },
+              child: Text(
+                Strings.logout,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold),
+              ),
+              color: Colors.deepOrange,
+              textColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50.0),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget tableHeader1() {
@@ -312,6 +342,7 @@ class _DashboradPageState extends State<DashboradPage> {
     return Container(
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
+      padding: EdgeInsets.only(top: 5),
       child: GridView.count(
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
@@ -322,6 +353,7 @@ class _DashboradPageState extends State<DashboradPage> {
             },
             child: Container(
               height: itemHeight,
+              // padding: EdgeInsets.all(5),
               margin: EdgeInsets.all(5),
               child: Stack(
                 alignment: AlignmentDirectional.topCenter,
@@ -362,19 +394,23 @@ class _DashboradPageState extends State<DashboradPage> {
                     ),
                   ),
                   Positioned(
-                      top: itemHeight / 2 - 30,
-                      left: 0,
-                      child: Container(
-                        height: 30,
-                          padding: EdgeInsets.all(5),
-                          color: Colors.deepOrange,
-                          child: Center(child: Text(
-                            product["price"],
-                            style: TextStyle(
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white,
-                                fontSize: 15),
-                          ),),),)
+                    top: itemHeight / 2 - 30,
+                    left: 0,
+                    child: Container(
+                      height: 30,
+                      padding: EdgeInsets.all(5),
+                      color: Colors.deepOrange,
+                      child: Center(
+                        child: Text(
+                          product["price"],
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white,
+                              fontSize: 15),
+                        ),
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),
