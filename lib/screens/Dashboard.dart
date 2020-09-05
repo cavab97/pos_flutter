@@ -48,7 +48,7 @@ class _DashboradPageState extends State<DashboradPage> {
     {
       'index': 4,
       'name': "Moody Cabrera sdfs ",
-      'picture': "assets/image4.jpg",
+      'picture': "assets/photo-1504674900247-0877df9cc836.jfif",
       'price': "500.00"
     },
     {
@@ -170,11 +170,11 @@ class _DashboradPageState extends State<DashboradPage> {
                   TableCell(
                       child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
                       cartITems(),
                       SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
                       paybutton(context)
                     ],
@@ -400,6 +400,11 @@ class _DashboradPageState extends State<DashboradPage> {
         border: TableBorder(
             horizontalInside: BorderSide(
                 width: 1, color: Colors.grey, style: BorderStyle.solid)),
+        columnWidths: {
+          0: FractionColumnWidth(.6),
+          1: FractionColumnWidth(.2),
+          2: FractionColumnWidth(.2),
+        },
         children: [
           TableRow(decoration: BoxDecoration(color: Colors.white), children: [
             Padding(
@@ -409,26 +414,26 @@ class _DashboradPageState extends State<DashboradPage> {
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: Colors.blue[900]),
+                      color: Color(0xff100c56)),
                 )),
             Padding(
-              padding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
+              padding: EdgeInsets.only(top: 20, bottom: 20),
               child: Text(
                 Strings.qty,
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: Colors.blue[900]),
+                    color: Color(0xff100c56)),
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(left: 10, top: 20, bottom: 20),
+              padding: EdgeInsets.only(right: 10, top: 20, bottom: 20),
               child: Text(
                 Strings.amount,
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: Colors.blue[900]),
+                    color: Color(0xff100c56)),
               ),
             )
           ]),
@@ -437,7 +442,7 @@ class _DashboradPageState extends State<DashboradPage> {
                 padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
                 child: Text("item 1")),
             Padding(
-                padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
+                padding: EdgeInsets.only(top: 10, bottom: 10),
                 child: Text("5.00")),
             Padding(
                 padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
@@ -448,7 +453,7 @@ class _DashboradPageState extends State<DashboradPage> {
                 padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
                 child: Text("item 1")),
             Padding(
-                padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
+                padding: EdgeInsets.only(top: 10, bottom: 10),
                 child: Text("5.00")),
             Padding(
                 padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
@@ -456,87 +461,218 @@ class _DashboradPageState extends State<DashboradPage> {
           ]),
         ]);
     final totalPriceTable = Table(
-        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         border: TableBorder(
             horizontalInside: BorderSide(
                 width: 1, color: Colors.grey, style: BorderStyle.solid)),
         children: [
           TableRow(children: [
-            Padding(
-              padding: EdgeInsets.only(top: 10, bottom: 10),
-              child: Text(
-                Strings.sub_total.toUpperCase(),
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.blue[900]),
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    Strings.sub_total.toUpperCase(),
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xff100c56)),
+                  ),
+                  Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      child: Text(
+                        "00:00",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xff100c56)),
+                      )),
+                ],
               ),
             ),
-            Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text(
-                  "00:00",
-                  style: TextStyle(
-                      fontWeight: FontWeight.w700, color: Colors.blue[900]),
-                )),
           ]),
           TableRow(children: [
-            Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text(
-                  Strings.discount.toUpperCase(),
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).accentColor),
-                )),
-            Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text(
-                  "00:00",
-                  style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).accentColor),
-                )),
-          ]),
-          TableRow(children: [
-            Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text(
-                  Strings.tax.toUpperCase(),
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.blue[900]),
-                )),
-            Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text(
-                  "00:00",
-                  style: TextStyle(
-                      fontWeight: FontWeight.w700, color: Colors.blue[900]),
-                )),
-          ]),
-          TableRow(children: [
-            Padding(
-              padding: EdgeInsets.only(top: 10, bottom: 10),
-              child: Text(
-                Strings.grand_total,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.blue[900]),
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      child: Text(
+                        Strings.discount.toUpperCase(),
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).accentColor),
+                      )),
+                  Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      child: Text(
+                        "00:00",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).accentColor),
+                      )),
+                ],
               ),
             ),
-            Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text(
-                  "150.00",
-                  style: TextStyle(
-                      fontWeight: FontWeight.w700, color: Colors.blue[900]),
-                )),
+          ]),
+          TableRow(children: [
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      child: Text(
+                        Strings.tax.toUpperCase(),
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xff100c56)),
+                      )),
+                  Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      child: Text(
+                        "00:00",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xff100c56)),
+                      )),
+                ],
+              ),
+            ),
+          ]),
+          TableRow(children: [
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: 10,
+                    ),
+                    child: Text(
+                      Strings.grand_total,
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xff100c56)),
+                    ),
+                  ),
+                  Padding(
+                      padding: EdgeInsets.only(
+                        top: 10,
+                      ),
+                      child: Text(
+                        "150.00",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xff100c56)),
+                      )),
+                ],
+              ),
+            ),
           ]),
         ]);
+
+    // final totalPriceTable = Table(
+    //     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+    //     border: TableBorder(
+    //         horizontalInside: BorderSide(
+    //             width: 1, color: Colors.grey, style: BorderStyle.solid)),
+    //     children: [
+
+    //       TableRow(children: [
+    //         TableCell(
+    //           child: Row(
+    //             mainAxisAlignment: MainAxisAlignment.spaceAround,
+    //             children: <Widget>[
+    //               new Text('ID'),
+    //               new Text('Value'),
+    //             ],
+    //           ),
+    //         ),
+    //       ]),
+    //       // TableRow(children: [
+    //       //   TableCell(
+    //       //       child: Row(
+    //       //     children: <Widget>[
+    //       //       Padding(
+    //       //         padding: EdgeInsets.only(top: 10, bottom: 10),
+    //       //         child: Text(
+    //       //           Strings.sub_total.toUpperCase(),
+    //       //           style: TextStyle(
+    //       //               fontSize: 18,
+    //       //               fontWeight: FontWeight.w700,
+    //       //               color: Color(0xff100c56)),
+    //       //         ),
+    //       //       ),
+    //       //       Padding(
+    //       //           padding: EdgeInsets.only(top: 10, bottom: 10),
+    //       //           child: Text(
+    //       //             "00:00",
+    //       //             style: TextStyle(
+    //       //                 fontWeight: FontWeight.w700, color: Color(0xff100c56)),
+    //       //           )),
+    //       //     ],
+    //       //   ))
+    //       // ]),
+    //       TableRow(children: [
+    //         Padding(
+    //             padding: EdgeInsets.only(top: 10, bottom: 10),
+    //             child: Text(
+    //               Strings.discount.toUpperCase(),
+    //               style: TextStyle(
+    //                   fontSize: 18,
+    //                   fontWeight: FontWeight.w700,
+    //                   color: Theme.of(context).accentColor),
+    //             )),
+    //         Padding(
+    //             padding: EdgeInsets.only(top: 10, bottom: 10),
+    //             child: Text(
+    //               "00:00",
+    //               style: TextStyle(
+    //                   fontWeight: FontWeight.w700,
+    //                   color: Theme.of(context).accentColor),
+    //             )),
+    //       ]),
+    //       TableRow(children: [
+    //         Padding(
+    //             padding: EdgeInsets.only(top: 10, bottom: 10),
+    //             child: Text(
+    //               Strings.tax.toUpperCase(),
+    //               style: TextStyle(
+    //                   fontSize: 18,
+    //                   fontWeight: FontWeight.w700,
+    //                   color: Color(0xff100c56)),
+    //             )),
+    //         Padding(
+    //             padding: EdgeInsets.only(top: 10, bottom: 10),
+    //             child: Text(
+    //               "00:00",
+    //               style: TextStyle(
+    //                   fontWeight: FontWeight.w700, color: Color(0xff100c56)),
+    //             )),
+    //       ]),
+    //       TableRow(children: [
+    //         Padding(
+    //           padding: EdgeInsets.only(top: 10, bottom: 10),
+    //           child: Text(
+    //             Strings.grand_total,
+    //             style: TextStyle(
+    //                 fontSize: 18,
+    //                 fontWeight: FontWeight.w700,
+    //                 color: Color(0xff100c56)),
+    //           ),
+    //         ),
+    //         Padding(
+    //             padding: EdgeInsets.only(top: 10, bottom: 10),
+    //             child: Text(
+    //               "150.00",
+    //               style: TextStyle(
+    //                   fontWeight: FontWeight.w700, color: Color(0xff100c56)),
+    //             )),
+    //       ]),
+    //     ]);
 
     return Container(
         //height: MediaQuery.of(context).size.height / 1.3,
