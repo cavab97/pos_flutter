@@ -80,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
         if (value != null && value.id != 0) {
           bool isSyncDone = await CommunFun.syncAfterSuccess(context);
           if (isSyncDone) {
-            Navigator.pushNamed(context, '/PINPage');
+            Navigator.pushNamed(context, Constant.PINScreen);
           }
         } else {
           scaffoldKey.currentState.showSnackBar(SnackBar(

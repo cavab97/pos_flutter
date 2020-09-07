@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/constant.dart';
 
 class PINPage extends StatefulWidget {
   // PIN Enter PAGE
@@ -39,7 +40,7 @@ class _PINPageState extends State<PINPage> {
   clockInwithPIN() {
     if (pinNumber.length >= 4) {
       //TODO : API CALL for clockin
-      Navigator.pushNamed(context, '/Dashboard');
+      Navigator.pushNamed(context, Constant.DashboardScreen);
     } else {
       scaffoldKey.currentState.showSnackBar(SnackBar(
         content: Text(Strings.pin_validation_message),

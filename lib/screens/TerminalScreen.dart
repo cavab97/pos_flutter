@@ -57,7 +57,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
           Preferences.setStringToSF(
               Constant.TERMINAL_KEY, value.terminalId.toString());
 
-          Navigator.pushNamed(context, '/Login',
+          Navigator.pushNamed(context, Constant.LoginScreen,
               arguments: {"terminalId": value.terminalId});
         } else if (value != null && value.status == Constant.STATUS422) {
           scaffoldKey.currentState.showSnackBar(SnackBar(

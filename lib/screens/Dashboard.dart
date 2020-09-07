@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
@@ -196,7 +197,7 @@ class _DashboradPageState extends State<DashboradPage> {
               padding:
                   EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
               onPressed: () {
-                Navigator.pushNamed(context, '/TerminalKeyPage');
+                Navigator.pushNamed(context, Constant.TerminalScreen);
               },
               child: Text(
                 Strings.logout,
@@ -302,7 +303,7 @@ class _DashboradPageState extends State<DashboradPage> {
             RaisedButton(
               padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
               onPressed: () {
-                Navigator.pushNamed(context, '/TansactionsPage');
+                Navigator.pushNamed(context, Constant.TransactionScreen);
               },
               child: Row(
                 children: <Widget>[
