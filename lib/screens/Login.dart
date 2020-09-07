@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
@@ -207,7 +208,11 @@ class _LoginPageState extends State<LoginPage> {
     return TextField(
       // User pin input
       controller: userPin,
+      obscureText: true,
       keyboardType: TextInputType.number,
+      inputFormatters: <TextInputFormatter>[
+        FilteringTextInputFormatter.digitsOnly
+      ],
       decoration: InputDecoration(
         prefixIcon: Padding(
           padding: EdgeInsets.only(left: 20, right: 20),

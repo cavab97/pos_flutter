@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
@@ -42,6 +41,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
   }
 
   setTerminalkey() async {
+    //Navigator.pushNamed(context, '/Login');
     var isValid = await validateFields(); // validate fields
     var deviceinfo = await CommunFun.deviceInfo();
     TemimalKey terminal = new TemimalKey();
@@ -53,11 +53,16 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
       terminal.deviceid = deviceinfo.id;
       await repo.sendTerminalKey(terminal).then((value) async {
         print(value);
-        if (value.status == 200) {
+        if (value != null && value.status == Constant.STATUS200) {
           Preferences.setStringToSF(
               Constant.TERMINAL_KEY, value.terminalId.toString());
+
           Navigator.pushNamed(context, '/Login',
               arguments: {"terminalId": value.terminalId});
+        } else if (value != null && value.status == Constant.STATUS422) {
+          scaffoldKey.currentState.showSnackBar(SnackBar(
+            content: Text(value.message),
+          ));
         } else {
           scaffoldKey.currentState.showSnackBar(SnackBar(
             content: Text(value.message),
@@ -83,46 +88,45 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       //  main part of the page
-      key: scaffoldKey,
-      body: SafeArea(
-        child: Center(
-          child: Container(
-            width: MediaQuery.of(context).size.width / 3,
-            child: new SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  loginlogo(), // Login logo
-                  SizedBox(height: 80),
-                  //
-                  terminalKeyInput((e) {
-                    // Key input
-                    print("on changes");
-                    if (e.length > 0) {
-                      setState(() {
-                        errormessage = "";
-                        isValidatekey = true;
-                      });
-                    }
+      key: scaffoldKey
+      ,      body: SafeArea(
+      child: Center(
+        child: Container(
+          width: MediaQuery.of(context).size.width / 1.7,
+          child: new SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                loginlogo(), // Login logo
+                SizedBox(height: 80),
+                //
+                terminalKeyInput((e) {
+                  // Key input
+                  print("on changes");
+                  if (e.length > 0) {
+                    setState(() {
+                      errormessage = "";
+                      isValidatekey = true;
+                    });
+                  }
+                }),
+                SizedBox(height: 50),
+                isLoading
+                    ? CommunFun.loader(context)
+                    : Container(
+                  // Key add button
+                  width: MediaQuery.of(context).size.width,
+                  child: CommunFun.roundedButton("Set Teminal Key", () {
+                    setTerminalkey();
                   }),
-                  SizedBox(height: 50),
-                  isLoading
-                      ? CommunFun.loader(context)
-                      : Container(
-                          // Key add button
-                          width: MediaQuery.of(context).size.width,
-                          child: CommunFun.roundedButton(
-                              Strings.terminalKeyBtn.toUpperCase(), () {
-                            setTerminalkey();
-                          }),
-                        )
-                ],
-              ),
+                )
+              ],
             ),
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -140,9 +144,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
     return TextField(
       controller: terminalKey,
       keyboardType: TextInputType.text,
-      maxLength: 4,
       decoration: InputDecoration(
-        counterText: "",
         prefixIcon: Padding(
           padding: EdgeInsets.only(left: 25, right: 25),
           child: Icon(
@@ -171,3 +173,5 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
     );
   }
 }
+
+
