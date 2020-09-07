@@ -57,31 +57,59 @@ class User {
       this.terminalId});
 
   User.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    appId = json['app_id'];
-    uuid = json['uuid'];
-    name = json['name'];
-    email = json['email'];
-    role = json['role'];
-    username = json['username'];
-    countryCode = json['country_code'];
-    mobile = json['mobile'];
-    profile = json['profile'];
-    commisionPercent = json['commision_percent'];
-    userPin = json['user_pin'];
-    apiToken = json['api_token'];
-    status = json['status'];
-    isAdmin = json['is_admin'];
-    deviceId = json['device_id'];
-    deviceToken = json['device_token'];
-    authKey = json['auth_key'];
-    lastLogin = json['last_login'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
-    deletedAt = json['deleted_at'];
-    createdBy = json['created_by'];
-    updatedBy = json['updated_by'];
-    deletedBy = json['deleted_by'];
+    try {
+      id = json['id'];
+      appId = json['app_id'];
+      uuid = json['uuid'];
+      name = json['name'];
+      email = json['email'];
+      role = json['role'];
+      username = json['username'];
+      countryCode = json['country_code'];
+      mobile = json['mobile'];
+      profile = json['profile'];
+      commisionPercent = json['commision_percent'];
+      userPin = json['user_pin'];
+      apiToken = json['api_token'];
+      status = json['status'];
+      isAdmin = json['is_admin'];
+      deviceId = json['device_id'];
+      deviceToken = json['device_token'];
+      authKey = json['auth_key'];
+      lastLogin = json['last_login'];
+      createdAt = json['created_at'];
+      updatedAt = json['updated_at'];
+      deletedAt = json['deleted_at'];
+      createdBy = json['created_by'];
+      updatedBy = json['updated_by'];
+      deletedBy = json['deleted_by'];
+    } catch (e) {
+      id = 0;
+      appId = '';
+      uuid = '';
+      name = '';
+      email = '';
+      role = 0;
+      username = '';
+      countryCode = '';
+      mobile = '';
+      profile = '';
+      commisionPercent = '';
+      userPin = 0;
+      apiToken = '';
+      status = 0;
+      isAdmin = 0;
+      deviceId = '';
+      deviceToken = '';
+      authKey = '';
+      lastLogin = '';
+      createdAt = '';
+      updatedAt = '';
+      deletedAt = '';
+      createdBy = 0;
+      updatedBy = 0;
+      deletedBy = '';
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -114,4 +142,3 @@ class User {
     return data;
   }
 }
-

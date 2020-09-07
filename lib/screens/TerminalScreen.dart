@@ -88,45 +88,45 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       //  main part of the page
-      key: scaffoldKey
-      ,      body: SafeArea(
-      child: Center(
-        child: Container(
-          width: MediaQuery.of(context).size.width / 1.7,
-          child: new SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                loginlogo(), // Login logo
-                SizedBox(height: 80),
-                //
-                terminalKeyInput((e) {
-                  // Key input
-                  print("on changes");
-                  if (e.length > 0) {
-                    setState(() {
-                      errormessage = "";
-                      isValidatekey = true;
-                    });
-                  }
-                }),
-                SizedBox(height: 50),
-                isLoading
-                    ? CommunFun.loader(context)
-                    : Container(
-                  // Key add button
-                  width: MediaQuery.of(context).size.width,
-                  child: CommunFun.roundedButton("Set Teminal Key", () {
-                    setTerminalkey();
+      key: scaffoldKey,
+      body: SafeArea(
+        child: Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width / 1.7,
+            child: new SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  loginlogo(), // Login logo
+                  SizedBox(height: 80),
+                  //
+                  terminalKeyInput((e) {
+                    // Key input
+                    print("on changes");
+                    if (e.length > 0) {
+                      setState(() {
+                        errormessage = "";
+                        isValidatekey = true;
+                      });
+                    }
                   }),
-                )
-              ],
+                  SizedBox(height: 50),
+                  isLoading
+                      ? CommunFun.loader(context)
+                      : Container(
+                          // Key add button
+                          width: MediaQuery.of(context).size.width,
+                          child: CommunFun.roundedButton("Set Teminal Key", () {
+                            setTerminalkey();
+                          }),
+                        )
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
     );
   }
 
@@ -173,5 +173,3 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
     );
   }
 }
-
-

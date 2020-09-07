@@ -52,7 +52,7 @@ class DatabaseHelper {
     print(data);
   }
 
-  Future<int> getlocalData() async {
+  Future<dynamic> getlocalData() async {
     Database db = await this.database;
     var result = await tableDataHelper.getRoleData(db);
     return result;

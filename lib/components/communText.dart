@@ -5,6 +5,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/services/tableSyncAPI.dart' as repo;
+import 'package:toast/toast.dart';
 
 class CommunFun {
   static loginText() {
@@ -121,5 +124,44 @@ class CommunFun {
     );
   }
 
- 
+  static showToast(context, message) {
+    Toast.show(message, context,
+        duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+  }
+
+  static syncAfterSuccess(context) async {
+    var data = {'serverdatetime': "2020-09-01 12:30:25", 'table': "users"};
+    var isReturn;
+    await repo.syncTable(data).then((value) async {
+      if (value["status"] == Constant.STATUS200) {
+        CommunFun.showToast(context, value["message"]);
+        isReturn = true;
+      } else {
+        CommunFun.showToast(context, value["message"]);
+        isReturn = false;
+      }
+    }).catchError((e) {
+      CommunFun.showToast(context, e.message);
+      isReturn = false;
+    }).whenComplete(() {});
+    return isReturn;
+  }
+
+  static syncSingleTable(context) async {
+    var data = {'serverdatetime': "2020-09-01 12:30:25", 'table': "users"};
+    var isReturn;
+    await repo.syncTable(data).then((value) async {
+      if (value["status"] == Constant.STATUS200) {
+        CommunFun.showToast(context, value["message"]);
+        isReturn = true;
+      } else {
+        CommunFun.showToast(context, value["message"]);
+        isReturn = false;
+      }
+    }).catchError((e) {
+      CommunFun.showToast(context, e.message);
+      isReturn = false;
+    }).whenComplete(() {});
+    return isReturn;
+  }
 }

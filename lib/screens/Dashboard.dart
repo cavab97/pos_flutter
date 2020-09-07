@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
-import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
@@ -14,7 +13,6 @@ class DashboradPage extends StatefulWidget {
 }
 
 class _DashboradPageState extends State<DashboradPage> {
-  DatabaseHelper databaseHelper = DatabaseHelper();
   GlobalKey<ScaffoldState> scaffoldKey;
   bool isDrawerOpen = false;
   var tabsList = [
@@ -63,7 +61,6 @@ class _DashboradPageState extends State<DashboradPage> {
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
-    databaseHelper.initializeDatabase(); // Initialize database first time here
   }
 
   openOpningAmmountPop() {
