@@ -2,24 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/helpers/config.dart';
-import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:http/http.dart' as http;
 import 'package:mcncashier/models/User.dart';
 
-Future<User> login(User user) async {
-  print(user);
+Future<dynamic> allTablesync(dynamic data) async {
+  var reqdata = data;
   try {
-    Uri url = Uri.parse(Configrations.base_URL + Configrations.login);
+    Uri url = Uri.parse(Configrations.base_URL + Configrations.synch_table);
     //print("url");
     print(url);
     final client = new http.Client();
     Map<String, dynamic> params = {
-      'username': user.name,
-      'user_pin': user.userPin,
-      'device_type': user.deviceType,
-      'device_token': user.deviceToken,
-      'device_id': user.deviceId,
-      'terminal_id': user.terminalId,
+      'serverdatetime': reqdata.name,
     };
     print(params);
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};

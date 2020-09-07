@@ -30,6 +30,7 @@ dependencies:
   device_info: ^0.4.2+7
   keyboard_visibility: ^0.5.6
   shared_preferences: ^0.5.10
+  toast: ^0.1.5
 
 dev_dependencies:
   flutter_test:

@@ -5,6 +5,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/user.dart' as repo;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController emailAddress = new TextEditingController();
   TextEditingController userPin = new TextEditingController();
   GlobalKey<ScaffoldState> scaffoldKey;
-
+  DatabaseHelper databaseHelper = DatabaseHelper();
   var errormessage = "";
   bool isValidateEmail = true;
   bool isValidatePassword = true;
@@ -31,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    databaseHelper.initializeDatabase(); // Initialize database first time here
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
     KeyboardVisibilityNotification().addNewListener(
       onHide: () {
@@ -67,7 +69,6 @@ class _LoginPageState extends State<LoginPage> {
         isLoading = true;
       });
       User user = new User();
-
       var terkey = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
       user.name = emailAddress.text;
       user.userPin = int.parse(userPin.text);
@@ -76,8 +77,16 @@ class _LoginPageState extends State<LoginPage> {
       user.deviceId = deviceinfo.id;
       user.terminalId = terkey != null ? terkey : '1'; //widget.terminalId;
       await repo.login(user).then((value) async {
-        print(value);
-        Navigator.pushNamed(context, Constant.PINScreen);
+        if (value != null && value.id != 0) {
+          bool isSyncDone = await CommunFun.syncAfterSuccess(context);
+          if (isSyncDone) {
+            Navigator.pushNamed(context, Constant.PINScreen);
+          }
+        } else {
+          scaffoldKey.currentState.showSnackBar(SnackBar(
+            content: Text("Some thing want wrrong!"),
+          ));
+        }
       }).catchError((e) {
         setState(() {
           isLoading = false;
@@ -210,9 +219,9 @@ class _LoginPageState extends State<LoginPage> {
       controller: userPin,
       obscureText: true,
       keyboardType: TextInputType.number,
-      inputFormatters: <TextInputFormatter>[
-        FilteringTextInputFormatter.digitsOnly
-      ],
+      // inputFormatters: <TextInputFormatter>[
+      //   FilteringTextInputFormatter.digitsOnly
+      // ],
       decoration: InputDecoration(
         prefixIcon: Padding(
           padding: EdgeInsets.only(left: 20, right: 20),
