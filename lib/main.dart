@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/routes.dart';
 import 'package:mcncashier/theme/theme.dart';
+
+import 'components/constant.dart';
 
 void main() async {
   runApp(MyApp());
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'cashierApp',
       theme: appTheme(),
-      initialRoute: '/TerminalKeyPage',
+      initialRoute: Constant.TerminalScreen,
       routes: routes,
     );
   }

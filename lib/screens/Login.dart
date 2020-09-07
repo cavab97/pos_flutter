@@ -77,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
       user.terminalId = terkey != null ? terkey : '1'; //widget.terminalId;
       await repo.login(user).then((value) async {
         print(value);
-        Navigator.pushNamed(context, '/PINPage');
+        Navigator.pushNamed(context, Constant.PINScreen);
       }).catchError((e) {
         setState(() {
           isLoading = false;
