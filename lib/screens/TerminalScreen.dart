@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:mcncashier/services/teminalkey.dart' as repo;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class TerminalKeyPage extends StatefulWidget {
   //Terminal key page
@@ -15,8 +15,7 @@ class TerminalKeyPage extends StatefulWidget {
 }
 
 class _TerminalKeyPageState extends State<TerminalKeyPage> {
-  TextEditingController terminalKey =
-      new TextEditingController(text: "LqOtOWvFn5dVJINHESOwxyWSfQ7YDAh2");
+  TextEditingController terminalKey = new TextEditingController(text: "Hmpi");
 
   GlobalKey<ScaffoldState> scaffoldKey;
   var errormessage = "";
@@ -43,7 +42,6 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
   }
 
   setTerminalkey() async {
-    //Navigator.pushNamed(context, '/Login');
     var isValid = await validateFields(); // validate fields
     var deviceinfo = await CommunFun.deviceInfo();
     TemimalKey terminal = new TemimalKey();
@@ -55,10 +53,9 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
       terminal.deviceid = deviceinfo.id;
       await repo.sendTerminalKey(terminal).then((value) async {
         print(value);
-        if (value != null && value.status == 200) {
+        if (value.status == 200) {
           Preferences.setStringToSF(
               Constant.TERMINAL_KEY, value.terminalId.toString());
-
           Navigator.pushNamed(context, '/Login',
               arguments: {"terminalId": value.terminalId});
         } else {
@@ -86,10 +83,11 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       //  main part of the page
+      key: scaffoldKey,
       body: SafeArea(
         child: Center(
           child: Container(
-            width: MediaQuery.of(context).size.width / 1.7,
+            width: MediaQuery.of(context).size.width / 3,
             child: new SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -114,7 +112,8 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
                       : Container(
                           // Key add button
                           width: MediaQuery.of(context).size.width,
-                          child: CommunFun.roundedButton("Set Teminal Key", () {
+                          child: CommunFun.roundedButton(
+                              Strings.terminalKeyBtn.toUpperCase(), () {
                             setTerminalkey();
                           }),
                         )
@@ -141,7 +140,9 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
     return TextField(
       controller: terminalKey,
       keyboardType: TextInputType.text,
+      maxLength: 4,
       decoration: InputDecoration(
+        counterText: "",
         prefixIcon: Padding(
           padding: EdgeInsets.only(left: 25, right: 25),
           child: Icon(

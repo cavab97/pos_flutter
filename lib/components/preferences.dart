@@ -1,51 +1,69 @@
-import 'package:mcncashier/components/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Preferences {
 /*Base method for get shared pref*/
-  static baseMain() async {
-    return await SharedPreferences.getInstance();
-  }
+static baseMain() async {
+SharedPreferences pref = await SharedPreferences.getInstance();
+return pref;
+}
 
-/*Check for Pref is available or not */
-  static checkIsAvailable(String key) {
-    return baseMain().containsKey(key);
-  }
+/*Check for Pref is available or not
+static checkIsAvailable(String key) async {
+SharedPreferences pref= await SharedPreferences.getInstance();
+int intValue= await pref.getInt(key) ?? 0;
+if(intValue==0){
+return true;
+}
+return false;
+} */
 
 /*set String shared pref*/
-  static setStringToSF(String key, String value) {
-    baseMain().setString(key, value);
-  }
+static setStringToSF(String key, String value) async {
+SharedPreferences pref = await SharedPreferences.getInstance();
+pref.setString(key, value);
+}
 
-/*set Bool  shared pref*/
-  static setBoolToSF(String key, bool value) async {
-    baseMain().setBool(key, value);
-  }
+/*set Bool shared pref*/
+static setBoolToSF(String key, bool value) async {
+SharedPreferences pref = await SharedPreferences.getInstance();
+pref.setBool(key, value);
+}
 
 /*get String pref*/
-  static getStringValuesSF(String key) async {
-//  int intValue = baseMain().getInt(key) ?? 0;
-    if (checkIsAvailable(key)) {
-      return baseMain().getString(key);
-    } else {
-      return null;
-    }
-  }
+static getStringValuesSF(String key) async {
+SharedPreferences pref = await SharedPreferences.getInstance();
+//final user = await checkIsAvailable(key);
+// if (user) {
+return pref.getString(key)?.toString() ?? null;
+//} else {
+// return "";
+/// }
+}
 
-  static getBoolValuesSF(String key) async {
-    if (checkIsAvailable(key)) {
-      return baseMain().getBool(key);
-    } else {
-      return false;
-    }
-  }
+static getBoolValuesSF(String key) async {
+SharedPreferences pref = await SharedPreferences.getInstance();
 
-  static removeSinglePref(String key) async {
-    if (checkIsAvailable(key)) {
-      baseMain().remove(key);
-      return true;
-    } else {
-      return false;
-    }
-  }
+return pref.getString(key) ?? null;
+
+/*final user = await checkIsAvailable(key);
+
+if (user) {
+return pref.getBool(key);
+} else {
+return false;
+}*/
+}
+
+static removeSinglePref(String key) async {
+SharedPreferences pref = await SharedPreferences.getInstance();
+pref.remove(key);
+
+/* final user = await checkIsAvailable(key);
+if (user) {
+pref.remove(key);
+return true;
+} else {
+return false;
+}*/
+}
 }

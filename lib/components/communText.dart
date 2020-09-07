@@ -45,7 +45,7 @@ class CommunFun {
       child: Text(
         text,
         style: TextStyle(
-            color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+            color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold),
       ),
       color: Colors.deepOrange,
       textColor: Colors.white,

@@ -3,7 +3,7 @@ class TemimalKey {
   bool show;
   String message;
   int terminalId;
-  String  terminalKey;
+  String terminalKey;
   String deviceid;
 
   TemimalKey({this.status, this.show, this.message, this.terminalId});

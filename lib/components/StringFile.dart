@@ -22,4 +22,5 @@ class Strings {
   static String pin_validation_message = "Please enter your PIN number";
   static String title_pay = "PAY";
   static String logout = "LOGOUT";
+  static String terminalKeyBtn = "Set Terminal Key";
 }

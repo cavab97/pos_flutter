@@ -67,8 +67,7 @@ class _LoginPageState extends State<LoginPage> {
       });
       User user = new User();
 
-      var terkey = Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
-
+      var terkey = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
       user.name = emailAddress.text;
       user.userPin = int.parse(userPin.text);
       user.deviceType = deviceinfo.type;

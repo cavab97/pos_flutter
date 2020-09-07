@@ -177,6 +177,35 @@ class CreateTables {
             "app_id INTEGER,op_method_id INTEGER,op_amount REAL,op_method_response TEXT,op_status INTEGER,op_datetime TEXT,op_by INTEGER" +
             ")");
 
+    //Table customer
+
+    datatables = db.execute("CREATE TABLE order_payment (customer_id " +
+        "customer_id	INTEGER," +
+        "uuid	char TEXT," +
+        "app_id	INTEGER," +
+        "terminal_id	INTEGER," +
+        "first_name	TEXT," +
+        "last_name	TEXT," +
+        "name	TEXT," +
+        "email	TEXT," +
+        "phonecode	INTEGER," +
+        "mobile	TEXT," +
+        "password	TEXT," +
+        "address	TEXT," +
+        "country_id	INTEGER," +
+        "state_id	INTEGER," +
+        "city_id	INTEGER," +
+        "zipcode	TEXT," +
+        "api_token	TEXT," +
+        "profile	TEXT," +
+        "last_login	TEXT," +
+        "status	INTEGER," +
+        "created_at	TEXT," +
+        "created_by	INTEGER," +
+        "updated_at	TEXT," +
+        "updated_by	INTEGER," +
+        ")");
+
     return datatables;
   }
 }
