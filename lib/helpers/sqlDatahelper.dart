@@ -19,6 +19,7 @@ class DatabaseHelper {
   DatabaseHelper._createInstance();
   CreateTables createTablehelper = CreateTables();
   TableData tableDataHelper = TableData();
+
   factory DatabaseHelper() {
     if (_databaseHelper == null) {
       _databaseHelper = DatabaseHelper
@@ -26,6 +27,7 @@ class DatabaseHelper {
     }
     return _databaseHelper;
   }
+
   Future<Database> get database async {
     if (_database == null) {
       _database = await initializeDatabase();
@@ -43,7 +45,7 @@ class DatabaseHelper {
     //   _database = await openDatabase(path, version: 1, onCreate: _onOpen;
     //   print("already exit\(path)" + path);
     // }
-    getlocalData();
+
     return _database;
   }
 
@@ -52,16 +54,51 @@ class DatabaseHelper {
     print(data);
   }
 
-  Future<dynamic> getlocalData() async {
+  // Future<dynamic> getlocalData() async {
+  //   Database db = await this.database;
+  //   var result = await tableDataHelper.getRoleData(db);
+  //   return result;
+  // }
+
+  Future<dynamic> insertData1(tablesData) async {
     Database db = await this.database;
-    var result = await tableDataHelper.getRoleData(db);
+    var result = await tableDataHelper.insertDatatable1(db, tablesData);
     return result;
   }
 
-  // Future<int> updateTodo(Todo todo) async {
-  //   var db = await this.database;
-  //   var result = await db.update(todoTable, todo.toMap(),
-  //       where: '$colId = ?', whereArgs: [todo.id]);
-  //   return result;
-  // }
+  Future<dynamic> insertData2_1(tablesData) async {
+    Database db = await this.database;
+    var result = await tableDataHelper.insertDatatable2_1(db, tablesData);
+    return result;
+  }
+
+  Future<dynamic> insertData2_2(tablesData) async {
+    Database db = await this.database;
+    var result = await tableDataHelper.insertDatatable2_2(db, tablesData);
+    return result;
+  }
+
+  Future<dynamic> insertData2_3(tablesData) async {
+    Database db = await this.database;
+    var result = await tableDataHelper.insertDatatable2_3(db, tablesData);
+    return result;
+  }
+
+  Future<dynamic> insertData3(tablesData) async {
+    Database db = await this.database;
+    var result = await tableDataHelper.insertDatatable3(db, tablesData);
+    return result;
+  }
+
+  Future<dynamic> insertData4_1(tablesData) async {
+    Database db = await this.database;
+    var result = await tableDataHelper.insertDatatable4_1(db, tablesData);
+    return result;
+  }
+
+  Future<dynamic> insertData4_2(tablesData) async {
+    Database db = await this.database;
+    var result = await tableDataHelper.insertDatatable4_2(db, tablesData);
+    return result;
+  }
 }
