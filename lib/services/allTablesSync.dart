@@ -1,36 +1,46 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/helpers/config.dart';
-import 'package:http/http.dart' as http;
-import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/services/CommunAPICall.dart';
 
-Future<dynamic> allTablesync(dynamic data) async {
-  var reqdata = data;
-  try {
-    Uri url = Uri.parse(Configrations.base_URL + Configrations.synch_table);
-    //print("url");
-    print(url);
-    final client = new http.Client();
-    Map<String, dynamic> params = {
-      'serverdatetime': reqdata.name,
-    };
-    print(params);
-    final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
-    final response = await client.post(
-      url,
-      headers: headers,
-      body: json.encode(params),
-    );
-    print(response);
-    var data = json.decode(response.body);
-    if (data["status"] == Constant.STATUS200) {
-      return User.fromJson(data["data"]);
-    } else {
-      return User.fromJson({});
-    }
-  } catch (e) {
-    print(e);
-    return User.fromJson({});
+class SyncAPICalls {
+  static getDataServerBulk1(context) async {
+    var apiurl =  Configrations.appdata1;
+    var stringParams = {'datetime': '2020-09-01 12:30:25', 'branchId': 1};
+    return await APICalls.apiCall(apiurl, context, stringParams);
+  }
+
+  static getDataServerBulk2_1(context) async {
+    var apiurl = Configrations.appdata2_1;
+    var stringParams = {'datetime': '2020-09-01 12:30:25', 'branchId': 1};
+    return await APICalls.apiCall(apiurl, context, stringParams);
+  }
+
+  static getDataServerBulk2_2(context) async {
+    var apiurl =  Configrations.appdata2_2;
+    var stringParams = {'datetime': '2020-09-01 12:30:25', 'branchId': 1};
+    return await APICalls.apiCall(apiurl, context, stringParams);
+  }
+
+  static getDataServerBulk2_3(context) async {
+    var apiurl = Configrations.appdata2_3;
+    var stringParams = {'datetime': '2020-09-01 12:30:25', 'branchId': 1};
+    return await APICalls.apiCall(apiurl, context, stringParams);
+  }
+
+  static getDataServerBulk3(context) async {
+    var apiurl =  Configrations.appdata3;
+    var stringParams = {'datetime': '2020-09-01 12:30:25', 'branchId': 1};
+    return await APICalls.apiCall(apiurl, context, stringParams);
+  }
+
+  static getDataServerBulk4_1(context) async {
+    var apiurl =  Configrations.appdata4_1;
+    var stringParams = {'datetime': '2020-09-01 12:30:25', 'branchId': 1};
+    return await APICalls.apiCall(apiurl, context, stringParams);
+  }
+
+  static getDataServerBulk4_2(context) async {
+    var apiurl = Configrations.appdata4_2;
+    var stringParams = {'datetime': '2020-09-01 12:30:25', 'branchId': 1};
+    return await APICalls.apiCall(apiurl, context, stringParams);
   }
 }

@@ -6,8 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/services/tableSyncAPI.dart' as repo;
 import 'package:toast/toast.dart';
+
+DatabaseHelper databaseHelper = DatabaseHelper();
 
 class CommunFun {
   static loginText() {
@@ -130,24 +135,179 @@ class CommunFun {
   }
 
   static syncAfterSuccess(context) async {
-    var data = {'serverdatetime': "2020-09-01 12:30:25", 'table': "users"};
-    var isReturn;
-    await repo.syncTable(data).then((value) async {
-      if (value["status"] == Constant.STATUS200) {
-        CommunFun.showToast(context, value["message"]);
-        isReturn = true;
-      } else {
-        CommunFun.showToast(context, value["message"]);
-        isReturn = false;
+    // sync in 4 part api call
+    var lastSync = await Preferences.getStringValuesSF(Constant.LastSync_Table);
+    if (lastSync == null) {
+      CommunFun.getDataTables1(context);
+    } else if (lastSync == "1") {
+      CommunFun.getDataTables2(context);
+    } else if (lastSync == "2") {
+      CommunFun.getDataTables3(context);
+    } else if (lastSync == "3") {
+      CommunFun.getDataTables4(context);
+    } else {
+      Navigator.pushNamed(context, Constant.PINScreen);
+    }
+  }
+
+  static getDataTables1(context) async {
+    // start with 1 tables
+    var data1 = await SyncAPICalls.getDataServerBulk1(context); //api call 1
+    if (data1 != null) {
+      var result = await databaseHelper.insertData1(data1["data"]);
+      print(result);
+      // await Preferences.setStringToSF(Constant.LastSync_Table, "1");
+    } else {
+      // handle Exaption
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    var data2_1 =
+        await SyncAPICalls.getDataServerBulk2_1(context); //api call 2_1
+    if (data2_1 != null) {
+      var result = await databaseHelper.insertData2_1(data2_1["data"]);
+      print(result);
+    } else {
+      // handle Exaption
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    var data2_2 =
+        await SyncAPICalls.getDataServerBulk2_2(context); //api call 2_2
+    if (data2_2 != null) {
+      var result = await databaseHelper.insertData2_2(data2_2["data"]);
+      print(result);
+    } else {
+      // handle Exaption
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    var data2_3 =
+        await SyncAPICalls.getDataServerBulk2_3(context); //api call 2_3
+    if (data2_3 != null) {
+      var result = await databaseHelper.insertData2_3(data2_3["data"]);
+      print(result);
+      //  await Preferences.setStringToSF(Constant.LastSync_Table, "2");
+    } else {
+      // handle Exaption
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    var data3 = await SyncAPICalls.getDataServerBulk3(context); // call 3
+    if (data3 != null) {
+      var result = await databaseHelper.insertData3(data3["data"]);
+      print(result);
+      // await Preferences.setStringToSF(Constant.LastSync_Table, "3");
+    } else {
+      // handle Exaption
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    var data4_1 = await SyncAPICalls.getDataServerBulk4_1(context);
+    if (data4_1 != null) {
+      var result = await databaseHelper.insertData4_1(data4_1["data"]);
+      print(result);
+    } else {
+      // handle Exaption
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    var data4_2 = await SyncAPICalls.getDataServerBulk4_2(context);
+    if (data4_2 != null) {
+      var result = await databaseHelper.insertData4_2(data4_2["data"]);
+      print(result);
+      if (result == 1) {
+        Navigator.pushNamed(context, Constant.PINScreen);
       }
-    }).catchError((e) {
-      CommunFun.showToast(context, e.message);
-      isReturn = false;
-    }).whenComplete(() {});
-    return isReturn;
+      //  await Preferences.setStringToSF(Constant.LastSync_Table, "4");
+    } else {
+      // handle Exaption
+      CommunFun.showToast(context, "something want wrong!");
+    }
+  }
+
+  static getDataTables2(context) async {
+    // start api call fron second api
+    var data2_1 =
+        await SyncAPICalls.getDataServerBulk2_1(context); //api call 2_1
+    if (data2_1 != null) {
+      databaseHelper.insertData2_1(data2_1["data"]);
+    } else {
+      // handle Exaption
+    }
+    var data2_2 =
+        await SyncAPICalls.getDataServerBulk2_2(context); //api call 2_2
+    if (data2_2 != null) {
+      databaseHelper.insertData2_2(data2_2["data"]);
+    } else {
+      // handle Exaption
+    }
+    var data2_3 =
+        await SyncAPICalls.getDataServerBulk2_3(context); //api call 2_3
+    if (data2_3 != null) {
+      databaseHelper.insertData2_3(data2_3["data"]);
+    } else {
+      // handle Exaption
+    }
+    var data3 = await SyncAPICalls.getDataServerBulk3(context); //api call 3
+    if (data3 != null) {
+      databaseHelper.insertData3(data3["data"]);
+    } else {
+      // handle Exaption
+    }
+    var data4_1 =
+        await SyncAPICalls.getDataServerBulk4_1(context); //api call 4_1
+    if (data4_1 != null) {
+      databaseHelper.insertData4_1(data4_1["data"]);
+    } else {
+      // handle Exaption
+    }
+    var data4_2 =
+        await SyncAPICalls.getDataServerBulk4_2(context); //api call 4_2
+    if (data4_2 != null) {
+      databaseHelper.insertData4_2(data4_2["data"]);
+    } else {
+      // handle Exaption
+    }
+  }
+
+  static getDataTables3(context) async {
+    var data3 = await SyncAPICalls.getDataServerBulk3(context); // call from  3
+    if (data3 != null) {
+      databaseHelper.insertData3(data3["data"]);
+    } else {
+      // handle Exaption
+    }
+    var data4_1 =
+        await SyncAPICalls.getDataServerBulk4_1(context); //api call 4_1
+    if (data4_1 != null) {
+      databaseHelper.insertData3(data4_1["data"]);
+    } else {
+      // handle Exaption
+    }
+    var data4_2 =
+        await SyncAPICalls.getDataServerBulk4_2(context); //api call 4_2
+    if (data4_2 != null) {
+      databaseHelper.insertData4_2(data4_2["data"]);
+    } else {
+      // handle Exaption
+    }
+  }
+
+  static getDataTables4(context) async {
+    //start from tables 4 API calls
+    var data4_1 =
+        await SyncAPICalls.getDataServerBulk4_1(context); //api call 4_1
+    if (data4_1 != null) {
+      databaseHelper.insertData4_1(data4_1["data"]);
+    } else {
+      // handle Exaption
+    }
+    var data4_2 =
+        await SyncAPICalls.getDataServerBulk4_2(context); //api call 4_2
+    if (data4_2 != null) {
+      databaseHelper.insertData4_2(data4_2["data"]);
+    } else {
+      // handle Exaption
+    }
   }
 
   static syncSingleTable(context) async {
+    // For Single table data
     var data = {'serverdatetime': "2020-09-01 12:30:25", 'table': "users"};
     var isReturn;
     await repo.syncTable(data).then((value) async {

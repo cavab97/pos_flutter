@@ -78,10 +78,7 @@ class _LoginPageState extends State<LoginPage> {
       user.terminalId = terkey != null ? terkey : '1'; //widget.terminalId;
       await repo.login(user).then((value) async {
         if (value != null && value.id != 0) {
-          bool isSyncDone = await CommunFun.syncAfterSuccess(context);
-          if (isSyncDone) {
-            Navigator.pushNamed(context, Constant.PINScreen);
-          }
+          await CommunFun.syncAfterSuccess(context);
         } else {
           scaffoldKey.currentState.showSnackBar(SnackBar(
             content: Text("Some thing want wrrong!"),
