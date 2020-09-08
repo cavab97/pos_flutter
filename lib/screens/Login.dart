@@ -212,9 +212,9 @@ class _LoginPageState extends State<LoginPage> {
       controller: userPin,
       obscureText: true,
       keyboardType: TextInputType.number,
-      inputFormatters: <TextInputFormatter>[
-         FilteringTextInputFormatter.digitsOnly
-       ],
+      // inputFormatters: <TextInputFormatter>[
+      //    FilteringTextInputFormatter.digitsOnly
+      //  ],
       decoration: InputDecoration(
         prefixIcon: Padding(
           padding: EdgeInsets.only(left: 20, right: 20),

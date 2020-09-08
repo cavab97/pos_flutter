@@ -1,4 +1,5 @@
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/models/Customer.dart';
 
 class LocalAPI {
   @override
@@ -10,7 +11,9 @@ class LocalAPI {
     return list;
   }
 
-  static getProduct() async {
-    
+  static getProduct() async {}
+
+  static addCustomer(Customer customer) async {
+    //var result = await db.insert("category", category.toJson());
   }
 }

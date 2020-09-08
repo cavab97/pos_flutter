@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/screens/AddCustomer.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
@@ -68,8 +69,8 @@ class _DashboradPageState extends State<DashboradPage> {
   }
 
   getCategoryList() async {
-    List categorys = await localAPI.getCategory();
-    print(categorys);
+    // List categorys = await localAPI.getCategory();
+    //print(categorys);
   }
 
   openOpningAmmountPop() {
@@ -108,6 +109,15 @@ class _DashboradPageState extends State<DashboradPage> {
         context: context,
         builder: (BuildContext context) {
           return InvoiceReceiptDailog();
+        });
+  }
+
+  opneShowAddCustomerDailog() {
+    // Send receipt Popup
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AddCustomerPage();
         });
   }
 
@@ -311,7 +321,8 @@ class _DashboradPageState extends State<DashboradPage> {
             RaisedButton(
               padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
               onPressed: () {
-                Navigator.pushNamed(context, Constant.TransactionScreen);
+                //Navigator.pushNamed(context, Constant.TransactionScreen);
+                opneShowAddCustomerDailog();
               },
               child: Row(
                 children: <Widget>[

@@ -25,4 +25,19 @@ class Strings {
   static String title_pay = "PAY";
   static String logout = "LOGOUT";
   static String terminalKeyBtn = "Set Terminal Key";
+  static String add = "add";
+  static String fisrtname = "Fisrt Name";
+  static String lastname = "Last Name";
+  static String email = "Email";
+  static String phone = "Phone";
+  static String password = "Password";
+  static String birthdate = "Birth Date";
+  static String addressline1 = "Address Line 1";
+  static String addressline2 = "Address Line 2";
+  static String city = "City";
+  static String state = "State";
+  static String country = "Country";
+  static String postcode = "PostCode";
+  static String countrys = "Countrys";
+
 }
