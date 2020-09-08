@@ -92,11 +92,7 @@ class _LoginPageState extends State<LoginPage> {
         scaffoldKey.currentState.showSnackBar(SnackBar(
           content: Text(e.message),
         ));
-      }).whenComplete(() {
-        setState(() {
-          isLoading = false;
-        });
-      });
+      }).whenComplete(() {});
     }
   }
 

@@ -5,6 +5,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
+import 'package:mcncashier/services/LocalAPIs.dart';
 
 class DashboradPage extends StatefulWidget {
   // main Product list page
@@ -15,6 +16,7 @@ class DashboradPage extends StatefulWidget {
 
 class _DashboradPageState extends State<DashboradPage> {
   GlobalKey<ScaffoldState> scaffoldKey;
+  LocalAPI localAPI = LocalAPI();
   bool isDrawerOpen = false;
   var tabsList = [
     {"id": 1, "name": "Drinks"},
@@ -62,6 +64,12 @@ class _DashboradPageState extends State<DashboradPage> {
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
+    getCategoryList();
+  }
+
+  getCategoryList() async {
+    List categorys = await localAPI.getCategory();
+    print(categorys);
   }
 
   openOpningAmmountPop() {

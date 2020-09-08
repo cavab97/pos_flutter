@@ -21,14 +21,20 @@ class TableData {
   //   return list;
   // }
 
-  Future<dynamic> ifExists(dynamic data) {
-    //  Cursor cursor = null;
-    //  String checkQuery = "SELECT " + KEY_NAME + " FROM " + TABLE_SHOP + " WHERE " + KEY_NAME + "= '"+model.getName() + "'";
-    //   cursor= db.rawQuery(checkQuery,null);
-    //   boolean exists = (cursor.getCount() > 0);
-    //   cursor.close();
-    //   return exists;
+  Future<int> ifExists(Database db, dynamic data) async {
+    String checkQuery = "SELECT " +
+        " FROM " +
+        data.tablename +
+        " WHERE " +
+        data.key +
+        " = '" +
+        data.value +
+        "'";
+    int count = Sqflite.firstIntValue(await db.rawQuery(
+        "SELECT COUNT(*) FROM $data.table WHERE $data.key =$data.value"));
+    return count;
   }
+
   Future<dynamic> insertDatatable1(Database db, dynamic tablesData) async {
     print(db);
     print(tablesData);
