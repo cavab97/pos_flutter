@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/services/LocalAPIs.dart';
 
 class AddCustomerPage extends StatefulWidget {
   AddCustomerPage({Key key}) : super(key: key);
@@ -22,7 +23,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   TextEditingController city_controller = new TextEditingController();
   TextEditingController state_controller = new TextEditingController();
   TextEditingController postcode_controller = new TextEditingController();
-
+  LocalAPI localAPI = LocalAPI();
   String _selectedCountry = "India";
   List<String> countries = ['A', 'B', 'C', 'D'];
 
@@ -32,9 +33,11 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
   }
 
-  validateFields() {}
+  validateFields() {
+    return true;
+  }
 
-  addCustomer() {
+  addCustomer() async {
     var isvalid = validateFields();
     if (isvalid) {
       Customer customer = new Customer();
@@ -43,15 +46,14 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
       customer.email = email_controller.text;
       customer.mobile = phone_controller.text;
       customer.password = password_controller.text;
-      customer.address =
-          addressLine1_controller.text + addressLine2_controller.text;
+      customer.address = addressLine1_controller.text;
       customer.email = email_controller.text;
       customer.cityId = 0;
       customer.stateId = 0;
       customer.countryId = 0;
-
-      
-      //customer.po
+      var result = await localAPI.addCustomer(customer);
+      print(result);
+      Navigator.of(context).pop();
     }
   }
 
@@ -150,21 +152,29 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
 
   Widget inputfield(lable, type, isCompal, isPassword, Function _onchnage) {
     return Padding(
-        padding: EdgeInsets.all(20),
-        child: TextField(
-          //controller: lable,
-          keyboardType: type,
-          obscureText: isPassword,
-          decoration: InputDecoration(
-              // errorText: !isValidateEmail ? errormessage : null,
-              // errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
-              labelText: isCompal ? lable + "*" : lable,
-              labelStyle: TextStyle(
-                fontSize: 22.0,
-                color: Colors.grey,
-              )),
-          style: TextStyle(height: 2, color: Colors.black, fontSize: 23.0),
-        ));
+      padding: EdgeInsets.all(20),
+      child: TextField(
+        //controller: lable,
+        keyboardType: type,
+        obscureText: isPassword,
+        decoration: InputDecoration(
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey),
+            ),
+            // errorText: !isValidateEmail ? errormessage : null,
+            // errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
+            labelText: isCompal ? lable + "*" : lable,
+            labelStyle: TextStyle(
+              fontSize: 22.0,
+              color: Colors.grey,
+            )),
+        style: TextStyle(height: 2, color: Colors.black, fontSize: 23.0),
+        onChanged: _onchnage,
+      ),
+    );
   }
 
   Widget mainContent() {
@@ -210,22 +220,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
               })),
               TableCell(
                   child: inputfield(
-                      Strings.birthdate, TextInputType.text, true, false, (e) {
-                dateofBirth_controller.text = e;
-              })),
-            ]),
-            TableRow(children: [
-              TableCell(
-                  child: inputfield(
                       Strings.addressline1, TextInputType.text, false, false,
                       (e) {
                 addressLine1_controller.text = e;
-              })),
-              TableCell(
-                  child: inputfield(
-                      Strings.addressline2, TextInputType.text, false, false,
-                      (e) {
-                addressLine2_controller.text = e;
               })),
             ]),
             TableRow(children: [

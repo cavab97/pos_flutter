@@ -111,4 +111,9 @@ class DatabaseHelper {
     var result = await tableDataHelper.insertDatatable4_2(db, tablesData);
     return result;
   }
+  Future<dynamic> accetsData(tablesData) async {
+    Database db = await this.database;
+    var result = await tableDataHelper.insertProductImage(db, tablesData);
+    return result;
+  }
 }

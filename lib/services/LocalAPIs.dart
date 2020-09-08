@@ -4,7 +4,7 @@ import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Product.dart';
 
 class LocalAPI {
- /* Future<List<Category>> getCategory() async {
+  /* Future<List<Category>> getCategory() async {
     final db = await DatabaseHelper.dbHelper.getDatabse(); //databaseHelper.database;
     List<Category> list = await db.rawQuery('SELECT * FROM category');
     return list;
@@ -12,18 +12,28 @@ class LocalAPI {
 
   Future<List<Category>> getAllCategory() async {
     var res = await DatabaseHelper.dbHelper.getDatabse().query("category");
-    List<Category> list = res.isNotEmpty ? res.map((c) => Category.fromJson(c)).toList() : [];
+    List<Category> list =
+        res.isNotEmpty ? res.map((c) => Category.fromJson(c)).toList() : [];
     return list;
   }
 
-  Future<List<Product>>  getProduct() async {
+  Future<List<Product>> getProduct() async {
     var res = await DatabaseHelper.dbHelper.getDatabse().query("product");
-    List<Product> list = res.isNotEmpty ? res.map((c) => Product.fromJson(c)).toList() : [];
+    List<Product> list =
+        res.isNotEmpty ? res.map((c) => Product.fromJson(c)).toList() : [];
     return list;
   }
-   
 
-  static addCustomer(Customer customer) async {
+  Future<List<Customer>> getCustomers() async {
+    var res = await DatabaseHelper.dbHelper.getDatabse().query("customer");
+    List<Customer> list =
+        res.isNotEmpty ? res.map((c) => Customer.fromJson(c)).toList() : [];
+    return list;
+  }
 
+  Future<int> addCustomer(Customer customer) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var result = await db.insert("customer", customer.toJson());
+    return result;
   }
 }

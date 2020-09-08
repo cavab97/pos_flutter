@@ -272,6 +272,12 @@ class CommunFun {
     } else {
       // handle Exaption
     }
+    var aceets = await SyncAPICalls.getAssets(context);
+    if (aceets != null) {
+      databaseHelper.accetsData(aceets["data"]);
+    } else {
+      // handle Exaption
+    }
     var data4_1 =
         await SyncAPICalls.getDataServerBulk4_1(context); //api call 4_1
     if (data4_1 != null) {

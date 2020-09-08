@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/routes.dart';
 import 'package:mcncashier/theme/theme.dart';
 
@@ -15,12 +16,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
-    
+    var terkey = Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+    print(terkey);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'cashierApp',
       theme: appTheme(),
       initialRoute: Constant.TerminalScreen,
+      // terkey == null ? Constant.TerminalScreen : Constant.DashboardScreen,
       routes: routes,
     );
   }

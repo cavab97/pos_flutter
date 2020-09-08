@@ -268,10 +268,12 @@ class CreateTables {
         "asset_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "asset_type	INTEGER," +
+        "asset_type_id	INTEGER," +
         "asset_path	TEXT," +
         "status	INTEGER," +
         "updated_at	TEXT," +
-        "updated_by	INTEGER" +
+        "updated_by	INTEGER," +
+        "base64 TEXT" +
         ")");
 
     // Table product_store_inventor
@@ -479,7 +481,7 @@ class CreateTables {
     //Table customer
 
     datatables = db.execute("CREATE TABLE customer (" +
-        "customer_id	INTEGER," +
+        "customer_id	INTEGER PRIMARY KEY AUTOINCREMENT," +
         "uuid	char TEXT," +
         "app_id	INTEGER," +
         "terminal_id	INTEGER," +

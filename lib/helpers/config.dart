@@ -10,4 +10,5 @@ class Configrations {
   static String appdata3 = "appdata3";
   static String appdata4_1 = "appdata4_1";
   static String appdata4_2 = "appdata4_2";
+   static String product_image = "productimage";
 }

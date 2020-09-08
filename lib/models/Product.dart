@@ -14,25 +14,24 @@ class Product {
   String deletedAt;
   int updatedBy;
   String deletedBy;
-  String base64;
 
   Product(
-      {this.productId,
-      this.uuid,
-      this.name,
-      this.description,
-      this.sku,
-      this.priceTypeId,
-      this.priceTypeValue,
-      this.price,
-      this.oldPrice,
-      this.hasInventory,
-      this.status,
-      this.updatedAt,
-      this.deletedAt,
-      this.updatedBy,
-      this.deletedBy,
-      this.base64});
+    {this.productId,
+    this.uuid,
+    this.name,
+    this.description,
+    this.sku,
+    this.priceTypeId,
+    this.priceTypeValue,
+    this.price,
+    this.oldPrice,
+    this.hasInventory,
+    this.status,
+    this.updatedAt,
+    this.deletedAt,
+    this.updatedBy,
+    this.deletedBy,
+  });
 
   Product.fromJson(Map<String, dynamic> json) {
     productId = json['product_id'];
@@ -50,7 +49,6 @@ class Product {
     deletedAt = json['deleted_at'];
     updatedBy = json['updated_by'];
     deletedBy = json['deleted_by'];
-    base64 = json['base64'];
   }
 
   Map<String, dynamic> toJson() {
@@ -70,7 +68,7 @@ class Product {
     data['deleted_at'] = this.deletedAt;
     data['updated_by'] = this.updatedBy;
     data['deleted_by'] = this.deletedBy;
-    data['base64'] = this.base64;
+
     return data;
   }
 }

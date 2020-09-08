@@ -15,7 +15,7 @@ class SyncAPICalls {
   }
 
   static getDataServerBulk2_2(context) async {
-    var apiurl =  Configrations.appdata2_2;
+    var apiurl = Configrations.appdata2_2;
     var stringParams = {'datetime': '2020-09-01 12:30:25', 'branchId': 1};
     return await APICalls.apiCall(apiurl, context, stringParams);
   }
@@ -27,19 +27,25 @@ class SyncAPICalls {
   }
 
   static getDataServerBulk3(context) async {
-    var apiurl =  Configrations.appdata3;
+    var apiurl = Configrations.appdata3;
     var stringParams = {'datetime': '2020-09-01 12:30:25', 'branchId': 1};
     return await APICalls.apiCall(apiurl, context, stringParams);
   }
 
   static getDataServerBulk4_1(context) async {
-    var apiurl =  Configrations.appdata4_1;
+    var apiurl = Configrations.appdata4_1;
     var stringParams = {'datetime': '2020-09-01 12:30:25', 'branchId': 1};
     return await APICalls.apiCall(apiurl, context, stringParams);
   }
 
   static getDataServerBulk4_2(context) async {
     var apiurl = Configrations.appdata4_2;
+    var stringParams = {'datetime': '2020-09-01 12:30:25', 'branchId': 1};
+    return await APICalls.apiCall(apiurl, context, stringParams);
+  }
+
+  static getAssets(context) async {
+    var apiurl = Configrations.product_image;
     var stringParams = {'datetime': '2020-09-01 12:30:25', 'branchId': 1};
     return await APICalls.apiCall(apiurl, context, stringParams);
   }

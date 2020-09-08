@@ -1,3 +1,4 @@
+import 'package:mcncashier/models/Asset.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Customer.dart';
@@ -38,19 +39,19 @@ class TableData {
         for (var i = 0; i < branchData.length; i++) {
           var branchDataitem = branchData[i];
           Branch branch = Branch.fromJson(branchDataitem);
-          var data = {
-            'table': "branch",
-            'key': "branch_id",
-            'value': branch.branchId,
-          };
-          var count = await ifExists(db, data);
-          if (count == 0) {
-            var result = await db.insert("branch", branch.toJson());
-            print(result);
-          } else {
-            var result = await db.update("branch", branch.toJson());
-            print(result);
-          }
+          // var data = {
+          //   'table': "branch",
+          //   'key': "branch_id",
+          //   'value': branch.branchId,
+          // };
+          // var count = await ifExists(db, data);
+          // if (count == 0) {
+          var result = await db.insert("branch", branch.toJson());
+          print(result);
+          // } else {
+          //   var result = await db.update("branch", branch.toJson());
+          //   print(result);
+          // }
         }
       }
       if (userData.length != 0) {
@@ -252,5 +253,24 @@ class TableData {
     print(db);
     print(tablesData);
     return 1;
+  }
+
+  Future<dynamic> insertProductImage(Database db, dynamic tablesData) async {
+    print(db);
+    print(tablesData);
+    var imageData = tablesData["product_image"];
+    try {
+      if (imageData.length != 0) {
+        for (var i = 0; i < imageData.length; i++) {
+          var imageDataitem = imageData[i];
+          Assets accet = Assets.fromJson(imageDataitem);
+          var result = await db.insert("asset", accet.toJson());
+          print(result);
+        }
+      }
+      return 1;
+    } catch (e) {
+      return 0;
+    }
   }
 }
