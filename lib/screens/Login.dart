@@ -229,7 +229,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         errorText: !isValidatePassword ? errormessage : null,
-        errorStyle: TextStyle(color: Colors.red),
+        errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
         hintText: Strings.pin_hint,
         hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
         border: OutlineInputBorder(

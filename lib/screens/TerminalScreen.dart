@@ -31,7 +31,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
     // validate Fields
     if (terminalKey.text == "" || terminalKey.text.length == 0) {
       setState(() {
-        errormessage = "Please enter terminal key.";
+        errormessage = Constant.VALID_TERMINAL_KEY;
         isValidatekey = false;
       });
       return false;
