@@ -1,4 +1,5 @@
 class Strings {
+  static String something_wrong = "Something went wrong!";
   static String pin_Dialog_title = "Pin Verification";
   static String title_opening_amount = "Opening Amount";
   static String forgot_password = "Forgot password?";
@@ -10,6 +11,7 @@ class Strings {
   static String pin_hint = "Pin";
   static String invoice_reciept = "Invoice receipt";
   static String sub_total = "Sub Total";
+  static String size = "Size";
   static String header_name = "Name";
   static String qty = "Qty";
   static String amount = "Amount";

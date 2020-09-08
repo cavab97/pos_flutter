@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:device_info/device_info.dart';
 import 'dart:io';
+
+import 'package:device_info/device_info.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
@@ -124,9 +124,11 @@ class CommunFun {
     );
   }
 
-  static showToast(context, message) {
-    Toast.show(message, context,
-        duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+  static showToast(context, message, isShow) {
+    if (isShow && message.toString().isNotEmpty) {
+      Toast.show(message, context,
+          duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+    }
   }
 
   static syncAfterSuccess(context) async {
@@ -134,14 +136,14 @@ class CommunFun {
     var isReturn;
     await repo.syncTable(data).then((value) async {
       if (value["status"] == Constant.STATUS200) {
-        CommunFun.showToast(context, value["message"]);
+        CommunFun.showToast(context, value["message"], true);
         isReturn = true;
       } else {
-        CommunFun.showToast(context, value["message"]);
+        CommunFun.showToast(context, value["message"], true);
         isReturn = false;
       }
     }).catchError((e) {
-      CommunFun.showToast(context, e.message);
+      CommunFun.showToast(context, e.message, true);
       isReturn = false;
     }).whenComplete(() {});
     return isReturn;
@@ -152,14 +154,14 @@ class CommunFun {
     var isReturn;
     await repo.syncTable(data).then((value) async {
       if (value["status"] == Constant.STATUS200) {
-        CommunFun.showToast(context, value["message"]);
+        CommunFun.showToast(context, value["message"],true);
         isReturn = true;
       } else {
-        CommunFun.showToast(context, value["message"]);
+        CommunFun.showToast(context, value["message"],true);
         isReturn = false;
       }
     }).catchError((e) {
-      CommunFun.showToast(context, e.message);
+      CommunFun.showToast(context, Strings.something_wrong, true);
       isReturn = false;
     }).whenComplete(() {});
     return isReturn;
