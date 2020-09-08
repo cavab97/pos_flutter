@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
@@ -10,6 +11,8 @@ class ProductQuantityDailog extends StatefulWidget {
 }
 
 class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
+  final List<int> numbers = [1, 2, 3, 5, 8, 13, 21, 34, 55];
+
   @override
   void initState() {
     super.initState();
@@ -110,41 +113,89 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Text(
-            "Notes and Quantity",
-            style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w400,
-                color: Colors.grey[800]),
-          ),
+          _sizeTitle(),
+          getSize(),
+          _extraNotesTitle(),
           SizedBox(height: 10),
-          SizedBox(
-              height: MediaQuery.of(context).size.height / 4,
-              width: MediaQuery.of(context).size.width,
-              child: Card(
-                color: Colors.grey[200],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Column(
-                  children: <Widget>[],
-                ),
-              )),
+          inputNotesView(),
         ],
       ),
     );
   }
 
-  Widget _quantityTextInput(Function() onchange) {
+  Widget getSize() {
     return Container(
+      margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10.0),
+      height: 50, // MediaQuery.of(context).size.height /8,
+      child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: numbers.length,
+          itemBuilder: (context, index) {
+            return Container(
+              width: 50, //MediaQuery.of(context).size.width * 0.6,
+              height: 20,
+              child: Card(
+                color: Colors.grey[200],
+                child: Container(
+                  child: Center(
+                      child: Text(
+                    numbers[index].toString(),
+                    style: TextStyle(color: Colors.black, fontSize: 18.0),
+                  )),
+                ),
+              ),
+            );
+          }),
+    );
+  }
+
+  Widget _sizeTitle() {
+    return Text(
+      Strings.size,
+      style: TextStyle(
+          fontSize: 18, fontWeight: FontWeight.w400, color: Colors.grey[800]),
+    );
+  }
+
+  Widget _extraNotesTitle() {
+    return Text(
+      "Notes and Quantity",
+      style: TextStyle(
+          fontSize: 20, fontWeight: FontWeight.w400, color: Colors.grey[800]),
+    );
+  }
+
+  Widget inputNotesView() {
+    return SizedBox(
+        height: 120, // MediaQuery.of(context).size.height / 4,
+        width: MediaQuery.of(context).size.width,
+        child: Card(
+          color: Colors.grey[200],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Column(
+            children: <Widget>[],
+          ),
+        ));
+  }
+
+  Widget _quantityTextInput(Function() onchange) {
+    return Center(
+      child: Container(
         height: 50,
         width: 90,
         child: TextField(
-            decoration: new InputDecoration(
-          border: new OutlineInputBorder(
-              borderSide: new BorderSide(color: Colors.grey)),
-          hintText: '0.00',
-        )));
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 20),
+          decoration: new InputDecoration(
+            border: new OutlineInputBorder(
+                borderSide: new BorderSide(color: Colors.grey)),
+            hintText: '0.00',
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _button(String number, Function() f) {
