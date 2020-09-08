@@ -186,8 +186,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         height: 50,
         width: 90,
         child: TextField(
+
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 20),
+          textAlignVertical: TextAlignVertical.center,
+          style: TextStyle(fontSize: 20,height: 1.4),
           decoration: new InputDecoration(
             border: new OutlineInputBorder(
                 borderSide: new BorderSide(color: Colors.grey)),

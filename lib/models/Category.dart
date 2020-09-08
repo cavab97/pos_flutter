@@ -9,8 +9,8 @@ class Category {
   int status;
   String updatedAt;
   int updatedBy;
-  Null deletedAt;
-  Null deletedBy;
+  String deletedAt;
+  int deletedBy;
 
   Category(
       {this.categoryId,

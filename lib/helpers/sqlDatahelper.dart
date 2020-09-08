@@ -16,9 +16,19 @@ class DatabaseHelper {
   String colDescription = 'description';
   String colDate = 'date';
   String databaseName = "MCN_POS.db";
+
   DatabaseHelper._createInstance();
+
   CreateTables createTablehelper = CreateTables();
   TableData tableDataHelper = TableData();
+
+  DatabaseHelper._privateConstructor();
+
+  static final DatabaseHelper dbHelper = DatabaseHelper._privateConstructor();
+
+  Database getDatabse() {
+    return _database;
+  }
 
   factory DatabaseHelper() {
     if (_databaseHelper == null) {
