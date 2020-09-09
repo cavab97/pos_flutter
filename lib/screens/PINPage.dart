@@ -89,18 +89,23 @@ class _PINPageState extends State<PINPage> {
     return Container(
         width: MediaQuery.of(context).size.width / 2.9,
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30), topLeft: Radius.circular(30)),
-            image: DecorationImage(
-                image: AssetImage("assets/bg.jpg"), fit: BoxFit.cover)),
+          color: Colors.grey,
+          borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(30), topLeft: Radius.circular(30)),
+          // image: DecorationImage(
+          //     image: AssetImage("assets/bg.jpg"), fit: BoxFit.cover)
+        ),
         child: Center(
-          child: Text(
-            '',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                color: Colors.brown, fontSize: 25, fontWeight: FontWeight.bold),
-          ),
-        ));
+            child: Padding(
+                padding: EdgeInsets.all(10),
+                child: SizedBox(
+                  // login logo
+                  height: 110.0,
+                  child: Image.asset(
+                    "assets/headerlogo.png",
+                    fit: BoxFit.contain,
+                  ),
+                ))));
   }
 
   Widget _button(String number, Function() f) {
@@ -152,29 +157,29 @@ class _PINPageState extends State<PINPage> {
                 children: <Widget>[
                   Icon(
                     pinNumber.length >= 1
-                        ? Icons.check_circle
-                        : Icons.check_circle_outline,
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
                     color: Colors.deepOrange,
                     size: 40,
                   ),
                   Icon(
                     pinNumber.length >= 2
-                        ? Icons.check_circle
-                        : Icons.check_circle_outline,
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
                     color: Colors.deepOrange,
                     size: 40,
                   ),
                   Icon(
                     pinNumber.length >= 3
-                        ? Icons.check_circle
-                        : Icons.check_circle_outline,
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
                     color: Colors.deepOrange,
                     size: 40,
                   ),
                   Icon(
                     pinNumber.length >= 4
-                        ? Icons.check_circle
-                        : Icons.check_circle_outline,
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
                     color: Colors.deepOrange,
                     size: 40,
                   ),

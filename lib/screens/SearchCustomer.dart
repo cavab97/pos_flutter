@@ -167,6 +167,9 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
       shrinkWrap: true,
       children: customerList.map((customer) {
         return ListTile(
+          onTap: () {
+            Navigator.of(context).pop();
+          },
           leading:
               Text(customer.name == null ? customer.firstName : customer.name),
           title: Text(customer.email),

@@ -7,11 +7,13 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/Product_Categroy.dart';
+import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/screens/SelectTable.dart';
+import 'package:mcncashier/services/CommunAPICall.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class DashboradPage extends StatefulWidget {
@@ -31,24 +33,28 @@ class _DashboradPageState extends State<DashboradPage>
   List<Category> tabsList = new List<Category>();
   List<Product> productList = new List<Product>();
   bool isDrawerOpen = false;
-
+  bool isShiftOpen = false;
   @override
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
-    var loginUser = Preferences.getStringValuesSF(Constant.LOIGN_USER);
-    print(loginUser);
+    checkshift();
     getCategoryList();
+  }
+
+  checkshift() async {
+    // var isOpen = await Preferences.getBoolValuesSF(Constant.IS_SHIFT_OPEN);
+    // setState(() {
+    //   isShiftOpen = isOpen != null ? isOpen : false;
+    // });
   }
 
   getCategoryList() async {
     List<Category> categorys = await localAPI.getAllCategory();
     setState(() {
       tabsList = categorys;
-
       _tabController = TabController(vsync: this, length: tabsList.length);
       _tabController.addListener(_handleTabSelection);
-
       getProductList(0);
     });
   }
@@ -89,8 +95,30 @@ class _DashboradPageState extends State<DashboradPage>
         // Opning Ammount Popup
         context: context,
         builder: (BuildContext context) {
-          return OpeningAmmountPage();
+          return OpeningAmmountPage(onEnter: (ammount) {
+            print(ammount);
+            sendOpenShft(ammount);
+          });
         });
+  }
+
+  sendOpenShft(ammount) async {
+    setState(() {
+      isShiftOpen = true;
+    });
+    //g Preferences.setBoolToSF(Constant.IS_SHIFT_OPEN, isShiftOpen);
+    Shift shift = new Shift();
+    shift.appId = 1;
+    shift.branchId = 1;
+    shift.startAmount = ammount;
+    shift.endAmount = 0;
+    shift.updatedAt = "2020-09-09 06:43:09";
+    shift.updatedBy = 1;
+    var result = await localAPI.insertShift(shift);
+    print(result);
+    //if (result == 1) {
+
+    //}
   }
 
   openDrawer() {
@@ -203,15 +231,16 @@ class _DashboradPageState extends State<DashboradPage>
                     ),
                   ),
                   TableCell(
-                      child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                      child: Stack(
+                    //crossAxisAlignment: CrossAxisAlignment.center,
                     //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
                       cartITems(),
                       SizedBox(
                         height: 10,
                       ),
-                      paybutton(context)
+                      paybutton(context),
+                      !isShiftOpen ? openShiftButton(context) : SizedBox()
                     ],
                   )),
                 ]),
@@ -397,23 +426,20 @@ class _DashboradPageState extends State<DashboradPage>
                 children: <Widget>[
                   Hero(
                       tag: product.productId,
-                      child:
-                          /* new ListTile(
-                        leading:
-                        dense: true,
-                      ) */
-                          Container(
+                      child: Container(
                         decoration: new BoxDecoration(
                           color: Colors.grey,
+                          image: DecorationImage(
+                              image: AssetImage("assets/image1.jfif"),
+                              fit: BoxFit.cover),
                         ),
                         width: MediaQuery.of(context).size.width,
                         height: itemHeight / 2,
-                        child: CommonUtils.imageFromBase64String(""),
+                        child: Center(),
                       )),
                   Container(
                     margin: EdgeInsets.only(top: itemHeight / 2),
                     width: MediaQuery.of(context).size.width,
-                    //height: itemHeight / 5,
                     decoration: BoxDecoration(
                       color: Colors.grey[600],
                     ),
@@ -462,12 +488,66 @@ class _DashboradPageState extends State<DashboradPage>
 
   Widget paybutton(context) {
     // Payment button
-    return Container(
+    return Center(
+      child: Container(
+        margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3),
         height: 70,
         width: 320,
-        child: CommunFun.roundedButton(Strings.title_pay, () {
-          openOpningAmmountPop();
-        }));
+        child: CommunFun.roundedButton(
+          Strings.title_pay,
+          () {
+            //  openOpningAmmountPop();
+            Navigator.pushNamed(context, Constant.TransactionScreen);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget openShiftButton(context) {
+    // Payment button
+    return Positioned(
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+      child: Center(
+        child: Container(
+            color: Colors.white.withOpacity(0.7),
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  Strings.shiftTextLable,
+                  style: TextStyle(fontSize: 30),
+                ),
+                SizedBox(height: 40),
+                shiftbtn(() {
+                  openOpningAmmountPop();
+                })
+              ],
+            )),
+      ),
+    );
+  }
+
+  Widget shiftbtn(Function onPress) {
+    return RaisedButton(
+      padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
+      onPressed: onPress,
+      child: Text(
+        Strings.open_shift,
+        style: TextStyle(color: Colors.white, fontSize: 25),
+      ),
+      color: Colors.deepOrange,
+      textColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+    );
   }
 
   Widget cartITems() {
@@ -517,24 +597,24 @@ class _DashboradPageState extends State<DashboradPage>
           TableRow(children: [
             Padding(
                 padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                child: Text("item 1")),
+                child: Text("PIZZA")),
             Padding(
                 padding: EdgeInsets.only(top: 10, bottom: 10),
                 child: Text("5.00")),
             Padding(
                 padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                child: Text("35.00")),
+                child: Text("20.00")),
           ]),
           TableRow(children: [
             Padding(
                 padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                child: Text("item 1")),
+                child: Text("APPLE")),
             Padding(
                 padding: EdgeInsets.only(top: 10, bottom: 10),
                 child: Text("5.00")),
             Padding(
                 padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                child: Text("35.00")),
+                child: Text("10.00")),
           ]),
         ]);
     final totalPriceTable = Table(
@@ -557,7 +637,7 @@ class _DashboradPageState extends State<DashboradPage>
                   Padding(
                       padding: EdgeInsets.only(top: 10, bottom: 10),
                       child: Text(
-                        "00:00",
+                        "150:00",
                         style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: Color(0xff100c56)),
@@ -609,7 +689,7 @@ class _DashboradPageState extends State<DashboradPage>
                   Padding(
                       padding: EdgeInsets.only(top: 10, bottom: 10),
                       child: Text(
-                        "00:00",
+                        "100:00",
                         style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: Color(0xff100c56)),

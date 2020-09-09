@@ -272,25 +272,25 @@ class _SelectTablePageState extends State<SelectTablePage> {
                     ],
                   ),
                 ),
-                Positioned(
-                  top: itemHeight / 2 - 30,
-                  left: 0,
-                  child: Container(
-                    height: 30,
-                    width: 50,
-                    padding: EdgeInsets.all(5),
-                    color: Colors.deepOrange,
-                    child: Center(
-                      child: Text(
-                        table.tableCapacity.toString(),
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white,
-                            fontSize: 15),
-                      ),
-                    ),
-                  ),
-                )
+                // Positioned(
+                //   top: itemHeight / 2 - 30,
+                //   left: 0,
+                //   child: Container(
+                //     height: 30,
+                //     width: 50,
+                //     padding: EdgeInsets.all(5),
+                //     color: Colors.deepOrange,
+                //     child: Center(
+                //       child: Text(
+                //         table.tableCapacity.toString(),
+                //         style: TextStyle(
+                //             fontWeight: FontWeight.w400,
+                //             color: Colors.white,
+                //             fontSize: 15),
+                //       ),
+                //     ),
+                //   ),
+                //)
               ],
             ),
           ),

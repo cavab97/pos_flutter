@@ -47,4 +47,6 @@ class Strings {
   static String new_order = " New Order";
   static String merge_order = "Merge Order";
   static String enterPax = "Enter Pax";
+  static String open_shift = "Open Shift";
+  static String shiftTextLable = "Your Shift is Closed";
 }

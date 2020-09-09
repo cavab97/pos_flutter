@@ -557,6 +557,19 @@ class CreateTables {
         'product_points REAL' +
         ')');
 
+    datatables = db.execute("CREATE TABLE shift(" +
+        "shift_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "uuid TEXT," +
+        "user_id INTEGER," +
+        "branch_id INTEGER," +
+        "start_amount INTEGER," +
+        "end_amount INTEGER," +
+        "status INTEGER," +
+        "updated_by INTEGER," +
+        "updated_at TEXT," +
+        "app_id INTEGER," +
+        "terminal_id INTEGER" +
+        ")");
     return datatables;
   }
 }

@@ -82,7 +82,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                 addCustomer();
               },
               child: Text(
-                Strings.add,
+                Strings.add.toUpperCase(),
                 style: TextStyle(fontSize: 30, color: Colors.white),
               ),
             ),
