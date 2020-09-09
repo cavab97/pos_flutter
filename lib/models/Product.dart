@@ -51,6 +51,7 @@ class Product {
     deletedAt = json['deleted_at'];
     updatedBy = json['updated_by'];
     deletedBy = json['deleted_by'];
+    base64 = json['base64'];
   }
 
   Map<String, dynamic> toJson() {
@@ -70,6 +71,7 @@ class Product {
     data['deleted_at'] = this.deletedAt;
     data['updated_by'] = this.updatedBy;
     data['deleted_by'] = this.deletedBy;
+    data['base64'] = this.base64;
     return data;
   }
 }
