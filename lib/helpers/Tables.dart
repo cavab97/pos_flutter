@@ -531,6 +531,45 @@ class CreateTables {
         "is_order_merged  REAl" +
         ")");
 
+    datatables = db.execute("CREATE TABLE  mst_cart (" +
+        "id	INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "table_id	INTEGER," +
+        "is_merge_table  TEXT," +
+        "merged_table_id  TEXT," +
+        "number_of_pax  INTEGER," +
+        "table_seat  TEXT," +
+        "save_order_id  TEXT," +
+        "merged_pax TEXT," +
+        "table_locked_by  INTEGER," +
+        "is_order_merged  REAl" +
+        ")");
+
+    datatables = db.execute("CREATE TABLE mst_cart(" +
+        'id INTEGER PRIMARY KEY AUTOINCREMENT,' +
+        'localID TEXT,' +
+        'user_id INTEGER,' +
+        'branch_id INTEGER,' +
+        'sub_total REAL,' +
+        'discount REAL,' +
+        'discount_type INTEGER,' +
+        'remark TEXT,' +
+        'tax REAL,' +
+        'grand_total REAL,' +
+        'total_qty  INTEGER,' +
+        'is_open INTEGER,' +
+        'is_deleted   REAL,' +
+        'created_by  INTEGER,' +
+        'created_at  TEXT,' +
+        'sync  REAL,' +
+        'customer_terminal INTEGER,' +
+        'queue_number INTEGER,' +
+        'service_charge_rate REAL,' +
+        'service_charge_amount INTEGER,' +
+        'redeem_points REAL,' +
+        'redeem_point_amount REAL,' +
+        'product_points REAL' +
+        ')');
+
     return datatables;
   }
 }
