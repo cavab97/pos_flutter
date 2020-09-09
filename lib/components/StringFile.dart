@@ -39,6 +39,7 @@ class Strings {
   static String country = "Country";
   static String postcode = "PostCode";
   static String countrys = "Countrys";
+
   static String search_customer = "Search Customer";
   static String customer_Search_Hint =
       "Search Customer Name,Email,Phone or Memeber id";

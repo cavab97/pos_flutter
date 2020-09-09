@@ -19,9 +19,6 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   TextEditingController password_controller = new TextEditingController();
   TextEditingController dateofBirth_controller = new TextEditingController();
   TextEditingController addressLine1_controller = new TextEditingController();
-  TextEditingController addressLine2_controller = new TextEditingController();
-  TextEditingController city_controller = new TextEditingController();
-  TextEditingController state_controller = new TextEditingController();
   TextEditingController postcode_controller = new TextEditingController();
   LocalAPI localAPI = LocalAPI();
   String _selectedCountry = "India";
@@ -85,7 +82,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                 addCustomer();
               },
               child: Text(
-                Strings.add.toUpperCase(),
+                Strings.add,
                 style: TextStyle(fontSize: 30, color: Colors.white),
               ),
             ),
@@ -136,6 +133,68 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                   child: new DropdownButton<String>(
                     isExpanded: true,
                     items: <String>['India', 'Canada', 'UK', 'USA']
+                        .map((String value) {
+                      return new DropdownMenuItem<String>(
+                        value: value,
+                        child: new Text(
+                          value,
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (_) {},
+                  ))
+            ]));
+  }
+
+  Widget cityselect() {
+    return new Padding(
+        padding: EdgeInsets.all(10),
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                Strings.city,
+                style: TextStyle(color: Colors.grey, fontSize: 23),
+              ),
+              Container(
+                  height: 70,
+                  width: MediaQuery.of(context).size.width,
+                  child: new DropdownButton<String>(
+                    isExpanded: true,
+                    items: <String>['India', 'Canada', 'UK', 'USA']
+                        .map((String value) {
+                      return new DropdownMenuItem<String>(
+                        value: value,
+                        child: new Text(
+                          value,
+                          style: TextStyle(color: Colors.black),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (_) {},
+                  ))
+            ]));
+  }
+
+  Widget stateSelect() {
+    return new Padding(
+        padding: EdgeInsets.all(10),
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                Strings.state,
+                style: TextStyle(color: Colors.grey, fontSize: 23),
+              ),
+              Container(
+                  height: 70,
+                  width: MediaQuery.of(context).size.width,
+                  child: new DropdownButton<String>(
+                    isExpanded: true,
+                    items: <String>['Gujarat', 'Mumbai', 'Rajastan', 'Maharast']
                         .map((String value) {
                       return new DropdownMenuItem<String>(
                         value: value,
@@ -226,16 +285,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
               })),
             ]),
             TableRow(children: [
-              TableCell(
-                  child: inputfield(
-                      Strings.city, TextInputType.text, false, false, (e) {
-                city_controller.text = e;
-              })),
-              TableCell(
-                  child: inputfield(
-                      Strings.state, TextInputType.text, false, false, (e) {
-                state_controller.text = e;
-              })),
+              TableCell(child: cityselect()),
+              TableCell(child: stateSelect()),
             ]),
             TableRow(children: [
               TableCell(child: countryselect()),

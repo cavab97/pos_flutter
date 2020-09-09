@@ -78,20 +78,17 @@ class _LoginPageState extends State<LoginPage> {
       user.terminalId = terkey != null ? terkey : '1'; //widget.terminalId;
       await repo.login(user).then((value) async {
         if (value != null && value.id != 0) {
+          print(value);
           await CommunFun.syncAfterSuccess(context);
         } else {
-          scaffoldKey.currentState.showSnackBar(SnackBar(
-            content: Text(Strings.something_wrong),
-          ));
+          CommunFun.showToast(context, Strings.something_wrong);
         }
       }).catchError((e) {
         setState(() {
           isLoading = false;
         });
         print(e);
-        scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text(e.message),
-        ));
+        CommunFun.showToast(context, e.message);
       }).whenComplete(() {});
     }
   }
