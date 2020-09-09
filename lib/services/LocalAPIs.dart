@@ -1,4 +1,5 @@
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/models/Asset.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Product.dart';
@@ -20,14 +21,34 @@ class LocalAPI {
     return list;
   }
 
+ Future<List<Assets>> assets() async {
+    var res = await DatabaseHelper.dbHelper.getDatabse().query("asset");
+    List<Assets> list =
+        res.isNotEmpty ? res.map((c) => Assets.fromJson(c)).toList() : [];
+    return list;
+  }
+
   Future<List<Product>> getProduct(String id) async {
     // var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery('select * from product left join product_category using(id) where category_id="'+id+'"');
-    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(
-        'SELECT * FROM `product` LEFT join product_category on product_category.product_id = product.product_id where product_category.category_id = ' +
-            id);
-    //  var res = await DatabaseHelper.dbHelper.getDatabse().query("product");
+    // var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery('SELECT * FROM `product` LEFT join product_category on product_category.product_id = product.product_id where product_category.category_id = '+id);
+    var res = await DatabaseHelper.dbHelper.getDatabse().query("product");
     List<Product> list =
         res.isNotEmpty ? res.map((c) => Product.fromJson(c)).toList() : [];
+
+    list.forEach((element) async {
+      var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(
+          'SELECT base64 FROM asset WHERE asset_type = 1 AND asset_type_id =' +
+              element.productId.toString());
+
+      if (res.isNotEmpty) {
+        print("IFFFFFFFFFFFFFFFFFFF");
+        element.base64 = res.toString();
+      }else{
+        print("=======================");
+        print(element.productId.toString());
+        print("Elsssssssssssssssssssss");
+      }
+    });
     return list;
   }
 
@@ -40,11 +61,11 @@ class LocalAPI {
     return catlist;
   }
 
-  Future getProductImage(String id) async {
+  Future<String> getProductImage(String id) async {
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(
         'SELECT base64 FROM asset WHERE asset_type = 1 AND asset_type_id =' +
             id);
-    return res;
+    return res.toString();
   }
 
   Future<List<Customer>> getCustomers() async {
