@@ -6,7 +6,6 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Product.dart';
-import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
@@ -21,8 +20,8 @@ class DashboradPage extends StatefulWidget {
   _DashboradPageState createState() => _DashboradPageState();
 }
 
-class _DashboradPageState extends State<DashboradPage> with SingleTickerProviderStateMixin {
-
+class _DashboradPageState extends State<DashboradPage>
+    with SingleTickerProviderStateMixin {
   TabController _tabController;
 
   GlobalKey<ScaffoldState> scaffoldKey;
@@ -44,7 +43,7 @@ class _DashboradPageState extends State<DashboradPage> with SingleTickerProvider
     setState(() {
       tabsList = categorys;
 
-      _tabController = TabController(vsync:this, length: tabsList.length);
+      _tabController = TabController(vsync: this, length: tabsList.length);
       _tabController.addListener(_handleTabSelection);
 
       getProductList(0);
@@ -52,19 +51,30 @@ class _DashboradPageState extends State<DashboradPage> with SingleTickerProvider
   }
 
   getProductList(int position) async {
+    print("Producccccccccccc");
+    print(tabsList[position].categoryId.toString());
 
     List<Product> product =
         await localAPI.getProduct(tabsList[position].categoryId.toString());
-    print("product");
+
+    print(product.length);
+
     setState(() {
       productList.clear();
       productList = product;
+
+      //if (productList.length > 0) {
+       /* productList.forEach((element) {
+          print("product");
+          print(localAPI.getProductImage(element.productId.toString()));
+        });*/
+      //}
     });
   }
 
   void _handleTabSelection() {
     if (_tabController.indexIsChanging) {
-     getProductList(_tabController.index);
+      getProductList(_tabController.index);
     }
   }
 
@@ -382,17 +392,20 @@ class _DashboradPageState extends State<DashboradPage> with SingleTickerProvider
                 children: <Widget>[
                   Hero(
                       tag: product.productId,
-                      child: Container(
-                          decoration: new BoxDecoration(
-                            color: Colors.greenAccent,
-                            image: new DecorationImage(
-                              image: ExactAssetImage(product.name),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          width: MediaQuery.of(context).size.width,
-                          height: itemHeight / 2,
-                          child: Center())),
+                      child:
+                          /* new ListTile(
+                        leading:
+                        dense: true,
+                      ) */
+                          Container(
+                        decoration: new BoxDecoration(
+                          color: Colors.grey,
+                        ),
+                        width: MediaQuery.of(context).size.width,
+                        height: itemHeight / 2,
+                        child:
+                            CommonUtils.imageFromBase64String(product.base64),
+                      )),
                   Container(
                     margin: EdgeInsets.only(top: itemHeight / 2),
                     width: MediaQuery.of(context).size.width,
