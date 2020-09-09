@@ -20,8 +20,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController emailAddress = new TextEditingController();
-  TextEditingController userPin = new TextEditingController();
+  TextEditingController emailAddress = new TextEditingController(text: "smith");
+  TextEditingController userPin = new TextEditingController(text: "955641");
   GlobalKey<ScaffoldState> scaffoldKey;
   DatabaseHelper databaseHelper = DatabaseHelper();
   var errormessage = "";
@@ -80,9 +80,10 @@ class _LoginPageState extends State<LoginPage> {
         if (value != null && value["status"] == Constant.STATUS200) {
           print(value);
           user = User.fromJson(value["data"]);
-          // Preferences.setJsonSF(Constant.LOIGN_USER, user);
-          //Preferences.setBoolToSF(Constant.IS_USER_LOGIN, true);
           await CommunFun.syncAfterSuccess(context);
+          setState(() {
+            isLoading = false;
+          });
         } else {
           setState(() {
             isLoading = false;

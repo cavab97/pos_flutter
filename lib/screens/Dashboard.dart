@@ -64,34 +64,10 @@ class _DashboradPageState extends State<DashboradPage>
   getProductList(int position) async {
     List<Product> product =
         await localAPI.getProduct(tabsList[position].categoryId.toString());
-
-    if (product.length > 0) {
-      int i = 0;
-      for (final item in product) {
-        var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(
-            'SELECT base64 FROM asset WHERE asset_type = 1 AND asset_type_id =' +
-                item.productId.toString());
-
-        if (res.isNotEmpty) {
-          item.base64 = res.toString();
-        } else {
-          item.base64 = CommonUtils.t;
-        }
-
-        i = i + 1;
-        if (i == product.length) {
-          setState(() {
-            productList.clear();
-            productList = product;
-          });
-        }
-      }
-    } else {
-      setState(() {
-        productList.clear();
-        productList = product;
-      });
-    }
+    setState(() {
+      productList.clear();
+      productList = product;
+    });
   }
 
   void _handleTabSelection() {
@@ -443,12 +419,12 @@ class _DashboradPageState extends State<DashboradPage>
                   Hero(
                       tag: product.productId,
                       child: Container(
-                        decoration: new BoxDecoration(
-                          color: Colors.grey,
-                          image: DecorationImage(
-                              image: AssetImage("assets/image1.jfif"),
-                              fit: BoxFit.cover),
-                        ),
+                        // decoration: new BoxDecoration(
+                        //   color: Colors.grey,
+                        //   image: DecorationImage(
+                        //       image: AssetImage("assets/image1.jfif"),
+                        //       fit: BoxFit.cover),
+                        // ),
                         width: MediaQuery.of(context).size.width,
                         height: itemHeight / 2,
                         child:

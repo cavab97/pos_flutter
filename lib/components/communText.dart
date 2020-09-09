@@ -212,11 +212,20 @@ class CommunFun {
       print(result);
       if (result == 1) {
         Navigator.pushNamed(context, Constant.PINScreen);
+      } else {
+        print("Error when getting data4_3");
       }
       //  await Preferences.setStringToSF(Constant.LastSync_Table, "4");
     } else {
       // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
+    }
+    var aceets = await SyncAPICalls.getAssets(context);
+    if (aceets != null) {
+      databaseHelper.accetsData(aceets["data"]);
+    } else {
+      // handle Exaption
+      print("Error when getting product image data");
     }
   }
 
@@ -228,6 +237,7 @@ class CommunFun {
       databaseHelper.insertData2_1(data2_1["data"]);
     } else {
       // handle Exaption
+      print("Error when getting data2_1");
     }
     var data2_2 =
         await SyncAPICalls.getDataServerBulk2_2(context); //api call 2_2
@@ -235,6 +245,7 @@ class CommunFun {
       databaseHelper.insertData2_2(data2_2["data"]);
     } else {
       // handle Exaption
+      print("Error when getting data2_2");
     }
     var data2_3 =
         await SyncAPICalls.getDataServerBulk2_3(context); //api call 2_3
@@ -242,12 +253,14 @@ class CommunFun {
       databaseHelper.insertData2_3(data2_3["data"]);
     } else {
       // handle Exaption
+      print("Error when getting data2_3");
     }
     var data3 = await SyncAPICalls.getDataServerBulk3(context); //api call 3
     if (data3 != null) {
       databaseHelper.insertData3(data3["data"]);
     } else {
       // handle Exaption
+      print("Error when getting data3");
     }
     var data4_1 =
         await SyncAPICalls.getDataServerBulk4_1(context); //api call 4_1
@@ -255,6 +268,7 @@ class CommunFun {
       databaseHelper.insertData4_1(data4_1["data"]);
     } else {
       // handle Exaption
+      print("Error when getting data4_1");
     }
     var data4_2 =
         await SyncAPICalls.getDataServerBulk4_2(context); //api call 4_2
@@ -262,6 +276,7 @@ class CommunFun {
       databaseHelper.insertData4_2(data4_2["data"]);
     } else {
       // handle Exaption
+      print("Error when getting data4_2");
     }
   }
 
@@ -271,19 +286,16 @@ class CommunFun {
       databaseHelper.insertData3(data3["data"]);
     } else {
       // handle Exaption
+      print("Error when getting data3");
     }
-    var aceets = await SyncAPICalls.getAssets(context);
-    if (aceets != null) {
-      databaseHelper.accetsData(aceets["data"]);
-    } else {
-      // handle Exaption
-    }
+
     var data4_1 =
         await SyncAPICalls.getDataServerBulk4_1(context); //api call 4_1
     if (data4_1 != null) {
       databaseHelper.insertData3(data4_1["data"]);
     } else {
       // handle Exaption
+      print("Error when getting data4_1");
     }
     var data4_2 =
         await SyncAPICalls.getDataServerBulk4_2(context); //api call 4_2
@@ -291,6 +303,7 @@ class CommunFun {
       databaseHelper.insertData4_2(data4_2["data"]);
     } else {
       // handle Exaption
+      print("Error when getting data4_2");
     }
   }
 
@@ -302,6 +315,7 @@ class CommunFun {
       databaseHelper.insertData4_1(data4_1["data"]);
     } else {
       // handle Exaption
+      print("Error when getting data4_1");
     }
     var data4_2 =
         await SyncAPICalls.getDataServerBulk4_2(context); //api call 4_2
@@ -309,6 +323,7 @@ class CommunFun {
       databaseHelper.insertData4_2(data4_2["data"]);
     } else {
       // handle Exaption
+      print("Error when getting data4_2");
     }
   }
 
