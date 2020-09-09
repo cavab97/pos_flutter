@@ -408,8 +408,7 @@ class _DashboradPageState extends State<DashboradPage>
                         ),
                         width: MediaQuery.of(context).size.width,
                         height: itemHeight / 2,
-                        child:
-                            CommonUtils.imageFromBase64String(product.base64),
+                        child: CommonUtils.imageFromBase64String(""),
                       )),
                   Container(
                     margin: EdgeInsets.only(top: itemHeight / 2),
