@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Product.dart';
+import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
@@ -17,7 +19,10 @@ class DashboradPage extends StatefulWidget {
   _DashboradPageState createState() => _DashboradPageState();
 }
 
-class _DashboradPageState extends State<DashboradPage> {
+class _DashboradPageState extends State<DashboradPage> with SingleTickerProviderStateMixin {
+
+  TabController _tabController;
+
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
   List<Category> tabsList = new List<Category>();
@@ -28,29 +33,48 @@ class _DashboradPageState extends State<DashboradPage> {
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
+
     getCategoryList();
-    getProductList();
   }
 
   getCategoryList() async {
     List<Category> categorys = await localAPI.getAllCategory();
-    print("categorys");
     setState(() {
       tabsList = categorys;
+
+      _tabController = TabController(vsync:this, length: tabsList.length);
+      _tabController.addListener(_handleTabSelection);
+
+      getProductList(0);
     });
   }
 
-  getProductList() async {
-    List<Product> product = await localAPI.getProduct();
+  getProductList(int position) async {
+
+    List<Product> product =
+        await localAPI.getProduct(tabsList[position].categoryId.toString());
     print("product");
     setState(() {
+      productList.clear();
       productList = product;
     });
   }
 
+  void _handleTabSelection() {
+    if (_tabController.indexIsChanging) {
+     getProductList(_tabController.index);
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   openOpningAmmountPop() {
     showDialog(
-      // Opning Ammount Popup
+        // Opning Ammount Popup
         context: context,
         builder: (BuildContext context) {
           return OpeningAmmountPage();
@@ -91,6 +115,7 @@ class _DashboradPageState extends State<DashboradPage> {
   Widget build(BuildContext context) {
     // Categrory Tabs
     final _tabs = TabBar(
+        controller: _tabController,
         indicatorSize: TabBarIndicatorSize.label,
         unselectedLabelColor: Colors.white,
         labelColor: Colors.white,
@@ -102,7 +127,6 @@ class _DashboradPageState extends State<DashboradPage> {
           print(tabsList[0].name);
           return new Tab(
             child: Container(
-
                 padding: EdgeInsets.symmetric(horizontal: 15),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
@@ -118,14 +142,8 @@ class _DashboradPageState extends State<DashboradPage> {
         drawer: drawerWidget(),
         body: SafeArea(
           child: Container(
-            width: MediaQuery
-                .of(context)
-                .size
-                .width,
-            height: MediaQuery
-                .of(context)
-                .size
-                .height,
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
             child: Table(
               border: TableBorder.all(color: Colors.white, width: 0.6),
               columnWidths: {
@@ -145,10 +163,7 @@ class _DashboradPageState extends State<DashboradPage> {
                         children: <Widget>[
                           Container(
                             margin: EdgeInsets.only(left: 5, right: 5),
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width,
+                            width: MediaQuery.of(context).size.width,
                             height: 65,
                             color: Colors.black26,
                             padding: EdgeInsets.all(10),
@@ -164,23 +179,21 @@ class _DashboradPageState extends State<DashboradPage> {
                   ),
                   TableCell(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          cartITems(),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          paybutton(context)
-                        ],
-                      )),
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      cartITems(),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      paybutton(context)
+                    ],
+                  )),
                 ]),
               ],
             ),
-          )
-          ,
-        )
-    );
+          ),
+        ));
   }
 
   Widget drawerWidget() {
@@ -194,7 +207,7 @@ class _DashboradPageState extends State<DashboradPage> {
           children: <Widget>[
             RaisedButton(
               padding:
-              EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
+                  EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
               onPressed: () {
                 Navigator.pushNamed(context, Constant.TerminalScreen);
               },
@@ -217,17 +230,12 @@ class _DashboradPageState extends State<DashboradPage> {
     );
   }
 
-  Widget
-  tableHeader1
-      () {
+  Widget tableHeader1() {
     // products Header part 1
     return Container(
       height: 80,
       padding: EdgeInsets.only(left: 10, right: 10),
-      width: MediaQuery
-          .of(context)
-          .size
-          .width / 3,
+      width: MediaQuery.of(context).size.width / 3,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -254,10 +262,7 @@ class _DashboradPageState extends State<DashboradPage> {
           ),
           Container(
             height: 50,
-            width: MediaQuery
-                .of(context)
-                .size
-                .width / 3.8,
+            width: MediaQuery.of(context).size.width / 3.8,
             child: TextField(
               keyboardType: TextInputType.text,
               decoration: InputDecoration(
@@ -279,8 +284,7 @@ class _DashboradPageState extends State<DashboradPage> {
                   ),
                 ),
                 filled: true,
-                contentPadding: EdgeInsets.only(
-                    left: 20, top: 20, bottom: 20),
+                contentPadding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
                 fillColor: Colors.white,
               ),
               style: TextStyle(color: Colors.black, fontSize: 25.0),
@@ -309,8 +313,7 @@ class _DashboradPageState extends State<DashboradPage> {
               size: 40,
             ),
             RaisedButton(
-              padding: EdgeInsets.only(
-                  left: 10, right: 10, top: 5, bottom: 5),
+              padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
               onPressed: () {
                 Navigator.pushNamed(context, Constant.TransactionScreen);
               },
@@ -341,22 +344,14 @@ class _DashboradPageState extends State<DashboradPage> {
 
   Widget porductsList() {
     // products List
-    var size = MediaQuery
-        .of(context)
-        .size;
+    var size = MediaQuery.of(context).size;
 
     /*24 is for notification bar on Android*/
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2;
     final double itemWidth = size.width / 4.2;
     return Container(
-      height: MediaQuery
-          .of(context)
-          .size
-          .height,
-      width: MediaQuery
-          .of(context)
-          .size
-          .width,
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.only(top: 5),
       child: GridView.count(
         childAspectRatio: (itemWidth / itemHeight),
@@ -375,26 +370,22 @@ class _DashboradPageState extends State<DashboradPage> {
                 children: <Widget>[
                   Hero(
                       tag: product.productId,
-                      child: Container(
-                          decoration: new BoxDecoration(
-                            color: Colors.greenAccent,
-                            image: new DecorationImage(
-                              image: ExactAssetImage(product.name),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          width: MediaQuery
-                              .of(context)
-                              .size
-                              .width,
-                          height: itemHeight / 2,
-                          child: Center())),
+                      child:
+                          /* new ListTile(
+                        leading:
+                        dense: true,
+                      ) */
+                          Container(
+                        decoration: new BoxDecoration(
+                          color: Colors.grey,
+                        ),
+                        width: MediaQuery.of(context).size.width,
+                        height: itemHeight / 2,
+                        child: CommonUtils.imageFromBase64String(),
+                      )),
                   Container(
                     margin: EdgeInsets.only(top: itemHeight / 2),
-                    width: MediaQuery
-                        .of(context)
-                        .size
-                        .width,
+                    width: MediaQuery.of(context).size.width,
                     //height: itemHeight / 5,
                     decoration: BoxDecoration(
                       color: Colors.grey[600],
@@ -419,6 +410,7 @@ class _DashboradPageState extends State<DashboradPage> {
                     left: 0,
                     child: Container(
                       height: 30,
+                      width: 50,
                       padding: EdgeInsets.all(5),
                       color: Colors.deepOrange,
                       child: Center(
@@ -559,9 +551,7 @@ class _DashboradPageState extends State<DashboradPage> {
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: Theme
-                                .of(context)
-                                .accentColor),
+                            color: Theme.of(context).accentColor),
                       )),
                   Padding(
                       padding: EdgeInsets.only(top: 10, bottom: 10),
@@ -569,9 +559,7 @@ class _DashboradPageState extends State<DashboradPage> {
                         "00:00",
                         style: TextStyle(
                             fontWeight: FontWeight.w700,
-                            color: Theme
-                                .of(context)
-                                .accentColor),
+                            color: Theme.of(context).accentColor),
                       )),
                 ],
               ),
@@ -737,19 +725,13 @@ class _DashboradPageState extends State<DashboradPage> {
     //     ]);
 
     return Container(
-      //height: MediaQuery.of(context).size.height / 1.3,
-        width: MediaQuery
-            .of(context)
-            .size
-            .width,
+        //height: MediaQuery.of(context).size.height / 1.3,
+        width: MediaQuery.of(context).size.width,
         padding: EdgeInsets.all(12),
         child: Column(
           children: <Widget>[
             Container(
-                height: MediaQuery
-                    .of(context)
-                    .size
-                    .height / 1.4,
+                height: MediaQuery.of(context).size.height / 1.4,
                 color: Colors.grey[300],
                 padding: EdgeInsets.all(10),
                 child: Stack(
