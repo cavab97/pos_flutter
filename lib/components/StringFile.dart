@@ -46,4 +46,5 @@ class Strings {
   static String select_table = "Select Table";
   static String new_order = " New Order";
   static String merge_order = "Merge Order";
+  static String enterPax = "Enter Pax";
 }

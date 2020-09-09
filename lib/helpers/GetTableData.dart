@@ -72,6 +72,7 @@ class TableData {
       }
       return 1;
     } catch (e) {
+      print(e);
       return 0;
     }
   }
@@ -100,6 +101,7 @@ class TableData {
       }
       return 1;
     } catch (e) {
+      print(e);
       return 0;
     }
   }
@@ -141,7 +143,6 @@ class TableData {
           var result =
               await db.insert("product_category", productcategory.toJson());
           print(result);
-          
         }
       }
       if (productbranchData.length != 0) {
@@ -166,6 +167,7 @@ class TableData {
       }
       return 1;
     } catch (e) {
+      print(e);
       return 0;
     }
   }
@@ -193,6 +195,7 @@ class TableData {
       }
       return 1;
     } catch (e) {
+      print(e);
       return 0;
     }
   }
@@ -240,6 +243,7 @@ class TableData {
       }
       return 1;
     } catch (e) {
+      print(e);
       return 0;
     }
   }
@@ -271,6 +275,7 @@ class TableData {
       }
       return 1;
     } catch (e) {
+      print(e);
       return 0;
     }
   }

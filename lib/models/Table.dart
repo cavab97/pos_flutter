@@ -7,10 +7,11 @@ class Tables {
   String tableQr;
   int tableCapacity;
   int status;
-  Null updatedAt;
+  String updatedAt;
+  int availableStatus;
   int updatedBy;
-  Null deletedAt;
-  Null deletedBy;
+  String deletedAt;
+  int deletedBy;
 
   Tables(
       {this.tableId,
@@ -22,6 +23,7 @@ class Tables {
       this.tableCapacity,
       this.status,
       this.updatedAt,
+      this.availableStatus,
       this.updatedBy,
       this.deletedAt,
       this.deletedBy});
@@ -35,6 +37,7 @@ class Tables {
     tableQr = json['table_qr'];
     tableCapacity = json['table_capacity'];
     status = json['status'];
+    availableStatus = json["available_status"];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
     deletedAt = json['deleted_at'];
@@ -51,6 +54,7 @@ class Tables {
     data['table_qr'] = this.tableQr;
     data['table_capacity'] = this.tableCapacity;
     data['status'] = this.status;
+    data["available_status"] = this.availableStatus;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;
     data['deleted_at'] = this.deletedAt;

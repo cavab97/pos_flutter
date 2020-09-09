@@ -4,6 +4,7 @@ import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Table.dart';
+import 'package:mcncashier/models/Table_order.dart';
 
 class LocalAPI {
   /* Future<List<Category>> getCategory() async {
@@ -66,9 +67,9 @@ class LocalAPI {
     return list;
   }
 
-  Future<int> insertTable_order(dynamic table_order) async {
+  Future<int> insertTableOrder(Table_order table_order) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
-    var result = await db.insert("customer", table_order.toJson());
+    var result = await db.insert("table_order", table_order.toJson());
     return result;
   }
 }

@@ -170,7 +170,8 @@ class CommunFun {
       // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
     }
-    var data2_2 = await SyncAPICalls.getDataServerBulk2_2(context); //api call 2_2
+    var data2_2 =
+        await SyncAPICalls.getDataServerBulk2_2(context); //api call 2_2
     if (data2_2 != null) {
       var result = await databaseHelper.insertData2_2(data2_2["data"]);
       print(result);
