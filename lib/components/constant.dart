@@ -23,7 +23,7 @@ class Constant {
   static final String DashboardScreen = "/Dashboard";
   static final String TransactionScreen = "/TansactionsPage";
   static final String TerminalScreen = "/TerminalKeyPage";
-
+ static final String  SelectTableScreen  = "/TableSelection";
 
 /*==============================================================================
                                   Error messages

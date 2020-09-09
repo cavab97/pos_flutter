@@ -77,11 +77,11 @@ class _LoginPageState extends State<LoginPage> {
       user.deviceId = deviceinfo.id;
       user.terminalId = terkey != null ? terkey : '1'; //widget.terminalId;
       await repo.login(user).then((value) async {
-        if (value != null && value.id != 0) {
+        if (value != null && value["status"] == Constant.STATUS200) {
           print(value);
           await CommunFun.syncAfterSuccess(context);
         } else {
-          CommunFun.showToast(context, Strings.something_wrong);
+          CommunFun.showToast(context, value["message"]);
         }
       }).catchError((e) {
         setState(() {

@@ -154,8 +154,11 @@ class CreateTables {
     datatables = db.execute("CREATE TABLE category_branch(" +
         "cb_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
+        "status INTEGER," +
         "category_id INTEGER," +
         "branch_id INTEGER ," +
+        "updated_at TEXT," +
+        "updated_by INTEGER," +
         "display_order INTEGER)");
 
     //  Table	attributes
@@ -509,6 +512,20 @@ class CreateTables {
         "updated_by	INTEGER," +
         "deleted_at	TEXT," +
         "deleted_by	INTEGER" +
+        ")");
+
+    //Tble  Table Order
+
+    datatables = db.execute("CREATE TABLE table_order (" +
+        "id	INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "table_id	INTEGER," +
+        "is_merge_table  TEXT," +
+        "merged_table_id  TEXT," +
+        "number_of_pax  INTEGER," +
+        "table_seat  TEXT," +
+        "save_order_id  TEXT," +
+        "table_locked_by  INTEGER," +
+        "is_order_merged  REAl" +
         ")");
 
     return datatables;

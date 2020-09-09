@@ -11,6 +11,7 @@ import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
+import 'package:mcncashier/screens/SelectTable.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class DashboradPage extends StatefulWidget {
@@ -21,8 +22,8 @@ class DashboradPage extends StatefulWidget {
   _DashboradPageState createState() => _DashboradPageState();
 }
 
-class _DashboradPageState extends State<DashboradPage> with SingleTickerProviderStateMixin {
-
+class _DashboradPageState extends State<DashboradPage>
+    with SingleTickerProviderStateMixin {
   TabController _tabController;
 
   GlobalKey<ScaffoldState> scaffoldKey;
@@ -44,7 +45,7 @@ class _DashboradPageState extends State<DashboradPage> with SingleTickerProvider
     setState(() {
       tabsList = categorys;
 
-      _tabController = TabController(vsync:this, length: tabsList.length);
+      _tabController = TabController(vsync: this, length: tabsList.length);
       _tabController.addListener(_handleTabSelection);
 
       getProductList(0);
@@ -52,7 +53,6 @@ class _DashboradPageState extends State<DashboradPage> with SingleTickerProvider
   }
 
   getProductList(int position) async {
-
     List<Product> product =
         await localAPI.getProduct(tabsList[position].categoryId.toString());
     print("product");
@@ -64,7 +64,7 @@ class _DashboradPageState extends State<DashboradPage> with SingleTickerProvider
 
   void _handleTabSelection() {
     if (_tabController.indexIsChanging) {
-     getProductList(_tabController.index);
+      getProductList(_tabController.index);
     }
   }
 
@@ -120,6 +120,10 @@ class _DashboradPageState extends State<DashboradPage> with SingleTickerProvider
         builder: (BuildContext context) {
           return SearchCustomerPage();
         });
+  }
+
+  selectTable() {
+    Navigator.pushNamed(context, Constant.SelectTableScreen);
   }
 
   @override
@@ -327,7 +331,7 @@ class _DashboradPageState extends State<DashboradPage> with SingleTickerProvider
             RaisedButton(
               padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
               onPressed: () {
-                Navigator.pushNamed(context, Constant.TransactionScreen);
+                opneShowAddCustomerDailog(); //  Navigator.pushNamed(context, Constant.TransactionScreen);
               },
               child: Row(
                 children: <Widget>[
@@ -371,7 +375,8 @@ class _DashboradPageState extends State<DashboradPage> with SingleTickerProvider
         children: productList.map((product) {
           return InkWell(
             onTap: () {
-              showQuantityDailog();
+              selectTable();
+              //showQuantityDailog();
             },
             child: Container(
               height: itemHeight,

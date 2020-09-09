@@ -6,7 +6,7 @@ import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:http/http.dart' as http;
 import 'package:mcncashier/models/User.dart';
 
-Future<User> login(User user) async {
+Future<dynamic> login(dynamic user) async {
   print(user);
   try {
     Uri url = Uri.parse(Configrations.base_URL + Configrations.login);
@@ -30,13 +30,8 @@ Future<User> login(User user) async {
     );
     print(response);
     var data = json.decode(response.body);
-    if (data["status"] == Constant.STATUS200) {
-      return User.fromJson(data["data"]);
-    } else {
-      return User.fromJson({});
-    }
+    return data;
   } catch (e) {
     print(e);
-    return User.fromJson({});
   }
 }

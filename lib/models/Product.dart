@@ -15,8 +15,8 @@ class Product {
   int updatedBy;
   String deletedBy;
 
-  Product(
-    {this.productId,
+  Product({
+    this.productId,
     this.uuid,
     this.name,
     this.description,
@@ -68,7 +68,6 @@ class Product {
     data['deleted_at'] = this.deletedAt;
     data['updated_by'] = this.updatedBy;
     data['deleted_by'] = this.deletedBy;
-
     return data;
   }
 }

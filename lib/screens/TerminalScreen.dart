@@ -56,7 +56,6 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
         if (value != null && value.status == Constant.STATUS200) {
           Preferences.setStringToSF(
               Constant.TERMINAL_KEY, value.terminalId.toString());
-
           Navigator.pushNamed(context, Constant.LoginScreen,
               arguments: {"terminalId": value.terminalId});
         } else if (value != null && value.status == Constant.STATUS422) {
