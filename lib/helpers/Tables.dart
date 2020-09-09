@@ -531,19 +531,6 @@ class CreateTables {
         "is_order_merged  REAl" +
         ")");
 
-    datatables = db.execute("CREATE TABLE  mst_cart (" +
-        "id	INTEGER PRIMARY KEY AUTOINCREMENT," +
-        "table_id	INTEGER," +
-        "is_merge_table  TEXT," +
-        "merged_table_id  TEXT," +
-        "number_of_pax  INTEGER," +
-        "table_seat  TEXT," +
-        "save_order_id  TEXT," +
-        "merged_pax TEXT," +
-        "table_locked_by  INTEGER," +
-        "is_order_merged  REAl" +
-        ")");
-
     datatables = db.execute("CREATE TABLE mst_cart(" +
         'id INTEGER PRIMARY KEY AUTOINCREMENT,' +
         'localID TEXT,' +

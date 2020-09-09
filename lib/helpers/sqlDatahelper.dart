@@ -1,6 +1,5 @@
 import 'package:mcncashier/helpers/GetTableData.dart';
 import 'package:mcncashier/helpers/Tables.dart';
-import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'dart:io';
@@ -111,6 +110,7 @@ class DatabaseHelper {
     var result = await tableDataHelper.insertDatatable4_2(db, tablesData);
     return result;
   }
+
   Future<dynamic> accetsData(tablesData) async {
     Database db = await this.database;
     var result = await tableDataHelper.insertProductImage(db, tablesData);

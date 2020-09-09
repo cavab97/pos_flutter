@@ -80,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
         if (value != null && value["status"] == Constant.STATUS200) {
           print(value);
           user = User.fromJson(value["data"]);
-          Preferences.setJsonSF(Constant.LOIGN_USER, user);
+          // Preferences.setJsonSF(Constant.LOIGN_USER, user);
           Preferences.setBoolToSF(Constant.IS_USER_LOGIN, true);
           await CommunFun.syncAfterSuccess(context);
         } else {

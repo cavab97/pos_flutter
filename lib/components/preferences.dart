@@ -25,10 +25,7 @@ class Preferences {
     pref.setString(key, value);
   }
 
-  static setJsonSF(String key, dynamic value) async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setStringList(key, value);
-  }
+ 
 
 /*set Bool  shared pref*/
   static setBoolToSF(String key, bool value) async {
