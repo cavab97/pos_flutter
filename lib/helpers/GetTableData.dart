@@ -22,16 +22,8 @@ class TableData {
   // }
 
   Future<int> ifExists(Database db, dynamic data) async {
-    String checkQuery = "SELECT " +
-        " FROM " +
-        data.tablename +
-        " WHERE " +
-        data.key +
-        " = '" +
-        data.value +
-        "'";
     int count = Sqflite.firstIntValue(await db.rawQuery(
-        "SELECT COUNT(*) FROM $data.table WHERE $data.key =$data.value"));
+        "SELECT COUNT(*) FROM $data['table'] WHERE $data['key'] =$data['value']"));
     return count;
   }
 
@@ -46,8 +38,19 @@ class TableData {
         for (var i = 0; i < branchData.length; i++) {
           var branchDataitem = branchData[i];
           Branch branch = Branch.fromJson(branchDataitem);
-          var result = await db.insert("branch", branch.toJson());
-          print(result);
+          var data = {
+            'table': "branch",
+            'key': "branch_id",
+            'value': branch.branchId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("branch", branch.toJson());
+            print(result);
+          } else {
+            var result = await db.update("branch", branch.toJson());
+            print(result);
+          }
         }
       }
       if (userData.length != 0) {
