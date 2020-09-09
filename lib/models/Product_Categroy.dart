@@ -2,7 +2,7 @@ class ProductCategory {
   int pcId;
   int productId;
   int categoryId;
-  int branchId;
+  String branchId;
   int displayOrder;
   int status;
   String updatedAt;

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Product.dart';
+import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
@@ -19,7 +21,10 @@ class DashboradPage extends StatefulWidget {
   _DashboradPageState createState() => _DashboradPageState();
 }
 
-class _DashboradPageState extends State<DashboradPage> {
+class _DashboradPageState extends State<DashboradPage> with SingleTickerProviderStateMixin {
+
+  TabController _tabController;
+
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
   List<Category> tabsList = new List<Category>();
@@ -30,24 +35,43 @@ class _DashboradPageState extends State<DashboradPage> {
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
+
     getCategoryList();
-    getProductList();
   }
 
   getCategoryList() async {
     List<Category> categorys = await localAPI.getAllCategory();
-    print("categorys");
     setState(() {
       tabsList = categorys;
+
+      _tabController = TabController(vsync:this, length: tabsList.length);
+      _tabController.addListener(_handleTabSelection);
+
+      getProductList(0);
     });
   }
 
-  getProductList() async {
-    List<Product> product = await localAPI.getProduct();
+  getProductList(int position) async {
+
+    List<Product> product =
+        await localAPI.getProduct(tabsList[position].categoryId.toString());
     print("product");
     setState(() {
+      productList.clear();
       productList = product;
     });
+  }
+
+  void _handleTabSelection() {
+    if (_tabController.indexIsChanging) {
+     getProductList(_tabController.index);
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   openOpningAmmountPop() {
@@ -102,6 +126,7 @@ class _DashboradPageState extends State<DashboradPage> {
   Widget build(BuildContext context) {
     // Categrory Tabs
     final _tabs = TabBar(
+        controller: _tabController,
         indicatorSize: TabBarIndicatorSize.label,
         unselectedLabelColor: Colors.white,
         labelColor: Colors.white,
@@ -302,8 +327,7 @@ class _DashboradPageState extends State<DashboradPage> {
             RaisedButton(
               padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
               onPressed: () {
-                //Navigator.pushNamed(context, Constant.TransactionScreen);
-                opneShowAddCustomerDailog();
+                Navigator.pushNamed(context, Constant.TransactionScreen);
               },
               child: Row(
                 children: <Widget>[
@@ -396,6 +420,7 @@ class _DashboradPageState extends State<DashboradPage> {
                     left: 0,
                     child: Container(
                       height: 30,
+                      width: 50,
                       padding: EdgeInsets.all(5),
                       color: Colors.deepOrange,
                       child: Center(
