@@ -42,7 +42,7 @@ class LocalAPI {
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(
         'SELECT * FROM `product` LEFT join product_category on product_category.product_id = product.product_id where product_category.category_id = ' +
             id);
-    // var res = await DatabaseHelper.dbHelper.getDatabse().query("product");
+    //var res = await DatabaseHelper.dbHelper.getDatabse().query("product");
     List<Product> list =
         res.isNotEmpty ? res.map((c) => Product.fromJson(c)).toList() : [];
 
@@ -52,32 +52,39 @@ class LocalAPI {
               element.productId.toString());
       print(res.length);
 
-      if (res.isNotEmpty) {
-        print("IFFFFFFFFFFFFFFFFFFF");
-        element.base64 = t;
-      }else{
-        print("=======================");
-        print(element.productId.toString());
-        print("Elsssssssssssssssssssss");
-      }
+      //  if (res.isNotEmpty) {
+      print("IFFFFFFFFFFFFFFFFFFF");
+      element.base64 = t;
+      //}else{
+      print("=======================");
+      print(element.productId.toString());
+      print("Elsssssssssssssssssssss");
+      //}
     });*/
     return list;
   }
 
-  Future<List<ProductCategory>> catp() async {
-    var cat =
-        await DatabaseHelper.dbHelper.getDatabse().query("product_category");
-    List<ProductCategory> catlist = cat.isNotEmpty
-        ? cat.map((c) => ProductCategory.fromJson(c)).toList()
+  Future<List<Assets>> catp() async {
+    var cat = await DatabaseHelper.dbHelper.getDatabse().query("asset");
+    List<Assets> catlist = cat.isNotEmpty
+        ? cat.map((c) => Assets.fromJson(c)).toList()
         : [];
     return catlist;
   }
 
-  Future<String> getProductImage(String id) async {
+  getProductImage(String id) async {
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(
         'SELECT base64 FROM asset WHERE asset_type = 1 AND asset_type_id =' +
             id);
-    return res.toString();
+
+    if (res.isNotEmpty) {
+      print("IFFFFFFFFFFFFFFFFFFF");
+      return res.toString();
+    } else {
+      print("=======================");
+      print("Elsssssssssssssssssssss");
+      return "";
+    }
   }
 
   Future<List<Customer>> getCustomers() async {

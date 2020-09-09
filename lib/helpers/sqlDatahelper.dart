@@ -112,6 +112,7 @@ class DatabaseHelper {
   }
 
   Future<dynamic> accetsData(tablesData) async {
+    print("Exception.........................tablesData");
     Database db = await this.database;
     var result = await tableDataHelper.insertProductImage(db, tablesData);
     return result;

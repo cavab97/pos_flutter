@@ -4,6 +4,8 @@ import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/models/Asset.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/Product_Categroy.dart';
@@ -63,19 +65,33 @@ class _DashboradPageState extends State<DashboradPage>
     List<Product> product =
         await localAPI.getProduct(tabsList[position].categoryId.toString());
 
-    print(product.length);
+    if (product.length > 0) {
+      int i = 0;
+      for (final item in product) {
+        var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(
+            'SELECT base64 FROM asset WHERE asset_type = 1 AND asset_type_id =' +
+                item.productId.toString());
 
-    setState(() {
-      productList.clear();
-      productList = product;
+        if (res.isNotEmpty) {
+          item.base64 = res.toString();
+        } else {
+          item.base64 = CommonUtils.t;
+        }
 
-      //if (productList.length > 0) {
-      /* productList.forEach((element) {
-          print("product");
-          print(localAPI.getProductImage(element.productId.toString()));
-        });*/
-      //}
-    });
+        i = i + 1;
+        if (i == product.length) {
+          setState(() {
+            productList.clear();
+            productList = product;
+          });
+        }
+      }
+    } else {
+      setState(() {
+        productList.clear();
+        productList = product;
+      });
+    }
   }
 
   void _handleTabSelection() {
@@ -435,7 +451,8 @@ class _DashboradPageState extends State<DashboradPage>
                         ),
                         width: MediaQuery.of(context).size.width,
                         height: itemHeight / 2,
-                        child: Center(),
+                        child:
+                            CommonUtils.imageFromBase64String(product.base64),
                       )),
                   Container(
                     margin: EdgeInsets.only(top: itemHeight / 2),
