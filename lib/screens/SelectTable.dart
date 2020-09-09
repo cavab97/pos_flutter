@@ -32,11 +32,22 @@ class _SelectTablePageState extends State<SelectTablePage> {
     });
   }
 
-  static selectTableForNewOrder() {
-    // NEw ORder
+  selectTableForNewOrder() {
+    var table = selectedTable;
+    var data = {
+//  table_id
+//  is_merge_table
+//  merged_table_id
+//  number_of_pax
+//  table_seat
+//  save_order_id
+// merged_pax
+// table_locked_by
+// is_order_merged
+    };
   }
 
-  static Widget neworder_button(context) {
+  Widget neworder_button(context) {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).pop();
@@ -50,38 +61,40 @@ class _SelectTablePageState extends State<SelectTablePage> {
     );
   }
 
-  AlertDialog selectAlert = AlertDialog(
-    shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(10.0))),
-    content: Builder(
-      builder: (context) {
-        return Container(
-            height: 100,
-            width: 150,
-            child: Center(
-              child: ListView(
-                shrinkWrap: true,
-                children: <Widget>[
-                  neworder_button(context),
-                  SizedBox(
-                    height: 10,
+  Widget alertDailog(context) {
+    return AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10.0))),
+        content: Builder(
+          builder: (context) {
+            return Container(
+                height: 100,
+                width: 150,
+                child: Center(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: <Widget>[
+                      neworder_button(context),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      CommunFun.divider(),
+                      Text(Strings.merge_order,
+                          textAlign: TextAlign.center,
+                          style:
+                              TextStyle(fontSize: 30, color: Colors.blueAccent))
+                    ],
                   ),
-                  CommunFun.divider(),
-                  Text(Strings.merge_order,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 30, color: Colors.blueAccent))
-                ],
-              ),
-            ));
-      },
-    ),
-  );
+                ));
+          },
+        ));
+  }
 
   openSelectTablePop() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return selectAlert;
+        return alertDailog(context);
       },
     );
   }

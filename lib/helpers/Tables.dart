@@ -260,6 +260,7 @@ class CreateTables {
         "uuid TEXT," +
         "product_id INTEGER," +
         "branch_id INTEGER," +
+        "warningStockLevel INTEGER," +
         "display_order INTEGER," +
         "status INTEGER," +
         "updated_at TEXT," +

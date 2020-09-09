@@ -4,6 +4,7 @@ class Constant {
 
   static final String NO_PREF_FOUND = "pref_not_found";
   static final String TERMINAL_KEY = "TerminalKey";
+  static final String LOIGN_USER = "Login_user";
   static final String LAGUAGE_CODE = 'languageCode';
   static final String LastSync_Table = "LastSync_Table";
 

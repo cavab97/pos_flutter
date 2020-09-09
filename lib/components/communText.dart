@@ -131,7 +131,7 @@ class CommunFun {
 
   static showToast(context, message) {
     Toast.show(message, context,
-        duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
+        duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
   }
 
   static syncAfterSuccess(context) async {

@@ -4,7 +4,6 @@ class ProductStoreInventory {
   int productId;
   int branchId;
   String qty;
-  int warningStockLevel;
   int status;
   String updatedAt;
   int updatedBy;
@@ -15,7 +14,6 @@ class ProductStoreInventory {
       this.productId,
       this.branchId,
       this.qty,
-      this.warningStockLevel,
       this.status,
       this.updatedAt,
       this.updatedBy});
@@ -26,7 +24,6 @@ class ProductStoreInventory {
     productId = json['product_id'];
     branchId = json['branch_id'];
     qty = json['qty'];
-    warningStockLevel = json['warningStockLevel'];
     status = json['status'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
@@ -39,7 +36,7 @@ class ProductStoreInventory {
     data['product_id'] = this.productId;
     data['branch_id'] = this.branchId;
     data['qty'] = this.qty;
-    data['warningStockLevel'] = this.warningStockLevel;
+
     data['status'] = this.status;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;

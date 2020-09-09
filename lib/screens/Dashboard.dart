@@ -35,7 +35,8 @@ class _DashboradPageState extends State<DashboradPage>
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
-
+    var loginUser = Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    print(loginUser);
     getCategoryList();
   }
 
@@ -65,7 +66,7 @@ class _DashboradPageState extends State<DashboradPage>
       productList = product;
 
       //if (productList.length > 0) {
-       /* productList.forEach((element) {
+      /* productList.forEach((element) {
           print("product");
           print(localAPI.getProductImage(element.productId.toString()));
         });*/

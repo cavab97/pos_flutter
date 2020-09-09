@@ -4,6 +4,7 @@ class ProductBranch {
   int productId;
   int branchId;
   int displayOrder;
+  int warningStockLevel;
   int status;
   String updatedAt;
   int updatedBy;
@@ -14,6 +15,7 @@ class ProductBranch {
       this.productId,
       this.branchId,
       this.displayOrder,
+      this.warningStockLevel,
       this.status,
       this.updatedAt,
       this.updatedBy});
@@ -24,6 +26,8 @@ class ProductBranch {
     productId = json['product_id'];
     branchId = json['branch_id'];
     displayOrder = json['display_order'];
+    warningStockLevel =
+        json["warningStockLevel"] != null ? json["warningStockLevel"] : 0;
     status = json['status'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
@@ -35,6 +39,7 @@ class ProductBranch {
     data['uuid'] = this.uuid;
     data['product_id'] = this.productId;
     data['branch_id'] = this.branchId;
+    data['warningStockLevel'] = this.warningStockLevel;
     data['display_order'] = this.displayOrder;
     data['status'] = this.status;
     data['updated_at'] = this.updatedAt;

@@ -18,6 +18,8 @@ class MyApp extends StatelessWidget {
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     var terkey = Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
     print(terkey);
+    var loginUser = Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    print(loginUser);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'cashierApp',

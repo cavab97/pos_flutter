@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Preferences {
@@ -21,6 +23,11 @@ class Preferences {
   static setStringToSF(String key, String value) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     pref.setString(key, value);
+  }
+
+  static setJsonSF(String key, dynamic value) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setStringList(key, value);
   }
 
 /*set Bool  shared pref*/

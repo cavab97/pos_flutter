@@ -33,5 +33,7 @@ Future<dynamic> login(dynamic user) async {
     return data;
   } catch (e) {
     print(e);
+    var res = {"status": -1, "message": e.message.toString()};
+    return res;
   }
 }

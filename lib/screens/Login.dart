@@ -79,8 +79,13 @@ class _LoginPageState extends State<LoginPage> {
       await repo.login(user).then((value) async {
         if (value != null && value["status"] == Constant.STATUS200) {
           print(value);
+          user = User.fromJson(value["data"]);
+         // Preferences.setJsonSF(Constant.LOIGN_USER, user);
           await CommunFun.syncAfterSuccess(context);
         } else {
+          setState(() {
+            isLoading = false;
+          });
           CommunFun.showToast(context, value["message"]);
         }
       }).catchError((e) {
