@@ -49,7 +49,7 @@ class Preferences {
 
   static Future<bool> getBoolValuesSF(String key) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    return pref.getBool(key);
+    return pref.getBool(key) ?? null;
 
     /*final user = await checkIsAvailable(key);
 
