@@ -54,13 +54,6 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getProductList(int position) async {
-    print("Producccccccccccc");
-    print(tabsList[position].categoryId.toString());
-
-    List<ProductCategory> c = await localAPI.catp();
-
-    print(c.length);
-
     List<Product> product =
         await localAPI.getProduct(tabsList[position].categoryId.toString());
 
