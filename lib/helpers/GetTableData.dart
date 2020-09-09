@@ -141,6 +141,7 @@ class TableData {
           var result =
               await db.insert("product_category", productcategory.toJson());
           print(result);
+          
         }
       }
       if (productbranchData.length != 0) {

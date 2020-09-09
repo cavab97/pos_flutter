@@ -223,7 +223,7 @@ class CreateTables {
         "pc_id INTEGER PRIMARY KEY," +
         "product_id INTEGER," +
         "category_id INTEGER," +
-        "branch_id TEXT," +
+        "branch_id INTEGER," +
         "display_order INTEGER," +
         "status INTEGER," +
         "updated_at TEXT," +
