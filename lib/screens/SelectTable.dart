@@ -35,15 +35,15 @@ class _SelectTablePageState extends State<SelectTablePage> {
   selectTableForNewOrder() {
     var table = selectedTable;
     var data = {
-//  table_id
-//  is_merge_table
-//  merged_table_id
-//  number_of_pax
-//  table_seat
-//  save_order_id
-// merged_pax
-// table_locked_by
-// is_order_merged
+      'table_id': table.table_id,
+      'is_merge_table': "",
+      'merged_table_id': '',
+      'number_of_pax': '',
+      'table_seat': '',
+      'save_order_id': '',
+      'merged_pax': '',
+      'table_locked_by': '',
+      'is_order_merged': '',
     };
   }
 
