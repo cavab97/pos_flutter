@@ -363,6 +363,7 @@ class CreateTables {
         "table_qr	TEXT," +
         "table_capacity	INTEGER," +
         "status	INTEGER," +
+        "available_status INTEGER," +
         "updated_at	TEXT," +
         "updated_by	INTEGER," +
         "deleted_at	TEXT," +
@@ -485,7 +486,7 @@ class CreateTables {
     //Table customer
 
     datatables = db.execute("CREATE TABLE customer (" +
-        "customer_id	INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "customer_id	INTEGER," +
         "uuid	char TEXT," +
         "app_id	INTEGER," +
         "terminal_id	INTEGER," +
@@ -525,6 +526,7 @@ class CreateTables {
         "number_of_pax  INTEGER," +
         "table_seat  TEXT," +
         "save_order_id  TEXT," +
+        "merged_pax TEXT," +
         "table_locked_by  INTEGER," +
         "is_order_merged  REAl" +
         ")");
