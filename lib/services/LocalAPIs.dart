@@ -86,4 +86,9 @@ class LocalAPI {
         res.isNotEmpty ? res.map((c) => Tables.fromJson(c)).toList() : [];
     return list;
   }
+  Future<int> insertTable_order(dynamic table_order) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var result = await db.insert("customer", table_order.toJson());
+    return result;
+  }
 }
