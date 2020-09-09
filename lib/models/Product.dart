@@ -14,6 +14,7 @@ class Product {
   String deletedAt;
   int updatedBy;
   String deletedBy;
+  String base64;
 
   Product({
     this.productId,
@@ -31,6 +32,7 @@ class Product {
     this.deletedAt,
     this.updatedBy,
     this.deletedBy,
+    this.base64,
   });
 
   Product.fromJson(Map<String, dynamic> json) {
