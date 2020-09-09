@@ -6,6 +6,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Product.dart';
+import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
@@ -55,6 +56,10 @@ class _DashboradPageState extends State<DashboradPage>
   getProductList(int position) async {
     print("Producccccccccccc");
     print(tabsList[position].categoryId.toString());
+
+    List<ProductCategory> c = await localAPI.catp();
+
+    print(c.length);
 
     List<Product> product =
         await localAPI.getProduct(tabsList[position].categoryId.toString());
