@@ -3,12 +3,12 @@ class Configrations {
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String synch_table = "synch-table";
-  static String appdata1 = "appdata1";
-  static String appdata2_1 = "appdata2_1";
-  static String appdata2_2 = "appdata2_2";
-  static String appdata2_3 = "appdata2_3";
-  static String appdata3 = "appdata3";
-  static String appdata4_1 = "appdata4_1";
-  static String appdata4_2 = "appdata4_2";
-   static String product_image = "productimage";
+  static String appdata1 = "branch-user-role-datatable";
+  static String appdata2_1 = "product-category-datatable";
+  static String appdata2_2 = "product-variant-datatable";
+  static String appdata2_3 = "printer-price-type-datatable";
+  static String appdata3 = "customer-terminal-payment-datatable";
+  static String appdata4_1 = "order-datatable";
+  static String appdata4_2 = "shift-datatable";
+  static String product_image = "productimage";
 }

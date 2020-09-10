@@ -6,7 +6,7 @@ import 'package:mcncashier/services/CommunAPICall.dart';
 class SyncAPICalls {
   static getDataServerBulk1(context) async {
     var apiurl = Configrations.appdata1;
-    var branchid = Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
     var stringParams = {'datetime': '', 'branchId': branchid};
     return await APICalls.apiCall(apiurl, context, stringParams);
   }

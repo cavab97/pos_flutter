@@ -242,6 +242,7 @@ class CreateTables {
         "uuid TEXT," +
         "product_id INTEGER," +
         "attribute_id INTEGER," +
+        "ca_id INTEGER," +
         "price INTEGER," +
         "status INTEGER," +
         "updated_at TEXT," +

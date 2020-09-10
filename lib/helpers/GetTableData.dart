@@ -12,6 +12,7 @@ import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Product_Modifire.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/Product_branch.dart';
+import 'package:mcncashier/models/Category_Attributes.dart';
 import 'package:mcncashier/models/Role.dart';
 import 'package:mcncashier/models/Modifier.dart';
 import 'package:mcncashier/models/Terminal.dart';
@@ -83,6 +84,7 @@ class TableData {
     var attributeData = tablesData["attributes"];
     var productData = tablesData["product"];
     var categorybranchData = tablesData["category_branch"];
+    var catAttributeData = tablesData["category_attribute"];
     var modifierData = tablesData["modifier"];
 
     try {
@@ -104,14 +106,15 @@ class TableData {
           print(result);
         }
       }
-      if (modifierData.length != 0) {
-        for (var i = 0; i < modifierData.length; i++) {
-          var modifierDataitem = modifierData[i];
-          Modifier modifier = Modifier.fromJson(modifierDataitem);
-          var result = await db.insert("modifier", modifier.toJson());
+      if (productData.length != 0) {
+        for (var i = 0; i < productData.length; i++) {
+          var productDataitem = productData[i];
+          Product product = Product.fromJson(productDataitem);
+          var result = await db.insert("product", product.toJson());
           print(result);
         }
       }
+
       if (attributeData.length != 0) {
         for (var i = 0; i < attributeData.length; i++) {
           var attributeDataitem = attributeData[i];
@@ -120,11 +123,21 @@ class TableData {
           print(result);
         }
       }
-      if (productData.length != 0) {
-        for (var i = 0; i < productData.length; i++) {
-          var productDataitem = productData[i];
-          Product product = Product.fromJson(productDataitem);
-          var result = await db.insert("product", product.toJson());
+      if (catAttributeData.length != 0) {
+        for (var i = 0; i < catAttributeData.length; i++) {
+          var categoryattributeDataitem = catAttributeData[i];
+          CategoryAttribute catattribute =
+              CategoryAttribute.fromJson(categoryattributeDataitem);
+          var result =
+              await db.insert("category_attribute", catattribute.toJson());
+          print(result);
+        }
+      }
+      if (modifierData.length != 0) {
+        for (var i = 0; i < modifierData.length; i++) {
+          var modifierDataitem = modifierData[i];
+          Modifier modifier = Modifier.fromJson(modifierDataitem);
+          var result = await db.insert("modifier", modifier.toJson());
           print(result);
         }
       }

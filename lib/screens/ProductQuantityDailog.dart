@@ -33,9 +33,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   getAttributes() async {
-    // List<ProductAttribute> productAttr =
-    //     await localAPI.getPorductAttributes(productItem);
-    // print(productAttr);
+    List<ProductAttribute> productAttr =
+        await localAPI.getPorductAttributes(productItem);
+    print(productAttr);
   }
 
   getModifire() {}

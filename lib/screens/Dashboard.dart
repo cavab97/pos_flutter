@@ -55,16 +55,15 @@ class _DashboradPageState extends State<DashboradPage>
         isTableSelected = true;
         selectedTable = table;
       });
-
       print(selectedTable);
     }
   }
 
   checkshift() async {
-    // var isOpen = await Preferences.getBoolValuesSF(Constant.IS_SHIFT_OPEN);
-    // setState(() {
-    //   isShiftOpen = isOpen != null ? isOpen : false;
-    // });
+    var isOpen = await Preferences.getBoolValuesSF(Constant.IS_SHIFT_OPEN);
+    setState(() {
+      isShiftOpen = isOpen != null ? isOpen : false;
+    });
   }
 
   getCategoryList() async {

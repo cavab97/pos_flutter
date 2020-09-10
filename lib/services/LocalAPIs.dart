@@ -4,6 +4,7 @@ import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Asset.dart';
 import 'package:mcncashier/models/Attributes.dart';
 import 'package:mcncashier/models/Category.dart';
+import 'package:mcncashier/models/Category_Attributes.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/Product_Attribute.dart';
@@ -119,31 +120,38 @@ class LocalAPI {
     return result;
   }
 
-  Future<List<ProductAttribute>> getPorductAttributes(Product product) async {
-    var query =
-        "SELECT * FROM `product_attribute` LEFT join category_attribute on category_attribute.ca_id = product_attribute.ca_id where product_attribute.product_id = " +
-            product.productId.toString() +
-            " AND product_attribute.status = 1 GROUP BY product_attribute.ca_id";
-    print(query);
-    var res = await DatabaseHelper.dbHelper.getDatabse().query(query);
-    print(res);
-    List<ProductAttribute> list = res.isNotEmpty
-        ? res.map((c) => ProductAttribute.fromJson(c)).toList()
+  Future<List> getPorductAttributes(Product product) async {
+    var querry1 = "SELECT CA.ca_id,CA.name FROM product_attribute PA " +
+        "LEFT join category_attribute CA on CA.ca_id = PA.ca_id " +
+        "WHERE PA.product_id = " +
+        product.productId.toString() +
+        " AND PA.status = 1 " +
+        "GROUP BY PA.ca_id ";
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(querry1);
+    List<CategoryAttribute> att_list = res.isNotEmpty
+        ? res.map((c) => CategoryAttribute.fromJson(c)).toList()
         : [];
-    for (var i = 0; i < list.length; i++) {
-      ProductAttribute attr = list[i];
-      var qry1 =
-          'SELECT * FROM `product_attribute` LEFT join attributes on attributes.attribute_id = product_attribute.attribute_id where product_attribute.product_id = ' +
-              attr.productId.toString() +
-              ' AND product_attribute.ca_id = 2 AND product_attribute.status = 1';
-      print(qry1);
-      var response = await DatabaseHelper.dbHelper.getDatabse().query(qry1);
-      List<Attributes> attr_list = res.isNotEmpty
-          ? response.map((c) => Attributes.fromJson(c)).toList()
-          : [];
-      print(attr_list);
+    print(att_list);
+
+    if (att_list.length > 0) {
+      for (var i = 0; i < att_list.length; i++) {
+        var attr = att_list[i];
+        var qry1 =
+            "SELECT attributes.name,attributes.attribute_id FROM `product_attribute`" +
+                " LEFT join attributes on attributes.ca_id = product_attribute.ca_id" +
+                " where product_attribute.product_id = " +
+                product.productId.toString() +
+                " AND product_attribute.ca_id = " +
+                attr.caId.toString() +
+                " AND product_attribute.status = 1";
+
+        var res1 = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry1);
+        List<Attributes> attributes = res1.isNotEmpty
+            ? res1.map((c) => Attributes.fromJson(c)).toList()
+            : [];
+      }
     }
 
-    return list;
+    return [];
   }
 }
