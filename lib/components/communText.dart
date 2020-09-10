@@ -130,12 +130,53 @@ class CommunFun {
   }
 
   static showToast(context, message) {
-    Toast.show(message, context,
-        duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+    Toast.show(
+      message,
+      context,
+      duration: Toast.LENGTH_LONG,
+      gravity: Toast.BOTTOM,
+    );
+  }
+
+  static syncDailog(context) {
+    return AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(30.0))),
+        content: Builder(
+          builder: (context) {
+            return Container(
+              height: 150,
+              width: 150,
+              child: Center(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  CommunFun.loader(context),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Text(Strings.syncText, style: TextStyle(fontSize: 30))
+                ],
+              )),
+            );
+          },
+        ));
+  }
+
+  static opneSyncPop(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return syncDailog(context);
+      },
+    );
   }
 
   static syncAfterSuccess(context) async {
     // sync in 4 part api call
+    opneSyncPop(context);
     var lastSync = await Preferences.getStringValuesSF(Constant.LastSync_Table);
     if (lastSync == null) {
       CommunFun.getDataTables1(context);
@@ -146,6 +187,7 @@ class CommunFun {
     } else if (lastSync == "3") {
       CommunFun.getDataTables4(context);
     } else {
+      Navigator.of(context).pop();
       Navigator.pushNamed(context, Constant.PINScreen);
     }
   }
@@ -156,7 +198,9 @@ class CommunFun {
     if (data1 != null) {
       var result = await databaseHelper.insertData1(data1["data"]);
       print(result);
-      // await Preferences.setStringToSF(Constant.LastSync_Table, "1");
+      await Preferences.setStringToSF(
+          Constant.SERVER_DATE_TIME, data1["data"]["serverdatetime"]);
+      await Preferences.setStringToSF(Constant.LastSync_Table, "1");
     } else {
       // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
@@ -166,6 +210,8 @@ class CommunFun {
     if (data2_1 != null) {
       var result = await databaseHelper.insertData2_1(data2_1["data"]);
       print(result);
+      await Preferences.setStringToSF(
+          Constant.SERVER_DATE_TIME, data2_1["data"]["serverdatetime"]);
     } else {
       // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
@@ -175,6 +221,8 @@ class CommunFun {
     if (data2_2 != null) {
       var result = await databaseHelper.insertData2_2(data2_2["data"]);
       print(result);
+      await Preferences.setStringToSF(
+          Constant.SERVER_DATE_TIME, data2_2["data"]["serverdatetime"]);
     } else {
       // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
@@ -184,7 +232,9 @@ class CommunFun {
     if (data2_3 != null) {
       var result = await databaseHelper.insertData2_3(data2_3["data"]);
       print(result);
-      //  await Preferences.setStringToSF(Constant.LastSync_Table, "2");
+      await Preferences.setStringToSF(
+          Constant.SERVER_DATE_TIME, data2_3["data"]["serverdatetime"]);
+      await Preferences.setStringToSF(Constant.LastSync_Table, "2");
     } else {
       // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
@@ -193,7 +243,9 @@ class CommunFun {
     if (data3 != null) {
       var result = await databaseHelper.insertData3(data3["data"]);
       print(result);
-      // await Preferences.setStringToSF(Constant.LastSync_Table, "3");
+      await Preferences.setStringToSF(
+          Constant.SERVER_DATE_TIME, data3["data"]["serverdatetime"]);
+      await Preferences.setStringToSF(Constant.LastSync_Table, "3");
     } else {
       // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
@@ -202,6 +254,8 @@ class CommunFun {
     if (data4_1 != null) {
       var result = await databaseHelper.insertData4_1(data4_1["data"]);
       print(result);
+      await Preferences.setStringToSF(
+          Constant.SERVER_DATE_TIME, data4_1["data"]["serverdatetime"]);
     } else {
       // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
@@ -211,11 +265,14 @@ class CommunFun {
       var result = await databaseHelper.insertData4_2(data4_2["data"]);
       print(result);
       if (result == 1) {
+        Navigator.of(context).pop();
         Navigator.pushNamed(context, Constant.PINScreen);
+        await Preferences.setStringToSF(
+            Constant.SERVER_DATE_TIME, data4_2["data"]["serverdatetime"]);
+        await Preferences.setStringToSF(Constant.LastSync_Table, "4");
       } else {
         print("Error when getting data4_3");
       }
-      //  await Preferences.setStringToSF(Constant.LastSync_Table, "4");
     } else {
       // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
@@ -223,6 +280,8 @@ class CommunFun {
     var aceets = await SyncAPICalls.getAssets(context);
     if (aceets != null) {
       databaseHelper.accetsData(aceets["data"]);
+      await Preferences.setStringToSF(
+          Constant.SERVER_DATE_TIME, aceets["data"]["serverdatetime"]);
     } else {
       // handle Exaption
       print("Error when getting product image data");

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -23,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController emailAddress = new TextEditingController(text: "smith");
   TextEditingController userPin = new TextEditingController(text: "955641");
   GlobalKey<ScaffoldState> scaffoldKey;
-  DatabaseHelper databaseHelper = DatabaseHelper();
+  // DatabaseHelper databaseHelper = DatabaseHelper();
   var errormessage = "";
   bool isValidateEmail = true;
   bool isValidatePassword = true;
@@ -32,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    databaseHelper.initializeDatabase(); // Initialize database first time here
+    // databaseHelper.initializeDatabase(); // Initialize database first time here
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
     KeyboardVisibilityNotification().addNewListener(
       onHide: () {
@@ -79,6 +81,8 @@ class _LoginPageState extends State<LoginPage> {
       await repo.login(user).then((value) async {
         if (value != null && value["status"] == Constant.STATUS200) {
           print(value);
+          await Preferences.setStringToSF(
+              Constant.LOIGN_USER, json.encode(value["data"]));
           user = User.fromJson(value["data"]);
           await CommunFun.syncAfterSuccess(context);
           setState(() {

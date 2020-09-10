@@ -1,21 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/models/Attributes.dart';
+import 'package:mcncashier/models/Product.dart';
+import 'package:mcncashier/models/Product_Attribute.dart';
+import 'package:mcncashier/services/LocalAPIs.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
-  ProductQuantityDailog({Key key}) : super(key: key);
-
+  ProductQuantityDailog({Key key, this.product}) : super(key: key);
+  final product;
   @override
   _ProductQuantityDailogState createState() => _ProductQuantityDailogState();
 }
 
 class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   final List<int> numbers = [1, 2, 3, 5, 8, 13, 21, 34, 55];
-
+  TextEditingController productController = new TextEditingController();
+  LocalAPI localAPI = LocalAPI();
+  Product productItem;
+  int product_qty = 1;
+  int price = 0;
   @override
   void initState() {
     super.initState();
+    setState(() {
+      productItem = widget.product;
+      price = productItem.price;
+    });
+    getAttributes();
+    getModifire();
+  }
+
+  getAttributes() async {
+    // List<ProductAttribute> productAttr =
+    //     await localAPI.getPorductAttributes(productItem);
+    // print(productAttr);
+  }
+
+  getModifire() {}
+  increaseQty() {
+    var prevproductqty = product_qty;
+    setState(() {
+      product_qty = prevproductqty + 1;
+      price = productItem.price * product_qty;
+    });
+  }
+
+  decreaseQty() {
+    if (product_qty != 0) {
+      var prevproductqty = product_qty;
+      setState(() {
+        product_qty = prevproductqty - 1;
+        price = productItem.price * product_qty;
+      });
+    }
   }
 
   @override
@@ -32,7 +71,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text("YMSFDF FOOD TSD", style: TextStyle(color: Colors.white)),
+                Text(productItem.name,
+                    style: TextStyle(fontSize: 25, color: Colors.white)),
                 addbutton(context)
               ],
             ),
@@ -48,7 +88,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             Positioned(
                 bottom: 10,
                 right: 30,
-                child: Text("500.00",
+                child: Text(price.toDouble().toString(),
                     style: TextStyle(
                         color: Colors.deepOrange,
                         fontSize: 30,
@@ -97,17 +137,22 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return Container(
       child: Row(
         children: <Widget>[
-          _button("-", () {}),
-          _quantityTextInput(() {}),
-          _button("+", () {}),
+          _button("-", () {
+            decreaseQty();
+          }),
+          _quantityTextInput(),
+          _button("+", () {
+            increaseQty();
+          }),
         ],
       ),
     );
   }
 
   Widget mainContent() {
-    return Container(
-      height: MediaQuery.of(context).size.height / 3,
+    return SingleChildScrollView(
+        child: Container(
+      //  height: MediaQuery.of(context).size.height / 2.4,
       width: MediaQuery.of(context).size.width / 2.8,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,12 +160,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         children: <Widget>[
           _sizeTitle(),
           getSize(),
+          SizedBox(height: 10),
           _extraNotesTitle(),
           SizedBox(height: 10),
           inputNotesView(),
         ],
       ),
-    );
+    ));
   }
 
   Widget getSize() {
@@ -166,36 +212,51 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   Widget inputNotesView() {
-    return SizedBox(
-        height: 120, // MediaQuery.of(context).size.height / 4,
+    return Container(
+        padding: EdgeInsets.all(10),
+        //height: 170, // MediaQuery.of(context).size.height / 4,
         width: MediaQuery.of(context).size.width,
         child: Card(
           color: Colors.grey[200],
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
-            children: <Widget>[],
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[notesInput()],
           ),
         ));
   }
 
-  Widget _quantityTextInput(Function() onchange) {
+  Widget notesInput() {
     return Center(
       child: Container(
-        height: 50,
-        width: 90,
+        padding: EdgeInsets.all(20),
         child: TextField(
-
-          textAlign: TextAlign.center,
+          keyboardType: TextInputType.multiline,
           textAlignVertical: TextAlignVertical.center,
-          style: TextStyle(fontSize: 20,height: 1.4),
+          style: TextStyle(fontSize: 20, height: 1.4),
+          maxLines: 3,
           decoration: new InputDecoration(
-            border: new OutlineInputBorder(
-                borderSide: new BorderSide(color: Colors.grey)),
-            hintText: '0.00',
+            border: InputBorder.none,
+            // hintText: product_qty.toDouble().toString(),
           ),
+          onChanged: (val) {},
         ),
+      ),
+    );
+  }
+
+  Widget _quantityTextInput() {
+    return Container(
+      height: 50,
+      width: 90,
+      decoration:
+          BoxDecoration(border: Border.all(width: 1, color: Colors.grey)),
+      child: Center(
+        child: Text(product_qty.toDouble().toString(),
+            style: TextStyle(color: Colors.grey, fontSize: 25)),
       ),
     );
   }

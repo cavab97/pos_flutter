@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -41,8 +45,10 @@ class _SelectTablePageState extends State<SelectTablePage> {
     table_order.number_of_pax = int.parse(paxController.text);
     var result = await localAPI.insertTableOrder(table_order);
     print(result);
+    await Preferences.setStringToSF(
+        Constant.TABLE_DATA, json.encode(table_order));
     Navigator.of(context).pop();
-    Navigator.of(context).pop();
+    Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
   Widget neworder_button(context) {
@@ -144,6 +150,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
   openSelectTablePop() {
     showDialog(
       context: context,
+      // barrierDismissible: false,
       builder: (BuildContext context) {
         return alertDailog(context);
       },
@@ -213,7 +220,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
 
   Widget tablesListwidget() {
     var size = MediaQuery.of(context).size;
-    final double itemHeight = (size.height - kToolbarHeight - 24) / 2;
+    final double itemHeight = (size.height - kToolbarHeight - 24) / 2.4;
     final double itemWidth = size.width / 4.2;
     return GridView.count(
       shrinkWrap: true,
@@ -221,6 +228,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
       crossAxisCount: 6,
       children: tableList.map((table) {
         return InkWell(
+          borderRadius: BorderRadius.all(Radius.circular(30.0)),
           onTap: () {
             setState(() {
               selectedTable = table;
@@ -230,33 +238,37 @@ class _SelectTablePageState extends State<SelectTablePage> {
           child: Container(
             width: itemHeight,
             height: itemWidth,
-            // padding: EdgeInsets.all(5),
             margin: EdgeInsets.all(5),
             child: Stack(
               alignment: AlignmentDirectional.topCenter,
               children: <Widget>[
                 Hero(
-                    tag: table.tableId,
-                    child: Container(
-                        decoration: new BoxDecoration(
-                          color: Colors.white,
-                          // image: new DecorationImage(
-                          //   image: ExactAssetImage(table.tableName),
-                          //   fit: BoxFit.cover,
-                          // ),
-                        ),
-                        width: MediaQuery.of(context).size.width,
-                        height: itemHeight / 2,
-                        child: Center(
-                            child: Text(table.tableName,
-                                style: TextStyle(fontSize: 30))))),
+                  tag: table.tableId,
+                  child: Container(
+                    decoration: new BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20.0),
+                            topRight: Radius.circular(20.0))),
+                    width: MediaQuery.of(context).size.width,
+                    height: itemHeight / 2,
+                    child: Center(
+                      child: Text(
+                        table.tableName,
+                        style: TextStyle(fontSize: 30),
+                      ),
+                    ),
+                  ),
+                ),
                 Container(
                   margin: EdgeInsets.only(top: itemHeight / 2),
                   width: MediaQuery.of(context).size.width,
                   //height: itemHeight / 5,
                   decoration: BoxDecoration(
-                    color: Colors.grey[600],
-                  ),
+                      color: Colors.grey[600],
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20.0),
+                          bottomRight: Radius.circular(20.0))),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,

@@ -33,6 +33,8 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
     Navigator.of(context).pop();
     showDialog(
         // Opning Ammount Popup
+
+        barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
           return AddCustomerPage();

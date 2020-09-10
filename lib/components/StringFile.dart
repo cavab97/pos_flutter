@@ -48,5 +48,8 @@ class Strings {
   static String merge_order = "Merge Order";
   static String enterPax = "Enter Pax";
   static String open_shift = "Open Shift";
-  static String shiftTextLable = "Your Shift is Closed";
+  static String shiftTextLable = "Sorry,we're";
+  static String closed = "CLOSED";
+  static String syncText = "Syncing...";
+   static String shift_open_message = "Shift is not Opned";
 }

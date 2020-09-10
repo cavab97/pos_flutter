@@ -3,11 +3,14 @@
 class Constant {
   static final String NO_PREF_FOUND = "pref_not_found";
   static final String TERMINAL_KEY = "TerminalKey";
+  static final String BRANCH_ID = "branchId";
   static final String LOIGN_USER = "Login_user";
   static final String IS_USER_LOGIN = "isUserLogin";
   static final String LAGUAGE_CODE = 'languageCode';
   static final String LastSync_Table = "LastSync_Table";
   static final String IS_SHIFT_OPEN = "IS_SHIFT_OPENE";
+  static final String SERVER_DATE_TIME = "ServertDateTime";
+  static final String TABLE_DATA = "table_id";
 
   /*==============================================================================
                               Manage API status

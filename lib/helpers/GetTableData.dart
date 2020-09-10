@@ -1,4 +1,6 @@
+import 'package:flutter/services.dart';
 import 'package:mcncashier/models/Asset.dart';
+import 'package:mcncashier/models/Attributes.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Customer.dart';
@@ -11,17 +13,14 @@ import 'package:mcncashier/models/Product_Modifire.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/Product_branch.dart';
 import 'package:mcncashier/models/Role.dart';
+import 'package:mcncashier/models/Modifier.dart';
 import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Table.dart';
+import 'package:mcncashier/models/category_branch.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TableData {
-  // Future<dynamic> getRoleData(Database db) async {
-  //   List<Map> list = await db.rawQuery('SELECT * FROM role');
-  //   return list;
-  // }
-
   Future<int> ifExists(Database db, dynamic data) async {
     int count = Sqflite.firstIntValue(await db.rawQuery(
         "SELECT COUNT(*) FROM $data['table'] WHERE $data['key'] =$data['value']"));
@@ -81,13 +80,43 @@ class TableData {
     print(db);
     print(tablesData);
     var categoryData = tablesData["category"];
+    var attributeData = tablesData["attributes"];
     var productData = tablesData["product"];
+    var categorybranchData = tablesData["category_branch"];
+    var modifierData = tablesData["modifier"];
+
     try {
       if (categoryData.length != 0) {
         for (var i = 0; i < categoryData.length; i++) {
           var categoryDataitem = categoryData[i];
           Category category = Category.fromJson(categoryDataitem);
           var result = await db.insert("category", category.toJson());
+          print(result);
+        }
+      }
+      if (categorybranchData.length != 0) {
+        for (var i = 0; i < categorybranchData.length; i++) {
+          var categorybranchDataitem = categorybranchData[i];
+          CategroyBranch categroyBranch =
+              CategroyBranch.fromJson(categorybranchDataitem);
+          var result =
+              await db.insert("category_branch", categroyBranch.toJson());
+          print(result);
+        }
+      }
+      if (modifierData.length != 0) {
+        for (var i = 0; i < modifierData.length; i++) {
+          var modifierDataitem = modifierData[i];
+          Modifier modifier = Modifier.fromJson(modifierDataitem);
+          var result = await db.insert("modifier", modifier.toJson());
+          print(result);
+        }
+      }
+      if (attributeData.length != 0) {
+        for (var i = 0; i < attributeData.length; i++) {
+          var attributeDataitem = attributeData[i];
+          Attributes attribute = Attributes.fromJson(attributeDataitem);
+          var result = await db.insert("attributes", attribute.toJson());
           print(result);
         }
       }

@@ -11,6 +11,7 @@ Future<TemimalKey> sendTerminalKey(TemimalKey terminal) async {
     Map<String, dynamic> params = {
       "terminal_key": terminal.terminalKey,
       "ter_device_id": terminal.deviceid,
+      "ter_device_token": terminal.terDeviceToken
     };
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await client.post(

@@ -165,11 +165,15 @@ class CreateTables {
 
     datatables = db.execute("CREATE TABLE attributes (" +
         "attribute_id INTEGER PRIMARY KEY," +
-        "uuid TEXT,name TEXT," +
-        "is_default INTEGER ," +
+        "uuid TEXT," +
+        "is_default INTEGER," +
+        "ca_id INTEGER," +
+        "name TEXT," +
         "status INTEGER," +
         "updated_at TEXT, " +
-        "updated_by INTEGER" +
+        "updated_by INTEGER," +
+        "deleted_at TEXT, " +
+        "deleted_by INTEGER" +
         ");");
 
     //Table	modifier
@@ -181,7 +185,9 @@ class CreateTables {
         "is_default INTEGER," +
         "status INTEGER," +
         "updated_at TEXT," +
-        " updated_by INTEGER " +
+        "updated_by INTEGER ," +
+        "deleted_at TEXT," +
+        "deleted_by INTEGER" +
         ");");
 
     //  Table	price_type
@@ -453,7 +459,7 @@ class CreateTables {
 
     // TABLE order_modifier
     datatables = db.execute("CREATE TABLE order_modifier(" +
-        "om_id INTEGER," +
+        "om_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
         "order_id INTEGER," +
         "detail_id INTEGER," +
@@ -461,26 +467,30 @@ class CreateTables {
         "app_id INTEGER," +
         "product_id INTEGER," +
         "modifier_id INTEGER," +
-        "om_amount REAL," +
+        "om_amount INTEGER," +
         "om_status INTEGER," +
         "om_datetime TEXT," +
-        "om_by INTEGER" +
+        "om_by INTEGER," +
+        "updated_at TEXT," +
+        "updated_by INTEGER" +
         ")");
 
     // TABLE order_payment
     datatables = db.execute("CREATE TABLE order_payment (" +
-        "op_id INTEGER," +
+        "op_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
         "order_id INTEGER," +
-        "branch_id INTEGER," +
+        "branch_id  INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
         "op_method_id INTEGER," +
-        "op_amount REAL," +
+        "op_amount INTEGER ," +
         "op_method_response TEXT," +
         "op_status INTEGER," +
         "op_datetime TEXT," +
-        "op_by INTEGER" +
+        "op_by INTEGER," +
+        "updated_at TEXT," +
+        "updated_by INTEGER" +
         ")");
 
     //Table customer
@@ -569,6 +579,16 @@ class CreateTables {
         "updated_at TEXT," +
         "app_id INTEGER," +
         "terminal_id INTEGER" +
+        ")");
+
+    datatables = db.execute("CREATE TABLE category_attribute(" +
+        "ca_id INTEGER PRIMARY KEY," +
+        "uuid TEXT," +
+        "slug  TEXT," +
+        "name  TEXT," +
+        "status  INTEGER," +
+        "updated_by INTEGER," +
+        "updated_at TEXT" +
         ")");
     return datatables;
   }

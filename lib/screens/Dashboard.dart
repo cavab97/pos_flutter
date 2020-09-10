@@ -1,21 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
-import 'package:mcncashier/helpers/sqlDatahelper.dart';
-import 'package:mcncashier/models/Asset.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Product.dart';
-import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/Table.dart';
+import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
-import 'package:mcncashier/screens/SelectTable.dart';
-import 'package:mcncashier/services/CommunAPICall.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class DashboradPage extends StatefulWidget {
@@ -36,12 +35,29 @@ class _DashboradPageState extends State<DashboradPage>
   List<Product> productList = new List<Product>();
   bool isDrawerOpen = false;
   bool isShiftOpen = false;
+  bool isTableSelected = false;
+  Table_order selectedTable;
   @override
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
     checkshift();
+    checkidTableSelected();
     getCategoryList();
+  }
+
+  checkidTableSelected() async {
+    var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+    if (tableid != null) {
+      var tableddata = json.decode(tableid);
+      Table_order table = Table_order.fromJson(tableddata);
+      setState(() {
+        isTableSelected = true;
+        selectedTable = table;
+      });
+
+      print(selectedTable);
+    }
   }
 
   checkshift() async {
@@ -125,12 +141,13 @@ class _DashboradPageState extends State<DashboradPage>
     });
   }
 
-  showQuantityDailog() async {
+  showQuantityDailog(product) async {
     // Increase Decrease Quantity popup
     showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (BuildContext context) {
-          return ProductQuantityDailog();
+          return ProductQuantityDailog(product: product);
         });
   }
 
@@ -138,6 +155,7 @@ class _DashboradPageState extends State<DashboradPage>
     // Send receipt Popup
     showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return InvoiceReceiptDailog();
         });
@@ -147,6 +165,7 @@ class _DashboradPageState extends State<DashboradPage>
     // Send receipt Popup
     showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return SearchCustomerPage();
         });
@@ -354,15 +373,30 @@ class _DashboradPageState extends State<DashboradPage>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Icon(
-              Icons.delete_outline,
-              color: Colors.white,
-              size: 40,
-            ),
+            selectedTable != null
+                ? Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        selectedTable.number_of_pax.toString(),
+                        style: TextStyle(color: Colors.white, fontSize: 25),
+                      ),
+                    ],
+                  )
+                : SizedBox(),
             RaisedButton(
               padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
               onPressed: () {
-                opneShowAddCustomerDailog(); //  Navigator.pushNamed(context, Constant.TransactionScreen);
+                if (isShiftOpen) {
+                  opneShowAddCustomerDailog();
+                } else {
+                  CommunFun.showToast(context, Strings.shift_open_message);
+                }
               },
               child: Row(
                 children: <Widget>[
@@ -406,8 +440,15 @@ class _DashboradPageState extends State<DashboradPage>
         children: productList.map((product) {
           return InkWell(
             onTap: () {
-              selectTable();
-              //showQuantityDailog();
+              if (isShiftOpen) {
+                if (isTableSelected) {
+                  showQuantityDailog(product);
+                } else {
+                  selectTable();
+                }
+              } else {
+                CommunFun.showToast(context, Strings.shift_open_message);
+              }
             },
             child: Container(
               height: itemHeight,
@@ -419,16 +460,14 @@ class _DashboradPageState extends State<DashboradPage>
                   Hero(
                       tag: product.productId,
                       child: Container(
-                        // decoration: new BoxDecoration(
-                        //   color: Colors.grey,
-                        //   image: DecorationImage(
-                        //       image: AssetImage("assets/image1.jfif"),
-                        //       fit: BoxFit.cover),
-                        // ),
                         width: MediaQuery.of(context).size.width,
                         height: itemHeight / 2,
-                        child:
-                            CommonUtils.imageFromBase64String(product.base64),
+                        child: product.base64 != "" && product.base64 != null
+                            ? CommonUtils.imageFromBase64String(product.base64)
+                            : new Image.asset(
+                                'assets/no_image.png',
+                                fit: BoxFit.cover,
+                              ),
                       )),
                   Container(
                     margin: EdgeInsets.only(top: itemHeight / 2),
@@ -517,7 +556,12 @@ class _DashboradPageState extends State<DashboradPage>
                   Strings.shiftTextLable,
                   style: TextStyle(fontSize: 30),
                 ),
-                SizedBox(height: 40),
+                SizedBox(height: 20),
+                Text(
+                  Strings.closed,
+                  style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 30),
                 shiftbtn(() {
                   openOpningAmmountPop();
                 })
@@ -529,15 +573,16 @@ class _DashboradPageState extends State<DashboradPage>
 
   Widget shiftbtn(Function onPress) {
     return RaisedButton(
-      padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
+      padding: EdgeInsets.only(top: 20, left: 30, right: 30, bottom: 20),
       onPressed: onPress,
       child: Text(
         Strings.open_shift,
-        style: TextStyle(color: Colors.white, fontSize: 25),
+        style: TextStyle(color: Colors.deepOrange, fontSize: 25),
       ),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
+      color: Colors.white,
       shape: RoundedRectangleBorder(
+        side: BorderSide(
+            width: 1, style: BorderStyle.solid, color: Colors.deepOrange),
         borderRadius: BorderRadius.circular(10.0),
       ),
     );

@@ -25,8 +25,6 @@ class Preferences {
     pref.setString(key, value);
   }
 
- 
-
 /*set Bool  shared pref*/
   static setBoolToSF(String key, bool value) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
