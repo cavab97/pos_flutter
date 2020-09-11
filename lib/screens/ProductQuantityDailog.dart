@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
-import 'package:mcncashier/models/Attributes.dart';
-import 'package:mcncashier/models/Product.dart';
-import 'package:mcncashier/models/Product_Attribute.dart';
+import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/models/Attribute_data.dart';
+import 'package:mcncashier/models/MST_Cart.dart';
+import 'package:mcncashier/models/ModifireData.dart';
+import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
@@ -15,10 +20,13 @@ class ProductQuantityDailog extends StatefulWidget {
 }
 
 class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
-  final List<int> numbers = [1, 2, 3, 5, 8, 13, 21, 34, 55];
   TextEditingController productController = new TextEditingController();
   LocalAPI localAPI = LocalAPI();
-  Product productItem;
+  List<Attribute_Data> attributeList = [];
+  ProductDetails productItem;
+  List<ModifireData> modifireList = [];
+  List selectedAttr = [];
+  ModifireData selectedModifier;
   int product_qty = 1;
   int price = 0;
   @override
@@ -29,22 +37,32 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       price = productItem.price;
     });
     getAttributes();
-    getModifire();
   }
 
   getAttributes() async {
-    List<ProductAttribute> productAttr =
-        await localAPI.getPorductAttributes(productItem);
-    print(productAttr);
+    List<Attribute_Data> productAttr =
+        await localAPI.getProductDetails(productItem);
+    if (productAttr.length > 0) {
+      setState(() {
+        attributeList = productAttr;
+      });
+    }
+    List<ModifireData> productModifeir =
+        await localAPI.getProductModifeir(productItem);
+    if (productModifeir.length > 0) {
+      setState(() {
+        modifireList = productModifeir;
+      });
+    }
   }
 
-  getModifire() {}
   increaseQty() {
     var prevproductqty = product_qty;
     setState(() {
       product_qty = prevproductqty + 1;
-      price = productItem.price * product_qty;
+      // price = productItem.price * product_qty;
     });
+    setPrice();
   }
 
   decreaseQty() {
@@ -52,9 +70,84 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       var prevproductqty = product_qty;
       setState(() {
         product_qty = prevproductqty - 1;
-        price = productItem.price * product_qty;
+        // price = productItem.price * product_qty;
+      });
+      setPrice();
+    }
+  }
+
+  onSelectAttr(id, attribute, attrTypeIDs, attrPrice) {
+    // var array = [];
+    var prvSeelected = selectedAttr;
+    var isSelected = selectedAttr.any((item) => item['ca_id'] == id);
+    if (isSelected) {
+      selectedAttr.removeWhere((item) => item['ca_id'] == id);
+      prvSeelected.add({
+        'ca_id': id,
+        'attribute': attribute,
+        'attrType_ID': attrTypeIDs,
+        'attr_price': attrPrice
+      });
+      setState(() {
+        selectedAttr = prvSeelected;
+      });
+    } else {
+      prvSeelected.add({
+        'ca_id': id,
+        'attribute': attribute,
+        'attrType_ID': attrTypeIDs,
+        'attr_price': attrPrice
+      });
+      setState(() {
+        selectedAttr = prvSeelected;
       });
     }
+    setPrice();
+  }
+
+  setPrice() {
+    var productPrice = productItem.price;
+    var pricewithQty = productPrice * product_qty;
+    var newPrice = pricewithQty;
+    if (selectedAttr.length > 0) {
+      for (int i = 0; i < selectedAttr.length; i++) {
+        var price = selectedAttr[i]["attr_price"];
+        newPrice += int.parse(price);
+      }
+    }
+    if (selectedModifier != null) {
+      newPrice += selectedModifier.price;
+    }
+    setState(() {
+      price = newPrice;
+    });
+  }
+
+  setModifire(mod) {
+    setState(() {
+      selectedModifier = mod;
+    });
+    setPrice();
+  }
+
+  produtAddTocart() async {
+    MST_Cart cart = new MST_Cart();
+    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var teminalID = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var loginData = await json.decode(loginUser);
+    cart.user_id = loginData["id"];
+    cart.branch_id = int.parse(branchid);
+    cart.sub_total = price.toDouble();
+    cart.discount = 0;
+    cart.discount_type = 0;
+    cart.total_qty = product_qty;
+    cart.tax = 0;
+    cart.grand_total = price.toDouble();
+    cart.customer_terminal = int.parse(teminalID);
+    var result = await localAPI.insertItemTocart(cart);
+    print(result);
+    Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
   @override
@@ -158,9 +251,16 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          _sizeTitle(),
-          getSize(),
-          SizedBox(height: 10),
+          getAttributeList(),
+          modifireList.length != 0
+              ? Text(
+                  Strings.modifier,
+                  style: TextStyle(fontSize: 20),
+                )
+              : SizedBox(),
+          SizedBox(height: 5),
+          modifireList.length != 0 ? modifireItmeList() : SizedBox(),
+          SizedBox(height: 15),
           _extraNotesTitle(),
           SizedBox(height: 10),
           inputNotesView(),
@@ -169,30 +269,115 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     ));
   }
 
-  Widget getSize() {
+  Widget getAttributeList() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10.0),
-      height: 50, // MediaQuery.of(context).size.height /8,
-      child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: numbers.length,
-          itemBuilder: (context, index) {
-            return Container(
-              width: 50, //MediaQuery.of(context).size.width * 0.6,
-              height: 20,
-              child: Card(
-                color: Colors.grey[200],
-                child: Container(
-                  child: Center(
-                      child: Text(
-                    numbers[index].toString(),
-                    style: TextStyle(color: Colors.black, fontSize: 18.0),
-                  )),
-                ),
+      margin: EdgeInsets.only(bottom: 10, top: 0),
+      // MediaQuery.of(context).size.height /8,
+      child: ListView(
+        shrinkWrap: true,
+        scrollDirection: Axis.vertical,
+        physics: AlwaysScrollableScrollPhysics(),
+        children: attributeList.map((attribute) {
+          var attributType = attribute.attr_types.split(',');
+          var attrIDs = attribute.attributeId.split(',').asMap();
+          var attrtypesPrice = attribute.attr_types_price.split(',').asMap();
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(height: 10),
+              Text(
+                attribute.attr_name,
+                style: TextStyle(fontSize: 20),
               ),
-            );
-          }),
+              Container(
+                  margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10.0),
+                  height: 60,
+                  child: ListView(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      children: attributType
+                          .asMap()
+                          .map((i, attr) {
+                            return MapEntry(
+                                i,
+                                Padding(
+                                    padding: EdgeInsets.all(5),
+                                    child: MaterialButton(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                          side: BorderSide(
+                                            color: selectedAttr.any((item) =>
+                                                    item['ca_id'] ==
+                                                        attribute.ca_id &&
+                                                    item['attribute'] == attr)
+                                                ? Colors.green
+                                                : Colors.grey[300],
+                                            width: 4,
+                                          )),
+                                      height: 30,
+                                      minWidth: 70,
+                                      child: Text(
+                                        attr.toString(),
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 25.0),
+                                      ),
+                                      textColor: Colors.black,
+                                      color: Colors.grey[300],
+                                      onPressed: () {
+                                        onSelectAttr(attribute.ca_id, attr,
+                                            attrIDs[i], attrtypesPrice[i]);
+                                      },
+                                    )));
+                          })
+                          .values
+                          .toList()))
+            ],
+          );
+        }).toList(),
+      ),
     );
+  }
+
+  Widget modifireItmeList() {
+    return Container(
+        height: 60,
+        child: ListView(
+            shrinkWrap: true,
+            physics: AlwaysScrollableScrollPhysics(),
+            scrollDirection: Axis.horizontal,
+            children: modifireList.map((modifier) {
+              if (modifier.isDefault == 1) {
+                setModifire(modifier);
+              }
+              return Padding(
+                  padding: EdgeInsets.all(5),
+                  child: MaterialButton(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        side: BorderSide(
+                            color: selectedModifier != null &&
+                                        modifier.pmId ==
+                                            selectedModifier.pmId ||
+                                    modifier.isDefault == 1
+                                ? Colors.green
+                                : Colors.grey[300],
+                            width: 4)),
+                    height: 30,
+                    minWidth: 70,
+                    child: Text(
+                      modifier.name.toString(),
+                      style: TextStyle(color: Colors.black, fontSize: 25.0),
+                    ),
+                    textColor: Colors.black,
+                    color: Colors.grey[300],
+                    onPressed: () {
+                      setModifire(modifier);
+                    },
+                  ));
+            }).toList()));
   }
 
   Widget _sizeTitle() {
@@ -284,7 +469,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     // Add button header rounded
     return RaisedButton(
       padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-      onPressed: () {},
+      onPressed: () {
+        produtAddTocart();
+      },
       child: Row(
         children: <Widget>[
           Icon(

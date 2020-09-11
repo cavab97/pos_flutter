@@ -343,14 +343,7 @@ class CreateTables {
         "updated_by	INTEGER" +
         ")");
 
-    // Table Shift
-    // TODO  : Shift
-
-    // Table Shift_details
-    // TODO  : Shift_details
-
     // TABLE payment_master
-
     datatables = db.execute("CREATE TABLE payment_master (" +
         "payment_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
@@ -591,6 +584,17 @@ class CreateTables {
         "updated_by INTEGER," +
         "updated_at TEXT" +
         ")");
+
+    // datatables = db.execute("CREATE TABLE branch_tax(" +
+    //     "id INTEGER PRIMARY KEY," +
+    //     "tax_id INTEGER," +
+    //     "brnach_id INTEGER," +
+    //     "name  TEXT," +
+    //     "rate  INTEGER," +
+    //     "status  INTEGER," +
+    //     "updated_by INTEGER," +
+    //     "updated_at TEXT" +
+    //     ")");
     return datatables;
   }
 }

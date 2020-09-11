@@ -51,5 +51,6 @@ class Strings {
   static String shiftTextLable = "Sorry,we're";
   static String closed = "CLOSED";
   static String syncText = "Syncing...";
-   static String shift_open_message = "Shift is not Opned";
+  static String shift_open_message = "Shift is not Opned";
+  static String modifier = "Modifier";
 }

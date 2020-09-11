@@ -1,4 +1,4 @@
-class Product {
+class ProductDetails {
   int productId;
   String uuid;
   String name;
@@ -16,7 +16,7 @@ class Product {
   String deletedBy;
   String base64;
 
-  Product({
+  ProductDetails({
     this.productId,
     this.uuid,
     this.name,
@@ -35,7 +35,7 @@ class Product {
     this.base64,
   });
 
-  Product.fromJson(Map<String, dynamic> json) {
+  ProductDetails.fromJson(Map<String, dynamic> json) {
     productId = json['product_id'];
     uuid = json['uuid'];
     name = json['name'];
@@ -51,7 +51,7 @@ class Product {
     deletedAt = json['deleted_at'];
     updatedBy = json['updated_by'];
     deletedBy = json['deleted_by'];
-    //base64 = json['base64'] != null ? json['base64'] : "";
+    base64 = json['base64'] != null ? json['base64'] : "";
   }
 
   Map<String, dynamic> toJson() {
@@ -71,7 +71,7 @@ class Product {
     data['deleted_at'] = this.deletedAt;
     data['updated_by'] = this.updatedBy;
     data['deleted_by'] = this.deletedBy;
-    // data['base64'] = this.base64;
+    data['base64'] = this.base64;
     return data;
   }
 }

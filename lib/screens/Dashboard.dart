@@ -7,7 +7,8 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Category.dart';
-import 'package:mcncashier/models/Product.dart';
+import 'package:mcncashier/models/MST_Cart.dart';
+import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Table_order.dart';
@@ -32,11 +33,16 @@ class _DashboradPageState extends State<DashboradPage>
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
   List<Category> tabsList = new List<Category>();
-  List<Product> productList = new List<Product>();
+  List<ProductDetails> productList = new List<ProductDetails>();
+  List<MST_Cart> cartList = new List<MST_Cart>();
   bool isDrawerOpen = false;
   bool isShiftOpen = false;
   bool isTableSelected = false;
   Table_order selectedTable;
+  int subtotal = 0;
+  int discount = 0;
+  int tax = 0;
+  int grandTotal = 0;
   @override
   void initState() {
     super.initState();
@@ -44,6 +50,7 @@ class _DashboradPageState extends State<DashboradPage>
     checkshift();
     checkidTableSelected();
     getCategoryList();
+    getCartItem();
   }
 
   checkidTableSelected() async {
@@ -60,10 +67,23 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   checkshift() async {
-    var isOpen = await Preferences.getBoolValuesSF(Constant.IS_SHIFT_OPEN);
+    var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
     setState(() {
-      isShiftOpen = isOpen != null ? isOpen : false;
+      isShiftOpen = isOpen != null && isOpen == "true" ? isOpen : false;
     });
+    if (isShiftOpen) {
+      getCartItem();
+    }
+  }
+
+  getCartItem() async {
+    List<MST_Cart> cartItem = await localAPI.getCartItem();
+    print(cartItem);
+    if (cartItem.length > 0) {
+      setState(() {
+        cartList = cartItem;
+      });
+    }
   }
 
   getCategoryList() async {
@@ -77,8 +97,9 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getProductList(int position) async {
-    List<Product> product =
-        await localAPI.getProduct(tabsList[position].categoryId.toString());
+    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    List<ProductDetails> product = await localAPI.getProduct(
+        tabsList[position].categoryId.toString(), branchid);
     setState(() {
       productList.clear();
       productList = product;
@@ -113,7 +134,7 @@ class _DashboradPageState extends State<DashboradPage>
     setState(() {
       isShiftOpen = true;
     });
-    //g Preferences.setBoolToSF(Constant.IS_SHIFT_OPEN, isShiftOpen);
+    Preferences.setStringToSF(Constant.IS_SHIFT_OPEN, isShiftOpen.toString());
     Shift shift = new Shift();
     shift.appId = 1;
     shift.branchId = 1;
@@ -242,10 +263,11 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                   TableCell(
                       child: Stack(
-                    //crossAxisAlignment: CrossAxisAlignment.center,
-                    //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      cartITems(),
+                      Container(
+                        color: Colors.white,
+                        child: cartITems(),
+                      ),
                       SizedBox(
                         height: 10,
                       ),
@@ -273,8 +295,8 @@ class _DashboradPageState extends State<DashboradPage>
               padding:
                   EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
               onPressed: () {
-                Navigator.pushNamed(context, Constant.TerminalScreen);
-                Preferences.removeSinglePref(Constant.TERMINAL_KEY);
+                Navigator.pushNamed(context, Constant.PINScreen);
+                //  Preferences.removeSinglePref(Constant.TERMINAL_KEY);
               },
               child: Text(
                 Strings.logout,
@@ -437,6 +459,7 @@ class _DashboradPageState extends State<DashboradPage>
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
         children: productList.map((product) {
+          var image_Arr = product.base64.split(" groupconcate_Image ");
           return InkWell(
             onTap: () {
               if (isShiftOpen) {
@@ -461,8 +484,8 @@ class _DashboradPageState extends State<DashboradPage>
                       child: Container(
                         width: MediaQuery.of(context).size.width,
                         height: itemHeight / 2,
-                        child: product.base64 != "" && product.base64 != null
-                            ? CommonUtils.imageFromBase64String(product.base64)
+                        child: image_Arr.length != 0 && image_Arr[0] != ""
+                            ? CommonUtils.imageFromBase64String(image_Arr[0])
                             : new Image.asset(
                                 'assets/no_image.png',
                                 fit: BoxFit.cover,
@@ -599,39 +622,8 @@ class _DashboradPageState extends State<DashboradPage>
           1: FractionColumnWidth(.2),
           2: FractionColumnWidth(.2),
         },
-        children: [
-          TableRow(decoration: BoxDecoration(color: Colors.white), children: [
-            Padding(
-                padding: EdgeInsets.only(left: 10, top: 20, bottom: 20),
-                child: Text(
-                  Strings.header_name,
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xff100c56)),
-                )),
-            Padding(
-              padding: EdgeInsets.only(top: 20, bottom: 20),
-              child: Text(
-                Strings.qty,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xff100c56)),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(right: 10, top: 20, bottom: 20),
-              child: Text(
-                Strings.amount,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xff100c56)),
-              ),
-            )
-          ]),
-          TableRow(children: [
+        children: cartList.map((f) {
+          return TableRow(children: [
             Padding(
                 padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
                 child: Text("PIZZA")),
@@ -641,19 +633,8 @@ class _DashboradPageState extends State<DashboradPage>
             Padding(
                 padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
                 child: Text("20.00")),
-          ]),
-          TableRow(children: [
-            Padding(
-                padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                child: Text("APPLE")),
-            Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("5.00")),
-            Padding(
-                padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                child: Text("10.00")),
-          ]),
-        ]);
+          ]);
+        }).toList());
     final totalPriceTable = Table(
         border: TableBorder(
             horizontalInside: BorderSide(
@@ -726,7 +707,7 @@ class _DashboradPageState extends State<DashboradPage>
                   Padding(
                       padding: EdgeInsets.only(top: 10, bottom: 10),
                       child: Text(
-                        "100:00",
+                        "150:00",
                         style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: Color(0xff100c56)),
@@ -757,7 +738,7 @@ class _DashboradPageState extends State<DashboradPage>
                         top: 10,
                       ),
                       child: Text(
-                        "150.00",
+                        "150:00",
                         style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: Color(0xff100c56)),
@@ -876,6 +857,7 @@ class _DashboradPageState extends State<DashboradPage>
           children: <Widget>[
             Container(
                 height: MediaQuery.of(context).size.height / 1.4,
+                width: MediaQuery.of(context).size.width,
                 color: Colors.grey[300],
                 padding: EdgeInsets.all(10),
                 child: Stack(
