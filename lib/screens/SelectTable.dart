@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Table_order.dart';
@@ -60,11 +61,8 @@ class _SelectTablePageState extends State<SelectTablePage> {
         Navigator.of(context).pop();
         opnPaxDailog();
       },
-      child: Text(
-        Strings.new_order,
-        textAlign: TextAlign.center,
-        style: TextStyle(color: Colors.blueAccent, fontSize: 30),
-      ),
+      child: Text(Strings.new_order,
+          textAlign: TextAlign.center, style: Styles.bluesmall()),
     );
   }
 
@@ -181,10 +179,12 @@ class _SelectTablePageState extends State<SelectTablePage> {
                         height: 10,
                       ),
                       CommunFun.divider(),
+                      SizedBox(
+                        height: 10,
+                      ),
                       Text(Strings.merge_order,
                           textAlign: TextAlign.center,
-                          style:
-                              TextStyle(fontSize: 30, color: Colors.blueAccent))
+                          style: Styles.bluesmall())
                     ],
                   ),
                 ));
@@ -206,14 +206,10 @@ class _SelectTablePageState extends State<SelectTablePage> {
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Text(
-          Strings.select_table,
-          style: TextStyle(fontSize: 30, color: Theme.of(context).primaryColor),
-        ),
-      ),
+          centerTitle: true,
+          iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: Text(Strings.select_table, style: Styles.whiteBold())),
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.all(20),
@@ -262,7 +258,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
                     child: Center(
                       child: Text(
                         table.tableName,
-                        style: TextStyle(fontSize: 30),
+                        style: Styles.communBlack(),
                       ),
                     ),
                   ),
@@ -281,9 +277,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                        table.numberofpax != null
-                            ? table.numberofpax.toString().toUpperCase()
-                            : "0",
+                        table.tableType.toString().toUpperCase(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 18,
@@ -293,25 +287,6 @@ class _SelectTablePageState extends State<SelectTablePage> {
                     ],
                   ),
                 ),
-                // Positioned(
-                //   top: itemHeight / 2 - 30,
-                //   left: 0,
-                //   child: Container(
-                //     height: 30,
-                //     width: 50,
-                //     padding: EdgeInsets.all(5),
-                //     color: Colors.deepOrange,
-                //     child: Center(
-                //       child: Text(
-                //         table.tableCapacity.toString(),
-                //         style: TextStyle(
-                //             fontWeight: FontWeight.w400,
-                //             color: Colors.white,
-                //             fontSize: 15),
-                //       ),
-                //     ),
-                //   ),
-                //)
               ],
             ),
           ),

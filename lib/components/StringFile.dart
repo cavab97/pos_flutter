@@ -1,4 +1,5 @@
 class Strings {
+  static String fontFamily = "Roboto";
   static String something_wrong = "Something went wrong!";
   static String pin_Dialog_title = "Pin Verification";
   static String title_opening_amount = "Opening Amount";

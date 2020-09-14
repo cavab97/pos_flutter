@@ -4,7 +4,7 @@ class TablesDetails {
   int branchId;
   String tableName;
   int saveorderid;
-  int numberofpax;
+ // int numberofpax;
   int tableType;
   String tableQr;
   int tableCapacity;
@@ -30,7 +30,7 @@ class TablesDetails {
     this.deletedAt,
     this.deletedBy,
     this.saveorderid,
-    this.numberofpax,
+    //this.numberofpax,
   });
 
   TablesDetails.fromJson(Map<String, dynamic> json) {
@@ -40,8 +40,8 @@ class TablesDetails {
     tableName = json['table_name'];
     tableType = json['table_type'];
     tableQr = json['table_qr'];
-    numberofpax =
-        json['number_of_pax'] != null ? int.parse(json['number_of_pax']) : 0;
+    // numberofpax =
+    //     json['number_of_pax'] != null ? int.parse(json['number_of_pax']) : 0;
     saveorderid =
         json['save_order_id'] != null ? int.parse(json['save_order_id']) : 0;
     tableCapacity = json['table_capacity'];
@@ -68,7 +68,7 @@ class TablesDetails {
     data['updated_by'] = this.updatedBy;
     data['deleted_at'] = this.deletedAt;
     data['deleted_by'] = this.deletedBy;
-    data['number_of_pax'] = this.numberofpax;
+    // data['number_of_pax'] = this.numberofpax;
     data['save_order_id'] = this.saveorderid;
     return data;
   }

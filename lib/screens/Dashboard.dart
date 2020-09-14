@@ -4,6 +4,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
@@ -44,11 +45,6 @@ class _DashboradPageState extends State<DashboradPage>
   int grandTotal = 0;
   int current_cart;
   bool isLoading = false;
-  TextStyle drawerText = new TextStyle(
-      color: Colors.black,
-      fontSize: 25,
-      fontWeight: FontWeight.w600,
-      fontFamily: "Roboto");
 
   @override
   void initState() {
@@ -213,7 +209,7 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return ProductQuantityDailog(product: product,cartID : current_cart);
+          return ProductQuantityDailog(product: product, cartID: current_cart);
         });
   }
 
@@ -262,7 +258,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
                 child: Text(
                   tabsList[index].name.toUpperCase(),
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: Styles.whiteBoldsmall(),
                 )),
           );
         }));
@@ -366,103 +362,60 @@ class _DashboradPageState extends State<DashboradPage>
   Widget drawerWidget() {
     return Drawer(
       child: Container(
-        padding: EdgeInsets.only(top: 30),
-        color: Colors.white,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[checkoutbtn(), nameBtn()],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Icon(
-                  Icons.add_circle_outline,
-                  color: Colors.white,
-                  size: 25,
-                ),
-                SizedBox(width: 10),
-                Text("Register", style: drawerText)
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Icon(
-                  Icons.add_circle_outline,
-                  color: Colors.white,
-                  size: 25,
-                ),
-                SizedBox(width: 10),
-                Text("Transaction", style: drawerText)
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Icon(
-                  Icons.add_circle_outline,
-                  color: Colors.white,
-                  size: 25,
-                ),
-                SizedBox(width: 10),
-                Text("Open Shift", style: drawerText)
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Icon(
-                  Icons.add_circle_outline,
-                  color: Colors.white,
-                  size: 25,
-                ),
-                SizedBox(width: 10),
-                Text("Shift Report", style: drawerText)
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Icon(
-                  Icons.add_circle_outline,
-                  color: Colors.white,
-                  size: 25,
-                ),
-                SizedBox(width: 10),
-                Text("Sync", style: drawerText)
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Icon(
-                  Icons.add_circle_outline,
-                  color: Colors.white,
-                  size: 25,
-                ),
-                SizedBox(width: 10),
-                Text("Attendce System", style: drawerText)
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Icon(
-                  Icons.add_circle_outline,
-                  color: Colors.white,
-                  size: 25,
-                ),
-                SizedBox(width: 10),
-                Text("Settings", style: drawerText)
-              ],
-            ),
-          ],
-        ),
-      ),
+          padding: EdgeInsets.only(top: 30),
+          color: Colors.white,
+          child: ListView(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[checkoutbtn(), nameBtn()],
+              ),
+              CommunFun.divider(),
+              ListTile(
+                  leading: Icon(
+                    Icons.art_track,
+                    color: Colors.black,
+                    size: 30,
+                  ),
+                  title: Text("Transaction", style: Styles.communBlack())),
+              ListTile(
+                  leading: Icon(
+                    Icons.open_in_new,
+                    color: Colors.black,
+                    size: 30,
+                  ),
+                  title: Text("Open Shift", style: Styles.communBlack())),
+              ListTile(
+                  leading: Icon(
+                    Icons.filter_tilt_shift,
+                    color: Colors.black,
+                    size: 30,
+                  ),
+                  title: Text("Shift Report", style: Styles.communBlack())),
+              ListTile(
+                  leading: Icon(
+                    Icons.transform,
+                    color: Colors.black,
+                    size: 40,
+                  ),
+                  title: Text("Sync", style: Styles.communBlack())),
+              ListTile(
+                  leading: Icon(
+                    Icons.sync,
+                    color: Colors.black,
+                    size: 30,
+                  ),
+                  title: Text("Attendce System", style: Styles.communBlack())),
+              ListTile(
+                  leading: Icon(
+                    Icons.settings,
+                    color: Colors.black,
+                    size: 30,
+                  ),
+                  title: Text("Settings", style: Styles.communBlack())),
+            ],
+          )),
     );
   }
 
@@ -734,10 +687,7 @@ class _DashboradPageState extends State<DashboradPage>
                         Text(
                           product.name.toString().toUpperCase(),
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white),
+                          style: Styles.whiteSimpleSmall(),
                         ),
                       ],
                     ),
@@ -865,36 +815,15 @@ class _DashboradPageState extends State<DashboradPage>
           TableRow(children: [
             Padding(
               padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-              child: Text(
-                Strings.header_name,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xff100c56),
-                ),
-              ),
+              child: Text(Strings.header_name, style: Styles.darkBlue()),
             ),
             Padding(
               padding: EdgeInsets.only(top: 10, bottom: 10),
-              child: Text(
-                Strings.qty,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xff100c56),
-                ),
-              ),
+              child: Text(Strings.qty, style: Styles.darkBlue()),
             ),
             Padding(
               padding: EdgeInsets.only(right: 0, top: 10, bottom: 10),
-              child: Text(
-                Strings.amount,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xff100c56),
-                ),
-              ),
+              child: Text(Strings.amount, style: Styles.darkBlue()),
             ),
           ])
         ]);
@@ -957,22 +886,12 @@ class _DashboradPageState extends State<DashboradPage>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text(
-                    Strings.sub_total.toUpperCase(),
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xff100c56)),
-                  ),
+                  Text(Strings.sub_total.toUpperCase(),
+                      style: Styles.darkBlue()),
                   Padding(
                       padding: EdgeInsets.only(top: 10, bottom: 10),
-                      child: Text(
-                        subtotal.toString(),
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xff100c56)),
-                      )),
+                      child:
+                          Text(subtotal.toString(), style: Styles.darkBlue())),
                 ],
               ),
             ),
@@ -1015,21 +934,12 @@ class _DashboradPageState extends State<DashboradPage>
                     padding: EdgeInsets.only(top: 10, bottom: 10),
                     child: Text(
                       Strings.tax.toUpperCase(),
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xff100c56)),
+                      style: Styles.darkBlue(),
                     ),
                   ),
                   Padding(
                     padding: EdgeInsets.only(top: 10, bottom: 10),
-                    child: Text(
-                      tax.toString(),
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xff100c56)),
-                    ),
+                    child: Text(tax.toString(), style: Styles.darkBlue()),
                   ),
                 ],
               ),
@@ -1044,25 +954,14 @@ class _DashboradPageState extends State<DashboradPage>
                     padding: EdgeInsets.only(
                       top: 10,
                     ),
-                    child: Text(
-                      Strings.grand_total,
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xff100c56)),
-                    ),
+                    child: Text(Strings.grand_total, style: Styles.darkBlue()),
                   ),
                   Padding(
                       padding: EdgeInsets.only(
                         top: 10,
                       ),
-                      child: Text(
-                        grandTotal.toString(),
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xff100c56)),
-                      )),
+                      child: Text(grandTotal.toString(),
+                          style: Styles.darkBlue())),
                 ],
               ),
             ),

@@ -11,6 +11,7 @@ import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/services/tableSyncAPI.dart' as repo;
 import 'package:toast/toast.dart';
+import 'package:mcncashier/components/styles.dart';
 
 DatabaseHelper databaseHelper = DatabaseHelper();
 
@@ -33,11 +34,11 @@ class CommunFun {
   static divider() {
     // Simple divider
     return Padding(
-      padding: EdgeInsets.only(top: 0, left: 20, right: 20, bottom: 15),
+      padding: EdgeInsets.all(10),
       child: Divider(
         height: 1,
         thickness: 1.0,
-        color: Colors.grey[300],
+        color: Colors.grey[400],
       ),
     );
   }
@@ -59,11 +60,7 @@ class CommunFun {
     return RaisedButton(
       padding: EdgeInsets.only(top: 20, bottom: 20),
       onPressed: _onPress,
-      child: Text(
-        text,
-        style: TextStyle(
-            color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold),
-      ),
+      child: Text(text, style: Styles.whiteBold()),
       color: Colors.deepOrange,
       textColor: Colors.white,
       shape: RoundedRectangleBorder(
