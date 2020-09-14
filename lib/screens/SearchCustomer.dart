@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/screens/AddCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -23,7 +28,9 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
   }
 
   getcustomerList() async {
-    List<Customer> customers = await localAPI.getCustomers();
+    var terminalkey = await CommunFun.getTeminalKey();
+
+    List<Customer> customers = await localAPI.getCustomers(terminalkey);
     setState(() {
       customerList = customers;
     });
@@ -39,6 +46,12 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
         builder: (BuildContext context) {
           return AddCustomerPage();
         });
+  }
+
+  saveCustomerTolocal(customer) async {
+    await Preferences.setStringToSF(
+        Constant.CUSTOMER_DATA, json.encode(customer));
+    await Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
   @override
@@ -170,7 +183,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
       children: customerList.map((customer) {
         return ListTile(
           onTap: () {
-            Navigator.of(context).pop();
+            saveCustomerTolocal(customer);
           },
           leading:
               Text(customer.name == null ? customer.firstName : customer.name),

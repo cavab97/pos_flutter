@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
@@ -8,10 +7,11 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
+import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Shift.dart';
-import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
@@ -29,12 +29,11 @@ class DashboradPage extends StatefulWidget {
 class _DashboradPageState extends State<DashboradPage>
     with SingleTickerProviderStateMixin {
   TabController _tabController;
-
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
   List<Category> tabsList = new List<Category>();
   List<ProductDetails> productList = new List<ProductDetails>();
-  List<MST_Cart> cartList = new List<MST_Cart>();
+  List<MSTCartdetails> cartList = new List<MSTCartdetails>();
   bool isDrawerOpen = false;
   bool isShiftOpen = false;
   bool isTableSelected = false;
@@ -43,14 +42,33 @@ class _DashboradPageState extends State<DashboradPage>
   int discount = 0;
   int tax = 0;
   int grandTotal = 0;
+  int current_cart;
+  bool isLoading = false;
+  TextStyle drawerText = new TextStyle(
+      color: Colors.black,
+      fontSize: 25,
+      fontWeight: FontWeight.w600,
+      fontFamily: "Roboto");
+
   @override
   void initState() {
     super.initState();
+    checkisInit();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
     checkshift();
     checkidTableSelected();
-    getCategoryList();
-    getCartItem();
+  }
+
+  checkisInit() async {
+    var isInit = await CommunFun.checkDatabaseExit();
+    if (isInit == true) {
+      await getCategoryList();
+      await getCartItem();
+    } else {
+      await databaseHelper.initializeDatabase();
+      await getCategoryList();
+      await getCartItem();
+    }
   }
 
   checkidTableSelected() async {
@@ -62,14 +80,22 @@ class _DashboradPageState extends State<DashboradPage>
         isTableSelected = true;
         selectedTable = table;
       });
-      print(selectedTable);
     }
+  }
+
+  getCurrentCart() async {
+    List<SaveOrder> currentOrder =
+        await localAPI.getSaveOrder(selectedTable.save_order_id);
+    print(currentOrder);
+    setState(() {
+      current_cart = currentOrder[0].cartId;
+    });
   }
 
   checkshift() async {
     var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
     setState(() {
-      isShiftOpen = isOpen != null && isOpen == "true" ? isOpen : false;
+      isShiftOpen = isOpen != null && isOpen == "true" ? true : false;
     });
     if (isShiftOpen) {
       getCartItem();
@@ -77,17 +103,38 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getCartItem() async {
-    List<MST_Cart> cartItem = await localAPI.getCartItem();
-    print(cartItem);
+    List<MSTCartdetails> cartItem = await localAPI.getCartItem();
     if (cartItem.length > 0) {
       setState(() {
         cartList = cartItem;
       });
+      countTotals();
     }
+  }
+
+  countTotals() {
+    var subTotal = 0;
+    var dis = 0;
+    var taxval = 0;
+    var grandtotal = 0;
+    for (var i = 0; i < cartList.length; i++) {
+      var cart = cartList[i];
+      subTotal += cart.productPrice * cart.productQty;
+      dis += cart.discount;
+      taxval += int.parse(cart.taxValue);
+      grandtotal = (subtotal + tax) - discount;
+    }
+    setState(() {
+      subtotal = subTotal;
+      discount = dis;
+      tax = taxval;
+      grandTotal = grandtotal;
+    });
   }
 
   getCategoryList() async {
     List<Category> categorys = await localAPI.getAllCategory();
+    print(categorys);
     setState(() {
       tabsList = categorys;
       _tabController = TabController(vsync: this, length: tabsList.length);
@@ -97,12 +144,16 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getProductList(int position) async {
+    setState(() {
+      isLoading = true;
+    });
     var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
     List<ProductDetails> product = await localAPI.getProduct(
         tabsList[position].categoryId.toString(), branchid);
     setState(() {
       productList.clear();
       productList = product;
+      isLoading = false;
     });
   }
 
@@ -124,7 +175,6 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         builder: (BuildContext context) {
           return OpeningAmmountPage(onEnter: (ammount) {
-            print(ammount);
             sendOpenShft(ammount);
           });
         });
@@ -138,15 +188,11 @@ class _DashboradPageState extends State<DashboradPage>
     Shift shift = new Shift();
     shift.appId = 1;
     shift.branchId = 1;
-    shift.startAmount = ammount;
+    shift.startAmount = int.parse(ammount);
     shift.endAmount = 0;
     shift.updatedAt = "2020-09-09 06:43:09";
     shift.updatedBy = 1;
     var result = await localAPI.insertShift(shift);
-    print(result);
-    //if (result == 1) {
-
-    //}
   }
 
   openDrawer() {
@@ -167,7 +213,7 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return ProductQuantityDailog(product: product);
+          return ProductQuantityDailog(product: product,cartID : current_cart);
         });
   }
 
@@ -208,7 +254,6 @@ class _DashboradPageState extends State<DashboradPage>
             borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
         labelStyle: TextStyle(fontSize: 16),
         tabs: List<Widget>.generate(tabsList.length, (int index) {
-          print(tabsList[0].name);
           return new Tab(
             child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 15),
@@ -217,7 +262,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
                 child: Text(
                   tabsList[index].name.toUpperCase(),
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 )),
           );
         }));
@@ -256,20 +301,18 @@ class _DashboradPageState extends State<DashboradPage>
                                 length: tabsList.length,
                                 child: _tabs),
                           ),
-                          porductsList(),
+                          isLoading ? porductsListLoading() : porductsList(),
                         ],
                       ),
                     ),
                   ),
                   TableCell(
                       child: Stack(
+                    fit: StackFit.loose,
                     children: <Widget>[
                       Container(
                         color: Colors.white,
                         child: cartITems(),
-                      ),
-                      SizedBox(
-                        height: 10,
                       ),
                       paybutton(context),
                       !isShiftOpen ? openShiftButton(context) : SizedBox()
@@ -282,6 +325,44 @@ class _DashboradPageState extends State<DashboradPage>
         ));
   }
 
+  Widget checkoutbtn() {
+    return RaisedButton(
+      padding: EdgeInsets.only(left: 10, right: 10),
+      onPressed: () {
+        Navigator.pushNamed(context, Constant.PINScreen);
+        //  Preferences.removeSinglePref(Constant.TERMINAL_KEY);
+      },
+      child: Text(
+        Strings.checkout,
+        style: TextStyle(color: Colors.white, fontSize: 18),
+      ),
+      color: Colors.deepOrange,
+      textColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50.0),
+      ),
+    );
+  }
+
+  Widget nameBtn() {
+    return RaisedButton(
+      padding: EdgeInsets.only(left: 10, right: 10),
+      onPressed: () {
+        Navigator.pushNamed(context, Constant.PINScreen);
+        //  Preferences.removeSinglePref(Constant.TERMINAL_KEY);
+      },
+      child: Text(
+        "Admin",
+        style: TextStyle(color: Colors.white, fontSize: 18),
+      ),
+      color: Colors.deepOrange,
+      textColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50.0),
+      ),
+    );
+  }
+
   Widget drawerWidget() {
     return Drawer(
       child: Container(
@@ -291,25 +372,93 @@ class _DashboradPageState extends State<DashboradPage>
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            RaisedButton(
-              padding:
-                  EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
-              onPressed: () {
-                Navigator.pushNamed(context, Constant.PINScreen);
-                //  Preferences.removeSinglePref(Constant.TERMINAL_KEY);
-              },
-              child: Text(
-                Strings.logout,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold),
-              ),
-              color: Colors.deepOrange,
-              textColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50.0),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[checkoutbtn(), nameBtn()],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Icon(
+                  Icons.add_circle_outline,
+                  color: Colors.white,
+                  size: 25,
+                ),
+                SizedBox(width: 10),
+                Text("Register", style: drawerText)
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Icon(
+                  Icons.add_circle_outline,
+                  color: Colors.white,
+                  size: 25,
+                ),
+                SizedBox(width: 10),
+                Text("Transaction", style: drawerText)
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Icon(
+                  Icons.add_circle_outline,
+                  color: Colors.white,
+                  size: 25,
+                ),
+                SizedBox(width: 10),
+                Text("Open Shift", style: drawerText)
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Icon(
+                  Icons.add_circle_outline,
+                  color: Colors.white,
+                  size: 25,
+                ),
+                SizedBox(width: 10),
+                Text("Shift Report", style: drawerText)
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Icon(
+                  Icons.add_circle_outline,
+                  color: Colors.white,
+                  size: 25,
+                ),
+                SizedBox(width: 10),
+                Text("Sync", style: drawerText)
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Icon(
+                  Icons.add_circle_outline,
+                  color: Colors.white,
+                  size: 25,
+                ),
+                SizedBox(width: 10),
+                Text("Attendce System", style: drawerText)
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Icon(
+                  Icons.add_circle_outline,
+                  color: Colors.white,
+                  size: 25,
+                ),
+                SizedBox(width: 10),
+                Text("Settings", style: drawerText)
+              ],
             ),
           ],
         ),
@@ -444,10 +593,90 @@ class _DashboradPageState extends State<DashboradPage>
         ));
   }
 
+  Widget porductsListLoading() {
+    // products List
+    var size = MediaQuery.of(context).size;
+    final double itemHeight = (size.height - kToolbarHeight - 24) / 1.6;
+    final double itemWidth = size.width / 4.2;
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      padding: EdgeInsets.only(top: 5),
+      child: GridView.count(
+          childAspectRatio: (itemWidth / itemHeight),
+          crossAxisCount: 5,
+          children: ['1', '2', '3', '4', '5'].map((i) {
+            return InkWell(
+              onTap: () {},
+              child: Container(
+                height: itemHeight,
+                // padding: EdgeInsets.all(5),
+                margin: EdgeInsets.all(5),
+                child: Stack(
+                  alignment: AlignmentDirectional.topCenter,
+                  children: <Widget>[
+                    Hero(
+                        tag: i,
+                        child: Container(
+                          color: Colors.grey,
+                          width: MediaQuery.of(context).size.width,
+                          height: itemHeight / 2,
+                          child: new Image.asset(
+                            'assets/no_image.png',
+                            fit: BoxFit.cover,
+                          ),
+                        )),
+                    Container(
+                      margin: EdgeInsets.only(top: itemHeight / 2.6),
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[600],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            "..",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      top: itemHeight / 2.6 - 30,
+                      left: 0,
+                      child: Container(
+                        height: 30,
+                        width: 50,
+                        padding: EdgeInsets.all(5),
+                        color: Colors.deepOrange,
+                        child: Center(
+                          child: Text(
+                            "...",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                color: Colors.white,
+                                fontSize: 15),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          }).toList()),
+    );
+  }
+
   Widget porductsList() {
     // products List
     var size = MediaQuery.of(context).size;
-
     /*24 is for notification bar on Android*/
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2;
     final double itemWidth = size.width / 4.2;
@@ -482,6 +711,7 @@ class _DashboradPageState extends State<DashboradPage>
                   Hero(
                       tag: product.productId,
                       child: Container(
+                        color: Colors.grey,
                         width: MediaQuery.of(context).size.width,
                         height: itemHeight / 2,
                         child: image_Arr.length != 0 && image_Arr[0] != ""
@@ -545,14 +775,23 @@ class _DashboradPageState extends State<DashboradPage>
     return Center(
       child: Container(
         margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3),
-        height: 70,
-        width: 320,
-        child: CommunFun.roundedButton(
-          Strings.title_pay,
-          () {
-            //  openOpningAmmountPop();
+        height: 60,
+        width: 300,
+        child: RaisedButton(
+          padding: EdgeInsets.only(top: 10, bottom: 5),
+          onPressed: () {
             Navigator.pushNamed(context, Constant.TransactionScreen);
           },
+          child: Text(
+            Strings.title_pay,
+            style: TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          color: Colors.deepOrange,
+          textColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(50.0),
+          ),
         ),
       ),
     );
@@ -612,7 +851,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   Widget cartITems() {
     // selected item list and total price calculations
-    final cartTable = Table(
+    final carttitle = Table(
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         border: TableBorder(
             horizontalInside: BorderSide(
@@ -622,23 +861,96 @@ class _DashboradPageState extends State<DashboradPage>
           1: FractionColumnWidth(.2),
           2: FractionColumnWidth(.2),
         },
-        children: cartList.map((f) {
+        children: [
+          TableRow(children: [
+            Padding(
+              padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
+              child: Text(
+                Strings.header_name,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xff100c56),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 10, bottom: 10),
+              child: Text(
+                Strings.qty,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xff100c56),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: 0, top: 10, bottom: 10),
+              child: Text(
+                Strings.amount,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xff100c56),
+                ),
+              ),
+            ),
+          ])
+        ]);
+    final cartTable = Table(
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        border: TableBorder(
+            bottom: BorderSide(
+                width: 1, color: Colors.grey[400], style: BorderStyle.solid),
+            horizontalInside: BorderSide(
+                width: 1, color: Colors.grey[400], style: BorderStyle.solid)),
+        columnWidths: {
+          0: FractionColumnWidth(.6),
+          1: FractionColumnWidth(.2),
+          2: FractionColumnWidth(.2),
+        },
+        children: cartList.map((cart) {
           return TableRow(children: [
             Padding(
-                padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                child: Text("PIZZA")),
+              padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
+              child: Text(
+                cart.productName.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[700],
+                ),
+              ),
+            ),
             Padding(
                 padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: Text("5.00")),
+                child: Text(
+                  cart.productQty.toDouble().toString(),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[700],
+                  ),
+                )),
             Padding(
                 padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                child: Text("20.00")),
+                child: Text(
+                  cart.productPrice.toDouble().toString(),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[700],
+                  ),
+                )),
           ]);
         }).toList());
     final totalPriceTable = Table(
         border: TableBorder(
+            top: BorderSide(
+                width: 1, color: Colors.grey[400], style: BorderStyle.solid),
             horizontalInside: BorderSide(
-                width: 1, color: Colors.grey, style: BorderStyle.solid)),
+                width: 1, color: Colors.grey[400], style: BorderStyle.solid)),
         children: [
           TableRow(children: [
             TableCell(
@@ -655,8 +967,9 @@ class _DashboradPageState extends State<DashboradPage>
                   Padding(
                       padding: EdgeInsets.only(top: 10, bottom: 10),
                       child: Text(
-                        "150:00",
+                        subtotal.toString(),
                         style: TextStyle(
+                            fontSize: 18,
                             fontWeight: FontWeight.w700,
                             color: Color(0xff100c56)),
                       )),
@@ -670,22 +983,25 @@ class _DashboradPageState extends State<DashboradPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Padding(
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
-                      child: Text(
-                        Strings.discount.toUpperCase(),
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).accentColor),
-                      )),
+                    padding: EdgeInsets.only(top: 10, bottom: 10),
+                    child: Text(
+                      Strings.discount.toUpperCase(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).accentColor),
+                    ),
+                  ),
                   Padding(
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
-                      child: Text(
-                        "00:00",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).accentColor),
-                      )),
+                    padding: EdgeInsets.only(top: 10, bottom: 10),
+                    child: Text(
+                      discount.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).accentColor),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -696,22 +1012,25 @@ class _DashboradPageState extends State<DashboradPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Padding(
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
-                      child: Text(
-                        Strings.tax.toUpperCase(),
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xff100c56)),
-                      )),
+                    padding: EdgeInsets.only(top: 10, bottom: 10),
+                    child: Text(
+                      Strings.tax.toUpperCase(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xff100c56)),
+                    ),
+                  ),
                   Padding(
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
-                      child: Text(
-                        "150:00",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xff100c56)),
-                      )),
+                    padding: EdgeInsets.only(top: 10, bottom: 10),
+                    child: Text(
+                      tax.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xff100c56)),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -738,8 +1057,9 @@ class _DashboradPageState extends State<DashboradPage>
                         top: 10,
                       ),
                       child: Text(
-                        "150:00",
+                        grandTotal.toString(),
                         style: TextStyle(
+                            fontSize: 18,
                             fontWeight: FontWeight.w700,
                             color: Color(0xff100c56)),
                       )),
@@ -749,128 +1069,29 @@ class _DashboradPageState extends State<DashboradPage>
           ]),
         ]);
 
-    // final totalPriceTable = Table(
-    //     defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-    //     border: TableBorder(
-    //         horizontalInside: BorderSide(
-    //             width: 1, color: Colors.grey, style: BorderStyle.solid)),
-    //     children: [
-
-    //       TableRow(children: [
-    //         TableCell(
-    //           child: Row(
-    //             mainAxisAlignment: MainAxisAlignment.spaceAround,
-    //             children: <Widget>[
-    //               new Text('ID'),
-    //               new Text('Value'),
-    //             ],
-    //           ),
-    //         ),
-    //       ]),
-    //       // TableRow(children: [
-    //       //   TableCell(
-    //       //       child: Row(
-    //       //     children: <Widget>[
-    //       //       Padding(
-    //       //         padding: EdgeInsets.only(top: 10, bottom: 10),
-    //       //         child: Text(
-    //       //           Strings.sub_total.toUpperCase(),
-    //       //           style: TextStyle(
-    //       //               fontSize: 18,
-    //       //               fontWeight: FontWeight.w700,
-    //       //               color: Color(0xff100c56)),
-    //       //         ),
-    //       //       ),
-    //       //       Padding(
-    //       //           padding: EdgeInsets.only(top: 10, bottom: 10),
-    //       //           child: Text(
-    //       //             "00:00",
-    //       //             style: TextStyle(
-    //       //                 fontWeight: FontWeight.w700, color: Color(0xff100c56)),
-    //       //           )),
-    //       //     ],
-    //       //   ))
-    //       // ]),
-    //       TableRow(children: [
-    //         Padding(
-    //             padding: EdgeInsets.only(top: 10, bottom: 10),
-    //             child: Text(
-    //               Strings.discount.toUpperCase(),
-    //               style: TextStyle(
-    //                   fontSize: 18,
-    //                   fontWeight: FontWeight.w700,
-    //                   color: Theme.of(context).accentColor),
-    //             )),
-    //         Padding(
-    //             padding: EdgeInsets.only(top: 10, bottom: 10),
-    //             child: Text(
-    //               "00:00",
-    //               style: TextStyle(
-    //                   fontWeight: FontWeight.w700,
-    //                   color: Theme.of(context).accentColor),
-    //             )),
-    //       ]),
-    //       TableRow(children: [
-    //         Padding(
-    //             padding: EdgeInsets.only(top: 10, bottom: 10),
-    //             child: Text(
-    //               Strings.tax.toUpperCase(),
-    //               style: TextStyle(
-    //                   fontSize: 18,
-    //                   fontWeight: FontWeight.w700,
-    //                   color: Color(0xff100c56)),
-    //             )),
-    //         Padding(
-    //             padding: EdgeInsets.only(top: 10, bottom: 10),
-    //             child: Text(
-    //               "00:00",
-    //               style: TextStyle(
-    //                   fontWeight: FontWeight.w700, color: Color(0xff100c56)),
-    //             )),
-    //       ]),
-    //       TableRow(children: [
-    //         Padding(
-    //           padding: EdgeInsets.only(top: 10, bottom: 10),
-    //           child: Text(
-    //             Strings.grand_total,
-    //             style: TextStyle(
-    //                 fontSize: 18,
-    //                 fontWeight: FontWeight.w700,
-    //                 color: Color(0xff100c56)),
-    //           ),
-    //         ),
-    //         Padding(
-    //             padding: EdgeInsets.only(top: 10, bottom: 10),
-    //             child: Text(
-    //               "150.00",
-    //               style: TextStyle(
-    //                   fontWeight: FontWeight.w700, color: Color(0xff100c56)),
-    //             )),
-    //       ]),
-    //     ]);
-
-    return Container(
-        //height: MediaQuery.of(context).size.height / 1.3,
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.all(12),
-        child: Column(
-          children: <Widget>[
-            Container(
-                height: MediaQuery.of(context).size.height / 1.4,
-                width: MediaQuery.of(context).size.width,
-                color: Colors.grey[300],
-                padding: EdgeInsets.all(10),
-                child: Stack(
-                  children: <Widget>[
-                    cartTable,
-                    Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(child: totalPriceTable))
-                  ],
-                )),
-          ],
-        ));
+    return Column(
+      children: <Widget>[
+        Container(
+            height: MediaQuery.of(context).size.height / 1.4,
+            width: MediaQuery.of(context).size.width,
+            color: Colors.grey[300],
+            padding: EdgeInsets.all(10),
+            child: Stack(
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width / 1.2,
+                  color: Colors.white,
+                  child: carttitle,
+                ),
+                Container(margin: EdgeInsets.only(top: 50), child: cartTable),
+                Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(child: totalPriceTable))
+              ],
+            )),
+      ],
+    );
   }
 }

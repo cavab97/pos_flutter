@@ -4,7 +4,7 @@ class Table_order {
   String merged_table_id;
   int number_of_pax;
   String table_seat;
-  String save_order_id;
+  int save_order_id;
   String merged_pax;
   int table_locked_by;
   int is_order_merged;

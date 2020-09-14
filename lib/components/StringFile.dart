@@ -23,7 +23,7 @@ class Strings {
   static String pin_Number = "PIN Number";
   static String pin_validation_message = "Please enter your PIN number";
   static String title_pay = "PAY";
-  static String logout = "LOGOUT";
+  static String checkout = "Clock Out";
   static String terminalKeyBtn = "Set Terminal Key";
   static String add = "add";
   static String add_new = "Add New";
@@ -53,4 +53,5 @@ class Strings {
   static String syncText = "Syncing...";
   static String shift_open_message = "Shift is not Opned";
   static String modifier = "Modifier";
+  static String notesAndQty = "Notes and Quantity";
 }

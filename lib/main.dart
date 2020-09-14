@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/routes.dart';
 import 'package:mcncashier/theme/theme.dart';
@@ -8,13 +8,15 @@ import 'package:mcncashier/theme/theme.dart';
 import 'components/constant.dart';
 
 void main() async {
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  final bool isLogged = await CommunFun.isLogged();
+  runApp(MyApp(islogin: isLogged));
 }
 
 class MyApp extends StatefulWidget {
   // main Product list page
-  MyApp({Key key}) : super(key: key);
-
+  MyApp({Key key, this.islogin}) : super(key: key);
+  final bool islogin;
   @override
   MyAppState createState() => MyAppState();
 }
@@ -27,17 +29,7 @@ class MyAppState extends State<MyApp> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    checkisLogin();
-  }
-
-  checkisLogin() async {
-    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
-    await databaseHelper.initializeDatabase();
-    if (loginUser != null) {
-      setState(() {
-        intitialRoute = loginUser;
-      });
-    }
+    databaseHelper.initializeDatabase();
   }
 
   @override
@@ -48,10 +40,8 @@ class MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       title: 'cashierApp',
       theme: appTheme(),
-      initialRoute: intitialRoute != null
-          ? Constant.DashboardScreen
-          : Constant.TerminalScreen,
-      // terkey == null ? Constant.TerminalScreen : Constant.DashboardScreen,
+      initialRoute:
+          widget.islogin ? Constant.DashboardScreen : Constant.TerminalScreen,
       routes: routes,
     );
   }

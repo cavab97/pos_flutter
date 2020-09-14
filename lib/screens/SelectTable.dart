@@ -9,6 +9,7 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/models/TableDetails.dart';
 
 class SelectTablePage extends StatefulWidget {
   // PIN Enter PAGE
@@ -22,7 +23,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
   TextEditingController paxController = new TextEditingController();
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
-  List<Tables> tableList = new List<Tables>();
+  List<TablesDetails> tableList = new List<TablesDetails>();
   var selectedTable;
   var number_of_pax;
   @override
@@ -33,7 +34,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
   }
 
   getTables() async {
-    List<Tables> tables = await localAPI.getTables();
+    var branchid = await CommunFun.getbranchId();
+
+    List<TablesDetails> tables = await localAPI.getTables(branchid);
     setState(() {
       tableList = tables;
     });
@@ -127,21 +130,24 @@ class _SelectTablePageState extends State<SelectTablePage> {
         title: Text(Strings.enterPax),
         content: Builder(
           builder: (context) {
-            return Container(
-              height: 200,
-              width: 200,
-              child: Center(
+            return SingleChildScrollView(
+              child: Container(
+                height: 200,
+                width: 200,
+                child: Center(
                   child: Column(
-                children: <Widget>[
-                  paxTextInput(),
-                  SizedBox(
-                    height: 50,
+                    children: <Widget>[
+                      paxTextInput(),
+                      SizedBox(
+                        height: 50,
+                      ),
+                      enterButton(() {
+                        selectTableForNewOrder();
+                      }),
+                    ],
                   ),
-                  enterButton(() {
-                    selectTableForNewOrder();
-                  }),
-                ],
-              )),
+                ),
+              ),
             );
           },
         ));
@@ -198,24 +204,25 @@ class _SelectTablePageState extends State<SelectTablePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        key: scaffoldKey,
-        appBar: AppBar(
-          centerTitle: true,
-          iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text(
-            Strings.select_table,
-            style:
-                TextStyle(fontSize: 30, color: Theme.of(context).primaryColor),
+      key: scaffoldKey,
+      appBar: AppBar(
+        centerTitle: true,
+        iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        title: Text(
+          Strings.select_table,
+          style: TextStyle(fontSize: 30, color: Theme.of(context).primaryColor),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            children: <Widget>[tablesListwidget()],
           ),
         ),
-        body: Center(
-          child: Container(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                children: <Widget>[tablesListwidget()],
-              )),
-        ));
+      ),
+    );
   }
 
   Widget tablesListwidget() {
@@ -274,7 +281,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                        table.tableType.toString().toUpperCase(),
+                        table.numberofpax != null
+                            ? table.numberofpax.toString().toUpperCase()
+                            : "0",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 18,

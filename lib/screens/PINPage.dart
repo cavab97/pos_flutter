@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/models/CheckInout.dart';
+import 'package:mcncashier/services/LocalAPIs.dart';
 
 class PINPage extends StatefulWidget {
   // PIN Enter PAGE
@@ -14,6 +20,7 @@ class _PINPageState extends State<PINPage> {
   var pinNumber = "";
   GlobalKey<ScaffoldState> scaffoldKey;
 
+  LocalAPI localAPI = LocalAPI();
   @override
   void initState() {
     super.initState();
@@ -37,9 +44,26 @@ class _PINPageState extends State<PINPage> {
     });
   }
 
-  clockInwithPIN() {
+  clockInwithPIN() async {
     if (pinNumber.length >= 4) {
       //TODO : API CALL for clockin
+      CheckinOut checkIn = new CheckinOut();
+      var deviceInfo = await CommunFun.deviceInfo();
+      var terminalId =
+          await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+      var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+      var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+      var date = DateTime.now();
+      var user = json.decode(loginUser);
+      checkIn.localID = "Android" + deviceInfo.androidId + terminalId;
+      checkIn.terminalId = int.parse(terminalId);
+      checkIn.userId = user["id"];
+      checkIn.branchId = int.parse(branchid);
+      checkIn.status = "IN";
+      checkIn.timeInOut = date.toString();
+      checkIn.createdAt = date.toString();
+      checkIn.sync = 0;
+      var result = await localAPI.userCheckInOut(checkIn);
       Navigator.pushNamed(context, Constant.DashboardScreen);
     } else {
       scaffoldKey.currentState.showSnackBar(SnackBar(

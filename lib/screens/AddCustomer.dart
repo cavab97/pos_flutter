@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
@@ -37,7 +38,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   addCustomer() async {
     var isvalid = validateFields();
     if (isvalid) {
+      var terminalkey = await CommunFun.getTeminalKey();
       Customer customer = new Customer();
+      customer.terminalId = terminalkey;
       customer.firstName = firstname_controller.text;
       customer.lastName = lastname_controller.text;
       customer.email = email_controller.text;

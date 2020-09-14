@@ -7,14 +7,19 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
+import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/TableDetails.dart';
+import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
-  ProductQuantityDailog({Key key, this.product}) : super(key: key);
+  ProductQuantityDailog({Key key, this.product, this.cartID}) : super(key: key);
   final product;
+  final int cartID;
   @override
   _ProductQuantityDailogState createState() => _ProductQuantityDailogState();
 }
@@ -26,9 +31,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   ProductDetails productItem;
   List<ModifireData> modifireList = [];
   List selectedAttr = [];
+  MST_Cart currentCart = new MST_Cart();
   ModifireData selectedModifier;
   int product_qty = 1;
   int price = 0;
+  TextStyle attrStyle = TextStyle(color: Colors.black, fontSize: 20.0);
   @override
   void initState() {
     super.initState();
@@ -37,6 +44,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       price = productItem.price;
     });
     getAttributes();
+    if (widget.cartID != null) {
+      getCartData();
+    }
   }
 
   getAttributes() async {
@@ -54,6 +64,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         modifireList = productModifeir;
       });
     }
+  }
+
+  getCartData() async {
+    MST_Cart cartval = await localAPI.getCurrentCart(widget.cartID);
+    setState(() {
+      currentCart = cartval;
+    });
   }
 
   increaseQty() {
@@ -132,22 +149,63 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   produtAddTocart() async {
     MST_Cart cart = new MST_Cart();
+    SaveOrder orderData = new SaveOrder();
     var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
-    var teminalID = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+    var table = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var customerData =
+        await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
     var loginData = await json.decode(loginUser);
-    cart.user_id = loginData["id"];
+
+    cart.user_id = customerData != null ? customerData["customer_id"] : 0;
     cart.branch_id = int.parse(branchid);
-    cart.sub_total = price.toDouble();
-    cart.discount = 0;
+    cart.sub_total =
+        currentCart.sub_total != null ? currentCart.sub_total + price : price;
+    cart.discount = currentCart.discount != null ? currentCart.discount + 0 : 0;
     cart.discount_type = 0;
-    cart.total_qty = product_qty;
+    cart.total_qty = currentCart.total_qty != null
+        ? currentCart.total_qty + product_qty
+        : product_qty;
     cart.tax = 0;
-    cart.grand_total = price.toDouble();
-    cart.customer_terminal = int.parse(teminalID);
-    var result = await localAPI.insertItemTocart(cart);
+    cart.grand_total = currentCart.grand_total != null
+        ? currentCart.grand_total + price.toDouble()
+        : price.toDouble();
+    cart.customer_terminal =
+        customerData != null ? customerData["terminal_id"] : 0;
+    cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    cart.created_by = loginData["id"];
+    cart.localID = await CommunFun.getLocalID();
+
+    var tableData = await json.decode(table);
+    orderData.orderName = tableData != null ? "" : "test";
+    orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    orderData.numberofPax = tableData != null ? tableData["number_of_pax"] : 0;
+    orderData.isTableOrder = tableData != null ? 1 : 0;
+    var productdata = productItem;
+    var result = await localAPI.insertItemTocart(
+
+        ///insert
+        //
+        currentCart.id != null ? currentCart.id : 0,
+        cart,
+        productdata,
+        orderData,
+        tableData["table_id"]);
     print(result);
-    Navigator.pushNamed(context, Constant.DashboardScreen);
+    if (tableData != null) {
+      List<TablesDetails> tabledata =
+          await localAPI.getTableData(branchid, tableData["table_id"]);
+      print(tabledata);
+      var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+      if (tableid != null) {
+        var tableddata = json.decode(tableid);
+        Table_order table = Table_order.fromJson(tableddata);
+        table.save_order_id = tabledata[0].saveorderid;
+        await Preferences.setStringToSF(
+            Constant.TABLE_DATA, json.encode(table));
+      }
+    }
+    await Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
   @override
@@ -243,30 +301,33 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   Widget mainContent() {
-    return SingleChildScrollView(
+    return SafeArea(
+      child: SingleChildScrollView(
         child: Container(
-      //  height: MediaQuery.of(context).size.height / 2.4,
-      width: MediaQuery.of(context).size.width / 2.8,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          getAttributeList(),
-          modifireList.length != 0
-              ? Text(
-                  Strings.modifier,
-                  style: TextStyle(fontSize: 20),
-                )
-              : SizedBox(),
-          SizedBox(height: 5),
-          modifireList.length != 0 ? modifireItmeList() : SizedBox(),
-          SizedBox(height: 15),
-          _extraNotesTitle(),
-          SizedBox(height: 10),
-          inputNotesView(),
-        ],
+          //  height: MediaQuery.of(context).size.height / 2.4,
+          width: MediaQuery.of(context).size.width / 2.8,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              getAttributeList(),
+              modifireList.length != 0
+                  ? Text(
+                      Strings.modifier,
+                      style: TextStyle(fontSize: 20),
+                    )
+                  : SizedBox(),
+              SizedBox(height: 5),
+              modifireList.length != 0 ? modifireItmeList() : SizedBox(),
+              SizedBox(height: 15),
+              _extraNotesTitle(),
+              SizedBox(height: 10),
+              inputNotesView(),
+            ],
+          ),
+        ),
       ),
-    ));
+    );
   }
 
   Widget getAttributeList() {
@@ -316,14 +377,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                                 : Colors.grey[300],
                                             width: 4,
                                           )),
-                                      height: 30,
-                                      minWidth: 70,
-                                      child: Text(
-                                        attr.toString(),
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 25.0),
-                                      ),
+                                      height: 25,
+                                      minWidth: 50,
+                                      child: Text(attr.toString(),
+                                          style: attrStyle),
                                       textColor: Colors.black,
                                       color: Colors.grey[300],
                                       onPressed: () {
@@ -365,11 +422,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                 ? Colors.green
                                 : Colors.grey[300],
                             width: 4)),
-                    height: 30,
-                    minWidth: 70,
+                    height: 20,
+                    minWidth: 50,
                     child: Text(
                       modifier.name.toString(),
-                      style: TextStyle(color: Colors.black, fontSize: 25.0),
+                      style: attrStyle,
                     ),
                     textColor: Colors.black,
                     color: Colors.grey[300],
@@ -390,7 +447,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   Widget _extraNotesTitle() {
     return Text(
-      "Notes and Quantity",
+      Strings.notesAndQty,
       style: TextStyle(
           fontSize: 20, fontWeight: FontWeight.w400, color: Colors.grey[800]),
     );

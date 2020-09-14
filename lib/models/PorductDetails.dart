@@ -8,6 +8,7 @@ class ProductDetails {
   String priceTypeValue;
   int price;
   int oldPrice;
+  int qty;
   int hasInventory;
   int status;
   String updatedAt;
@@ -27,6 +28,7 @@ class ProductDetails {
     this.price,
     this.oldPrice,
     this.hasInventory,
+    this.qty,
     this.status,
     this.updatedAt,
     this.deletedAt,
@@ -47,6 +49,7 @@ class ProductDetails {
     oldPrice = json['old_price'];
     hasInventory = json['has_inventory'];
     status = json['status'];
+    qty = int.parse(json['qty']);
     updatedAt = json['updated_at'];
     deletedAt = json['deleted_at'];
     updatedBy = json['updated_by'];
@@ -65,6 +68,7 @@ class ProductDetails {
     data['price_type_value'] = this.priceTypeValue;
     data['price'] = this.price;
     data['old_price'] = this.oldPrice;
+    data['qty'] = this.qty;
     data['has_inventory'] = this.hasInventory;
     data['status'] = this.status;
     data['updated_at'] = this.updatedAt;

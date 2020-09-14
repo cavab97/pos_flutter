@@ -30,7 +30,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(Strings.title_opening_amount.toUpperCase(),
-                    style: TextStyle(fontSize: 25, color: Colors.white)),
+                    style: TextStyle(fontSize: 20, color: Colors.white)),
               ],
             ),
           ),
@@ -115,11 +115,11 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
             side: BorderSide(color: Colors.black, width: 3.0)),
-        height: MediaQuery.of(context).size.height / 8.8,
-        minWidth: MediaQuery.of(context).size.width / 9.8,
+        height: MediaQuery.of(context).size.height / 9.7,
+        //minWidth: MediaQuery.of(context).size.width / 9.9,
         child: Text(number,
             textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 55.0)),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 40.0)),
         textColor: Colors.black,
         color: Colors.white,
         onPressed: f,
@@ -135,8 +135,8 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
             side: BorderSide(color: Colors.black, width: 3.0)),
-        height: 100.0,
-        minWidth: 120.0,
+        height: MediaQuery.of(context).size.height / 9.7,
+        // minWidth: MediaQuery.of(context).size.width / 9.9,
         child: Icon(
           Icons.backspace,
           color: Colors.black,
@@ -158,7 +158,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         children: <Widget>[
           Text(currentNumber,
               style: TextStyle(
-                  fontSize: 90,
+                  fontSize: 60,
                   color: Colors.black,
                   fontWeight: FontWeight.bold)),
           /*Flexible(
@@ -182,7 +182,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
   Widget getNumbers(context) {
     return Center(
       child: Container(
-        width: MediaQuery.of(context).size.width / 2,
+        width: MediaQuery.of(context).size.width / 2.5,
         child: Column(
           children: <Widget>[
             Row(
@@ -225,29 +225,29 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
               ],
             ),
             Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    //mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Padding(
-                              padding: EdgeInsets.only(right: 25, top: 10),
+                              padding: EdgeInsets.only(left: 20, top: 10),
                               child: _button("7", () {
                                 numberClick('7');
                               })),
                           // using custom widget button
                           Padding(
-                              padding: EdgeInsets.only(right: 25, top: 10),
+                              padding: EdgeInsets.only(left: 30, top: 10),
                               child: _button("8", () {
                                 numberClick('8');
                               })),
                           Padding(
-                              padding: EdgeInsets.only(right: 25, top: 10),
+                              padding: EdgeInsets.only(left: 30, top: 10),
                               child: _button("9", () {
                                 numberClick('9');
                               })),
@@ -257,24 +257,24 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: <Widget>[
                           Padding(
-                              padding: EdgeInsets.only(right: 30, top: 10),
+                              padding: EdgeInsets.only(left: 20, top: 10),
                               child: _button("0", () {
                                 numberClick('0');
                               })),
                           Padding(
-                            padding: EdgeInsets.only(right: 30, top: 10),
+                            padding: EdgeInsets.only(left: 25, top: 10),
                             child: MaterialButton(
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18.0),
                                   side: BorderSide(
                                       color: Colors.black, width: 3.0)),
-                              height: MediaQuery.of(context).size.height / 8.8,
-                              minWidth: MediaQuery.of(context).size.width / 4.6,
+                              height: MediaQuery.of(context).size.height / 9.5,
+                              minWidth: MediaQuery.of(context).size.width / 6.1,
                               child: Text("00".toUpperCase(),
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 55.0)),
+                                      fontSize: 40.0)),
                               textColor: Colors.black,
                               color: Colors.white,
                               onPressed: () {
@@ -286,38 +286,28 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                       ),
                     ],
                   ),
-                  Column(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 5, right: 5, top: 10),
-                        child: MaterialButton(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18.0),
-                              side:
-                                  BorderSide(color: Colors.black, width: 3.0)),
-                          height: MediaQuery.of(context).size.height / 3.9,
-                          minWidth: MediaQuery.of(context).size.width / 9.9,
-                          child: Text("enter".toUpperCase(),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 30.0)),
-                          textColor: Colors.black,
-                          color: Colors.white,
-                          onPressed: () {
-                            widget.onEnter(currentNumber);
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      )
-                    ],
+                  Padding(
+                    padding: EdgeInsets.only(left: 10, right: 10, top: 10),
+                    child: MaterialButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: BorderSide(color: Colors.black, width: 3.0)),
+                      height: MediaQuery.of(context).size.height / 4.2,
+                      // minWidth: MediaQuery.of(context).size.width / 9.9
+                      minWidth: 50,
+                      child: Text("enter".toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 20.0)),
+                      textColor: Colors.black,
+                      color: Colors.white,
+                      onPressed: () {
+                        widget.onEnter(currentNumber);
+                        Navigator.of(context).pop();
+                      },
+                    ),
                   )
                 ]),
-            SizedBox(
-              height: 10,
-            ),
-            SizedBox(
-              height: 15,
-            ),
           ],
         ),
       ),

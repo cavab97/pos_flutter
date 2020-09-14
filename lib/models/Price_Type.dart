@@ -5,8 +5,8 @@ class Pricetype {
   int status;
   String updatedAt;
   int updatedBy;
-  Null deletedAt;
-  Null deletedBy;
+  String deletedAt;
+  int deletedBy;
 
   Pricetype(
       {this.ptId,

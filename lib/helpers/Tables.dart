@@ -294,6 +294,8 @@ class CreateTables {
         "product_id	INTEGER," +
         "branch_id	INTEGER," +
         "qty	TEXT," +
+        "rac_id INTEGER," +
+        "box_id INTEGER," +
         "warningStockLevel	INTEGER," +
         "status	INTEGER," +
         "updated_at	TEXT," +
@@ -377,10 +379,12 @@ class CreateTables {
         "terminal_id INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "terminal_device_id	TEXT," +
+        "terminal_device_token TEXT," +
         "branch_id	INTEGER," +
         "terminal_type	INTEGER," +
         "terminal_is_mother	INTEGER," +
         "terminal_name	TEXT," +
+        "terminal_verified_at TEXT," +
         "terminal_key	TEXT," +
         "status	INTEGER," +
         "updated_at	TEXT," +
@@ -441,6 +445,8 @@ class CreateTables {
         "terminal_id INTEGER," +
         "app_id INTEGER," +
         "product_id INTEGER," +
+        "product_price INTEGER," +
+        "product_old_price INTEGER," +
         "category_id INTEGER," +
         "detail_attribute_id INTEGER," +
         "detail_attribute_price INTEGER," +
@@ -529,7 +535,7 @@ class CreateTables {
         "merged_table_id  TEXT," +
         "number_of_pax  INTEGER," +
         "table_seat  TEXT," +
-        "save_order_id  TEXT," +
+        "save_order_id  INTEGER," +
         "merged_pax TEXT," +
         "table_locked_by  INTEGER," +
         "is_order_merged  REAl" +
@@ -540,7 +546,7 @@ class CreateTables {
         'localID TEXT,' +
         'user_id INTEGER,' +
         'branch_id INTEGER,' +
-        'sub_total REAL,' +
+        'sub_total REAL,' + //DOUBLE
         'discount REAL,' +
         'discount_type INTEGER,' +
         'remark TEXT,' +
@@ -551,14 +557,39 @@ class CreateTables {
         'is_deleted   REAL,' +
         'created_by  INTEGER,' +
         'created_at  TEXT,' +
-        'sync  REAL,' +
+        // 'sync  NUMERIC,' + //BOOLEAN
         'customer_terminal INTEGER,' +
-        'queue_number INTEGER,' +
-        'service_charge_rate REAL,' +
-        'service_charge_amount INTEGER,' +
-        'redeem_points REAL,' +
-        'redeem_point_amount REAL,' +
-        'product_points REAL' +
+        'queue_number INTEGER' +
+        // 'service_charge_rate REAL,' +
+        // 'service_charge_amount INTEGER,' +
+        // 'redeem_points REAL,' +
+        // 'redeem_point_amount REAL,' +
+        // 'product_points REAL' +
+        ')');
+
+    datatables = db.execute("CREATE TABLE mst_cart_detail( " +
+        'id INTEGER PRIMARY KEY AUTOINCREMENT,' +
+        'cart_id INTEGER,' +
+        'localID INTEGER,' +
+        'product_id INTEGER,' +
+        'product_name TEXT,' +
+        'product_price INTEGER,' +
+        'product_net_price INTEGER,' +
+        'product_qty INTEGER,' +
+        'tax_id TEXT,' +
+        'tax_value TEXT,' + //varchar
+        'discount INTEGER,' + //DOUBLE
+        'discount_type  INTEGER,' + //int
+        'remark TEXT,' +
+        'is_deleted   INTEGER,' +
+        'created_by  INTEGER,' +
+        'created_at  TEXT,' +
+        // 'sync  NUMERIC,' +
+        'is_send_kichen NUMERIC,' +
+        'item_unit TEXT,' +
+        'has_composite_inventory NUMERIC' + //BOOLEAN
+        // 'product_points INTEGER,' +
+        // 'product_total_points INTEGER' +
         ')');
 
     datatables = db.execute("CREATE TABLE shift(" +
@@ -585,16 +616,86 @@ class CreateTables {
         "updated_at TEXT" +
         ")");
 
-    // datatables = db.execute("CREATE TABLE branch_tax(" +
-    //     "id INTEGER PRIMARY KEY," +
-    //     "tax_id INTEGER," +
-    //     "brnach_id INTEGER," +
-    //     "name  TEXT," +
-    //     "rate  INTEGER," +
-    //     "status  INTEGER," +
-    //     "updated_by INTEGER," +
-    //     "updated_at TEXT" +
-    //     ")");
+    datatables = db.execute("CREATE TABLE branch_tax(" +
+        "id INTEGER PRIMARY KEY," +
+        "tax_id INTEGER," +
+        "brnach_id INTEGER," +
+        "name  TEXT," +
+        "rate  INTEGER," +
+        "status  INTEGER," +
+        "updated_by INTEGER," +
+        "updated_at TEXT" +
+        ")");
+    datatables = db.execute("CREATE TABLE save_order( " +
+        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "cart_id INTEGER," +
+        "order_Name," +
+        "number_of_pax INTEGER," +
+        "is_table_order NUMERIC," +
+        "created_At TEXT" +
+        ")");
+
+    datatables = db.execute("CREATE TABLE user_checkinout( " +
+        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "localID TEXT," +
+        "user_id INTEGER," +
+        "branch_id INTEGER," +
+        "status INTEGER," +
+        "timeinout TEXT," +
+        "created_at TEXT," +
+        "terminalid INTEGER," +
+        "sync INTEGER" +
+        ")");
+
+    // db.transaction((txn) async {
+    //   int id1 = await txn.rawInsert("INSERT INTO user_checkinout(" +
+    //       "localID, user_id, branch_id,status,timeinout,created_at,terminalid,sync)" +
+    //       "VALUES('1',1,1,0,'20-12-2020 11:44:32','20-12-2020 11:44:32',1,0)");
+    //   print('inserted1: $id1');
+    // });
+
     return datatables;
   }
 }
+
+// DAtaType For flutter
+// **** INTEGER
+// INT
+// INTEGER
+// TINYINT
+// SMALLINT
+// MEDIUMINT
+// BIGINT
+// UNSIGNED BIG INT
+// INT2
+// INT8
+
+// *** TEXT
+
+// CHARACTER(20)
+// VARCHAR(255)
+// VARYING CHARACTER(255)
+// NCHAR(55)
+// NATIVE CHARACTER(70)
+// NVARCHAR(100)
+// TEXT
+// CLOB
+
+/// ***  BLOB
+//  BLOB
+// no datatype specified
+
+// *** REAL
+
+//  REAL
+// DOUBLE
+// DOUBLE PRECISION
+// FLOAT
+
+// NUMERIC
+
+// NUMERIC
+// DECIMAL(10,5)
+// BOOLEAN
+// DATE
+// DATETIME

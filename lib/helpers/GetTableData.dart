@@ -258,13 +258,11 @@ class TableData {
         }
       }
 
-      if (terminalData.length != 0) {
-        for (var i = 0; i < terminalData.length; i++) {
-          var terminalDataitem = terminalData[i];
-          Terminal terminal = Terminal.fromJson(terminalDataitem);
-          var result = await db.insert("terminal", terminal.toJson());
-          print(result);
-        }
+      if (terminalData != null) {
+        var terminalDataitem = terminalData;
+        Terminal terminal = Terminal.fromJson(terminalDataitem);
+        var result = await db.insert("terminal", terminal.toJson());
+        print(result);
       }
       if (tableData.length != 0) {
         for (var i = 0; i < tableData.length; i++) {

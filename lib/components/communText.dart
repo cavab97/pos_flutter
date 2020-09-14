@@ -21,6 +21,15 @@ class CommunFun {
             color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold));
   }
 
+  static isLogged() async {
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    if (loginUser != null) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   static divider() {
     // Simple divider
     return Padding(
@@ -403,5 +412,41 @@ class CommunFun {
       isReturn = false;
     }).whenComplete(() {});
     return isReturn;
+  }
+
+  static checkDatabaseExit() async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    if (db != null) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  static getTeminalKey() async {
+    var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+    return terminalId;
+  }
+
+  static getbranchId() async {
+    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    return branchid;
+  }
+
+  static getCurrentDateTime(dateTime) async {
+    //converttoserver tiem
+    return dateTime.toString();
+  }
+
+  static getLocalID() async {
+    var deviceInfo = await CommunFun.deviceInfo();
+
+    final now = new DateTime.now();
+    var datetime = new DateTime(now.year, now.month, now.day);
+    var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+    var localid = Platform.isAndroid
+        ? "ANDROID" + deviceInfo.androidId + terminalId
+        : "IOS" + deviceInfo.androidId + terminalId;
+    return localid.toString();
   }
 }
