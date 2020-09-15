@@ -6,9 +6,9 @@ class ProductDetails {
   String sku;
   int priceTypeId;
   String priceTypeValue;
-  int price;
-  int oldPrice;
-  int qty;
+  double price;
+  double oldPrice;
+  double qty;
   int hasInventory;
   int status;
   String updatedAt;
@@ -45,11 +45,15 @@ class ProductDetails {
     sku = json['sku'];
     priceTypeId = json['price_type_id'];
     priceTypeValue = json['price_type_value'];
-    price = json['price'];
-    oldPrice = json['old_price'];
+    price = json['price'] is int
+        ? (json['price'] as int).toDouble()
+        : json['price'];
+    oldPrice = json['old_price'] is int
+        ? (json['old_price'] as int).toDouble()
+        : json['old_price'];
     hasInventory = json['has_inventory'];
     status = json['status'];
-    qty = int.parse(json['qty']);
+    qty = json['qty'] != null ? double.parse(json['qty']) : 0.0;
     updatedAt = json['updated_at'];
     deletedAt = json['deleted_at'];
     updatedBy = json['updated_by'];

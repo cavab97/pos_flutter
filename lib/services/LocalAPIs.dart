@@ -125,11 +125,12 @@ class LocalAPI {
       ProductDetails product, SaveOrder orderData, tableiD) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var cartid;
-    if (cartidd == 0) {
+    if (cartidd == null) {
       cartid = await db.insert("mst_cart", cartData.toJson());
     } else {
-      cartid = await db.update("mst_cart", cartData.toJson(),
+      var res_cartid = await db.update("mst_cart", cartData.toJson(),
           where: '${cartData.id} = ?', whereArgs: [cartidd]);
+      cartid = cartidd;
     }
     orderData.cartId = cartid; //cartid
     var response = await db.insert("save_order", orderData.toJson());
@@ -153,10 +154,10 @@ class LocalAPI {
     cartdetails.cartId = id;
     cartdetails.productId = product.productId;
     cartdetails.productName = product.name;
-    cartdetails.productPrice = cartData.sub_total;
-    cartdetails.productQty = cartData.total_qty;
+    cartdetails.productPrice = product.price;
+    cartdetails.productQty = product.qty;
     cartdetails.discount = 0;
-    cartdetails.taxValue = '0';
+    cartdetails.taxValue = 0;
     cartdetails.createdAt = DateTime.now().toString();
     var result1 = await db.insert("mst_cart_detail", cartdetails.toJson());
     print(result1);
@@ -179,7 +180,7 @@ class LocalAPI {
   }
 
   Future<List<SaveOrder>> getSaveOrder(id) async {
-    var qry = "SELECT * from save_order WHERE id =" + id;
+    var qry = "SELECT * from save_order WHERE id =" + id.toString();
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<SaveOrder> list =
         res.isNotEmpty ? res.map((c) => SaveOrder.fromJson(c)).toList() : [];
@@ -201,10 +202,11 @@ class LocalAPI {
     return list;
   }
 
-  Future<MST_Cart> getCurrentCart(cartID) async {
-    var query = "SELECT * from mst_cart where id=" + cartID;
+  Future<List<MST_Cart>> getCurrentCart(cartID) async {
+    var query = "SELECT * from mst_cart where id=" + cartID.toString();
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
-    MST_Cart list = res.isNotEmpty ? res.map((c) => MST_Cart.fromJson(c)) : [];
+    List<MST_Cart> list =
+        res.isNotEmpty ? res.map((c) => MST_Cart.fromJson(c)).toList() : [];
     return list;
   }
 }

@@ -4,7 +4,7 @@ class TablesDetails {
   int branchId;
   String tableName;
   int saveorderid;
- // int numberofpax;
+  // int numberofpax;
   int tableType;
   String tableQr;
   int tableCapacity;
@@ -42,8 +42,7 @@ class TablesDetails {
     tableQr = json['table_qr'];
     // numberofpax =
     //     json['number_of_pax'] != null ? int.parse(json['number_of_pax']) : 0;
-    saveorderid =
-        json['save_order_id'] != null ? int.parse(json['save_order_id']) : 0;
+    saveorderid = json['save_order_id'] != null ? json['save_order_id'] : 0;
     tableCapacity = json['table_capacity'];
     status = json['status'];
     availableStatus = json["available_status"];

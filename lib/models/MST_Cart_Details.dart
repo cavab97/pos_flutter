@@ -1,14 +1,16 @@
+import 'dart:ffi';
+
 class MSTCartdetails {
   int cartId;
   String localID;
   int productId;
   String productName;
-  int productPrice;
-  int productQty;
-  int productNetPrice;
+  double productPrice;
+  double productQty;
+  double productNetPrice;
   String taxId;
-  String taxValue;
-  int discount;
+  double taxValue;
+  double discount;
   int discountType;
   String remark;
   int isDeleted;
@@ -48,12 +50,12 @@ class MSTCartdetails {
     localID = json["localID"];
     productId = json["product_id"];
     productName = json["product_name"];
-    productPrice = json["product_price"];
-    productQty = json["product_qty"];
-    productNetPrice = json["product_net_price"];
+    productPrice = json["product_price"] as double;
+    productQty = json["product_qty"] as double;
+    productNetPrice = json["product_net_price"] as double;
     taxId = json["tax_id"];
-    taxValue = json["tax_value"];
-    discount = json["discount"];
+    taxValue = json["tax_value"] as double;
+    discount = json["discount"] as double;
     discountType = json["discount_type"];
     remark = json["remark"];
     isDeleted = json["is_deleted"];

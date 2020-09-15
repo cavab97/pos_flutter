@@ -55,4 +55,6 @@ class Strings {
   static String shift_open_message = "Shift is not Opned";
   static String modifier = "Modifier";
   static String notesAndQty = "Notes and Quantity";
+    static String btnclockin = "Clock\nIN";
+    static String btnclockout = "Clock\nOUT";
 }

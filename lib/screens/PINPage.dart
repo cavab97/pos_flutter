@@ -5,6 +5,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/CheckInout.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
@@ -143,8 +144,7 @@ class _PINPageState extends State<PINPage> {
         height: MediaQuery.of(context).size.height / 8.7,
         minWidth: MediaQuery.of(context).size.width / 9.9,
         child: Text(number,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30.0)),
+            textAlign: TextAlign.center, style: Styles.blackBoldLarge()),
         textColor: Colors.black,
         color: Colors.grey[100],
         onPressed: f,
@@ -169,8 +169,7 @@ class _PINPageState extends State<PINPage> {
                   children: <Widget>[
                     Text(
                       Strings.pin_Number,
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
+                      style: Styles.blackBoldLarge(),
                     )
                   ]),
               SizedBox(
@@ -266,13 +265,13 @@ class _PINPageState extends State<PINPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  _button("Clock\nIN", () {
+                  _button(Strings.btnclockin, () {
                     clockInwithPIN();
                   }),
                   _button("0", () {
                     addINPin("0");
                   }),
-                  _button("Clock\nOUT", () {}),
+                  _button(Strings.btnclockout, () {}),
                 ],
               ),
               SizedBox(
@@ -286,11 +285,7 @@ class _PINPageState extends State<PINPage> {
                         onPressed: () {
                           clearPin();
                         },
-                        child: Text("Clear",
-                            style: TextStyle(
-                                color: Colors.deepOrange,
-                                fontSize: 30,
-                                fontWeight: FontWeight.w600)))
+                        child: Text("Clear", style: Styles.orangeLarge()))
                   ])
             ],
           ),

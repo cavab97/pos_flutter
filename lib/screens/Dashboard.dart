@@ -11,6 +11,7 @@ import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
@@ -39,10 +40,10 @@ class _DashboradPageState extends State<DashboradPage>
   bool isShiftOpen = false;
   bool isTableSelected = false;
   Table_order selectedTable;
-  int subtotal = 0;
-  int discount = 0;
-  int tax = 0;
-  int grandTotal = 0;
+  double subtotal = 0;
+  double discount = 0;
+  double tax = 0;
+  double grandTotal = 0;
   int current_cart;
   bool isLoading = false;
 
@@ -69,13 +70,21 @@ class _DashboradPageState extends State<DashboradPage>
 
   checkidTableSelected() async {
     var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
     if (tableid != null) {
       var tableddata = json.decode(tableid);
       Table_order table = Table_order.fromJson(tableddata);
+      List<TablesDetails> tabledata =
+          await localAPI.getTableData(branchid, table.table_id);
+      table.save_order_id = tabledata[0].saveorderid;
       setState(() {
         isTableSelected = true;
         selectedTable = table;
       });
+      if (selectedTable.save_order_id != null &&
+          selectedTable.save_order_id != 0) {
+        getCurrentCart();
+      }
     }
   }
 
@@ -83,9 +92,11 @@ class _DashboradPageState extends State<DashboradPage>
     List<SaveOrder> currentOrder =
         await localAPI.getSaveOrder(selectedTable.save_order_id);
     print(currentOrder);
-    setState(() {
-      current_cart = currentOrder[0].cartId;
-    });
+    if (currentOrder.length != 0) {
+      setState(() {
+        current_cart = currentOrder[0].cartId;
+      });
+    }
   }
 
   checkshift() async {
@@ -109,15 +120,15 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   countTotals() {
-    var subTotal = 0;
-    var dis = 0;
-    var taxval = 0;
-    var grandtotal = 0;
+    var subTotal = 0.0;
+    var dis = 0.0;
+    var taxval = 0.0;
+    var grandtotal = 0.0;
     for (var i = 0; i < cartList.length; i++) {
       var cart = cartList[i];
       subTotal += cart.productPrice * cart.productQty;
       dis += cart.discount;
-      taxval += int.parse(cart.taxValue);
+      taxval += cart.taxValue;
       grandtotal = (subtotal + tax) - discount;
     }
     setState(() {
@@ -126,6 +137,15 @@ class _DashboradPageState extends State<DashboradPage>
       tax = taxval;
       grandTotal = grandtotal;
     });
+  }
+
+  void selectOption(choice) {
+    // Causes the app to rebuild with the new _selectedChoice.
+
+    switch (choice) {
+      case 0:
+        break;
+    }
   }
 
   getCategoryList() async {
@@ -186,7 +206,7 @@ class _DashboradPageState extends State<DashboradPage>
     shift.branchId = 1;
     shift.startAmount = int.parse(ammount);
     shift.endAmount = 0;
-    shift.updatedAt = "2020-09-09 06:43:09";
+    shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     shift.updatedBy = 1;
     var result = await localAPI.insertShift(shift);
   }
@@ -401,6 +421,10 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                   title: Text("Sync", style: Styles.communBlack())),
               ListTile(
+                  onTap: () async {
+                    await Preferences.removeSinglePref(Constant.LastSync_Table);
+                    await CommunFun.syncAfterSuccess(context);
+                  },
                   leading: Icon(
                     Icons.sync,
                     color: Colors.black,
@@ -502,48 +526,107 @@ class _DashboradPageState extends State<DashboradPage>
                       Icon(
                         Icons.person,
                         color: Colors.white,
-                        size: 40,
+                        size: 30,
                       ),
                       SizedBox(width: 10),
                       Text(
                         selectedTable.number_of_pax.toString(),
-                        style: TextStyle(color: Colors.white, fontSize: 25),
+                        style: Styles.whiteBoldsmall(),
                       ),
                     ],
                   )
                 : SizedBox(),
-            RaisedButton(
-              padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-              onPressed: () {
-                if (isShiftOpen) {
-                  opneShowAddCustomerDailog();
-                } else {
-                  CommunFun.showToast(context, Strings.shift_open_message);
-                }
-              },
-              child: Row(
-                children: <Widget>[
-                  Icon(
-                    Icons.add_circle_outline,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-                  SizedBox(width: 5),
-                  Text(Strings.btn_Add_customer,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      )),
-                ],
-              ),
-              color: Colors.deepOrange,
-              textColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50.0),
-              ),
-            )
+            addCustomerBtn(context),
+            menubutton(() {
+              // opneMenuButton();
+            })
           ],
         ));
+  }
+
+  Widget addCustomerBtn(context) {
+    return RaisedButton(
+      padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+      onPressed: () {
+        if (isShiftOpen) {
+          opneShowAddCustomerDailog();
+        } else {
+          CommunFun.showToast(context, Strings.shift_open_message);
+        }
+      },
+      child: Row(
+        children: <Widget>[
+          Icon(
+            Icons.add_circle_outline,
+            color: Colors.white,
+            size: 30,
+          ),
+          SizedBox(width: 5),
+          Text(Strings.btn_Add_customer,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+              )),
+        ],
+      ),
+      color: Colors.deepOrange,
+      textColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50.0),
+      ),
+    );
+  }
+
+  Widget menubutton(Function _onPress) {
+    return PopupMenuButton(
+        icon: Icon(
+          Icons.more_horiz,
+          color: Colors.pinkAccent,
+        ),
+        offset: Offset(0, 100),
+        // onSelected: 0,
+        onSelected: selectOption,
+        itemBuilder: (BuildContext context) => [
+              PopupMenuItem(
+                value: 0,
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.save_alt,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                    Text("Save Order")
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 1,
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.add_circle_outline,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                    Text("Open Order"),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 2,
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.add_circle_outline,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                    Text("Split Order"),
+                  ],
+                ),
+              ),
+            ]);
   }
 
   Widget porductsListLoading() {
@@ -855,7 +938,7 @@ class _DashboradPageState extends State<DashboradPage>
             Padding(
                 padding: EdgeInsets.only(top: 10, bottom: 10),
                 child: Text(
-                  cart.productQty.toDouble().toString(),
+                  cart.productQty.toString(),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -865,7 +948,7 @@ class _DashboradPageState extends State<DashboradPage>
             Padding(
                 padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
                 child: Text(
-                  cart.productPrice.toDouble().toString(),
+                  cart.productPrice.toString(),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -982,7 +1065,11 @@ class _DashboradPageState extends State<DashboradPage>
                   color: Colors.white,
                   child: carttitle,
                 ),
-                Container(margin: EdgeInsets.only(top: 50), child: cartTable),
+                Container(
+                    //color: Colors.white,
+                    height: MediaQuery.of(context).size.height / 2.4,
+                    margin: EdgeInsets.only(top: 50),
+                    child: SingleChildScrollView(child: cartTable)),
                 Positioned(
                     bottom: 0,
                     left: 0,

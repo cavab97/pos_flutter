@@ -6,8 +6,8 @@ class Product {
   String sku;
   int priceTypeId;
   String priceTypeValue;
-  int price;
-  int oldPrice;
+  double price;
+  double oldPrice;
   int hasInventory;
   int status;
   String updatedAt;
@@ -43,8 +43,12 @@ class Product {
     sku = json['sku'];
     priceTypeId = json['price_type_id'];
     priceTypeValue = json['price_type_value'];
-    price = json['price'];
-    oldPrice = json['old_price'];
+    price = json['price'] is int
+        ? (json['price'] as int).toDouble()
+        : json['price'];
+    oldPrice = json['old_price'] is int
+        ? (json['old_price'] as int).toDouble()
+        : json['old_price'];
     hasInventory = json['has_inventory'];
     status = json['status'];
     updatedAt = json['updated_at'];

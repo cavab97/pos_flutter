@@ -3,13 +3,13 @@ class MST_Cart {
   String localID;
   int user_id;
   int branch_id;
-  int sub_total;
-  int discount;
+  double sub_total;
+  double discount;
   int discount_type;
   String remark;
   double tax;
   double grand_total;
-  int total_qty;
+  double total_qty;
   int is_open;
   int is_deleted;
   int created_by;
@@ -54,17 +54,21 @@ class MST_Cart {
     localID = json["localID"];
     user_id = json["user_id"];
     branch_id = json["branch_id"];
-    sub_total = json["sub_total"];
-    discount = json["discount"];
+    sub_total = json["sub_total"] is int
+        ? (json['sub_total'] as int).toDouble()
+        : json['sub_total'];
+    discount = json["discount"] is int
+        ? (json['discount'] as int).toDouble()
+        : json['discount'];
     discount_type = json["discount_type"];
     remark = json["remark"];
-    tax = json["tax"];
-    grand_total = json["grand_total"];
-    total_qty = json["total_qty"];
+    tax = json["tax"] is int ? (json['tax'] as int).toDouble() : json['tax'];
+    grand_total = json["grand_total"] as double;
+    total_qty = json["total_qty"] as double;
     is_open = json["is_open"];
     is_deleted = json["is_deleted"];
     created_by = json["created_by"];
-    created_at = json["created_by"];
+    created_at = json["created_at"];
     // sync = json["sync"];
     customer_terminal = json["customer_terminal"];
     queue_number = json["queue_number"];

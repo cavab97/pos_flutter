@@ -214,8 +214,8 @@ class CreateTables {
         "sku TEXT," +
         "price_type_id INTEGER," +
         "price_type_value TEXT ," +
-        "price INTEGER," +
-        "old_price INTEGER," +
+        "price REAL," +
+        "old_price REAL," +
         "has_inventory INTEGER," +
         "status INTEGER," +
         "updated_at TEXT," +
@@ -226,7 +226,7 @@ class CreateTables {
 
     // Table product_category
     datatables = db.execute("CREATE TABLE product_category(" +
-        "pc_id INTEGER PRIMARY KEY," +
+        "pc_id INTEGER PRIMARY KEY AUTOINCREMENT," +
         "product_id INTEGER," +
         "category_id INTEGER," +
         "branch_id INTEGER," +
@@ -552,7 +552,7 @@ class CreateTables {
         'remark TEXT,' +
         'tax REAL,' +
         'grand_total REAL,' +
-        'total_qty  INTEGER,' +
+        'total_qty  REAL,' +
         'is_open INTEGER,' +
         'is_deleted   REAL,' +
         'created_by  INTEGER,' +
@@ -567,18 +567,28 @@ class CreateTables {
         // 'product_points REAL' +
         ')');
 
+    datatables = db.execute("CREATE TABLE mst_cart_sub_detail (" +
+        " id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        " cart_details_id INTEGER," +
+        " localID TEXT," +
+        " cart_details_product_id INTEGER," +
+        " modifier_id TEXT," +
+        " modifier_option_id TEXT," +
+        " variant_qty TEXT"
+            ")");
+
     datatables = db.execute("CREATE TABLE mst_cart_detail( " +
         'id INTEGER PRIMARY KEY AUTOINCREMENT,' +
         'cart_id INTEGER,' +
         'localID INTEGER,' +
         'product_id INTEGER,' +
         'product_name TEXT,' +
-        'product_price INTEGER,' +
-        'product_net_price INTEGER,' +
-        'product_qty INTEGER,' +
+        'product_price REAL,' +
+        'product_net_price REAL,' +
+        'product_qty REAL,' +
         'tax_id TEXT,' +
-        'tax_value TEXT,' + //varchar
-        'discount INTEGER,' + //DOUBLE
+        'tax_value REAL,' + //varchar
+        'discount REAL,' + //DOUBLE
         'discount_type  INTEGER,' + //int
         'remark TEXT,' +
         'is_deleted   INTEGER,' +

@@ -38,6 +38,15 @@ class Styles {
         fontFamily: Strings.fontFamily);
   }
 
+  static blackBoldLarge() {
+    // Back Text
+    return TextStyle(
+        color: Color(0xFF000000),
+        fontSize: 25,
+        fontWeight: FontWeight.w800,
+        fontFamily: Strings.fontFamily);
+  }
+
   static bluesmall() {
     return TextStyle(
         color: Color(0xFF0388fc),
@@ -51,6 +60,14 @@ class Styles {
         fontSize: 18,
         fontWeight: FontWeight.w700,
         color: Color(0xff100c56),
+        fontFamily: Strings.fontFamily);
+  }
+
+  static orangeLarge() {
+    return TextStyle(
+        fontSize: 30,
+        fontWeight: FontWeight.w600,
+        color: Color(0xffff531a),
         fontFamily: Strings.fontFamily);
   }
 }

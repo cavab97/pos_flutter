@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
@@ -7,11 +6,8 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
-import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
-import 'package:mcncashier/models/TableDetails.dart';
-import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
@@ -34,7 +30,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   MST_Cart currentCart = new MST_Cart();
   ModifireData selectedModifier;
   int product_qty = 1;
-  int price = 0;
+  double price = 0.0;
   TextStyle attrStyle = TextStyle(color: Colors.black, fontSize: 20.0);
   @override
   void initState() {
@@ -67,10 +63,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   getCartData() async {
-    MST_Cart cartval = await localAPI.getCurrentCart(widget.cartID);
-    setState(() {
-      currentCart = cartval;
-    });
+    List<MST_Cart> cartval = await localAPI.getCurrentCart(widget.cartID);
+    if (cartval.length != 0) {
+      setState(() {
+        currentCart = cartval[0];
+      });
+    }
   }
 
   increaseQty() {
@@ -164,47 +162,32 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cart.discount = currentCart.discount != null ? currentCart.discount + 0 : 0;
     cart.discount_type = 0;
     cart.total_qty = currentCart.total_qty != null
-        ? currentCart.total_qty + product_qty
-        : product_qty;
+        ? currentCart.total_qty + product_qty.toDouble()
+        : product_qty.toDouble();
     cart.tax = 0;
     cart.grand_total = currentCart.grand_total != null
-        ? currentCart.grand_total + price.toDouble()
-        : price.toDouble();
+        ? currentCart.grand_total + price
+        : price;
     cart.customer_terminal =
         customerData != null ? customerData["terminal_id"] : 0;
     cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
     cart.created_by = loginData["id"];
     cart.localID = await CommunFun.getLocalID();
-
     var tableData = await json.decode(table);
     orderData.orderName = tableData != null ? "" : "test";
     orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     orderData.numberofPax = tableData != null ? tableData["number_of_pax"] : 0;
     orderData.isTableOrder = tableData != null ? 1 : 0;
     var productdata = productItem;
+    productdata.qty = product_qty.toDouble();
     var result = await localAPI.insertItemTocart(
-
         ///insert
-        //
-        currentCart.id != null ? currentCart.id : 0,
+        currentCart.id,
         cart,
         productdata,
         orderData,
         tableData["table_id"]);
     print(result);
-    if (tableData != null) {
-      List<TablesDetails> tabledata =
-          await localAPI.getTableData(branchid, tableData["table_id"]);
-      print(tabledata);
-      var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
-      if (tableid != null) {
-        var tableddata = json.decode(tableid);
-        Table_order table = Table_order.fromJson(tableddata);
-        table.save_order_id = tabledata[0].saveorderid;
-        await Preferences.setStringToSF(
-            Constant.TABLE_DATA, json.encode(table));
-      }
-    }
     await Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
@@ -239,7 +222,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             Positioned(
                 bottom: 10,
                 right: 30,
-                child: Text(price.toDouble().toString(),
+                child: Text(price.toString(),
                     style: TextStyle(
                         color: Colors.deepOrange,
                         fontSize: 30,
@@ -497,7 +480,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       decoration:
           BoxDecoration(border: Border.all(width: 1, color: Colors.grey)),
       child: Center(
-        child: Text(product_qty.toDouble().toString(),
+        child: Text(product_qty.toString(),
             style: TextStyle(color: Colors.grey, fontSize: 25)),
       ),
     );
