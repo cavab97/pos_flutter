@@ -8,6 +8,7 @@ import 'package:mcncashier/models/Attribute_data.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
@@ -148,13 +149,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   produtAddTocart() async {
     MST_Cart cart = new MST_Cart();
     SaveOrder orderData = new SaveOrder();
+    MSTSubCartdetails subCartData = new MSTSubCartdetails();
     var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
     var table = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
     var customerData =
         await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
     var loginData = await json.decode(loginUser);
-
+    //cart data
     cart.user_id = customerData != null ? customerData["customer_id"] : 0;
     cart.branch_id = int.parse(branchid);
     cart.sub_total =
@@ -173,20 +175,22 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
     cart.created_by = loginData["id"];
     cart.localID = await CommunFun.getLocalID();
-    var tableData = await json.decode(table);
+    var tableData = await json.decode(table); // table data
     orderData.orderName = tableData != null ? "" : "test";
     orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     orderData.numberofPax = tableData != null ? tableData["number_of_pax"] : 0;
     orderData.isTableOrder = tableData != null ? 1 : 0;
-    var productdata = productItem;
+    var productdata = productItem; // PRoduct Data
     productdata.qty = product_qty.toDouble();
+
+// MST Sub Cart details
+  subCartData.localID = cart.localID;
+  subCartData.cartDetailsProductId = productdata.productId;
+  subCartData.modifierId = selectedModifier.modifierId;
+  subCartData.variantQty = product_qty.toDouble();
+    ///insert
     var result = await localAPI.insertItemTocart(
-        ///insert
-        currentCart.id,
-        cart,
-        productdata,
-        orderData,
-        tableData["table_id"]);
+        currentCart.id, cart, productdata, orderData, tableData["table_id"],subCartData);
     print(result);
     await Navigator.pushNamed(context, Constant.DashboardScreen);
   }

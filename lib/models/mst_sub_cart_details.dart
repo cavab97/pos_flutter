@@ -5,7 +5,7 @@ class MSTSubCartdetails {
   int cartDetailsProductId;
   int modifierId;
   int modifierOptionId;
-  String variantQty;
+  double variantQty;
 
   MSTSubCartdetails({
     this.id,
