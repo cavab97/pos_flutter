@@ -38,6 +38,15 @@ class Styles {
         fontFamily: Strings.fontFamily);
   }
 
+  static communBlacksmall() {
+    // Back Text
+    return TextStyle(
+        color: Color(0xFF000000),
+        fontSize: 18,
+        fontWeight: FontWeight.normal,
+        fontFamily: Strings.fontFamily);
+  }
+
   static blackBoldLarge() {
     // Back Text
     return TextStyle(

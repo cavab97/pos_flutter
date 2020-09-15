@@ -571,11 +571,12 @@ class CreateTables {
         " id INTEGER PRIMARY KEY AUTOINCREMENT," +
         " cart_details_id INTEGER," +
         " localID TEXT," +
-        " cart_details_product_id INTEGER," +
+        " product_id INTEGER," +
         " modifier_id TEXT," +
-        " modifier_option_id TEXT," +
-        " variant_qty TEXT"
-            ")");
+        " modifier_price  TEXT," +
+        " attribute_id INTEGER," +
+        " ca_id INTEGER" +
+        ")");
 
     datatables = db.execute("CREATE TABLE mst_cart_detail( " +
         'id INTEGER PRIMARY KEY AUTOINCREMENT,' +
@@ -657,12 +658,128 @@ class CreateTables {
         "sync INTEGER" +
         ")");
 
-    // db.transaction((txn) async {
-    //   int id1 = await txn.rawInsert("INSERT INTO user_checkinout(" +
-    //       "localID, user_id, branch_id,status,timeinout,created_at,terminalid,sync)" +
-    //       "VALUES('1',1,1,0,'20-12-2020 11:44:32','20-12-2020 11:44:32',1,0)");
-    //   print('inserted1: $id1');
-    // });
+    //TABLE mst_invoice
+    datatables = db.execute("CREATE TABLE mst_invoice ( " +
+        "id INTEGER," +
+        "localID TEXT," +
+        "user_id INTEGER," +
+        "branch_id INTEGER," +
+        "sub_total REAL," +
+        "discount REAL," +
+        "discount_type INTEGER," +
+        "remark varchar," +
+        "tax REAL," +
+        "grand_total REAL," +
+        "total_qty INTEGER," +
+        "paid_amount REAL," +
+        "change_amount REAL," +
+        "status INTEGER," +
+        "created_by INTEGER," +
+        "updated_by INTEGER," +
+        "created_at TEXT," +
+        "updated_at TEXT," +
+        "sync NUMERIC," +
+        "invoice_status INTEGER," +
+        "other_invoice_id TEXT," +
+        "serverId TEXT," +
+        "pax TEXT," +
+        "terminal_id INTEGER," +
+        "invoice_unique_id TEXT," +
+        "service_charge_rate REAL," +
+        "service_charge_amount REAL," +
+        "is_facked TEXT," +
+        "table_id TEXT," +
+        "is_merge_table TEXT," +
+        "merge_table_id TEXT," +
+        "table_seat TEXT," +
+        "customer_terminal INTEGER," +
+        "queue_number INTEGER," +
+        "creditcard_service_charge_rate REAL," +
+        "creditcard_service_charge_amt REAL" +
+
+// redeem_points DOUBLE,
+// redeem_point_amount DOUBLE,
+// point_earn_equal DOUBLE,
+// point_amount DOUBLE,
+// product_points DOUBLE
+
+        ")");
+
+    // TAble mst_invoice Details
+    datatables = db.execute("CREATE TABLE mst_invoice_detail ( " +
+        "id   INTEGER," +
+        "invoice_id   INTEGER," +
+        "localID   TEXT," +
+        "product_id   INTEGER," +
+        "product_name   TEXT," +
+        "product_price   REAL," +
+        "product_qty   REAL," +
+        "product_net_price   REAL," +
+        "discount   REAL," +
+        "discount_type   INTEGER," +
+        "tax_id   TEXT," +
+        "tax_value   TEXT ," +
+        "remark   TEXT," +
+        "status  INTEGER," +
+        "created_by  INTEGER," +
+        "updated_by  INTEGER," +
+        "created_at  TEXT," +
+        "updated_at  TEXT," +
+        "product_return   INTEGER," +
+        "return_qty   INTEGER," +
+        "return_amount   REAL," +
+        "return_product_id   TEXT," +
+        "sync   NUMERIC," +
+        "serverId  TEXT," +
+        "item_unit  TEXT" +
+        // "product_points  REAL," +
+        // "product_total_points  REAL," +
+        // "return_product_total_points  REAL" +
+        ")");
+
+    // table mst_invoice_sub_detail
+    datatables = db.execute("CREATE TABLE mst_invoice_sub_detail ( " +
+        "id  INTEGER," +
+        "invoice_details_id  INTEGER," +
+        "localID  TEXT," +
+        "invoice_details_product_id  INTEGER," +
+        "modifier_id  TEXT," +
+        "modifier_name  TEXT," +
+        "modifier_option_id  TEXT," +
+        "modifier_option_name  TEXT," +
+        "enable_qty  TEXT," +
+        "variant_qty  TEXT," +
+        "status INTEGER," +
+        "created_by INTEGER," +
+        "updated_by INTEGER," +
+        "created_at TEXT," +
+        "updated_at TEXT," +
+        "sync  NUMERIC," +
+        "serverId TEXT" +
+        ")");
+
+    // table mst_invoice_payment
+    datatables = db.execute("CREATE TABLE mst_invoice_payment ( " +
+        "id INTEGER," +
+        "invoice_id INTEGER," +
+        "localID TEXT," +
+        "payment_id INTEGER," +
+        "payment_amount REAL," +
+        "status INTEGER," +
+        "created_by INTEGER," +
+        "updated_by INTEGER," +
+        "created_at TEXT," +
+        "updated_at TEXT," +
+        "sync NUMERIC," +
+        "serverId TEXT," +
+        "sub_payment_method TEXT," +
+        "payment_status TEXT," +
+        "payment_transaction_id TEXT," +
+        "payment_response TEXT," +
+        "order_type TEXT," +
+        "payment_type TEXT," +
+        "payment_type_id INTEGER" +
+        ")");
 
     return datatables;
   }

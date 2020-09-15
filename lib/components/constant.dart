@@ -12,7 +12,10 @@ class Constant {
   static final String SERVER_DATE_TIME = "ServertDateTime";
   static final String TABLE_DATA = "table_id";
   static final String CUSTOMER_DATA = "customerData";
-
+  static final String IS_CHECKIN = "Checkin";
+ static final String IS_CHECKOUT = "Checkout";
+  static final String SHIFT_ID = "Shift_Id";
+   static final String DASH_SHIFT = "dashShift";
   /*==============================================================================
                               Manage API status
   =================================================================================*/
