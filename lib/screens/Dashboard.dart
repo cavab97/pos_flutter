@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
@@ -30,6 +31,11 @@ class DashboradPage extends StatefulWidget {
 
 class _DashboradPageState extends State<DashboradPage>
     with SingleTickerProviderStateMixin {
+
+  GlobalKey<AutoCompleteTextFieldState<ProductDetails>> keyAutoSuggestion = new GlobalKey();
+
+  AutoCompleteTextField searchTextField;
+
   TabController _tabController;
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
@@ -476,7 +482,103 @@ class _DashboradPageState extends State<DashboradPage>
           Container(
             height: 50,
             width: MediaQuery.of(context).size.width / 3.8,
-            child: TextField(
+              child: new Column(children: <Widget>[
+                new Column(children: <Widget>[
+                  searchTextField = AutoCompleteTextField<ProductDetails>(
+                      style: new TextStyle(color: Colors.black, fontSize: 16.0),
+                      decoration: new InputDecoration(
+                          suffixIcon: Container(
+                            width: 85.0,
+                            height: 60.0,
+                          ),
+                          contentPadding:
+                          EdgeInsets.fromLTRB(10.0, 30.0, 10.0, 20.0),
+                          filled: true,
+                          hintText: 'Search Player Name',
+                          hintStyle: TextStyle(color: Colors.black)),
+                      itemSubmitted: (item) {
+                        setState(() => searchTextField
+                            .textField.controller.text = item.base64);
+                      },
+                      clearOnSubmit: false,
+                      key: keyAutoSuggestion,
+                      //suggestions: ProductDetails.fromJson(),
+                      itemBuilder: (context, item) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text(
+                              item.name,
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(15.0),
+                            ),
+                            Text(
+                              item.base64,
+                            )
+                          ],
+                        );
+                      },
+                      itemSorter: (a, b) {
+                        return a.base64.compareTo(b.base64);
+                      },
+                      itemFilter: (item, query) {
+                        return item.base64
+                            .toLowerCase()
+                            .startsWith(query.toLowerCase());
+                      }),
+                ]),
+              ])
+
+            //For single suggestion
+            /*SimpleAutoCompleteTextField(
+              suggestions: [
+                "Apple",
+                "Armidillo",
+                "Actual",
+                "Actuary",
+                "America",
+                "Apple",
+                "Armidillo",
+                "Actual",
+                "Actuary",
+                "America",
+                "Argentina",
+                "Australia",
+                "Antarctica",
+                "Blueberry",
+              ],
+              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                suffixIcon: Padding(
+                  padding: EdgeInsets.only(right: 25),
+                  child: Icon(
+                    Icons.search,
+                    color: Colors.deepOrange,
+                    size: 30,
+                  ),
+                ),
+                hintText: Strings.search_bar_text,
+                hintStyle: TextStyle(fontSize: 18.0, color: Colors.black),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(50),
+                  borderSide: BorderSide(
+                    width: 0,
+                    style: BorderStyle.none,
+                  ),
+                ),
+                filled: true,
+                contentPadding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
+                fillColor: Colors.white,
+              ),
+              style: TextStyle(color: Colors.black, fontSize: 20.0),
+              key: keyAutoSuggestion,
+
+            ),*/
+
+            //Old one
+            /*TextField(
               keyboardType: TextInputType.text,
               decoration: InputDecoration(
                 suffixIcon: Padding(
@@ -504,7 +606,7 @@ class _DashboradPageState extends State<DashboradPage>
               onChanged: (e) {
                 print(e);
               },
-            ),
+            ),*/
           )
         ],
       ),
