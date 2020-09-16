@@ -3,14 +3,17 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
 import 'package:mcncashier/models/Category.dart';
+import 'package:mcncashier/models/CheckInout.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
+import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/TableDetails.dart';
+import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 
 class LocalAPI {
@@ -71,7 +74,8 @@ class LocalAPI {
         "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax from tables " +
             " LEFT JOIN table_order on table_order.table_id = tables.table_id " +
             " WHERE tables.status = 1 AND branch_id = " +
-            branchid;
+            branchid +
+            " GROUP by tables.table_id";
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<TablesDetails> list = res.isNotEmpty
         ? res.map((c) => TablesDetails.fromJson(c)).toList()
@@ -81,13 +85,33 @@ class LocalAPI {
 
   Future<int> insertTableOrder(Table_order table_order) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
-    var result = await db.insert("table_order", table_order.toJson());
+    var qry = "SELECT * from table_order where table_id =" +
+        table_order.table_id.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<Table_order> list =
+        res.isNotEmpty ? res.map((c) => Table_order.fromJson(c)).toList() : [];
+    var result;
+    if (list.length > 0) {
+      result = await db.update("table_order", table_order.toJson(),
+          where: '${table_order.table_id} = ?',
+          whereArgs: [table_order.table_id]);
+    } else {
+      result = await db.insert("table_order", table_order.toJson());
+    }
+
     return result;
   }
 
   Future<int> insertShift(Shift shift) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
-    var result = await db.insert("shift", shift.toJson());
+    var result;
+    if (shift.shiftId != null) {
+      result = await db.update("shift", shift.toJson(),
+          where: '${shift.shiftId} = ?', whereArgs: [shift.shiftId]);
+    } else {
+      result = await db.insert("shift", shift.toJson());
+    }
+
     return result;
   }
 
@@ -143,7 +167,6 @@ class LocalAPI {
       print(tablesaved);
     }
     var detailID = await addintoCartDetails(cartid, cartData, product);
-
     return detailID;
   }
 
@@ -164,19 +187,33 @@ class LocalAPI {
     return result1;
   }
 
-  Future<List<MSTCartdetails>> getCartItem() async {
-    var res =
-        await DatabaseHelper.dbHelper.getDatabse().query("mst_cart_detail");
+  Future<int> addsubCartData(MSTSubCartdetails data) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var result1 = await db.insert("mst_cart_sub_detail", data.toJson());
+    print(result1);
+    return result1;
+  }
+
+  Future<List<MSTCartdetails>> getCartItem(cartId) async {
+    var qry =
+        "SELECT * from mst_cart_detail where cart_id = " + cartId.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<MSTCartdetails> list = res.isNotEmpty
         ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
         : [];
     return list;
   }
 
-  Future<int> userCheckInOut(clockinOutData) async {
+  Future<int> userCheckInOut(CheckinOut clockinOutData) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
-    var result = await db.insert("user_checkinout", clockinOutData.toJson());
-    return result;
+    var shiftid;
+    if (clockinOutData.status == "IN") {
+      shiftid = await db.insert("user_checkinout", clockinOutData.toJson());
+    } else {
+      shiftid = await db.update("user_checkinout", clockinOutData.toJson(),
+          where: '${clockinOutData.id} = ?', whereArgs: [clockinOutData.id]);
+    }
+    return shiftid;
   }
 
   Future<List<SaveOrder>> getSaveOrder(id) async {
@@ -190,9 +227,11 @@ class LocalAPI {
   Future<List<TablesDetails>> getTableData(branchid, tableID) async {
     var query =
         "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax from tables " +
-            " LEFT JOIN table_order on table_order.table_id= " +
+            " LEFT JOIN table_order on table_order.table_id = " +
             tableID.toString() +
-            " WHERE tables.status = 1 AND branch_id = " +
+            " WHERE tables.table_id= " +
+            tableID.toString() +
+            " AND tables.status = 1 AND branch_id = " +
             branchid;
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<TablesDetails> list = res.isNotEmpty
@@ -207,6 +246,14 @@ class LocalAPI {
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<MST_Cart> list =
         res.isNotEmpty ? res.map((c) => MST_Cart.fromJson(c)).toList() : [];
+    return list;
+  }
+
+  Future<List<Payments>> getPaymentMethods() async {
+    var query = "SELECT * from mst_cart where status = 1";
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+    List<Payments> list =
+        res.isNotEmpty ? res.map((c) => Payments.fromJson(c)).toList() : [];
     return list;
   }
 }

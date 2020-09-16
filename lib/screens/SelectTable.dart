@@ -11,6 +11,7 @@ import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/TableDetails.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 class SelectTablePage extends StatefulWidget {
   // PIN Enter PAGE
@@ -32,11 +33,15 @@ class _SelectTablePageState extends State<SelectTablePage> {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
     getTables();
+    KeyboardVisibilityNotification().addNewListener(
+      onHide: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+    );
   }
 
   getTables() async {
     var branchid = await CommunFun.getbranchId();
-
     List<TablesDetails> tables = await localAPI.getTables(branchid);
     setState(() {
       tableList = tables;
@@ -236,6 +241,8 @@ class _SelectTablePageState extends State<SelectTablePage> {
             setState(() {
               selectedTable = table;
             });
+            paxController.text =
+                table.numberofpax != null ? table.numberofpax.toString() : "";
             openSelectTablePop();
           },
           child: Container(
@@ -268,7 +275,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
                   width: MediaQuery.of(context).size.width,
                   //height: itemHeight / 5,
                   decoration: BoxDecoration(
-                      color: Colors.grey[600],
+                      color: table.availableStatus == 1
+                          ? Colors.grey[600]
+                          : Colors.deepOrange,
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(20.0),
                           bottomRight: Radius.circular(20.0))),
@@ -277,7 +286,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                        table.tableType.toString().toUpperCase(),
+                        table.availableStatus == 1
+                            ? "Available"
+                            : "Not Available",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 18,

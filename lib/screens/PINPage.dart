@@ -20,12 +20,21 @@ class PINPage extends StatefulWidget {
 class _PINPageState extends State<PINPage> {
   var pinNumber = "";
   GlobalKey<ScaffoldState> scaffoldKey;
+  bool isCheckIn = false;
 
   LocalAPI localAPI = LocalAPI();
   @override
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
+    checkAlreadyclockin();
+  }
+
+  checkAlreadyclockin() async {
+    var isClockin = await Preferences.getStringValuesSF(Constant.IS_CHECKIN);
+    if (isClockin != null) {
+      isCheckIn = isClockin == "true" ? true : false;
+    }
   }
 
   addINPin(val) {
@@ -46,30 +55,72 @@ class _PINPageState extends State<PINPage> {
   }
 
   clockInwithPIN() async {
-    if (pinNumber.length >= 4) {
-      //TODO : API CALL for clockin
-      CheckinOut checkIn = new CheckinOut();
-      var deviceInfo = await CommunFun.deviceInfo();
-      var terminalId =
-          await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
-      var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
-      var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
-      var date = DateTime.now();
-      var user = json.decode(loginUser);
-      checkIn.localID = "Android" + deviceInfo.androidId + terminalId;
-      checkIn.terminalId = int.parse(terminalId);
-      checkIn.userId = user["id"];
-      checkIn.branchId = int.parse(branchid);
-      checkIn.status = "IN";
-      checkIn.timeInOut = date.toString();
-      checkIn.createdAt = date.toString();
-      checkIn.sync = 0;
-      var result = await localAPI.userCheckInOut(checkIn);
-      Navigator.pushNamed(context, Constant.DashboardScreen);
+    if (!isCheckIn) {
+      if (pinNumber.length >= 4) {
+        //TODO : API CALL for clockin
+        CheckinOut checkIn = new CheckinOut();
+        var deviceInfo = await CommunFun.deviceInfo();
+        var terminalId =
+            await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+        var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+        var loginUser =
+            await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+        var date = DateTime.now();
+        var user = json.decode(loginUser);
+        checkIn.localID = "Android" + deviceInfo.androidId + terminalId;
+        checkIn.terminalId = int.parse(terminalId);
+        checkIn.userId = user["id"];
+        checkIn.branchId = int.parse(branchid);
+        checkIn.status = "IN";
+        checkIn.timeInOut = date.toString();
+        checkIn.createdAt = date.toString();
+        checkIn.sync = 0;
+        var result = await localAPI.userCheckInOut(checkIn);
+        await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
+        await Preferences.setStringToSF(Constant.SHIFT_ID, result.toString());
+        Navigator.pushNamed(context, Constant.DashboardScreen);
+      } else {
+        scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text(Strings.pin_validation_message),
+        ));
+      }
     } else {
-      scaffoldKey.currentState.showSnackBar(SnackBar(
-        content: Text(Strings.pin_validation_message),
-      ));
+      CommunFun.showToast(context, "User Already checkedIN.");
+    }
+  }
+
+  clockOutwithPIN() async {
+    if (!isCheckIn) {
+      if (pinNumber.length >= 4) {
+        CheckinOut checkIn = new CheckinOut();
+        var deviceInfo = await CommunFun.deviceInfo();
+        var shiftid = await Preferences.getStringValuesSF(Constant.SHIFT_ID);
+        var terminalId =
+            await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+        var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+        var loginUser =
+            await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+        var date = DateTime.now();
+        var user = json.decode(loginUser);
+        checkIn.id = int.parse(shiftid);
+        checkIn.localID = "Android" + deviceInfo.androidId + terminalId;
+        checkIn.terminalId = int.parse(terminalId);
+        checkIn.userId = user["id"];
+        checkIn.branchId = int.parse(branchid);
+        checkIn.status = "OUT";
+        checkIn.timeInOut = date.toString();
+        checkIn.sync = 0;
+        var result = await localAPI.userCheckInOut(checkIn);
+        await Preferences.removeSinglePref(Constant.IS_CHECKIN);
+        await Preferences.removeSinglePref(Constant.SHIFT_ID);
+        Navigator.pushNamed(context, Constant.PINScreen);
+      } else {
+        scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text(Strings.pin_validation_message),
+        ));
+      }
+    } else {
+      CommunFun.showToast(context, "User Already checkedOUT.");
     }
   }
 
@@ -271,7 +322,9 @@ class _PINPageState extends State<PINPage> {
                   _button("0", () {
                     addINPin("0");
                   }),
-                  _button(Strings.btnclockout, () {}),
+                  _button(Strings.btnclockout, () {
+                    clockOutwithPIN();
+                  }),
                 ],
               ),
               SizedBox(

@@ -4,8 +4,10 @@ import 'package:mcncashier/components/StringFile.dart';
 
 class OpeningAmmountPage extends StatefulWidget {
   // Opning ammount popup
-  OpeningAmmountPage({Key key, this.onEnter}) : super(key: key);
+  OpeningAmmountPage({Key key, this.isStartAmmount, this.onEnter})
+      : super(key: key);
   Function onEnter;
+  final bool isStartAmmount;
   @override
   _OpeningAmmountPageState createState() => _OpeningAmmountPageState();
 }
@@ -302,7 +304,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                       textColor: Colors.black,
                       color: Colors.white,
                       onPressed: () {
-                        widget.onEnter(currentNumber);
+                        widget.onEnter(currentNumber, widget.isStartAmmount);
                         Navigator.of(context).pop();
                       },
                     ),

@@ -123,8 +123,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   setPrice() {
     var productPrice = productItem.price;
-    var pricewithQty = productPrice * product_qty;
-    var newPrice = pricewithQty;
+    var newPrice = productPrice;
     if (selectedAttr.length > 0) {
       for (int i = 0; i < selectedAttr.length; i++) {
         var price = selectedAttr[i]["attr_price"];
@@ -134,8 +133,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (selectedModifier != null) {
       newPrice += selectedModifier.price;
     }
+    var pricewithQty = newPrice * product_qty;
     setState(() {
-      price = newPrice;
+      price = pricewithQty;
     });
   }
 
@@ -182,16 +182,20 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     orderData.isTableOrder = tableData != null ? 1 : 0;
     var productdata = productItem; // PRoduct Data
     productdata.qty = product_qty.toDouble();
-
+    productdata.price = price;
 // MST Sub Cart details
-  subCartData.localID = cart.localID;
-  subCartData.cartDetailsProductId = productdata.productId;
-  subCartData.modifierId = selectedModifier.modifierId;
-  subCartData.variantQty = product_qty.toDouble();
+
     ///insert
-    var result = await localAPI.insertItemTocart(
-        currentCart.id, cart, productdata, orderData, tableData["table_id"],subCartData);
+    var result = await localAPI.insertItemTocart(currentCart.id, cart,
+        productdata, orderData, tableData["table_id"], subCartData);
     print(result);
+    subCartData.cartdetailsId = result;
+    subCartData.localID = cart.localID;
+    subCartData.productId = productdata.productId;
+    subCartData.modifierId = selectedModifier.modifierId.toString();
+    subCartData.modifirePrice = selectedModifier.price.toString();
+    var res = await localAPI.addsubCartData(subCartData);
+    print(res);
     await Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
@@ -229,7 +233,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                 child: Text(price.toString(),
                     style: TextStyle(
                         color: Colors.deepOrange,
-                        fontSize: 30,
+                        fontSize: 25,
                         fontWeight: FontWeight.bold))),
             Container(
               width: MediaQuery.of(context).size.width / 1.4,
@@ -411,9 +415,19 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                             width: 4)),
                     height: 20,
                     minWidth: 50,
-                    child: Text(
-                      modifier.name.toString(),
-                      style: attrStyle,
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          modifier.name.toString(),
+                          style: attrStyle,
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          modifier.price.toDouble().toString(),
+                          style:
+                              TextStyle(color: Colors.deepOrange, fontSize: 15),
+                        ),
+                      ],
                     ),
                     textColor: Colors.black,
                     color: Colors.grey[300],
@@ -479,13 +493,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   Widget _quantityTextInput() {
     return Container(
-      height: 50,
-      width: 90,
+      height: 40,
+      width: 70,
       decoration:
           BoxDecoration(border: Border.all(width: 1, color: Colors.grey)),
       child: Center(
         child: Text(product_qty.toString(),
-            style: TextStyle(color: Colors.grey, fontSize: 25)),
+            style: TextStyle(color: Colors.grey, fontSize: 20)),
       ),
     );
   }
@@ -495,13 +509,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return Padding(
       padding: EdgeInsets.all(5),
       child: MaterialButton(
-        height: 50,
+        height: 35,
         child: Text(number,
             textAlign: TextAlign.center,
             style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 40.0)),
+                fontSize: 30.0)),
         textColor: Colors.black,
         color: Colors.deepOrange,
         onPressed: f,
