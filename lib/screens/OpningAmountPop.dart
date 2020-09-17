@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mcncashier/components/StringFile.dart';
+
 
 class OpeningAmmountPage extends StatefulWidget {
   // Opning ammount popup
-  OpeningAmmountPage({Key key, this.isStartAmmount, this.onEnter})
+  OpeningAmmountPage({Key key, this.ammountext, this.onEnter})
       : super(key: key);
   Function onEnter;
-  final bool isStartAmmount;
+  final String ammountext;
   @override
   _OpeningAmmountPageState createState() => _OpeningAmmountPageState();
 }
@@ -31,7 +31,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(Strings.title_opening_amount.toUpperCase(),
+                Text(widget.ammountext.toString().toUpperCase(),
                     style: TextStyle(fontSize: 20, color: Colors.white)),
               ],
             ),
@@ -304,7 +304,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                       textColor: Colors.black,
                       color: Colors.white,
                       onPressed: () {
-                        widget.onEnter(currentNumber, widget.isStartAmmount);
+                        widget.onEnter(currentNumber);
                         Navigator.of(context).pop();
                       },
                     ),

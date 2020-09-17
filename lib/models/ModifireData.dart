@@ -3,7 +3,7 @@ class ModifireData {
   int modifierId;
   int isDefault;
   int pmId;
-  int price;
+  double price;
 
   ModifireData({
     this.name,

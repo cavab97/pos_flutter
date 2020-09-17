@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 class MSTCartdetails {
+  int id;
   int cartId;
   String localID;
   int productId;
@@ -46,6 +47,7 @@ class MSTCartdetails {
       this.createdBy});
 
   MSTCartdetails.fromJson(Map<String, dynamic> json) {
+    id = json["id"];
     cartId = json["cart_id"];
     localID = json["localID"];
     productId = json["product_id"];
@@ -70,7 +72,7 @@ class MSTCartdetails {
   }
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-
+    data["id"] = this.id;
     data["cart_id"] = this.cartId;
     data["localID"] = this.localID;
     data["product_id"] = this.productId;

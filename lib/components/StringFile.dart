@@ -3,6 +3,7 @@ class Strings {
   static String something_wrong = "Something went wrong!";
   static String pin_Dialog_title = "Pin Verification";
   static String title_opening_amount = "Opening Amount";
+  static String title_closing_amount = "Closing Amount";
   static String forgot_password = "Forgot password?";
   static String login_text = "YOU CAN ENTER YOUR USERNAME & PASSWORD HERE";
   static String cancel_tansaction = "Cancel Transaction";
@@ -58,4 +59,6 @@ class Strings {
   static String btnclockin = "Clock\nIN";
   static String btnclockout = "Clock\nOUT";
   static String select_Payment_type = "Select Payment Method";
+  static String btn_exect = "Excet";
+  static String cash = "CASH";
 }

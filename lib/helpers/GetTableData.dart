@@ -4,6 +4,7 @@ import 'package:mcncashier/models/Attributes.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Pinter.dart';
 import 'package:mcncashier/models/Price_Type.dart';
 import 'package:mcncashier/models/Product.dart';
@@ -276,9 +277,9 @@ class TableData {
         // TODO : need resaponce
         for (var i = 0; i < paymentData.length; i++) {
           var paymentDataitem = paymentData[i];
-          //Payment table = Tables.fromJson(paymentDataitem);
-          //var result = await db.insert("tables", table.toJson());
-          //print(result);
+          Payments payments = Payments.fromJson(paymentDataitem);
+          var result = await db.insert("payment", payments.toJson());
+          print(result);
         }
       }
       return 1;

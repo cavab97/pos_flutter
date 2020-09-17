@@ -47,6 +47,7 @@ class _DashboradPageState extends State<DashboradPage>
   double tax = 0;
   double grandTotal = 0;
   int current_cart;
+
   bool isLoading = false;
 
   @override
@@ -145,7 +146,7 @@ class _DashboradPageState extends State<DashboradPage>
       subTotal += cart.productPrice;
       dis += cart.discount;
       taxval += cart.taxValue;
-      grandtotal = (subtotal + tax) - discount;
+      grandtotal = (subTotal + taxval) - dis;
     }
     setState(() {
       subtotal = subTotal;
@@ -172,7 +173,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   closeShift() {
-    openOpningAmmountPop(false);
+    openOpningAmmountPop(Strings.title_closing_amount);
   }
 
   void selectOption(choice) {
@@ -231,19 +232,10 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         builder: (BuildContext context) {
           return OpeningAmmountPage(
-              isStartAmmount: isopning,
-              onEnter: (ammount, isstartAmmount) {
-                sendOpenShft(ammount, isstartAmmount);
+              ammountext: isopning,
+              onEnter: (ammountext) {
+                sendOpenShft(ammountext);
               });
-        });
-  }
-
-  opnePaymentMethod() {
-    showDialog(
-        // Opning Ammount Popup
-        context: context,
-        builder: (BuildContext context) {
-          return PaymentMethodPop();
         });
   }
 
@@ -255,7 +247,7 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
-  sendOpenShft(ammount, isStart) async {
+  sendOpenShft(ammount) async {
     setState(() {
       isShiftOpen = true;
     });
@@ -265,16 +257,16 @@ class _DashboradPageState extends State<DashboradPage>
 
     shift.appId = 1;
     shift.branchId = 1;
-    if (isStart) {
+    if (shiftid == null) {
       shift.startAmount = int.parse(ammount);
     } else {
-      shift.shiftId = shiftid;
-      shift.endAmount = !isStart ? int.parse(ammount) : 0;
+      shift.shiftId = int.parse(shiftid);
+      shift.endAmount = int.parse(ammount);
     }
     shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     shift.updatedBy = 1;
     var result = await localAPI.insertShift(shift);
-    if (isStart) {
+    if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
     } else {
       await Preferences.removeSinglePref(Constant.DASH_SHIFT);
@@ -326,6 +318,22 @@ class _DashboradPageState extends State<DashboradPage>
         });
   }
 
+  opnePaymentMethod() {
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return PaymentMethodPop(
+              cartID: current_cart,
+              itemCount: cartList.length,
+              subTotal: subtotal,
+              grandTotal: grandTotal);
+        });
+  }
+
+  editCartItem(cart) {
+    //TODO : edit cart Item
+  }
   selectTable() {
     Navigator.pushNamed(context, Constant.SelectTableScreen);
   }
@@ -676,7 +684,7 @@ class _DashboradPageState extends State<DashboradPage>
                         color: Colors.black,
                         size: 30,
                       ),
-                      SizedBox(width: 10),
+                      SizedBox(width: 20),
                       Text("Close Table", style: Styles.communBlack())
                     ],
                   ),
@@ -693,7 +701,7 @@ class _DashboradPageState extends State<DashboradPage>
                         color: Colors.black,
                         size: 30,
                       ),
-                      SizedBox(width: 10),
+                      SizedBox(width: 20),
                       Text("Save Order", style: Styles.communBlack())
                     ],
                   ),
@@ -710,7 +718,7 @@ class _DashboradPageState extends State<DashboradPage>
                         color: Colors.black,
                         size: 30,
                       ),
-                      SizedBox(width: 10),
+                      SizedBox(width: 20),
                       Text("Open Order", style: Styles.communBlack()),
                     ],
                   ),
@@ -727,7 +735,7 @@ class _DashboradPageState extends State<DashboradPage>
                         color: Colors.black,
                         size: 30,
                       ),
-                      SizedBox(width: 10),
+                      SizedBox(width: 20),
                       Text("Split Order", style: Styles.communBlack()),
                     ],
                   ),
@@ -744,7 +752,7 @@ class _DashboradPageState extends State<DashboradPage>
                         color: Colors.black,
                         size: 30,
                       ),
-                      SizedBox(width: 10),
+                      SizedBox(width: 20),
                       Text("Close Shift", style: Styles.communBlack()),
                     ],
                   ),
@@ -981,7 +989,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
                 SizedBox(height: 30),
                 shiftbtn(() {
-                  openOpningAmmountPop(true);
+                  openOpningAmmountPop(Strings.title_opening_amount);
                 })
               ],
             )),
@@ -1080,12 +1088,16 @@ class _DashboradPageState extends State<DashboradPage>
             menuItems: <Widget>[
               new Container(
                 child: new IconButton(
+                  onPressed: () {},
                   icon: new Icon(Icons.delete),
                 ),
               ),
               new Container(
                 child: new IconButton(
-                  icon: new Icon(Icons.info),
+                  onPressed: () {
+                    editCartItem(cart);
+                  },
+                  icon: new Icon(Icons.edit),
                 ),
               ),
             ],

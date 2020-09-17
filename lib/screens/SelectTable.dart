@@ -52,6 +52,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
     Table_order table_order = new Table_order();
     table_order.table_id = selectedTable.tableId;
     table_order.number_of_pax = int.parse(paxController.text);
+    table_order.save_order_id = selectedTable.saveorderid;
     var result = await localAPI.insertTableOrder(table_order);
     print(result);
     await Preferences.setStringToSF(
@@ -262,12 +263,26 @@ class _SelectTablePageState extends State<SelectTablePage> {
                             topRight: Radius.circular(20.0))),
                     width: MediaQuery.of(context).size.width,
                     height: itemHeight / 2,
-                    child: Center(
-                      child: Text(
-                        table.tableName,
-                        style: Styles.communBlack(),
-                      ),
-                    ),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            table.tableName,
+                            style: Styles.blackBoldLarge(),
+                          ),
+                          SizedBox(height: 10),
+                          table.numberofpax != null
+                              ? Text(
+                                  table.numberofpax.toString() +
+                                      "/" +
+                                      table.tableCapacity.toString(),
+                                  style: Styles.communBlack())
+                              : Text(
+                                  table.tableCapacity.toString(),
+                                  style: Styles.communBlack(),
+                                )
+                        ]),
                   ),
                 ),
                 Container(
@@ -275,9 +290,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
                   width: MediaQuery.of(context).size.width,
                   //height: itemHeight / 5,
                   decoration: BoxDecoration(
-                      color: table.availableStatus == 1
-                          ? Colors.grey[600]
-                          : Colors.deepOrange,
+                      color: table.numberofpax != null
+                          ? Colors.deepOrange
+                          : Colors.grey[600],
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(20.0),
                           bottomRight: Radius.circular(20.0))),
@@ -286,9 +301,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                        table.availableStatus == 1
-                            ? "Available"
-                            : "Not Available",
+                        table.numberofpax != null
+                            ? "Not Available"
+                            : "Available",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 18,

@@ -29,7 +29,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   List<ModifireData> modifireList = [];
   List selectedAttr = [];
   MST_Cart currentCart = new MST_Cart();
-  ModifireData selectedModifier;
+  List<ModifireData> selectedModifier = [];
   int product_qty = 1;
   double price = 0.0;
   TextStyle attrStyle = TextStyle(color: Colors.black, fontSize: 20.0);
@@ -130,9 +130,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         newPrice += int.parse(price);
       }
     }
-    if (selectedModifier != null) {
-      newPrice += selectedModifier.price;
+    if (selectedModifier.length > 0) {
+      for (int i = 0; i < selectedModifier.length; i++) {
+        var mprice = selectedModifier[i].price;
+        newPrice += mprice;
+      }
     }
+
     var pricewithQty = newPrice * product_qty;
     setState(() {
       price = pricewithQty;
@@ -140,9 +144,18 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   setModifire(mod) {
-    setState(() {
-      selectedModifier = mod;
-    });
+    var isSelected = selectedModifier.any((item) => item.pmId == mod.pmId);
+    if (isSelected) {
+      selectedModifier.removeWhere((item) => item.pmId == mod);
+      setState(() {
+        selectedModifier = selectedModifier;
+      });
+    } else {
+      selectedModifier.add(mod);
+      setState(() {
+        selectedModifier = selectedModifier;
+      });
+    }
     setPrice();
   }
 
@@ -188,14 +201,33 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     ///insert
     var result = await localAPI.insertItemTocart(currentCart.id, cart,
         productdata, orderData, tableData["table_id"], subCartData);
-    print(result);
-    subCartData.cartdetailsId = result;
-    subCartData.localID = cart.localID;
-    subCartData.productId = productdata.productId;
-    subCartData.modifierId = selectedModifier.modifierId.toString();
-    subCartData.modifirePrice = selectedModifier.price.toString();
-    var res = await localAPI.addsubCartData(subCartData);
-    print(res);
+
+    if (selectedModifier.length > 0) {
+      for (var i = 0; i < selectedModifier.length; i++) {
+        var modifire = selectedModifier[i];
+        subCartData.cartdetailsId = result;
+        subCartData.localID = cart.localID;
+        subCartData.productId = productdata.productId;
+        subCartData.modifierId = modifire.modifierId;
+        subCartData.modifirePrice = modifire.price;
+        var res = await localAPI.addsubCartData(subCartData);
+        print(res);
+      }
+    }
+    if (selectedAttr.length > 0) {
+      for (var i = 0; i < selectedAttr.length; i++) {
+        var attr = selectedAttr[i];
+        subCartData.cartdetailsId = result;
+        subCartData.localID = cart.localID;
+        subCartData.productId = productdata.productId;
+        subCartData.caId = attr["ca_id"];
+        subCartData.attributeId = int.parse(attr["attrType_ID"]);
+        subCartData.attrPrice = int.parse(attr["attr_price"]).toDouble();
+        var res = await localAPI.addsubCartData(subCartData);
+        print(res);
+      }
+    }
+    
     await Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
@@ -406,10 +438,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                         side: BorderSide(
-                            color: selectedModifier != null &&
-                                        modifier.pmId ==
-                                            selectedModifier.pmId ||
-                                    modifier.isDefault == 1
+                            color: selectedModifier.any((item) =>
+                                    item.pmId == modifier.pmId ||
+                                    modifier.isDefault == 1)
                                 ? Colors.green
                                 : Colors.grey[300],
                             width: 4)),
@@ -509,7 +540,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return Padding(
       padding: EdgeInsets.all(5),
       child: MaterialButton(
-        height: 35,
+        height: 40,
         child: Text(number,
             textAlign: TextAlign.center,
             style: TextStyle(
