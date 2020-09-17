@@ -21,7 +21,18 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "2.4.0"
+=======
+    version: "2.5.0-nullsafety"
+  autocomplete_textfield:
+    dependency: "direct main"
+    description:
+      name: autocomplete_textfield
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.7.3"
+>>>>>>> f962d8393e1794786c9ca151554abdcb9ad2354a
   boolean_selector:
     dependency: transitive
     description:
@@ -90,13 +101,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_slidable:
-    dependency: "direct main"
-    description:
-      name: flutter_slidable
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.5.7"
   flutter_staggered_grid_view:
     dependency: "direct main"
     description:
