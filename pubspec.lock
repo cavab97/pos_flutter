@@ -21,10 +21,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
     version: "2.4.0"
-=======
-    version: "2.5.0-nullsafety"
   autocomplete_textfield:
     dependency: "direct main"
     description:
@@ -32,7 +29,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.7.3"
->>>>>>> f962d8393e1794786c9ca151554abdcb9ad2354a
   boolean_selector:
     dependency: transitive
     description:
@@ -194,7 +190,7 @@ packages:
       name: path_provider_macos
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.4+3"
+    version: "0.0.4+4"
   path_provider_platform_interface:
     dependency: transitive
     description:
@@ -347,6 +343,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.11"
+  timezone:
+    dependency: "direct main"
+    description:
+      name: timezone
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.7"
   toast:
     dependency: "direct main"
     description:

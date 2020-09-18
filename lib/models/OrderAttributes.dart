@@ -9,7 +9,7 @@ class OrderAttributes {
   int attribute_id;
   double attr_price;
   int ca_id;
-  int oa_status;
+
   String oa_datetime;
   int oa_by;
   String updated_at;
@@ -25,7 +25,6 @@ class OrderAttributes {
     this.attribute_id,
     this.attr_price,
     this.ca_id,
-    this.oa_status,
     this.oa_datetime,
     this.oa_by,
     this.updated_at,
@@ -45,11 +44,10 @@ class OrderAttributes {
         ? (json['attr_price'] as int).toDouble()
         : json['attr_price'];
     ca_id = json["ca_id"];
-    oa_status = json["oa_status"];
     oa_datetime = json["oa_datetime"];
     oa_by = json["oa_by"];
     updated_at = json["updated_at"];
-    updated_by = json["updated_at"];
+    updated_by = json["updated_by"];
   }
 
   Map<String, dynamic> toJson() {
@@ -64,7 +62,6 @@ class OrderAttributes {
     data["attribute_id"] = this.attribute_id;
     data["attr_price"] = this.attr_price;
     data["ca_id"] = this.ca_id;
-    data["oa_status"] = this.oa_status;
     data["oa_datetime"] = this.oa_datetime;
     data["oa_by"] = this.oa_by;
     data["updated_at"] = this.updated_at;

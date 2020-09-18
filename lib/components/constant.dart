@@ -10,6 +10,7 @@ class Constant {
   static final String LastSync_Table = "LastSync_Table";
   static final String IS_SHIFT_OPEN = "IS_SHIFT_OPENE";
   static final String SERVER_DATE_TIME = "ServertDateTime";
+  static final String SERVER_TIME_ZONE = "ServertTimeZone";
   static final String TABLE_DATA = "table_id";
   static final String CUSTOMER_DATA = "customerData";
   static final String IS_CHECKIN = "Checkin";

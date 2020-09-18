@@ -30,4 +30,3 @@ Future<dynamic> syncTable(dynamic data) async {
     return null;
   }
 }
-

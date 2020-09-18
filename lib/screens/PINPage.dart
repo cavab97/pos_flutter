@@ -21,7 +21,7 @@ class _PINPageState extends State<PINPage> {
   var pinNumber = "";
   GlobalKey<ScaffoldState> scaffoldKey;
   bool isCheckIn = false;
-
+  bool isLoading = false;
   LocalAPI localAPI = LocalAPI();
   @override
   void initState() {
@@ -38,7 +38,7 @@ class _PINPageState extends State<PINPage> {
   }
 
   addINPin(val) {
-    if (pinNumber.length < 4) {
+    if (pinNumber.length < 6) {
       var currentpinNumber = pinNumber;
       currentpinNumber += val;
       print(currentpinNumber);
@@ -55,9 +55,15 @@ class _PINPageState extends State<PINPage> {
   }
 
   clockInwithPIN() async {
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var user = json.decode(loginUser);
+    var pin = user["user_pin"];
     if (!isCheckIn) {
-      if (pinNumber.length >= 4) {
+      if (pinNumber.length >= 6 && pin.toString() == pinNumber) {
         //TODO : API CALL for clockin
+        setState(() {
+          isLoading = true;
+        });
         CheckinOut checkIn = new CheckinOut();
         var deviceInfo = await CommunFun.deviceInfo();
         var terminalId =
@@ -79,10 +85,17 @@ class _PINPageState extends State<PINPage> {
         await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
         await Preferences.setStringToSF(Constant.SHIFT_ID, result.toString());
         Navigator.pushNamed(context, Constant.DashboardScreen);
+        setState(() {
+          isLoading = false;
+        });
       } else {
-        scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text(Strings.pin_validation_message),
-        ));
+        if (pinNumber.length >= 6) {
+          CommunFun.showToast(context, "Invalid PIN.");
+        } else {
+          scaffoldKey.currentState.showSnackBar(SnackBar(
+            content: Text(Strings.pin_validation_message),
+          ));
+        }
       }
     } else {
       CommunFun.showToast(context, "User Already checkedIN.");
@@ -90,8 +103,14 @@ class _PINPageState extends State<PINPage> {
   }
 
   clockOutwithPIN() async {
-    if (!isCheckIn) {
-      if (pinNumber.length >= 4) {
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var user = json.decode(loginUser);
+    var pin = user["user_pin"];
+    if (isCheckIn) {
+      if (pinNumber.length >= 6 && pinNumber == pin.toString()) {
+        setState(() {
+          isLoading = true;
+        });
         CheckinOut checkIn = new CheckinOut();
         var deviceInfo = await CommunFun.deviceInfo();
         var shiftid = await Preferences.getStringValuesSF(Constant.SHIFT_ID);
@@ -114,10 +133,15 @@ class _PINPageState extends State<PINPage> {
         await Preferences.removeSinglePref(Constant.IS_CHECKIN);
         await Preferences.removeSinglePref(Constant.SHIFT_ID);
         Navigator.pushNamed(context, Constant.PINScreen);
+        setState(() {
+          isLoading = false;
+        });
       } else {
-        scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text(Strings.pin_validation_message),
-        ));
+        if (pinNumber.length >= 6) {
+          CommunFun.showToast(context, "Invalid PIN.");
+        } else {
+          CommunFun.showToast(context, Strings.pin_validation_message);
+        }
       }
     } else {
       CommunFun.showToast(context, "User Already checkedOUT.");
@@ -257,6 +281,20 @@ class _PINPageState extends State<PINPage> {
                     color: Colors.deepOrange,
                     size: 40,
                   ),
+                  Icon(
+                    pinNumber.length >= 5
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
+                    color: Colors.deepOrange,
+                    size: 40,
+                  ),
+                  Icon(
+                    pinNumber.length >= 6
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
+                    color: Colors.deepOrange,
+                    size: 40,
+                  ),
                 ],
               ),
               SizedBox(
@@ -330,6 +368,9 @@ class _PINPageState extends State<PINPage> {
               SizedBox(
                 height: 15,
               ),
+             isLoading?
+             CommunFun.loader(context)
+             :
               Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -347,5 +388,3 @@ class _PINPageState extends State<PINPage> {
     );
   }
 }
-
-class KeyboardVisibilityNotification {}

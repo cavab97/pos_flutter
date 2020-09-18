@@ -100,17 +100,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     }
   }
 
-  Future<User> getuserDetails() async {
-    User user = new User();
-    var users = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
-    if (users != null) {
-      var user1 = json.decode(users);
-      return user = User.fromJson(user1);
-    } else {
-      return user;
-    }
-  }
-
   Future<List<MSTCartdetails>> getcartDetails() async {
     List<MSTCartdetails> list = await localAPI.getCartItem(widget.cartID);
     print(list);
@@ -125,7 +114,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   }
 
   clearCartAfterSuccess() async {
-    var result = await localAPI.removeCartItem(widget.cartID);
+    Table_order tables = await getTableData();
+    var result = await localAPI.removeCartItem(widget.cartID, tables.table_id);
     print(result);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
   }
@@ -137,7 +127,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     Orders order = new Orders();
     Customer customer = await getCustomer();
     Table_order tables = await getTableData();
-    User userdata = await getuserDetails();
+    User userdata = await CommunFun.getuserDetails();
     var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
     var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
     var uuid = await CommunFun.getLocalID();
@@ -213,7 +203,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
           attributes.attribute_id = modifire.attributeId;
           attributes.attr_price = modifire.attrPrice;
           attributes.ca_id = modifire.caId;
-          attributes.oa_status = 1;
           attributes.oa_datetime = datetime;
           attributes.oa_by = userdata.id;
           attributes.updated_at = datetime;
@@ -232,7 +221,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     orderpayment.terminal_id = int.parse(terminalId);
     orderpayment.app_id = int.parse(terminalId);
     orderpayment.op_method_id = payment.paymentId;
-    orderpayment.op_amount = widget.grandTotal;
+    orderpayment.op_amount = widget.grandTotal.toDouble();
     orderpayment.op_method_response = '';
     orderpayment.op_status = 1;
     orderpayment.op_datetime = datetime;

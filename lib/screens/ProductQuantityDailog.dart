@@ -6,6 +6,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
+import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
@@ -14,9 +15,11 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
-  ProductQuantityDailog({Key key, this.product, this.cartID}) : super(key: key);
+  ProductQuantityDailog({Key key, this.product, this.cartID, this.iscartItem})
+      : super(key: key);
   final product;
   final int cartID;
+  final iscartItem;
   @override
   _ProductQuantityDailogState createState() => _ProductQuantityDailogState();
 }
@@ -26,24 +29,69 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   LocalAPI localAPI = LocalAPI();
   List<Attribute_Data> attributeList = [];
   ProductDetails productItem;
+  MSTCartdetails cartitem;
   List<ModifireData> modifireList = [];
   List selectedAttr = [];
   MST_Cart currentCart = new MST_Cart();
   List<ModifireData> selectedModifier = [];
-  int product_qty = 1;
+  double product_qty = 1;
   double price = 0.0;
+  bool isEditing = false;
+
   TextStyle attrStyle = TextStyle(color: Colors.black, fontSize: 20.0);
   @override
   void initState() {
     super.initState();
     setState(() {
+      isEditing = widget.iscartItem != null;
       productItem = widget.product;
       price = productItem.price;
+      cartitem = widget.iscartItem;
     });
     getAttributes();
     if (widget.cartID != null) {
       getCartData();
     }
+  }
+
+  setEditingData() async {
+    List<MSTSubCartdetails> details =
+        await localAPI.getItemModifire(cartitem.id);
+
+    if (details.length > 0) {
+      for (var i = 0; i < details.length; i++) {
+        var item = details[i];
+        if (item.caId != null) {
+          //Attr
+          if (attributeList.length > 0) {
+            for (var i = 0; i < attributeList.length; i++) {
+              var attribute = attributeList[i];
+              var attributType = attribute.attr_types.split(',');
+              var attrIDs = attribute.attributeId.split(',').asMap();
+              var attrtypesPrice =
+                  attribute.attr_types_price.split(',').asMap();
+              for (var a = 0; a < attributType.length; a++) {
+                onSelectAttr(attribute.ca_id, attributType[a], attrIDs[a],
+                    attrtypesPrice[a]);
+              }
+            }
+          }
+        } else {
+          // Modi
+          if (modifireList.length > 0) {
+            for (var j = 0; j < modifireList.length; j++) {
+              if (modifireList[j].modifierId == item.modifierId) {
+                setModifire(modifireList[i]);
+              }
+            }
+          }
+        }
+      }
+    }
+    product_qty = cartitem.productQty is int
+        ? cartitem.productQty.toDouble()
+        : cartitem.productQty;
+    price = cartitem.productPrice;
   }
 
   getAttributes() async {
@@ -61,6 +109,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         modifireList = productModifeir;
       });
     }
+    if (isEditing) {
+      setEditingData();
+    }
   }
 
   getCartData() async {
@@ -73,11 +124,21 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   increaseQty() {
-    var prevproductqty = product_qty;
-    setState(() {
-      product_qty = prevproductqty + 1;
-      // price = productItem.price * product_qty;
-    });
+    if (productItem.hasInventory == 0) {
+      var prevproductqty = product_qty;
+      setState(() {
+        product_qty = prevproductqty + 1;
+      });
+    } else {
+      if (product_qty <= productItem.qty) {
+        var prevproductqty = product_qty;
+        setState(() {
+          product_qty = prevproductqty + 1;
+        });
+      } else {
+        CommunFun.showToast(context, "selected qty is not available in store");
+      }
+    }
     setPrice();
   }
 
@@ -145,6 +206,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   setModifire(mod) {
     var isSelected = selectedModifier.any((item) => item.pmId == mod.pmId);
+
     if (isSelected) {
       selectedModifier.removeWhere((item) => item.pmId == mod);
       setState(() {
@@ -157,6 +219,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       });
     }
     setPrice();
+  }
+
+  updateCartItem() {
+    produtAddTocart();
   }
 
   produtAddTocart() async {
@@ -185,27 +251,46 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         : price;
     cart.customer_terminal =
         customerData != null ? customerData["terminal_id"] : 0;
-    cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    if (!isEditing) {
+      cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    }
     cart.created_by = loginData["id"];
     cart.localID = await CommunFun.getLocalID();
     var tableData = await json.decode(table); // table data
     orderData.orderName = tableData != null ? "" : "test";
-    orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    if (!isEditing) {
+      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    }
     orderData.numberofPax = tableData != null ? tableData["number_of_pax"] : 0;
     orderData.isTableOrder = tableData != null ? 1 : 0;
     var productdata = productItem; // PRoduct Data
     productdata.qty = product_qty.toDouble();
     productdata.price = price;
-// MST Sub Cart details
+    // MST Sub Cart details
 
     ///insert
-    var result = await localAPI.insertItemTocart(currentCart.id, cart,
+    var cartid = await localAPI.insertItemTocart(currentCart.id, cart,
         productdata, orderData, tableData["table_id"], subCartData);
+
+    MSTCartdetails cartdetails = new MSTCartdetails();
+    if (isEditing) {
+      cartdetails.id = cartitem.id;
+    }
+    cartdetails.cartId = cartid;
+    cartdetails.productId = productdata.productId;
+    cartdetails.productName = productdata.name;
+    cartdetails.productPrice = productdata.price;
+    cartdetails.productQty = productdata.qty;
+    cartdetails.discount = 0;
+    cartdetails.taxValue = 0;
+    cartdetails.createdAt = DateTime.now().toString();
+
+    var detailID = await localAPI.addintoCartDetails(cartdetails);
 
     if (selectedModifier.length > 0) {
       for (var i = 0; i < selectedModifier.length; i++) {
         var modifire = selectedModifier[i];
-        subCartData.cartdetailsId = result;
+        subCartData.cartdetailsId = detailID;
         subCartData.localID = cart.localID;
         subCartData.productId = productdata.productId;
         subCartData.modifierId = modifire.modifierId;
@@ -217,7 +302,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (selectedAttr.length > 0) {
       for (var i = 0; i < selectedAttr.length; i++) {
         var attr = selectedAttr[i];
-        subCartData.cartdetailsId = result;
+        subCartData.cartdetailsId = detailID;
         subCartData.localID = cart.localID;
         subCartData.productId = productdata.productId;
         subCartData.caId = attr["ca_id"];
@@ -227,7 +312,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         print(res);
       }
     }
-    
+
     await Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
@@ -327,8 +412,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return SafeArea(
       child: SingleChildScrollView(
         child: Container(
-          //  height: MediaQuery.of(context).size.height / 2.4,
           width: MediaQuery.of(context).size.width / 2.8,
+          //height: MediaQuery.of(context).size.height /2.5,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -559,17 +644,27 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return RaisedButton(
       padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
       onPressed: () {
-        produtAddTocart();
+        if (isEditing) {
+          updateCartItem();
+        } else {
+          produtAddTocart();
+        }
       },
       child: Row(
         children: <Widget>[
-          Icon(
-            Icons.add_circle_outline,
-            color: Colors.white,
-            size: 30,
-          ),
+          !isEditing
+              ? Icon(
+                  Icons.add_circle_outline,
+                  color: Colors.white,
+                  size: 30,
+                )
+              : Icon(
+                  Icons.edit,
+                  color: Colors.white,
+                  size: 27,
+                ),
           SizedBox(width: 10),
-          Text("Add",
+          Text(isEditing ? "Update" : "Add",
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
