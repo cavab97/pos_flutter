@@ -281,12 +281,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.productName = productdata.name;
     cartdetails.productPrice = productdata.price;
     cartdetails.productQty = productdata.qty;
+    cartdetails.productNetPrice = productdata.oldPrice;
     cartdetails.discount = 0;
     cartdetails.taxValue = 0;
+    cartdetails.createdBy = loginData["id"];
     cartdetails.createdAt = DateTime.now().toString();
-
     var detailID = await localAPI.addintoCartDetails(cartdetails);
-
+    
     if (selectedModifier.length > 0) {
       for (var i = 0; i < selectedModifier.length; i++) {
         var modifire = selectedModifier[i];
@@ -347,7 +348,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             Positioned(
                 bottom: 10,
                 right: 30,
-                child: Text(price.toString(),
+                child: Text(productItem.priceTypeName + " " + price.toString(),
                     style: TextStyle(
                         color: Colors.deepOrange,
                         fontSize: 25,

@@ -50,7 +50,7 @@ class ProductDetails {
     priceTypeValue = json['price_type_value'];
     price = json['price'] is int
         ? (json['price'] as int).toDouble()
-        : json['price'] as double;
+        : json['price'];
 
     oldPrice = json['old_price'] is int
         ? (json['old_price'] as int).toDouble()

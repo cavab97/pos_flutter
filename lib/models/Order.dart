@@ -5,7 +5,7 @@ class Orders {
   int terminal_id;
   int app_id;
   int table_no;
-  int invoice_no;
+  String invoice_no;
   int customer_id;
   int tax_percent;
   double tax_amount;

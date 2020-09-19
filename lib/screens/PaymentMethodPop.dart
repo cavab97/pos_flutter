@@ -8,6 +8,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Order.dart';
@@ -41,6 +42,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   LocalAPI localAPI = LocalAPI();
   bool isLoading = false;
   var newAmmount;
+  MST_Cart cartData;
   @override
   void initState() {
     // TODO: implement initState
@@ -49,6 +51,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       newAmmount = widget.grandTotal;
     });
     getPaymentMethods();
+    getcartData();
   }
 
   getPaymentMethods() async {
@@ -58,6 +61,14 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         paymenttyppeList = result;
       });
     }
+  }
+
+  getcartData() async {
+    var cartDatalist = await localAPI.getCartData(widget.cartID);
+    print(cartData);
+    setState(() {
+      cartData = cartDatalist;
+    });
   }
 
   openAmountPop() {
@@ -128,29 +139,31 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     Customer customer = await getCustomer();
     Table_order tables = await getTableData();
     User userdata = await CommunFun.getuserDetails();
+    List<MSTCartdetails> cartList = await getcartDetails();
     var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
     var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
     var uuid = await CommunFun.getLocalID();
-    var datetime =
-        await CommunFun.getCurrentDateTime(DateTime.now()).toString();
+    var datetime = CommunFun.getCurrentDateTime(DateTime.now()).toString();
+
     order.uuid = uuid;
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
     order.app_id = int.parse(terminalId);
     order.table_no = tables.table_id;
+    order.invoice_no = "000000" + order.app_id.toString();
     order.customer_id = customer.customerId;
-    order.sub_total = widget.subTotal;
-    order.sub_total_after_discount = widget.subTotal;
-    order.grand_total = widget.grandTotal;
-    order.order_item_count = widget.itemCount;
+    order.sub_total = cartData.sub_total;
+    order.sub_total_after_discount = cartData.sub_total - cartData.discount;
+    order.grand_total = cartData.grand_total - cartData.discount;
+    order.order_item_count = cartData.total_qty.toInt();
     order.order_date = datetime;
     order.order_by = userdata.id;
-
+    order.voucher_id = cartData.voucherId;
+    order.voucher_amount = cartData.discount;
     var orderid = await localAPI.placeOrder(order);
     print(orderid);
     var orderDetailid;
     if (orderid > 0) {
-      List<MSTCartdetails> cartList = await getcartDetails();
       if (cartList.length > 0) {
         var orderId = orderid;
         for (var i = 0; i < cartList.length; i++) {
@@ -164,6 +177,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
           orderDetail.product_id = cartItem.productId;
           orderDetail.product_price = cartItem.productPrice;
           orderDetail.product_old_price = cartItem.productNetPrice;
+          orderDetail.detail_qty = cartItem.productQty;
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
           print(orderDetailid);
         }
@@ -220,7 +234,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     orderpayment.branch_id = int.parse(branchid);
     orderpayment.terminal_id = int.parse(terminalId);
     orderpayment.app_id = int.parse(terminalId);
-    orderpayment.op_method_id = payment.paymentId;
+    orderpayment.op_method_id = payment != "" ? payment.paymentId : 0;
     orderpayment.op_amount = widget.grandTotal.toDouble();
     orderpayment.op_method_response = '';
     orderpayment.op_status = 1;
@@ -297,7 +311,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                     SizedBox(width: 10),
                     GestureDetector(
                       onTap: () {
-                        sendPaymentByCash("CASH");
+                        sendPaymentByCash("");
                       },
                       child: Container(
                         height: 50,

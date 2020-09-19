@@ -267,21 +267,11 @@ class _SelectTablePageState extends State<SelectTablePage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
+                          SizedBox(height: 30),
                           Text(
                             table.tableName,
                             style: Styles.blackBoldLarge(),
                           ),
-                          SizedBox(height: 10),
-                          table.numberofpax != null
-                              ? Text(
-                                  table.numberofpax.toString() +
-                                      "/" +
-                                      table.tableCapacity.toString(),
-                                  style: Styles.communBlack())
-                              : Text(
-                                  table.tableCapacity.toString(),
-                                  style: Styles.communBlack(),
-                                )
                         ]),
                   ),
                 ),
@@ -300,19 +290,27 @@ class _SelectTablePageState extends State<SelectTablePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(
-                        table.numberofpax != null
-                            ? "Not Available"
-                            : "Available",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white),
-                      ),
+                      table.numberofpax != null
+                          ? Text(
+                              "Occupied : " +
+                                  table.numberofpax.toString() +
+                                  "/" +
+                                  table.tableCapacity.toString(),
+                              style: Styles.whiteSimpleSmall())
+                          : Text(
+                              "Vacant : " +
+                                  "0" +
+                                  "/" +
+                                  table.tableCapacity.toString(),
+                              style: Styles.whiteSimpleSmall())
                     ],
                   ),
                 ),
+                Positioned(
+                    top: 10,
+                    left: 10,
+                    child: Text(table.numberofpax != null ? "Orders : 1" : "Orders : 0",
+                        style: Styles.communBlack()))
               ],
             ),
           ),

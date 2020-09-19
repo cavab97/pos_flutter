@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/constant.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 class TransactionsPage extends StatefulWidget {
   // Transactions list
@@ -19,46 +22,22 @@ class TransactionsPage extends StatefulWidget {
 }
 
 class _TransactionsPageState extends State<TransactionsPage> {
-  var productsList = [
-    {
-      'index': 0,
-      'name': "Daniels Salazar fd sd",
-      'picture': "assets/image1.jfif",
-      'price': "500.00"
-    },
-    {
-      'index': 2,
-      'name': "Contreras Reesenjnc jn",
-      'picture': "assets/image2.jfif",
-      'price': "500.00"
-    },
-    {
-      'index': 3,
-      'name': "Moody Cabrera sdfds ",
-      'picture': "assets/image3.jfif",
-      'price': "500.00"
-    },
-    {
-      'index': 4,
-      'name': "Moody Cabrera sdfs ",
-      'picture': "assets/photo-1504674900247-0877df9cc836.jfif",
-      'price': "500.00"
-    },
-    {
-      'index': 5,
-      'name': "Moody Cabrera",
-      'picture': "assets/image5.webp",
-      'price': "500.00"
-    }
-  ];
   LocalAPI localAPI = LocalAPI();
   List<Orders> orderLists = [];
+  List<Orders> filterList = [];
   Orders selectedOrder = new Orders();
+  OrderPayment orderpayment = new OrderPayment();
   List<ProductDetails> detailsList = [];
+  bool isFiltering = false;
   @override
   void initState() {
     super.initState();
     getTansactionList();
+    KeyboardVisibilityNotification().addNewListener(
+      onHide: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+    );
   }
 
   getTansactionList() async {
@@ -82,6 +61,28 @@ class _TransactionsPageState extends State<TransactionsPage> {
         detailsList = details;
       });
     }
+    List<OrderPayment> orderpaymentdata =
+        await localAPI.getOrderpaymentData(order.app_id);
+    setState(() {
+      orderpayment = orderpaymentdata[0];
+    });
+  }
+
+  startFilter() {
+    setState(() {
+      filterList = orderLists;
+      isFiltering = true;
+    });
+  }
+
+  filterOrders(val) {
+    var list = orderLists
+        .where((x) =>
+            x.invoice_no.toString().toLowerCase().contains(val.toLowerCase()))
+        .toList();
+    setState(() {
+      filterList = list;
+    });
   }
 
   @override
@@ -150,88 +151,90 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     // Part 2 transactions list
                     child: Center(
                       child: SingleChildScrollView(
-                          child: orderLists.length > 0
-                              ? Container(
-                                  width: MediaQuery.of(context).size.width / 2,
-                                  margin: EdgeInsets.only(top: 5),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: <Widget>[
-                                      Text(
-                                        "Wen,August 19 09:53 PM",
-                                        style: TextStyle(
-                                            fontSize: 25,
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                Theme.of(context).primaryColor),
-                                      ),
-                                      SizedBox(
-                                        height: 30,
-                                      ),
-                                      Text(
-                                        "13.00",
-                                        style: TextStyle(
-                                            fontSize: 28,
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                Theme.of(context).accentColor),
-                                      ),
-                                      SizedBox(
-                                        height: 30,
-                                      ),
-                                      Text(
-                                        "00000000 - Processed by OKDEE OKEY PROCESSED FORM",
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                Theme.of(context).primaryColor),
-                                      ),
-                                      SizedBox(
-                                        height: 30,
-                                      ),
-                                      Container(
-                                        height: 50,
-                                        width:
-                                            MediaQuery.of(context).size.width /
-                                                2,
-                                        child: Center(
-                                          child: Text(
-                                            "Aaron Young",
-                                            style: TextStyle(
-                                                fontSize: 23,
-                                                fontWeight: FontWeight.bold,
-                                                color: Theme.of(context)
-                                                    .accentColor),
-                                          ),
+                        child: orderLists.length > 0
+                            ? Container(
+                                width: MediaQuery.of(context).size.width / 2,
+                                margin: EdgeInsets.only(top: 5),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Text(
+                                      "Wen,August 19 09:53 PM",
+                                      style: TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
+                                    SizedBox(
+                                      height: 30,
+                                    ),
+                                    Text(
+                                      orderpayment.op_amount.toString(),
+                                      style: TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context).accentColor),
+                                    ),
+                                    SizedBox(
+                                      height: 30,
+                                    ),
+                                    Text(
+                                      selectedOrder.invoice_no != null
+                                          ? selectedOrder.invoice_no +
+                                              " - Processed by OKDEE OKEY PROCESSED FORM"
+                                          : " 0000000 - Processed by OKDEE OKEY PROCESSED FORM",
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
+                                    SizedBox(
+                                      height: 30,
+                                    ),
+                                    Container(
+                                      height: 50,
+                                      width:
+                                          MediaQuery.of(context).size.width / 2,
+                                      child: Center(
+                                        child: Text(
+                                          "Aaron Young",
+                                          style: TextStyle(
+                                              fontSize: 23,
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context)
+                                                  .accentColor),
                                         ),
-                                        color:
-                                            Colors.grey[900].withOpacity(0.4),
                                       ),
-                                      productList(),
-                                      SizedBox(
-                                        height: 30,
-                                      ),
-                                      totalAmountValues(),
-                                      SizedBox(
-                                        height: 30,
-                                      ),
-                                      cancelButton(() {
-                                        Navigator.of(context).pop();
-                                      }),
-                                    ],
-                                  ),
-                                )
-                              : Container(
-                                  width: MediaQuery.of(context).size.width / 2,
-                                  margin: EdgeInsets.only(top: 5),
-                                  child: Center(
-                                    child: Text("No Details Found",
-                                        style: Styles.whiteBold()),
-                                  ),
-                                )),
+                                      color: Colors.grey[900].withOpacity(0.4),
+                                    ),
+                                    productList(),
+                                    SizedBox(
+                                      height: 30,
+                                    ),
+                                    totalAmountValues(),
+                                    SizedBox(
+                                      height: 30,
+                                    ),
+                                    cancelButton(() {
+                                      CommunFun.showToast(
+                                          context, "Work in progress...");
+                                      //Navigator.of(context).pop();
+                                    }),
+                                  ],
+                                ),
+                              )
+                            : Container(
+                                width: MediaQuery.of(context).size.width / 2,
+                                margin: EdgeInsets.only(top: 5),
+                                child: Center(
+                                  child: Text("No Details Found",
+                                      style: Styles.whiteBold()),
+                                ),
+                              ),
+                      ),
                     ),
                   ),
                 ]),
@@ -281,8 +284,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
           fillColor: Colors.white,
         ),
         style: TextStyle(color: Colors.black, fontSize: 25.0),
+        onTap: () {
+          startFilter();
+        },
         onChanged: (e) {
           print(e);
+          if (e.length != 0) {
+            filterOrders(e);
+          }
         },
       ),
     );
@@ -337,7 +346,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   Padding(
                       padding: EdgeInsets.only(top: 10, bottom: 10),
                       child: Text(
-                        "00:00",
+                        selectedOrder.voucher_amount.toString(),
                         style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: Theme.of(context).accentColor),
@@ -446,17 +455,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         width: 130,
                         decoration: new BoxDecoration(
                           color: Colors.greenAccent,
-                          image: new DecorationImage(
-                            image: new ExactAssetImage("assets/image1.jfif"),
-                            fit: BoxFit.cover,
-                          ),
+                          // image: new DecorationImage(
+                          //   image: new ExactAssetImage("assets/image1.jfif"),
+                          //   fit: BoxFit.cover,
+                          // ),
                         ),
-                        // child: image_Arr.length != 0 && image_Arr[0] != ""
-                        //     ? CommonUtils.imageFromBase64String(image_Arr[0])
-                        //     : new Image.asset(
-                        //         'assets/no_image.png',
-                        //         fit: BoxFit.cover,
-                        //       ),
+                        child: image_Arr.length != 0 && image_Arr[0] != ""
+                            ? CommonUtils.imageFromBase64String(image_Arr[0])
+                            : new Image.asset(
+                                'assets/no_image.png',
+                                fit: BoxFit.cover,
+                              ),
                       ),
                     ),
                     SizedBox(width: 15),
@@ -480,7 +489,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           SizedBox(
                             width: 8,
                           ),
-                          Text(product.price.toString(),
+                          Text(product.qty.toString(),
                               style: TextStyle(
                                   fontSize: 20,
                                   color: Theme.of(context).primaryColor)),
@@ -488,7 +497,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           Text(product.price.toString(),
                               style: TextStyle(
                                   fontSize: 20,
-                                  color: Theme.of(context).accentColor)),
+                                  color: Theme.of(context).primaryColor)),
                         ],
                       ),
                     )
@@ -513,7 +522,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                     color: Colors.grey[600])),
-            subtitle: Text('INVOICE : 0000000092',
+            subtitle: Text('INVOICE : ' + item.invoice_no.toString(),
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w500,

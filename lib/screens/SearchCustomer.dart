@@ -29,7 +29,6 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
 
   getcustomerList() async {
     var terminalkey = await CommunFun.getTeminalKey();
-
     List<Customer> customers = await localAPI.getCustomers(terminalkey);
     setState(() {
       customerList = customers;

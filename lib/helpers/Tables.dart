@@ -412,8 +412,10 @@ class CreateTables {
         "uses_customer INTEGER," +
         "status	INTEGER," +
         "updated_at	TEXT," +
-        "updated_by	INTEGER" +
-        ")");
+        "updated_by	INTEGER," +
+        "deleted_at TEXT," +
+        "deleted_by INTEGER"
+            ")");
 
     // TABLE order
     datatables = db.execute("CREATE TABLE orders(" +
@@ -506,7 +508,7 @@ class CreateTables {
         "terminal_id INTEGER," +
         "app_id INTEGER," +
         "op_method_id INTEGER," +
-        "op_amount INTEGER ," +
+        "op_amount REAL," +
         "op_method_response TEXT," +
         "op_status INTEGER," +
         "op_datetime TEXT," +
@@ -575,18 +577,11 @@ class CreateTables {
         'tax REAL,' +
         'grand_total REAL,' +
         'total_qty  REAL,' +
-        'is_open INTEGER,' +
         'is_deleted   REAL,' +
         'created_by  INTEGER,' +
         'created_at  TEXT,' +
-        // 'sync  NUMERIC,' + //BOOLEAN
-        'customer_terminal INTEGER,' +
-        'queue_number INTEGER' +
-        // 'service_charge_rate REAL,' +
-        // 'service_charge_amount INTEGER,' +
-        // 'redeem_points REAL,' +
-        // 'redeem_point_amount REAL,' +
-        // 'product_points REAL' +
+        'voucher_id INTEGER,' +
+        'customer_terminal INTEGER' +
         ')');
 
     datatables = db.execute("CREATE TABLE mst_cart_sub_detail (" +

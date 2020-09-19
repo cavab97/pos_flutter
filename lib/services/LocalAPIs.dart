@@ -12,9 +12,11 @@ import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Product.dart';
+import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/TableDetails.dart';
+import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
@@ -78,10 +80,9 @@ class LocalAPI {
   }
 
   Future<List<Customer>> getCustomers(teminalID) async {
-    var query = "SELECT * from customer WHERE " +
-        " customer.status = 1 " +
-        " AND customer.terminal_id = " +
-        teminalID;
+    var query = "SELECT * from customer WHERE " + " customer.status = 1 ";
+
+    teminalID;
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Customer> list =
         res.isNotEmpty ? res.map((c) => Customer.fromJson(c)).toList() : [];
@@ -145,7 +146,7 @@ class LocalAPI {
     var result;
     if (shift.shiftId != null) {
       result = await db.update("shift", shift.toJson(),
-          where: '${shift.shiftId} = ?', whereArgs: [shift.shiftId]);
+          where: 'shift_id = ?', whereArgs: [shift.shiftId]);
     } else {
       result = await db.insert("shift", shift.toJson());
     }
@@ -208,8 +209,9 @@ class LocalAPI {
             "table_order", response.toString());
       }
     } else {
+      cartData.id = cartidd;
       var res_cartid = await db.update("mst_cart", cartData.toJson(),
-          where: '${cartData.id} = ?', whereArgs: [cartidd]);
+          where: 'id = ?', whereArgs: [cartidd]);
       cartid = cartidd;
       await SyncAPICalls.logActivity(
           "product", "Product update in to cart", "mst_cart", res_cartid);
@@ -228,9 +230,6 @@ class LocalAPI {
     } else {
       cartdetailid = await db.insert("mst_cart_detail", cartdetails.toJson());
     }
-    await SyncAPICalls.logActivity(
-        "product", "insert cart details", "mst_cart_detail", cartdetailid);
-    return cartdetailid;
   }
 
   Future<int> addsubCartData(MSTSubCartdetails data) async {
@@ -517,22 +516,88 @@ class LocalAPI {
     List<Orders> list = ordersList.isNotEmpty
         ? ordersList.map((c) => Orders.fromJson(c)).toList()
         : [];
+    await SyncAPICalls.logActivity(
+        "Transactions", "get Orders list", "Orders", branchid);
     return list;
   }
 
   Future<List<ProductDetails>> getOrderDetails(orderid) async {
-    var qry = "SELECT product.product_id,product.name,product.has_inventory  ," +
-        " replace(product.price ,product.price,order_detail.product_price) as price ,group_concat(replace(asset.base64,'data:image/jpg;base64,','') ," +
-        " ' groupconcate_Image ') as base64  from order_detail  " +
-        " LEFT join product on product.product_id = order_detail.product_id " +
-        " LEFT join asset on asset.asset_type = 1 AND " +
-        " asset.asset_type_id = product.product_id  where order_detail.order_id =" +
-        orderid.toString();
+    var qry =
+        "SELECT P.product_id,P.name,P.price group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 FROM order_detail O " +
+            " LEFT JOIN product P ON O.product_id = P.product_id" +
+            " LEFT join asset on asset.asset_type_id = P.product_id " +
+            " WHERE asset.asset_type = 1 and order_id = " +
+            orderid.toString() +
+            " group by p.product_id";
 
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<ProductDetails> list = ordersList.isNotEmpty
         ? ordersList.map((c) => ProductDetails.fromJson(c)).toList()
         : [];
+    await SyncAPICalls.logActivity(
+        "Transactions", "get Orders  details list", "ProductDetails", orderid);
     return list;
+  }
+
+  Future<List<OrderPayment>> getOrderpaymentData(orderid) async {
+    var qry =
+        "SELECT * from order_payment where order_id =" + orderid.toString();
+    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<OrderPayment> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<Voucher>> checkVoucherIsExit(code) async {
+    var qry = "SELECT * from voucher  where voucher_code = '" + code + "'";
+    var voucherList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<Voucher> list = voucherList.isNotEmpty
+        ? voucherList.map((c) => Voucher.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity("voucher", "get voucher list", "voucher", 1);
+    return list;
+  }
+
+  Future<List<ProductCategory>> getProductCategory(ids) async {
+    var qry =
+        "SELECT * from product_category WHERE product_id =  " + ids.toString();
+    var voucherList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<ProductCategory> list = voucherList.isNotEmpty
+        ? voucherList.map((c) => ProductCategory.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<dynamic> updateVoucher(MSTCartdetails details, voucherId) async {
+    var qry = "Update mst_cart_detail SET discount = " +
+        details.discount.toString() +
+        " , discount_type = " +
+        details.discountType.toString() +
+        " where id = " +
+        details.id.toString();
+    var data = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    var qry1 = "Update mst_cart SET discount = (discount +" +
+        details.discount.toString() +
+        " ), discount_type = " +
+        details.discountType.toString() +
+        " , voucher_id = " +
+        voucherId.toString() +
+        " where id = " +
+        details.id.toString();
+    var data1 = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry1);
+    await SyncAPICalls.logActivity(
+        "voucher", "add voucher in cart", "voucher", voucherId);
+    return data1;
+  }
+
+  Future<MST_Cart> getCartData(cartid) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var cartdata =
+        await db.query('mst_cart', where: 'id = ?', whereArgs: [cartid]);
+    List<MST_Cart> list = cartdata.isNotEmpty
+        ? cartdata.map((c) => MST_Cart.fromJson(c)).toList()
+        : [];
+    return list[0];
   }
 }

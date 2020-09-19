@@ -14,6 +14,7 @@ import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
@@ -21,6 +22,8 @@ import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
+import 'package:mcncashier/screens/VoucherPop.dart';
+import 'package:mcncashier/screens/VoucherapplyorNotpop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class DashboradPage extends StatefulWidget {
@@ -53,6 +56,7 @@ class _DashboradPageState extends State<DashboradPage>
   double discount = 0;
   double tax = 0;
   double grandTotal = 0;
+  Voucher selectedvoucher;
   int current_cart;
   bool isLoading = false;
 
@@ -189,7 +193,7 @@ class _DashboradPageState extends State<DashboradPage>
       case 0:
         closeTable();
         break;
-      case 4:
+      case 2:
         closeShift();
         break;
     }
@@ -246,6 +250,49 @@ class _DashboradPageState extends State<DashboradPage>
               });
         });
   }
+
+  openVoucherPop() {
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return VoucherPop(
+            cartList: cartList,
+            subTotal: subtotal,
+            onEnter: (voucher) {
+              if (selectedvoucher != null) {
+                setState(() {
+                  selectedvoucher = selectedvoucher;
+                });
+              }
+
+              getCartItem(current_cart);
+            },
+          );
+        });
+  }
+
+  // opneVoucherPop() async {
+  //   // var customerData =
+  //   //     await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
+  //   // if (customerData != null) {
+  //   showDialog(
+  //       // Opning Ammount Popup
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return VoucherApplyconfirmPop(
+  //           onEnter: () {
+  //             openVoucherPopFinal();
+  //           },
+  //           onCancel: () {
+  //             sendPayment();
+  //           },
+  //         );
+  //       });
+  //   // } else {
+  //   //   sendPayment();
+  //   // }
+  // }
 
   sendPayment() {
     if (cartList.length != 0) {
@@ -527,7 +574,11 @@ class _DashboradPageState extends State<DashboradPage>
               CommunFun.divider(),
               ListTile(
                   onTap: () {
-                    gotoTansactionPage();
+                    if (isShiftOpen) {
+                      gotoTansactionPage();
+                    } else {
+                      CommunFun.showToast(context, "Shift is closed.");
+                    }
                   },
                   leading: Icon(
                     Icons.art_track,
@@ -536,12 +587,20 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                   title: Text("Transaction", style: Styles.communBlack())),
               ListTile(
+                  onTap: () {
+                    if (isShiftOpen) {
+                      closeShift();
+                    } else {
+                      openOpningAmmountPop(Strings.title_opening_amount);
+                    }
+                  },
                   leading: Icon(
                     Icons.open_in_new,
                     color: Colors.black,
                     size: 30,
                   ),
-                  title: Text("Open Shift", style: Styles.communBlack())),
+                  title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
+                      style: Styles.communBlack())),
               ListTile(
                   leading: Icon(
                     Icons.filter_tilt_shift,
@@ -835,40 +894,6 @@ class _DashboradPageState extends State<DashboradPage>
                   child: Row(
                     children: <Widget>[
                       Icon(
-                        Icons.save_alt,
-                        color: Colors.black,
-                        size: 30,
-                      ),
-                      SizedBox(width: 20),
-                      Text("Save Order", style: Styles.communBlack())
-                    ],
-                  ),
-                ),
-              ),
-              PopupMenuItem(
-                value: 2,
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Row(
-                    children: <Widget>[
-                      Icon(
-                        Icons.open_in_new,
-                        color: Colors.black,
-                        size: 30,
-                      ),
-                      SizedBox(width: 20),
-                      Text("Open Order", style: Styles.communBlack()),
-                    ],
-                  ),
-                ),
-              ),
-              PopupMenuItem(
-                value: 3,
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Row(
-                    children: <Widget>[
-                      Icon(
                         Icons.call_split,
                         color: Colors.black,
                         size: 30,
@@ -880,7 +905,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                value: 4,
+                value: 2,
                 child: Padding(
                   padding: EdgeInsets.all(20),
                   child: Row(
@@ -1000,8 +1025,9 @@ class _DashboradPageState extends State<DashboradPage>
     // Payment button
     return Center(
       child: Container(
-        margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3),
-        height: 60,
+        margin:
+            EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3 + 10),
+        height: 50,
         width: 300,
         child: RaisedButton(
           padding: EdgeInsets.only(top: 10, bottom: 5),
@@ -1310,18 +1336,49 @@ class _DashboradPageState extends State<DashboradPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.only(
-                      top: 10,
-                    ),
+                    padding: EdgeInsets.only(top: 10, bottom: 10),
                     child: Text(Strings.grand_total, style: Styles.darkBlue()),
                   ),
                   Padding(
-                      padding: EdgeInsets.only(
-                        right: 20,
-                        top: 10,
-                      ),
+                      padding: EdgeInsets.only(right: 20, top: 10, bottom: 10),
                       child: Text(grandTotal.toString(),
                           style: Styles.darkBlue())),
+                ],
+              ),
+            ),
+          ]),
+          TableRow(children: [
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  selectedvoucher != null
+                      ? Text(selectedvoucher.voucherName)
+                      : SizedBox(),
+                  Padding(
+                      padding: EdgeInsets.only(top: 10),
+                      child: RaisedButton(
+                        padding: EdgeInsets.only(
+                            left: 10, right: 10, top: 5, bottom: 5),
+                        onPressed: () {
+                          openVoucherPop();
+                        },
+                        child: Row(
+                          children: <Widget>[
+                            Text("Apply Promocode",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                )),
+                          ],
+                        ),
+                        color: Colors.deepOrange,
+                        textColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50.0),
+                        ),
+                      ))
                 ],
               ),
             ),
@@ -1331,7 +1388,7 @@ class _DashboradPageState extends State<DashboradPage>
     return Column(
       children: <Widget>[
         Container(
-            height: MediaQuery.of(context).size.height / 1.4,
+            height: MediaQuery.of(context).size.height / 1.3,
             width: MediaQuery.of(context).size.width,
             color: Colors.grey[300],
             padding: EdgeInsets.all(10),
@@ -1346,9 +1403,9 @@ class _DashboradPageState extends State<DashboradPage>
                     : SizedBox(),
                 Container(
                     //color: Colors.white,
-                    height: MediaQuery.of(context).size.height / 2.4,
+                    height: MediaQuery.of(context).size.height / 3.2,
                     margin: EdgeInsets.only(top: 50),
-                    child: SingleChildScrollView(child: cartTable)),
+                    child: cartTable),
                 cartList.length != 0
                     ? Positioned(
                         bottom: 0,

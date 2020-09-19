@@ -62,19 +62,13 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
           Navigator.pushNamed(context, Constant.LoginScreen,
               arguments: {"terminalId": value.terminalId});
         } else if (value != null && value.status == Constant.STATUS422) {
-          scaffoldKey.currentState.showSnackBar(SnackBar(
-            content: Text(value.message),
-          ));
+          CommunFun.showToast(context, value.message);
         } else {
-          scaffoldKey.currentState.showSnackBar(SnackBar(
-            content: Text(value.message),
-          ));
+          CommunFun.showToast(context, value.message);
         }
       }).catchError((e) {
         print(e);
-        scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text(e.message),
-        ));
+        CommunFun.showToast(context, e.message);
         setState(() {
           isLoading = false;
         });

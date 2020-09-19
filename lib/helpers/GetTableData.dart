@@ -19,6 +19,8 @@ import 'package:mcncashier/models/Modifier.dart';
 import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Table.dart';
+import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/category_branch.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -292,13 +294,41 @@ class TableData {
   Future<dynamic> insertDatatable4_1(Database db, dynamic tablesData) async {
     print(db);
     print(tablesData);
-    return 1;
+    var voucherData = tablesData["voucher"];
+    try {
+      if (voucherData.length != 0) {
+        for (var i = 0; i < voucherData.length; i++) {
+          var voucherDataitem = voucherData[i];
+          Voucher vouchers = Voucher.fromJson(voucherDataitem);
+          var result = await db.insert("voucher", vouchers.toJson());
+          print(result);
+        }
+      }
+      return 1;
+    } catch (e) {
+      print(e);
+      return 0;
+    }
   }
 
   Future<dynamic> insertDatatable4_2(Database db, dynamic tablesData) async {
     print(db);
     print(tablesData);
-    return 1;
+    var shiftdata = tablesData["shift"];
+    try {
+      if (shiftdata.length != 0) {
+        for (var i = 0; i < shiftdata.length; i++) {
+          var shiftdataitem = shiftdata[i];
+          Shift shift = Shift.fromJson(shiftdataitem);
+          var result = await db.insert("shift", shift.toJson());
+          print(result);
+        }
+      }
+      return 1;
+    } catch (e) {
+      print(e);
+      return 0;
+    }
   }
 
   Future<dynamic> insertProductImage(Database db, dynamic tablesData) async {

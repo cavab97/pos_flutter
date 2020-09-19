@@ -421,20 +421,17 @@ class CommunFun {
 
   static getCurrentDateTime(dateTime) async {
     //converttoserver tiem
-    //var timeZone =
+    // var timeZone =
     //     await Preferences.getStringValuesSF(Constant.SERVER_TIME_ZONE);
     // final detroitTime =
     //     new tz.TZDateTime.from(dateTime, tz.getLocation(timeZone));
     // print('Local India Time: ' + dateTime.toString());
     // print('Detroit Time: ' + detroitTime.toString());
-    return dateTime.toString();
+    return await dateTime.toString();
   }
 
   static getLocalID() async {
     var deviceInfo = await CommunFun.deviceInfo();
-
-    final now = new DateTime.now();
-    var datetime = new DateTime(now.year, now.month, now.day);
     var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
     var localid = Platform.isAndroid
         ? "ANDROID" + deviceInfo.androidId + terminalId

@@ -150,7 +150,8 @@ class _PINPageState extends State<PINPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+      child: Scaffold(
         key: scaffoldKey,
         body: Center(
           child: Container(
@@ -175,14 +176,16 @@ class _PINPageState extends State<PINPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       imageview(context), // Part 1 image with logo
-                      getNumbers(context) // Part 2  Muber keypade
+                      getNumbers(context), // Part 2  Muber keypade
                     ],
                   ),
                 ),
               ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   Widget imageview(context) {
@@ -232,13 +235,29 @@ class _PINPageState extends State<PINPage> {
     return SingleChildScrollView(
       child: Container(
         width: MediaQuery.of(context).size.width / 2.8,
-        margin: EdgeInsets.only(left: 70),
+        margin: EdgeInsets.only(left: 70, right: 70),
         child: Center(
           child: Column(
             children: <Widget>[
-              SizedBox(
-                height: 20,
-              ),
+              isCheckIn
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        IconButton(
+                            padding: EdgeInsets.only(
+                              left: 100,
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            icon: Icon(
+                              Icons.close,
+                              color: Colors.black,
+                              size: 50,
+                            )),
+                      ],
+                    )
+                  : SizedBox(height: 20),
               Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
@@ -368,19 +387,18 @@ class _PINPageState extends State<PINPage> {
               SizedBox(
                 height: 15,
               ),
-             isLoading?
-             CommunFun.loader(context)
-             :
-              Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    FlatButton(
-                        onPressed: () {
-                          clearPin();
-                        },
-                        child: Text("Clear", style: Styles.orangeLarge()))
-                  ])
+              isLoading
+                  ? CommunFun.loader(context)
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                          FlatButton(
+                              onPressed: () {
+                                clearPin();
+                              },
+                              child: Text("Clear", style: Styles.orangeLarge()))
+                        ])
             ],
           ),
         ),
