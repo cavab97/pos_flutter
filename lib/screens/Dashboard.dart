@@ -8,7 +8,6 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Category.dart';
-import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Shift.dart';
@@ -16,14 +15,12 @@ import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/saveOrder.dart';
-
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
-import 'package:mcncashier/screens/VoucherapplyorNotpop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class DashboradPage extends StatefulWidget {
@@ -57,7 +54,7 @@ class _DashboradPageState extends State<DashboradPage>
   double tax = 0;
   double grandTotal = 0;
   Voucher selectedvoucher;
-  int current_cart;
+  int currentCart;
   bool isLoading = false;
 
   @override
@@ -111,7 +108,7 @@ class _DashboradPageState extends State<DashboradPage>
       tax = 0.0;
       subtotal = 0.0;
       isTableSelected = false;
-      current_cart = null;
+      currentCart = null;
     });
   }
 
@@ -121,10 +118,10 @@ class _DashboradPageState extends State<DashboradPage>
     print(currentOrder);
     if (currentOrder.length != 0) {
       setState(() {
-        current_cart = currentOrder[0].cartId;
+        currentCart = currentOrder[0].cartId;
       });
       if (isShiftOpen) {
-        getCartItem(current_cart);
+        getCartItem(currentCart);
       }
     }
   }
@@ -266,7 +263,7 @@ class _DashboradPageState extends State<DashboradPage>
                 });
               }
 
-              getCartItem(current_cart);
+              getCartItem(currentCart);
             },
           );
         });
@@ -298,7 +295,7 @@ class _DashboradPageState extends State<DashboradPage>
     if (cartList.length != 0) {
       opnePaymentMethod();
     } else {
-      CommunFun.showToast(context, "Cart is empty");
+      CommunFun.showToast(context, Strings.cart_empty);
     }
   }
 
@@ -349,7 +346,7 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return ProductQuantityDailog(product: product, cartID: current_cart);
+          return ProductQuantityDailog(product: product, cartID: currentCart);
         });
   }
 
@@ -379,7 +376,7 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         builder: (BuildContext context) {
           return PaymentMethodPop(
-              cartID: current_cart,
+              cartID: currentCart,
               itemCount: cartList.length,
               subTotal: subtotal,
               grandTotal: grandTotal);
@@ -387,12 +384,12 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   itememovefromCart(cartitem) async {
-    await localAPI.deleteCartItem(cartitem, current_cart, cartList.length == 1);
+    await localAPI.deleteCartItem(cartitem, currentCart, cartList.length == 1);
     if (cartList.length > 1) {
-      await getCartItem(current_cart);
+      await getCartItem(currentCart);
     } else {
       setState(() {
-        current_cart = null;
+        currentCart = null;
         cartList = [];
         grandTotal = 0.0;
         discount = 0.0;
@@ -412,7 +409,7 @@ class _DashboradPageState extends State<DashboradPage>
             barrierDismissible: false,
             builder: (BuildContext context) {
               return ProductQuantityDailog(
-                  product: product, cartID: current_cart, iscartItem: cart);
+                  product: product, cartID: currentCart, iscartItem: cart);
             });
         return false;
       }
@@ -577,7 +574,7 @@ class _DashboradPageState extends State<DashboradPage>
                     if (isShiftOpen) {
                       gotoTansactionPage();
                     } else {
-                      CommunFun.showToast(context, "Shift is closed.");
+                      CommunFun.showToast(context, Strings.shift_closed);
                     }
                   },
                   leading: Icon(
@@ -882,7 +879,7 @@ class _DashboradPageState extends State<DashboradPage>
                         size: 30,
                       ),
                       SizedBox(width: 20),
-                      Text("Close Table", style: Styles.communBlack())
+                      Text(Strings.close_table, style: Styles.communBlack())
                     ],
                   ),
                 ),
@@ -899,7 +896,7 @@ class _DashboradPageState extends State<DashboradPage>
                         size: 30,
                       ),
                       SizedBox(width: 20),
-                      Text("Split Order", style: Styles.communBlack()),
+                      Text(Strings.split_order, style: Styles.communBlack()),
                     ],
                   ),
                 ),
@@ -916,7 +913,7 @@ class _DashboradPageState extends State<DashboradPage>
                         size: 30,
                       ),
                       SizedBox(width: 20),
-                      Text("Close Shift", style: Styles.communBlack()),
+                      Text(Strings.close_shift, style: Styles.communBlack()),
                     ],
                   ),
                 ),
@@ -967,7 +964,7 @@ class _DashboradPageState extends State<DashboradPage>
                         child: image_Arr.length != 0 && image_Arr[0] != ""
                             ? CommonUtils.imageFromBase64String(image_Arr[0])
                             : new Image.asset(
-                                'assets/no_image.png',
+                                Strings.no_image,
                                 fit: BoxFit.cover,
                               ),
                       )),
@@ -1000,9 +997,9 @@ class _DashboradPageState extends State<DashboradPage>
                       child: Center(
                         child: Text(
                           product.hasInventory == 1 && product.qty == 0
-                              ? "OUT OF STOCK"
+                              ? Strings.out_of_stoke
                               : product.priceTypeName +
-                                  " " +
+                                  ' ' +
                                   product.price.toString(),
                           style: TextStyle(
                               fontWeight: FontWeight.w400,
@@ -1366,7 +1363,7 @@ class _DashboradPageState extends State<DashboradPage>
                         },
                         child: Row(
                           children: <Widget>[
-                            Text("Apply Promocode",
+                            Text(Strings.apply_promocode,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -1414,7 +1411,7 @@ class _DashboradPageState extends State<DashboradPage>
                         child: Container(child: totalPriceTable),
                       )
                     : Center(
-                        child: Text("No item Available",
+                        child: Text(Strings.item_not_available,
                             style: Styles.communBlack()))
               ],
             )),

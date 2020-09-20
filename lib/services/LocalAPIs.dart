@@ -600,4 +600,11 @@ class LocalAPI {
         : [];
     return list[0];
   }
+
+  Future<dynamic> getVoucherusecount(voucherid) async {
+    var qry = "SELECT count(voucher_id) from orders where voucher_id = " +
+        voucherid.toString();
+    var count = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    return count;
+  }
 }

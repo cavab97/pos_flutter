@@ -88,7 +88,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
           color: Colors.grey[400],
           size: 40,
         ),
-        hintText: "Enter pax",
+        hintText: Strings.enter_pax,
         hintStyle: TextStyle(
             fontSize: 18.0,
             fontWeight: FontWeight.bold,
@@ -292,13 +292,13 @@ class _SelectTablePageState extends State<SelectTablePage> {
                     children: <Widget>[
                       table.numberofpax != null
                           ? Text(
-                              "Occupied : " +
+                              Strings.occupied +
                                   table.numberofpax.toString() +
                                   "/" +
                                   table.tableCapacity.toString(),
                               style: Styles.whiteSimpleSmall())
                           : Text(
-                              "Vacant : " +
+                              Strings.vacant +
                                   "0" +
                                   "/" +
                                   table.tableCapacity.toString(),
@@ -309,7 +309,10 @@ class _SelectTablePageState extends State<SelectTablePage> {
                 Positioned(
                     top: 10,
                     left: 10,
-                    child: Text(table.numberofpax != null ? "Orders : 1" : "Orders : 0",
+                    child: Text(
+                        table.numberofpax != null
+                            ? Strings.orders + " 1"
+                            : Strings.orders + "0",
                         style: Styles.communBlack()))
               ],
             ),

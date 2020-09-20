@@ -124,7 +124,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     ),
                                   ),
                                   SizedBox(width: 10),
-                                  Text("Transaction",
+                                  Text(Strings.transaction,
                                       style: TextStyle(
                                           fontSize: 30,
                                           fontWeight: FontWeight.bold,
@@ -143,7 +143,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               orderLists.length > 0
                                   ? searchTransationList()
                                   : Center(
-                                      child: Text("No Orders Found",
+                                      child: Text(Strings.no_order_found,
                                           style: Styles.darkBlue()))
                             ],
                           ))),
@@ -230,7 +230,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                 width: MediaQuery.of(context).size.width / 2,
                                 margin: EdgeInsets.only(top: 5),
                                 child: Center(
-                                  child: Text("No Details Found",
+                                  child: Text(Strings.no_details_found,
                                       style: Styles.whiteBold()),
                                 ),
                               ),
@@ -267,7 +267,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               size: 40,
             ),
           ),
-          hintText: "Invoice Number or S/N",
+          hintText: Strings.searchbox_hint,
           hintStyle: TextStyle(
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
@@ -463,7 +463,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         child: image_Arr.length != 0 && image_Arr[0] != ""
                             ? CommonUtils.imageFromBase64String(image_Arr[0])
                             : new Image.asset(
-                                'assets/no_image.png',
+                                Strings.no_imageAsset,
                                 fit: BoxFit.cover,
                               ),
                       ),
@@ -522,7 +522,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                     color: Colors.grey[600])),
-            subtitle: Text('INVOICE : ' + item.invoice_no.toString(),
+            subtitle: Text(Strings.invoice + item.invoice_no.toString(),
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w500,

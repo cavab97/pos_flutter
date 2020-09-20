@@ -90,15 +90,13 @@ class _PINPageState extends State<PINPage> {
         });
       } else {
         if (pinNumber.length >= 6) {
-          CommunFun.showToast(context, "Invalid PIN.");
+          CommunFun.showToast(context, Strings.invalid_pin_msg);
         } else {
-          scaffoldKey.currentState.showSnackBar(SnackBar(
-            content: Text(Strings.pin_validation_message),
-          ));
+          CommunFun.showToast(context, Strings.pin_validation_message);
         }
       }
     } else {
-      CommunFun.showToast(context, "User Already checkedIN.");
+      CommunFun.showToast(context, Strings.already_clockin_msg);
     }
   }
 
@@ -138,13 +136,13 @@ class _PINPageState extends State<PINPage> {
         });
       } else {
         if (pinNumber.length >= 6) {
-          CommunFun.showToast(context, "Invalid PIN.");
+          CommunFun.showToast(context, Strings.invalid_pin_msg);
         } else {
           CommunFun.showToast(context, Strings.pin_validation_message);
         }
       }
     } else {
-      CommunFun.showToast(context, "User Already checkedOUT.");
+      CommunFun.showToast(context, Strings.already_clockout_msg);
     }
   }
 
@@ -160,7 +158,7 @@ class _PINPageState extends State<PINPage> {
             height: MediaQuery.of(context).size.height,
             decoration: BoxDecoration(
               image: DecorationImage(
-                  image: AssetImage("assets/bg.jpg"), fit: BoxFit.cover),
+                  image: AssetImage(Strings.assetsBG), fit: BoxFit.cover),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -205,7 +203,7 @@ class _PINPageState extends State<PINPage> {
                   // login logo
                   height: 110.0,
                   child: Image.asset(
-                    "assets/headerlogo.png",
+                    Strings.asset_headerLogo,
                     fit: BoxFit.contain,
                   ),
                 ))));
@@ -397,7 +395,7 @@ class _PINPageState extends State<PINPage> {
                               onPressed: () {
                                 clearPin();
                               },
-                              child: Text("Clear", style: Styles.orangeLarge()))
+                              child: Text(Strings.clear, style: Styles.orangeLarge()))
                         ])
             ],
           ),

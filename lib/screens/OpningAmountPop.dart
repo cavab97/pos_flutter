@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:mcncashier/components/StringFile.dart';
 
 class OpeningAmmountPage extends StatefulWidget {
   // Opning ammount popup
@@ -163,19 +163,6 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                   fontSize: 60,
                   color: Colors.black,
                   fontWeight: FontWeight.bold)),
-          /*Flexible(
-            child: RichText(
-              overflow: TextOverflow.ellipsis,
-              strutStyle:
-                  StrutStyle(fontSize: 90.0, fontWeight: FontWeight.bold),
-              text: TextSpan(
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 90,
-                      fontWeight: FontWeight.bold),
-                  text: currentNumber),
-            ),*/
-          // )
         ],
       ),
     );
@@ -297,7 +284,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                       height: MediaQuery.of(context).size.height / 4.2,
                       // minWidth: MediaQuery.of(context).size.width / 9.9
                       minWidth: 50,
-                      child: Text("enter".toUpperCase(),
+                      child: Text(Strings.enter.toUpperCase(),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 20.0)),

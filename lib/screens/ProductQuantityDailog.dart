@@ -136,7 +136,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           product_qty = prevproductqty + 1;
         });
       } else {
-        CommunFun.showToast(context, "selected qty is not available in store");
+        CommunFun.showToast(context, Strings.store_Validation_message);
       }
     }
     setPrice();
@@ -665,7 +665,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                   size: 27,
                 ),
           SizedBox(width: 10),
-          Text(isEditing ? "Update" : "Add",
+          Text(isEditing ? Strings.update : Strings.add,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,

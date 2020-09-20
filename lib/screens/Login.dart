@@ -173,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
       // login logo
       height: 110.0,
       child: Image.asset(
-        "assets/headerlogo.png",
+        Strings.asset_headerLogo,
         fit: BoxFit.contain,
       ),
     );

@@ -1,12 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
-import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
-import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -33,86 +32,112 @@ class VoucherPopState extends State<VoucherPop> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    saprateProductid();
   }
 
-  saprateProductid() async {
-    var productid;
-    for (var i = 0; i < widget.cartList.length; i++) {
-      var item = widget.cartList[i];
-      if (productid == null) {
-        productid = item.productId.toString();
+  checkMinMaxValue(vaocher) {
+    // Check in minimum  max value with cart value
+    if (vaocher.minimumAmount <= widget.subTotal &&
+        vaocher.maximumAmount >= widget.subTotal) {
+      return true;
+    } else {
+      if (vaocher.minimumAmount <= widget.subTotal) {
+        CommunFun.showToast(
+            context,
+            "Required minimum cart amount " +
+                vaocher.minimumAmount.toString() +
+                " for this voucher.");
       } else {
-        productid += "," + item.productId.toString();
+        CommunFun.showToast(
+            context,
+            "Required maximum cart amount " +
+                vaocher.maximumAmount.toString() +
+                " for this voucher.");
       }
     }
-    setState(() {
-      productIDs = productid;
-    });
-    // List<ProductCategory> getproductCat =
-    //     await localAPI.getProductCategory(productIDs);
-    // setState(() {
-    //   productcateIDS = getproductCat.length > 0 ? getproductCat : [];
-    // });
   }
 
-  validateCode() async {
+  checkisExpired(vaocher) {
+    DateTime fromDate = DateTime.parse(vaocher.voucherApplicableFrom);
+    DateTime toDate = DateTime.parse(vaocher.voucherApplicableTo);
+    DateTime now = new DateTime.now();
+    if (fromDate.isBefore(now) && toDate.isAfter(now)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  checkitsUsableorNot(vaocher) async {
+    var count = await localAPI.getVoucherusecount(vaocher.voucherId);
+    return count;
+  }
+
+  checkValidVoucher(vaocher) async {
     Voucher selectedvoucher;
-    if (codeConteroller.text.length != 0) {
-      var customerData =
-          await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
-      List<Voucher> vaocher =
-          await localAPI.checkVoucherIsExit(codeConteroller.text);
-      if (vaocher.length > 0) {
-        // check min val
-        if (vaocher[0].minimumAmount < widget.subTotal) {
-          //check product
-          for (int i = 0; i < widget.cartList.length; i++) {
-            var cartitem = widget.cartList[i];
-            // product
-            vaocher[0].voucherProducts.split(',').forEach((tag) {
+    //  var chheckIsExpired = await checkisExpired(vaocher);
+    // if (chheckIsExpired == true) {
+    var isminmaxValid = await checkMinMaxValue(vaocher);
+    if (isminmaxValid == true) {
+      var count = await checkitsUsableorNot(vaocher);
+      if (count < vaocher.usesTotal) {
+        //check product
+        for (int i = 0; i < widget.cartList.length; i++) {
+          var cartitem = widget.cartList[i];
+          // product
+          if (vaocher.voucherProducts != "") {
+            vaocher.voucherProducts.split(',').forEach((tag) {
               if (cartitem.productId.toString() == tag) {
-                widget.cartList[i].discount = vaocher[0].voucherDiscount;
-                widget.cartList[i].discountType =
-                    vaocher[0].voucherDiscountType;
+                cartitem.discount = vaocher.voucherDiscount;
+                cartitem.discountType = vaocher.voucherDiscountType;
               }
             });
-            List<ProductCategory> produt_category =
+          }
+          // categorys
+          if (vaocher.voucherCategories != "") {
+            List<ProductCategory> produtCategory =
                 await localAPI.getProductCategory(cartitem.productId);
-            vaocher[0].voucherCategories.split(',').forEach((tag) {
-              for (int j = 0; j < produt_category.length; j++) {
-                ProductCategory cat = produt_category[j];
+            vaocher.voucherCategories.split(',').forEach((tag) {
+              for (int j = 0; j < produtCategory.length; j++) {
+                ProductCategory cat = produtCategory[j];
                 if (cat.categoryId.toString() == tag) {
-                  widget.cartList[i].discount = vaocher[0].voucherDiscount;
-                  widget.cartList[i].discountType =
-                      vaocher[0].voucherDiscountType;
+                  cartitem.discount = vaocher.voucherDiscount;
+                  cartitem.discountType = vaocher.voucherDiscountType;
                 }
               }
             });
-            if (widget.cartList[i].discount != null &&
-                widget.cartList[i].discount != 0.0) {
-              var result = await localAPI.updateVoucher(
-                  widget.cartList[i], vaocher[0].voucherId);
-              selectedvoucher = vaocher[0];
-            }
           }
-          widget.onEnter(selectedvoucher);
-          Navigator.of(context).pop();
-        } else {
-          CommunFun.showToast(
-              context,
-              "Required minimum cart amount " +
-                  vaocher[0].minimumAmount.toString() +
-                  " for this voucher.");
+          if (cartitem.discount != null && cartitem.discount != 0.0) {
+            var result =
+                await localAPI.updateVoucher(cartitem, vaocher.voucherId);
+            selectedvoucher = vaocher;
+          }
         }
+        widget.onEnter(selectedvoucher);
+        Navigator.of(context).pop(); // close Pop
+      }
+    } else {
+      CommunFun.showToast(context,
+          "Voucher already used " + vaocher.usesTotal.toString() + "times.");
+    }
+    // } else {
+    //   CommunFun.showToast(context, Strings.voucher_expired);
+    // }
+  }
+
+  validateCode() async {
+    if (codeConteroller.text.length != 0) {
+      List<Voucher> vaocher =
+          await localAPI.checkVoucherIsExit(codeConteroller.text);
+      if (vaocher.length > 0) {
+        checkValidVoucher(vaocher[0]);
       } else {
         setState(() {
-          errorMSG = "Invalid code entered.";
+          errorMSG = Strings.voucher_not_exit;
         });
       }
     } else {
       setState(() {
-        errorMSG = "code must be required.";
+        errorMSG = Strings.voucher_code_msg;
       });
     }
   }
@@ -134,7 +159,7 @@ class VoucherPopState extends State<VoucherPop> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text("Apply Coupon/Voucher", style: Styles.whiteBold()),
+                  Text(Strings.applycoupen, style: Styles.whiteBold()),
                 ],
               ),
             ),
@@ -145,13 +170,13 @@ class VoucherPopState extends State<VoucherPop> {
         actions: <Widget>[
           isLoading ? CommunFun.loader(context) : SizedBox(),
           FlatButton(
-            child: Text("Cancel", style: Styles.orangeSmall()),
+            child: Text(Strings.cancel, style: Styles.orangeSmall()),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           FlatButton(
-            child: Text("Apply", style: Styles.orangeSmall()),
+            child: Text(Strings.apply, style: Styles.orangeSmall()),
             onPressed: () {
               validateCode();
             },
@@ -184,45 +209,46 @@ class VoucherPopState extends State<VoucherPop> {
 
   Widget mainContent() {
     return SingleChildScrollView(
-        child: Container(
-            width: MediaQuery.of(context).size.width / 2.8,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Voucher code :", style: Styles.communBlack()),
-                SizedBox(
-                  height: 20,
+      child: Container(
+        width: MediaQuery.of(context).size.width / 2.8,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(Strings.vauchercode, style: Styles.communBlack()),
+            SizedBox(
+              height: 20,
+            ),
+            TextField(
+              controller: codeConteroller,
+              keyboardType: TextInputType.text,
+              decoration: InputDecoration(
+                errorStyle: TextStyle(color: Colors.red, fontSize: 20),
+                errorText: errorMSG != "" ? errorMSG : "",
+                hintText: Strings.enter_Code,
+                hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(width: 3, color: Colors.grey),
                 ),
-                TextField(
-                  controller: codeConteroller,
-                  keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
-                    errorStyle: TextStyle(color: Colors.red, fontSize: 20),
-                    errorText: errorMSG != "" ? errorMSG : "",
-                    hintText: "Enter code",
-                    hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(width: 3, color: Colors.grey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(width: 3, color: Colors.grey),
-                    ),
-                    filled: true,
-                    contentPadding:
-                        EdgeInsets.only(left: 20, top: 25, bottom: 25),
-                    fillColor: Colors.white,
-                  ),
-                  style: TextStyle(color: Colors.black, fontSize: 25.0),
-                  onChanged: (e) {
-                    print(e);
-                    setState(() {
-                      errorMSG = "";
-                    });
-                  },
-                )
-              ],
-            )));
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(width: 3, color: Colors.grey),
+                ),
+                filled: true,
+                contentPadding: EdgeInsets.only(left: 20, top: 25, bottom: 25),
+                fillColor: Colors.white,
+              ),
+              style: TextStyle(color: Colors.black, fontSize: 25.0),
+              onChanged: (e) {
+                print(e);
+                setState(() {
+                  errorMSG = "";
+                });
+              },
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
