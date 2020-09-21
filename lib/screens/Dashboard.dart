@@ -18,6 +18,7 @@ import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
+import 'package:mcncashier/screens/PrinterList.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
@@ -305,6 +306,16 @@ class _DashboradPageState extends State<DashboradPage>
   //   //   sendPayment();
   //   // }
   // }
+  opnePrinterPop() {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return PrinterListDailog(onPress: () {
+            // TOTO : pring reicipt code 
+          });
+        });
+  }
 
   sendPayment() {
     if (cartList.length != 0) {
@@ -1055,30 +1066,58 @@ class _DashboradPageState extends State<DashboradPage>
 
   Widget paybutton(context) {
     // Payment button
-    return Center(
-      child: Container(
-        margin:
-            EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3 + 10),
-        height: 50,
-        width: 300,
-        child: RaisedButton(
-          padding: EdgeInsets.only(top: 10, bottom: 5),
-          onPressed: () {
-            sendPayment();
-          },
-          child: Text(
-            Strings.title_pay,
-            style: TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Container(
+            margin: EdgeInsets.only(
+                top: MediaQuery.of(context).size.height / 1.3 + 10),
+            height: 50,
+            width: 100,
+            child: RaisedButton(
+              padding: EdgeInsets.only(top: 10, bottom: 5),
+              onPressed: () {
+                opnePrinterPop();
+              },
+              child: Text(
+                "Send",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+              ),
+              color: Colors.deepOrange,
+              textColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50.0),
+              ),
+            ),
           ),
-          color: Colors.deepOrange,
-          textColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(50.0),
+          Container(
+            margin: EdgeInsets.only(
+                top: MediaQuery.of(context).size.height / 1.3 + 10),
+            height: 50,
+            width: 200,
+            child: RaisedButton(
+              padding: EdgeInsets.only(top: 10, bottom: 5),
+              onPressed: () {
+                sendPayment();
+              },
+              child: Text(
+                Strings.title_pay,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+              ),
+              color: Colors.deepOrange,
+              textColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50.0),
+              ),
+            ),
           ),
-        ),
-      ),
-    );
+        ]);
   }
 
   Widget openShiftButton(context) {
