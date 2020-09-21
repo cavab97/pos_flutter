@@ -6,11 +6,13 @@ import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:intl/intl.dart';
 
 class TransactionsPage extends StatefulWidget {
   // Transactions list
@@ -27,6 +29,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   List<Orders> filterList = [];
   Orders selectedOrder = new Orders();
   OrderPayment orderpayment = new OrderPayment();
+  User paymemtUser = new User();
   List<ProductDetails> detailsList = [];
   bool isFiltering = false;
   @override
@@ -48,6 +51,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       setState(() {
         orderLists = orderList;
       });
+      getOrderDetails(orderLists[0]);
     }
   }
 
@@ -63,9 +67,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
     }
     List<OrderPayment> orderpaymentdata =
         await localAPI.getOrderpaymentData(order.app_id);
-    setState(() {
-      orderpayment = orderpaymentdata[0];
-    });
+    if (orderpaymentdata.length != 0) {
+      setState(() {
+        orderpayment = orderpaymentdata[0];
+      });
+      User user = await localAPI.getPaymentUser(orderpayment.op_by);
+      if (user != null) {
+        setState(() {
+          paymemtUser = user;
+        });
+      }
+    }
   }
 
   startFilter() {
@@ -159,8 +171,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
+                                    SizedBox(height: 5),
                                     Text(
-                                      "Wen,August 19 09:53 PM",
+                                      DateFormat('EEE, MMM d yyyy, hh:mm aaa')
+                                          .format(DateTime.parse(
+                                              selectedOrder.order_date)),
                                       style: TextStyle(
                                           fontSize: 25,
                                           fontWeight: FontWeight.bold,
@@ -180,17 +195,22 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     SizedBox(
                                       height: 30,
                                     ),
-                                    Text(
-                                      selectedOrder.invoice_no != null
-                                          ? selectedOrder.invoice_no +
-                                              " - Processed by OKDEE OKEY PROCESSED FORM"
-                                          : " 0000000 - Processed by OKDEE OKEY PROCESSED FORM",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color:
-                                              Theme.of(context).primaryColor),
-                                    ),
+                                    paymemtUser != null
+                                        ? Text(
+                                            selectedOrder.invoice_no != null &&
+                                                    paymemtUser != null
+                                                ? selectedOrder.invoice_no +
+                                                    " - Processed by " +
+                                                    paymemtUser.name
+                                                : " 0000000 - Processed by " +
+                                                    paymemtUser.name,
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Theme.of(context)
+                                                    .primaryColor),
+                                          )
+                                        : SizedBox(),
                                     SizedBox(
                                       height: 30,
                                     ),
@@ -517,7 +537,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
             onTap: () {
               getOrderDetails(item);
             },
-            title: Text('09:34 PM',
+            title: Text(
+                DateFormat('hh:mm aaa').format(DateTime.parse(item.order_date)),
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w500,

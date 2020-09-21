@@ -2,6 +2,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
+import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/CheckInout.dart';
 import 'package:mcncashier/models/Customer.dart';
@@ -11,7 +12,9 @@ import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
-import 'package:mcncashier/models/Product.dart';
+import 'package:mcncashier/models/Tax.dart';
+import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
@@ -464,7 +467,7 @@ class LocalAPI {
     return cartd;
   }
 
-  Future<int> deleteCartItem(cartItem, cartID, isLast) async {
+  Future<int> deleteCartItem(cartItem, cartID, mainCart, isLast) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     await db
         .delete("mst_cart_Detail", where: 'id = ?', whereArgs: [cartItem.id]);
@@ -489,6 +492,10 @@ class LocalAPI {
       await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartID]);
       await SyncAPICalls.logActivity("cart",
           "delete cart all item from save_order", "save_order", cartItem.id);
+    } else {
+      //Update cart
+      await db.update("mst_cart", mainCart.toJson(),
+          where: 'id = ?', whereArgs: [cartID]);
     }
     return cartID;
   }
@@ -523,7 +530,7 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getOrderDetails(orderid) async {
     var qry =
-        "SELECT P.product_id,P.name,P.price group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 FROM order_detail O " +
+        "SELECT P.product_id,P.name,P.price,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 FROM order_detail O " +
             " LEFT JOIN product P ON O.product_id = P.product_id" +
             " LEFT join asset on asset.asset_type_id = P.product_id " +
             " WHERE asset.asset_type = 1 and order_id = " +
@@ -581,10 +588,12 @@ class LocalAPI {
         details.discount.toString() +
         " ), discount_type = " +
         details.discountType.toString() +
-        " , voucher_id = " +
+        " , grand_total = (grand_total- " +
+        details.discount.toString() +
+        ") , voucher_id = " +
         voucherId.toString() +
         " where id = " +
-        details.id.toString();
+        details.cartId.toString();
     var data1 = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry1);
     await SyncAPICalls.logActivity(
         "voucher", "add voucher in cart", "voucher", voucherId);
@@ -601,10 +610,62 @@ class LocalAPI {
     return list[0];
   }
 
+  Future<Branch> getbranchData(branchID) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var cartdata = await db.query('branch',
+        where: 'branch_id = ?', whereArgs: [branchID.toString()]);
+    List<Branch> list = cartdata.isNotEmpty
+        ? cartdata.map((c) => Branch.fromJson(c)).toList()
+        : [];
+    return list[0];
+  }
+
+  Future<Voucher> getvoucher(voucherid) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var voucher = await db.query('voucher',
+        where: 'voucher_id = ?', whereArgs: [voucherid.toString()]);
+    List<Voucher> list = voucher.isNotEmpty
+        ? voucher.map((c) => Voucher.fromJson(c)).toList()
+        : [];
+    return list[0];
+  }
+
   Future<dynamic> getVoucherusecount(voucherid) async {
-    var qry = "SELECT count(voucher_id) from orders where voucher_id = " +
-        voucherid.toString();
+    var qry =
+        "SELECT count(voucher_id) from voucher_history where voucher_id = " +
+            voucherid.toString();
     var count = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     return count;
   }
+
+  Future<dynamic> saveVoucherHistory(VoucherHistory voucherHis) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var hitid = await db.insert("voucher_history", voucherHis.toJson());
+    await SyncAPICalls.logActivity(
+        "order", "add voucher history in cart", "voucher_history", hitid);
+    return hitid;
+  }
+
+  Future<List<Tax>> getTaxList(branchid) async {
+    var tax = await DatabaseHelper.dbHelper.getDatabse().query('branch_tax',
+        where: 'branch_id = ?', whereArgs: [branchid.toString()]);
+    List<Tax> list =
+        tax.isNotEmpty ? tax.map((c) => Tax.fromJson(c)).toList() : [];
+    return list;
+  }
+
+  Future<User> getPaymentUser(userid) async {
+    var user = await DatabaseHelper.dbHelper
+        .getDatabse()
+        .query('users', where: 'id = ?', whereArgs: [userid.toString()]);
+    List<User> list =
+        user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
+    return list[0];
+  }
+  // Future<dynamic> removePromocode(voucherid) async {
+  //   var qry = "SELECT count(voucher_id) from orders where voucher_id = " +
+  //       voucherid.toString();
+  //   var count = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+  //   return count;
+  // }
 }

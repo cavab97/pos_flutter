@@ -9,6 +9,7 @@ import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -37,7 +38,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   double product_qty = 1;
   double price = 0.0;
   bool isEditing = false;
-
+  Tax taxlist = new Tax();
   TextStyle attrStyle = TextStyle(color: Colors.black, fontSize: 20.0);
   @override
   void initState() {
@@ -49,8 +50,19 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       cartitem = widget.iscartItem;
     });
     getAttributes();
+    getTaxs();
     if (widget.cartID != null) {
       getCartData();
+    }
+  }
+
+  getTaxs() async {
+    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    List<Tax> taxlists = await localAPI.getTaxList(branchid);
+    if (taxlists.length > 0) {
+      setState(() {
+        taxlist = taxlists[0];
+      });
     }
   }
 
@@ -143,7 +155,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   decreaseQty() {
-    if (product_qty != 0) {
+    if (product_qty > 1) {
       var prevproductqty = product_qty;
       setState(() {
         product_qty = prevproductqty - 1;
@@ -235,20 +247,27 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var customerData =
         await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
     var loginData = await json.decode(loginUser);
-    //cart data
-    cart.user_id = customerData != null ? customerData["customer_id"] : 0;
-    cart.branch_id = int.parse(branchid);
-    cart.sub_total =
-        currentCart.sub_total != null ? currentCart.sub_total + price : price;
-    cart.discount = currentCart.discount != null ? currentCart.discount + 0 : 0;
-    cart.discount_type = 0;
-    cart.total_qty = currentCart.total_qty != null
+
+    double taxval = taxlist.rate != null ? double.parse(taxlist.rate) : 0.0;
+    var disc = currentCart.discount != null ? currentCart.discount : 0.0;
+    double qty = currentCart.total_qty != null
         ? currentCart.total_qty + product_qty.toDouble()
         : product_qty.toDouble();
-    cart.tax = 0;
-    cart.grand_total = currentCart.grand_total != null
+    double subT = currentCart.sub_total != null ? currentCart.sub_total : price;
+    double grandTotal = currentCart.grand_total != null
         ? currentCart.grand_total + price
-        : price;
+        : price + taxval - disc;
+
+    //cart data
+
+    cart.user_id = customerData != null ? customerData["customer_id"] : 0;
+    cart.branch_id = int.parse(branchid);
+    cart.sub_total = subT;
+    cart.discount = disc;
+    cart.discount_type = currentCart.discount_type;
+    cart.total_qty = qty;
+    cart.tax = taxval;
+    cart.grand_total = grandTotal;
     cart.customer_terminal =
         customerData != null ? customerData["terminal_id"] : 0;
     if (!isEditing) {
@@ -263,6 +282,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     orderData.numberofPax = tableData != null ? tableData["number_of_pax"] : 0;
     orderData.isTableOrder = tableData != null ? 1 : 0;
+    if (!isEditing) {
+      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    }
     var productdata = productItem; // PRoduct Data
     productdata.qty = product_qty.toDouble();
     productdata.price = price;
@@ -283,11 +305,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.productQty = productdata.qty;
     cartdetails.productNetPrice = productdata.oldPrice;
     cartdetails.discount = 0;
-    cartdetails.taxValue = 0;
+    cartdetails.taxValue =
+        taxlist.rate != null ? double.parse(taxlist.rate) : 0;
+    cartdetails.taxId = taxlist.id;
     cartdetails.createdBy = loginData["id"];
     cartdetails.createdAt = DateTime.now().toString();
     var detailID = await localAPI.addintoCartDetails(cartdetails);
-    
+
     if (selectedModifier.length > 0) {
       for (var i = 0; i < selectedModifier.length; i++) {
         var modifire = selectedModifier[i];

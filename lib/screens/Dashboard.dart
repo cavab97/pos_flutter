@@ -8,11 +8,13 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Category.dart';
+import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
@@ -22,6 +24,7 @@ import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class DashboradPage extends StatefulWidget {
   // main Product list page
@@ -35,9 +38,7 @@ class _DashboradPageState extends State<DashboradPage>
     with SingleTickerProviderStateMixin {
   GlobalKey<AutoCompleteTextFieldState<ProductDetails>> keyAutoSuggestion =
       new GlobalKey();
-
   AutoCompleteTextField searchTextField;
-
   TabController _tabController;
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
@@ -53,6 +54,7 @@ class _DashboradPageState extends State<DashboradPage>
   double discount = 0;
   double tax = 0;
   double grandTotal = 0;
+  MST_Cart allcartData;
   Voucher selectedvoucher;
   int currentCart;
   bool isLoading = false;
@@ -126,6 +128,13 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
+  syncOrdersTodatabase() async {
+    await CommunFun.opneSyncPop(context);
+    var res = await SyncAPICalls.syncOrderstoDatabase(context);
+    print(res);
+    await Navigator.of(context).pop();
+  }
+
   checkshift() async {
     var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
     setState(() {
@@ -139,27 +148,34 @@ class _DashboradPageState extends State<DashboradPage>
       setState(() {
         cartList = cartItem;
       });
-      countTotals();
+      countTotals(cartId);
     }
   }
 
-  countTotals() {
-    var subTotal = 0.0;
-    var dis = 0.0;
-    var taxval = 0.0;
-    var grandtotal = 0.0;
-    for (var i = 0; i < cartList.length; i++) {
-      var cart = cartList[i];
-      subTotal += cart.productPrice;
-      dis += cart.discount;
-      taxval += cart.taxValue;
-      grandtotal = (subTotal + taxval) - dis;
+  countTotals(cartId) async {
+    MST_Cart cart = await localAPI.getCartData(cartId);
+    // var subTotal = 0.0;
+    // var dis = 0.0;
+    // var taxval = 0.0;
+    // var grandtotal = 0.0;
+    // for (var i = 0; i < cartList.length; i++) {
+    //   var cart = cartList[i];
+    //   subTotal += cart.productPrice;
+    //   dis += cart.discount;
+    //   taxval = cart.taxValue;
+    //   grandtotal = (subTotal + taxval) - dis;
+    // }
+    Voucher vaocher;
+    if (cart.voucherId != null) {
+      vaocher = await localAPI.getvoucher(cart.voucherId);
     }
     setState(() {
-      subtotal = subTotal;
-      discount = dis;
-      tax = taxval;
-      grandTotal = grandtotal;
+      allcartData = cart;
+      subtotal = cart.sub_total;
+      discount = cart.discount;
+      tax = cart.tax;
+      grandTotal = cart.grand_total;
+      selectedvoucher = vaocher;
     });
   }
 
@@ -257,12 +273,11 @@ class _DashboradPageState extends State<DashboradPage>
             cartList: cartList,
             subTotal: subtotal,
             onEnter: (voucher) {
-              if (selectedvoucher != null) {
+              if (voucher != null) {
                 setState(() {
-                  selectedvoucher = selectedvoucher;
+                  selectedvoucher = voucher;
                 });
               }
-
               getCartItem(currentCart);
             },
           );
@@ -305,10 +320,16 @@ class _DashboradPageState extends State<DashboradPage>
     });
     Preferences.setStringToSF(Constant.IS_SHIFT_OPEN, isShiftOpen.toString());
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+    var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    User userdata = await CommunFun.getuserDetails();
     Shift shift = new Shift();
-
-    shift.appId = 1;
-    shift.branchId = 1;
+    shift.appId = int.parse(terminalId);
+    shift.terminalId = int.parse(terminalId);
+    shift.branchId = int.parse(branchid);
+    shift.userId = userdata.id;
+    shift.uuid = await CommunFun.getLocalID();
+    shift.status = 1;
     if (shiftid == null) {
       shift.startAmount = int.parse(ammount);
     } else {
@@ -316,7 +337,7 @@ class _DashboradPageState extends State<DashboradPage>
       shift.endAmount = int.parse(ammount);
     }
     shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
-    shift.updatedBy = 1;
+    shift.updatedBy = userdata.id;
     var result = await localAPI.insertShift(shift);
     if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
@@ -384,7 +405,16 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   itememovefromCart(cartitem) async {
-    await localAPI.deleteCartItem(cartitem, currentCart, cartList.length == 1);
+    MST_Cart cart = new MST_Cart();
+    MSTCartdetails cartitemdata = cartitem;
+    cart = allcartData;
+    cart.sub_total = allcartData.sub_total - cartitemdata.productPrice;
+    cart.discount = allcartData.discount - cartitemdata.discount;
+    cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
+    cart.grand_total = allcartData.grand_total - cartitemdata.productPrice;
+    await localAPI.deleteCartItem(
+        cartitem, currentCart, cart, cartList.length == 1);
+
     if (cartList.length > 1) {
       await getCartItem(currentCart);
     } else {
@@ -545,7 +575,7 @@ class _DashboradPageState extends State<DashboradPage>
         //  Preferences.removeSinglePref(Constant.TERMINAL_KEY);
       },
       child: Text(
-        userDetails["name"],
+        userDetails != null ? userDetails["name"] : "",
         style: TextStyle(color: Colors.white, fontSize: 18),
       ),
       color: Colors.deepOrange,
@@ -606,12 +636,15 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                   title: Text("Shift Report", style: Styles.communBlack())),
               ListTile(
+                  onTap: () {
+                    syncOrdersTodatabase();
+                  },
                   leading: Icon(
                     Icons.transform,
                     color: Colors.black,
                     size: 40,
                   ),
-                  title: Text("Sync", style: Styles.communBlack())),
+                  title: Text("Sync Orders", style: Styles.communBlack())),
               ListTile(
                   onTap: () async {
                     await Preferences.removeSinglePref(Constant.LastSync_Table);
@@ -670,38 +703,40 @@ class _DashboradPageState extends State<DashboradPage>
               height: 70,
               margin: EdgeInsets.only(top: 15),
               width: MediaQuery.of(context).size.width / 3.8,
-              child: new Column(children: <Widget>[
-                SimpleAutoCompleteTextField(
-                  key: null,
-                  suggestions: ["Apple", "Pizza", "mini Pizza"],
-                  keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
-                    suffixIcon: Padding(
-                      padding: EdgeInsets.only(right: 25),
-                      child: Icon(
-                        Icons.search,
-                        color: Colors.deepOrange,
-                        size: 30,
+              child: new Column(
+                children: <Widget>[
+                  SimpleAutoCompleteTextField(
+                    key: null,
+                    suggestions: ["Apple", "Pizza", "mini Pizza"],
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                      suffixIcon: Padding(
+                        padding: EdgeInsets.only(right: 25),
+                        child: Icon(
+                          Icons.search,
+                          color: Colors.deepOrange,
+                          size: 30,
+                        ),
                       ),
-                    ),
-                    hintText: Strings.search_bar_text,
-                    hintStyle: TextStyle(fontSize: 18.0, color: Colors.black),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(50),
-                      borderSide: BorderSide(
-                        width: 0,
-                        style: BorderStyle.none,
+                      hintText: Strings.search_bar_text,
+                      hintStyle: TextStyle(fontSize: 18.0, color: Colors.black),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50),
+                        borderSide: BorderSide(
+                          width: 0,
+                          style: BorderStyle.none,
+                        ),
                       ),
+                      filled: true,
+                      contentPadding:
+                          EdgeInsets.only(left: 20, top: 0, bottom: 0),
+                      fillColor: Colors.white,
                     ),
-                    filled: true,
-                    contentPadding:
-                        EdgeInsets.only(left: 20, top: 0, bottom: 0),
-                    fillColor: Colors.white,
+                    style: TextStyle(color: Colors.black, fontSize: 20.0),
+                    // key: keyAutoSuggestion,
                   ),
-                  style: TextStyle(color: Colors.black, fontSize: 20.0),
-                  // key: keyAutoSuggestion,
-                ),
-              ])
+                ],
+              )
 
               //For single suggestion
               /*SimpleAutoCompleteTextField(
@@ -1347,11 +1382,27 @@ class _DashboradPageState extends State<DashboradPage>
           TableRow(children: [
             TableCell(
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   selectedvoucher != null
-                      ? Text(selectedvoucher.voucherName)
+                      ? Padding(
+                          padding: EdgeInsets.only(top: 10),
+                          child: Chip(
+                            backgroundColor: Colors.grey,
+                            avatar: CircleAvatar(
+                              backgroundColor: Colors.grey.shade800,
+                              child: Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                            label: Text(
+                              selectedvoucher.voucherName,
+                              style: Styles.whiteBoldsmall(),
+                            ),
+                          ))
                       : SizedBox(),
                   Padding(
                       padding: EdgeInsets.only(top: 10),

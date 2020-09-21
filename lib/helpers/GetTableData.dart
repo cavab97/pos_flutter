@@ -18,6 +18,7 @@ import 'package:mcncashier/models/Role.dart';
 import 'package:mcncashier/models/Modifier.dart';
 import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Voucher.dart';
@@ -37,6 +38,7 @@ class TableData {
     var branchData = tablesData["branch"];
     var userData = tablesData["user"];
     var roleData = tablesData["role"];
+    var taxData = tablesData["branch_tax"];
     try {
       if (branchData.length != 0) {
         for (var i = 0; i < branchData.length; i++) {
@@ -70,6 +72,14 @@ class TableData {
           var roleDataitem = roleData[i];
           Role role = Role.fromJson(roleDataitem);
           var result = await db.insert("role", role.toJson());
+          print(result);
+        }
+      }
+      if (taxData.length != 0) {
+        for (var i = 0; i < taxData.length; i++) {
+          var taxDataitem = taxData[i];
+          Tax role = Tax.fromJson(taxDataitem);
+          var result = await db.insert("branch_tax", role.toJson());
           print(result);
         }
       }

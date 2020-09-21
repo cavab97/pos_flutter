@@ -4,6 +4,7 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/config.dart';
 import 'package:mcncashier/models/TerminalLog.dart';
 import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/services/CommunAPICall.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -13,8 +14,10 @@ class SyncAPICalls {
     var apiurl = Configrations.appdata1;
     var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
     var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var serverTime =
+        await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
     var stringParams = {
-      'datetime': '2020-05-05 11:41:50',
+      'datetime': serverTime != null ? serverTime : '',
       'branchId': branchid,
       'terminal_id': terminalId
     };
@@ -29,7 +32,7 @@ class SyncAPICalls {
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
 
     var stringParams = {
-      'datetime': '2020-05-05 11:41:50', //serverTime,
+      'datetime': serverTime != null ? serverTime : '',
       'branchId': branchid,
       'terminal_id': terminalId
     };
@@ -43,7 +46,7 @@ class SyncAPICalls {
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
     var stringParams = {
-      'datetime': '2020-05-05 11:41:50', //serverTime,
+      'datetime': serverTime != null ? serverTime : '',
       'branchId': branchid,
       'terminal_id': terminalId
     };
@@ -57,7 +60,7 @@ class SyncAPICalls {
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
     var stringParams = {
-      'datetime': '2020-05-05 11:41:50', // serverTime,
+      'datetime': serverTime != null ? serverTime : '',
       'branchId': branchid,
       'terminal_id': terminalId
     };
@@ -71,7 +74,7 @@ class SyncAPICalls {
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
     var stringParams = {
-      'datetime': '2020-05-05 11:41:50',
+      'datetime': serverTime != null ? serverTime : '',
       'branchId': branchid,
       'terminal_id': terminalId
     };
@@ -85,7 +88,7 @@ class SyncAPICalls {
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
     var stringParams = {
-      'datetime': '2020-05-05 11:41:50', //serverTime,
+      'datetime': serverTime != null ? serverTime : '',
       'branchId': branchid,
       'terminal_id': terminalId
     };
@@ -100,7 +103,7 @@ class SyncAPICalls {
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
 
     var stringParams = {
-      'datetime': '2020-05-05 11:41:50', //serverTime
+      'datetime': serverTime != null ? serverTime : '',
       'branchId': branchid,
       'terminal_id': terminalId
     };
@@ -114,7 +117,7 @@ class SyncAPICalls {
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
     var stringParams = {
-      'datetime': '2020-05-05 11:41:50',
+      'datetime': serverTime != null ? serverTime : '',
       'branchId': branchid, // serverTime,
       'terminal_id': terminalId
     };
@@ -131,8 +134,7 @@ class SyncAPICalls {
     final DateTime now = DateTime.now();
     final String date = DateFormat('yyyy-MM-dd').format(now);
     final String time = DateFormat('HH:mm').format(now);
-    var datetime =
-        await CommunFun.getCurrentDateTime(DateTime.now()).toString();
+    var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
     log.uuid = uuid;
     log.terminal_id = int.parse(terminalId);
     log.branch_id = int.parse(branchid);
@@ -147,5 +149,24 @@ class SyncAPICalls {
     log.updated_by = userdata.id;
     var logid = await localAPI.terminalLog(log);
     print(logid);
+  }
+
+  static syncOrderstoDatabase(context) async {
+    try {
+      var terminalId =
+          await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+      var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+      LocalAPI localAPI = LocalAPI();
+      var apiurl = Configrations.order_sync;
+      List<Orders> orders = await localAPI.getOrdersList(branchid, terminalId);
+      var stringParams = {
+        'terminal_id': terminalId,
+        'branch_id': branchid,
+        'orders': orders
+      };
+      return await APICalls.apiCall(apiurl, context, stringParams);
+    } catch (e) {
+      print(e);
+    }
   }
 }

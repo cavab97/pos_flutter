@@ -13,6 +13,8 @@ class Branch {
   String latitude;
   String longitude;
   int status;
+  String orderPrefix;
+  String invoiceStart;
   String updatedAt;
   int updatedBy;
   Null deletedAt;
@@ -34,6 +36,8 @@ class Branch {
       this.latitude,
       this.longitude,
       this.status,
+      this.orderPrefix,
+      this.invoiceStart,
       this.updatedAt,
       this.updatedBy,
       this.deletedAt,
@@ -55,6 +59,8 @@ class Branch {
     latitude = json['latitude'];
     longitude = json['longitude'];
     status = json['status'];
+    orderPrefix = json['order_prefix'];
+    invoiceStart = json['invoice_start'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
     deletedAt = json['deleted_at'];
@@ -78,6 +84,8 @@ class Branch {
     data['latitude'] = this.latitude;
     data['longitude'] = this.longitude;
     data['status'] = this.status;
+    data['order_prefix'] = this.orderPrefix;
+    data['invoice_start'] = this.invoiceStart;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;
     data['deleted_at'] = this.deletedAt;

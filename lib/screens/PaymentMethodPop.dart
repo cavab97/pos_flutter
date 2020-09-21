@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
@@ -7,6 +6,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
@@ -15,6 +15,7 @@ import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
@@ -42,6 +43,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   LocalAPI localAPI = LocalAPI();
   bool isLoading = false;
   var newAmmount;
+  Branch branchdata;
   MST_Cart cartData;
   @override
   void initState() {
@@ -52,6 +54,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     });
     getPaymentMethods();
     getcartData();
+    getbranch();
   }
 
   getPaymentMethods() async {
@@ -61,6 +64,14 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         paymenttyppeList = result;
       });
     }
+  }
+
+  getbranch() async {
+    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var branch = await localAPI.getbranchData(branchid);
+    setState(() {
+      branchdata = branch;
+    });
   }
 
   getcartData() async {
@@ -143,25 +154,36 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
     var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
     var uuid = await CommunFun.getLocalID();
-    var datetime = CommunFun.getCurrentDateTime(DateTime.now()).toString();
-
+    var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
+    var invoiceNo = branchdata.orderPrefix + branchdata.invoiceStart;
     order.uuid = uuid;
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
     order.app_id = int.parse(terminalId);
     order.table_no = tables.table_id;
-    order.invoice_no = "000000" + order.app_id.toString();
+    order.invoice_no = invoiceNo + order.app_id.toString();
     order.customer_id = customer.customerId;
     order.sub_total = cartData.sub_total;
     order.sub_total_after_discount = cartData.sub_total - cartData.discount;
     order.grand_total = cartData.grand_total - cartData.discount;
     order.order_item_count = cartData.total_qty.toInt();
+    order.tax_amount = cartData.tax;
     order.order_date = datetime;
     order.order_by = userdata.id;
     order.voucher_id = cartData.voucherId;
     order.voucher_amount = cartData.discount;
     var orderid = await localAPI.placeOrder(order);
     print(orderid);
+    if (cartData.voucherId != 0 && cartData.voucherId != null) {
+      VoucherHistory history = new VoucherHistory();
+      history.voucher_id = cartData.voucherId;
+      history.amount = cartData.discount;
+      history.created_at = datetime;
+      history.order_id = orderid;
+      history.uuid = uuid;
+      var hisID = await localAPI.saveVoucherHistory(history);
+      print(hisID);
+    }
     var orderDetailid;
     if (orderid > 0) {
       if (cartList.length > 0) {
@@ -199,9 +221,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
           modifireData.product_id = modifire.productId;
           modifireData.modifier_id = modifire.modifierId;
           modifireData.om_amount = modifire.modifirePrice;
-          // modifireData.om_status = 1;
-          // modifireData.om_datetime = 1;
-          // modifireData.om_by = 1;
           modifireData.updated_at = datetime;
           modifireData.updated_by = userdata.id;
           var ordermodifreid = await localAPI.sendModifireData(modifireData);
@@ -240,6 +259,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     orderpayment.op_status = 1;
     orderpayment.op_datetime = datetime;
     orderpayment.op_by = userdata.id;
+    orderpayment.updated_at = datetime;
+    orderpayment.updated_by = userdata.id;
     var paymentid = await localAPI.sendtoOrderPayment(orderpayment);
     print(paymentid);
     await clearCartAfterSuccess();
@@ -287,11 +308,16 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
               children: <Widget>[
                 Row(
                   children: <Widget>[
-                    SizedBox(width: 15),
-                    Container(
-                        height: 70,
-                        width: 70,
-                        child: Image.asset("assets/bg.jpg")),
+                    SizedBox(width: 10),
+                    // Container(
+                    //     height: 70,
+                    //     width: 70,
+                    //     child: Image.asset("assets/bg.jpg")),
+                    Icon(
+                      Icons.credit_card,
+                      color: Colors.black,
+                      size: 50,
+                    ),
                     SizedBox(width: 15),
                     Text(
                       Strings.cash,
@@ -335,10 +361,15 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
             children: paymenttyppeList.map((payment) {
               return ListTile(
                   contentPadding: EdgeInsets.all(10),
-                  leading: Container(
-                      height: 70,
-                      width: 70,
-                      child: Image.asset("assets/bg.jpg")),
+                  leading: Icon(
+                    Icons.credit_card,
+                    color: Colors.black,
+                    size: 50,
+                  ),
+                  // Container(
+                  //     height: 70,
+                  //     width: 70,
+                  //     child: Image.asset("assets/bg.jpg")),
                   onTap: () {
                     sendPaymentByCash(payment);
                   },

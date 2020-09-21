@@ -33,6 +33,7 @@ dependencies:
   toast: ^0.1.5
   autocomplete_textfield: ^1.7.3
   timezone: ^0.5.4
+  flutter_typeahead: ^1.8.8
   
 dev_dependencies:
   flutter_test:

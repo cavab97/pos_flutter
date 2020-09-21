@@ -123,6 +123,8 @@ class CreateTables {
         "open_from	TEXT," +
         "closed_on	TEXT," +
         "tax INTEGER," +
+        "invoice_start TEXT," +
+        "order_prefix TEXT," +
         "branch_banner TEXT," +
         "latitude	TEXT," +
         "longitude	TEXT," +
@@ -393,6 +395,16 @@ class CreateTables {
         "deleted_by	INTEGER" +
         ")");
 
+    datatables = db.execute("CREATE TABLE voucher_history (" +
+        "voucher_history_id INTEGER PRIMARY KEY," +
+        "uuid TEXT," +
+        "voucher_id INTEGER," +
+        "order_id INTEGER," +
+        "user_id INTEGER," +
+        "amount REAL," +
+        "created_at TEXT" +
+        ")");
+
     // TABLE voucher
     datatables = db.execute("CREATE TABLE voucher (" +
         "voucher_id	INTEGER PRIMARY KEY," +
@@ -454,10 +466,8 @@ class CreateTables {
         "product_price REAL," +
         "product_old_price INTEGER," +
         "category_id INTEGER," +
-        "detail_attribute_id INTEGER," +
-        "detail_attribute_price INTEGER," +
         "detail_amount REAL," +
-        "detail_qty INTEGER," +
+        "detail_qty REAL," +
         "detail_status INTEGER" +
         "detail_datetime TEXT," +
         "detail_by INTEGER" +
@@ -605,7 +615,7 @@ class CreateTables {
         'product_price REAL,' +
         'product_net_price REAL,' +
         'product_qty REAL,' +
-        'tax_id TEXT,' +
+        'tax_id INTEGER,' +
         'tax_value REAL,' + //varchar
         'discount REAL,' + //DOUBLE
         'discount_type  INTEGER,' + //int
@@ -648,8 +658,7 @@ class CreateTables {
     datatables = db.execute("CREATE TABLE branch_tax(" +
         "id INTEGER PRIMARY KEY," +
         "tax_id INTEGER," +
-        "brnach_id INTEGER," +
-        "name  TEXT," +
+        "branch_id INTEGER," +
         "rate  INTEGER," +
         "status  INTEGER," +
         "updated_by INTEGER," +
@@ -692,6 +701,9 @@ class CreateTables {
         "updated_by INTEGER" +
         ")");
 
+    //  datatables = db.execute("CREATE TABLE voucher_log ( " +
+    //     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+    //     ")");
     return datatables;
   }
 }

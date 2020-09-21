@@ -11,4 +11,5 @@ class Configrations {
   static String appdata4_1 = "order-datatable";
   static String appdata4_2 = "shift-datatable";
   static String product_image = "productimage";
+  static String order_sync = "create-order-data";
 }

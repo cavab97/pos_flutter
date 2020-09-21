@@ -9,9 +9,8 @@ class MSTCartdetails {
   double productPrice;
   double productQty;
   double productNetPrice;
-  String taxId;
+  int taxId;
   double taxValue;
-
   double discount;
   int discountType;
   String remark;
