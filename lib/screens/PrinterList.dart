@@ -12,7 +12,7 @@ import 'package:ping_discover_network/ping_discover_network.dart';
 import 'package:wifi/wifi.dart';
 
 class PrinterListDailog extends StatefulWidget {
-  PrinterListDailog({Key key, this.onPress,this.cartList}) : super(key: key);
+  PrinterListDailog({Key key, this.onPress, this.cartList}) : super(key: key);
   Function onPress;
   List<MSTCartdetails> cartList;
 
@@ -29,19 +29,31 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
   List<String> devices = [];
   bool isDiscovering = false;
   int found = -1;
- // int portController = 1900;
+  // int portController = 1900;
   PaperSize paper = PaperSize.mm80;
-
+  List<MSTCartdetails> itemList = [];
   @override
   void initState() {
     super.initState();
+    setState(() {
+      itemList = widget.cartList;
+    });
+    discover(context);
   }
 
   sendTokitched() async {
-    var ids = ["1", "1"];
-    dynamic send = await localAPI.sendToKitched(ids);
-    print(send);
+    List<String> ids = [];
+    for (var i = 0; i < itemList.length; i++) {
+      if (itemList[i].isSendKichen == null || itemList[i].isSendKichen == 0) {
+        ids.add(itemList[i].id.toString());
+      }
+      if (i == itemList.length - 1) {
+        dynamic send = await localAPI.sendToKitched(ids);
+        print(send);
+      }
+    }
   }
+
   void discover(BuildContext ctx) async {
     setState(() {
       isDiscovering = true;
@@ -66,7 +78,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
 
     final String subnet = ip.substring(0, ip.lastIndexOf('.'));
     int port = 9100;
-   /* try {
+    /* try {
       port = int.parse(portController.text);
     } catch (e) {
       portController.text = port.toString();
@@ -128,22 +140,29 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
     ]);
     ticket.hr();
 
-    ticket.row([
-      PosColumn(text: '2', width: 2),
-      PosColumn(text: 'ONION RINGS', width: 10),
-    ]);
-    ticket.row([
-      PosColumn(text: '1', width: 2),
-      PosColumn(text: 'PIZZA', width: 10),
-    ]);
-    ticket.row([
-      PosColumn(text: '1', width: 2),
-      PosColumn(text: 'SPRING ROLLS', width: 10),
-    ]);
-    ticket.row([
-      PosColumn(text: '3', width: 2),
-      PosColumn(text: 'CRUNCHY STICKS', width: 10),
-    ]);
+    for (var i = 0; i < itemList.length; i++) {
+      var item = itemList[i];
+      ticket.row([
+        PosColumn(text: item.productQty.toString(), width: 2),
+        PosColumn(text: item.productName, width: 10),
+      ]);
+    }
+    // ticket.row([
+    //   PosColumn(text: '2', width: 2),
+    //   PosColumn(text: 'ONION RINGS', width: 10),
+    // ]);
+    // ticket.row([
+    //   PosColumn(text: '1', width: 2),
+    //   PosColumn(text: 'PIZZA', width: 10),
+    // ]);
+    // ticket.row([
+    //   PosColumn(text: '1', width: 2),
+    //   PosColumn(text: 'SPRING ROLLS', width: 10),
+    // ]);
+    // ticket.row([
+    //   PosColumn(text: '3', width: 2),
+    //   PosColumn(text: 'CRUNCHY STICKS', width: 10),
+    // ]);
 
     ticket.feed(2);
     ticket.cut();
@@ -151,6 +170,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
   }
 
   void testPrint(String printerIp, BuildContext ctx) async {
+    sendTokitched();
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
@@ -199,6 +219,16 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
               size: 50,
             ),
           ),
+          Positioned(
+              left: 30,
+              top: 15,
+              child: IconButton(
+                  icon: Icon(
+                    Icons.sync,
+                    color: Colors.white,
+                    size: 40,
+                  ),
+                  onPressed: isDiscovering ? null : () => discover(context))),
           closeButton(context),
         ],
       ),
@@ -238,17 +268,17 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           SizedBox(height: 10),
-         // Text('Local ip: $localIp', style: TextStyle(fontSize: 16)),
-          SizedBox(height: 15),
-          RaisedButton(
-              child: Text('${isDiscovering ? 'Discovering...' : 'Discover'}'),
-              onPressed: isDiscovering ? null : () => discover(context)),
+          // Text('Local ip: $localIp', style: TextStyle(fontSize: 16)),
+          // SizedBox(height: 15),
+          // RaisedButton(
+          //     child: Text('${isDiscovering ? 'Discovering...' : 'Discover'}'),
+          //     onPressed: isDiscovering ? null : () => discover(context)),
           SizedBox(height: 15),
           found >= 0
               ? Text('Found: $found device(s)', style: TextStyle(fontSize: 16))
               : Container(),
           Container(
-           // height: MediaQuery.of(context).size.height / 2.2,
+            // height: MediaQuery.of(context).size.height / 2.2,
             child: ListView.builder(
               shrinkWrap: true,
               itemCount: devices.length,
@@ -271,7 +301,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
                                   Text(
-                                    '${devices[index]}:1900',//${portController.text}',
+                                    '${devices[index]}:1900', //${portController.text}',
                                     style: TextStyle(fontSize: 16),
                                   ),
                                   Text(

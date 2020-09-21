@@ -171,6 +171,8 @@ class SyncAPICalls {
           await localAPI.getOrderModifireTable(terminalId);
       List<OrderPayment> ordersPayment =
           await localAPI.getOrderPaymentTable(branchid);
+      List<dynamic> orderlist = [];
+      orderlist.add(orders);
       var stringParams = {
         'terminal_id': terminalId,
         'branch_id': branchid,
@@ -181,5 +183,4 @@ class SyncAPICalls {
       print(e);
     }
   }
-
 }
