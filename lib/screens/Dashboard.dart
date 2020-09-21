@@ -311,9 +311,11 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return PrinterListDailog(onPress: () {
-            // TOTO : pring reicipt code 
-          });
+          return PrinterListDailog(
+              cartList: cartList,
+              onPress: () {
+                // TOTO : pring reicipt code
+              });
         });
   }
 
