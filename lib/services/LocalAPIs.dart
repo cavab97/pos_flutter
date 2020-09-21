@@ -513,21 +513,6 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<Orders>> getOrdersList(branchid, terminalid) async {
-    var qry = "SELECT * from orders where branch_id = " +
-        branchid.toString() +
-        " AND terminal_id = " +
-        terminalid.toString();
-
-    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    List<Orders> list = ordersList.isNotEmpty
-        ? ordersList.map((c) => Orders.fromJson(c)).toList()
-        : [];
-    await SyncAPICalls.logActivity(
-        "Transactions", "get Orders list", "Orders", branchid);
-    return list;
-  }
-
   Future<List<ProductDetails>> getOrderDetails(orderid) async {
     var qry =
         "SELECT P.product_id,P.name,P.price,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 FROM order_detail O " +
@@ -662,10 +647,94 @@ class LocalAPI {
         user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
     return list[0];
   }
+
   // Future<dynamic> removePromocode(voucherid) async {
   //   var qry = "SELECT count(voucher_id) from orders where voucher_id = " +
   //       voucherid.toString();
   //   var count = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
   //   return count;
   // }
+  Future<List<Orders>> getOrdersList(branchid, terminalid) async {
+    var qry = "SELECT * from orders where branch_id = " +
+        branchid.toString() +
+        " AND terminal_id = " +
+        terminalid.toString();
+
+    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<Orders> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => Orders.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Transactions", "get Orders list", "Orders", branchid);
+    return list;
+  }
+
+  Future<List<Orders>> getOrdersListTable(branchid) async {
+    var qry = "SELECT * from orders where branch_id = " + branchid.toString();
+    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<Orders> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => Orders.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Order sync", "get Orders list", "Orders", branchid);
+    return list;
+  }
+
+  Future<List<OrderDetail>> getOrderDetailTable(branchid) async {
+    var qry =
+        "SELECT * from order_detail where branch_id = " + branchid.toString();
+    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<OrderDetail> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Order sync", "get Orders detail list", "Orders", branchid);
+    return list;
+  }
+
+  Future<List<OrderAttributes>> getOrderAttributesTable(branchid) async {
+    var qry = "SELECT * from order_attribute where terminal_id = " +
+        branchid.toString();
+
+    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<OrderAttributes> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => OrderAttributes.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Order sync", "get Orders_modifire list", "order_attribute", branchid);
+    return list;
+  }
+
+  Future<List<OrderModifire>> getOrderModifireTable(branchid) async {
+    var qry = "SELECT * from order_modifier where terminal_id = " +
+        branchid.toString();
+    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<OrderModifire> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => OrderModifire.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Order sync", "get Orders Modifire Table", "order_modifier", branchid);
+    return list;
+  }
+
+  Future<List<OrderPayment>> getOrderPaymentTable(branchid) async {
+    var qry =
+        "SELECT * from order_payment where branch_id = " + branchid.toString();
+    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<OrderPayment> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Order sync", "get Orders payment Table", "order_payment", branchid);
+    return list;
+  }
+
+  Future<dynamic> sendToKitched(ids) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var qry = "update mst_cart_detail set is_send_kichen = 1 WHERE id in(" +
+        ids +
+        ")";
+    var ordersList = await db.rawQuery(qry);
+    return ordersList;
+  }
 }

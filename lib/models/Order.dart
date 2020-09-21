@@ -19,6 +19,8 @@ class Orders {
   int order_item_count;
   String order_date;
   int order_by;
+  String updated_at;
+  int updated_by;
 
   Orders({
     this.order_id,
@@ -41,6 +43,8 @@ class Orders {
     this.order_item_count,
     this.order_date,
     this.order_by,
+    this.updated_at,
+    this.updated_by,
   });
 
   Orders.fromJson(Map<String, dynamic> json) {
@@ -64,6 +68,8 @@ class Orders {
     order_item_count = json["order_item_count"];
     order_date = json["order_date"];
     order_by = json["order_by"];
+    updated_at = json["updated_at"];
+    updated_by = json["updated_by"];
   }
 
   Map<String, dynamic> toJson() {
@@ -88,6 +94,8 @@ class Orders {
     data["order_item_count"] = this.order_item_count;
     data["order_date"] = this.order_date;
     data["order_by"] = this.order_by;
+    data["updated_at"] = this.updated_at;
+    data["updated_by"] = this.updated_by;
     return data;
   }
 }

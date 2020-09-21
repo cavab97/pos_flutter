@@ -312,7 +312,7 @@ class _DashboradPageState extends State<DashboradPage>
         barrierDismissible: false,
         builder: (BuildContext context) {
           return PrinterListDailog(onPress: () {
-            // TOTO : pring reicipt code 
+            // TOTO : pring reicipt code
           });
         });
   }
@@ -1067,20 +1067,20 @@ class _DashboradPageState extends State<DashboradPage>
   Widget paybutton(context) {
     // Payment button
     return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           Container(
             margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height / 1.3 + 10),
             height: 50,
-            width: 100,
+            width: 200,
             child: RaisedButton(
-              padding: EdgeInsets.only(top: 10, bottom: 5),
+              padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
                 opnePrinterPop();
               },
               child: Text(
-                "Send",
+                "SEND",
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -1099,7 +1099,7 @@ class _DashboradPageState extends State<DashboradPage>
             height: 50,
             width: 200,
             child: RaisedButton(
-              padding: EdgeInsets.only(top: 10, bottom: 5),
+              padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
                 sendPayment();
               },

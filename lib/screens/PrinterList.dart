@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/services/LocalAPIs.dart';
 
 class PrinterListDailog extends StatefulWidget {
   PrinterListDailog({Key key, this.onPress}) : super(key: key);
@@ -11,10 +12,16 @@ class PrinterListDailog extends StatefulWidget {
 
 class _PrinterListDailogState extends State<PrinterListDailog> {
   DatabaseHelper databaseHelper = DatabaseHelper();
-
+  LocalAPI localAPI = LocalAPI();
   @override
   void initState() {
     super.initState();
+  }
+
+  sendTokitched() async {
+    var ids = ["1", "1"];
+    dynamic send = await localAPI.sendToKitched(ids);
+    print(send);
   }
 
   @override

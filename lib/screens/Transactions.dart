@@ -195,15 +195,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     SizedBox(
                                       height: 30,
                                     ),
-                                    paymemtUser != null
+                                    paymemtUser != null && selectedOrder != null
                                         ? Text(
                                             selectedOrder.invoice_no != null &&
                                                     paymemtUser != null
                                                 ? selectedOrder.invoice_no +
-                                                    " - Processed by " +
-                                                    paymemtUser.name
-                                                : " 0000000 - Processed by " +
-                                                    paymemtUser.name,
+                                                    " - Processed by "
+                                                : " 0000000 - Processed by ",
                                             style: TextStyle(
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,

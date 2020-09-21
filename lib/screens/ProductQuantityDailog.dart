@@ -253,7 +253,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     double qty = currentCart.total_qty != null
         ? currentCart.total_qty + product_qty.toDouble()
         : product_qty.toDouble();
-    double subT = currentCart.sub_total != null ? currentCart.sub_total : price;
+    double subT =
+        currentCart.sub_total != null ? currentCart.sub_total + price : price;
     double grandTotal = currentCart.grand_total != null
         ? currentCart.grand_total + price
         : price + taxval - disc;

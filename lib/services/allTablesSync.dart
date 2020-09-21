@@ -2,6 +2,10 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/config.dart';
+import 'package:mcncashier/models/OrderAttributes.dart';
+import 'package:mcncashier/models/OrderDetails.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/TerminalLog.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Order.dart';
@@ -158,7 +162,15 @@ class SyncAPICalls {
       var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
       LocalAPI localAPI = LocalAPI();
       var apiurl = Configrations.order_sync;
-      List<Orders> orders = await localAPI.getOrdersList(branchid, terminalId);
+      List<Orders> orders = await localAPI.getOrdersListTable(branchid);
+      List<OrderDetail> ordersDetail =
+          await localAPI.getOrderDetailTable(branchid);
+      List<OrderAttributes> ordersAttribute =
+          await localAPI.getOrderAttributesTable(terminalId);
+      List<OrderModifire> ordersModifire =
+          await localAPI.getOrderModifireTable(terminalId);
+      List<OrderPayment> ordersPayment =
+          await localAPI.getOrderPaymentTable(branchid);
       var stringParams = {
         'terminal_id': terminalId,
         'branch_id': branchid,
@@ -169,4 +181,5 @@ class SyncAPICalls {
       print(e);
     }
   }
+
 }

@@ -450,7 +450,9 @@ class CreateTables {
         "order_status INTEGER," +
         "order_item_count INTEGER," +
         "order_date TEXT," +
-        "order_by INTEGER" +
+        "order_by INTEGER," +
+        "updated_at TEXT," +
+        "updated_by INTEGER" +
         ")");
 
     // TABLE order_detail
