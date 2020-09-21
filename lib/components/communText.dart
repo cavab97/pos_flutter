@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:timezone/standalone.dart' as tz;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:device_info/device_info.dart';
@@ -8,6 +10,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/services/tableSyncAPI.dart' as repo;
 import 'package:toast/toast.dart';
@@ -198,72 +201,62 @@ class CommunFun {
     }
   }
 
+  static setServerTime(data, lastSync) async {
+    await Preferences.setStringToSF(
+        Constant.SERVER_DATE_TIME, data["data"]["serverdatetime"]);
+    await Preferences.setStringToSF(
+        Constant.SERVER_TIME_ZONE, data["data"]["timezone"]);
+    await Preferences.setStringToSF(Constant.LastSync_Table, lastSync);
+  }
+
   static getDataTables1(context) async {
     // start with 1 tables
     var data1 = await SyncAPICalls.getDataServerBulk1(context); //api call 1
     if (data1 != null) {
-      var result = await databaseHelper.insertData1(data1["data"]);
-      print(result);
-      await Preferences.setStringToSF(
-          Constant.SERVER_DATE_TIME, data1["data"]["serverdatetime"]);
-      await Preferences.setStringToSF(Constant.LastSync_Table, "1");
+      await databaseHelper.insertData1(data1["data"]);
+      await CommunFun.setServerTime(data1, "1");
     } else {
-      // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
     }
+
     var data2_1 =
         await SyncAPICalls.getDataServerBulk2_1(context); //api call 2_1
     if (data2_1 != null) {
-      var result = await databaseHelper.insertData2_1(data2_1["data"]);
-      print(result);
-      await Preferences.setStringToSF(
-          Constant.SERVER_DATE_TIME, data2_1["data"]["serverdatetime"]);
+      await databaseHelper.insertData2_1(data2_1["data"]);
+      await CommunFun.setServerTime(data2_1, "1");
     } else {
-      // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
     }
+
     var data2_2 =
         await SyncAPICalls.getDataServerBulk2_2(context); //api call 2_2
     if (data2_2 != null) {
-      var result = await databaseHelper.insertData2_2(data2_2["data"]);
-      print(result);
-      await Preferences.setStringToSF(
-          Constant.SERVER_DATE_TIME, data2_2["data"]["serverdatetime"]);
+      await databaseHelper.insertData2_2(data2_2["data"]);
+      await CommunFun.setServerTime(data2_2, "1");
     } else {
-      // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
     }
     var data2_3 =
         await SyncAPICalls.getDataServerBulk2_3(context); //api call 2_3
     if (data2_3 != null) {
-      var result = await databaseHelper.insertData2_3(data2_3["data"]);
-      print(result);
-      await Preferences.setStringToSF(
-          Constant.SERVER_DATE_TIME, data2_3["data"]["serverdatetime"]);
-      await Preferences.setStringToSF(Constant.LastSync_Table, "2");
+      await databaseHelper.insertData2_3(data2_3["data"]);
+      await CommunFun.setServerTime(data2_3, "2");
     } else {
-      // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
     }
+
     var data3 = await SyncAPICalls.getDataServerBulk3(context); // call 3
     if (data3 != null) {
-      var result = await databaseHelper.insertData3(data3["data"]);
-      print(result);
-      await Preferences.setStringToSF(
-          Constant.SERVER_DATE_TIME, data3["data"]["serverdatetime"]);
-      await Preferences.setStringToSF(Constant.LastSync_Table, "3");
+      await databaseHelper.insertData3(data3["data"]);
+      await CommunFun.setServerTime(data3, "3");
     } else {
-      // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
     }
     var data4_1 = await SyncAPICalls.getDataServerBulk4_1(context);
     if (data4_1 != null) {
-      var result = await databaseHelper.insertData4_1(data4_1["data"]);
-      print(result);
-      await Preferences.setStringToSF(
-          Constant.SERVER_DATE_TIME, data4_1["data"]["serverdatetime"]);
+      await databaseHelper.insertData4_1(data4_1["data"]);
+      await CommunFun.setServerTime(data4_1, "3");
     } else {
-      // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
     }
     var data4_2 = await SyncAPICalls.getDataServerBulk4_2(context);
@@ -271,23 +264,19 @@ class CommunFun {
       var result = await databaseHelper.insertData4_2(data4_2["data"]);
       print(result);
       if (result == 1) {
+        await CommunFun.setServerTime(data4_2, "4");
         Navigator.of(context).pop();
         Navigator.pushNamed(context, Constant.PINScreen);
-        await Preferences.setStringToSF(
-            Constant.SERVER_DATE_TIME, data4_2["data"]["serverdatetime"]);
-        await Preferences.setStringToSF(Constant.LastSync_Table, "4");
       } else {
         print("Error when getting data4_3");
       }
     } else {
-      // handle Exaption
       CommunFun.showToast(context, "something want wrong!");
     }
     var aceets = await SyncAPICalls.getAssets(context);
     if (aceets != null) {
       databaseHelper.accetsData(aceets["data"]);
-      await Preferences.setStringToSF(
-          Constant.SERVER_DATE_TIME, aceets["data"]["serverdatetime"]);
+      await CommunFun.setServerTime(aceets, "4");
     } else {
       // handle Exaption
       print("Error when getting product image data");
@@ -432,18 +421,32 @@ class CommunFun {
 
   static getCurrentDateTime(dateTime) async {
     //converttoserver tiem
-    return dateTime.toString();
+    // var timeZone =
+    //     await Preferences.getStringValuesSF(Constant.SERVER_TIME_ZONE);
+    // final detroitTime =
+    //     new tz.TZDateTime.from(dateTime, tz.getLocation(timeZone));
+    // print('Local India Time: ' + dateTime.toString());
+    // print('Detroit Time: ' + detroitTime.toString());
+    return await dateTime.toString();
   }
 
   static getLocalID() async {
     var deviceInfo = await CommunFun.deviceInfo();
-
-    final now = new DateTime.now();
-    var datetime = new DateTime(now.year, now.month, now.day);
     var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
     var localid = Platform.isAndroid
         ? "ANDROID" + deviceInfo.androidId + terminalId
         : "IOS" + deviceInfo.androidId + terminalId;
     return localid.toString();
+  }
+
+  static getuserDetails() async {
+    User user = new User();
+    var users = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    if (users != null) {
+      var user1 = json.decode(users);
+      return user = User.fromJson(user1);
+    } else {
+      return user;
+    }
   }
 }

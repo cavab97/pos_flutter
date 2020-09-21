@@ -10,13 +10,13 @@ class MST_Cart {
   double tax;
   double grand_total;
   double total_qty;
-  int is_open;
+  int voucherId;
   int is_deleted;
   int created_by;
   String created_at;
   // int sync;
   int customer_terminal;
-  int queue_number;
+
   // double service_charge_rate;
   // int service_charge_amount;
   // double redeem_points;
@@ -33,20 +33,13 @@ class MST_Cart {
     this.discount_type,
     this.remark,
     this.tax,
+    this.voucherId,
     this.grand_total,
     this.total_qty,
-    this.is_open,
     this.is_deleted,
     this.created_by,
     this.created_at,
-    // this.sync,
     this.customer_terminal,
-    this.queue_number,
-    // this.service_charge_rate,
-    // this.service_charge_amount,
-    // this.redeem_points,
-    // this.redeem_point_amount,
-    // this.product_points,
   });
 
   MST_Cart.fromJson(Map<String, dynamic> json) {
@@ -65,18 +58,12 @@ class MST_Cart {
     tax = json["tax"] is int ? (json['tax'] as int).toDouble() : json['tax'];
     grand_total = json["grand_total"] as double;
     total_qty = json["total_qty"] as double;
-    is_open = json["is_open"];
+    voucherId = json["voucher_id"];
     is_deleted = json["is_deleted"];
     created_by = json["created_by"];
     created_at = json["created_at"];
-    // sync = json["sync"];
+
     customer_terminal = json["customer_terminal"];
-    queue_number = json["queue_number"];
-    // service_charge_rate = json["service_charge_rate"];
-    // service_charge_amount = json["service_charge_amount"];
-    // redeem_points = json["redeem_points"];
-    // redeem_point_amount = json["redeem_point_amount"];
-    // product_points = json["product_points"];
   }
 
   Map<String, dynamic> toJson() {
@@ -93,18 +80,12 @@ class MST_Cart {
     data["tax"] = this.tax;
     data["grand_total"] = this.grand_total;
     data["total_qty"] = this.total_qty;
-    data["is_open"] = this.is_open;
+    data["voucher_id"] = this.voucherId;
     data["is_deleted"] = this.is_deleted;
     data["created_by"] = this.created_by;
     data["created_at"] = this.created_at;
-    // data["sync"] = this.sync;
+
     data["customer_terminal"] = this.customer_terminal;
-    data["queue_number"] = this.queue_number;
-    // data["service_charge_rate"] = this.service_charge_rate;
-    // data["service_charge_amount"] = this.service_charge_amount;
-    // data["redeem_points"] = this.redeem_points;
-    // data["redeem_point_amount"] = this.redeem_point_amount;
-    // data["product_points"] = this.product_points;
 
     return data;
   }

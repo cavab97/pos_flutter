@@ -21,7 +21,7 @@ class Attribute_Data {
     qty = json["qty"];
     attr_types = json["attr_types"].toString();
     attr_types_price = json["attr_types_price"];
-    attributeId = json["attribute_id"].toString();
+    attributeId = json["attributeId"].toString();
     ca_id = json["ca_id"];
   }
 
@@ -33,7 +33,7 @@ class Attribute_Data {
     data["attr_name"] = this.attr_name;
     data["attr_types"] = this.attr_types.toString();
     data["attr_types_price"] = this.attr_types_price;
-    data["attribute_id"] = this.attributeId;
+    data["attributeId"] = this.attributeId;
     return data;
   }
 }

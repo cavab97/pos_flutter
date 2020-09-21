@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
@@ -62,19 +63,13 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
           Navigator.pushNamed(context, Constant.LoginScreen,
               arguments: {"terminalId": value.terminalId});
         } else if (value != null && value.status == Constant.STATUS422) {
-          scaffoldKey.currentState.showSnackBar(SnackBar(
-            content: Text(value.message),
-          ));
+          CommunFun.showToast(context, value.message);
         } else {
-          scaffoldKey.currentState.showSnackBar(SnackBar(
-            content: Text(value.message),
-          ));
+          CommunFun.showToast(context, value.message);
         }
       }).catchError((e) {
         print(e);
-        scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text(e.message),
-        ));
+        CommunFun.showToast(context, e.message);
         setState(() {
           isLoading = false;
         });
@@ -102,10 +97,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
                 children: <Widget>[
                   loginlogo(), // Login logo
                   SizedBox(height: 80),
-                  //
                   terminalKeyInput((e) {
-                    // Key input
-                    print("on changes");
                     if (e.length > 0) {
                       setState(() {
                         errormessage = "";
@@ -119,7 +111,8 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
                       : Container(
                           // Key add button
                           width: MediaQuery.of(context).size.width,
-                          child: CommunFun.roundedButton("Set Teminal Key", () {
+                          child: CommunFun.roundedButton(
+                              Strings.set_terminal_key, () {
                             setTerminalkey();
                           }),
                         )
@@ -136,7 +129,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
     return SizedBox(
       height: 110.0,
       child: Image.asset(
-        "assets/headerlogo.png",
+        Strings.asset_headerLogo,
         fit: BoxFit.contain,
       ),
     );
@@ -157,7 +150,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
         ),
         errorText: !isValidatekey ? errormessage : null,
         errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
-        hintText: "Terminal Key",
+        hintText: Strings.terminalKey,
         hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50),

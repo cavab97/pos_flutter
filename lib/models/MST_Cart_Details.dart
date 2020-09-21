@@ -1,6 +1,7 @@
 import 'dart:ffi';
 
 class MSTCartdetails {
+  int id;
   int cartId;
   String localID;
   int productId;
@@ -10,6 +11,7 @@ class MSTCartdetails {
   double productNetPrice;
   String taxId;
   double taxValue;
+
   double discount;
   int discountType;
   String remark;
@@ -46,6 +48,7 @@ class MSTCartdetails {
       this.createdBy});
 
   MSTCartdetails.fromJson(Map<String, dynamic> json) {
+    id = json["id"];
     cartId = json["cart_id"];
     localID = json["localID"];
     productId = json["product_id"];
@@ -59,7 +62,7 @@ class MSTCartdetails {
     discountType = json["discount_type"];
     remark = json["remark"];
     isDeleted = json["is_deleted"];
-    // sync = json["sync"];
+
     isSendKichen = json["is_send_kichen"];
     itemUnit = json["item_unit"];
     hasCompositeInventory = json["has_composite_inventory"];
@@ -70,7 +73,7 @@ class MSTCartdetails {
   }
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-
+    data["id"] = this.id;
     data["cart_id"] = this.cartId;
     data["localID"] = this.localID;
     data["product_id"] = this.productId;
@@ -84,11 +87,8 @@ class MSTCartdetails {
     data["discount_type"] = this.discountType;
     data["remark"] = this.remark;
     data["is_deleted"] = this.isDeleted;
-    // data["sync"] = this.sync;
     data["is_send_kichen"] = this.isSendKichen;
     data["has_composite_inventory"] = this.hasCompositeInventory;
-    // data["product_points"] = this.productPoints;
-    // data["product_total_points"] = this.productTotalPoints;
     data["item_unit"] = this.itemUnit;
     data["created_by"] = this.createdBy;
     data["created_at"] = this.createdAt;

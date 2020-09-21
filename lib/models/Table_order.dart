@@ -39,7 +39,7 @@ class Table_order {
     data['merged_table_id'] = this.merged_table_id;
     data['number_of_pax'] = this.number_of_pax;
     data['table_seat'] = this.table_seat;
-    data['save_order_id'] = this.table_seat;
+    data['save_order_id'] = this.save_order_id;
     data['merged_pax'] = this.merged_pax;
     data["table_locked_by"] = this.table_locked_by;
     data["is_order_merged"] = this.is_order_merged;

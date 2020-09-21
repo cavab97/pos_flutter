@@ -8,18 +8,19 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Category.dart';
-import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
+import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class DashboradPage extends StatefulWidget {
@@ -32,8 +33,8 @@ class DashboradPage extends StatefulWidget {
 
 class _DashboradPageState extends State<DashboradPage>
     with SingleTickerProviderStateMixin {
-
-  GlobalKey<AutoCompleteTextFieldState<ProductDetails>> keyAutoSuggestion = new GlobalKey();
+  GlobalKey<AutoCompleteTextFieldState<ProductDetails>> keyAutoSuggestion =
+      new GlobalKey();
 
   AutoCompleteTextField searchTextField;
 
@@ -52,7 +53,8 @@ class _DashboradPageState extends State<DashboradPage>
   double discount = 0;
   double tax = 0;
   double grandTotal = 0;
-  int current_cart;
+  Voucher selectedvoucher;
+  int currentCart;
   bool isLoading = false;
 
   @override
@@ -106,7 +108,7 @@ class _DashboradPageState extends State<DashboradPage>
       tax = 0.0;
       subtotal = 0.0;
       isTableSelected = false;
-      current_cart = null;
+      currentCart = null;
     });
   }
 
@@ -116,10 +118,10 @@ class _DashboradPageState extends State<DashboradPage>
     print(currentOrder);
     if (currentOrder.length != 0) {
       setState(() {
-        current_cart = currentOrder[0].cartId;
+        currentCart = currentOrder[0].cartId;
       });
       if (isShiftOpen) {
-        getCartItem(current_cart);
+        getCartItem(currentCart);
       }
     }
   }
@@ -151,7 +153,7 @@ class _DashboradPageState extends State<DashboradPage>
       subTotal += cart.productPrice;
       dis += cart.discount;
       taxval += cart.taxValue;
-      grandtotal = (subtotal + tax) - discount;
+      grandtotal = (subTotal + taxval) - dis;
     }
     setState(() {
       subtotal = subTotal;
@@ -178,7 +180,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   closeShift() {
-    openOpningAmmountPop(false);
+    openOpningAmmountPop(Strings.title_closing_amount);
   }
 
   void selectOption(choice) {
@@ -188,7 +190,7 @@ class _DashboradPageState extends State<DashboradPage>
       case 0:
         closeTable();
         break;
-      case 4:
+      case 2:
         closeShift();
         break;
     }
@@ -212,9 +214,11 @@ class _DashboradPageState extends State<DashboradPage>
     var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
     List<ProductDetails> product = await localAPI.getProduct(
         tabsList[position].categoryId.toString(), branchid);
+
     setState(() {
       productList.clear();
-      productList = product;
+      productList =
+          product.length != 0 && product[0].productId != null ? product : [];
       isLoading = false;
     });
   }
@@ -237,31 +241,65 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         builder: (BuildContext context) {
           return OpeningAmmountPage(
-              isStartAmmount: isopning,
-              onEnter: (ammount, isstartAmmount) {
-                sendOpenShft(ammount, isstartAmmount);
+              ammountext: isopning,
+              onEnter: (ammountext) {
+                sendOpenShft(ammountext);
               });
         });
   }
 
-  opnePaymentMethod() {
+  openVoucherPop() {
     showDialog(
         // Opning Ammount Popup
         context: context,
         builder: (BuildContext context) {
-          return PaymentMethodPop();
+          return VoucherPop(
+            cartList: cartList,
+            subTotal: subtotal,
+            onEnter: (voucher) {
+              if (selectedvoucher != null) {
+                setState(() {
+                  selectedvoucher = selectedvoucher;
+                });
+              }
+
+              getCartItem(currentCart);
+            },
+          );
         });
   }
+
+  // opneVoucherPop() async {
+  //   // var customerData =
+  //   //     await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
+  //   // if (customerData != null) {
+  //   showDialog(
+  //       // Opning Ammount Popup
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return VoucherApplyconfirmPop(
+  //           onEnter: () {
+  //             openVoucherPopFinal();
+  //           },
+  //           onCancel: () {
+  //             sendPayment();
+  //           },
+  //         );
+  //       });
+  //   // } else {
+  //   //   sendPayment();
+  //   // }
+  // }
 
   sendPayment() {
     if (cartList.length != 0) {
       opnePaymentMethod();
     } else {
-      CommunFun.showToast(context, "Cart is empty");
+      CommunFun.showToast(context, Strings.cart_empty);
     }
   }
 
-  sendOpenShft(ammount, isStart) async {
+  sendOpenShft(ammount) async {
     setState(() {
       isShiftOpen = true;
     });
@@ -271,16 +309,16 @@ class _DashboradPageState extends State<DashboradPage>
 
     shift.appId = 1;
     shift.branchId = 1;
-    if (isStart) {
+    if (shiftid == null) {
       shift.startAmount = int.parse(ammount);
     } else {
-      shift.shiftId = shiftid;
-      shift.endAmount = !isStart ? int.parse(ammount) : 0;
+      shift.shiftId = int.parse(shiftid);
+      shift.endAmount = int.parse(ammount);
     }
     shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     shift.updatedBy = 1;
     var result = await localAPI.insertShift(shift);
-    if (isStart) {
+    if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
     } else {
       await Preferences.removeSinglePref(Constant.DASH_SHIFT);
@@ -308,7 +346,7 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return ProductQuantityDailog(product: product, cartID: current_cart);
+          return ProductQuantityDailog(product: product, cartID: currentCart);
         });
   }
 
@@ -332,12 +370,66 @@ class _DashboradPageState extends State<DashboradPage>
         });
   }
 
+  opnePaymentMethod() {
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return PaymentMethodPop(
+              cartID: currentCart,
+              itemCount: cartList.length,
+              subTotal: subtotal,
+              grandTotal: grandTotal);
+        });
+  }
+
+  itememovefromCart(cartitem) async {
+    await localAPI.deleteCartItem(cartitem, currentCart, cartList.length == 1);
+    if (cartList.length > 1) {
+      await getCartItem(currentCart);
+    } else {
+      setState(() {
+        currentCart = null;
+        cartList = [];
+        grandTotal = 0.0;
+        discount = 0.0;
+        tax = 0.0;
+        subtotal = 0.0;
+      });
+    }
+  }
+
+  editCartItem(cart) async {
+    ProductDetails product;
+    for (int i = 0; i < productList.length; i++) {
+      if (productList[i].productId == cart.productId) {
+        product = productList[i];
+        await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return ProductQuantityDailog(
+                  product: product, cartID: currentCart, iscartItem: cart);
+            });
+        return false;
+      }
+    }
+  }
+
   selectTable() {
     Navigator.pushNamed(context, Constant.SelectTableScreen);
   }
 
+  gotoTansactionPage() {
+    Navigator.pushNamed(context, Constant.TransactionScreen);
+  }
+
   @override
   Widget build(BuildContext context) {
+    Future<bool> _willPopCallback() async {
+      return false;
+    }
+
     // Categrory Tabs
     final _tabs = TabBar(
         controller: _tabController,
@@ -361,64 +453,69 @@ class _DashboradPageState extends State<DashboradPage>
                 )),
           );
         }));
-    return Scaffold(
-        key: scaffoldKey,
-        drawer: drawerWidget(),
-        body: SafeArea(
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: Table(
-              border: TableBorder.all(color: Colors.white, width: 0.6),
-              columnWidths: {
-                0: FractionColumnWidth(.6),
-                1: FractionColumnWidth(.3),
-              },
-              children: [
-                TableRow(children: [
-                  TableCell(child: tableHeader1()),
-                  TableCell(child: tableHeader2()),
-                ]),
-                TableRow(children: [
-                  TableCell(
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            margin: EdgeInsets.only(left: 5, right: 5),
-                            width: MediaQuery.of(context).size.width,
-                            height: 65,
-                            color: Colors.black26,
-                            padding: EdgeInsets.all(10),
-                            child: DefaultTabController(
-                                initialIndex: 0,
-                                length: tabsList.length,
-                                child: _tabs),
-                          ),
-                          // porductsListLoading() :
-                          porductsList(),
-                        ],
+    return WillPopScope(
+      child: Scaffold(
+          key: scaffoldKey,
+          drawer: drawerWidget(),
+          body: SafeArea(
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Table(
+                border: TableBorder.all(color: Colors.white, width: 0.6),
+                columnWidths: {
+                  0: FractionColumnWidth(.6),
+                  1: FractionColumnWidth(.3),
+                },
+                children: [
+                  TableRow(children: [
+                    TableCell(child: tableHeader1()),
+                    TableCell(child: tableHeader2()),
+                  ]),
+                  TableRow(children: [
+                    TableCell(
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          children: <Widget>[
+                            Container(
+                              margin: EdgeInsets.only(left: 5, right: 5),
+                              width: MediaQuery.of(context).size.width,
+                              height: 65,
+                              color: Colors.black26,
+                              padding: EdgeInsets.all(10),
+                              child: DefaultTabController(
+                                  initialIndex: 0,
+                                  length: tabsList.length,
+                                  child: _tabs),
+                            ),
+                            // porductsListLoading() :
+                            isLoading
+                                ? CommunFun.loader(context)
+                                : porductsList(),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  TableCell(
-                      child: Stack(
-                    fit: StackFit.loose,
-                    children: <Widget>[
-                      Container(
-                        color: Colors.white,
-                        child: cartITems(),
-                      ),
-                      paybutton(context),
-                      !isShiftOpen ? openShiftButton(context) : SizedBox()
-                    ],
-                  )),
-                ]),
-              ],
+                    TableCell(
+                        child: Stack(
+                      fit: StackFit.loose,
+                      children: <Widget>[
+                        Container(
+                          color: Colors.white,
+                          child: cartITems(),
+                        ),
+                        paybutton(context),
+                        !isShiftOpen ? openShiftButton(context) : SizedBox()
+                      ],
+                    )),
+                  ]),
+                ],
+              ),
             ),
-          ),
-        ));
+          )),
+      onWillPop: _willPopCallback,
+    );
   }
 
   Widget checkoutbtn() {
@@ -473,6 +570,13 @@ class _DashboradPageState extends State<DashboradPage>
               ),
               CommunFun.divider(),
               ListTile(
+                  onTap: () {
+                    if (isShiftOpen) {
+                      gotoTansactionPage();
+                    } else {
+                      CommunFun.showToast(context, Strings.shift_closed);
+                    }
+                  },
                   leading: Icon(
                     Icons.art_track,
                     color: Colors.black,
@@ -480,12 +584,20 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                   title: Text("Transaction", style: Styles.communBlack())),
               ListTile(
+                  onTap: () {
+                    if (isShiftOpen) {
+                      closeShift();
+                    } else {
+                      openOpningAmmountPop(Strings.title_opening_amount);
+                    }
+                  },
                   leading: Icon(
                     Icons.open_in_new,
                     color: Colors.black,
                     size: 30,
                   ),
-                  title: Text("Open Shift", style: Styles.communBlack())),
+                  title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
+                      style: Styles.communBlack())),
               ListTile(
                   leading: Icon(
                     Icons.filter_tilt_shift,
@@ -531,14 +643,15 @@ class _DashboradPageState extends State<DashboradPage>
       width: MediaQuery.of(context).size.width / 3,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Row(
             children: <Widget>[
-              GestureDetector(
-                  onTap: () {
+              IconButton(
+                  onPressed: () {
                     openDrawer();
                   },
-                  child: Icon(
+                  icon: Icon(
                     Icons.dehaze,
                     color: Colors.white,
                     size: 40,
@@ -554,59 +667,44 @@ class _DashboradPageState extends State<DashboradPage>
             ],
           ),
           Container(
-            height: 50,
-            width: MediaQuery.of(context).size.width / 3.8,
+              height: 70,
+              margin: EdgeInsets.only(top: 15),
+              width: MediaQuery.of(context).size.width / 3.8,
               child: new Column(children: <Widget>[
-                new Column(children: <Widget>[
-                  searchTextField = AutoCompleteTextField<ProductDetails>(
-                      style: new TextStyle(color: Colors.black, fontSize: 16.0),
-                      decoration: new InputDecoration(
-                          suffixIcon: Container(
-                            width: 85.0,
-                            height: 60.0,
-                          ),
-                          contentPadding:
-                          EdgeInsets.fromLTRB(10.0, 30.0, 10.0, 20.0),
-                          filled: true,
-                          hintText: 'Search Player Name',
-                          hintStyle: TextStyle(color: Colors.black)),
-                      itemSubmitted: (item) {
-                        setState(() => searchTextField
-                            .textField.controller.text = item.base64);
-                      },
-                      clearOnSubmit: false,
-                      key: keyAutoSuggestion,
-                      //suggestions: ProductDetails.fromJson(),
-                      itemBuilder: (context, item) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text(
-                              item.name,
-                              style: TextStyle(fontSize: 16.0),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.all(15.0),
-                            ),
-                            Text(
-                              item.base64,
-                            )
-                          ],
-                        );
-                      },
-                      itemSorter: (a, b) {
-                        return a.base64.compareTo(b.base64);
-                      },
-                      itemFilter: (item, query) {
-                        return item.base64
-                            .toLowerCase()
-                            .startsWith(query.toLowerCase());
-                      }),
-                ]),
+                SimpleAutoCompleteTextField(
+                  key: null,
+                  suggestions: ["Apple", "Pizza", "mini Pizza"],
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    suffixIcon: Padding(
+                      padding: EdgeInsets.only(right: 25),
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.deepOrange,
+                        size: 30,
+                      ),
+                    ),
+                    hintText: Strings.search_bar_text,
+                    hintStyle: TextStyle(fontSize: 18.0, color: Colors.black),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(50),
+                      borderSide: BorderSide(
+                        width: 0,
+                        style: BorderStyle.none,
+                      ),
+                    ),
+                    filled: true,
+                    contentPadding:
+                        EdgeInsets.only(left: 20, top: 0, bottom: 0),
+                    fillColor: Colors.white,
+                  ),
+                  style: TextStyle(color: Colors.black, fontSize: 20.0),
+                  // key: keyAutoSuggestion,
+                ),
               ])
 
-            //For single suggestion
-            /*SimpleAutoCompleteTextField(
+              //For single suggestion
+              /*SimpleAutoCompleteTextField(
               suggestions: [
                 "Apple",
                 "Armidillo",
@@ -651,8 +749,8 @@ class _DashboradPageState extends State<DashboradPage>
 
             ),*/
 
-            //Old one ok?
-            /*TextField(
+              //Old one
+              /*TextField(
               keyboardType: TextInputType.text,
               decoration: InputDecoration(
                 suffixIcon: Padding(
@@ -681,7 +779,7 @@ class _DashboradPageState extends State<DashboradPage>
                 print(e);
               },
             ),*/
-          )
+              )
         ],
       ),
     );
@@ -714,13 +812,15 @@ class _DashboradPageState extends State<DashboradPage>
                   )
                 : SizedBox(),
             Row(
-              // crossAxisAlignment: CrossAxisAlignment.center,
-              // mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 addCustomerBtn(context),
-                menubutton(() {
-                  // opneMenuButton();
-                })
+                Padding(
+                    padding: EdgeInsets.only(bottom: 15),
+                    child: menubutton(() {
+                      // opneMenuButton();
+                    }))
               ],
             )
           ],
@@ -778,8 +878,8 @@ class _DashboradPageState extends State<DashboradPage>
                         color: Colors.black,
                         size: 30,
                       ),
-                      SizedBox(width: 10),
-                      Text("Close Table", style: Styles.communBlack())
+                      SizedBox(width: 20),
+                      Text(Strings.close_table, style: Styles.communBlack())
                     ],
                   ),
                 ),
@@ -791,12 +891,12 @@ class _DashboradPageState extends State<DashboradPage>
                   child: Row(
                     children: <Widget>[
                       Icon(
-                        Icons.save_alt,
+                        Icons.call_split,
                         color: Colors.black,
                         size: 30,
                       ),
-                      SizedBox(width: 10),
-                      Text("Save Order", style: Styles.communBlack())
+                      SizedBox(width: 20),
+                      Text(Strings.split_order, style: Styles.communBlack()),
                     ],
                   ),
                 ),
@@ -808,132 +908,17 @@ class _DashboradPageState extends State<DashboradPage>
                   child: Row(
                     children: <Widget>[
                       Icon(
-                        Icons.open_in_new,
-                        color: Colors.black,
-                        size: 30,
-                      ),
-                      SizedBox(width: 10),
-                      Text("Open Order", style: Styles.communBlack()),
-                    ],
-                  ),
-                ),
-              ),
-              PopupMenuItem(
-                value: 3,
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Row(
-                    children: <Widget>[
-                      Icon(
                         Icons.call_split,
                         color: Colors.black,
                         size: 30,
                       ),
-                      SizedBox(width: 10),
-                      Text("Split Order", style: Styles.communBlack()),
-                    ],
-                  ),
-                ),
-              ),
-              PopupMenuItem(
-                value: 4,
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Row(
-                    children: <Widget>[
-                      Icon(
-                        Icons.call_split,
-                        color: Colors.black,
-                        size: 30,
-                      ),
-                      SizedBox(width: 10),
-                      Text("Close Shift", style: Styles.communBlack()),
+                      SizedBox(width: 20),
+                      Text(Strings.close_shift, style: Styles.communBlack()),
                     ],
                   ),
                 ),
               ),
             ]);
-  }
-
-  Widget porductsListLoading() {
-    // products List
-    var size = MediaQuery.of(context).size;
-    final double itemHeight = (size.height - kToolbarHeight - 24) / 1.6;
-    final double itemWidth = size.width / 4.2;
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.only(top: 5),
-      child: GridView.count(
-          childAspectRatio: (itemWidth / itemHeight),
-          crossAxisCount: 5,
-          children: ['1', '2', '3', '4', '5'].map((i) {
-            return InkWell(
-              onTap: () {},
-              child: Container(
-                height: itemHeight,
-                // padding: EdgeInsets.all(5),
-                margin: EdgeInsets.all(5),
-                child: Stack(
-                  alignment: AlignmentDirectional.topCenter,
-                  children: <Widget>[
-                    Hero(
-                        tag: i,
-                        child: Container(
-                          color: Colors.grey,
-                          width: MediaQuery.of(context).size.width,
-                          height: itemHeight / 2,
-                          child: new Image.asset(
-                            'assets/no_image.png',
-                            fit: BoxFit.cover,
-                          ),
-                        )),
-                    Container(
-                      margin: EdgeInsets.only(top: itemHeight / 2.6),
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[600],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            "..",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      top: itemHeight / 2.6 - 30,
-                      left: 0,
-                      child: Container(
-                        height: 30,
-                        width: 50,
-                        padding: EdgeInsets.all(5),
-                        color: Colors.deepOrange,
-                        child: Center(
-                          child: Text(
-                            "...",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white,
-                                fontSize: 15),
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            );
-          }).toList()),
-    );
   }
 
   Widget porductsList() {
@@ -971,7 +956,7 @@ class _DashboradPageState extends State<DashboradPage>
                 alignment: AlignmentDirectional.topCenter,
                 children: <Widget>[
                   Hero(
-                      tag: product.productId,
+                      tag: product.productId != null ? product.productId : 0,
                       child: Container(
                         color: Colors.grey,
                         width: MediaQuery.of(context).size.width,
@@ -979,7 +964,7 @@ class _DashboradPageState extends State<DashboradPage>
                         child: image_Arr.length != 0 && image_Arr[0] != ""
                             ? CommonUtils.imageFromBase64String(image_Arr[0])
                             : new Image.asset(
-                                'assets/no_image.png',
+                                Strings.no_image,
                                 fit: BoxFit.cover,
                               ),
                       )),
@@ -1006,12 +991,16 @@ class _DashboradPageState extends State<DashboradPage>
                     left: 0,
                     child: Container(
                       height: 30,
-                      width: 50,
+                      // width: 50,
                       padding: EdgeInsets.all(5),
                       color: Colors.deepOrange,
                       child: Center(
                         child: Text(
-                          product.price.toString(),
+                          product.hasInventory == 1 && product.qty == 0
+                              ? Strings.out_of_stoke
+                              : product.priceTypeName +
+                                  ' ' +
+                                  product.price.toString(),
                           style: TextStyle(
                               fontWeight: FontWeight.w400,
                               color: Colors.white,
@@ -1033,8 +1022,9 @@ class _DashboradPageState extends State<DashboradPage>
     // Payment button
     return Center(
       child: Container(
-        margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3),
-        height: 60,
+        margin:
+            EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3 + 10),
+        height: 50,
         width: 300,
         child: RaisedButton(
           padding: EdgeInsets.only(top: 10, bottom: 5),
@@ -1083,7 +1073,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
                 SizedBox(height: 30),
                 shiftbtn(() {
-                  openOpningAmmountPop(true);
+                  openOpningAmmountPop(Strings.title_opening_amount);
                 })
               ],
             )),
@@ -1145,49 +1135,68 @@ class _DashboradPageState extends State<DashboradPage>
           return new SlideMenu(
             child: new ListTile(
               title: new Container(
-                  child: new Row(children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                  child: Text(
-                    cart.productName.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[700],
+                  child: new Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      child: Text(
+                        cart.productName.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[700],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Padding(
-                    padding: EdgeInsets.only(top: 10, bottom: 10),
-                    child: Text(
-                      cart.productQty.toString(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                    )),
-                Padding(
-                    padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                    child: Text(
-                      cart.productPrice.toString(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                    )),
-              ])),
+                    Container(
+                        // color: Colors.red,
+                        width: MediaQuery.of(context).size.width / 8.2,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Padding(
+                                padding: EdgeInsets.only(top: 10, bottom: 10),
+                                child: Text(
+                                  cart.productQty.toString(),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey[700],
+                                  ),
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    right: 10, top: 10, bottom: 10),
+                                child: Text(
+                                  cart.productPrice.toString(),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey[700],
+                                  ),
+                                )),
+                          ],
+                        ))
+                  ])),
             ),
             menuItems: <Widget>[
               new Container(
                 child: new IconButton(
-                  icon: new Icon(Icons.delete),
+                  onPressed: () {
+                    itememovefromCart(cart);
+                  },
+                  icon: new Icon(Icons.delete,
+                      size: 30, color: Colors.deepOrange),
                 ),
               ),
               new Container(
                 child: new IconButton(
-                  icon: new Icon(Icons.info),
+                  onPressed: () {
+                    editCartItem(cart);
+                  },
+                  icon:
+                      new Icon(Icons.edit, size: 30, color: Colors.deepOrange),
                 ),
               ),
             ],
@@ -1324,18 +1333,49 @@ class _DashboradPageState extends State<DashboradPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.only(
-                      top: 10,
-                    ),
+                    padding: EdgeInsets.only(top: 10, bottom: 10),
                     child: Text(Strings.grand_total, style: Styles.darkBlue()),
                   ),
                   Padding(
-                      padding: EdgeInsets.only(
-                        right: 20,
-                        top: 10,
-                      ),
+                      padding: EdgeInsets.only(right: 20, top: 10, bottom: 10),
                       child: Text(grandTotal.toString(),
                           style: Styles.darkBlue())),
+                ],
+              ),
+            ),
+          ]),
+          TableRow(children: [
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  selectedvoucher != null
+                      ? Text(selectedvoucher.voucherName)
+                      : SizedBox(),
+                  Padding(
+                      padding: EdgeInsets.only(top: 10),
+                      child: RaisedButton(
+                        padding: EdgeInsets.only(
+                            left: 10, right: 10, top: 5, bottom: 5),
+                        onPressed: () {
+                          openVoucherPop();
+                        },
+                        child: Row(
+                          children: <Widget>[
+                            Text(Strings.apply_promocode,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                )),
+                          ],
+                        ),
+                        color: Colors.deepOrange,
+                        textColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50.0),
+                        ),
+                      ))
                 ],
               ),
             ),
@@ -1345,7 +1385,7 @@ class _DashboradPageState extends State<DashboradPage>
     return Column(
       children: <Widget>[
         Container(
-            height: MediaQuery.of(context).size.height / 1.4,
+            height: MediaQuery.of(context).size.height / 1.3,
             width: MediaQuery.of(context).size.width,
             color: Colors.grey[300],
             padding: EdgeInsets.all(10),
@@ -1360,9 +1400,9 @@ class _DashboradPageState extends State<DashboradPage>
                     : SizedBox(),
                 Container(
                     //color: Colors.white,
-                    height: MediaQuery.of(context).size.height / 2.4,
+                    height: MediaQuery.of(context).size.height / 3.2,
                     margin: EdgeInsets.only(top: 50),
-                    child: SingleChildScrollView(child: cartTable)),
+                    child: cartTable),
                 cartList.length != 0
                     ? Positioned(
                         bottom: 0,
@@ -1371,7 +1411,7 @@ class _DashboradPageState extends State<DashboradPage>
                         child: Container(child: totalPriceTable),
                       )
                     : Center(
-                        child: Text("No item Available",
+                        child: Text(Strings.item_not_available,
                             style: Styles.communBlack()))
               ],
             )),

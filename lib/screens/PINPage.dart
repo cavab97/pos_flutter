@@ -21,7 +21,7 @@ class _PINPageState extends State<PINPage> {
   var pinNumber = "";
   GlobalKey<ScaffoldState> scaffoldKey;
   bool isCheckIn = false;
-
+  bool isLoading = false;
   LocalAPI localAPI = LocalAPI();
   @override
   void initState() {
@@ -38,7 +38,7 @@ class _PINPageState extends State<PINPage> {
   }
 
   addINPin(val) {
-    if (pinNumber.length < 4) {
+    if (pinNumber.length < 6) {
       var currentpinNumber = pinNumber;
       currentpinNumber += val;
       print(currentpinNumber);
@@ -55,9 +55,15 @@ class _PINPageState extends State<PINPage> {
   }
 
   clockInwithPIN() async {
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var user = json.decode(loginUser);
+    var pin = user["user_pin"];
     if (!isCheckIn) {
-      if (pinNumber.length >= 4) {
+      if (pinNumber.length >= 6 && pin.toString() == pinNumber) {
         //TODO : API CALL for clockin
+        setState(() {
+          isLoading = true;
+        });
         CheckinOut checkIn = new CheckinOut();
         var deviceInfo = await CommunFun.deviceInfo();
         var terminalId =
@@ -79,19 +85,30 @@ class _PINPageState extends State<PINPage> {
         await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
         await Preferences.setStringToSF(Constant.SHIFT_ID, result.toString());
         Navigator.pushNamed(context, Constant.DashboardScreen);
+        setState(() {
+          isLoading = false;
+        });
       } else {
-        scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text(Strings.pin_validation_message),
-        ));
+        if (pinNumber.length >= 6) {
+          CommunFun.showToast(context, Strings.invalid_pin_msg);
+        } else {
+          CommunFun.showToast(context, Strings.pin_validation_message);
+        }
       }
     } else {
-      CommunFun.showToast(context, "User Already checkedIN.");
+      CommunFun.showToast(context, Strings.already_clockin_msg);
     }
   }
 
   clockOutwithPIN() async {
-    if (!isCheckIn) {
-      if (pinNumber.length >= 4) {
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var user = json.decode(loginUser);
+    var pin = user["user_pin"];
+    if (isCheckIn) {
+      if (pinNumber.length >= 6 && pinNumber == pin.toString()) {
+        setState(() {
+          isLoading = true;
+        });
         CheckinOut checkIn = new CheckinOut();
         var deviceInfo = await CommunFun.deviceInfo();
         var shiftid = await Preferences.getStringValuesSF(Constant.SHIFT_ID);
@@ -114,19 +131,25 @@ class _PINPageState extends State<PINPage> {
         await Preferences.removeSinglePref(Constant.IS_CHECKIN);
         await Preferences.removeSinglePref(Constant.SHIFT_ID);
         Navigator.pushNamed(context, Constant.PINScreen);
+        setState(() {
+          isLoading = false;
+        });
       } else {
-        scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text(Strings.pin_validation_message),
-        ));
+        if (pinNumber.length >= 6) {
+          CommunFun.showToast(context, Strings.invalid_pin_msg);
+        } else {
+          CommunFun.showToast(context, Strings.pin_validation_message);
+        }
       }
     } else {
-      CommunFun.showToast(context, "User Already checkedOUT.");
+      CommunFun.showToast(context, Strings.already_clockout_msg);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+      child: Scaffold(
         key: scaffoldKey,
         body: Center(
           child: Container(
@@ -135,7 +158,7 @@ class _PINPageState extends State<PINPage> {
             height: MediaQuery.of(context).size.height,
             decoration: BoxDecoration(
               image: DecorationImage(
-                  image: AssetImage("assets/bg.jpg"), fit: BoxFit.cover),
+                  image: AssetImage(Strings.assetsBG), fit: BoxFit.cover),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -151,14 +174,16 @@ class _PINPageState extends State<PINPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       imageview(context), // Part 1 image with logo
-                      getNumbers(context) // Part 2  Muber keypade
+                      getNumbers(context), // Part 2  Muber keypade
                     ],
                   ),
                 ),
               ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   Widget imageview(context) {
@@ -178,7 +203,7 @@ class _PINPageState extends State<PINPage> {
                   // login logo
                   height: 110.0,
                   child: Image.asset(
-                    "assets/headerlogo.png",
+                    Strings.asset_headerLogo,
                     fit: BoxFit.contain,
                   ),
                 ))));
@@ -208,13 +233,29 @@ class _PINPageState extends State<PINPage> {
     return SingleChildScrollView(
       child: Container(
         width: MediaQuery.of(context).size.width / 2.8,
-        margin: EdgeInsets.only(left: 70),
+        margin: EdgeInsets.only(left: 70, right: 70),
         child: Center(
           child: Column(
             children: <Widget>[
-              SizedBox(
-                height: 20,
-              ),
+              isCheckIn
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        IconButton(
+                            padding: EdgeInsets.only(
+                              left: 100,
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            icon: Icon(
+                              Icons.close,
+                              color: Colors.black,
+                              size: 50,
+                            )),
+                      ],
+                    )
+                  : SizedBox(height: 20),
               Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
@@ -252,6 +293,20 @@ class _PINPageState extends State<PINPage> {
                   ),
                   Icon(
                     pinNumber.length >= 4
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
+                    color: Colors.deepOrange,
+                    size: 40,
+                  ),
+                  Icon(
+                    pinNumber.length >= 5
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
+                    color: Colors.deepOrange,
+                    size: 40,
+                  ),
+                  Icon(
+                    pinNumber.length >= 6
                         ? Icons.lens
                         : Icons.panorama_fish_eye,
                     color: Colors.deepOrange,
@@ -330,16 +385,18 @@ class _PINPageState extends State<PINPage> {
               SizedBox(
                 height: 15,
               ),
-              Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    FlatButton(
-                        onPressed: () {
-                          clearPin();
-                        },
-                        child: Text("Clear", style: Styles.orangeLarge()))
-                  ])
+              isLoading
+                  ? CommunFun.loader(context)
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                          FlatButton(
+                              onPressed: () {
+                                clearPin();
+                              },
+                              child: Text(Strings.clear, style: Styles.orangeLarge()))
+                        ])
             ],
           ),
         ),
@@ -347,5 +404,3 @@ class _PINPageState extends State<PINPage> {
     );
   }
 }
-
-class KeyboardVisibilityNotification {}

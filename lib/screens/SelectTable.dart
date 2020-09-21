@@ -52,6 +52,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
     Table_order table_order = new Table_order();
     table_order.table_id = selectedTable.tableId;
     table_order.number_of_pax = int.parse(paxController.text);
+    table_order.save_order_id = selectedTable.saveorderid;
     var result = await localAPI.insertTableOrder(table_order);
     print(result);
     await Preferences.setStringToSF(
@@ -87,7 +88,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
           color: Colors.grey[400],
           size: 40,
         ),
-        hintText: "Enter pax",
+        hintText: Strings.enter_pax,
         hintStyle: TextStyle(
             fontSize: 18.0,
             fontWeight: FontWeight.bold,
@@ -262,12 +263,16 @@ class _SelectTablePageState extends State<SelectTablePage> {
                             topRight: Radius.circular(20.0))),
                     width: MediaQuery.of(context).size.width,
                     height: itemHeight / 2,
-                    child: Center(
-                      child: Text(
-                        table.tableName,
-                        style: Styles.communBlack(),
-                      ),
-                    ),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          SizedBox(height: 30),
+                          Text(
+                            table.tableName,
+                            style: Styles.blackBoldLarge(),
+                          ),
+                        ]),
                   ),
                 ),
                 Container(
@@ -275,9 +280,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
                   width: MediaQuery.of(context).size.width,
                   //height: itemHeight / 5,
                   decoration: BoxDecoration(
-                      color: table.availableStatus == 1
-                          ? Colors.grey[600]
-                          : Colors.deepOrange,
+                      color: table.numberofpax != null
+                          ? Colors.deepOrange
+                          : Colors.grey[600],
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(20.0),
                           bottomRight: Radius.circular(20.0))),
@@ -285,19 +290,30 @@ class _SelectTablePageState extends State<SelectTablePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(
-                        table.availableStatus == 1
-                            ? "Available"
-                            : "Not Available",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white),
-                      ),
+                      table.numberofpax != null
+                          ? Text(
+                              Strings.occupied +
+                                  table.numberofpax.toString() +
+                                  "/" +
+                                  table.tableCapacity.toString(),
+                              style: Styles.whiteSimpleSmall())
+                          : Text(
+                              Strings.vacant +
+                                  "0" +
+                                  "/" +
+                                  table.tableCapacity.toString(),
+                              style: Styles.whiteSimpleSmall())
                     ],
                   ),
                 ),
+                Positioned(
+                    top: 10,
+                    left: 10,
+                    child: Text(
+                        table.numberofpax != null
+                            ? Strings.orders + " 1"
+                            : Strings.orders + "0",
+                        style: Styles.communBlack()))
               ],
             ),
           ),

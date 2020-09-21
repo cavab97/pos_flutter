@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/OrderDetails.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/components/constant.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 
 class TransactionsPage extends StatefulWidget {
   // Transactions list
@@ -12,42 +22,67 @@ class TransactionsPage extends StatefulWidget {
 }
 
 class _TransactionsPageState extends State<TransactionsPage> {
-  var productsList = [
-    {
-      'index': 0,
-      'name': "Daniels Salazar fd sd",
-      'picture': "assets/image1.jfif",
-      'price': "500.00"
-    },
-    {
-      'index': 2,
-      'name': "Contreras Reesenjnc jn",
-      'picture': "assets/image2.jfif",
-      'price': "500.00"
-    },
-    {
-      'index': 3,
-      'name': "Moody Cabrera sdfds ",
-      'picture': "assets/image3.jfif",
-      'price': "500.00"
-    },
-    {
-      'index': 4,
-      'name': "Moody Cabrera sdfs ",
-      'picture': "assets/photo-1504674900247-0877df9cc836.jfif",
-      'price': "500.00"
-    },
-    {
-      'index': 5,
-      'name': "Moody Cabrera",
-      'picture': "assets/image5.webp",
-      'price': "500.00"
-    }
-  ];
-
+  LocalAPI localAPI = LocalAPI();
+  List<Orders> orderLists = [];
+  List<Orders> filterList = [];
+  Orders selectedOrder = new Orders();
+  OrderPayment orderpayment = new OrderPayment();
+  List<ProductDetails> detailsList = [];
+  bool isFiltering = false;
   @override
   void initState() {
     super.initState();
+    getTansactionList();
+    KeyboardVisibilityNotification().addNewListener(
+      onHide: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+    );
+  }
+
+  getTansactionList() async {
+    var terminalid = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    List<Orders> orderList = await localAPI.getOrdersList(branchid, terminalid);
+    if (orderList.length > 0) {
+      setState(() {
+        orderLists = orderList;
+      });
+    }
+  }
+
+  getOrderDetails(order) async {
+    setState(() {
+      selectedOrder = order;
+    });
+    List<ProductDetails> details = await localAPI.getOrderDetails(order.app_id);
+    if (details.length > 0) {
+      setState(() {
+        detailsList = details;
+      });
+    }
+    List<OrderPayment> orderpaymentdata =
+        await localAPI.getOrderpaymentData(order.app_id);
+    setState(() {
+      orderpayment = orderpaymentdata[0];
+    });
+  }
+
+  startFilter() {
+    setState(() {
+      filterList = orderLists;
+      isFiltering = true;
+    });
+  }
+
+  filterOrders(val) {
+    var list = orderLists
+        .where((x) =>
+            x.invoice_no.toString().toLowerCase().contains(val.toLowerCase()))
+        .toList();
+    setState(() {
+      filterList = list;
+    });
   }
 
   @override
@@ -74,92 +109,131 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           child: ListView(
                             padding: EdgeInsets.all(20),
                             children: <Widget>[
-                              Text("Transaction",
-                                  style: TextStyle(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[800])),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  IconButton(
+                                    padding: EdgeInsets.all(0),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    icon: Icon(
+                                      Icons.keyboard_arrow_left,
+                                      size: 50,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text(Strings.transaction,
+                                      style: TextStyle(
+                                          fontSize: 30,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey[800])),
+                                ],
+                              ),
                               transationsSearchBox(),
                               SizedBox(
                                 height: 15,
                               ),
-                              Text("Wednesday, August 19",
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.blueGrey[900])),
-                              searchTransationList()
+                              // Text("Wednesday, August 19",
+                              //     style: TextStyle(
+                              //         fontSize: 20,
+                              //         fontWeight: FontWeight.bold,
+                              //         color: Colors.blueGrey[900])),
+                              orderLists.length > 0
+                                  ? searchTransationList()
+                                  : Center(
+                                      child: Text(Strings.no_order_found,
+                                          style: Styles.darkBlue()))
                             ],
                           ))),
                   TableCell(
                     // Part 2 transactions list
                     child: Center(
                       child: SingleChildScrollView(
-                        child: Container(
-                          width: MediaQuery.of(context).size.width / 2,
-                          margin: EdgeInsets.only(top: 5),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Text(
-                                "Wen,August 19 09:53 PM",
-                                style: TextStyle(
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).primaryColor),
-                              ),
-                              SizedBox(
-                                height: 30,
-                              ),
-                              Text(
-                                "13.00",
-                                style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).accentColor),
-                              ),
-                              SizedBox(
-                                height: 30,
-                              ),
-                              Text(
-                                "00000000 - Processed by OKDEE OKEY PROCESSED FORM",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).primaryColor),
-                              ),
-                              SizedBox(
-                                height: 30,
-                              ),
-                              Container(
-                                height: 50,
+                        child: orderLists.length > 0
+                            ? Container(
                                 width: MediaQuery.of(context).size.width / 2,
-                                child: Center(
-                                  child: Text(
-                                    "Aaron Young",
-                                    style: TextStyle(
-                                        fontSize: 23,
-                                        fontWeight: FontWeight.bold,
-                                        color: Theme.of(context).accentColor),
-                                  ),
+                                margin: EdgeInsets.only(top: 5),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Text(
+                                      "Wen,August 19 09:53 PM",
+                                      style: TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
+                                    SizedBox(
+                                      height: 30,
+                                    ),
+                                    Text(
+                                      orderpayment.op_amount.toString(),
+                                      style: TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context).accentColor),
+                                    ),
+                                    SizedBox(
+                                      height: 30,
+                                    ),
+                                    Text(
+                                      selectedOrder.invoice_no != null
+                                          ? selectedOrder.invoice_no +
+                                              " - Processed by OKDEE OKEY PROCESSED FORM"
+                                          : " 0000000 - Processed by OKDEE OKEY PROCESSED FORM",
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
+                                    SizedBox(
+                                      height: 30,
+                                    ),
+                                    Container(
+                                      height: 50,
+                                      width:
+                                          MediaQuery.of(context).size.width / 2,
+                                      child: Center(
+                                        child: Text(
+                                          "Aaron Young",
+                                          style: TextStyle(
+                                              fontSize: 23,
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context)
+                                                  .accentColor),
+                                        ),
+                                      ),
+                                      color: Colors.grey[900].withOpacity(0.4),
+                                    ),
+                                    productList(),
+                                    SizedBox(
+                                      height: 30,
+                                    ),
+                                    totalAmountValues(),
+                                    SizedBox(
+                                      height: 30,
+                                    ),
+                                    cancelButton(() {
+                                      CommunFun.showToast(
+                                          context, "Work in progress...");
+                                      //Navigator.of(context).pop();
+                                    }),
+                                  ],
                                 ),
-                                color: Colors.grey[900].withOpacity(0.4),
+                              )
+                            : Container(
+                                width: MediaQuery.of(context).size.width / 2,
+                                margin: EdgeInsets.only(top: 5),
+                                child: Center(
+                                  child: Text(Strings.no_details_found,
+                                      style: Styles.whiteBold()),
+                                ),
                               ),
-                              productList(),
-                              SizedBox(
-                                height: 30,
-                              ),
-                              totalAmountValues(),
-                              SizedBox(
-                                height: 30,
-                              ),
-                              cancelButton(() {
-                                Navigator.of(context).pop();
-                              }),
-                            ],
-                          ),
-                        ),
                       ),
                     ),
                   ),
@@ -193,7 +267,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               size: 40,
             ),
           ),
-          hintText: "Invoice Number or S/N",
+          hintText: Strings.searchbox_hint,
           hintStyle: TextStyle(
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
@@ -210,8 +284,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
           fillColor: Colors.white,
         ),
         style: TextStyle(color: Colors.black, fontSize: 25.0),
+        onTap: () {
+          startFilter();
+        },
         onChanged: (e) {
           print(e);
+          if (e.length != 0) {
+            filterOrders(e);
+          }
         },
       ),
     );
@@ -239,7 +319,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   Padding(
                       padding: EdgeInsets.only(top: 10, bottom: 10),
                       child: Text(
-                        "00:00",
+                        selectedOrder.sub_total != null
+                            ? selectedOrder.sub_total.toString()
+                            : "00:00",
                         style: TextStyle(
                             fontWeight: FontWeight.w700, color: Colors.grey),
                       )),
@@ -264,7 +346,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   Padding(
                       padding: EdgeInsets.only(top: 10, bottom: 10),
                       child: Text(
-                        "00:00",
+                        selectedOrder.voucher_amount.toString(),
                         style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: Theme.of(context).accentColor),
@@ -290,10 +372,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   Padding(
                       padding: EdgeInsets.only(top: 10, bottom: 10),
                       child: Text(
-                        "00:00",
+                        selectedOrder.tax_amount != null
+                            ? selectedOrder.tax_amount.toString()
+                            : "00:00",
                         style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: Colors.grey),
+                            fontWeight: FontWeight.w700, color: Colors.grey),
                       )),
                 ],
               ),
@@ -321,7 +404,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         top: 10,
                       ),
                       child: Text(
-                        "150.00",
+                        selectedOrder.grand_total != null
+                            ? selectedOrder.grand_total.toString()
+                            : "00:00",
                         style: TextStyle(
                             fontWeight: FontWeight.w700, color: Colors.grey),
                       )),
@@ -354,7 +439,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
       width: MediaQuery.of(context).size.width / 2,
       child: SingleChildScrollView(
         child: Column(
-            children: productsList.map((product) {
+            children: detailsList.map((product) {
+          var image_Arr = product.base64.split(" groupconcate_Image ");
           return InkWell(
               onTap: () {},
               child: Container(
@@ -363,17 +449,23 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     Hero(
-                      tag: product["index"],
+                      tag: product.productId,
                       child: Container(
                         height: 100,
                         width: 130,
                         decoration: new BoxDecoration(
                           color: Colors.greenAccent,
-                          image: new DecorationImage(
-                            image: new ExactAssetImage(product["picture"]),
-                            fit: BoxFit.cover,
-                          ),
+                          // image: new DecorationImage(
+                          //   image: new ExactAssetImage("assets/image1.jfif"),
+                          //   fit: BoxFit.cover,
+                          // ),
                         ),
+                        child: image_Arr.length != 0 && image_Arr[0] != ""
+                            ? CommonUtils.imageFromBase64String(image_Arr[0])
+                            : new Image.asset(
+                                Strings.no_imageAsset,
+                                fit: BoxFit.cover,
+                              ),
                       ),
                     ),
                     SizedBox(width: 15),
@@ -385,7 +477,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text(product["name"].toString().toUpperCase(),
+                                Text(product.name.toString().toUpperCase(),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 2,
                                     style: TextStyle(
@@ -397,15 +489,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           SizedBox(
                             width: 8,
                           ),
-                          Text(product["price"],
+                          Text(product.qty.toString(),
                               style: TextStyle(
                                   fontSize: 20,
                                   color: Theme.of(context).primaryColor)),
                           SizedBox(width: 80),
-                          Text(product["price"],
+                          Text(product.price.toString(),
                               style: TextStyle(
                                   fontSize: 20,
-                                  color: Theme.of(context).accentColor)),
+                                  color: Theme.of(context).primaryColor)),
                         ],
                       ),
                     )
@@ -418,79 +510,30 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   Widget searchTransationList() {
-    return ListView(shrinkWrap: true, children: <Widget>[
-      ListTile(
-        title: Text('09:34 PM',
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600])),
-        subtitle: Text('INVOICE : 0000000092',
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600])),
-        isThreeLine: true,
-        trailing: Text("35.00",
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600])),
-      ),
-      ListTile(
-        title: Text('09:34 PM',
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600])),
-        subtitle: Text('INVOICE : 0000000092',
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600])),
-        isThreeLine: true,
-        trailing: Text("35.00",
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600])),
-      ),
-      ListTile(
-        title: Text('09:34 PM',
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600])),
-        subtitle: Text('INVOICE : 0000000092',
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600])),
-        isThreeLine: true,
-        trailing: Text("35.00",
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600])),
-      ),
-      ListTile(
-        title: Text('09:34 PM',
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600])),
-        subtitle: Text('INVOICE : 0000000092',
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600])),
-        isThreeLine: true,
-        trailing: Text("35.00",
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[600])),
-      ),
-    ]);
+    return ListView(
+        shrinkWrap: true,
+        children: orderLists.map((item) {
+          return ListTile(
+            onTap: () {
+              getOrderDetails(item);
+            },
+            title: Text('09:34 PM',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[600])),
+            subtitle: Text(Strings.invoice + item.invoice_no.toString(),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[600])),
+            isThreeLine: true,
+            trailing: Text(item.grand_total.toString(),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[600])),
+          );
+        }).toList());
   }
 }

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -22,8 +21,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController emailAddress = new TextEditingController(text: "smith");
-  TextEditingController userPin = new TextEditingController(text: "955641");
+  TextEditingController emailAddress = new TextEditingController(text: "");
+  TextEditingController userPin = new TextEditingController(text: "");
   GlobalKey<ScaffoldState> scaffoldKey;
   // DatabaseHelper databaseHelper = DatabaseHelper();
   var errormessage = "";
@@ -174,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
       // login logo
       height: 110.0,
       child: Image.asset(
-        "assets/headerlogo.png",
+        Strings.asset_headerLogo,
         fit: BoxFit.contain,
       ),
     );

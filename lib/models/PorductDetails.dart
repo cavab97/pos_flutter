@@ -6,6 +6,7 @@ class ProductDetails {
   String sku;
   int priceTypeId;
   String priceTypeValue;
+  String priceTypeName;
   double price;
   double oldPrice;
   double qty;
@@ -27,6 +28,7 @@ class ProductDetails {
     this.priceTypeValue,
     this.price,
     this.oldPrice,
+    this.priceTypeName,
     this.hasInventory,
     this.qty,
     this.status,
@@ -43,11 +45,13 @@ class ProductDetails {
     name = json['name'];
     description = json['description'];
     sku = json['sku'];
+    priceTypeName = json['price_type_Name'];
     priceTypeId = json['price_type_id'];
     priceTypeValue = json['price_type_value'];
     price = json['price'] is int
         ? (json['price'] as int).toDouble()
         : json['price'];
+
     oldPrice = json['old_price'] is int
         ? (json['old_price'] as int).toDouble()
         : json['old_price'];
@@ -72,6 +76,7 @@ class ProductDetails {
     data['price_type_value'] = this.priceTypeValue;
     data['price'] = this.price;
     data['old_price'] = this.oldPrice;
+    data['price_type_Name'] = this.priceTypeName;
     data['qty'] = this.qty;
     data['has_inventory'] = this.hasInventory;
     data['status'] = this.status;

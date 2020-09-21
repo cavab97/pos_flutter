@@ -3,6 +3,7 @@ class Strings {
   static String something_wrong = "Something went wrong!";
   static String pin_Dialog_title = "Pin Verification";
   static String title_opening_amount = "Opening Amount";
+  static String title_closing_amount = "Closing Amount";
   static String forgot_password = "Forgot password?";
   static String login_text = "YOU CAN ENTER YOUR USERNAME & PASSWORD HERE";
   static String cancel_tansaction = "Cancel Transaction";
@@ -23,10 +24,13 @@ class Strings {
   static String btn_Add_customer = "Add Customer";
   static String pin_Number = "PIN Number";
   static String pin_validation_message = "Please enter your PIN number";
+  static String already_clockin_msg = "User Already checkedIN.";
+  static String already_clockout_msg = "User Already checkedOUT.";
   static String title_pay = "PAY";
   static String checkout = "Clock Out";
   static String terminalKeyBtn = "Set Terminal Key";
-  static String add = "add";
+  static String add = "Add";
+  static String update = "Update";
   static String add_new = "Add New";
   static String fisrtname = "Fisrt Name";
   static String lastname = "Last Name";
@@ -40,7 +44,6 @@ class Strings {
   static String country = "Country";
   static String postcode = "PostCode";
   static String countrys = "Countrys";
-
   static String search_customer = "Search Customer";
   static String customer_Search_Hint =
       "Search Customer Name,Email,Phone or Memeber id";
@@ -58,4 +61,44 @@ class Strings {
   static String btnclockin = "Clock\nIN";
   static String btnclockout = "Clock\nOUT";
   static String select_Payment_type = "Select Payment Method";
+  static String btn_exect = "Excet";
+  static String cash = "CASH";
+  static String cart_empty = "Cart is empty";
+  static String shift_closed = "Shift is closed.";
+  static String close_table = "Close Table";
+  static String split_order = "Split Order";
+  static String close_shift = "Close Shift";
+  static String no_image = "assets/no_image.png";
+  static String out_of_stoke = "OUT OF STOCK";
+  static String apply_promocode = "Apply Promocode";
+  static String item_not_available = "No item Available";
+  static String asset_headerLogo = "assets/headerlogo.png";
+  static String assetsBG = "assets/bg.jpg";
+  static String no_imageAsset = 'assets/no_image.png';
+  static String enter = "Enter";
+  static String invalid_pin_msg = "Invalid PIN.";
+  static String clear = "Clear";
+  static String store_Validation_message =
+      "selected qty is not available in store";
+  static String enter_pax = "Enter pax";
+  static String occupied = "Occupied : ";
+  static String vacant = "Vacant : ";
+  static String orders = "Orders :";
+  static String set_terminal_key = "Set Teminal Key";
+  static String terminalKey = "Terminal Key";
+
+  static String transaction = "Transaction";
+  static String no_order_found = "No Orders Found";
+  static String no_details_found = "No Details Found";
+  static String searchbox_hint = "Invoice Number or S/N";
+  static String invoice = 'INVOICE : ';
+  static String applycoupen = "Apply Coupon/Voucher";
+  static String cancel = "Cancel";
+  static String apply = "Apply";
+  static String vauchercode = "Voucher code :";
+  static String enter_Code = "Enter code";
+  static String voucher_not_exit = "Voucher not exist.";
+  static String voucher_code_msg = "Voucher code must be required.";
+  static String voucher_already_used = "Voucher already used 5 times.";
+  static String voucher_expired = "Voucher already expired.";
 }

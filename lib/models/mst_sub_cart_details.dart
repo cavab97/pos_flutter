@@ -3,9 +3,10 @@ class MSTSubCartdetails {
   int cartdetailsId;
   String localID;
   int productId;
-  String modifierId;
-  String modifirePrice;
+  int modifierId;
+  double modifirePrice;
   int attributeId;
+  double attrPrice;
   int caId;
 
   MSTSubCartdetails({
@@ -15,6 +16,7 @@ class MSTSubCartdetails {
     this.productId,
     this.modifierId,
     this.modifirePrice,
+    this.attrPrice,
     this.attributeId,
     this.caId,
   });
@@ -27,6 +29,7 @@ class MSTSubCartdetails {
     modifierId = json["modifier_id"];
     modifirePrice = json["modifier_price"];
     caId = json["ca_id"];
+    attrPrice = json["attr_price"];
   }
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
@@ -37,6 +40,7 @@ class MSTSubCartdetails {
     data["modifier_id"] = this.modifierId;
     data["modifier_price"] = this.modifirePrice;
     data["ca_id"] = this.caId;
+    data["attr_price"] = this.attrPrice;
     return data;
   }
 }

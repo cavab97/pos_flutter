@@ -4,10 +4,10 @@ import 'package:mcncashier/components/StringFile.dart';
 
 class OpeningAmmountPage extends StatefulWidget {
   // Opning ammount popup
-  OpeningAmmountPage({Key key, this.isStartAmmount, this.onEnter})
+  OpeningAmmountPage({Key key, this.ammountext, this.onEnter})
       : super(key: key);
   Function onEnter;
-  final bool isStartAmmount;
+  final String ammountext;
   @override
   _OpeningAmmountPageState createState() => _OpeningAmmountPageState();
 }
@@ -31,7 +31,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(Strings.title_opening_amount.toUpperCase(),
+                Text(widget.ammountext.toString().toUpperCase(),
                     style: TextStyle(fontSize: 20, color: Colors.white)),
               ],
             ),
@@ -163,19 +163,6 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                   fontSize: 60,
                   color: Colors.black,
                   fontWeight: FontWeight.bold)),
-          /*Flexible(
-            child: RichText(
-              overflow: TextOverflow.ellipsis,
-              strutStyle:
-                  StrutStyle(fontSize: 90.0, fontWeight: FontWeight.bold),
-              text: TextSpan(
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 90,
-                      fontWeight: FontWeight.bold),
-                  text: currentNumber),
-            ),*/
-          // )
         ],
       ),
     );
@@ -297,14 +284,14 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                       height: MediaQuery.of(context).size.height / 4.2,
                       // minWidth: MediaQuery.of(context).size.width / 9.9
                       minWidth: 50,
-                      child: Text("enter".toUpperCase(),
+                      child: Text(Strings.enter.toUpperCase(),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 20.0)),
                       textColor: Colors.black,
                       color: Colors.white,
                       onPressed: () {
-                        widget.onEnter(currentNumber, widget.isStartAmmount);
+                        widget.onEnter(currentNumber);
                         Navigator.of(context).pop();
                       },
                     ),

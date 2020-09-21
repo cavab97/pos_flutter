@@ -255,7 +255,7 @@ class CreateTables {
         "uuid TEXT," +
         "product_id INTEGER," +
         "modifier_id INTEGER," +
-        "price INTEGER," +
+        "price REAL," +
         "status INTEGER," +
         "updated_at TEXT," +
         "updated_by INTEGER" +
@@ -346,7 +346,7 @@ class CreateTables {
         ")");
 
     // TABLE payment_master
-    datatables = db.execute("CREATE TABLE payment_master (" +
+    datatables = db.execute("CREATE TABLE payment (" +
         "payment_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "name	TEXT," +
@@ -406,19 +406,25 @@ class CreateTables {
         "voucher_applicable_to	TEXT," +
         "voucher_categories	TEXT," +
         "voucher_products	TEXT," +
+        "minimum_amount  REAL," +
+        "maximum_amount  REAL," +
+        "uses_total INTEGER," +
+        "uses_customer INTEGER," +
         "status	INTEGER," +
         "updated_at	TEXT," +
-        "updated_by	INTEGER" +
-        ")");
+        "updated_by	INTEGER," +
+        "deleted_at TEXT," +
+        "deleted_by INTEGER"
+            ")");
 
     // TABLE order
     datatables = db.execute("CREATE TABLE orders(" +
-        "order_id INTEGER PRIMARY KEY," +
+        "order_id INTEGER," +
         "uuid TEXT," +
         "branch_id INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
-        "table_no TEXT," +
+        "table_no INTEGER," +
         "invoice_no TEXT," +
         "customer_id INTEGER," +
         "tax_percent INTEGER," +
@@ -438,14 +444,14 @@ class CreateTables {
     // TABLE order_detail
 
     datatables = db.execute("CREATE TABLE order_detail (" +
-        "detail_id INTEGER PRIMARY KEY," +
+        "detail_id INTEGER," +
         "uuid TEXT," +
         "order_id INTEGER," +
         "branch_id INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
         "product_id INTEGER," +
-        "product_price INTEGER," +
+        "product_price REAL," +
         "product_old_price INTEGER," +
         "category_id INTEGER," +
         "detail_attribute_id INTEGER," +
@@ -459,7 +465,7 @@ class CreateTables {
 
     // TABLE order_modifier
     datatables = db.execute("CREATE TABLE order_modifier(" +
-        "om_id INTEGER PRIMARY KEY," +
+        "om_id INTEGER," +
         "uuid TEXT," +
         "order_id INTEGER," +
         "detail_id INTEGER," +
@@ -474,17 +480,35 @@ class CreateTables {
         "updated_at TEXT," +
         "updated_by INTEGER" +
         ")");
+    // TABLE order_modifier
+    datatables = db.execute("CREATE TABLE order_attributes(" +
+        "oa_id INTEGER," +
+        "uuid TEXT," +
+        "order_id INTEGER," +
+        "detail_id INTEGER," +
+        "terminal_id INTEGER," +
+        "app_id INTEGER," +
+        "product_id INTEGER," +
+        "attribute_id INTEGER," +
+        "attr_price INTEGER," +
+        "ca_id INTEGER" +
+        "oa_status INTEGER," +
+        "oa_datetime TEXT," +
+        "oa_by INTEGER," +
+        "updated_at TEXT," +
+        "updated_by INTEGER" +
+        ")");
 
     // TABLE order_payment
     datatables = db.execute("CREATE TABLE order_payment (" +
-        "op_id INTEGER PRIMARY KEY," +
+        "op_id INTEGER," +
         "uuid TEXT," +
         "order_id INTEGER," +
         "branch_id  INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
         "op_method_id INTEGER," +
-        "op_amount INTEGER ," +
+        "op_amount REAL," +
         "op_method_response TEXT," +
         "op_status INTEGER," +
         "op_datetime TEXT," +
@@ -553,18 +577,11 @@ class CreateTables {
         'tax REAL,' +
         'grand_total REAL,' +
         'total_qty  REAL,' +
-        'is_open INTEGER,' +
         'is_deleted   REAL,' +
         'created_by  INTEGER,' +
         'created_at  TEXT,' +
-        // 'sync  NUMERIC,' + //BOOLEAN
-        'customer_terminal INTEGER,' +
-        'queue_number INTEGER' +
-        // 'service_charge_rate REAL,' +
-        // 'service_charge_amount INTEGER,' +
-        // 'redeem_points REAL,' +
-        // 'redeem_point_amount REAL,' +
-        // 'product_points REAL' +
+        'voucher_id INTEGER,' +
+        'customer_terminal INTEGER' +
         ')');
 
     datatables = db.execute("CREATE TABLE mst_cart_sub_detail (" +
@@ -572,8 +589,9 @@ class CreateTables {
         " cart_details_id INTEGER," +
         " localID TEXT," +
         " product_id INTEGER," +
-        " modifier_id TEXT," +
-        " modifier_price  TEXT," +
+        " modifier_id INTEGER," +
+        " modifier_price  REAL," +
+        " attr_price  REAL," +
         " attribute_id INTEGER," +
         " ca_id INTEGER" +
         ")");
@@ -658,127 +676,20 @@ class CreateTables {
         "sync INTEGER" +
         ")");
 
-    //TABLE mst_invoice
-    datatables = db.execute("CREATE TABLE mst_invoice ( " +
-        "id INTEGER," +
-        "localID TEXT," +
-        "user_id INTEGER," +
-        "branch_id INTEGER," +
-        "sub_total REAL," +
-        "discount REAL," +
-        "discount_type INTEGER," +
-        "remark varchar," +
-        "tax REAL," +
-        "grand_total REAL," +
-        "total_qty INTEGER," +
-        "paid_amount REAL," +
-        "change_amount REAL," +
-        "status INTEGER," +
-        "created_by INTEGER," +
-        "updated_by INTEGER," +
-        "created_at TEXT," +
-        "updated_at TEXT," +
-        "sync NUMERIC," +
-        "invoice_status INTEGER," +
-        "other_invoice_id TEXT," +
-        "serverId TEXT," +
-        "pax TEXT," +
+    datatables = db.execute("CREATE TABLE terminal_log ( " +
+        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "uuid INTEGER," +
         "terminal_id INTEGER," +
-        "invoice_unique_id TEXT," +
-        "service_charge_rate REAL," +
-        "service_charge_amount REAL," +
-        "is_facked TEXT," +
-        "table_id TEXT," +
-        "is_merge_table TEXT," +
-        "merge_table_id TEXT," +
-        "table_seat TEXT," +
-        "customer_terminal INTEGER," +
-        "queue_number INTEGER," +
-        "creditcard_service_charge_rate REAL," +
-        "creditcard_service_charge_amt REAL" +
-
-// redeem_points DOUBLE,
-// redeem_point_amount DOUBLE,
-// point_earn_equal DOUBLE,
-// point_amount DOUBLE,
-// product_points DOUBLE
-
-        ")");
-
-    // TAble mst_invoice Details
-    datatables = db.execute("CREATE TABLE mst_invoice_detail ( " +
-        "id   INTEGER," +
-        "invoice_id   INTEGER," +
-        "localID   TEXT," +
-        "product_id   INTEGER," +
-        "product_name   TEXT," +
-        "product_price   REAL," +
-        "product_qty   REAL," +
-        "product_net_price   REAL," +
-        "discount   REAL," +
-        "discount_type   INTEGER," +
-        "tax_id   TEXT," +
-        "tax_value   TEXT ," +
-        "remark   TEXT," +
-        "status  INTEGER," +
-        "created_by  INTEGER," +
-        "updated_by  INTEGER," +
-        "created_at  TEXT," +
-        "updated_at  TEXT," +
-        "product_return   INTEGER," +
-        "return_qty   INTEGER," +
-        "return_amount   REAL," +
-        "return_product_id   TEXT," +
-        "sync   NUMERIC," +
-        "serverId  TEXT," +
-        "item_unit  TEXT" +
-        // "product_points  REAL," +
-        // "product_total_points  REAL," +
-        // "return_product_total_points  REAL" +
-        ")");
-
-    // table mst_invoice_sub_detail
-    datatables = db.execute("CREATE TABLE mst_invoice_sub_detail ( " +
-        "id  INTEGER," +
-        "invoice_details_id  INTEGER," +
-        "localID  TEXT," +
-        "invoice_details_product_id  INTEGER," +
-        "modifier_id  TEXT," +
-        "modifier_name  TEXT," +
-        "modifier_option_id  TEXT," +
-        "modifier_option_name  TEXT," +
-        "enable_qty  TEXT," +
-        "variant_qty  TEXT," +
-        "status INTEGER," +
-        "created_by INTEGER," +
-        "updated_by INTEGER," +
-        "created_at TEXT," +
+        "branch_id INTEGER," +
+        "module_name TEXT," +
+        "discription TEXT," +
+        "activity_date TEXT," +
+        "activity_time TEXT," +
+        "table_name TEXT," +
+        "entity_id INTEGER," +
+        "status NUMERIC," +
         "updated_at TEXT," +
-        "sync  NUMERIC," +
-        "serverId TEXT" +
-        ")");
-
-    // table mst_invoice_payment
-    datatables = db.execute("CREATE TABLE mst_invoice_payment ( " +
-        "id INTEGER," +
-        "invoice_id INTEGER," +
-        "localID TEXT," +
-        "payment_id INTEGER," +
-        "payment_amount REAL," +
-        "status INTEGER," +
-        "created_by INTEGER," +
-        "updated_by INTEGER," +
-        "created_at TEXT," +
-        "updated_at TEXT," +
-        "sync NUMERIC," +
-        "serverId TEXT," +
-        "sub_payment_method TEXT," +
-        "payment_status TEXT," +
-        "payment_transaction_id TEXT," +
-        "payment_response TEXT," +
-        "order_type TEXT," +
-        "payment_type TEXT," +
-        "payment_type_id INTEGER" +
+        "updated_by INTEGER" +
         ")");
 
     return datatables;

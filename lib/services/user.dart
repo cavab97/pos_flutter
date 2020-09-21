@@ -5,6 +5,7 @@ import 'package:mcncashier/helpers/config.dart';
 import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:http/http.dart' as http;
 import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 Future<dynamic> login(dynamic user) async {
   print(user);
@@ -30,6 +31,8 @@ Future<dynamic> login(dynamic user) async {
     );
     print(response);
     var data = json.decode(response.body);
+    await SyncAPICalls.logActivity(
+        "Login", "login-user", "user", user.terminalId);
     return data;
   } catch (e) {
     print(e);
