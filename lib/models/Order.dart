@@ -5,6 +5,7 @@ class Orders {
   int terminal_id;
   int app_id;
   int table_no;
+  int table_id;
   String invoice_no;
   int customer_id;
   int tax_percent;
@@ -19,6 +20,8 @@ class Orders {
   int order_item_count;
   String order_date;
   int order_by;
+  int server_id;
+  String tax_json;
   String updated_at;
   int updated_by;
 
@@ -29,6 +32,7 @@ class Orders {
     this.terminal_id,
     this.app_id,
     this.table_no,
+    this.table_id,
     this.invoice_no,
     this.customer_id,
     this.tax_percent,
@@ -43,6 +47,8 @@ class Orders {
     this.order_item_count,
     this.order_date,
     this.order_by,
+    this.server_id,
+    this.tax_json,
     this.updated_at,
     this.updated_by,
   });
@@ -54,6 +60,7 @@ class Orders {
     terminal_id = json["terminal_id"];
     app_id = json["app_id"];
     table_no = json["table_no"];
+    table_id = json["table_id"];
     invoice_no = json["invoice_no"];
     customer_id = json["customer_id"];
     tax_percent = json["tax_percent"];
@@ -68,6 +75,8 @@ class Orders {
     order_item_count = json["order_item_count"];
     order_date = json["order_date"];
     order_by = json["order_by"];
+    server_id = json['server_id'];
+    tax_json = json['tax_json'];
     updated_at = json["updated_at"];
     updated_by = json["updated_by"];
   }
@@ -80,6 +89,7 @@ class Orders {
     data["terminal_id"] = this.terminal_id;
     data["app_id"] = this.app_id;
     data["table_no"] = this.table_no;
+    data["table_id"] = this.table_id;
     data["invoice_no"] = this.invoice_no;
     data["customer_id"] = this.customer_id;
     data["tax_percent"] = this.tax_percent;
@@ -93,6 +103,8 @@ class Orders {
     data["order_status"] = this.order_status;
     data["order_item_count"] = this.order_item_count;
     data["order_date"] = this.order_date;
+    data["server_id"] = this.server_id;
+    data["tax_json"] = this.tax_json;
     data["order_by"] = this.order_by;
     data["updated_at"] = this.updated_at;
     data["updated_by"] = this.updated_by;

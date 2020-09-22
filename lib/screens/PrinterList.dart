@@ -147,10 +147,12 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
 
     for (var i = 0; i < itemList.length; i++) {
       var item = itemList[i];
-      ticket.row([
-        PosColumn(text: item.productQty.toString(), width: 2),
-        PosColumn(text: item.productName, width: 10),
-      ]);
+      if (item.isSendKichen == null) {
+        ticket.row([
+          PosColumn(text: item.productQty.toString(), width: 2),
+          PosColumn(text: item.productName, width: 10),
+        ]);
+      }
     }
     // ticket.row([
     //   PosColumn(text: '2', width: 2),
@@ -387,7 +389,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
           //     child: Text('${isDiscovering ? 'Discovering...' : 'Discover'}'),
           //     onPressed: isDiscovering ? null : () => discover(context)),
           SizedBox(height: 15),
-          found >= 0
+          found >= 1
               ? Text('Found: $found device(s)', style: TextStyle(fontSize: 16))
               : Container(),
           Container(

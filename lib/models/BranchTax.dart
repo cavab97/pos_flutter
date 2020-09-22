@@ -1,46 +1,38 @@
-class Tax {
+class BranchTax {
+  int id;
   int taxId;
-  String uuid;
-  String code;
-  String description;
+  int branchId;
   String rate;
   int status;
-  int isFixed;
   String updatedAt;
   int updatedBy;
 
-  Tax(
-      {this.taxId,
-      this.uuid,
-      this.code,
-      this.description,
+  BranchTax(
+      {this.id,
+      this.taxId,
+      this.branchId,
       this.rate,
       this.status,
-      this.isFixed,
       this.updatedAt,
       this.updatedBy});
 
-  Tax.fromJson(Map<String, dynamic> json) {
+  BranchTax.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
     taxId = json['tax_id'];
-    uuid = json['uuid'];
-    code = json['code'];
-    description = json['description'];
-    rate = json['rate'];
+    branchId = json['branch_id'];
+    rate = json['rate'].toString();
     status = json['status'];
-    isFixed = json['is_fixed'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
     data['tax_id'] = this.taxId;
-    data['uuid'] = this.uuid;
-    data['code'] = this.code;
-    data['description'] = this.description;
+    data['branch_id'] = this.branchId;
     data['rate'] = this.rate;
     data['status'] = this.status;
-    data['is_fixed'] = this.isFixed;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;
     return data;

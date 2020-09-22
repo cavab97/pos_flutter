@@ -1,20 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/models/Branch.dart';
+import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/OrderDetails.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/models/Payment.dart';
+import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/services/LocalAPIs.dart';
 
 class InvoiceReceiptDailog extends StatefulWidget {
-  InvoiceReceiptDailog({Key key}) : super(key: key);
-
+  InvoiceReceiptDailog({Key key, this.orderid}) : super(key: key);
+  final int orderid;
   @override
   _InvoiceReceiptDailogState createState() => _InvoiceReceiptDailogState();
 }
 
 class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
   DatabaseHelper databaseHelper = DatabaseHelper();
-
+  LocalAPI localAPI = LocalAPI();
+  int orderid;
   @override
   void initState() {
     super.initState();
+    setState(() {
+      orderid = widget.orderid;
+    });
+    getOederData();
+  }
+
+  getOederData() async {
+    var branchID = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    Branch branchAddress = await localAPI.getBranchData(branchID);
+    OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
+    Payments paument_method =
+        await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
+    User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
+    List<OrderDetail> itemsList = await localAPI.getOrderDetailsList(orderid);
+    Orders order = await localAPI.getcurrentOrders(orderid);
   }
 
   @override

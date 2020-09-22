@@ -16,9 +16,10 @@ import 'package:mcncashier/models/Product_branch.dart';
 import 'package:mcncashier/models/Category_Attributes.dart';
 import 'package:mcncashier/models/Role.dart';
 import 'package:mcncashier/models/Modifier.dart';
+import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/models/User.dart';
-import 'package:mcncashier/models/Tax.dart';
+import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Voucher.dart';
@@ -39,6 +40,7 @@ class TableData {
     var userData = tablesData["user"];
     var roleData = tablesData["role"];
     var taxData = tablesData["branch_tax"];
+    var taxList = tablesData["tax"];
     try {
       if (branchData.length != 0) {
         for (var i = 0; i < branchData.length; i++) {
@@ -78,8 +80,16 @@ class TableData {
       if (taxData.length != 0) {
         for (var i = 0; i < taxData.length; i++) {
           var taxDataitem = taxData[i];
-          Tax role = Tax.fromJson(taxDataitem);
+          BranchTax role = BranchTax.fromJson(taxDataitem);
           var result = await db.insert("branch_tax", role.toJson());
+          print(result);
+        }
+      }
+      if (taxList.length != 0) {
+        for (var i = 0; i < taxList.length; i++) {
+          var taxListitem = taxList[i];
+          Tax taxval = Tax.fromJson(taxListitem);
+          var result = await db.insert("tax", taxval.toJson());
           print(result);
         }
       }

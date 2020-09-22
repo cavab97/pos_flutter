@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -32,6 +34,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
   User paymemtUser = new User();
   List<ProductDetails> detailsList = [];
   bool isFiltering = false;
+  Customer customer = new Customer();
+  Payments paumentMethod = new Payments();
   @override
   void initState() {
     super.initState();
@@ -65,19 +69,23 @@ class _TransactionsPageState extends State<TransactionsPage> {
         detailsList = details;
       });
     }
-    List<OrderPayment> orderpaymentdata =
+    OrderPayment orderpaymentdata =
         await localAPI.getOrderpaymentData(order.app_id);
-    if (orderpaymentdata.length != 0) {
+    setState(() {
+      orderpayment = orderpaymentdata;
+    });
+    Payments paument_method =
+        await localAPI.getOrderpaymentmethod(orderpayment.op_method_id);
+    setState(() {
+      paumentMethod = paument_method;
+    });
+    User user = await localAPI.getPaymentUser(orderpayment.op_by);
+    if (user != null) {
       setState(() {
-        orderpayment = orderpaymentdata[0];
+        paymemtUser = user;
       });
-      User user = await localAPI.getPaymentUser(orderpayment.op_by);
-      if (user != null) {
-        setState(() {
-          paymemtUser = user;
-        });
-      }
     }
+    
   }
 
   startFilter() {
@@ -195,18 +203,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     SizedBox(
                                       height: 30,
                                     ),
-                                    paymemtUser != null && selectedOrder != null
+                                    selectedOrder != null &&
+                                            paymemtUser.username != null
                                         ? Text(
-                                            selectedOrder.invoice_no != null &&
-                                                    paymemtUser != null
-                                                ? selectedOrder.invoice_no +
-                                                    " - Processed by "
-                                                : " 0000000 - Processed by ",
-                                            style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                                color: Theme.of(context)
-                                                    .primaryColor),
+                                            selectedOrder.invoice_no +
+                                                " - Processed by " +
+                                                paymemtUser.username,
+                                            style: Styles.whiteBoldsmall(),
                                           )
                                         : SizedBox(),
                                     SizedBox(
@@ -218,7 +221,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                           MediaQuery.of(context).size.width / 2,
                                       child: Center(
                                         child: Text(
-                                          "Aaron Young",
+                                          customer.firstName != null
+                                              ? customer.firstName
+                                              : "Open Customer",
                                           style: TextStyle(
                                               fontSize: 23,
                                               fontWeight: FontWeight.bold,
@@ -530,29 +535,56 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Widget searchTransationList() {
     return ListView(
         shrinkWrap: true,
-        children: orderLists.map((item) {
-          return ListTile(
-            onTap: () {
-              getOrderDetails(item);
-            },
-            title: Text(
-                DateFormat('hh:mm aaa').format(DateTime.parse(item.order_date)),
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[600])),
-            subtitle: Text(Strings.invoice + item.invoice_no.toString(),
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[600])),
-            isThreeLine: true,
-            trailing: Text(item.grand_total.toString(),
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[600])),
-          );
-        }).toList());
+        children: isFiltering
+            ? filterList.map((item) {
+                return ListTile(
+                  onTap: () {
+                    getOrderDetails(item);
+                  },
+                  title: Text(
+                      DateFormat('hh:mm aaa')
+                          .format(DateTime.parse(item.order_date)),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                  subtitle: Text(Strings.invoice + item.invoice_no.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                  isThreeLine: true,
+                  trailing: Text(item.grand_total.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                );
+              }).toList()
+            : orderLists.map((item) {
+                return ListTile(
+                  onTap: () {
+                    getOrderDetails(item);
+                  },
+                  title: Text(
+                      DateFormat('hh:mm aaa')
+                          .format(DateTime.parse(item.order_date)),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                  subtitle: Text(Strings.invoice + item.invoice_no.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                  isThreeLine: true,
+                  trailing: Text(item.grand_total.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                );
+              }).toList());
   }
 }

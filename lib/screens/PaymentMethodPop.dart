@@ -27,12 +27,18 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 class PaymentMethodPop extends StatefulWidget {
   // Opning ammount popup
   PaymentMethodPop(
-      {Key key, this.cartID, this.itemCount, this.subTotal, this.grandTotal})
+      {Key key,
+      this.cartID,
+      this.itemCount,
+      this.subTotal,
+      this.grandTotal,
+      this.onClose})
       : super(key: key);
   final double grandTotal;
   final int cartID;
   final int itemCount;
   final double subTotal;
+  Function onClose;
 
   @override
   PaymentMethodPopState createState() => PaymentMethodPopState();
@@ -160,8 +166,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
     order.app_id = int.parse(terminalId);
-    order.table_no = tables.table_id;
-    order.invoice_no = invoiceNo + order.app_id.toString();
+    order.table_id = tables.table_id;
+    order.invoice_no = invoiceNo;
     order.customer_id = customer.customerId;
     order.sub_total = cartData.sub_total;
     order.sub_total_after_discount = cartData.sub_total - cartData.discount;
@@ -202,6 +208,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
           orderDetail.detail_qty = cartItem.productQty;
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
           print(orderDetailid);
+          await localAPI.removeFromInventory(orderDetail);
         }
       }
     }
@@ -264,6 +271,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     var paymentid = await localAPI.sendtoOrderPayment(orderpayment);
     print(paymentid);
     await clearCartAfterSuccess();
+    widget.onClose(orderid);
     Navigator.pushNamed(context, Constant.DashboardScreen);
     setState(() {
       isLoading = false;

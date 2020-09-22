@@ -9,6 +9,8 @@ import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/Product_Store_Inventory.dart';
+import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
@@ -38,7 +40,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   double product_qty = 1;
   double price = 0.0;
   bool isEditing = false;
-  Tax taxlist = new Tax();
+  List<BranchTax> taxlist = [];
   TextStyle attrStyle = TextStyle(color: Colors.black, fontSize: 20.0);
   @override
   void initState() {
@@ -51,6 +53,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     });
     getAttributes();
     getTaxs();
+
     if (widget.cartID != null) {
       getCartData();
     }
@@ -58,10 +61,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   getTaxs() async {
     var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
-    List<Tax> taxlists = await localAPI.getTaxList(branchid);
+    List<BranchTax> taxlists = await localAPI.getTaxList(branchid);
     if (taxlists.length > 0) {
       setState(() {
-        taxlist = taxlists[0];
+        taxlist = taxlists;
       });
     }
   }
@@ -135,12 +138,18 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
-  increaseQty() {
+  increaseQty() async {
     if (productItem.hasInventory == 0) {
-      var prevproductqty = product_qty;
-      setState(() {
-        product_qty = prevproductqty + 1;
-      });
+      ProductStoreInventory cartval =
+          await localAPI.checkItemAvailableinStore(productItem.productId);
+      if (int.parse(cartval.qty) >= product_qty) {
+        var prevproductqty = product_qty;
+        setState(() {
+          product_qty = prevproductqty + 1;
+        });
+      } else {
+        CommunFun.showToast(context, Strings.stock_not_valilable);
+      }
     } else {
       if (product_qty <= productItem.qty) {
         var prevproductqty = product_qty;
@@ -248,26 +257,52 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
     var loginData = await json.decode(loginUser);
 
-    double taxval = taxlist.rate != null ? double.parse(taxlist.rate) : 0.0;
     var disc = currentCart.discount != null ? currentCart.discount : 0.0;
     double qty = currentCart.total_qty != null
         ? currentCart.total_qty + product_qty.toDouble()
         : product_qty.toDouble();
     double subT =
         currentCart.sub_total != null ? currentCart.sub_total + price : price;
+
+    var totalTax = [];
+    double taxvalues = 0;
+    if (taxlist.length > 0) {
+      for (var i = 0; i < taxlist.length; i++) {
+        var taxlistitem = taxlist[i];
+        Tax tax = await localAPI.getTaxName(taxlistitem.taxId);
+        var taxval = taxlistitem.rate != null
+            ? subT * double.parse(taxlistitem.rate) / 100
+            : 0.0;
+        taxvalues += taxval;
+
+        var taxmap = {
+          "id": taxlistitem.id,
+          "tax_id": taxlistitem.taxId,
+          "branch_id": taxlistitem.branchId,
+          "rate": taxlistitem.rate,
+          "status": taxlistitem.status,
+          "updated_at": taxlistitem.updatedAt,
+          "updated_by": taxlistitem.updatedBy,
+          "taxAmount": taxval.toString(),
+          "taxName": tax.code
+        };
+        totalTax.add(taxmap);
+      }
+    }
+
     double grandTotal = currentCart.grand_total != null
         ? currentCart.grand_total + price
-        : price + taxval - disc;
+        : price + taxvalues - disc;
 
     //cart data
-
     cart.user_id = customerData != null ? customerData["customer_id"] : 0;
     cart.branch_id = int.parse(branchid);
     cart.sub_total = subT;
     cart.discount = disc;
     cart.discount_type = currentCart.discount_type;
     cart.total_qty = qty;
-    cart.tax = taxval;
+    cart.tax = taxvalues;
+    cart.tax_json = json.encode(totalTax);
     cart.grand_total = grandTotal;
     cart.customer_terminal =
         customerData != null ? customerData["terminal_id"] : 0;
@@ -305,10 +340,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.productPrice = productdata.price;
     cartdetails.productQty = productdata.qty;
     cartdetails.productNetPrice = productdata.oldPrice;
-    cartdetails.discount = 0;
-    cartdetails.taxValue =
-        taxlist.rate != null ? double.parse(taxlist.rate) : 0;
-    cartdetails.taxId = taxlist.id;
     cartdetails.createdBy = loginData["id"];
     cartdetails.createdAt = DateTime.now().toString();
     var detailID = await localAPI.addintoCartDetails(cartdetails);

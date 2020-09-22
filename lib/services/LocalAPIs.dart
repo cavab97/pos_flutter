@@ -12,6 +12,9 @@ import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/Product.dart';
+import 'package:mcncashier/models/Product_Store_Inventory.dart';
+import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
@@ -335,6 +338,15 @@ class LocalAPI {
     return list;
   }
 
+  Future<Orders> getcurrentOrders(orderid) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var result =
+        await db.query('orders', where: "app_id = ?", whereArgs: [orderid]);
+    List<Orders> list =
+        result.isNotEmpty ? result.map((c) => Orders.fromJson(c)).toList() : [];
+    return list[0];
+  }
+
   Future<int> placeOrder(Orders orderData) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var checkisExitqry =
@@ -347,8 +359,8 @@ class LocalAPI {
           : [];
       orderData.app_id = list[0].app_id + 1;
     }
+    orderData.invoice_no = orderData.invoice_no + orderData.app_id.toString();
     var orderid = await db.insert("orders", orderData.toJson());
-
     await SyncAPICalls.logActivity("orders", "place order", "orders", orderid);
     return orderData.app_id;
   }
@@ -531,14 +543,27 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<OrderPayment>> getOrderpaymentData(orderid) async {
+  Future<List<OrderDetail>> getOrderDetailsList(orderid) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+
+    var ordersList = await db
+        .query("order_detail", where: "order_id = ?", whereArgs: [orderid]);
+    List<OrderDetail> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "invoice", "get Orders  details list", "ProductDetails", orderid);
+    return list;
+  }
+
+  Future<OrderPayment> getOrderpaymentData(orderid) async {
     var qry =
-        "SELECT * from order_payment where order_id =" + orderid.toString();
+        "SELECT * from order_payment where order_id = " + orderid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderPayment> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
         : [];
-    return list;
+    return list[0];
   }
 
   Future<List<Voucher>> checkVoucherIsExit(code) async {
@@ -631,12 +656,32 @@ class LocalAPI {
     return hitid;
   }
 
-  Future<List<Tax>> getTaxList(branchid) async {
+  Future<List<BranchTax>> getTaxList(branchid) async {
     var tax = await DatabaseHelper.dbHelper.getDatabse().query('branch_tax',
         where: 'branch_id = ?', whereArgs: [branchid.toString()]);
+    List<BranchTax> list =
+        tax.isNotEmpty ? tax.map((c) => BranchTax.fromJson(c)).toList() : [];
+    return list;
+  }
+
+  Future<Tax> getTaxName(taxId) async {
+    var tax = await DatabaseHelper.dbHelper
+        .getDatabse()
+        .query('tax', where: 'tax_id = ?', whereArgs: [taxId.toString()]);
     List<Tax> list =
         tax.isNotEmpty ? tax.map((c) => Tax.fromJson(c)).toList() : [];
-    return list;
+    return list[0];
+  }
+
+  Future<Payments> getOrderpaymentmethod(methodID) async {
+    var paymentMeth = await DatabaseHelper.dbHelper.getDatabse().query(
+        'payment',
+        where: 'payment_id = ?',
+        whereArgs: [methodID.toString()]);
+    List<Payments> list = paymentMeth.isNotEmpty
+        ? paymentMeth.map((c) => Payments.fromJson(c)).toList()
+        : [];
+    return list[0];
   }
 
   Future<User> getPaymentUser(userid) async {
@@ -680,52 +725,51 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<OrderDetail>> getOrderDetailTable(branchid) async {
-    var qry =
-        "SELECT * from order_detail where branch_id = " + branchid.toString();
+  Future<List<OrderDetail>> getOrderDetailTable(orderid) async {
+    var qry = "SELECT * from order_detail where app_id = " + orderid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderDetail> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
-        "Order sync", "get Orders detail list", "Orders", branchid);
+        "Order sync", "get Orders detail list", "Orders", orderid);
     return list;
   }
 
-  Future<List<OrderAttributes>> getOrderAttributesTable(branchid) async {
-    var qry = "SELECT * from order_attribute where terminal_id = " +
-        branchid.toString();
+  Future<List<OrderAttributes>> getOrderAttributesTable(detailid) async {
+    var qry =
+        "SELECT * from order_attributes where  app_id = " + detailid.toString();
 
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderAttributes> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderAttributes.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
-        "Order sync", "get Orders_modifire list", "order_attribute", branchid);
+        "Order sync", "get Orders_modifire list", "order_attribute", detailid);
     return list;
   }
 
-  Future<List<OrderModifire>> getOrderModifireTable(branchid) async {
-    var qry = "SELECT * from order_modifier where terminal_id = " +
-        branchid.toString();
+  Future<List<OrderModifire>> getOrderModifireTable(detailid) async {
+    var qry =
+        "SELECT * from order_modifier where app_id = " + detailid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderModifire> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderModifire.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
-        "Order sync", "get Orders Modifire Table", "order_modifier", branchid);
+        "Order sync", "get Orders Modifire Table", "order_modifier", detailid);
     return list;
   }
 
-  Future<List<OrderPayment>> getOrderPaymentTable(branchid) async {
+  Future<List<OrderPayment>> getOrderPaymentTable(orderid) async {
     var qry =
-        "SELECT * from order_payment where branch_id = " + branchid.toString();
+        "SELECT * from order_payment where app_id = " + orderid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderPayment> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
-        "Order sync", "get Orders payment Table", "order_payment", branchid);
+        "Order sync", "get Orders payment Table", "order_payment", orderid);
     return list;
   }
 
@@ -735,6 +779,51 @@ class LocalAPI {
         ids +
         ")";
     var ordersList = await db.rawQuery(qry);
+    await SyncAPICalls.logActivity(
+        "Send to kitchen", "send item to kitchen", "mst_cart_detail", 1);
     return ordersList;
+  }
+
+  Future<ProductStoreInventory> checkItemAvailableinStore(productId) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var inventoryProd = await db.query("product_store_inventory",
+        where: 'product_id = ?', whereArgs: [productId]);
+    List<ProductStoreInventory> list = inventoryProd.isNotEmpty
+        ? inventoryProd.map((c) => ProductStoreInventory.fromJson(c)).toList()
+        : [];
+    return list[0];
+  }
+
+  Future removeFromInventory(OrderDetail produtdata) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var inventoryProd = await db.query("product",
+        where: 'product_id = ?', whereArgs: [produtdata.product_id]);
+    List<Product> list = inventoryProd.isNotEmpty
+        ? inventoryProd.map((c) => Product.fromJson(c)).toList()
+        : [];
+
+    if (list[0].hasInventory == 1) {
+      var intupdate = "Update product_store_inventory set qty = (qty - " +
+          produtdata.detail_qty.toString() +
+          ") WHERE product_id = " +
+          produtdata.product_id.toString();
+      var updateed = await db.rawQuery(intupdate);
+      await SyncAPICalls.logActivity("Order", "update InventoryTable",
+          "product_store_inventory", produtdata.product_id);
+    }
+  }
+
+  Future<int> updateInvetory() async {}
+
+  Future<Branch> getBranchData(branchID) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var result =
+        await db.query("branch", where: 'branch_id = ?', whereArgs: [branchID]);
+    List<Branch> list =
+        result.isNotEmpty ? result.map((c) => Branch.fromJson(c)).toList() : [];
+
+    await SyncAPICalls.logActivity(
+        "branch details", "branch details for invoice", "branch", branchID);
+    return list[0];
   }
 }

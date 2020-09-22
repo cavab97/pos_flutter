@@ -129,8 +129,8 @@ class CommunFun {
     // basic Loader
     return Center(
       child: Container(
-        height: 70.0,
-        width: 70.0,
+        height: 50.0,
+        width: 50.0,
         child: CircularProgressIndicator(
           backgroundColor: Colors.white,
           valueColor:

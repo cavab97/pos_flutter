@@ -67,12 +67,10 @@ class VoucherPopState extends State<VoucherPop> {
     DateTime toDate = DateTime.parse(vaocher.voucherApplicableTo);
     DateTime now = new DateTime.now();
     String nowDate = DateFormat('yyyy-MM-dd').format(now);
-    String fromDatenow = DateFormat('yyyy-MM-dd').format(fromDate);
+    String fromtonow = DateFormat('yyyy-MM-dd').format(toDate);
     print(now.isBefore(fromDate));
     print(now.isAfter(toDate));
-
-    if (now.isBefore(fromDate) && now.isAfter(toDate) ||
-        nowDate == fromDatenow) {
+    if (now.isBefore(toDate) && now.isAfter(fromDate) || nowDate == fromtonow) {
       return true;
     } else {
       return false;
@@ -99,8 +97,14 @@ class VoucherPopState extends State<VoucherPop> {
             if (vaocher.voucherProducts != "") {
               vaocher.voucherProducts.split(',').forEach((tag) {
                 if (cartitem.productId.toString() == tag) {
-                  cartitem.discount = vaocher.voucherDiscount;
-                  cartitem.discountType = vaocher.voucherDiscountType;
+                  if (vaocher.voucherDiscountType == 1) {
+                    cartitem.discount = vaocher.voucherDiscount;
+                    cartitem.discountType = vaocher.voucherDiscountType;
+                  } else {
+                    cartitem.discount =
+                        (cartitem.productPrice * vaocher.voucherDiscount) / 100;
+                    cartitem.discountType = vaocher.voucherDiscountType;
+                  }
                 }
               });
             }

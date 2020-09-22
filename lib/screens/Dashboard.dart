@@ -36,14 +36,17 @@ class DashboradPage extends StatefulWidget {
 }
 
 class _DashboradPageState extends State<DashboradPage>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   GlobalKey<AutoCompleteTextFieldState<ProductDetails>> keyAutoSuggestion =
       new GlobalKey();
   AutoCompleteTextField searchTextField;
   TabController _tabController;
+  TabController _subtabController;
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
+  List<Category> allCaterories = new List<Category>();
   List<Category> tabsList = new List<Category>();
+  List<Category> subCatList = new List<Category>();
   List<ProductDetails> productList = new List<ProductDetails>();
   List<MSTCartdetails> cartList = new List<MSTCartdetails>();
   bool isDrawerOpen = false;
@@ -54,6 +57,7 @@ class _DashboradPageState extends State<DashboradPage>
   double subtotal = 0;
   double discount = 0;
   double tax = 0;
+  List taxJson = [];
   double grandTotal = 0;
   MST_Cart allcartData;
   Voucher selectedvoucher;
@@ -175,6 +179,7 @@ class _DashboradPageState extends State<DashboradPage>
       subtotal = cart.sub_total;
       discount = cart.discount;
       tax = cart.tax;
+      taxJson = json.decode(cart.tax_json);
       grandTotal = cart.grand_total;
       selectedvoucher = vaocher;
     });
@@ -216,21 +221,32 @@ class _DashboradPageState extends State<DashboradPage>
   getCategoryList() async {
     List<Category> categorys = await localAPI.getAllCategory();
     print(categorys);
+    List<Category> catList = categorys.where((i) => i.parentId == 0).toList();
     setState(() {
-      tabsList = categorys;
-      _tabController = TabController(vsync: this, length: tabsList.length);
-      _tabController.addListener(_handleTabSelection);
-      getProductList(0);
+      tabsList = catList;
+      allCaterories = categorys;
     });
+    _tabController = TabController(vsync: this, length: tabsList.length);
+    _tabController.addListener(_handleTabSelection);
+
+    getProductList(tabsList[0].categoryId);
   }
 
-  getProductList(int position) async {
+  _backtoMainCat() {
+    setState(() {
+      subCatList = [];
+    });
+    var cat = tabsList[_tabController.index].categoryId;
+    getProductList(cat);
+  }
+
+  getProductList(categoryId) async {
     setState(() {
       isLoading = true;
     });
     var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
-    List<ProductDetails> product = await localAPI.getProduct(
-        tabsList[position].categoryId.toString(), branchid);
+    List<ProductDetails> product =
+        await localAPI.getProduct(categoryId.toString(), branchid);
 
     setState(() {
       productList.clear();
@@ -242,13 +258,33 @@ class _DashboradPageState extends State<DashboradPage>
 
   void _handleTabSelection() {
     if (_tabController.indexIsChanging) {
-      getProductList(_tabController.index);
+      var cat = tabsList[_tabController.index].categoryId;
+      List<Category> subList =
+          allCaterories.where((i) => i.parentId == cat).toList();
+      setState(() {
+        subCatList = subList;
+      });
+      _subtabController =
+          new TabController(vsync: this, length: subCatList.length);
+      _subtabController.addListener(_handleSubTabSelection);
+      if (subCatList.length > 0) {
+        cat = subCatList[_subtabController.index].categoryId;
+      }
+      getProductList(cat);
+    }
+  }
+
+  void _handleSubTabSelection() {
+    if (_subtabController.indexIsChanging) {
+      var cat = subCatList[_subtabController.index].categoryId;
+      getProductList(cat);
     }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _subtabController.dispose();
     super.dispose();
   }
 
@@ -384,13 +420,13 @@ class _DashboradPageState extends State<DashboradPage>
         });
   }
 
-  openSendReceiptPop() {
+  openSendReceiptPop(orderID) {
     // Send receipt Popup
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return InvoiceReceiptDailog();
+          return InvoiceReceiptDailog(orderid: orderID);
         });
   }
 
@@ -410,10 +446,14 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         builder: (BuildContext context) {
           return PaymentMethodPop(
-              cartID: currentCart,
-              itemCount: cartList.length,
-              subTotal: subtotal,
-              grandTotal: grandTotal);
+            cartID: currentCart,
+            itemCount: cartList.length,
+            subTotal: subtotal,
+            grandTotal: grandTotal,
+            onClose: (orderID) {
+              openSendReceiptPop(orderID);
+            },
+          );
         });
   }
 
@@ -464,6 +504,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   gotoTansactionPage() {
+    Navigator.of(context).pop();
     Navigator.pushNamed(context, Constant.TransactionScreen);
   }
 
@@ -486,7 +527,7 @@ class _DashboradPageState extends State<DashboradPage>
         tabs: List<Widget>.generate(tabsList.length, (int index) {
           return new Tab(
             child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 15),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                 ),
@@ -496,6 +537,29 @@ class _DashboradPageState extends State<DashboradPage>
                 )),
           );
         }));
+    final _subtabs = TabBar(
+        controller: _subtabController,
+        indicatorSize: TabBarIndicatorSize.label,
+        unselectedLabelColor: Colors.white,
+        labelColor: Colors.white,
+        isScrollable: true,
+        indicator: BoxDecoration(
+            borderRadius: BorderRadius.circular(30), color: Colors.deepOrange),
+        labelStyle: TextStyle(fontSize: 16),
+        tabs: List<Widget>.generate(subCatList.length, (int index) {
+          return new Tab(
+            child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 15),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Text(
+                  subCatList[index].name.toUpperCase(),
+                  style: Styles.whiteSimpleSmall(),
+                )),
+          );
+        }));
+
     return WillPopScope(
       child: Scaffold(
           key: scaffoldKey,
@@ -521,17 +585,41 @@ class _DashboradPageState extends State<DashboradPage>
                         padding: EdgeInsets.all(10),
                         child: Column(
                           children: <Widget>[
-                            Container(
-                              margin: EdgeInsets.only(left: 5, right: 5),
-                              width: MediaQuery.of(context).size.width,
-                              height: 65,
-                              color: Colors.black26,
-                              padding: EdgeInsets.all(10),
-                              child: DefaultTabController(
-                                  initialIndex: 0,
-                                  length: tabsList.length,
-                                  child: _tabs),
-                            ),
+                            subCatList.length == 0
+                                ? Container(
+                                    margin: EdgeInsets.only(left: 5, right: 5),
+                                    width: MediaQuery.of(context).size.width,
+                                    height: 65,
+                                    color: Colors.black26,
+                                    padding: EdgeInsets.all(10),
+                                    child: DefaultTabController(
+                                        initialIndex: 0,
+                                        length: tabsList.length,
+                                        child: _tabs),
+                                  )
+                                : Container(
+                                    margin: EdgeInsets.only(left: 5, right: 5),
+                                    width: MediaQuery.of(context).size.width,
+                                    height: 65,
+                                    color: Colors.black26,
+                                    padding: EdgeInsets.all(10),
+                                    child: Row(
+                                      children: <Widget>[
+                                        IconButton(
+                                            onPressed: _backtoMainCat,
+                                            icon: Icon(
+                                              Icons.arrow_back,
+                                              color: Colors.white,
+                                              size: 30,
+                                            )),
+                                        DefaultTabController(
+                                            initialIndex: 0,
+                                            length: subCatList.length,
+                                            child: _subtabs),
+                                      ],
+                                    ),
+                                  ),
+
                             // porductsListLoading() :
                             isLoading
                                 ? CommunFun.loader(context)
@@ -628,6 +716,7 @@ class _DashboradPageState extends State<DashboradPage>
                   title: Text("Transaction", style: Styles.communBlack())),
               ListTile(
                   onTap: () {
+                    Navigator.of(context).pop();
                     if (isShiftOpen) {
                       closeShift();
                     } else {
@@ -650,6 +739,7 @@ class _DashboradPageState extends State<DashboradPage>
                   title: Text("Shift Report", style: Styles.communBlack())),
               ListTile(
                   onTap: () {
+                    Navigator.of(context).pop();
                     syncOrdersTodatabase();
                   },
                   leading: Icon(
@@ -1044,16 +1134,12 @@ class _DashboradPageState extends State<DashboradPage>
                       color: Colors.deepOrange,
                       child: Center(
                         child: Text(
-                          product.hasInventory == 1 && product.qty == 0
-                              ? Strings.out_of_stoke
-                              : product.priceTypeName +
-                                  ' ' +
-                                  product.price.toString(),
-                          style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              color: Colors.white,
-                              fontSize: 15),
-                        ),
+                            product.hasInventory == 1 && product.qty == 0
+                                ? Strings.out_of_stoke
+                                : product.priceTypeName +
+                                    ' ' +
+                                    product.price.toString(),
+                            style: Styles.whiteSimpleSmall()),
                       ),
                     ),
                   )
@@ -1262,8 +1348,7 @@ class _DashboradPageState extends State<DashboradPage>
                   onPressed: () {
                     itememovefromCart(cart);
                   },
-                  icon: new Icon(Icons.delete,
-                      size: 30, color: Colors.deepOrange),
+                  icon: new Icon(Icons.delete, size: 30, color: Colors.red),
                 ),
               ),
               new Container(
@@ -1385,22 +1470,48 @@ class _DashboradPageState extends State<DashboradPage>
           ]),
           TableRow(children: [
             TableCell(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: 10, bottom: 10),
-                    child: Text(
-                      Strings.tax.toUpperCase(),
-                      style: Styles.darkBlue(),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(right: 20, top: 10, bottom: 10),
-                    child: Text(tax.toString(), style: Styles.darkBlue()),
-                  ),
-                ],
-              ),
+              child: taxJson.length != 0
+                  ? Column(
+                      children: taxJson.map((taxitem) {
+                      return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(top: 10, bottom: 10),
+                              child: Text(
+                                Strings.tax.toUpperCase() +
+                                    taxitem["taxName"] +
+                                    "(" +
+                                    taxitem["rate"] +
+                                    "%)",
+                                style: Styles.darkBlue(),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  right: 20, top: 10, bottom: 10),
+                              child: Text(taxitem["taxAmount"].toString(),
+                                  style: Styles.darkBlue()),
+                            )
+                          ]);
+                    }).toList())
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                          Padding(
+                            padding: EdgeInsets.only(top: 10, bottom: 10),
+                            child: Text(
+                              Strings.tax.toUpperCase(),
+                              style: Styles.darkBlue(),
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                EdgeInsets.only(right: 20, top: 10, bottom: 10),
+                            child:
+                                Text(tax.toString(), style: Styles.darkBlue()),
+                          )
+                        ]),
             ),
           ]),
           TableRow(children: [
