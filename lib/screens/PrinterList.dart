@@ -1,16 +1,10 @@
-import 'dart:typed_data';
-
-import 'package:flutter/material.dart';
-import 'package:mcncashier/components/StringFile.dart';
-import 'package:mcncashier/helpers/sqlDatahelper.dart';
-import 'package:mcncashier/services/LocalAPIs.dart';
-
 import 'package:esc_pos_printer/esc_pos_printer.dart';
-import 'package:flutter/services.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:image/image.dart';
+import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:ping_discover_network/ping_discover_network.dart';
 import 'package:wifi/wifi.dart';
 
@@ -176,114 +170,6 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
     return ticket;
   }
 
-  Future<Ticket> Receipt(PaperSize paper) async {
-    final profile = await CapabilityProfile.load();
-    final Ticket ticket = Ticket(paper, profile);
-
-    /* // Print image
-    final ByteData data = await rootBundle.load('assets/headerlogo.png');
-    final Uint8List bytes = data.buffer.asUint8List();
-    final image = decodeImage(bytes);
-    ticket.image(image, align: PosAlign.center);
-*/
-    ticket.text("", linesAfter: 1);
-    ticket.text(
-        'Bh. S. G. Business Hub Sarkhej - Gandhinagar Hwy Vasant Nagar, Ognaj Ahmedabad, Gujarat 380081',
-        styles: PosStyles(
-            fontType: PosFontType.fontA,
-            align: PosAlign.center,
-            bold: true,
-            width: PosTextSize.size1));
-    ticket.text("Contact No : 123456789",
-        linesAfter: 2,
-        styles: PosStyles(
-            fontType: PosFontType.fontA, align: PosAlign.center, bold: true));
-
-    ticket.emptyLines(1);
-
-    final now = DateTime.now();
-    final formatter = DateFormat('MM/dd/yyyy H:m');
-    final String timestamp = formatter.format(now);
-
-    ticket.text('Processed by  : Valani Bhavesh',
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text("Invoice Date : " + timestamp,
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text("Invoice No : MCN000001",
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text('Terminal Name : MCN002',
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text('Name : Walk-in Customer',
-        styles: PosStyles(align: PosAlign.left));
-
-    ticket.hr();
-    ticket.row([
-      PosColumn(
-          text: 'ITEM', width: 7, styles: PosStyles(align: PosAlign.left)),
-      PosColumn(
-          text: 'QTY', width: 1, styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: 'PRICE', width: 2, styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: 'AMT', width: 2, styles: PosStyles(align: PosAlign.right)),
-    ]);
-    ticket.hr();
-
-    for (var i = 0; i < itemList.length; i++) {
-      var item = itemList[i];
-      ticket.row([
-        PosColumn(
-            text: item.productName,
-            width: 7,
-            styles: PosStyles(align: PosAlign.left)),
-        PosColumn(
-            text: item.productQty.toString(),
-            width: 1,
-            styles: PosStyles(align: PosAlign.right)),
-        PosColumn(
-            text: "20.00", width: 2, styles: PosStyles(align: PosAlign.right)),
-        PosColumn(
-            text: "50.00", width: 2, styles: PosStyles(align: PosAlign.right)),
-      ]);
-    }
-    ticket.hr();
-    ticket.row([
-      PosColumn(
-          text: "SUBTOTAL(MYR)",
-          width: 8,
-          styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: "50.00", width: 4, styles: PosStyles(align: PosAlign.right)),
-    ]);
-    ticket.hr();
-    ticket.row([
-      PosColumn(
-          text: "GRANDTOTAL(MYR)",
-          width: 8,
-          styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: "50.00", width: 4, styles: PosStyles(align: PosAlign.right)),
-    ]);
-    ticket.row([
-      PosColumn(
-          text: "CASH(MYR)",
-          width: 8,
-          styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: "50.00", width: 4, styles: PosStyles(align: PosAlign.right)),
-    ]);
-
-    ticket.feed(2);
-    ticket.text('Thank you!',
-        styles: PosStyles(align: PosAlign.center, bold: true));
-    ticket.text('Please visit us again',
-        styles: PosStyles(align: PosAlign.center, bold: true));
-
-    ticket.feed(2);
-    ticket.cut();
-    return ticket;
-  }
-
   void testPrint(String printerIp, BuildContext ctx) async {
     sendTokitched();
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
@@ -298,7 +184,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
 
     // DEMO RECEIPT
     final PosPrintResult res =
-        await printerManager.printTicket(await Receipt(paper));
+        await printerManager.printTicket(await KOTReceipt(paper));
 
     final snackBar =
         SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
