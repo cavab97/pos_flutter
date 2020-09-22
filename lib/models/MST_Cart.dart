@@ -8,6 +8,7 @@ class MST_Cart {
   int discount_type;
   String remark;
   double tax;
+  String tax_json;
   double grand_total;
   double total_qty;
   int voucherId;
@@ -33,6 +34,7 @@ class MST_Cart {
     this.discount_type,
     this.remark,
     this.tax,
+    this.tax_json,
     this.voucherId,
     this.grand_total,
     this.total_qty,
@@ -56,13 +58,13 @@ class MST_Cart {
     discount_type = json["discount_type"];
     remark = json["remark"];
     tax = json["tax"] is int ? (json['tax'] as int).toDouble() : json['tax'];
+    tax_json = json["tax_json"];
     grand_total = json["grand_total"] as double;
     total_qty = json["total_qty"] as double;
     voucherId = json["voucher_id"];
     is_deleted = json["is_deleted"];
     created_by = json["created_by"];
     created_at = json["created_at"];
-
     customer_terminal = json["customer_terminal"];
   }
 
@@ -78,6 +80,7 @@ class MST_Cart {
     data["discount_type "] = this.discount_type;
     data["remark"] = this.remark;
     data["tax"] = this.tax;
+    data["tax_json"] = this.tax_json;
     data["grand_total"] = this.grand_total;
     data["total_qty"] = this.total_qty;
     data["voucher_id"] = this.voucherId;

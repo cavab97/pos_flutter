@@ -20,6 +20,8 @@ class Orders {
   int order_item_count;
   String order_date;
   int order_by;
+  int server_id;
+  String tax_json;
   String updated_at;
   int updated_by;
 
@@ -45,6 +47,8 @@ class Orders {
     this.order_item_count,
     this.order_date,
     this.order_by,
+    this.server_id,
+    this.tax_json,
     this.updated_at,
     this.updated_by,
   });
@@ -71,6 +75,8 @@ class Orders {
     order_item_count = json["order_item_count"];
     order_date = json["order_date"];
     order_by = json["order_by"];
+    server_id = json['server_id'];
+    tax_json = json['tax_json'];
     updated_at = json["updated_at"];
     updated_by = json["updated_by"];
   }
@@ -97,6 +103,8 @@ class Orders {
     data["order_status"] = this.order_status;
     data["order_item_count"] = this.order_item_count;
     data["order_date"] = this.order_date;
+    data["server_id"] = this.server_id;
+    data["tax_json"] = this.tax_json;
     data["order_by"] = this.order_by;
     data["updated_at"] = this.updated_at;
     data["updated_by"] = this.updated_by;

@@ -442,6 +442,7 @@ class CreateTables {
         "customer_id INTEGER," +
         "tax_percent INTEGER," +
         "tax_amount REAL," +
+        "tax_json TEXT," +
         "voucher_id INTEGER," +
         "voucher_amount REAL," +
         "sub_total REAL," +
@@ -588,6 +589,7 @@ class CreateTables {
         'discount_type INTEGER,' +
         'remark TEXT,' +
         'tax REAL,' +
+        'tax_json TEXT,' +
         'grand_total REAL,' +
         'total_qty  REAL,' +
         'is_deleted   REAL,' +
@@ -653,6 +655,18 @@ class CreateTables {
         "uuid TEXT," +
         "slug  TEXT," +
         "name  TEXT," +
+        "status  INTEGER," +
+        "updated_by INTEGER," +
+        "updated_at TEXT" +
+        ")");
+
+    datatables = db.execute("CREATE TABLE tax(" +
+        "tax_id INTEGER," +
+        "uuid TEXT," +
+        "code TEXT," +
+        "description TEXT," +
+        "rate  INTEGER," +
+        "is_fixed NUMERIC," +
         "status  INTEGER," +
         "updated_by INTEGER," +
         "updated_at TEXT" +

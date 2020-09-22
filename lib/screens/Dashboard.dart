@@ -57,6 +57,7 @@ class _DashboradPageState extends State<DashboradPage>
   double subtotal = 0;
   double discount = 0;
   double tax = 0;
+  List taxJson = [];
   double grandTotal = 0;
   MST_Cart allcartData;
   Voucher selectedvoucher;
@@ -178,6 +179,7 @@ class _DashboradPageState extends State<DashboradPage>
       subtotal = cart.sub_total;
       discount = cart.discount;
       tax = cart.tax;
+      taxJson = json.decode(cart.tax_json);
       grandTotal = cart.grand_total;
       selectedvoucher = vaocher;
     });
@@ -418,13 +420,13 @@ class _DashboradPageState extends State<DashboradPage>
         });
   }
 
-  openSendReceiptPop() {
+  openSendReceiptPop(orderID) {
     // Send receipt Popup
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return InvoiceReceiptDailog();
+          return InvoiceReceiptDailog(orderid: orderID);
         });
   }
 
@@ -444,10 +446,14 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         builder: (BuildContext context) {
           return PaymentMethodPop(
-              cartID: currentCart,
-              itemCount: cartList.length,
-              subTotal: subtotal,
-              grandTotal: grandTotal);
+            cartID: currentCart,
+            itemCount: cartList.length,
+            subTotal: subtotal,
+            grandTotal: grandTotal,
+            onClose: (orderID) {
+              openSendReceiptPop(orderID);
+            },
+          );
         });
   }
 
@@ -1464,22 +1470,48 @@ class _DashboradPageState extends State<DashboradPage>
           ]),
           TableRow(children: [
             TableCell(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: 10, bottom: 10),
-                    child: Text(
-                      Strings.tax.toUpperCase(),
-                      style: Styles.darkBlue(),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(right: 20, top: 10, bottom: 10),
-                    child: Text(tax.toString(), style: Styles.darkBlue()),
-                  ),
-                ],
-              ),
+              child: taxJson.length != 0
+                  ? Column(
+                      children: taxJson.map((taxitem) {
+                      return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(top: 10, bottom: 10),
+                              child: Text(
+                                Strings.tax.toUpperCase() +
+                                    taxitem["taxName"] +
+                                    "(" +
+                                    taxitem["rate"] +
+                                    "%)",
+                                style: Styles.darkBlue(),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  right: 20, top: 10, bottom: 10),
+                              child: Text(taxitem["taxAmount"].toString(),
+                                  style: Styles.darkBlue()),
+                            )
+                          ]);
+                    }).toList())
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                          Padding(
+                            padding: EdgeInsets.only(top: 10, bottom: 10),
+                            child: Text(
+                              Strings.tax.toUpperCase(),
+                              style: Styles.darkBlue(),
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                EdgeInsets.only(right: 20, top: 10, bottom: 10),
+                            child:
+                                Text(tax.toString(), style: Styles.darkBlue()),
+                          )
+                        ]),
             ),
           ]),
           TableRow(children: [

@@ -27,12 +27,18 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 class PaymentMethodPop extends StatefulWidget {
   // Opning ammount popup
   PaymentMethodPop(
-      {Key key, this.cartID, this.itemCount, this.subTotal, this.grandTotal})
+      {Key key,
+      this.cartID,
+      this.itemCount,
+      this.subTotal,
+      this.grandTotal,
+      this.onClose})
       : super(key: key);
   final double grandTotal;
   final int cartID;
   final int itemCount;
   final double subTotal;
+  Function onClose;
 
   @override
   PaymentMethodPopState createState() => PaymentMethodPopState();
@@ -265,6 +271,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     var paymentid = await localAPI.sendtoOrderPayment(orderpayment);
     print(paymentid);
     await clearCartAfterSuccess();
+    widget.onClose(orderid);
     Navigator.pushNamed(context, Constant.DashboardScreen);
     setState(() {
       isLoading = false;

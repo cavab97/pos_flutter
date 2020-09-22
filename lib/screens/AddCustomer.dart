@@ -1,4 +1,4 @@
-  import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/Customer.dart';
@@ -220,10 +220,11 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
         keyboardType: type,
         obscureText: isPassword,
         decoration: InputDecoration(
-            enabledBorder: UnderlineInputBorder(
+            border: OutlineInputBorder(),
+            enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(color: Colors.grey),
             ),
-            focusedBorder: UnderlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(color: Colors.grey),
             ),
             // errorText: !isValidateEmail ? errormessage : null,

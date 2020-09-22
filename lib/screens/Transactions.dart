@@ -69,24 +69,23 @@ class _TransactionsPageState extends State<TransactionsPage> {
         detailsList = details;
       });
     }
-    List<OrderPayment> orderpaymentdata =
+    OrderPayment orderpaymentdata =
         await localAPI.getOrderpaymentData(order.app_id);
-    if (orderpaymentdata.length != 0) {
+    setState(() {
+      orderpayment = orderpaymentdata;
+    });
+    Payments paument_method =
+        await localAPI.getOrderpaymentmethod(orderpayment.op_method_id);
+    setState(() {
+      paumentMethod = paument_method;
+    });
+    User user = await localAPI.getPaymentUser(orderpayment.op_by);
+    if (user != null) {
       setState(() {
-        orderpayment = orderpaymentdata[0];
+        paymemtUser = user;
       });
-      Payments paument_method =
-          await localAPI.getOrderpaymentmethod(orderpayment.op_method_id);
-      setState(() {
-        paumentMethod = paument_method;
-      });
-      // User user = await localAPI.getPaymentUser(orderpayment.op_by);
-      // if (user != null) {
-      //   setState(() {
-      //     paymemtUser = user;
-      //   });
-      // }
     }
+    
   }
 
   startFilter() {
@@ -205,13 +204,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                       height: 30,
                                     ),
                                     selectedOrder != null &&
-                                            paumentMethod.name != null
+                                            paymemtUser.username != null
                                         ? Text(
-                                            selectedOrder.invoice_no != null
-                                                ? selectedOrder.invoice_no +
-                                                    " - Processed by " +
-                                                    paumentMethod.name
-                                                : " 0000000 - Processed by ",
+                                            selectedOrder.invoice_no +
+                                                " - Processed by " +
+                                                paymemtUser.username,
                                             style: Styles.whiteBoldsmall(),
                                           )
                                         : SizedBox(),

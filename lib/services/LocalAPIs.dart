@@ -14,6 +14,7 @@ import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
+import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
@@ -337,6 +338,15 @@ class LocalAPI {
     return list;
   }
 
+  Future<Orders> getcurrentOrders(orderid) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var result =
+        await db.query('orders', where: "app_id = ?", whereArgs: [orderid]);
+    List<Orders> list =
+        result.isNotEmpty ? result.map((c) => Orders.fromJson(c)).toList() : [];
+    return list[0];
+  }
+
   Future<int> placeOrder(Orders orderData) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var checkisExitqry =
@@ -533,14 +543,27 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<OrderPayment>> getOrderpaymentData(orderid) async {
+  Future<List<OrderDetail>> getOrderDetailsList(orderid) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+
+    var ordersList = await db
+        .query("order_detail", where: "order_id = ?", whereArgs: [orderid]);
+    List<OrderDetail> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "invoice", "get Orders  details list", "ProductDetails", orderid);
+    return list;
+  }
+
+  Future<OrderPayment> getOrderpaymentData(orderid) async {
     var qry =
         "SELECT * from order_payment where order_id = " + orderid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderPayment> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
         : [];
-    return list;
+    return list[0];
   }
 
   Future<List<Voucher>> checkVoucherIsExit(code) async {
@@ -633,12 +656,21 @@ class LocalAPI {
     return hitid;
   }
 
-  Future<List<Tax>> getTaxList(branchid) async {
+  Future<List<BranchTax>> getTaxList(branchid) async {
     var tax = await DatabaseHelper.dbHelper.getDatabse().query('branch_tax',
         where: 'branch_id = ?', whereArgs: [branchid.toString()]);
+    List<BranchTax> list =
+        tax.isNotEmpty ? tax.map((c) => BranchTax.fromJson(c)).toList() : [];
+    return list;
+  }
+
+  Future<Tax> getTaxName(taxId) async {
+    var tax = await DatabaseHelper.dbHelper
+        .getDatabse()
+        .query('tax', where: 'tax_id = ?', whereArgs: [taxId.toString()]);
     List<Tax> list =
         tax.isNotEmpty ? tax.map((c) => Tax.fromJson(c)).toList() : [];
-    return list;
+    return list[0];
   }
 
   Future<Payments> getOrderpaymentmethod(methodID) async {
@@ -782,4 +814,16 @@ class LocalAPI {
   }
 
   Future<int> updateInvetory() async {}
+
+  Future<Branch> getBranchData(branchID) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var result =
+        await db.query("branch", where: 'branch_id = ?', whereArgs: [branchID]);
+    List<Branch> list =
+        result.isNotEmpty ? result.map((c) => Branch.fromJson(c)).toList() : [];
+
+    await SyncAPICalls.logActivity(
+        "branch details", "branch details for invoice", "branch", branchID);
+    return list[0];
+  }
 }
