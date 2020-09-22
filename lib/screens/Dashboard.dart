@@ -1479,7 +1479,7 @@ class _DashboradPageState extends State<DashboradPage>
                             Padding(
                               padding: EdgeInsets.only(top: 10, bottom: 10),
                               child: Text(
-                                Strings.tax.toUpperCase() +
+                                Strings.tax.toUpperCase() + " "+
                                     taxitem["taxName"] +
                                     "(" +
                                     taxitem["rate"] +

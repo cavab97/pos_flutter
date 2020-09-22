@@ -269,7 +269,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
-        Tax tax = await localAPI.getTaxName(taxlistitem.taxId);
+        // Tax tax = await localAPI.getTaxName(taxlistitem.taxId);
         var taxval = taxlistitem.rate != null
             ? subT * double.parse(taxlistitem.rate) / 100
             : 0.0;
@@ -284,7 +284,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           "updated_at": taxlistitem.updatedAt,
           "updated_by": taxlistitem.updatedBy,
           "taxAmount": taxval.toString(),
-          "taxName": tax.code
+          "taxName": "GST" //tax.code
         };
         totalTax.add(taxmap);
       }

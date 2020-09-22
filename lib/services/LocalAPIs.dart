@@ -667,7 +667,7 @@ class LocalAPI {
   Future<Tax> getTaxName(taxId) async {
     var tax = await DatabaseHelper.dbHelper
         .getDatabse()
-        .query('tax', where: 'tax_id = ?', whereArgs: [taxId.toString()]);
+        .query('tax', where: 'tax_id =?', whereArgs: [taxId.toString()]);
     List<Tax> list =
         tax.isNotEmpty ? tax.map((c) => Tax.fromJson(c)).toList() : [];
     return list[0];

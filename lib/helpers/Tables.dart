@@ -452,6 +452,7 @@ class CreateTables {
         "order_status INTEGER," +
         "order_item_count INTEGER," +
         "order_date TEXT," +
+        "server_id INTEGER,"+
         "order_by INTEGER," +
         "updated_at TEXT," +
         "updated_by INTEGER" +
