@@ -9,6 +9,7 @@ import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
@@ -51,6 +52,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     });
     getAttributes();
     getTaxs();
+
     if (widget.cartID != null) {
       getCartData();
     }
@@ -135,12 +137,18 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
-  increaseQty() {
+  increaseQty() async {
     if (productItem.hasInventory == 0) {
-      var prevproductqty = product_qty;
-      setState(() {
-        product_qty = prevproductqty + 1;
-      });
+      ProductStoreInventory cartval =
+          await localAPI.checkItemAvailableinStore(productItem.productId);
+      if (int.parse(cartval.qty) >= product_qty) {
+        var prevproductqty = product_qty;
+        setState(() {
+          product_qty = prevproductqty + 1;
+        });
+      } else {
+        CommunFun.showToast(context, Strings.stock_not_valilable);
+      }
     } else {
       if (product_qty <= productItem.qty) {
         var prevproductqty = product_qty;
@@ -248,13 +256,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
     var loginData = await json.decode(loginUser);
 
-    double taxval = taxlist.rate != null ? double.parse(taxlist.rate) : 0.0;
     var disc = currentCart.discount != null ? currentCart.discount : 0.0;
     double qty = currentCart.total_qty != null
         ? currentCart.total_qty + product_qty.toDouble()
         : product_qty.toDouble();
     double subT =
         currentCart.sub_total != null ? currentCart.sub_total + price : price;
+    double taxval =
+        taxlist.rate != null ? subT * double.parse(taxlist.rate) / 100 : 0.0;
     double grandTotal = currentCart.grand_total != null
         ? currentCart.grand_total + price
         : price + taxval - disc;
@@ -307,7 +316,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.productNetPrice = productdata.oldPrice;
     cartdetails.discount = 0;
     cartdetails.taxValue =
-        taxlist.rate != null ? double.parse(taxlist.rate) : 0;
+        taxlist.rate != null ? subT * double.parse(taxlist.rate) / 100 : 0;
     cartdetails.taxId = taxlist.id;
     cartdetails.createdBy = loginData["id"];
     cartdetails.createdAt = DateTime.now().toString();

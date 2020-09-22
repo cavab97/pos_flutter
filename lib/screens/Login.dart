@@ -21,8 +21,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController emailAddress = new TextEditingController(text: "");
-  TextEditingController userPin = new TextEditingController(text: "");
+  TextEditingController emailAddress = new TextEditingController(text: "smith");
+  TextEditingController userPin = new TextEditingController(text: "955641");
   GlobalKey<ScaffoldState> scaffoldKey;
   // DatabaseHelper databaseHelper = DatabaseHelper();
   var errormessage = "";

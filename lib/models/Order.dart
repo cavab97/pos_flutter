@@ -5,6 +5,7 @@ class Orders {
   int terminal_id;
   int app_id;
   int table_no;
+  int table_id;
   String invoice_no;
   int customer_id;
   int tax_percent;
@@ -29,6 +30,7 @@ class Orders {
     this.terminal_id,
     this.app_id,
     this.table_no,
+    this.table_id,
     this.invoice_no,
     this.customer_id,
     this.tax_percent,
@@ -54,6 +56,7 @@ class Orders {
     terminal_id = json["terminal_id"];
     app_id = json["app_id"];
     table_no = json["table_no"];
+    table_id = json["table_id"];
     invoice_no = json["invoice_no"];
     customer_id = json["customer_id"];
     tax_percent = json["tax_percent"];
@@ -80,6 +83,7 @@ class Orders {
     data["terminal_id"] = this.terminal_id;
     data["app_id"] = this.app_id;
     data["table_no"] = this.table_no;
+    data["table_id"] = this.table_id;
     data["invoice_no"] = this.invoice_no;
     data["customer_id"] = this.customer_id;
     data["tax_percent"] = this.tax_percent;

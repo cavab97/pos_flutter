@@ -101,4 +101,5 @@ class Strings {
   static String voucher_code_msg = "Voucher code must be required.";
   static String voucher_already_used = "Voucher already used 5 times.";
   static String voucher_expired = "Voucher already expired.";
+  static String stock_not_valilable = "Product is Out of stock.";
 }

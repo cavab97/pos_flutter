@@ -437,6 +437,7 @@ class CreateTables {
         "terminal_id INTEGER," +
         "app_id INTEGER," +
         "table_no INTEGER," +
+        "table_id INTEGER," +
         "invoice_no TEXT," +
         "customer_id INTEGER," +
         "tax_percent INTEGER," +

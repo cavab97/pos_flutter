@@ -160,8 +160,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
     order.app_id = int.parse(terminalId);
-    order.table_no = tables.table_id;
-    order.invoice_no = invoiceNo + order.app_id.toString();
+    order.table_id = tables.table_id;
+    order.invoice_no = invoiceNo;
     order.customer_id = customer.customerId;
     order.sub_total = cartData.sub_total;
     order.sub_total_after_discount = cartData.sub_total - cartData.discount;
@@ -202,6 +202,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
           orderDetail.detail_qty = cartItem.productQty;
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
           print(orderDetailid);
+          await localAPI.removeFromInventory(orderDetail);
         }
       }
     }

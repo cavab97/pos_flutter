@@ -163,22 +163,76 @@ class SyncAPICalls {
       LocalAPI localAPI = LocalAPI();
       var apiurl = Configrations.order_sync;
       List<Orders> orders = await localAPI.getOrdersListTable(branchid);
-      List<OrderDetail> ordersDetail =
-          await localAPI.getOrderDetailTable(branchid);
-      List<OrderAttributes> ordersAttribute =
-          await localAPI.getOrderAttributesTable(terminalId);
-      List<OrderModifire> ordersModifire =
-          await localAPI.getOrderModifireTable(terminalId);
-      List<OrderPayment> ordersPayment =
-          await localAPI.getOrderPaymentTable(branchid);
-      List<dynamic> orderlist = [];
-      orderlist.add(orders);
-      var stringParams = {
-        'terminal_id': terminalId,
-        'branch_id': branchid,
-        'orders': orders
-      };
-      return await APICalls.apiCall(apiurl, context, stringParams);
+      List ordersList = [];
+      for (var i = 0; i < orders.length; i++) {
+        var order = orders[i];
+        List<OrderDetail> ordersDetail =
+            await localAPI.getOrderDetailTable(order.app_id);
+        List detailList = [];
+        for (var j = 0; j < ordersDetail.length; j++) {
+          var details = ordersDetail[j];
+          List<OrderAttributes> ordersAttribute =
+              await localAPI.getOrderAttributesTable(details.app_id);
+          List<OrderModifire> ordersModifire =
+              await localAPI.getOrderModifireTable(details.app_id);
+          var productMap = {
+            "detailId": details.detailId,
+            "uuid": details.uuid,
+            "order_id": details.order_id,
+            "branch_id": details.branch_id,
+            "terminal_id": details.terminal_id,
+            "app_id": details.app_id,
+            "product_id": details.product_id,
+            "product_price": details.product_price,
+            "product_old_price": details.product_old_price,
+            "category_id": details.category_id,
+            "detail_amount": details.detail_amount,
+            "detail_qty": details.detail_qty,
+            "detail_status": details.detail_status,
+            "detail_by": details.detail_by,
+            "order_modifier": ordersModifire,
+            "order_attributes": ordersAttribute,
+          };
+          detailList.add(productMap);
+        }
+        List<OrderPayment> ordersPayment =
+            await localAPI.getOrderPaymentTable(order.app_id);
+        var orderMap = {
+          "order_id": order.order_id,
+          "uuid": order.uuid,
+          "branch_id": order.branch_id,
+          "terminal_id": order.terminal_id,
+          "app_id": order.app_id,
+          "table_no": order.table_no,
+          "table_id": order.table_id,
+          "invoice_no": order.invoice_no,
+          "customer_id": order.customer_id,
+          "tax_percent": order.tax_percent,
+          "tax_amount": order.tax_amount,
+          "voucher_id": order.voucher_id,
+          "voucher_amount": order.voucher_amount,
+          "sub_total": order.sub_total,
+          "sub_total_after_discount": order.sub_total_after_discount,
+          "grand_total": order.grand_total,
+          "order_source": order.order_source,
+          "order_status": order.order_status,
+          "order_item_count": order.order_item_count,
+          "order_date": order.order_date,
+          "order_by": order.order_by,
+          "updated_at": order.updated_at,
+          "updated_by": order.updated_by,
+          "order_detail": detailList,
+          'order_payment': ordersPayment
+        };
+        ordersList.add(orderMap);
+        print(ordersList);
+        var stringParams = {
+          'terminal_id': terminalId,
+          'branch_id': branchid,
+          'orders': ordersList
+        };
+        return await APICalls.apiCall(apiurl, context, stringParams);
+      }
     } catch (e) {
       print(e);
     }
