@@ -451,6 +451,7 @@ class _DashboradPageState extends State<DashboradPage>
             subTotal: subtotal,
             grandTotal: grandTotal,
             onClose: (orderID) {
+              Navigator.of(context).pop();
               openSendReceiptPop(orderID);
             },
           );

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:ping_discover_network/ping_discover_network.dart';
 import 'package:wifi/wifi.dart';
@@ -20,6 +21,7 @@ class PrinterListDailog extends StatefulWidget {
 class _PrinterListDailogState extends State<PrinterListDailog> {
   DatabaseHelper databaseHelper = DatabaseHelper();
   LocalAPI localAPI = LocalAPI();
+  Printer printKOT = Printer();
 
   /*For printer */
   String localIp = '';
@@ -108,87 +110,10 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
       });
   }
 
-  Future<Ticket> KOTReceipt(PaperSize paper) async {
-    final profile = await CapabilityProfile.load();
-    final Ticket ticket = Ticket(paper, profile);
-
-    ticket.text('K.O.T',
-        styles: PosStyles(
-          fontType: PosFontType.fontA,
-          align: PosAlign.center,
-          bold: true,
-          height: PosTextSize.size2,
-          width: PosTextSize.size2,
-        ),
-        linesAfter: 1);
-
-    final now = DateTime.now();
-    final formatter = DateFormat('MM/dd/yyyy H:m');
-    final String timestamp = formatter.format(now);
-    ticket.text("Date : " + timestamp, styles: PosStyles(align: PosAlign.left));
-    ticket.text('Pax : ', styles: PosStyles(align: PosAlign.left));
-    ticket.text('Table No : MCN_TAB001',
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text('Terminal Name : MCN002',
-        styles: PosStyles(align: PosAlign.left));
-
-    ticket.hr();
-    ticket.row([
-      PosColumn(text: 'Qty', width: 2),
-      PosColumn(text: 'Item', width: 10),
-    ]);
-    ticket.hr();
-
-    for (var i = 0; i < itemList.length; i++) {
-      var item = itemList[i];
-      if (item.isSendKichen == null) {
-        ticket.row([
-          PosColumn(text: item.productQty.toString(), width: 2),
-          PosColumn(text: item.productName, width: 10),
-        ]);
-      }
-    }
-    // ticket.row([
-    //   PosColumn(text: '2', width: 2),
-    //   PosColumn(text: 'ONION RINGS', width: 10),
-    // ]);
-    // ticket.row([
-    //   PosColumn(text: '1', width: 2),
-    //   PosColumn(text: 'PIZZA', width: 10),
-    // ]);
-    // ticket.row([
-    //   PosColumn(text: '1', width: 2),
-    //   PosColumn(text: 'SPRING ROLLS', width: 10),
-    // ]);
-    // ticket.row([
-    //   PosColumn(text: '3', width: 2),
-    //   PosColumn(text: 'CRUNCHY STICKS', width: 10),
-    // ]);
-
-    ticket.feed(2);
-    ticket.cut();
-    return ticket;
-  }
-
   void testPrint(String printerIp, BuildContext ctx) async {
     sendTokitched();
-    final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter(printerIp, port: 9100);
+    printKOT.checkKOTPrint(printerIp, ctx, itemList);
 
-    // TODO Don't forget to choose printer's paper size
-    // const PaperSize paper = PaperSize.mm80;
-
-    // TEST PRINT
-    // final PosPrintResult res =
-    //     await printerManager.printTicket(await testTicket(paper));
-
-    // DEMO RECEIPT
-    final PosPrintResult res =
-        await printerManager.printTicket(await KOTReceipt(paper));
-
-    final snackBar =
-        SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
-    Scaffold.of(ctx).showSnackBar(snackBar);
   }
 
   @override

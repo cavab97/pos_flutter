@@ -272,7 +272,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     print(paymentid);
     await clearCartAfterSuccess();
     widget.onClose(orderid);
-    Navigator.pushNamed(context, Constant.DashboardScreen);
+    //Navigator.pushNamed(context, Constant.DashboardScreen);
     setState(() {
       isLoading = false;
     });
