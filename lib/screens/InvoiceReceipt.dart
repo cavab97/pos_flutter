@@ -11,10 +11,8 @@ import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
-
 import 'package:intl/intl.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
-import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:ping_discover_network/ping_discover_network.dart';
 import 'package:wifi/wifi.dart';
@@ -170,7 +168,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
               itemCount: devices.length,
               itemBuilder: (BuildContext context, int index) {
                 return InkWell(
-                  onTap: () => testPrint(devices[index], context),
+                  onTap: () => Receipt(paper),
                   child: Column(
                     children: <Widget>[
                       Container(
@@ -293,7 +291,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
 
     ticket.emptyLines(1);
 
-    final now = DateTime.parse(orderData.updated_at);
+    final now = DateTime.parse(orderData.order_date);
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
 
@@ -323,10 +321,10 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
 
     for (var i = 0; i < orderdetail.length; i++) {
       var item = orderdetail[i];
-      var name = orderdItem[i];
+      //var name = orderdItem[i];
       ticket.row([
         PosColumn(
-            text: name.name, width: 7, styles: PosStyles(align: PosAlign.left)),
+            text: "name.name", width: 7, styles: PosStyles(align: PosAlign.left)),
         PosColumn(
             text: item.detail_qty.toString(),
             width: 1,

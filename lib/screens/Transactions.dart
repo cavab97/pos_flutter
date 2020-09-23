@@ -15,6 +15,7 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
 
 class TransactionsPage extends StatefulWidget {
   // Transactions list
@@ -30,6 +31,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   List<Orders> orderLists = [];
   List<Orders> filterList = [];
   Orders selectedOrder = new Orders();
+  List taxJson = [];
   OrderPayment orderpayment = new OrderPayment();
   User paymemtUser = new User();
   List<ProductDetails> detailsList = [];
@@ -62,6 +64,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   getOrderDetails(order) async {
     setState(() {
       selectedOrder = order;
+      taxJson = json.decode(selectedOrder.tax_json);
     });
     List<ProductDetails> details = await localAPI.getOrderDetails(order.app_id);
     if (details.length > 0) {
@@ -85,7 +88,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
         paymemtUser = user;
       });
     }
-    
   }
 
   startFilter() {
@@ -185,13 +187,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                           .format(DateTime.parse(
                                               selectedOrder.order_date)),
                                       style: TextStyle(
-                                          fontSize: 25,
+                                          fontSize: 18,
                                           fontWeight: FontWeight.bold,
                                           color:
                                               Theme.of(context).primaryColor),
                                     ),
                                     SizedBox(
-                                      height: 30,
+                                      height: 20,
                                     ),
                                     Text(
                                       orderpayment.op_amount.toString(),
@@ -201,7 +203,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                           color: Theme.of(context).accentColor),
                                     ),
                                     SizedBox(
-                                      height: 30,
+                                      height:20,
                                     ),
                                     selectedOrder != null &&
                                             paymemtUser.username != null
@@ -235,11 +237,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     ),
                                     productList(),
                                     SizedBox(
-                                      height: 30,
+                                      height: 10,
                                     ),
                                     totalAmountValues(),
                                     SizedBox(
-                                      height: 30,
+                                      height: 20,
                                     ),
                                     cancelButton(() {
                                       CommunFun.showToast(
@@ -380,29 +382,56 @@ class _TransactionsPageState extends State<TransactionsPage> {
           ]),
           TableRow(children: [
             TableCell(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Padding(
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
-                      child: Text(
-                        Strings.tax.toUpperCase(),
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.grey),
-                      )),
-                  Padding(
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
-                      child: Text(
-                        selectedOrder.tax_amount != null
-                            ? selectedOrder.tax_amount.toString()
-                            : "00:00",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w700, color: Colors.grey),
-                      )),
-                ],
-              ),
+              child: taxJson.length != 0
+                  ? Column(
+                      children: taxJson.map((taxitem) {
+                      return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(top: 10, bottom: 10),
+                              child: Text(
+                                Strings.tax.toUpperCase() +
+                                    " " +
+                                    taxitem["taxName"] +
+                                    "(" +
+                                    taxitem["rate"] +
+                                    "%)",
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.grey),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(top: 10, bottom: 10),
+                              child: Text(taxitem["taxAmount"].toString(),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.grey)),
+                            )
+                          ]);
+                    }).toList())
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                          Padding(
+                            padding: EdgeInsets.only(top: 10, bottom: 10),
+                            child: Text(
+                              Strings.tax.toUpperCase(),
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.grey),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(top: 10, bottom: 10),
+                            child: Text(selectedOrder.tax_amount.toString(),
+                                style: TextStyle(
+                            fontWeight: FontWeight.w700, color: Colors.grey)),
+                          )
+                        ]),
             ),
           ]),
           TableRow(children: [
@@ -474,8 +503,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     Hero(
                       tag: product.productId,
                       child: Container(
-                        height: 100,
-                        width: 130,
+                        height: 80,
+                        width: 100,
                         decoration: new BoxDecoration(
                           color: Colors.greenAccent,
                           // image: new DecorationImage(

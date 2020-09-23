@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -73,9 +74,9 @@ class _LoginPageState extends State<LoginPage> {
       var terkey = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
       user.name = emailAddress.text;
       user.userPin = int.parse(userPin.text);
-      user.deviceType = deviceinfo.type;
-      user.deviceToken = deviceinfo.androidId;
-      user.deviceId = deviceinfo.id;
+      user.deviceType = deviceinfo["deviceType"];
+      user.deviceToken = deviceinfo["deviceToken"];
+      user.deviceId = deviceinfo["deviceId"];
       user.terminalId = terkey != null ? terkey : '1'; //widget.terminalId;
       await repo.login(user).then((value) async {
         if (value != null && value["status"] == Constant.STATUS200) {

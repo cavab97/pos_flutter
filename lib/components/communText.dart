@@ -107,15 +107,25 @@ class CommunFun {
     );
   }
 
-  static deviceInfo() {
+  static deviceInfo() async {
     // Device Info
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     var deviceData;
     try {
       if (Platform.isAndroid) {
-        deviceData = deviceInfo.androidInfo;
+        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+        deviceData = {
+          "deviceId": androidInfo.device,
+          "deviceToken": androidInfo.androidId,
+          "deviceType": androidInfo.type
+        };
       } else if (Platform.isIOS) {
-        deviceData = deviceInfo.iosInfo;
+        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+        deviceData = {
+          "deviceId": iosInfo.identifierForVendor,
+          "deviceToken": iosInfo.utsname.machine,
+          "deviceType": iosInfo.name
+        };
       }
     } on PlatformException {
       deviceData = <String, dynamic>{
@@ -447,8 +457,8 @@ class CommunFun {
     var deviceInfo = await CommunFun.deviceInfo();
     var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
     var localid = Platform.isAndroid
-        ? "ANDROID" + deviceInfo.androidId + terminalId
-        : "IOS" + deviceInfo.androidId + terminalId;
+        ? "ANDROID" + deviceInfo["deviceId"] + terminalId
+        : "IOS" + deviceInfo["deviceId"] + terminalId;
     return localid.toString();
   }
 

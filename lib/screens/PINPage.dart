@@ -65,7 +65,6 @@ class _PINPageState extends State<PINPage> {
           isLoading = true;
         });
         CheckinOut checkIn = new CheckinOut();
-        var deviceInfo = await CommunFun.deviceInfo();
         var terminalId =
             await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
         var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
@@ -73,7 +72,7 @@ class _PINPageState extends State<PINPage> {
             await Preferences.getStringValuesSF(Constant.LOIGN_USER);
         var date = DateTime.now();
         var user = json.decode(loginUser);
-        checkIn.localID = "Android" + deviceInfo.androidId + terminalId;
+        checkIn.localID = await CommunFun.getLocalID();
         checkIn.terminalId = int.parse(terminalId);
         checkIn.userId = user["id"];
         checkIn.branchId = int.parse(branchid);
@@ -110,7 +109,6 @@ class _PINPageState extends State<PINPage> {
           isLoading = true;
         });
         CheckinOut checkIn = new CheckinOut();
-        var deviceInfo = await CommunFun.deviceInfo();
         var shiftid = await Preferences.getStringValuesSF(Constant.SHIFT_ID);
         var terminalId =
             await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
@@ -120,7 +118,7 @@ class _PINPageState extends State<PINPage> {
         var date = DateTime.now();
         var user = json.decode(loginUser);
         checkIn.id = int.parse(shiftid);
-        checkIn.localID = "Android" + deviceInfo.androidId + terminalId;
+        checkIn.localID = await CommunFun.getLocalID();
         checkIn.terminalId = int.parse(terminalId);
         checkIn.userId = user["id"];
         checkIn.branchId = int.parse(branchid);
@@ -395,7 +393,8 @@ class _PINPageState extends State<PINPage> {
                               onPressed: () {
                                 clearPin();
                               },
-                              child: Text(Strings.clear, style: Styles.orangeLarge()))
+                              child: Text(Strings.clear,
+                                  style: Styles.orangeLarge()))
                         ])
             ],
           ),

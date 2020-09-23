@@ -1,7 +1,5 @@
-import 'package:esc_pos_printer/esc_pos_printer.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
@@ -9,16 +7,14 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:ping_discover_network/ping_discover_network.dart';
 import 'package:wifi/wifi.dart';
 
-class PrinterListDailog extends StatefulWidget {
-  PrinterListDailog({Key key, this.onPress, this.cartList}) : super(key: key);
-  Function onPress;
-  List<MSTCartdetails> cartList;
+class SelectPrinterDailog extends StatefulWidget {
+  SelectPrinterDailog({Key key}) : super(key: key);
 
   @override
-  _PrinterListDailogState createState() => _PrinterListDailogState();
+  SelectPrinterDailogState createState() => SelectPrinterDailogState();
 }
 
-class _PrinterListDailogState extends State<PrinterListDailog> {
+class SelectPrinterDailogState extends State<SelectPrinterDailog> {
   DatabaseHelper databaseHelper = DatabaseHelper();
   LocalAPI localAPI = LocalAPI();
 
@@ -35,23 +31,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      itemList = widget.cartList;
-    });
     discover(context);
-  }
-
-  sendTokitched() async {
-    List<String> ids = [];
-    for (var i = 0; i < itemList.length; i++) {
-      if (itemList[i].isSendKichen == null || itemList[i].isSendKichen == 0) {
-        ids.add(itemList[i].id.toString());
-      }
-      if (i == itemList.length - 1) {
-        dynamic send = await localAPI.sendToKitched(ids);
-        print(send);
-      }
-    }
   }
 
   void discover(BuildContext ctx) async {
@@ -109,89 +89,6 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
       });
   }
 
-  Future<Ticket> KOTReceipt(PaperSize paper) async {
-    final profile = await CapabilityProfile.load();
-    final Ticket ticket = Ticket(paper, profile);
-
-    ticket.text('K.O.T',
-        styles: PosStyles(
-          fontType: PosFontType.fontA,
-          align: PosAlign.center,
-          bold: true,
-          height: PosTextSize.size2,
-          width: PosTextSize.size2,
-        ),
-        linesAfter: 1);
-
-    final now = DateTime.now();
-    final formatter = DateFormat('MM/dd/yyyy H:m');
-    final String timestamp = formatter.format(now);
-    ticket.text("Date : " + timestamp, styles: PosStyles(align: PosAlign.left));
-    ticket.text('Pax : ', styles: PosStyles(align: PosAlign.left));
-    ticket.text('Table No : MCN_TAB001',
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text('Terminal Name : MCN002',
-        styles: PosStyles(align: PosAlign.left));
-
-    ticket.hr();
-    ticket.row([
-      PosColumn(text: 'Qty', width: 2),
-      PosColumn(text: 'Item', width: 10),
-    ]);
-    ticket.hr();
-
-    for (var i = 0; i < itemList.length; i++) {
-      var item = itemList[i];
-      if (item.isSendKichen == null) {
-        ticket.row([
-          PosColumn(text: item.productQty.toString(), width: 2),
-          PosColumn(text: item.productName, width: 10),
-        ]);
-      }
-    }
-    // ticket.row([
-    //   PosColumn(text: '2', width: 2),
-    //   PosColumn(text: 'ONION RINGS', width: 10),
-    // ]);
-    // ticket.row([
-    //   PosColumn(text: '1', width: 2),
-    //   PosColumn(text: 'PIZZA', width: 10),
-    // ]);
-    // ticket.row([
-    //   PosColumn(text: '1', width: 2),
-    //   PosColumn(text: 'SPRING ROLLS', width: 10),
-    // ]);
-    // ticket.row([
-    //   PosColumn(text: '3', width: 2),
-    //   PosColumn(text: 'CRUNCHY STICKS', width: 10),
-    // ]);
-
-    ticket.feed(2);
-    ticket.cut();
-    return ticket;
-  }
-
-  void testPrint(String printerIp, BuildContext ctx) async {
-    sendTokitched();
-    final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter(printerIp, port: 9100);
-
-    // TODO Don't forget to choose printer's paper size
-    // const PaperSize paper = PaperSize.mm80;
-
-    // TEST PRINT
-    // final PosPrintResult res =
-    //     await printerManager.printTicket(await testTicket(paper));
-
-    // DEMO RECEIPT
-    final PosPrintResult res =
-        await printerManager.printTicket(await KOTReceipt(paper));
-
-    final snackBar =
-        SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
-    Scaffold.of(ctx).showSnackBar(snackBar);
-  }
-
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -207,7 +104,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Select Printer", style: Styles.whiteBold()),
+                Text("Scan Printer", style: Styles.whiteBold()),
               ],
             ),
           ),
@@ -220,16 +117,6 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
               size: 50,
             ),
           ),
-          Positioned(
-              left: 30,
-              top: 15,
-              child: IconButton(
-                  icon: Icon(
-                    Icons.sync,
-                    color: Colors.white,
-                    size: 40,
-                  ),
-                  onPressed: isDiscovering ? null : () => discover(context))),
           closeButton(context),
         ],
       ),
@@ -262,22 +149,15 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
   //widget.onPress;
   Widget mainContent() {
     return Container(
-      height: MediaQuery.of(context).size.height / 1.5,
-      width: MediaQuery.of(context).size.width / 2,
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+      height: MediaQuery.of(context).size.height / 2,
+      width: MediaQuery.of(context).size.width / 2.5,
+      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
+          Text("List", style: Styles.communBlack()),
           SizedBox(height: 10),
-          // Text('Local ip: $localIp', style: TextStyle(fontSize: 16)),
-          // SizedBox(height: 15),
-          // RaisedButton(
-          //     child: Text('${isDiscovering ? 'Discovering...' : 'Discover'}'),
-          //     onPressed: isDiscovering ? null : () => discover(context)),
-          SizedBox(height: 15),
-          found >= 1
-              ? Text('Found: $found device(s)', style: TextStyle(fontSize: 16))
-              : Container(),
           Container(
             // height: MediaQuery.of(context).size.height / 2.2,
             child: ListView.builder(
@@ -285,7 +165,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
               itemCount: devices.length,
               itemBuilder: (BuildContext context, int index) {
                 return InkWell(
-                  onTap: () => testPrint(devices[index], context),
+                  //onTap: () => testPrint(devices[index], context),
                   child: Column(
                     children: <Widget>[
                       Container(
@@ -294,8 +174,6 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
                         alignment: Alignment.centerLeft,
                         child: Row(
                           children: <Widget>[
-                            Icon(Icons.print),
-                            SizedBox(width: 10),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,20 +182,14 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
                                   Text(
                                     '${devices[index]}:1900',
                                     //${portController.text}',
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                  Text(
-                                    'Click to print a test receipt',
-                                    style: TextStyle(color: Colors.grey[700]),
+                                    style: Styles.communBlack(),
                                   ),
                                 ],
                               ),
                             ),
-                            Icon(Icons.chevron_right),
                           ],
                         ),
                       ),
-                      Divider(),
                     ],
                   ),
                 );

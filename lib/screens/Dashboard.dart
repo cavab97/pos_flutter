@@ -342,13 +342,13 @@ class _DashboradPageState extends State<DashboradPage>
   //   //   sendPayment();
   //   // }
   // }
-  opnePrinterPop() {
+  opnePrinterPop(cartLists) {
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return PrinterListDailog(
-              cartList: cartList,
+              cartList: cartLists,
               onPress: () {
                 // TOTO : pring reicipt code
               });
@@ -422,12 +422,6 @@ class _DashboradPageState extends State<DashboradPage>
 
   openSendReceiptPop(orderID) {
     // Send receipt Popup
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return InvoiceReceiptDailog(orderid: orderID);
-        });
   }
 
   opneShowAddCustomerDailog() {
@@ -450,9 +444,7 @@ class _DashboradPageState extends State<DashboradPage>
             itemCount: cartList.length,
             subTotal: subtotal,
             grandTotal: grandTotal,
-            onClose: (orderID) {
-              openSendReceiptPop(orderID);
-            },
+            onClose: (orderID) {},
           );
         });
   }
@@ -467,7 +459,11 @@ class _DashboradPageState extends State<DashboradPage>
     cart.grand_total = allcartData.grand_total - cartitemdata.productPrice;
     await localAPI.deleteCartItem(
         cartitem, currentCart, cart, cartList.length == 1);
-
+    if (cartitem.isSendKichen == 1) {
+      var deletedlist = [];
+      deletedlist.add(cartitem);
+      opnePrinterPop(deletedlist);
+    }
     if (cartList.length > 1) {
       await getCartItem(currentCart);
     } else {
@@ -760,6 +756,10 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                   title: Text("Attendce System", style: Styles.communBlack())),
               ListTile(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.pushNamed(context, Constant.SettingsScreen);
+                  },
                   leading: Icon(
                     Icons.settings,
                     color: Colors.black,
@@ -1165,7 +1165,7 @@ class _DashboradPageState extends State<DashboradPage>
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
-                opnePrinterPop();
+                opnePrinterPop(cartList);
               },
               child: Text(
                 "SEND",
@@ -1344,20 +1344,23 @@ class _DashboradPageState extends State<DashboradPage>
             ),
             menuItems: <Widget>[
               new Container(
+                padding: EdgeInsets.only(top: 10, bottom: 10),
+                color: Colors.red,
                 child: new IconButton(
+                  padding: EdgeInsets.all(0),
                   onPressed: () {
                     itememovefromCart(cart);
                   },
-                  icon: new Icon(Icons.delete, size: 30, color: Colors.red),
+                  icon: new Icon(Icons.delete, size: 30, color: Colors.white),
                 ),
               ),
               new Container(
                 child: new IconButton(
+                  padding: EdgeInsets.all(0),
                   onPressed: () {
                     editCartItem(cart);
                   },
-                  icon:
-                      new Icon(Icons.edit, size: 30, color: Colors.deepOrange),
+                  icon: new Icon(Icons.edit, size: 30, color: Colors.white),
                 ),
               ),
             ],
@@ -1479,7 +1482,8 @@ class _DashboradPageState extends State<DashboradPage>
                             Padding(
                               padding: EdgeInsets.only(top: 10, bottom: 10),
                               child: Text(
-                                Strings.tax.toUpperCase() + " "+
+                                Strings.tax.toUpperCase() +
+                                    " " +
                                     taxitem["taxName"] +
                                     "(" +
                                     taxitem["rate"] +

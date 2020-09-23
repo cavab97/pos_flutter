@@ -20,8 +20,8 @@ import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
+import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
-import 'package:mcncashier/services/CommunAPICall.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class PaymentMethodPop extends StatefulWidget {
@@ -81,11 +81,13 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   }
 
   getcartData() async {
-    var cartDatalist = await localAPI.getCartData(widget.cartID);
-    print(cartData);
-    setState(() {
-      cartData = cartDatalist;
-    });
+    if (widget.cartID != null) {
+      var cartDatalist = await localAPI.getCartData(widget.cartID);
+      print(cartData);
+      setState(() {
+        cartData = cartDatalist;
+      });
+    }
   }
 
   openAmountPop() {
@@ -174,6 +176,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     order.grand_total = cartData.grand_total - cartData.discount;
     order.order_item_count = cartData.total_qty.toInt();
     order.tax_amount = cartData.tax;
+    order.tax_json = cartData.tax_json;
     order.order_date = datetime;
     order.order_by = userdata.id;
     order.voucher_id = cartData.voucherId;
@@ -272,7 +275,13 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     print(paymentid);
     await clearCartAfterSuccess();
     widget.onClose(orderid);
-    Navigator.pushNamed(context, Constant.DashboardScreen);
+    await Navigator.pushNamed(context, Constant.DashboardScreen);
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return InvoiceReceiptDailog(orderid: orderid);
+        });
     setState(() {
       isLoading = false;
     });

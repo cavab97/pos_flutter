@@ -370,6 +370,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       }
     }
 
+    if (isEditing && cartitem.isSendKichen == 1) {
+      var items = [];
+      items.add(cartitem);
+      //  senditemtoKitchen(items);
+    }
+
     await Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 

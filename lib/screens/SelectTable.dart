@@ -49,16 +49,20 @@ class _SelectTablePageState extends State<SelectTablePage> {
   }
 
   selectTableForNewOrder() async {
-    Table_order table_order = new Table_order();
-    table_order.table_id = selectedTable.tableId;
-    table_order.number_of_pax = int.parse(paxController.text);
-    table_order.save_order_id = selectedTable.saveorderid;
-    var result = await localAPI.insertTableOrder(table_order);
-    print(result);
-    await Preferences.setStringToSF(
-        Constant.TABLE_DATA, json.encode(table_order));
-    Navigator.of(context).pop();
-    Navigator.pushNamed(context, Constant.DashboardScreen);
+    if (int.parse(paxController.text) <= selectedTable.tableCapacity) {
+      Table_order table_order = new Table_order();
+      table_order.table_id = selectedTable.tableId;
+      table_order.number_of_pax = int.parse(paxController.text);
+      table_order.save_order_id = selectedTable.saveorderid;
+      var result = await localAPI.insertTableOrder(table_order);
+      print(result);
+      await Preferences.setStringToSF(
+          Constant.TABLE_DATA, json.encode(table_order));
+      Navigator.of(context).pop();
+      Navigator.pushNamed(context, Constant.DashboardScreen);
+    } else {
+      CommunFun.showToast(context, "Please enter pax minimum table capcity.");
+    }
   }
 
   Widget neworder_button(context) {
@@ -134,6 +138,11 @@ class _SelectTablePageState extends State<SelectTablePage> {
         title: Text(Strings.enterPax),
         content: Builder(
           builder: (context) {
+            KeyboardVisibilityNotification().addNewListener(
+              onHide: () {
+                FocusScope.of(context).requestFocus(new FocusNode());
+              },
+            );
             return SingleChildScrollView(
               child: Container(
                 height: 200,

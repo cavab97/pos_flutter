@@ -51,21 +51,21 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
         isLoading = true;
       });
       terminal.terminalKey = terminalKey.text;
-      terminal.deviceid = deviceinfo.id;
-      terminal.terDeviceToken = deviceinfo.androidId;
+      terminal.deviceid = deviceinfo["deviceId"];
+      terminal.terDeviceToken = deviceinfo["deviceToken"];
       await repo.sendTerminalKey(terminal).then((value) async {
         print(value);
-        if (value != null && value.status == Constant.STATUS200) {
+        if (value != null && value["status"] == Constant.STATUS200) {
           Preferences.setStringToSF(
-              Constant.TERMINAL_KEY, value.terminalId.toString());
+              Constant.TERMINAL_KEY, value["terminal_id"].toString());
           Preferences.setStringToSF(
-              Constant.BRANCH_ID, value.branchId.toString());
+              Constant.BRANCH_ID, value["branch_id"].toString());
           Navigator.pushNamed(context, Constant.LoginScreen,
-              arguments: {"terminalId": value.terminalId});
-        } else if (value != null && value.status == Constant.STATUS422) {
-          CommunFun.showToast(context, value.message);
+              arguments: {"terminalId": value["terminal_id"]});
+        } else if (value != null && value["status"] == Constant.STATUS422) {
+          CommunFun.showToast(context, value["message"]);
         } else {
-          CommunFun.showToast(context, value.message);
+          CommunFun.showToast(context, value["message"]);
         }
       }).catchError((e) {
         print(e);

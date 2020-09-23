@@ -776,7 +776,7 @@ class LocalAPI {
   Future<dynamic> sendToKitched(ids) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var qry = "update mst_cart_detail set is_send_kichen = 1 WHERE id in(" +
-        ids +
+        ids.toString() +
         ")";
     var ordersList = await db.rawQuery(qry);
     await SyncAPICalls.logActivity(
