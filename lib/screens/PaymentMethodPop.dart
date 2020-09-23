@@ -275,13 +275,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     print(paymentid);
     await clearCartAfterSuccess();
     widget.onClose(orderid);
-    await Navigator.pushNamed(context, Constant.DashboardScreen);
-    await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return InvoiceReceiptDailog(orderid: orderid);
-        });
+    //Navigator.pushNamed(context, Constant.DashboardScreen);
     setState(() {
       isLoading = false;
     });
