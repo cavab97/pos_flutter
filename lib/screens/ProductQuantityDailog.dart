@@ -18,11 +18,11 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
-  ProductQuantityDailog({Key key, this.product, this.cartID, this.iscartItem})
+  ProductQuantityDailog({Key key, this.product, this.cartID, this.cartItem})
       : super(key: key);
   final product;
   final int cartID;
-  final iscartItem;
+  final cartItem;
   @override
   _ProductQuantityDailogState createState() => _ProductQuantityDailogState();
 }
@@ -37,7 +37,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   List selectedAttr = [];
   MST_Cart currentCart = new MST_Cart();
   List<ModifireData> selectedModifier = [];
-  double product_qty = 1;
+  double product_qty = 1.0;
   double price = 0.0;
   bool isEditing = false;
   List<BranchTax> taxlist = [];
@@ -46,14 +46,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   void initState() {
     super.initState();
     setState(() {
-      isEditing = widget.iscartItem != null;
+      isEditing = widget.cartItem != null;
       productItem = widget.product;
       price = productItem.price;
-      cartitem = widget.iscartItem;
+      cartitem = widget.cartItem;
     });
     getAttributes();
     getTaxs();
-
     if (widget.cartID != null) {
       getCartData();
     }
@@ -72,7 +71,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   setEditingData() async {
     List<MSTSubCartdetails> details =
         await localAPI.getItemModifire(cartitem.id);
-
     if (details.length > 0) {
       for (var i = 0; i < details.length; i++) {
         var item = details[i];
@@ -103,10 +101,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         }
       }
     }
-    product_qty = cartitem.productQty is int
-        ? cartitem.productQty.toDouble()
-        : cartitem.productQty;
-    price = cartitem.productPrice;
+
+    setState(() {
+      product_qty = cartitem.productQty is int
+          ? cartitem.productQty.toDouble()
+          : cartitem.productQty;
+      price = cartitem.productPrice;
+    });
   }
 
   getAttributes() async {
@@ -256,14 +257,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var customerData =
         await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
     var loginData = await json.decode(loginUser);
-
-    var disc = currentCart.discount != null ? currentCart.discount : 0.0;
+    var disc = currentCart.discount != null
+        ? double.parse(currentCart.discount.toStringAsFixed(2))
+        : 0.0;
     double qty = currentCart.total_qty != null
         ? currentCart.total_qty + product_qty.toDouble()
         : product_qty.toDouble();
     double subT =
         currentCart.sub_total != null ? currentCart.sub_total + price : price;
-
     var totalTax = [];
     double taxvalues = 0;
     if (taxlist.length > 0) {
@@ -271,8 +272,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         var taxlistitem = taxlist[i];
         // Tax tax = await localAPI.getTaxName(taxlistitem.taxId);
         var taxval = taxlistitem.rate != null
-            ? subT * double.parse(taxlistitem.rate) / 100
+            ? subT * double.parse(taxlistitem.rate) / 10
             : 0.0;
+        taxval = double.parse(taxval.toStringAsFixed(2));
         taxvalues += taxval;
 
         var taxmap = {
@@ -297,13 +299,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     //cart data
     cart.user_id = customerData != null ? customerData["customer_id"] : 0;
     cart.branch_id = int.parse(branchid);
-    cart.sub_total = subT;
+    cart.sub_total = double.parse(subT.toStringAsFixed(2));
     cart.discount = disc;
     cart.discount_type = currentCart.discount_type;
     cart.total_qty = qty;
     cart.tax = taxvalues;
     cart.tax_json = json.encode(totalTax);
-    cart.grand_total = grandTotal;
+    cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
     cart.customer_terminal =
         customerData != null ? customerData["terminal_id"] : 0;
     if (!isEditing) {
@@ -337,10 +339,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.cartId = cartid;
     cartdetails.productId = productdata.productId;
     cartdetails.productName = productdata.name;
-    cartdetails.productPrice = productdata.price;
+    cartdetails.productPrice =
+        double.parse(productdata.price.toStringAsFixed(2));
     cartdetails.productQty = productdata.qty;
-    cartdetails.productNetPrice = productdata.oldPrice;
+    cartdetails.productNetPrice = productdata.price;
     cartdetails.createdBy = loginData["id"];
+    cartdetails.discount = 0;
     cartdetails.createdAt = DateTime.now().toString();
     var detailID = await localAPI.addintoCartDetails(cartdetails);
 
