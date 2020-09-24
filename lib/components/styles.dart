@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mcncashier/components/StringFile.dart';
 
@@ -92,5 +93,9 @@ class Styles {
         fontWeight: FontWeight.w600,
         color: Color(0xffff531a),
         fontFamily: Strings.fontFamily);
+  }
+
+  static normalBlack() {
+    return TextStyle(color: Colors.black, fontSize: 25.0);
   }
 }

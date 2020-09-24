@@ -25,6 +25,7 @@ import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
+import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/PrinterList.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
@@ -93,7 +94,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   checkidTableSelected() async {
     var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var branchid = await CommunFun.getbranchId();
     if (tableid != null) {
       var tableddata = json.decode(tableid);
       Table_order table = Table_order.fromJson(tableddata);
@@ -251,7 +252,7 @@ class _DashboradPageState extends State<DashboradPage>
     setState(() {
       isLoading = true;
     });
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var branchid = await CommunFun.getbranchId();
     List<ProductDetails> product =
         await localAPI.getProduct(categoryId.toString(), branchid);
 
@@ -376,8 +377,8 @@ class _DashboradPageState extends State<DashboradPage>
     });
     Preferences.setStringToSF(Constant.IS_SHIFT_OPEN, isShiftOpen.toString());
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
-    var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var terminalId = await CommunFun.getTeminalKey();
+    var branchid = await CommunFun.getbranchId();
     User userdata = await CommunFun.getuserDetails();
     Shift shift = new Shift();
     shift.appId = int.parse(terminalId);
@@ -494,7 +495,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getbranch() async {
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var branchid = await CommunFun.getbranchId();
     var branch = await localAPI.getbranchData(branchid);
     return branch;
   }
@@ -516,16 +517,28 @@ class _DashboradPageState extends State<DashboradPage>
     Table_order tables = await getTableData();
     User userdata = await CommunFun.getuserDetails();
     List<MSTCartdetails> cartList = await getcartDetails();
-    var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var terminalId = await CommunFun.getTeminalKey();
+    var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
     var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
-    var invoiceNo = branchdata.orderPrefix + branchdata.invoiceStart;
+    List<Orders> lastappid = await localAPI.getLastOrderAppid();
+    int length = branchdata.invoiceStart.length;
+    var invoiceNo;
+    if (lastappid.length > 0) {
+      order.app_id = lastappid[0].app_id + 1;
+      invoiceNo =
+          branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
+    } else {
+      order.app_id = int.parse(terminalId);
+      invoiceNo =
+          branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
+    }
+
     order.uuid = uuid;
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
-    order.app_id = int.parse(terminalId);
     order.table_id = tables.table_id;
+    order.table_no = tables.table_id;
     order.invoice_no = invoiceNo;
     order.customer_id = customer.customerId;
     order.sub_total = cartData.sub_total;
@@ -633,6 +646,12 @@ class _DashboradPageState extends State<DashboradPage>
     var paymentid = await localAPI.sendtoOrderPayment(orderpayment);
     print(paymentid);
     await clearCartAfterSuccess();
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return InvoiceReceiptDailog(orderid: orderid);
+        });
   }
 
   clearCartAfterSuccess() async {
@@ -641,6 +660,16 @@ class _DashboradPageState extends State<DashboradPage>
     print(result);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     Navigator.pushNamed(context, Constant.DashboardScreen);
+  }
+
+  removeTax(cartdata, item) {
+    var taxjson = json.decode(cartdata);
+    for (var i = 0; i < taxjson.length; i++) {
+      taxjson[i]["taxAmount"] =
+          double.parse(taxjson[i]["taxAmount"]) - item.taxValue;
+      return false;
+    }
+    return taxjson;
   }
 
   itememovefromCart(cartitem) async {
@@ -654,6 +683,8 @@ class _DashboradPageState extends State<DashboradPage>
           : 0;
       cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
       cart.grand_total = allcartData.grand_total - cartitemdata.productPrice;
+      cart.tax_json =
+          json.encode(removeTax(allcartData.tax_json, cartitemdata));
       await localAPI.deleteCartItem(
           cartitem, currentCart, cart, cartList.length == 1);
       if (cartitem.isSendKichen == 1) {

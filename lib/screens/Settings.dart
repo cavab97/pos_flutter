@@ -205,8 +205,7 @@ class _SettingsPageState extends State<SettingsPage> {
           decoration:
               new BoxDecoration(border: new Border.all(color: Colors.white)),
           child: ListTile(
-              title: Text("Auto sync",
-                  style: Styles.whiteSimpleSmall()),
+              title: Text("Auto sync", style: Styles.whiteSimpleSmall()),
               trailing: Transform.scale(
                 scale: 1,
                 child: CupertinoSwitch(

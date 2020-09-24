@@ -65,9 +65,8 @@ class _PINPageState extends State<PINPage> {
           isLoading = true;
         });
         CheckinOut checkIn = new CheckinOut();
-        var terminalId =
-            await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
-        var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+        var terminalId = await CommunFun.getTeminalKey();
+        var branchid = await CommunFun.getbranchId();
         var loginUser =
             await Preferences.getStringValuesSF(Constant.LOIGN_USER);
         var date = DateTime.now();
@@ -110,9 +109,8 @@ class _PINPageState extends State<PINPage> {
         });
         CheckinOut checkIn = new CheckinOut();
         var shiftid = await Preferences.getStringValuesSF(Constant.SHIFT_ID);
-        var terminalId =
-            await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
-        var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+        var terminalId = await CommunFun.getTeminalKey();
+        var branchid = await CommunFun.getbranchId();
         var loginUser =
             await Preferences.getStringValuesSF(Constant.LOIGN_USER);
         var date = DateTime.now();

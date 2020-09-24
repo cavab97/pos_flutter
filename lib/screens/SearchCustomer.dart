@@ -5,6 +5,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/screens/AddCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -68,21 +69,20 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(Strings.search_customer,
-                    style: TextStyle(fontSize: 30, color: Colors.white)),
+                Text(Strings.search_customer, style: Styles.whiteBold()),
               ],
             ),
           ),
           Positioned(
-            right: 30,
-            top: 15,
+            left: 30,
+            top: 25,
             child: GestureDetector(
               onTap: () {
                 addCustomer();
               },
               child: Text(
                 Strings.add_new.toUpperCase(),
-                style: TextStyle(fontSize: 30, color: Colors.white),
+                style: Styles.whiteSimpleSmall(),
               ),
             ),
           ),
@@ -184,9 +184,11 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           onTap: () {
             saveCustomerTolocal(customer);
           },
-          leading:
-              Text(customer.name == null ? customer.firstName : customer.name),
-          title: Text(customer.email),
+          leading: Text(
+            customer.name == null ? customer.firstName : customer.name,
+            style: Styles.communBlack(),
+          ),
+          title: Text(customer.email, style: Styles.communBlack()),
         );
       }).toList(),
     );

@@ -1,14 +1,11 @@
-import 'package:esc_pos_printer/esc_pos_printer.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
-import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Branch.dart';
-import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
@@ -16,9 +13,6 @@ import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
-import 'package:mcncashier/services/LocalAPIs.dart';
-import 'package:intl/intl.dart';
-import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:ping_discover_network/ping_discover_network.dart';
 import 'package:wifi/wifi.dart';
@@ -66,11 +60,11 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
   }
 
   getOederData() async {
-    var branchID = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var branchID =  await CommunFun.getbranchId();
     Branch branchAddress = await localAPI.getBranchData(branchID);
     OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
     Payments paument_method =
-    await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
+        await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
     List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
@@ -117,7 +111,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
             top: 10,
             child: IconButton(
               onPressed: () {
-                //testPrint(paper);
+                testPrint("192.168.0.130", context);
               },
               icon: Icon(
                 Icons.print,
@@ -158,14 +152,8 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
   //widget.onPress;
   Widget mainContent() {
     return Container(
-      height: MediaQuery
-          .of(context)
-          .size
-          .height / 1.5,
-      width: MediaQuery
-          .of(context)
-          .size
-          .width / 2,
+      height: MediaQuery.of(context).size.height / 1.5,
+      width: MediaQuery.of(context).size.width / 2,
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -187,7 +175,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
               itemCount: devices.length,
               itemBuilder: (BuildContext context, int index) {
                 return InkWell(
-                  //onTap: () => Receipt(paper),
+                  onTap: () => testPrint(devices[index] + ":1900", context),
                   child: Column(
                     children: <Widget>[
                       Container(
@@ -245,7 +233,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
     } catch (e) {
       final snackBar = SnackBar(
           content:
-          Text('WiFi is not connected $e', textAlign: TextAlign.center));
+              Text('WiFi is not connected $e', textAlign: TextAlign.center));
       Scaffold.of(ctx).showSnackBar(snackBar);
       return;
     }
@@ -287,14 +275,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
   }
 
   void testPrint(String printerIp, BuildContext ctx) async {
-    printReceipt.checkReceiptPrint(
-        printerIp,
-        ctx,
-        paper,
-        branchData,
-        orderdItem,
-        orderdetail,
-        orderData,
-        paymentdata);
+    printReceipt.checkReceiptPrint(printerIp, ctx, paper, branchData,
+        orderdItem, orderdetail, orderData, paymentdata);
   }
 }

@@ -4,16 +4,14 @@ import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Order.dart';
-import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/components/styles.dart';
-import 'package:mcncashier/components/preferences.dart';
-import 'package:mcncashier/components/constant.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
@@ -37,6 +35,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   User paymemtUser = new User();
   List<ProductDetails> detailsList = [];
   bool isFiltering = false;
+  bool isRefunding = false;
   Customer customer = new Customer();
   Payments paumentMethod = new Payments();
   @override
@@ -51,8 +50,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   getTansactionList() async {
-    var terminalid = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var terminalid = await CommunFun.getTeminalKey();
+    var branchid = await CommunFun.getbranchId();
     List<Orders> orderList = await localAPI.getOrdersList(branchid, terminalid);
     if (orderList.length > 0) {
       setState(() {
@@ -108,6 +107,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
   }
 
+  refundProcessStart() {
+    setState(() {
+      isRefunding = true;
+    });
+  }
+
   cancleAlertpopOpne() {
     showDialog(
         context: context,
@@ -133,7 +138,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               if (reason == "Other") {
                 otherReasonPop();
               } else {
-                paymentMethodPop();
+                paymentMethodPop(reason);
               }
             },
           );
@@ -148,13 +153,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
           return AddOtherReason(
             onClose: (otherText) {
               Navigator.of(context).pop();
-              paymentMethodPop();
+              paymentMethodPop(otherText);
             },
           );
         });
   }
 
-  paymentMethodPop() {
+  paymentMethodPop(reason) {
     showDialog(
         // Opning Ammount Popup
         context: context,
@@ -163,24 +168,57 @@ class _TransactionsPageState extends State<TransactionsPage> {
             subTotal: selectedOrder.sub_total,
             grandTotal: selectedOrder.grand_total,
             onClose: (mehtod) {
-              cancleTransactionWithMethod(mehtod);
+              cancleTransactionWithMethod(mehtod, reason);
             },
           );
         });
   }
 
-  cancleTransactionWithMethod(paymehtod) {
+  cancleTransactionWithMethod(paymehtod, reason) {
     print(paymehtod);
-    cancleTransation();
+    cancleTransation(reason);
     Navigator.of(context).pop();
   }
 
-  cancleTransation() async {
+  cancleTransation(reason) async {
     //TODO :Cancle Transation Pop // 1 for  cancle
     var orderid = await localAPI.updateOrderStatus(selectedOrder.app_id, 3);
+    var payment = await localAPI.updatePaymentStatus(orderpayment.app_id, 3);
+    var terID = await CommunFun.getTeminalKey();
+    User userdata = await CommunFun.getuserDetails();
+    CancelOrder order = new CancelOrder();
+    order.id = selectedOrder.order_id;
+    order.invoiceId = selectedOrder.app_id;
+    order.localID = await CommunFun.getLocalID();
+    order.reason = reason;
+    order.status = 3;
+    order.createdBy = userdata.id;
+    order.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    order.terminalId = int.parse(terID);
+    order.invoiceTerminalId = int.parse(terID);
+    var addTocancle = await localAPI.insertCancelOrder(order);
+    // TODO update store inventory
     getTansactionList();
   }
 
+  refundSelectedammout() {
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return PaymentMethodPop(
+            subTotal: selectedOrder.sub_total,
+            grandTotal: selectedOrder.grand_total,
+            onClose: (mehtod) {
+              returnPayment(mehtod);
+            },
+          );
+        });
+  }
+
+  returnPayment(paymentMehtod) {
+    // TODO : update payment tables
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -231,11 +269,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               SizedBox(
                                 height: 15,
                               ),
-                              // Text("Wednesday, August 19",
-                              //     style: TextStyle(
-                              //         fontSize: 20,
-                              //         fontWeight: FontWeight.bold,
-                              //         color: Colors.blueGrey[900])),
                               orderLists.length > 0
                                   ? searchTransationList()
                                   : Center(
@@ -298,7 +331,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     child: Text(
                                       customer.firstName != null
                                           ? customer.firstName
-                                          : "Open Customer",
+                                          : "Walk-In Customer",
                                       style: TextStyle(
                                           fontSize: 23,
                                           fontWeight: FontWeight.bold,
@@ -319,21 +352,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               Divider(),
                               totalAmountValues(),
                               Divider(),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: <Widget>[
-                                  refundButton(() {
-                                    CommunFun.showToast(
-                                        context, "Work in progress...");
-                                    //Navigator.of(context).pop();
-                                  }),
-                                  SizedBox(width: 10),
-                                  cancelButton(() {
-                                    cancleAlertpopOpne();
-                                  }),
-                                ],
-                              )
+                              isRefunding
+                                  ? refundButtons(context)
+                                  : transationsButton()
                             ]),
                           )
                         ]),
@@ -397,6 +418,85 @@ class _TransactionsPageState extends State<TransactionsPage> {
           }
         },
       ),
+    );
+  }
+
+  Widget refundButtons(context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        refundCancelButton(() {
+          setState(() {
+            isRefunding = false;
+          });
+        }),
+        SizedBox(width: 10),
+        refundNextButton(() {
+          refundSelectedammout();
+        }),
+      ],
+    );
+  }
+
+  refundCancelButton(_onPress) {
+    return Expanded(
+      child: RaisedButton(
+        padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
+        onPressed: _onPress,
+        child: Text(
+          "Cancel",
+          style: TextStyle(
+              color:
+                  orderpayment.op_status == 1 ? Colors.white : Colors.white38,
+              fontSize: 20),
+        ),
+        color: Colors.deepOrange,
+        textColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+      ),
+    );
+  }
+
+  refundNextButton(_onPress) {
+    return Expanded(
+      child: RaisedButton(
+        padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
+        onPressed: _onPress,
+        child: Text(
+          "Next",
+          style: TextStyle(
+              color:
+                  orderpayment.op_status == 1 ? Colors.white : Colors.white38,
+              fontSize: 20),
+        ),
+        color: Colors.deepOrange,
+        textColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+      ),
+    );
+  }
+
+  Widget transationsButton() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        refundButton(() {
+          if (orderpayment.op_status == 1) {
+            // refund ordr
+            refundProcessStart();
+          }
+        }),
+        SizedBox(width: 10),
+        cancelButton(() {
+          if (orderpayment.op_status == 1) {
+            cancleAlertpopOpne();
+          }
+        }),
+      ],
     );
   }
 
@@ -561,7 +661,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
         onPressed: _onPress,
         child: Text(
           "Refund",
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          style: TextStyle(
+              color:
+                  orderpayment.op_status == 1 ? Colors.white : Colors.white38,
+              fontSize: 20),
         ),
         color: Colors.deepOrange,
         textColor: Colors.white,
@@ -579,7 +682,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
         onPressed: _onPress,
         child: Text(
           Strings.cancel_tansaction,
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          style: TextStyle(
+              color:
+                  orderpayment.op_status == 1 ? Colors.white : Colors.white38,
+              fontSize: 20),
         ),
         color: Colors.deepOrange,
         textColor: Colors.white,
@@ -655,6 +761,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               style: TextStyle(
                                   fontSize: 20,
                                   color: Theme.of(context).primaryColor)),
+                          isRefunding
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.remove_circle_outline,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () {})
+                              : SizedBox(),
                         ],
                       ),
                     )
@@ -831,25 +945,37 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
           shrinkWrap: true,
           children: <Widget>[
             ListTile(
+                onTap: () {
+                  widget.onClose("Incorrect Item");
+                },
                 title: Text(
-              "Incorrect Item",
-              style: Styles.communBlack(),
-            )),
+                  "Incorrect Item",
+                  style: Styles.communBlack(),
+                )),
             ListTile(
+                onTap: () {
+                  widget.onClose("Incorrect variant");
+                },
                 title: Text(
-              "Incorrect variant",
-              style: Styles.communBlack(),
-            )),
+                  "Incorrect variant",
+                  style: Styles.communBlack(),
+                )),
             ListTile(
+                onTap: () {
+                  widget.onClose("Incorrect payment type");
+                },
                 title: Text(
-              "Incorrect payment type",
-              style: Styles.communBlack(),
-            )),
+                  "Incorrect payment type",
+                  style: Styles.communBlack(),
+                )),
             ListTile(
+                onTap: () {
+                  widget.onClose("Incorrect quantity");
+                },
                 title: Text(
-              "Incorrect quantity",
-              style: Styles.communBlack(),
-            )),
+                  "Incorrect quantity",
+                  style: Styles.communBlack(),
+                )),
             ListTile(
                 onTap: () {
                   widget.onClose("Other");

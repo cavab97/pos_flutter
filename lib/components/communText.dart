@@ -455,7 +455,7 @@ class CommunFun {
 
   static getLocalID() async {
     var deviceInfo = await CommunFun.deviceInfo();
-    var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+    var terminalId =  await CommunFun.getTeminalKey();
     var localid = Platform.isAndroid
         ? "ANDROID" + deviceInfo["deviceId"] + terminalId
         : "IOS" + deviceInfo["deviceId"] + terminalId;

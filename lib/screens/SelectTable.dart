@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:mcncashier/components/StringFile.dart';
@@ -7,7 +6,6 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
-import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/TableDetails.dart';
@@ -28,6 +26,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
   List<TablesDetails> tableList = new List<TablesDetails>();
   var selectedTable;
   var number_of_pax;
+  bool isLoading = false;
   @override
   void initState() {
     super.initState();
@@ -41,11 +40,23 @@ class _SelectTablePageState extends State<SelectTablePage> {
   }
 
   getTables() async {
+    setState(() {
+      isLoading = true;
+    });
     var branchid = await CommunFun.getbranchId();
     List<TablesDetails> tables = await localAPI.getTables(branchid);
     setState(() {
       tableList = tables;
+      isLoading = false;
     });
+  }
+
+  viewOrder() async {
+    var tableid = selectedTable.tableId;
+    List<Table_order> order = await localAPI.getTableOrders(tableid);
+    await Preferences.setStringToSF(Constant.TABLE_DATA, json.encode(order[0]));
+    Navigator.of(context).pop();
+    Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
   selectTableForNewOrder() async {
@@ -72,6 +83,16 @@ class _SelectTablePageState extends State<SelectTablePage> {
         opnPaxDailog();
       },
       child: Text(Strings.new_order,
+          textAlign: TextAlign.center, style: Styles.bluesmall()),
+    );
+  }
+
+  Widget viewOrderBtn(context) {
+    return GestureDetector(
+      onTap: () {
+        viewOrder();
+      },
+      child: Text(Strings.view_order,
           textAlign: TextAlign.center, style: Styles.bluesmall()),
     );
   }
@@ -183,23 +204,27 @@ class _SelectTablePageState extends State<SelectTablePage> {
         content: Builder(
           builder: (context) {
             return Container(
-                height: 100,
-                width: 150,
+                height: 200,
+                width: 250,
                 child: Center(
                   child: ListView(
                     shrinkWrap: true,
                     children: <Widget>[
-                      neworder_button(context),
-                      SizedBox(
-                        height: 10,
+                      ListTile(
+                        title: neworder_button(context),
                       ),
-                      CommunFun.divider(),
-                      SizedBox(
-                        height: 10,
+                      Divider(),
+                      ListTile(
+                        title: viewOrderBtn(context),
                       ),
-                      Text(Strings.merge_order,
+                      Divider(),
+                      ListTile(
+                        title: Text(
+                          Strings.merge_order,
                           textAlign: TextAlign.center,
-                          style: Styles.bluesmall())
+                          style: Styles.bluesmall(),
+                        ),
+                      )
                     ],
                   ),
                 ));
@@ -229,7 +254,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
         child: Container(
           padding: EdgeInsets.all(20),
           child: Column(
-            children: <Widget>[tablesListwidget()],
+            children: <Widget>[
+              !isLoading ? tablesListwidget() : CommunFun.loader(context)
+            ],
           ),
         ),
       ),
