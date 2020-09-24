@@ -261,11 +261,13 @@ class LocalAPI {
     } else {
       cartdetailid = await db.insert("mst_cart_detail", cartdetails.toJson());
     }
+    await SyncAPICalls.logActivity(
+        "product", "insert  cart details", "mst_cart_detail", cartdetailid);
+    return cartdetailid;
   }
 
   Future<int> addsubCartData(MSTSubCartdetails data) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
-
     var result1 = await db.insert("mst_cart_sub_detail", data.toJson());
     print(result1);
     await SyncAPICalls.logActivity(
@@ -850,5 +852,20 @@ class LocalAPI {
     await SyncAPICalls.logActivity(
         "branch details", "branch details for invoice", "branch", branchID);
     return list[0];
+  }
+
+  // 1 For New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
+  Future<int> updateOrderStatus(orderid, status) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var qry = "UPDATE orders SET order_status = " +
+        status.toString() +
+        " where app_id = " +
+        orderid.toString();
+    var result = db.rawUpdate(qry);
+    if (result != null) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 }

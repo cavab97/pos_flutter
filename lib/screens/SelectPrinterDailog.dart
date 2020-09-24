@@ -8,8 +8,8 @@ import 'package:ping_discover_network/ping_discover_network.dart';
 import 'package:wifi/wifi.dart';
 
 class SelectPrinterDailog extends StatefulWidget {
-  SelectPrinterDailog({Key key}) : super(key: key);
-
+  SelectPrinterDailog({Key key, this.onClose}) : super(key: key);
+  Function onClose;
   @override
   SelectPrinterDailogState createState() => SelectPrinterDailogState();
 }
@@ -89,6 +89,10 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
       });
   }
 
+  addPrinter(ip) {
+    widget.onClose(ip);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -109,14 +113,13 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
             ),
           ),
           Positioned(
-            right: 30,
-            top: 10,
-            child: Icon(
-              Icons.print,
-              color: Colors.white,
-              size: 50,
-            ),
-          ),
+              right: 30,
+              top: 10,
+              child: FlatButton(
+                  onPressed: () {
+                    discover(context);
+                  },
+                  child: Text("Scan", style: Styles.whiteSimpleSmall()))),
           closeButton(context),
         ],
       ),
@@ -150,7 +153,7 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
   Widget mainContent() {
     return Container(
       height: MediaQuery.of(context).size.height / 2,
-      width: MediaQuery.of(context).size.width / 2.5,
+      width: MediaQuery.of(context).size.width / 3,
       padding: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,32 +168,11 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
               itemCount: devices.length,
               itemBuilder: (BuildContext context, int index) {
                 return InkWell(
-                  //onTap: () => testPrint(devices[index], context),
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        height: 60,
-                        padding: EdgeInsets.only(left: 10),
-                        alignment: Alignment.centerLeft,
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Text(
-                                    '${devices[index]}:1900',
-                                    //${portController.text}',
-                                    style: Styles.communBlack(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  onTap: () => addPrinter(devices[index]),
+                  child: Text(
+                    '${devices[index]}:1900',
+                    //${portController.text}',
+                    style: Styles.communBlack(),
                   ),
                 );
               },

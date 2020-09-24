@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/screens/PrinteTypeDailog.dart';
 import 'package:mcncashier/screens/SelectPrinterDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -58,12 +60,26 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
+  openSelectType(ip) {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return ChoosePrinterDailog(selectedIP: ip);
+        });
+  }
+
   openPrinterOption() {
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return SelectPrinterDailog();
+          return SelectPrinterDailog(
+            onClose: (ip) {
+              Navigator.of(context).pop();
+              openSelectType(ip);
+            },
+          );
         });
   }
 
@@ -89,7 +105,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       color: Colors.white,
                       child: ListView(
                         shrinkWrap: true,
-                        padding: EdgeInsets.all(20),
+                        padding: EdgeInsets.only(left: 20, right: 20),
                         children: <Widget>[
                           ListTile(
                             contentPadding: EdgeInsets.only(left: 0, top: 20),
@@ -170,13 +186,39 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget generalSettings() {
     return ListView(
+      padding: EdgeInsets.all(20),
       shrinkWrap: true,
       children: <Widget>[
-        Center(child: Text("General")),
-        ListTile(title: Text("Auto sync After order shift.")),
-        ListTile(title: Text("Auto sync After order shift.")),
-        ListTile(title: Text("Auto sync After order shift.")),
-        ListTile(title: Text("Auto sync After order shift."))
+        SizedBox(
+          height: 10,
+        ),
+        Center(
+          child: Text(
+            "General",
+            style: Styles.whiteBold(),
+          ),
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        Container(
+          decoration:
+              new BoxDecoration(border: new Border.all(color: Colors.white)),
+          child: ListTile(
+              title: Text("Auto sync",
+                  style: Styles.whiteSimpleSmall()),
+              trailing: Transform.scale(
+                scale: 1,
+                child: CupertinoSwitch(
+                  value: false,
+                  onChanged: (bool value) {
+                    // setState(() {
+                    //   _switchValue = value;
+                    // });
+                  },
+                ),
+              )),
+        )
       ],
     );
   }
@@ -190,37 +232,41 @@ class _SettingsPageState extends State<SettingsPage> {
             padding: EdgeInsets.all(20),
             shrinkWrap: true,
             children: <Widget>[
+              SizedBox(
+                height: 10,
+              ),
               Center(
-                  child: Text(
-                "Printing",
-                style: Styles.whiteBold(),
-              )),
+                child: Text(
+                  "Printing",
+                  style: Styles.whiteBold(),
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
               Container(
                 decoration: new BoxDecoration(
                     border: new Border.all(color: Colors.white)),
                 child: ListTile(
-                  title: Text("Always Print Receipt",
-                      style: Styles.whiteSimpleSmall()),
-                  trailing: SizedBox(
-                    width: 70,
-                    height: 80,
-                    child: Switch(
-                        inactiveTrackColor: Colors.grey,
-                        activeColor: Colors.deepOrange,
-                        value: alwaysPrint,
-                        onChanged: (val) {
-                          setState(() {
-                            alwaysPrint = val;
-                          });
-                        }),
-                  ),
-                ),
+                    title: Text("Always Print Receipt",
+                        style: Styles.whiteSimpleSmall()),
+                    trailing: Transform.scale(
+                      scale: 1,
+                      child: CupertinoSwitch(
+                        value: false,
+                        onChanged: (bool value) {
+                          // setState(() {
+                          //   _switchValue = value;
+                          // });
+                        },
+                      ),
+                    )),
               )
             ],
           ),
         ),
         Positioned(
-            bottom: 30,
+            bottom: 40,
             left: 0,
             right: 0,
             child: Row(

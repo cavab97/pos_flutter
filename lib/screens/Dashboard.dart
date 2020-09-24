@@ -9,16 +9,23 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Category.dart';
+import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/OrderAttributes.dart';
+import 'package:mcncashier/models/OrderDetails.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher.dart';
+import 'package:mcncashier/models/Voucher_History.dart';
+import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
-import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/PrinterList.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
@@ -455,41 +462,234 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         builder: (BuildContext context) {
           return PaymentMethodPop(
-            cartID: currentCart,
-            itemCount: cartList.length,
             subTotal: subtotal,
             grandTotal: grandTotal,
-            onClose: (orderID) {},
+            onClose: (mehtod) {
+              paymentWithMethod(mehtod);
+            },
           );
         });
   }
 
-  itememovefromCart(cartitem) async {
-    MST_Cart cart = new MST_Cart();
-    MSTCartdetails cartitemdata = cartitem;
-    cart = allcartData;
-    cart.sub_total = allcartData.sub_total - cartitemdata.productPrice;
-    cart.discount = allcartData.discount - cartitemdata.discount;
-    cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
-    cart.grand_total = allcartData.grand_total - cartitemdata.productPrice;
-    await localAPI.deleteCartItem(
-        cartitem, currentCart, cart, cartList.length == 1);
-    if (cartitem.isSendKichen == 1) {
-      var deletedlist = [];
-      deletedlist.add(cartitem);
-      opnePrinterPop(deletedlist);
-    }
-    if (cartList.length > 1) {
-      await getCartItem(currentCart);
+  Future<Customer> getCustomer() async {
+    Customer customer = new Customer();
+    var customerData =
+        await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
+    if (customerData != null) {
+      var customers = json.decode(customerData);
+      customer = Customer.fromJson(customers);
+      return customer;
     } else {
-      setState(() {
-        currentCart = null;
-        cartList = [];
-        grandTotal = 0.0;
-        discount = 0.0;
-        tax = 0.0;
-        subtotal = 0.0;
-      });
+      return customer;
+    }
+  }
+
+  Future<Table_order> getTableData() async {
+    Table_order tables = new Table_order();
+    var tabledata = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+    if (tabledata != null) {
+      var table = json.decode(tabledata);
+      tables = Table_order.fromJson(table);
+      return tables;
+    } else {
+      return tables;
+    }
+  }
+
+  Future<List<MSTSubCartdetails>> getmodifireList() async {
+    List<MSTSubCartdetails> list = await localAPI.itemmodifireList(currentCart);
+    print(list);
+    return list;
+  }
+
+  Future<List<MSTCartdetails>> getcartDetails() async {
+    List<MSTCartdetails> list = await localAPI.getCartItem(currentCart);
+    print(list);
+    return list;
+  }
+
+  getbranch() async {
+    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var branch = await localAPI.getbranchData(branchid);
+    return branch;
+  }
+
+  getcartData() async {
+    var cartDatalist = await localAPI.getCartData(currentCart);
+    return cartDatalist;
+  }
+
+  paymentWithMethod(mehtod) async {
+    var cartData = await getcartData();
+    var branchdata = await getbranch();
+    sendPaymentByCash(cartData, mehtod, branchdata);
+  }
+
+  sendPaymentByCash(cartData, payment, branchdata) async {
+    Orders order = new Orders();
+    Customer customer = await getCustomer();
+    Table_order tables = await getTableData();
+    User userdata = await CommunFun.getuserDetails();
+    List<MSTCartdetails> cartList = await getcartDetails();
+    var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var uuid = await CommunFun.getLocalID();
+    var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
+    var invoiceNo = branchdata.orderPrefix + branchdata.invoiceStart;
+    order.uuid = uuid;
+    order.branch_id = int.parse(branchid);
+    order.terminal_id = int.parse(terminalId);
+    order.app_id = int.parse(terminalId);
+    order.table_id = tables.table_id;
+    order.invoice_no = invoiceNo;
+    order.customer_id = customer.customerId;
+    order.sub_total = cartData.sub_total;
+    order.sub_total_after_discount = cartData.sub_total;
+    order.grand_total = cartData.grand_total;
+    order.order_item_count = cartData.total_qty.toInt();
+    order.tax_amount = cartData.tax;
+    order.tax_json = cartData.tax_json;
+    order.order_date = datetime;
+    order.order_status = 1;
+    order.order_by = userdata.id;
+    order.voucher_id = cartData.voucherId;
+    order.voucher_amount = cartData.discount;
+    var orderid = await localAPI.placeOrder(order);
+    print(orderid);
+    if (cartData.voucherId != 0 && cartData.voucherId != null) {
+      VoucherHistory history = new VoucherHistory();
+      history.voucher_id = cartData.voucherId;
+      history.amount = cartData.discount;
+      history.created_at = datetime;
+      history.order_id = orderid;
+      history.uuid = uuid;
+      var hisID = await localAPI.saveVoucherHistory(history);
+      print(hisID);
+    }
+    var orderDetailid;
+    if (orderid > 0) {
+      if (cartList.length > 0) {
+        var orderId = orderid;
+        for (var i = 0; i < cartList.length; i++) {
+          OrderDetail orderDetail = new OrderDetail();
+          var cartItem = cartList[i];
+          orderDetail.uuid = uuid;
+          orderDetail.order_id = orderId;
+          orderDetail.branch_id = int.parse(branchid);
+          orderDetail.terminal_id = int.parse(terminalId);
+          orderDetail.app_id = int.parse(terminalId);
+          orderDetail.product_id = cartItem.productId;
+          orderDetail.product_price = cartItem.productPrice;
+          orderDetail.product_old_price = cartItem.productNetPrice;
+          orderDetail.detail_qty = cartItem.productQty;
+          orderDetailid = await localAPI.sendOrderDetails(orderDetail);
+          print(orderDetailid);
+          await localAPI.removeFromInventory(orderDetail);
+        }
+      }
+    }
+    List<MSTSubCartdetails> modifireList = await getmodifireList();
+    if (modifireList.length > 0) {
+      var orderId = orderid;
+
+      for (var i = 0; i < modifireList.length; i++) {
+        OrderModifire modifireData = new OrderModifire();
+        var modifire = modifireList[i];
+        if (modifire.caId == null) {
+          modifireData.uuid = uuid;
+          modifireData.order_id = orderId;
+          modifireData.detail_id = orderDetailid;
+          modifireData.terminal_id = int.parse(terminalId);
+          modifireData.app_id = int.parse(terminalId);
+          modifireData.product_id = modifire.productId;
+          modifireData.modifier_id = modifire.modifierId;
+          modifireData.om_amount = modifire.modifirePrice;
+          modifireData.updated_at = datetime;
+          modifireData.updated_by = userdata.id;
+          var ordermodifreid = await localAPI.sendModifireData(modifireData);
+          print(ordermodifreid);
+        } else {
+          OrderAttributes attributes = new OrderAttributes();
+          attributes.uuid = uuid;
+          attributes.order_id = orderId;
+          attributes.detail_id = orderDetailid;
+          attributes.terminal_id = int.parse(terminalId);
+          attributes.app_id = int.parse(terminalId);
+          attributes.product_id = modifire.productId;
+          attributes.attribute_id = modifire.attributeId;
+          attributes.attr_price = modifire.attrPrice;
+          attributes.ca_id = modifire.caId;
+          attributes.oa_datetime = datetime;
+          attributes.oa_by = userdata.id;
+          attributes.updated_at = datetime;
+          attributes.updated_by = userdata.id;
+          var orderAttri = await localAPI.sendAttrData(attributes);
+          print(orderAttri);
+        }
+      }
+    }
+
+    OrderPayment orderpayment = new OrderPayment();
+
+    orderpayment.uuid = uuid;
+    orderpayment.order_id = orderid;
+    orderpayment.branch_id = int.parse(branchid);
+    orderpayment.terminal_id = int.parse(terminalId);
+    orderpayment.app_id = int.parse(terminalId);
+    orderpayment.op_method_id = payment != "" ? payment.paymentId : 0;
+    orderpayment.op_amount =
+        (cartData.grand_total - cartData.discount).toDouble();
+    orderpayment.op_method_response = '';
+    orderpayment.op_status = 1;
+    orderpayment.op_datetime = datetime;
+    orderpayment.op_by = userdata.id;
+    orderpayment.updated_at = datetime;
+    orderpayment.updated_by = userdata.id;
+    var paymentid = await localAPI.sendtoOrderPayment(orderpayment);
+    print(paymentid);
+    await clearCartAfterSuccess();
+  }
+
+  clearCartAfterSuccess() async {
+    Table_order tables = await getTableData();
+    var result = await localAPI.removeCartItem(currentCart, tables.table_id);
+    print(result);
+    await Preferences.removeSinglePref(Constant.TABLE_DATA);
+    Navigator.pushNamed(context, Constant.DashboardScreen);
+  }
+
+  itememovefromCart(cartitem) async {
+    try {
+      MST_Cart cart = new MST_Cart();
+      MSTCartdetails cartitemdata = cartitem;
+      cart = allcartData;
+      cart.sub_total = allcartData.sub_total - cartitemdata.productPrice;
+      cart.discount = allcartData.discount != null
+          ? allcartData.discount - cartitemdata.discount
+          : 0;
+      cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
+      cart.grand_total = allcartData.grand_total - cartitemdata.productPrice;
+      await localAPI.deleteCartItem(
+          cartitem, currentCart, cart, cartList.length == 1);
+      if (cartitem.isSendKichen == 1) {
+        var deletedlist = [];
+        deletedlist.add(cartitem);
+        opnePrinterPop(deletedlist);
+      }
+      if (cartList.length > 1) {
+        await getCartItem(currentCart);
+      } else {
+        setState(() {
+          currentCart = null;
+          cartList = [];
+          grandTotal = 0.0;
+          discount = 0.0;
+          tax = 0.0;
+          subtotal = 0.0;
+        });
+      }
+    } catch (e) {
+      CommunFun.showToast(context, e.message.toString());
     }
   }
 
@@ -503,7 +703,7 @@ class _DashboradPageState extends State<DashboradPage>
             barrierDismissible: false,
             builder: (BuildContext context) {
               return ProductQuantityDailog(
-                  product: product, cartID: currentCart, iscartItem: cart);
+                  product: product, cartID: currentCart, cartItem: cart);
             });
         return false;
       }
@@ -1316,7 +1516,7 @@ class _DashboradPageState extends State<DashboradPage>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                     Padding(
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      padding: EdgeInsets.only(top: 5, bottom: 5),
                       child: Text(
                         cart.productName.toUpperCase(),
                         style: TextStyle(
@@ -1333,7 +1533,7 @@ class _DashboradPageState extends State<DashboradPage>
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Padding(
-                                padding: EdgeInsets.only(top: 10, bottom: 10),
+                                padding: EdgeInsets.only(top: 0, bottom: 0),
                                 child: Text(
                                   cart.productQty.toString(),
                                   style: TextStyle(
@@ -1344,7 +1544,7 @@ class _DashboradPageState extends State<DashboradPage>
                                 )),
                             Padding(
                                 padding: EdgeInsets.only(
-                                    right: 10, top: 10, bottom: 10),
+                                    right: 10, top: 0, bottom: 0),
                                 child: Text(
                                   cart.productPrice.toString(),
                                   style: TextStyle(
@@ -1359,7 +1559,7 @@ class _DashboradPageState extends State<DashboradPage>
             ),
             menuItems: <Widget>[
               new Container(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
+                padding: EdgeInsets.only(top: 5, bottom: 5),
                 color: Colors.red,
                 child: new IconButton(
                   padding: EdgeInsets.all(0),
