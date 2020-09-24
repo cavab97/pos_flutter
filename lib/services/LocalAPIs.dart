@@ -175,11 +175,24 @@ class LocalAPI {
     return result;
   }
 
+  Future updateTableIdInOrder(orderid, tableid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "UPDATE orders SET table_id =" +
+        tableid.toString() +
+        "table_no = " +
+        tableid.toString() +
+        " where app_id =" +
+        orderid.toString();
+    var res = await db.rawQuery(qry);
+    await SyncAPICalls.logActivity(
+        "assign table", "assing table to web order", "orders", tableid);
+  }
+
   Future<int> insertTablePrinter(Printer table_printer) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from printer where printer_ip = 1"; //+
     // table_printer.printerIp.toString();
-    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    var res = await db.rawQuery(qry);
     List<Printer> list =
         res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
     var result;
@@ -206,10 +219,8 @@ class LocalAPI {
     List<Printer> list =
         res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
 
-    await SyncAPICalls.logActivity(
-        "Printer",
-        list.length > 0 ? "Print KOT" : "Print KOT",
-        "printerId","1");
+    await SyncAPICalls.logActivity("Printer",
+        list.length > 0 ? "Print KOT" : "Print KOT", "printerId", "1");
 
     print("=====================================");
     print(list[0].printerIp);

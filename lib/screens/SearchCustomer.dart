@@ -21,6 +21,8 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
   List<Customer> customerList = new List<Customer>();
+  List<Customer> filterList = [];
+  bool isFiltring = false;
   @override
   void initState() {
     super.initState();
@@ -52,6 +54,16 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
     await Preferences.setStringToSF(
         Constant.CUSTOMER_DATA, json.encode(customer));
     await Navigator.pushNamed(context, Constant.DashboardScreen);
+  }
+
+  filterCustomer(val) {
+    var list = customerList
+        .where(
+            (x) => x.name.toString().toLowerCase().contains(val.toLowerCase()))
+        .toList();
+    setState(() {
+      filterList = list;
+    });
   }
 
   @override
@@ -169,28 +181,50 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           fillColor: Colors.white,
         ),
         style: TextStyle(color: Colors.black, fontSize: 25.0),
+        onTap: () {
+          setState(() {
+            isFiltring = true;
+          });
+        },
         onChanged: (e) {
-          print(e);
+          filterCustomer(e);
         },
       ),
     );
   }
 
   Widget customerLists() {
-    return ListView(
-      shrinkWrap: true,
-      children: customerList.map((customer) {
-        return ListTile(
-          onTap: () {
-            saveCustomerTolocal(customer);
-          },
-          leading: Text(
-            customer.name == null ? customer.firstName : customer.name,
-            style: Styles.communBlack(),
-          ),
-          title: Text(customer.email, style: Styles.communBlack()),
-        );
-      }).toList(),
-    );
+    if (isFiltring) {
+      return ListView(
+          shrinkWrap: true,
+          children: filterList.map((customer) {
+            return ListTile(
+              onTap: () {
+                saveCustomerTolocal(customer);
+              },
+              leading: Text(
+                customer.name == null ? customer.firstName : customer.name,
+                style: Styles.communBlack(),
+              ),
+              title: Text(customer.email, style: Styles.communBlack()),
+            );
+          }).toList());
+    } else {
+      return ListView(
+        shrinkWrap: true,
+        children: customerList.map((customer) {
+          return ListTile(
+            onTap: () {
+              saveCustomerTolocal(customer);
+            },
+            leading: Text(
+              customer.name == null ? customer.firstName : customer.name,
+              style: Styles.communBlack(),
+            ),
+            title: Text(customer.email, style: Styles.communBlack()),
+          );
+        }).toList(),
+      );
+    }
   }
 }

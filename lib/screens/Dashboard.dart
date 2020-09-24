@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
@@ -48,6 +49,7 @@ class _DashboradPageState extends State<DashboradPage>
     with TickerProviderStateMixin {
   GlobalKey<AutoCompleteTextFieldState<ProductDetails>> keyAutoSuggestion =
       new GlobalKey();
+  TextEditingController searchTextFieldController = new TextEditingController();
   AutoCompleteTextField searchTextField;
   TabController _tabController;
   TabController _subtabController;
@@ -82,6 +84,11 @@ class _DashboradPageState extends State<DashboradPage>
     checkshift();
     checkidTableSelected();
     getUserData();
+    KeyboardVisibilityNotification().addNewListener(
+      onHide: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+    );
   }
 
   checkisInit() async {
@@ -276,7 +283,7 @@ class _DashboradPageState extends State<DashboradPage>
       SearchProductList =
           product.length != 0 && product[0].productId != null ? product : [];
     });
-   // return SearchProductList;
+    // return SearchProductList;
   }
 
   void _handleTabSelection() {
@@ -742,7 +749,8 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   selectTable() {
-    Navigator.pushNamed(context, Constant.SelectTableScreen);
+    Navigator.pushNamed(context, Constant.SelectTableScreen,
+        arguments: {"isAssign": false});
   }
 
   gotoTansactionPage() {
@@ -1049,46 +1057,68 @@ class _DashboradPageState extends State<DashboradPage>
             ],
           ),
           Container(
-              height: 70,
-              margin: EdgeInsets.only(top: 15),
-              width: MediaQuery.of(context).size.width / 3.8,
-              child: new Column(
-                children: <Widget>[
-                  TypeAheadField(
-                    textFieldConfiguration: TextFieldConfiguration(
-                      autofocus: true,
-                      style: Styles.communBlacksmall(),
-                      decoration: InputDecoration(
-                          suffixIcon: Padding(
-                        padding: EdgeInsets.only(right: 25),
-                        child: Icon(
-                          Icons.search,
-                          color: Colors.deepOrange,
-                          size: 30,
-                        ),
-                      )),
+            height: 70,
+            margin: EdgeInsets.only(top: 15),
+            width: MediaQuery.of(context).size.width / 3.8,
+            child: TypeAheadField(
+              textFieldConfiguration: TextFieldConfiguration(
+                controller: searchTextFieldController,
+                style: Styles.communBlacksmall(),
+                decoration: InputDecoration(
+                    contentPadding:
+                        EdgeInsets.only(left: 20, top: 0, bottom: 0),
+                    suffixIcon: Padding(
+                      padding: EdgeInsets.only(right: 20),
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.deepOrange,
+                        size: 30,
+                      ),
                     ),
-                    suggestionsCallback: (pattern) async {
-                      return getSearchList(pattern);
-                    },
-                    itemBuilder: (context, suggestion) {
-                      return ListTile(
-                        leading: Icon(Icons.shopping_cart),
-                        title: Text("suggestion['name']"),
-                        subtitle: Text("\$150"),
-                      );
-                    },
-                    onSuggestionSelected: (suggestion) {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          //builder: (context) => ProductPage(product: suggestion)
-                          ));
-                    },
+                    hintText: Strings.search_bar_text,
+                    hintStyle: Styles.communGrey(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(50),
+                      borderSide: BorderSide(
+                        width: 0,
+                        style: BorderStyle.none,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white),
+              ),
+              suggestionsCallback: (pattern) async {
+                return productList; //getSearchList(pattern);
+              },
+              itemBuilder: (context, productList) {
+                var image_Arr =
+                    productList.base64.split(" groupconcate_Image ");
+                return ListTile(
+                  leading: Container(
+                    color: Colors.grey,
+                    width: 50,
+                    height: 50,
+                    child: image_Arr.length != 0 && image_Arr[0] != ""
+                        ? CommonUtils.imageFromBase64String(image_Arr[0])
+                        : new Image.asset(
+                            Strings.no_image,
+                            fit: BoxFit.cover,
+                          ),
                   ),
-                ],
-              )
+                  title: Text(productList.name),
+                  subtitle: Text(productList.price.toString()),
+                );
+              },
+              onSuggestionSelected: (suggestion) {
+                print(suggestion);
+                // Navigator.of(context).push(MaterialPageRoute(
+                //     //builder: (context) => ProductPage(product: suggestion)
+                //     ));
+              },
+            ),
 
-              //For single suggestion
-              /*SimpleAutoCompleteTextField(
+            //For single suggestion
+            /*SimpleAutoCompleteTextField(
               suggestions: [
                 "Apple",
                 "Armidillo",
@@ -1133,8 +1163,8 @@ class _DashboradPageState extends State<DashboradPage>
 
             ),*/
 
-              //Old one
-              /*TextField(
+            //Old one
+            /*TextField(
               keyboardType: TextInputType.text,
               decoration: InputDecoration(
                 suffixIcon: Padding(
@@ -1163,7 +1193,7 @@ class _DashboradPageState extends State<DashboradPage>
                 print(e);
               },
             ),*/
-              )
+          )
         ],
       ),
     );

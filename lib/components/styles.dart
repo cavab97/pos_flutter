@@ -98,4 +98,8 @@ class Styles {
   static normalBlack() {
     return TextStyle(color: Colors.black, fontSize: 25.0);
   }
+
+  static communGrey() {
+    return TextStyle(color: Colors.grey, fontSize: 20.0);
+  }
 }

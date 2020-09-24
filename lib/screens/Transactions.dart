@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
@@ -36,6 +37,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   List<ProductDetails> detailsList = [];
   bool isFiltering = false;
   bool isRefunding = false;
+  bool isWeborder = true;
   Customer customer = new Customer();
   Payments paumentMethod = new Payments();
   @override
@@ -219,135 +221,151 @@ class _TransactionsPageState extends State<TransactionsPage> {
   returnPayment(paymentMehtod) {
     // TODO : update payment tables
   }
+  assignTable() {
+    Navigator.pushNamed(context, Constant.SelectTableScreen,
+        arguments: {'isAssign': true, 'orderID': selectedOrder.app_id});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: transactionsDrawer(), // page Drawer
-        body: SafeArea(
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: Table(
-              columnWidths: {
-                0: FractionColumnWidth(.3),
-                1: FractionColumnWidth(.6),
-              },
-              children: [
-                TableRow(children: [
-                  TableCell(
-                      // Part 1 white
-                      child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
-                          color: Colors.white,
-                          child: ListView(
-                            padding: EdgeInsets.all(20),
-                            children: <Widget>[
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  IconButton(
-                                    padding: EdgeInsets.all(0),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    icon: Icon(
-                                      Icons.keyboard_arrow_left,
-                                      size: 50,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(Strings.transaction,
-                                      style: TextStyle(
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey[800])),
-                                ],
-                              ),
-                              transationsSearchBox(),
-                              SizedBox(
-                                height: 15,
-                              ),
-                              orderLists.length > 0
-                                  ? searchTransationList()
-                                  : Center(
-                                      child: Text(Strings.no_order_found,
-                                          style: Styles.darkBlue()))
-                            ],
-                          ))),
-                  TableCell(
-                    // Part 2 transactions list
-                    child: Center(
-                      child: SingleChildScrollView(
-                        child: Stack(children: <Widget>[
-                          Container(
-                            width: MediaQuery.of(context).size.width / 1.9,
-                            height: MediaQuery.of(context).size.height,
-                            margin: EdgeInsets.only(top: 5),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+      drawer: transactionsDrawer(), // page Drawer
+      body: SafeArea(
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: Table(
+            columnWidths: {
+              0: FractionColumnWidth(.3),
+              1: FractionColumnWidth(.6),
+            },
+            children: [
+              TableRow(children: [
+                TableCell(
+                    // Part 1 white
+                    child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        color: Colors.white,
+                        child: ListView(
+                          padding: EdgeInsets.all(20),
+                          children: <Widget>[
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
-                                SizedBox(height: 5),
-                                Text(
+                                IconButton(
+                                  padding: EdgeInsets.all(0),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  icon: Icon(
+                                    Icons.keyboard_arrow_left,
+                                    size: 50,
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(Strings.transaction,
+                                    style: TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[800])),
+                              ],
+                            ),
+                            transationsSearchBox(),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            orderLists.length > 0
+                                ? searchTransationList()
+                                : Center(
+                                    child: Text(Strings.no_order_found,
+                                        style: Styles.darkBlue()))
+                          ],
+                        ))),
+                TableCell(
+                  // Part 2 transactions list
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: Stack(children: <Widget>[
+                        Padding(
+                            padding: EdgeInsets.only(right: 10, top: 10),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                isWeborder
+                                    ? assingTableButton(() {
+                                        assignTable();
+                                      })
+                                    : SizedBox()
+                              ],
+                            )),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 50),
+                          height: MediaQuery.of(context).size.height,
+                          margin: EdgeInsets.only(top: 5),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              SizedBox(height: 15),
+                              Text(
                                   DateFormat('EEE, MMM d yyyy, hh:mm aaa')
                                       .format(DateTime.parse(
                                           selectedOrder.order_date)),
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).primaryColor),
-                                ),
-                                SizedBox(
-                                  height: 20,
-                                ),
-                                Text(
-                                  orderpayment.op_amount.toString(),
-                                  style: TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).accentColor),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                selectedOrder != null &&
-                                        paymemtUser.username != null
-                                    ? Text(
-                                        selectedOrder.invoice_no +
-                                            " - Processed by " +
-                                            paymemtUser.username,
-                                        style: Styles.whiteBoldsmall(),
-                                      )
-                                    : SizedBox(),
-                                SizedBox(
-                                  height: 20,
-                                ),
-                                Container(
-                                  height: 50,
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Center(
-                                    child: Text(
-                                      customer.firstName != null
-                                          ? customer.firstName
-                                          : "Walk-In Customer",
-                                      style: TextStyle(
-                                          fontSize: 23,
-                                          fontWeight: FontWeight.bold,
-                                          color: Theme.of(context).accentColor),
-                                    ),
+                                  style: Styles.whiteSimpleSmall()),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Text(
+                                orderpayment.op_amount.toString(),
+                                style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).accentColor),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              selectedOrder != null &&
+                                      paymemtUser.username != null
+                                  ? Text(
+                                      selectedOrder.invoice_no +
+                                          " - Processed by " +
+                                          paymemtUser.username,
+                                      style: Styles.whiteBoldsmall(),
+                                    )
+                                  : SizedBox(),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Container(
+                                height: 50,
+                                width: MediaQuery.of(context).size.width,
+                                child: Center(
+                                  child: Text(
+                                    customer.firstName != null
+                                        ? customer.firstName
+                                        : "Walk-In Customer",
+                                    style: TextStyle(
+                                        fontSize: 23,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context).accentColor),
                                   ),
-                                  color: Colors.grey[900].withOpacity(0.4),
                                 ),
-                                productList(),
-                              ],
-                            ),
+                                color: Colors.grey[900].withOpacity(0.4),
+                              ),
+                              productList(),
+                            ],
                           ),
-                          Positioned(
-                            bottom: 40,
-                            left: 0,
-                            right: 0,
+                        ),
+                        Positioned(
+                          bottom: 40,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 50),
                             child: Column(children: <Widget>[
                               Divider(),
                               totalAmountValues(),
@@ -356,16 +374,31 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                   ? refundButtons(context)
                                   : transationsButton()
                             ]),
-                          )
-                        ]),
-                      ),
+                          ),
+                        ),
+                      ]),
                     ),
-                  )
-                ]),
-              ],
-            ),
+                  ),
+                )
+              ]),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
+  }
+
+  Widget assingTableButton(onPress) {
+    return RaisedButton(
+      padding: EdgeInsets.all(10),
+      onPressed: onPress,
+      child: Text("Assign Table", style: Styles.whiteSimpleSmall()),
+      color: Colors.deepOrange,
+      textColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+    );
   }
 
   transactionsDrawer() {
@@ -781,93 +814,107 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   Widget searchTransationList() {
-    return ListView(
-        shrinkWrap: true,
-        children: isFiltering
-            ? filterList.map((item) {
-                return Container(
-                  decoration: new BoxDecoration(
-                      color: selectedOrder.app_id == item.app_id
-                          ? Colors.grey[200]
-                          : Colors.white),
-                  child: ListTile(
-                    onTap: () {
-                      getOrderDetails(item);
-                    },
-                    title: Row(
-                      children: <Widget>[
-                        Text(
-                            DateFormat('hh:mm aaa')
-                                .format(DateTime.parse(item.order_date)),
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey[600])),
-                        Container(color: Colors.red, child: Text("Cancle"))
-                      ],
-                    ),
-                    subtitle: Text(Strings.invoice + item.invoice_no.toString(),
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[600])),
-                    isThreeLine: true,
-                    trailing: Text(item.grand_total.toString(),
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[600])),
+    if (isFiltering) {
+      return ListView(
+          shrinkWrap: true,
+          children: filterList.map((item) {
+            return Container(
+                decoration: new BoxDecoration(
+                    color: selectedOrder.app_id == item.app_id
+                        ? Colors.grey[200]
+                        : Colors.white),
+                child: ListTile(
+                  dense: false,
+                  selected: selectedOrder.app_id == item.app_id,
+                  onTap: () {
+                    getOrderDetails(item);
+                  },
+                  title: Row(
+                    children: <Widget>[
+                      Text(
+                          DateFormat('hh:mm aaa')
+                              .format(DateTime.parse(item.order_date)),
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[600])),
+                      SizedBox(width: 10),
+                      item.order_status == 3
+                          ? Container(
+                              padding: EdgeInsets.all(3),
+                              color: Colors.red,
+                              child: Text(
+                                "Cancel",
+                                style: Styles.whiteBoldsmall(),
+                              ),
+                            )
+                          : SizedBox()
+                    ],
                   ),
-                );
-              }).toList()
-            : orderLists.map((item) {
-                return Container(
-                    decoration: new BoxDecoration(
-                        color: selectedOrder.app_id == item.app_id
-                            ? Colors.grey[200]
-                            : Colors.white),
-                    child: ListTile(
-                      dense: false,
-                      selected: selectedOrder.app_id == item.app_id,
-                      onTap: () {
-                        getOrderDetails(item);
-                      },
-                      title: Row(
-                        children: <Widget>[
-                          Text(
-                              DateFormat('hh:mm aaa')
-                                  .format(DateTime.parse(item.order_date)),
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey[600])),
-                          SizedBox(width: 10),
-                          item.order_status == 3
-                              ? Container(
-                                  padding: EdgeInsets.all(3),
-                                  color: Colors.red,
-                                  child: Text(
-                                    "Cancel",
-                                    style: Styles.whiteBoldsmall(),
-                                  ),
-                                )
-                              : SizedBox()
-                        ],
-                      ),
-                      subtitle: Text(
-                          Strings.invoice + item.invoice_no.toString(),
+                  subtitle: Text(Strings.invoice + item.invoice_no.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                  isThreeLine: true,
+                  trailing: Text(item.grand_total.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                ));
+          }).toList());
+    } else {
+      return ListView(
+          shrinkWrap: true,
+          children: orderLists.map((item) {
+            return Container(
+                decoration: new BoxDecoration(
+                    color: selectedOrder.app_id == item.app_id
+                        ? Colors.grey[200]
+                        : Colors.white),
+                child: ListTile(
+                  dense: false,
+                  selected: selectedOrder.app_id == item.app_id,
+                  onTap: () {
+                    getOrderDetails(item);
+                  },
+                  title: Row(
+                    children: <Widget>[
+                      Text(
+                          DateFormat('hh:mm aaa')
+                              .format(DateTime.parse(item.order_date)),
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
                               color: Colors.grey[600])),
-                      isThreeLine: true,
-                      trailing: Text(item.grand_total.toString(),
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[600])),
-                    ));
-              }).toList());
+                      SizedBox(width: 10),
+                      item.order_status == 3
+                          ? Container(
+                              padding: EdgeInsets.all(3),
+                              color: Colors.red,
+                              child: Text(
+                                "Cancel",
+                                style: Styles.whiteBoldsmall(),
+                              ),
+                            )
+                          : SizedBox()
+                    ],
+                  ),
+                  subtitle: Text(Strings.invoice + item.invoice_no.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                  isThreeLine: true,
+                  trailing: Text(item.grand_total.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                ));
+          }).toList());
+    }
   }
 }
 
