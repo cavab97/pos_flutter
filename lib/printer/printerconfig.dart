@@ -81,6 +81,7 @@ class Printer {
       List<OrderDetail> orderdetail,
       Orders orderData,
       OrderPayment paymentdata) async {
+
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
@@ -122,9 +123,9 @@ class Printer {
     ticket.hr();
     ticket.row([
       PosColumn(
-          text: 'ITEM', width: 7, styles: PosStyles(align: PosAlign.left)),
+          text: 'ITEM', width: 6, styles: PosStyles(align: PosAlign.left)),
       PosColumn(
-          text: 'QTY', width: 1, styles: PosStyles(align: PosAlign.right)),
+          text: 'QTY', width: 2, styles: PosStyles(align: PosAlign.right)),
       PosColumn(
           text: 'PRICE', width: 2, styles: PosStyles(align: PosAlign.right)),
       PosColumn(
@@ -137,10 +138,10 @@ class Printer {
       var name = orderdItem[i];
       ticket.row([
         PosColumn(
-            text: name.name, width: 7, styles: PosStyles(align: PosAlign.left)),
+            text: name.name, width: 6, styles: PosStyles(align: PosAlign.left)),
         PosColumn(
             text: item.detail_qty.toString(),
-            width: 1,
+            width: 2,
             styles: PosStyles(align: PosAlign.right)),
         PosColumn(
             text: item.product_old_price.toString(),

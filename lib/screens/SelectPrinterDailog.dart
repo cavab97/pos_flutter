@@ -10,6 +10,7 @@ import 'package:wifi/wifi.dart';
 class SelectPrinterDailog extends StatefulWidget {
   SelectPrinterDailog({Key key, this.onClose}) : super(key: key);
   Function onClose;
+
   @override
   SelectPrinterDailogState createState() => SelectPrinterDailogState();
 }
@@ -37,8 +38,9 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
   void discover(BuildContext ctx) async {
     setState(() {
       isDiscovering = true;
-      devices.clear();
-      found = -1;
+      //devices.clear();
+      //found = -1;
+      devices.add("192.168.109");
     });
 
     String ip;
@@ -91,6 +93,8 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
 
   addPrinter(ip) {
     widget.onClose(ip);
+    //TODO: save printer  apic call
+
   }
 
   @override

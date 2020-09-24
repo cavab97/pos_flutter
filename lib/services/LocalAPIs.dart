@@ -12,6 +12,7 @@ import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/BranchTax.dart';
@@ -170,6 +171,48 @@ class LocalAPI {
         table_order.table_id);
 
     return result;
+  }
+
+  Future<int> insertTablePrinter(Printer table_printer) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from printer where printer_ip = 1"; //+
+    // table_printer.printerIp.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<Printer> list =
+        res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
+    var result;
+    if (list.length > 0) {
+      result = await db.update("printer", table_printer.toJson(),
+          where: 'printerIp = ?', whereArgs: [table_printer.printerIp]);
+    } else {
+      result = await db.insert("printer", table_printer.toJson());
+    }
+    await SyncAPICalls.logActivity(
+        "Printer",
+        list.length > 0 ? "Update table printer" : "Insert table printer",
+        "printerId",
+        table_printer.printerId);
+
+    return result;
+  }
+
+  Future<List<Printer>> selectPrinterForPrint() async {
+    var qry =
+        "SELECT * from printer LEFT JOIN product_branch on product_branch.product_id = 1  AND printer.printer_id = product_branch.printer_id";
+    // table_printer.printerIp.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<Printer> list =
+        res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
+
+    await SyncAPICalls.logActivity(
+        "Printer",
+        list.length > 0 ? "Print KOT" : "Print KOT",
+        "printerId","1");
+
+    print("=====================================");
+    print(list[0].printerIp);
+    print("=====================================");
+    return list;
   }
 
   Future<int> insertShift(Shift shift) async {

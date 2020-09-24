@@ -3,6 +3,7 @@ class MSTSubCartdetails {
   int cartdetailsId;
   String localID;
   int productId;
+  int printer_id;
   int modifierId;
   double modifirePrice;
   int attributeId;
@@ -14,6 +15,7 @@ class MSTSubCartdetails {
     this.cartdetailsId,
     this.localID,
     this.productId,
+    this.printer_id,
     this.modifierId,
     this.modifirePrice,
     this.attrPrice,
@@ -26,6 +28,7 @@ class MSTSubCartdetails {
     cartdetailsId = json["cart_details_id"];
     localID = json["localID"];
     productId = json["product_id"];
+    printer_id = json["printer_id"];
     modifierId = json["modifier_id"];
     modifirePrice = json["modifier_price"];
     caId = json["ca_id"];
@@ -37,6 +40,7 @@ class MSTSubCartdetails {
     data["cart_details_id"] = this.cartdetailsId;
     data["localID"] = this.localID;
     data["product_id"] = this.productId;
+    data["printer_id"] = this.printer_id;
     data["modifier_id"] = this.modifierId;
     data["modifier_price"] = this.modifirePrice;
     data["ca_id"] = this.caId;

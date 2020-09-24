@@ -36,7 +36,7 @@ dependencies:
   flutter_typeahead: ^1.8.8
 
   # For POS Printer
-  esc_pos_printer: ^3.2.6
+  esc_pos_printer: ^3.2.9
   wifi: ^0.1.5
   ping_discover_network: ^0.2.0+1
   intl: ^0.16.1
