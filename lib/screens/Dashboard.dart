@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
@@ -56,6 +57,7 @@ class _DashboradPageState extends State<DashboradPage>
   List<Category> tabsList = new List<Category>();
   List<Category> subCatList = new List<Category>();
   List<ProductDetails> productList = new List<ProductDetails>();
+  List<ProductDetails> SearchProductList = new List<ProductDetails>();
   List<MSTCartdetails> cartList = new List<MSTCartdetails>();
   bool isDrawerOpen = false;
   bool isShiftOpen = false;
@@ -262,6 +264,19 @@ class _DashboradPageState extends State<DashboradPage>
           product.length != 0 && product[0].productId != null ? product : [];
       isLoading = false;
     });
+  }
+
+  getSearchList(seachText) async {
+    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    List<ProductDetails> product =
+        await localAPI.getSeachProduct(seachText.toString(), branchid);
+
+    setState(() {
+      SearchProductList.clear();
+      SearchProductList =
+          product.length != 0 && product[0].productId != null ? product : [];
+    });
+   // return SearchProductList;
   }
 
   void _handleTabSelection() {
@@ -1039,35 +1054,35 @@ class _DashboradPageState extends State<DashboradPage>
               width: MediaQuery.of(context).size.width / 3.8,
               child: new Column(
                 children: <Widget>[
-                  SimpleAutoCompleteTextField(
-                    key: null,
-                    suggestions: ["Apple", "Pizza", "mini Pizza"],
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                      suffixIcon: Padding(
+                  TypeAheadField(
+                    textFieldConfiguration: TextFieldConfiguration(
+                      autofocus: true,
+                      style: Styles.communBlacksmall(),
+                      decoration: InputDecoration(
+                          suffixIcon: Padding(
                         padding: EdgeInsets.only(right: 25),
                         child: Icon(
                           Icons.search,
                           color: Colors.deepOrange,
                           size: 30,
                         ),
-                      ),
-                      hintText: Strings.search_bar_text,
-                      hintStyle: TextStyle(fontSize: 18.0, color: Colors.black),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(50),
-                        borderSide: BorderSide(
-                          width: 0,
-                          style: BorderStyle.none,
-                        ),
-                      ),
-                      filled: true,
-                      contentPadding:
-                          EdgeInsets.only(left: 20, top: 0, bottom: 0),
-                      fillColor: Colors.white,
+                      )),
                     ),
-                    style: TextStyle(color: Colors.black, fontSize: 20.0),
-                    // key: keyAutoSuggestion,
+                    suggestionsCallback: (pattern) async {
+                      return getSearchList(pattern);
+                    },
+                    itemBuilder: (context, suggestion) {
+                      return ListTile(
+                        leading: Icon(Icons.shopping_cart),
+                        title: Text("suggestion['name']"),
+                        subtitle: Text("\$150"),
+                      );
+                    },
+                    onSuggestionSelected: (suggestion) {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          //builder: (context) => ProductPage(product: suggestion)
+                          ));
+                    },
                   ),
                 ],
               )

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/screens/PrinteTypeDailog.dart';
 import 'package:mcncashier/screens/SelectPrinterDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -23,6 +24,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool isChangeTheme = false;
   bool isChangeLanguage = false;
   bool alwaysPrint = false;
+
   @override
   void initState() {
     super.initState();
@@ -65,7 +67,19 @@ class _SettingsPageState extends State<SettingsPage> {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return ChoosePrinterDailog(selectedIP: ip);
+          return ChoosePrinterDailog(
+              selectedIP: ip,
+              onClose: (selected) async {
+                Navigator.of(context).pop();
+                //TODO: Save Printer
+                print(selected);
+                Printer table_printe = new Printer();
+                table_printe.printerIp = ip;
+                table_printe.printerIsCashier = selected;
+                var result = await localAPI.insertTablePrinter(table_printe);
+                print("Printer result");
+                print(result);
+              });
         });
   }
 
@@ -290,7 +304,7 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
           onPressed: _onPress,
           child: Text(
-            "Print Test Recipt",
+            "Print Test Receipt",
             style: Styles.whiteSimpleSmall(),
           ),
           color: StaticColor.backgroundColor,

@@ -7,25 +7,14 @@ import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class ChoosePrinterDailog extends StatefulWidget {
-  ChoosePrinterDailog({Key key, this.selectedIP}) : super(key: key);
+  ChoosePrinterDailog({Key key, this.selectedIP,this.onClose}) : super(key: key);
   final selectedIP;
+  Function onClose;
   @override
   ChoosePrinterDailogState createState() => ChoosePrinterDailogState();
 }
 
 class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
-  DatabaseHelper databaseHelper = DatabaseHelper();
-  LocalAPI localAPI = LocalAPI();
-
-  /*For printer */
-  String localIp = '';
-  List<String> devices = [];
-  bool isDiscovering = false;
-  int found = -1;
-
-  // int portController = 1900;
-  PaperSize paper = PaperSize.mm80;
-  List<MSTCartdetails> itemList = [];
 
   @override
   void initState() {
@@ -56,7 +45,9 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
               left: 20,
               top: 10,
               child: FlatButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    widget.onClose(1);
+                  },
                   child: Text("Done", style: Styles.whiteSimpleSmall()))),
           closeButton(context),
         ],

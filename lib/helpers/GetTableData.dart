@@ -5,7 +5,7 @@ import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Payment.dart';
-import 'package:mcncashier/models/Pinter.dart';
+import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Price_Type.dart';
 import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/Product_Attribute.dart';

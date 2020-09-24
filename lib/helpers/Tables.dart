@@ -269,6 +269,7 @@ class CreateTables {
         "uuid TEXT," +
         "product_id INTEGER," +
         "branch_id INTEGER," +
+        "printer_id INTEGER," +
         "warningStockLevel INTEGER," +
         "display_order INTEGER," +
         "status INTEGER," +
@@ -603,6 +604,7 @@ class CreateTables {
         'localID TEXT,' +
         'user_id INTEGER,' +
         'branch_id INTEGER,' +
+        'printer_id INTEGER,' +
         'sub_total REAL,' + //DOUBLE
         'discount REAL,' +
         'discount_type INTEGER,' +

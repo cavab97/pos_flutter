@@ -13,6 +13,7 @@ import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/BranchTax.dart';
@@ -87,6 +88,31 @@ class LocalAPI {
     return list;
   }
 
+  Future<List<ProductDetails>> getSeachProduct(
+      String searchText, String branchID) async {
+    var query = "SELECT product.*,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 ,product_store_inventory.qty , price_type.name as price_type_Name FROM `product` " +
+        " LEFT join product_category on product_category.product_id = product.product_id " +
+        " LEFT join  product_branch on product_branch.product_id = product.product_id " +
+        " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
+        " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
+        " LEFT join product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
+        " where product.name  LIKE '%$searchText%'" +
+        " AND product_branch.branch_id = " +
+        branchID +
+        " AND product_store_inventory.branch_id  = " +
+        branchID +
+        " AND product.status = 1"
+            " GROUP By product.product_id";
+
+    List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+    List<ProductDetails> list = res.isNotEmpty
+        ? res.map((c) => ProductDetails.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Product", "geting Product List", "product", searchText);
+    return list;
+  }
+
   Future<List<Customer>> getCustomers(teminalID) async {
     var query = "SELECT * from customer WHERE " + " customer.status = 1 ";
 
@@ -147,6 +173,48 @@ class LocalAPI {
         table_order.table_id);
 
     return result;
+  }
+
+  Future<int> insertTablePrinter(Printer table_printer) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from printer where printer_ip = 1"; //+
+    // table_printer.printerIp.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<Printer> list =
+        res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
+    var result;
+    if (list.length > 0) {
+      result = await db.update("printer", table_printer.toJson(),
+          where: 'printerIp = ?', whereArgs: [table_printer.printerIp]);
+    } else {
+      result = await db.insert("printer", table_printer.toJson());
+    }
+    await SyncAPICalls.logActivity(
+        "Printer",
+        list.length > 0 ? "Update table printer" : "Insert table printer",
+        "printerId",
+        table_printer.printerId);
+
+    return result;
+  }
+
+  Future<List<Printer>> selectPrinterForPrint() async {
+    var qry =
+        "SELECT * from printer LEFT JOIN product_branch on product_branch.product_id = 1  AND printer.printer_id = product_branch.printer_id";
+    // table_printer.printerIp.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<Printer> list =
+        res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
+
+    await SyncAPICalls.logActivity(
+        "Printer",
+        list.length > 0 ? "Print KOT" : "Print KOT",
+        "printerId","1");
+
+    print("=====================================");
+    print(list[0].printerIp);
+    print("=====================================");
+    return list;
   }
 
   Future<int> insertShift(Shift shift) async {
