@@ -3,7 +3,7 @@ class Tax {
   String uuid;
   String code;
   String description;
-  String rate;
+  int rate;
   int status;
   int isFixed;
   String updatedAt;

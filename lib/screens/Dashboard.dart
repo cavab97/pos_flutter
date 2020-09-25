@@ -282,7 +282,8 @@ class _DashboradPageState extends State<DashboradPage>
 
   getSearchList(seachText) async {
     var branchid = await CommunFun.getbranchId();
-    List<ProductDetails> product = await localAPI.getSeachProduct(seachText.toString(), branchid);
+    List<ProductDetails> product =
+        await localAPI.getSeachProduct(seachText.toString(), branchid);
 
     setState(() {
       SearchProductList.clear();
@@ -480,6 +481,7 @@ class _DashboradPageState extends State<DashboradPage>
             subTotal: subtotal,
             grandTotal: grandTotal,
             onClose: (mehtod) {
+              CommunFun.processingPopup(context);
               paymentWithMethod(mehtod);
             },
           );
@@ -579,13 +581,13 @@ class _DashboradPageState extends State<DashboradPage>
     order.order_date = datetime;
     order.order_status = 1;
     order.order_by = userdata.id;
-    order.voucher_id = cartData.voucherId;
+    order.voucher_id = cartData.voucher_id;
     order.voucher_amount = cartData.discount;
     var orderid = await localAPI.placeOrder(order);
     print(orderid);
-    if (cartData.voucherId != 0 && cartData.voucherId != null) {
+    if (cartData.voucher_id != 0 && cartData.voucher_id != null) {
       VoucherHistory history = new VoucherHistory();
-      history.voucher_id = cartData.voucherId;
+      history.voucher_id = cartData.voucher_id;
       history.amount = cartData.discount;
       history.created_at = datetime;
       history.order_id = orderid;
@@ -675,7 +677,8 @@ class _DashboradPageState extends State<DashboradPage>
     var paymentid = await localAPI.sendtoOrderPayment(orderpayment);
     print(paymentid);
     await clearCartAfterSuccess();
-    showDialog(
+    await Navigator.of(context).pop();
+    await showDialog(
         // Opning Ammount Popup
         context: context,
         builder: (BuildContext context) {
