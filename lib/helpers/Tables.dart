@@ -449,7 +449,7 @@ class CreateTables {
         "sub_total REAL," +
         "sub_total_after_discount REAL," +
         "grand_total REAL," +
-        "order_source INTEGER," +
+        "order_source INTEGER," + // 1  web, 2  app
         "order_status INTEGER," +
         "order_item_count INTEGER," +
         "order_date TEXT," +
@@ -604,7 +604,6 @@ class CreateTables {
         'localID TEXT,' +
         'user_id INTEGER,' +
         'branch_id INTEGER,' +
-        'printer_id INTEGER,' +
         'sub_total REAL,' + //DOUBLE
         'discount REAL,' +
         'discount_type INTEGER,' +
@@ -617,6 +616,7 @@ class CreateTables {
         'created_by  INTEGER,' +
         'created_at  TEXT,' +
         'voucher_id INTEGER,' +
+        'sync NUMERIC,' +
         'customer_terminal INTEGER' +
         ')');
 

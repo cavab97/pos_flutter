@@ -62,7 +62,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   getTaxs() async {
-    var branchid =  await CommunFun.getbranchId();
+    var branchid = await CommunFun.getbranchId();
     List<BranchTax> taxlists = await localAPI.getTaxList(branchid);
     if (taxlists.length > 0) {
       setState(() {
@@ -358,7 +358,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     MST_Cart cart = new MST_Cart();
     SaveOrder orderData = new SaveOrder();
     MSTSubCartdetails subCartData = new MSTSubCartdetails();
-    var branchid =  await CommunFun.getbranchId();
+    var branchid = await CommunFun.getbranchId();
     var table = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
     var customerData =
@@ -366,9 +366,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var loginData = await json.decode(loginUser);
     var qty = await countTotalQty();
     var disc = await countDiscount();
-    var subtotal = countSubtotal();
-    var totalTax = countTax(subtotal);
-    var grandTotal = countGrandtotal(taxvalues, disc);
+    var subtotal = await countSubtotal();
+    var totalTax = await countTax(subtotal);
+    var grandTotal = await countGrandtotal(taxvalues, disc);
 
     //cart data
     cart.user_id = customerData != null ? customerData["customer_id"] : 0;
@@ -448,13 +448,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         print(res);
       }
     }
-
     if (isEditing && cartitem.isSendKichen == 1) {
       var items = [];
       items.add(cartitem);
       //  senditemtoKitchen(items);
     }
-
     await Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 

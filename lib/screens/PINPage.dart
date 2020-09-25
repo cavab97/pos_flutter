@@ -7,6 +7,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/CheckInout.dart';
+import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class PINPage extends StatefulWidget {
@@ -55,37 +56,39 @@ class _PINPageState extends State<PINPage> {
   }
 
   clockInwithPIN() async {
-    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
-    var user = json.decode(loginUser);
-    var pin = user["user_pin"];
     if (!isCheckIn) {
-      if (pinNumber.length >= 6 && pin.toString() == pinNumber) {
-        //TODO : API CALL for clockin
+      if (pinNumber.length >= 6) {
         setState(() {
           isLoading = true;
         });
-        CheckinOut checkIn = new CheckinOut();
-        var terminalId = await CommunFun.getTeminalKey();
-        var branchid = await CommunFun.getbranchId();
-        var loginUser =
-            await Preferences.getStringValuesSF(Constant.LOIGN_USER);
-        var date = DateTime.now();
-        var user = json.decode(loginUser);
-        checkIn.localID = await CommunFun.getLocalID();
-        checkIn.terminalId = int.parse(terminalId);
-        checkIn.userId = user["id"];
-        checkIn.branchId = int.parse(branchid);
-        checkIn.status = "IN";
-        checkIn.timeInOut = date.toString();
-        checkIn.createdAt = date.toString();
-        checkIn.sync = 0;
-        var result = await localAPI.userCheckInOut(checkIn);
-        await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
-        await Preferences.setStringToSF(Constant.SHIFT_ID, result.toString());
-        Navigator.pushNamed(context, Constant.DashboardScreen);
-        setState(() {
-          isLoading = false;
-        });
+        List<User> checkUserExit = await localAPI.checkUserExit(pinNumber);
+        User user;
+        if (checkUserExit.length != 0) {
+          user = checkUserExit[0];
+          CheckinOut checkIn = new CheckinOut();
+          var terminalId = await CommunFun.getTeminalKey();
+          var branchid = await CommunFun.getbranchId();
+          var date = DateTime.now();
+          checkIn.localID = await CommunFun.getLocalID();
+          checkIn.terminalId = int.parse(terminalId);
+          checkIn.userId = user.id;
+          checkIn.branchId = int.parse(branchid);
+          checkIn.status = "IN";
+          checkIn.timeInOut = date.toString();
+          checkIn.createdAt = date.toString();
+          checkIn.sync = 0;
+          var result = await localAPI.userCheckInOut(checkIn);
+          await Preferences.setStringToSF(
+              Constant.LOIGN_USER, json.encode(user));
+          await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
+          await Preferences.setStringToSF(Constant.SHIFT_ID, result.toString());
+          Navigator.pushNamed(context, Constant.DashboardScreen);
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          CommunFun.showToast(context, Strings.invalid_pin_msg);
+        }
       } else {
         if (pinNumber.length >= 6) {
           CommunFun.showToast(context, Strings.invalid_pin_msg);
@@ -103,33 +106,37 @@ class _PINPageState extends State<PINPage> {
     var user = json.decode(loginUser);
     var pin = user["user_pin"];
     if (isCheckIn) {
-      if (pinNumber.length >= 6 && pinNumber == pin.toString()) {
+      if (pinNumber.length >= 6) {
         setState(() {
           isLoading = true;
         });
-        CheckinOut checkIn = new CheckinOut();
-        var shiftid = await Preferences.getStringValuesSF(Constant.SHIFT_ID);
-        var terminalId = await CommunFun.getTeminalKey();
-        var branchid = await CommunFun.getbranchId();
-        var loginUser =
-            await Preferences.getStringValuesSF(Constant.LOIGN_USER);
-        var date = DateTime.now();
-        var user = json.decode(loginUser);
-        checkIn.id = int.parse(shiftid);
-        checkIn.localID = await CommunFun.getLocalID();
-        checkIn.terminalId = int.parse(terminalId);
-        checkIn.userId = user["id"];
-        checkIn.branchId = int.parse(branchid);
-        checkIn.status = "OUT";
-        checkIn.timeInOut = date.toString();
-        checkIn.sync = 0;
-        var result = await localAPI.userCheckInOut(checkIn);
-        await Preferences.removeSinglePref(Constant.IS_CHECKIN);
-        await Preferences.removeSinglePref(Constant.SHIFT_ID);
-        Navigator.pushNamed(context, Constant.PINScreen);
-        setState(() {
-          isLoading = false;
-        });
+        List<User> checkUserExit = await localAPI.checkUserExit(pinNumber);
+        User checkuser;
+        if (checkUserExit.length != 0) {
+          checkuser = checkUserExit[0];
+          CheckinOut checkIn = new CheckinOut();
+          var shiftid = await Preferences.getStringValuesSF(Constant.SHIFT_ID);
+          var terminalId = await CommunFun.getTeminalKey();
+          var branchid = await CommunFun.getbranchId();
+          var date = DateTime.now();
+          checkIn.id = int.parse(shiftid);
+          checkIn.localID = await CommunFun.getLocalID();
+          checkIn.terminalId = int.parse(terminalId);
+          checkIn.userId = checkuser.id;
+          checkIn.branchId = int.parse(branchid);
+          checkIn.status = "OUT";
+          checkIn.timeInOut = date.toString();
+          checkIn.sync = 0;
+          var result = await localAPI.userCheckInOut(checkIn);
+          await Preferences.removeSinglePref(Constant.IS_CHECKIN);
+          await Preferences.removeSinglePref(Constant.SHIFT_ID);
+          Navigator.pushNamed(context, Constant.PINScreen);
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          CommunFun.showToast(context, Strings.invalid_pin_msg);
+        }
       } else {
         if (pinNumber.length >= 6) {
           CommunFun.showToast(context, Strings.invalid_pin_msg);

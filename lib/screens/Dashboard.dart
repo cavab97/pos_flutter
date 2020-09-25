@@ -806,9 +806,9 @@ class _DashboradPageState extends State<DashboradPage>
                 child: Text(
                   subCatList[index].name.toUpperCase(),
                   style: Styles.whiteSimpleSmall(),
-                )),
+                ),),
           );
-        }));
+        }),);
 
     return WillPopScope(
       child: Scaffold(

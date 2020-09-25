@@ -8,7 +8,6 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
-import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/user.dart' as repo;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -142,15 +141,15 @@ class _LoginPageState extends State<LoginPage> {
                       isValidatePassword = true;
                     });
                   }),
-                  SizedBox(height: 50),
-                  GestureDetector(
-                    // forgot password btn
-                    onTap: () {
-                      // TODO : goto Forgot password
-                    },
-                    child: CommunFun.forgotPasswordText(context),
-                  ),
-                  SizedBox(height: 50),
+                  SizedBox(height: 80),
+                  // GestureDetector(
+                  //   // forgot password btn
+                  //   onTap: () {
+                  //     // TODO : goto Forgot password
+                  //   },
+                  //   child: CommunFun.forgotPasswordText(context),
+                  // ),
+                  // SizedBox(height: 50),
                   isLoading
                       ? CommunFun.loader(context)
                       : Container(
