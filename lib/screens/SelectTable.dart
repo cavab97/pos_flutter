@@ -7,6 +7,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -93,13 +94,17 @@ class _SelectTablePageState extends State<SelectTablePage> {
 
   assignTabletoOrder() async {
     if (int.parse(paxController.text) <= selectedTable.tableCapacity) {
+      SaveOrder orderData = new SaveOrder();
+      orderData.orderName = selectedTable.tableName;
+      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+      orderData.numberofPax = int.parse(paxController.text);
+      orderData.cartId = orderid;
+
       Table_order tableorder = new Table_order();
       tableorder.table_id = selectedTable.tableId;
       tableorder.number_of_pax = int.parse(paxController.text);
-      var result = await localAPI.insertTableOrder(tableorder);
-      print(result);
-      var tbleres =
-          await localAPI.updateTableIdInOrder(orderid, selectedTable.tableId);
+      await localAPI.insertTableOrder(tableorder);
+      await localAPI.insertSaveOrders(orderData, selectedTable.tableId);
       Navigator.of(context).pop();
       Navigator.pushNamed(context, Constant.TransactionScreen);
     } else {

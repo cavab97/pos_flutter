@@ -455,7 +455,7 @@ class CommunFun {
 
   static getLocalID() async {
     var deviceInfo = await CommunFun.deviceInfo();
-    var terminalId =  await CommunFun.getTeminalKey();
+    var terminalId = await CommunFun.getTeminalKey();
     var localid = Platform.isAndroid
         ? "ANDROID" + deviceInfo["deviceId"] + terminalId
         : "IOS" + deviceInfo["deviceId"] + terminalId;
@@ -471,5 +471,38 @@ class CommunFun {
     } else {
       return user;
     }
+  }
+
+  static processingPopup(context) {
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(30.0))),
+            content: Builder(
+              builder: (context) {
+                return Container(
+                  height: 150,
+                  width: 150,
+                  child: Center(
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      CommunFun.loader(context),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Text(Strings.procesing, style: TextStyle(fontSize: 30))
+                    ],
+                  )),
+                );
+              },
+            ),
+          );
+        });
   }
 }

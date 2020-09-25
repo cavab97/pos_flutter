@@ -35,7 +35,7 @@ class Constant {
   static final String TerminalScreen = "/TerminalKeyPage";
   static final String SelectTableScreen = "/TableSelection";
   static final String SettingsScreen = "/Settings";
-
+  static final String WebOrderPages = "/WebOrders";
 /*==============================================================================
                                   Error messages
   =================================================================================*/

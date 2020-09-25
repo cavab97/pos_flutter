@@ -1005,7 +1005,6 @@ class LocalAPI {
         user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
     return list;
   }
-
   Future<List<Printer>> getPrinter(productID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from printer where printer.printer_id = (Select printer_id from product_branch WHERE product_branch.product_id = $productID)";
@@ -1025,4 +1024,5 @@ class LocalAPI {
         : [];
     return list;
   }
+
 }

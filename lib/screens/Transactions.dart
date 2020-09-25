@@ -5,6 +5,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
@@ -35,6 +36,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   OrderPayment orderpayment = new OrderPayment();
   User paymemtUser = new User();
   List<ProductDetails> detailsList = [];
+  List<OrderDetail> orderItemList = [];
   bool isFiltering = false;
   bool isRefunding = false;
   bool isWeborder = true;
@@ -66,12 +68,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
   getOrderDetails(order) async {
     setState(() {
       selectedOrder = order;
+      isWeborder = order.order_source == 1 ? true : false;
       taxJson = json.decode(selectedOrder.tax_json);
     });
+
+    List<OrderDetail> orderItem =
+        await localAPI.getOrderDetailsList(order.app_id);
     List<ProductDetails> details = await localAPI.getOrderDetails(order.app_id);
     if (details.length > 0) {
       setState(() {
         detailsList = details;
+        orderItemList = orderItem;
       });
     }
     OrderPayment orderpaymentdata =
@@ -221,9 +228,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
   returnPayment(paymentMehtod) {
     // TODO : update payment tables
   }
-  assignTable() {
-    Navigator.pushNamed(context, Constant.SelectTableScreen,
-        arguments: {'isAssign': true, 'orderID': selectedOrder.app_id});
+  deleteItemFormList(product) async {
+    var result = await localAPI.deleteOrderItem(product.app_id);
   }
 
   @override
@@ -288,19 +294,19 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   child: Center(
                     child: SingleChildScrollView(
                       child: Stack(children: <Widget>[
-                        Padding(
-                            padding: EdgeInsets.only(right: 10, top: 10),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: <Widget>[
-                                isWeborder
-                                    ? assingTableButton(() {
-                                        assignTable();
-                                      })
-                                    : SizedBox()
-                              ],
-                            )),
+                        // Padding(
+                        //     padding: EdgeInsets.only(right: 10, top: 10),
+                        //     child: Row(
+                        //       crossAxisAlignment: CrossAxisAlignment.center,
+                        //       mainAxisAlignment: MainAxisAlignment.end,
+                        //       children: <Widget>[
+                        //         isWeborder
+                        //             ? assingTableButton(() {
+                        //                 assignTable();
+                        //               })
+                        //             : SizedBox()
+                        //       ],
+                        //     )),
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 50),
                           height: MediaQuery.of(context).size.height,
@@ -313,7 +319,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               Text(
                                   DateFormat('EEE, MMM d yyyy, hh:mm aaa')
                                       .format(DateTime.parse(
-                                          selectedOrder.order_date)),
+                                          selectedOrder.order_date != null
+                                              ? selectedOrder.order_date
+                                              : DateTime.now().toString())),
                                   style: Styles.whiteSimpleSmall()),
                               SizedBox(
                                 height: 20,
@@ -731,12 +739,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget productList() {
     return Container(
+      padding: EdgeInsets.symmetric(horizontal: 50),
       height: MediaQuery.of(context).size.height / 2.5,
-      width: MediaQuery.of(context).size.width / 1.9,
+      // width: MediaQuery.of(context).size.width / 1.7,
       child: SingleChildScrollView(
         child: Column(
-            children: detailsList.map((product) {
-          var image_Arr = product.base64.split(" groupconcate_Image ");
+            children: orderItemList.map((product) {
+          var index = orderItemList.indexOf(product);
+          var item = detailsList[index];
+          var image_Arr = item.base64.split(" groupconcate_Image ");
           return InkWell(
               onTap: () {},
               child: Container(
@@ -745,7 +756,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     Hero(
-                      tag: product.productId,
+                      tag: product.product_id,
                       child: Container(
                         height: 80,
                         width: 100,
@@ -773,7 +784,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text(product.name.toString().toUpperCase(),
+                                Text(item.name.toString().toUpperCase(),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 2,
                                     style: TextStyle(
@@ -785,22 +796,27 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           SizedBox(
                             width: 8,
                           ),
-                          Text(product.qty.toString(),
+                          Text(product.detail_qty.toString(),
                               style: TextStyle(
                                   fontSize: 20,
                                   color: Theme.of(context).primaryColor)),
                           SizedBox(width: 80),
-                          Text(product.price.toString(),
+                          Text(product.product_price.toString(),
                               style: TextStyle(
                                   fontSize: 20,
                                   color: Theme.of(context).primaryColor)),
                           isRefunding
                               ? IconButton(
+                                  padding:
+                                      EdgeInsets.only(left: 10, bottom: 20),
                                   icon: Icon(
                                     Icons.remove_circle_outline,
                                     color: Colors.red,
+                                    size: 40,
                                   ),
-                                  onPressed: () {})
+                                  onPressed: () {
+                                    deleteItemFormList(product);
+                                  })
                               : SizedBox(),
                         ],
                       ),

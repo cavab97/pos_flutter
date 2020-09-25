@@ -1,4 +1,3 @@
-
 class MSTCartdetails {
   int id;
   int cartId;
@@ -18,34 +17,37 @@ class MSTCartdetails {
   int sync;
   int isSendKichen;
   String itemUnit;
+  String cart_detail;
   int hasCompositeInventory;
   int productPoints;
   int productTotalPoints;
   String createdAt;
   int createdBy;
 
-  MSTCartdetails({this.cartId,
-    this.localID,
-    this.productId,
-    this.printer_id,
-    this.productName,
-    this.productPrice,
-    this.productQty,
-    this.productNetPrice,
-    this.taxId,
-    this.taxValue,
-    this.discount,
-    this.discountType,
-    this.remark,
-    this.isDeleted,
-    // this.sync,
-    this.isSendKichen,
-    this.itemUnit,
-    this.hasCompositeInventory,
-    // this.productPoints,
-    // this.productTotalPoints,
-    this.createdAt,
-    this.createdBy});
+  MSTCartdetails(
+      {this.cartId,
+      this.localID,
+      this.productId,
+      this.printer_id,
+      this.productName,
+      this.productPrice,
+      this.productQty,
+      this.productNetPrice,
+      this.taxId,
+      this.taxValue,
+      this.discount,
+      this.discountType,
+      this.remark,
+      this.isDeleted,
+      // this.sync,
+      this.isSendKichen,
+      this.itemUnit,
+      this.hasCompositeInventory,
+      this.cart_detail,
+      // this.productPoints,
+      // this.productTotalPoints,
+      this.createdAt,
+      this.createdBy});
 
   MSTCartdetails.fromJson(Map<String, dynamic> json) {
     id = json["id"];
@@ -63,7 +65,7 @@ class MSTCartdetails {
     discountType = json["discount_type"];
     remark = json["remark"];
     isDeleted = json["is_deleted"];
-
+    cart_detail = json['cart_detail'];
     isSendKichen = json["is_send_kichen"];
     itemUnit = json["item_unit"];
     hasCompositeInventory = json["has_composite_inventory"];
@@ -91,6 +93,7 @@ class MSTCartdetails {
     data["remark"] = this.remark;
     data["is_deleted"] = this.isDeleted;
     data["is_send_kichen"] = this.isSendKichen;
+    data["cart_detail"] = this.cart_detail;
     data["has_composite_inventory"] = this.hasCompositeInventory;
     data["item_unit"] = this.itemUnit;
     data["created_by"] = this.createdBy;

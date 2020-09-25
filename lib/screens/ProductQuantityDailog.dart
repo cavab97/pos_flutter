@@ -331,13 +331,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return grandTotal = ((grandTotal + tax) - dis);
   }
 
-  countTax(subT) {
+  countTax(subT) async {
     var totalTax = [];
     double taxvalue = taxvalues;
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
-        // Tax tax = await localAPI.getTaxName(taxlistitem.taxId);
+        List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
         var taxval = taxlistitem.rate != null
             ? subT * double.parse(taxlistitem.rate) / 100
             : 0.0;
@@ -355,7 +355,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           "updated_at": taxlistitem.updatedAt,
           "updated_by": taxlistitem.updatedBy,
           "taxAmount": taxval.toString(),
-          "taxName": "GST" //tax.code
+          "taxName": tax.length > 0 ? tax[0].code : "" //tax.code
         };
         totalTax.add(taxmap);
       }
@@ -393,6 +393,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cart.discount_type = currentCart.discount_type;
     cart.total_qty = qty;
     cart.tax = taxvalues;
+    cart.source = 2;
     cart.tax_json = json.encode(totalTax);
     cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
     cart.customer_terminal =
@@ -432,6 +433,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         double.parse(productdata.price.toStringAsFixed(2));
     cartdetails.productQty = productdata.qty;
     cartdetails.productNetPrice = productdata.price;
+
     cartdetails.createdBy = loginData["id"];
     cartdetails.discount = 0;
     cartdetails.taxValue = taxvalues;
