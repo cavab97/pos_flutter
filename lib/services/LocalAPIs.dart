@@ -56,7 +56,7 @@ class LocalAPI {
 
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Category> list =
-        res.isNotEmpty ? res.map((c) => Category.fromJson(c)).toList() : [];
+    res.isNotEmpty ? res.map((c) => Category.fromJson(c)).toList() : [];
 
     await SyncAPICalls.logActivity(
         "Product", "geting category List", "category", branchID);
@@ -119,7 +119,7 @@ class LocalAPI {
     teminalID;
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Customer> list =
-        res.isNotEmpty ? res.map((c) => Customer.fromJson(c)).toList() : [];
+    res.isNotEmpty ? res.map((c) => Customer.fromJson(c)).toList() : [];
     await SyncAPICalls.logActivity(
         "Customer", "geting customer list", "customer", teminalID);
 
@@ -158,7 +158,7 @@ class LocalAPI {
         table_order.table_id.toString();
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<Table_order> list =
-        res.isNotEmpty ? res.map((c) => Table_order.fromJson(c)).toList() : [];
+    res.isNotEmpty ? res.map((c) => Table_order.fromJson(c)).toList() : [];
     var result;
     if (list.length > 0) {
       result = await db.update("table_order", table_order.toJson(),
@@ -194,7 +194,7 @@ class LocalAPI {
     // table_printer.printerIp.toString();
     var res = await db.rawQuery(qry);
     List<Printer> list =
-        res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
+    res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
     var result;
     if (list.length > 0) {
       result = await db.update("printer", table_printer.toJson(),
@@ -217,7 +217,7 @@ class LocalAPI {
     // table_printer.printerIp.toString();
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<Printer> list =
-        res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
+    res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
 
     await SyncAPICalls.logActivity("Printer",
         list.length > 0 ? "Print KOT" : "Print KOT", "printerId", "1");
@@ -268,7 +268,7 @@ class LocalAPI {
             " GROUP by product_modifier.pm_id";
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<ModifireData> list =
-        res.isNotEmpty ? res.map((c) => ModifireData.fromJson(c)).toList() : [];
+    res.isNotEmpty ? res.map((c) => ModifireData.fromJson(c)).toList() : [];
     await SyncAPICalls.logActivity(
         "Product", "Getting Product modifire", "modifier", product.productId);
     return list;
@@ -383,7 +383,7 @@ class LocalAPI {
     var qry = "SELECT * from save_order WHERE id =" + id.toString();
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<SaveOrder> list =
-        res.isNotEmpty ? res.map((c) => SaveOrder.fromJson(c)).toList() : [];
+    res.isNotEmpty ? res.map((c) => SaveOrder.fromJson(c)).toList() : [];
     await SyncAPICalls.logActivity(
         "product", "get save_order", "save_order", id);
 
@@ -412,7 +412,7 @@ class LocalAPI {
     var query = "SELECT * from mst_cart where id=" + cartID.toString();
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<MST_Cart> list =
-        res.isNotEmpty ? res.map((c) => MST_Cart.fromJson(c)).toList() : [];
+    res.isNotEmpty ? res.map((c) => MST_Cart.fromJson(c)).toList() : [];
     await SyncAPICalls.logActivity("product", "get cart list", "mst_cart", 1);
     return list;
   }
@@ -432,7 +432,7 @@ class LocalAPI {
     var query = "SELECT * from payment where status = 1";
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Payments> list =
-        res.isNotEmpty ? res.map((c) => Payments.fromJson(c)).toList() : [];
+    res.isNotEmpty ? res.map((c) => Payments.fromJson(c)).toList() : [];
     await SyncAPICalls.logActivity("payment", "get payment list", "payment", 1);
 
     return list;
@@ -441,9 +441,9 @@ class LocalAPI {
   Future<Orders> getcurrentOrders(orderid) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var result =
-        await db.query('orders', where: "app_id = ?", whereArgs: [orderid]);
+    await db.query('orders', where: "app_id = ?", whereArgs: [orderid]);
     List<Orders> list =
-        result.isNotEmpty ? result.map((c) => Orders.fromJson(c)).toList() : [];
+    result.isNotEmpty ? result.map((c) => Orders.fromJson(c)).toList() : [];
     return list[0];
   }
 
@@ -462,7 +462,7 @@ class LocalAPI {
     var checkisExitqry =
         "SELECT *  FROM orders where app_id =" + orderData.app_id.toString();
     var checkisExit =
-        await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
+    await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
     if (checkisExit.length > 0) {
       List<Orders> list = checkisExit.isNotEmpty
           ? checkisExit.map((c) => Orders.fromJson(c)).toList()
@@ -478,7 +478,7 @@ class LocalAPI {
     var checkisExitqry = "SELECT *  FROM order_detail where app_id =" +
         orderDetailData.app_id.toString();
     var checkisExit =
-        await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
+    await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
     if (checkisExit.length > 0) {
       List<OrderDetail> list = checkisExit.isNotEmpty
           ? checkisExit.map((c) => OrderDetail.fromJson(c)).toList()
@@ -496,7 +496,7 @@ class LocalAPI {
     var checkisExitqry = "SELECT *  FROM order_modifier where app_id =" +
         orderDetailData.app_id.toString();
     var checkisExit =
-        await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
+    await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
     if (checkisExit.length > 0) {
       List<OrderModifire> list = checkisExit.isNotEmpty
           ? checkisExit.map((c) => OrderModifire.fromJson(c)).toList()
@@ -514,7 +514,7 @@ class LocalAPI {
     var checkisExitqry = "SELECT *  FROM order_attributes where app_id =" +
         orderDetailData.app_id.toString();
     var checkisExit =
-        await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
+    await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
     if (checkisExit.length > 0) {
       List<OrderAttributes> list = checkisExit.isNotEmpty
           ? checkisExit.map((c) => OrderAttributes.fromJson(c)).toList()
@@ -532,7 +532,7 @@ class LocalAPI {
     var checkisExitqry = "SELECT *  FROM order_payment where app_id =" +
         paymentData.app_id.toString();
     var checkisExit =
-        await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
+    await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
     if (checkisExit.length > 0) {
       List<OrderPayment> list = checkisExit.isNotEmpty
           ? checkisExit.map((c) => OrderPayment.fromJson(c)).toList()
@@ -549,7 +549,7 @@ class LocalAPI {
     var db = await DatabaseHelper.dbHelper.getDatabse();
 
     var cart = // cart table
-        await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
+    await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
     print(cart);
     await SyncAPICalls.logActivity("orders", "clear cart", "mst_cart", 1);
 
@@ -721,7 +721,7 @@ class LocalAPI {
   Future<MST_Cart> getCartData(cartid) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var cartdata =
-        await db.query('mst_cart', where: 'id = ?', whereArgs: [cartid]);
+    await db.query('mst_cart', where: 'id = ?', whereArgs: [cartid]);
     List<MST_Cart> list = cartdata.isNotEmpty
         ? cartdata.map((c) => MST_Cart.fromJson(c)).toList()
         : [];
@@ -768,7 +768,7 @@ class LocalAPI {
     var tax = await DatabaseHelper.dbHelper.getDatabse().query('branch_tax',
         where: 'branch_id = ?', whereArgs: [branchid.toString()]);
     List<BranchTax> list =
-        tax.isNotEmpty ? tax.map((c) => BranchTax.fromJson(c)).toList() : [];
+    tax.isNotEmpty ? tax.map((c) => BranchTax.fromJson(c)).toList() : [];
     return list;
   }
 
@@ -776,7 +776,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var tax = await db.query('tax');
     List<Tax> list =
-        tax.isNotEmpty ? tax.map((c) => Tax.fromJson(c)).toList() : [];
+    tax.isNotEmpty ? tax.map((c) => Tax.fromJson(c)).toList() : [];
     return list;
   }
 
@@ -795,7 +795,7 @@ class LocalAPI {
     var user = await db
         .query('users', where: 'id = ?', whereArgs: [userid.toString()]);
     List<User> list =
-        user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
+    user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
     return list[0];
   }
 
@@ -947,9 +947,9 @@ class LocalAPI {
   Future<Branch> getBranchData(branchID) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var result =
-        await db.query("branch", where: 'branch_id = ?', whereArgs: [branchID]);
+    await db.query("branch", where: 'branch_id = ?', whereArgs: [branchID]);
     List<Branch> list =
-        result.isNotEmpty ? result.map((c) => Branch.fromJson(c)).toList() : [];
+    result.isNotEmpty ? result.map((c) => Branch.fromJson(c)).toList() : [];
 
     await SyncAPICalls.logActivity(
         "branch details", "branch details for invoice", "branch", branchID);
@@ -1008,14 +1008,14 @@ class LocalAPI {
     var qry = "SELECT * from users where user_pin = " + userpin.toString();
     var user = await db.rawQuery(qry);
     List<User> list =
-        user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
+    user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
     return list;
   }
 
   Future<int> deleteOrderItem(detailid) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var result =
-        db.rawDelete("DELETE FROM order_detail WHERE app_id = ?", [detailid]);
+    db.rawDelete("DELETE FROM order_detail WHERE app_id = ?", [detailid]);
     return result;
   }
 
@@ -1025,6 +1025,25 @@ class LocalAPI {
         "SELECT * FROM mst_cart WHERE branch_id = " + branchid.toString());
     List<MST_Cart> list = result.isNotEmpty
         ? result.map((c) => MST_Cart.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+  Future<List<Printer>> getPrinter(productID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from printer where printer.printer_id = (Select printer_id from product_branch WHERE product_branch.product_id = $productID)";
+    var result = await db.rawQuery(qry);
+    List<Printer> list = result.isNotEmpty
+        ? result.map((c) => Printer.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<Printer>> getAllPrinter() async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from printer";
+    var result = await db.rawQuery(qry);
+    List<Printer> list = result.isNotEmpty
+        ? result.map((c) => Printer.fromJson(c)).toList()
         : [];
     return list;
   }

@@ -19,6 +19,7 @@ import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
@@ -27,6 +28,7 @@ import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/PrinterList.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
@@ -55,8 +57,11 @@ class _DashboradPageState extends State<DashboradPage>
   TabController _subtabController;
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
+  PrintReceipt printKOT = PrintReceipt();
+
   List<Category> allCaterories = new List<Category>();
   List<Category> tabsList = new List<Category>();
+  List<Printer> printerList = new List<Printer>();
   List<Category> subCatList = new List<Category>();
   List<ProductDetails> productList = new List<ProductDetails>();
   List<ProductDetails> SearchProductList = new List<ProductDetails>();
@@ -99,6 +104,7 @@ class _DashboradPageState extends State<DashboradPage>
     var isInit = await CommunFun.checkDatabaseExit();
     if (isInit == true) {
       await getCategoryList();
+      await getAllPrinter();
     } else {
       await databaseHelper.initializeDatabase();
       await getCategoryList();
@@ -263,6 +269,14 @@ class _DashboradPageState extends State<DashboradPage>
     getProductList(tabsList[0].categoryId);
   }
 
+  getAllPrinter() async {
+    List<Printer> printer = await localAPI.getAllPrinter();
+    print(printer);
+    setState(() {
+      printerList = printer;
+    });
+  }
+
   _backtoMainCat() {
     setState(() {
       subCatList = [];
@@ -388,7 +402,22 @@ class _DashboradPageState extends State<DashboradPage>
 
   /*This method used for print KOT receipt print*/
   opnePrinterPop(cartLists) {
-    showDialog(
+    for (int i = 0; i < printerList.length; i++) {
+      List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
+      tempCart.clear();
+      for (int j = 0; j < cartList.length; j++) {
+        MSTCartdetails temp = MSTCartdetails();
+        if (printerList[i].printerId == cartList[j].printer_id) {
+          temp = cartList[j];
+          tempCart.add(temp);
+        }
+      }
+      if (tempCart.length > 0) {
+        printKOT.checkKOTPrint(
+            printerList[i].printerIp.toString(), context, tempCart);
+      }
+    }
+    /*showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
@@ -397,7 +426,7 @@ class _DashboradPageState extends State<DashboradPage>
               onPress: () {
                 // TOTO : pring reicipt code
               });
-        });
+        });*/
   }
 
   sendPayment() {

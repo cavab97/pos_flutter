@@ -22,7 +22,7 @@ class PrinterListDailog extends StatefulWidget {
 class _PrinterListDailogState extends State<PrinterListDailog> {
   DatabaseHelper databaseHelper = DatabaseHelper();
   LocalAPI localAPI = LocalAPI();
-  Printer printKOT = Printer();
+  PrintReceipt printKOT = PrintReceipt();
 
   /*For printer */
   String localIp = '';

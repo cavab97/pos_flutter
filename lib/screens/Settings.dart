@@ -19,6 +19,8 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   LocalAPI localAPI = LocalAPI();
+  List<Printer> printerList = new List<Printer>();
+
   bool isPrinterSettings = false;
   bool isGeneralSettings = false;
   bool isChangeTheme = false;
@@ -59,6 +61,15 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       isGeneralSettings = false;
       isPrinterSettings = true;
+    });
+  }
+
+  /*Get all Printer from DB*/
+  getAllPrinter() async {
+    List<Printer> printer = await localAPI.getAllPrinter();
+    print(printer);
+    setState(() {
+      printerList = printer;
     });
   }
 
@@ -154,6 +165,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             selected: isPrinterSettings,
                             onTap: () {
                               openSideData("Printer");
+                              getAllPrinter();
                             },
                             title: Text(
                               "Printer",
@@ -274,6 +286,54 @@ class _SettingsPageState extends State<SettingsPage> {
                         },
                       ),
                     )),
+              ),
+              Container(
+                color: Colors.white,
+                margin: EdgeInsets.only(top: 10),
+                // height: MediaQuery.of(context).size.height / 2.2,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: printerList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return InkWell(
+                    //  onTap: () => testPrint(devices[index], context),
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            height: 60,
+                            padding: EdgeInsets.only(left: 10),
+                            alignment: Alignment.centerLeft,
+                            child: Row(
+                              children: <Widget>[
+                                Icon(Icons.print),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(
+                                        '${printerList[index].printerIp}',
+                                        //${portController.text}',
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                      Text(
+                                        'Click to print a test receipt',
+                                        style: TextStyle(color: Colors.grey[700]),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(Icons.chevron_right),
+                              ],
+                            ),
+                          ),
+                          Divider(),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               )
             ],
           ),

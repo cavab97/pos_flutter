@@ -9,6 +9,7 @@ import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Tax.dart';
@@ -23,6 +24,7 @@ class ProductQuantityDailog extends StatefulWidget {
   final product;
   final int cartID;
   final cartItem;
+
   @override
   _ProductQuantityDailogState createState() => _ProductQuantityDailogState();
 }
@@ -40,10 +42,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   List<ModifireData> selectedModifier = [];
   double product_qty = 1.0;
   double price = 0.0;
+  Printer printer;
   bool isEditing = false;
   List<BranchTax> taxlist = [];
   double taxvalues = 0;
   TextStyle attrStyle = TextStyle(color: Colors.black, fontSize: 20.0);
+
   @override
   void initState() {
     super.initState();
@@ -55,9 +59,20 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     });
     getAttributes();
     getTaxs();
+    getPrinter();
     if (widget.cartID != null) {
       getCartData();
       getcartItemsDetails();
+    }
+  }
+
+  getPrinter() async {
+    List<Printer> printerlist =
+        await localAPI.getPrinter(productItem.productId.toString());
+    if (printerlist.length > 0) {
+      setState(() {
+        printer = printerlist[0];
+      });
     }
   }
 
@@ -422,6 +437,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.createdBy = loginData["id"];
     cartdetails.discount = 0;
     cartdetails.taxValue = taxvalues;
+    cartdetails.printer_id = printer.printerId;
     cartdetails.createdAt = DateTime.now().toString();
     var detailID = await localAPI.addintoCartDetails(cartdetails);
 
@@ -482,7 +498,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           closeButton(context), // close button
         ],
       ),
-      content: mainContent(), //main part of the popup
+      content: mainContent(),
+      //main part of the popup
       actions: <Widget>[
         // Button div + - buttons
         Stack(

@@ -11,7 +11,7 @@ import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 
-class Printer {
+class PrintReceipt {
   PaperSize paper = PaperSize.mm80;
 
   Future<Ticket> KOTReceipt(
@@ -69,6 +69,11 @@ class Printer {
     final PosPrintResult res =
         await printerManager.printTicket(await KOTReceipt(paper, cartList));
 
+    print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
+    print(res.msg);
+    print(printerIp);
+    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+
     final snackBar =
         SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
     Scaffold.of(ctx).showSnackBar(snackBar);
@@ -81,7 +86,6 @@ class Printer {
       List<OrderDetail> orderdetail,
       Orders orderData,
       OrderPayment paymentdata) async {
-
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
