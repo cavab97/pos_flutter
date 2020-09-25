@@ -637,6 +637,7 @@ class CreateTables {
         'cart_id INTEGER,' +
         'localID INTEGER,' +
         'product_id INTEGER,' +
+        'printer_id INTEGER,' +
         'product_name TEXT,' +
         'product_price REAL,' +
         'product_net_price REAL,' +

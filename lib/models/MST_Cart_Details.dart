@@ -4,6 +4,7 @@ class MSTCartdetails {
   int cartId;
   String localID;
   int productId;
+  int printer_id;
   String productName;
   double productPrice;
   double productQty;
@@ -22,34 +23,36 @@ class MSTCartdetails {
   int productTotalPoints;
   String createdAt;
   int createdBy;
-  MSTCartdetails(
-      {this.cartId,
-      this.localID,
-      this.productId,
-      this.productName,
-      this.productPrice,
-      this.productQty,
-      this.productNetPrice,
-      this.taxId,
-      this.taxValue,
-      this.discount,
-      this.discountType,
-      this.remark,
-      this.isDeleted,
-      // this.sync,
-      this.isSendKichen,
-      this.itemUnit,
-      this.hasCompositeInventory,
-      // this.productPoints,
-      // this.productTotalPoints,
-      this.createdAt,
-      this.createdBy});
+
+  MSTCartdetails({this.cartId,
+    this.localID,
+    this.productId,
+    this.printer_id,
+    this.productName,
+    this.productPrice,
+    this.productQty,
+    this.productNetPrice,
+    this.taxId,
+    this.taxValue,
+    this.discount,
+    this.discountType,
+    this.remark,
+    this.isDeleted,
+    // this.sync,
+    this.isSendKichen,
+    this.itemUnit,
+    this.hasCompositeInventory,
+    // this.productPoints,
+    // this.productTotalPoints,
+    this.createdAt,
+    this.createdBy});
 
   MSTCartdetails.fromJson(Map<String, dynamic> json) {
     id = json["id"];
     cartId = json["cart_id"];
     localID = json["localID"];
     productId = json["product_id"];
+    printer_id = json["printer_id"];
     productName = json["product_name"];
     productPrice = json["product_price"] as double;
     productQty = json["product_qty"] as double;
@@ -69,12 +72,14 @@ class MSTCartdetails {
     createdAt = json["created_at"];
     createdBy = json["created_by"];
   }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data["id"] = this.id;
     data["cart_id"] = this.cartId;
     data["localID"] = this.localID;
     data["product_id"] = this.productId;
+    data["printer_id"] = this.printer_id;
     data["product_name"] = this.productName;
     data["product_price"] = this.productPrice;
     data["product_qty"] = this.productQty;
