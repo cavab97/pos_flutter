@@ -27,9 +27,19 @@ import 'package:sqflite/sqflite.dart';
 
 class TableData {
   Future<int> ifExists(Database db, dynamic data) async {
-    int count = Sqflite.firstIntValue(await db.rawQuery(
-        "SELECT COUNT(*) FROM $data['table'] WHERE $data['key'] =$data['value']"));
-    return count;
+    try {
+      int count = Sqflite.firstIntValue(await db.rawQuery(
+          "SELECT COUNT(*) FROM " +
+              data['table'] +
+              " WHERE " +
+              data['key'] +
+              " = " +
+              data['value'].toString() +
+              ""));
+      return count;
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<dynamic> insertDatatable1(Database db, dynamic tablesData) async {
