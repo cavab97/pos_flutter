@@ -5,6 +5,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/screens/AddCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -20,6 +21,8 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
   List<Customer> customerList = new List<Customer>();
+  List<Customer> filterList = [];
+  bool isFiltring = false;
   @override
   void initState() {
     super.initState();
@@ -53,6 +56,16 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
     await Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
+  filterCustomer(val) {
+    var list = customerList
+        .where(
+            (x) => x.name.toString().toLowerCase().contains(val.toLowerCase()))
+        .toList();
+    setState(() {
+      filterList = list;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -68,21 +81,20 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(Strings.search_customer,
-                    style: TextStyle(fontSize: 30, color: Colors.white)),
+                Text(Strings.search_customer, style: Styles.whiteBold()),
               ],
             ),
           ),
           Positioned(
-            right: 30,
-            top: 15,
+            left: 30,
+            top: 25,
             child: GestureDetector(
               onTap: () {
                 addCustomer();
               },
               child: Text(
                 Strings.add_new.toUpperCase(),
-                style: TextStyle(fontSize: 30, color: Colors.white),
+                style: Styles.whiteSimpleSmall(),
               ),
             ),
           ),
@@ -169,26 +181,50 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           fillColor: Colors.white,
         ),
         style: TextStyle(color: Colors.black, fontSize: 25.0),
+        onTap: () {
+          setState(() {
+            isFiltring = true;
+          });
+        },
         onChanged: (e) {
-          print(e);
+          filterCustomer(e);
         },
       ),
     );
   }
 
   Widget customerLists() {
-    return ListView(
-      shrinkWrap: true,
-      children: customerList.map((customer) {
-        return ListTile(
-          onTap: () {
-            saveCustomerTolocal(customer);
-          },
-          leading:
-              Text(customer.name == null ? customer.firstName : customer.name),
-          title: Text(customer.email),
-        );
-      }).toList(),
-    );
+    if (isFiltring) {
+      return ListView(
+          shrinkWrap: true,
+          children: filterList.map((customer) {
+            return ListTile(
+              onTap: () {
+                saveCustomerTolocal(customer);
+              },
+              leading: Text(
+                customer.name == null ? customer.firstName : customer.name,
+                style: Styles.communBlack(),
+              ),
+              title: Text(customer.email, style: Styles.communBlack()),
+            );
+          }).toList());
+    } else {
+      return ListView(
+        shrinkWrap: true,
+        children: customerList.map((customer) {
+          return ListTile(
+            onTap: () {
+              saveCustomerTolocal(customer);
+            },
+            leading: Text(
+              customer.name == null ? customer.firstName : customer.name,
+              style: Styles.communBlack(),
+            ),
+            title: Text(customer.email, style: Styles.communBlack()),
+          );
+        }).toList(),
+      );
+    }
   }
 }

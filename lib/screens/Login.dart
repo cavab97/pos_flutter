@@ -7,6 +7,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/user.dart' as repo;
@@ -71,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
         isLoading = true;
       });
       User user = new User();
-      var terkey = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+      var terkey = await CommunFun.getTeminalKey();
       user.name = emailAddress.text;
       user.userPin = int.parse(userPin.text);
       user.deviceType = deviceinfo["deviceType"];
@@ -187,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
       keyboardType: TextInputType.text,
       decoration: InputDecoration(
         prefixIcon: Padding(
-          padding: EdgeInsets.only(left: 25, right: 25),
+          padding: EdgeInsets.only(left: 20, right: 20),
           child: Icon(
             Icons.perm_identity,
             color: Colors.black,
@@ -197,7 +198,7 @@ class _LoginPageState extends State<LoginPage> {
         errorText: !isValidateEmail ? errormessage : null,
         errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
         hintText: Strings.username_hint,
-        hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
+        hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50),
           borderSide: BorderSide(
@@ -206,10 +207,10 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         filled: true,
-        contentPadding: EdgeInsets.only(top: 25, bottom: 25),
+        contentPadding: EdgeInsets.only(top: 20, bottom: 20),
         fillColor: Colors.white,
       ),
-      style: TextStyle(color: Colors.black, fontSize: 25.0),
+      style: Styles.normalBlack(),
       onChanged: onChange,
     );
   }
@@ -235,7 +236,7 @@ class _LoginPageState extends State<LoginPage> {
         errorText: !isValidatePassword ? errormessage : null,
         errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
         hintText: Strings.pin_hint,
-        hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
+        hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50),
           borderSide: BorderSide(
@@ -244,11 +245,11 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         filled: true,
-        contentPadding: EdgeInsets.only(top: 25, bottom: 25),
+        contentPadding: EdgeInsets.only(top: 20, bottom: 20),
         fillColor: Colors.white,
       ),
       //obscureText: true,
-      style: TextStyle(color: Colors.black, fontSize: 25.0),
+      style: Styles.normalBlack(),
       onChanged: onChange,
     );
   }

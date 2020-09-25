@@ -3,6 +3,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:mcncashier/services/teminalkey.dart' as repo;
 
@@ -112,7 +113,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
                           // Key add button
                           width: MediaQuery.of(context).size.width,
                           child: CommunFun.roundedButton(
-                              Strings.set_terminal_key, () {
+                              Strings.set_terminal_key.toUpperCase(), () {
                             setTerminalkey();
                           }),
                         )
@@ -151,19 +152,15 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
         errorText: !isValidatekey ? errormessage : null,
         errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
         hintText: Strings.terminalKey,
-        hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
+        hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(50),
-          borderSide: BorderSide(
-            width: 0,
-            style: BorderStyle.none,
-          ),
+          borderRadius: BorderRadius.circular(100),
         ),
         filled: true,
-        contentPadding: EdgeInsets.only(top: 25, bottom: 25),
+        contentPadding: EdgeInsets.only(top: 20, bottom: 20),
         fillColor: Colors.white,
       ),
-      style: TextStyle(color: Colors.black, fontSize: 25.0),
+      style: Styles.normalBlack(),
       onChanged: onChange,
     );
   }

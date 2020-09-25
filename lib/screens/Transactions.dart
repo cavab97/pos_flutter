@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Order.dart';
-import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/components/styles.dart';
-import 'package:mcncashier/components/preferences.dart';
-import 'package:mcncashier/components/constant.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
@@ -37,6 +36,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
   User paymemtUser = new User();
   List<ProductDetails> detailsList = [];
   bool isFiltering = false;
+  bool isRefunding = false;
+  bool isWeborder = true;
   Customer customer = new Customer();
   Payments paumentMethod = new Payments();
   @override
@@ -51,8 +52,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   getTansactionList() async {
-    var terminalid = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var terminalid = await CommunFun.getTeminalKey();
+    var branchid = await CommunFun.getbranchId();
     List<Orders> orderList = await localAPI.getOrdersList(branchid, terminalid);
     if (orderList.length > 0) {
       setState(() {
@@ -108,6 +109,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
   }
 
+  refundProcessStart() {
+    setState(() {
+      isRefunding = true;
+    });
+  }
+
   cancleAlertpopOpne() {
     showDialog(
         context: context,
@@ -133,7 +140,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               if (reason == "Other") {
                 otherReasonPop();
               } else {
-                paymentMethodPop();
+                paymentMethodPop(reason);
               }
             },
           );
@@ -148,13 +155,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
           return AddOtherReason(
             onClose: (otherText) {
               Navigator.of(context).pop();
-              paymentMethodPop();
+              paymentMethodPop(otherText);
             },
           );
         });
   }
 
-  paymentMethodPop() {
+  paymentMethodPop(reason) {
     showDialog(
         // Opning Ammount Popup
         context: context,
@@ -163,188 +170,235 @@ class _TransactionsPageState extends State<TransactionsPage> {
             subTotal: selectedOrder.sub_total,
             grandTotal: selectedOrder.grand_total,
             onClose: (mehtod) {
-              cancleTransactionWithMethod(mehtod);
+              cancleTransactionWithMethod(mehtod, reason);
             },
           );
         });
   }
 
-  cancleTransactionWithMethod(paymehtod) {
+  cancleTransactionWithMethod(paymehtod, reason) {
     print(paymehtod);
-    cancleTransation();
+    cancleTransation(reason);
     Navigator.of(context).pop();
   }
 
-  cancleTransation() async {
+  cancleTransation(reason) async {
     //TODO :Cancle Transation Pop // 1 for  cancle
     var orderid = await localAPI.updateOrderStatus(selectedOrder.app_id, 3);
+    var payment = await localAPI.updatePaymentStatus(orderpayment.app_id, 3);
+    var terID = await CommunFun.getTeminalKey();
+    User userdata = await CommunFun.getuserDetails();
+    CancelOrder order = new CancelOrder();
+    order.id = selectedOrder.order_id;
+    order.invoiceId = selectedOrder.app_id;
+    order.localID = await CommunFun.getLocalID();
+    order.reason = reason;
+    order.status = 3;
+    order.createdBy = userdata.id;
+    order.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    order.terminalId = int.parse(terID);
+    order.invoiceTerminalId = int.parse(terID);
+    var addTocancle = await localAPI.insertCancelOrder(order);
+    // TODO update store inventory
     getTansactionList();
+  }
+
+  refundSelectedammout() {
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return PaymentMethodPop(
+            subTotal: selectedOrder.sub_total,
+            grandTotal: selectedOrder.grand_total,
+            onClose: (mehtod) {
+              returnPayment(mehtod);
+            },
+          );
+        });
+  }
+
+  returnPayment(paymentMehtod) {
+    // TODO : update payment tables
+  }
+  assignTable() {
+    Navigator.pushNamed(context, Constant.SelectTableScreen,
+        arguments: {'isAssign': true, 'orderID': selectedOrder.app_id});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: transactionsDrawer(), // page Drawer
-        body: SafeArea(
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: Table(
-              columnWidths: {
-                0: FractionColumnWidth(.3),
-                1: FractionColumnWidth(.6),
-              },
-              children: [
-                TableRow(children: [
-                  TableCell(
-                      // Part 1 white
-                      child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
-                          color: Colors.white,
-                          child: ListView(
-                            padding: EdgeInsets.all(20),
-                            children: <Widget>[
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  IconButton(
-                                    padding: EdgeInsets.all(0),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    icon: Icon(
-                                      Icons.keyboard_arrow_left,
-                                      size: 50,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(Strings.transaction,
-                                      style: TextStyle(
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey[800])),
-                                ],
-                              ),
-                              transationsSearchBox(),
-                              SizedBox(
-                                height: 15,
-                              ),
-                              // Text("Wednesday, August 19",
-                              //     style: TextStyle(
-                              //         fontSize: 20,
-                              //         fontWeight: FontWeight.bold,
-                              //         color: Colors.blueGrey[900])),
-                              orderLists.length > 0
-                                  ? searchTransationList()
-                                  : Center(
-                                      child: Text(Strings.no_order_found,
-                                          style: Styles.darkBlue()))
-                            ],
-                          ))),
-                  TableCell(
-                    // Part 2 transactions list
-                    child: Center(
-                      child: SingleChildScrollView(
-                        child: Stack(children: <Widget>[
-                          Container(
-                            width: MediaQuery.of(context).size.width / 1.9,
-                            height: MediaQuery.of(context).size.height,
-                            margin: EdgeInsets.only(top: 5),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
+      drawer: transactionsDrawer(), // page Drawer
+      body: SafeArea(
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: Table(
+            columnWidths: {
+              0: FractionColumnWidth(.3),
+              1: FractionColumnWidth(.6),
+            },
+            children: [
+              TableRow(children: [
+                TableCell(
+                    // Part 1 white
+                    child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        color: Colors.white,
+                        child: ListView(
+                          padding: EdgeInsets.all(20),
+                          children: <Widget>[
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
-                                SizedBox(height: 5),
-                                Text(
+                                IconButton(
+                                  padding: EdgeInsets.all(0),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  icon: Icon(
+                                    Icons.keyboard_arrow_left,
+                                    size: 50,
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Text(Strings.transaction,
+                                    style: TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[800])),
+                              ],
+                            ),
+                            transationsSearchBox(),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            orderLists.length > 0
+                                ? searchTransationList()
+                                : Center(
+                                    child: Text(Strings.no_order_found,
+                                        style: Styles.darkBlue()))
+                          ],
+                        ))),
+                TableCell(
+                  // Part 2 transactions list
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: Stack(children: <Widget>[
+                        Padding(
+                            padding: EdgeInsets.only(right: 10, top: 10),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                isWeborder
+                                    ? assingTableButton(() {
+                                        assignTable();
+                                      })
+                                    : SizedBox()
+                              ],
+                            )),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 50),
+                          height: MediaQuery.of(context).size.height,
+                          margin: EdgeInsets.only(top: 5),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              SizedBox(height: 15),
+                              Text(
                                   DateFormat('EEE, MMM d yyyy, hh:mm aaa')
                                       .format(DateTime.parse(
                                           selectedOrder.order_date)),
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).primaryColor),
-                                ),
-                                SizedBox(
-                                  height: 20,
-                                ),
-                                Text(
-                                  orderpayment.op_amount.toString(),
-                                  style: TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).accentColor),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                selectedOrder != null &&
-                                        paymemtUser.username != null
-                                    ? Text(
-                                        selectedOrder.invoice_no +
-                                            " - Processed by " +
-                                            paymemtUser.username,
-                                        style: Styles.whiteBoldsmall(),
-                                      )
-                                    : SizedBox(),
-                                SizedBox(
-                                  height: 20,
-                                ),
-                                Container(
-                                  height: 50,
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Center(
-                                    child: Text(
-                                      customer.firstName != null
-                                          ? customer.firstName
-                                          : "Open Customer",
-                                      style: TextStyle(
-                                          fontSize: 23,
-                                          fontWeight: FontWeight.bold,
-                                          color: Theme.of(context).accentColor),
-                                    ),
+                                  style: Styles.whiteSimpleSmall()),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Text(
+                                orderpayment.op_amount.toString(),
+                                style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).accentColor),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              selectedOrder != null &&
+                                      paymemtUser.username != null
+                                  ? Text(
+                                      selectedOrder.invoice_no +
+                                          " - Processed by " +
+                                          paymemtUser.username,
+                                      style: Styles.whiteBoldsmall(),
+                                    )
+                                  : SizedBox(),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Container(
+                                height: 50,
+                                width: MediaQuery.of(context).size.width,
+                                child: Center(
+                                  child: Text(
+                                    customer.firstName != null
+                                        ? customer.firstName
+                                        : "Walk-In Customer",
+                                    style: TextStyle(
+                                        fontSize: 23,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context).accentColor),
                                   ),
-                                  color: Colors.grey[900].withOpacity(0.4),
                                 ),
-                                productList(),
-                              ],
-                            ),
+                                color: Colors.grey[900].withOpacity(0.4),
+                              ),
+                              productList(),
+                            ],
                           ),
-                          Positioned(
-                            bottom: 40,
-                            left: 0,
-                            right: 0,
+                        ),
+                        Positioned(
+                          bottom: 40,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 50),
                             child: Column(children: <Widget>[
                               Divider(),
                               totalAmountValues(),
                               Divider(),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: <Widget>[
-                                  refundButton(() {
-                                    CommunFun.showToast(
-                                        context, "Work in progress...");
-                                    //Navigator.of(context).pop();
-                                  }),
-                                  SizedBox(width: 10),
-                                  cancelButton(() {
-                                    cancleAlertpopOpne();
-                                  }),
-                                ],
-                              )
+                              isRefunding
+                                  ? refundButtons(context)
+                                  : transationsButton()
                             ]),
-                          )
-                        ]),
-                      ),
+                          ),
+                        ),
+                      ]),
                     ),
-                  )
-                ]),
-              ],
-            ),
+                  ),
+                )
+              ]),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
+  }
+
+  Widget assingTableButton(onPress) {
+    return RaisedButton(
+      padding: EdgeInsets.all(10),
+      onPressed: onPress,
+      child: Text("Assign Table", style: Styles.whiteSimpleSmall()),
+      color: Colors.deepOrange,
+      textColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+    );
   }
 
   transactionsDrawer() {
@@ -397,6 +451,85 @@ class _TransactionsPageState extends State<TransactionsPage> {
           }
         },
       ),
+    );
+  }
+
+  Widget refundButtons(context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        refundCancelButton(() {
+          setState(() {
+            isRefunding = false;
+          });
+        }),
+        SizedBox(width: 10),
+        refundNextButton(() {
+          refundSelectedammout();
+        }),
+      ],
+    );
+  }
+
+  refundCancelButton(_onPress) {
+    return Expanded(
+      child: RaisedButton(
+        padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
+        onPressed: _onPress,
+        child: Text(
+          "Cancel",
+          style: TextStyle(
+              color:
+                  orderpayment.op_status == 1 ? Colors.white : Colors.white38,
+              fontSize: 20),
+        ),
+        color: Colors.deepOrange,
+        textColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+      ),
+    );
+  }
+
+  refundNextButton(_onPress) {
+    return Expanded(
+      child: RaisedButton(
+        padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
+        onPressed: _onPress,
+        child: Text(
+          "Next",
+          style: TextStyle(
+              color:
+                  orderpayment.op_status == 1 ? Colors.white : Colors.white38,
+              fontSize: 20),
+        ),
+        color: Colors.deepOrange,
+        textColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+      ),
+    );
+  }
+
+  Widget transationsButton() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        refundButton(() {
+          if (orderpayment.op_status == 1) {
+            // refund ordr
+            refundProcessStart();
+          }
+        }),
+        SizedBox(width: 10),
+        cancelButton(() {
+          if (orderpayment.op_status == 1) {
+            cancleAlertpopOpne();
+          }
+        }),
+      ],
     );
   }
 
@@ -561,7 +694,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
         onPressed: _onPress,
         child: Text(
           "Refund",
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          style: TextStyle(
+              color:
+                  orderpayment.op_status == 1 ? Colors.white : Colors.white38,
+              fontSize: 20),
         ),
         color: Colors.deepOrange,
         textColor: Colors.white,
@@ -579,7 +715,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
         onPressed: _onPress,
         child: Text(
           Strings.cancel_tansaction,
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          style: TextStyle(
+              color:
+                  orderpayment.op_status == 1 ? Colors.white : Colors.white38,
+              fontSize: 20),
         ),
         color: Colors.deepOrange,
         textColor: Colors.white,
@@ -655,6 +794,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               style: TextStyle(
                                   fontSize: 20,
                                   color: Theme.of(context).primaryColor)),
+                          isRefunding
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.remove_circle_outline,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () {})
+                              : SizedBox(),
                         ],
                       ),
                     )
@@ -667,93 +814,107 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   Widget searchTransationList() {
-    return ListView(
-        shrinkWrap: true,
-        children: isFiltering
-            ? filterList.map((item) {
-                return Container(
-                  decoration: new BoxDecoration(
-                      color: selectedOrder.app_id == item.app_id
-                          ? Colors.grey[200]
-                          : Colors.white),
-                  child: ListTile(
-                    onTap: () {
-                      getOrderDetails(item);
-                    },
-                    title: Row(
-                      children: <Widget>[
-                        Text(
-                            DateFormat('hh:mm aaa')
-                                .format(DateTime.parse(item.order_date)),
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey[600])),
-                        Container(color: Colors.red, child: Text("Cancle"))
-                      ],
-                    ),
-                    subtitle: Text(Strings.invoice + item.invoice_no.toString(),
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[600])),
-                    isThreeLine: true,
-                    trailing: Text(item.grand_total.toString(),
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[600])),
+    if (isFiltering) {
+      return ListView(
+          shrinkWrap: true,
+          children: filterList.map((item) {
+            return Container(
+                decoration: new BoxDecoration(
+                    color: selectedOrder.app_id == item.app_id
+                        ? Colors.grey[200]
+                        : Colors.white),
+                child: ListTile(
+                  dense: false,
+                  selected: selectedOrder.app_id == item.app_id,
+                  onTap: () {
+                    getOrderDetails(item);
+                  },
+                  title: Row(
+                    children: <Widget>[
+                      Text(
+                          DateFormat('hh:mm aaa')
+                              .format(DateTime.parse(item.order_date)),
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[600])),
+                      SizedBox(width: 10),
+                      item.order_status == 3
+                          ? Container(
+                              padding: EdgeInsets.all(3),
+                              color: Colors.red,
+                              child: Text(
+                                "Cancel",
+                                style: Styles.whiteBoldsmall(),
+                              ),
+                            )
+                          : SizedBox()
+                    ],
                   ),
-                );
-              }).toList()
-            : orderLists.map((item) {
-                return Container(
-                    decoration: new BoxDecoration(
-                        color: selectedOrder.app_id == item.app_id
-                            ? Colors.grey[200]
-                            : Colors.white),
-                    child: ListTile(
-                      dense: false,
-                      selected: selectedOrder.app_id == item.app_id,
-                      onTap: () {
-                        getOrderDetails(item);
-                      },
-                      title: Row(
-                        children: <Widget>[
-                          Text(
-                              DateFormat('hh:mm aaa')
-                                  .format(DateTime.parse(item.order_date)),
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey[600])),
-                          SizedBox(width: 10),
-                          item.order_status == 3
-                              ? Container(
-                                  padding: EdgeInsets.all(3),
-                                  color: Colors.red,
-                                  child: Text(
-                                    "Cancel",
-                                    style: Styles.whiteBoldsmall(),
-                                  ),
-                                )
-                              : SizedBox()
-                        ],
-                      ),
-                      subtitle: Text(
-                          Strings.invoice + item.invoice_no.toString(),
+                  subtitle: Text(Strings.invoice + item.invoice_no.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                  isThreeLine: true,
+                  trailing: Text(item.grand_total.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                ));
+          }).toList());
+    } else {
+      return ListView(
+          shrinkWrap: true,
+          children: orderLists.map((item) {
+            return Container(
+                decoration: new BoxDecoration(
+                    color: selectedOrder.app_id == item.app_id
+                        ? Colors.grey[200]
+                        : Colors.white),
+                child: ListTile(
+                  dense: false,
+                  selected: selectedOrder.app_id == item.app_id,
+                  onTap: () {
+                    getOrderDetails(item);
+                  },
+                  title: Row(
+                    children: <Widget>[
+                      Text(
+                          DateFormat('hh:mm aaa')
+                              .format(DateTime.parse(item.order_date)),
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
                               color: Colors.grey[600])),
-                      isThreeLine: true,
-                      trailing: Text(item.grand_total.toString(),
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[600])),
-                    ));
-              }).toList());
+                      SizedBox(width: 10),
+                      item.order_status == 3
+                          ? Container(
+                              padding: EdgeInsets.all(3),
+                              color: Colors.red,
+                              child: Text(
+                                "Cancel",
+                                style: Styles.whiteBoldsmall(),
+                              ),
+                            )
+                          : SizedBox()
+                    ],
+                  ),
+                  subtitle: Text(Strings.invoice + item.invoice_no.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                  isThreeLine: true,
+                  trailing: Text(item.grand_total.toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey[600])),
+                ));
+          }).toList());
+    }
   }
 }
 
@@ -831,25 +992,37 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
           shrinkWrap: true,
           children: <Widget>[
             ListTile(
+                onTap: () {
+                  widget.onClose("Incorrect Item");
+                },
                 title: Text(
-              "Incorrect Item",
-              style: Styles.communBlack(),
-            )),
+                  "Incorrect Item",
+                  style: Styles.communBlack(),
+                )),
             ListTile(
+                onTap: () {
+                  widget.onClose("Incorrect variant");
+                },
                 title: Text(
-              "Incorrect variant",
-              style: Styles.communBlack(),
-            )),
+                  "Incorrect variant",
+                  style: Styles.communBlack(),
+                )),
             ListTile(
+                onTap: () {
+                  widget.onClose("Incorrect payment type");
+                },
                 title: Text(
-              "Incorrect payment type",
-              style: Styles.communBlack(),
-            )),
+                  "Incorrect payment type",
+                  style: Styles.communBlack(),
+                )),
             ListTile(
+                onTap: () {
+                  widget.onClose("Incorrect quantity");
+                },
                 title: Text(
-              "Incorrect quantity",
-              style: Styles.communBlack(),
-            )),
+                  "Incorrect quantity",
+                  style: Styles.communBlack(),
+                )),
             ListTile(
                 onTap: () {
                   widget.onClose("Other");

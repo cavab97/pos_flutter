@@ -36,11 +36,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   List<ModifireData> modifireList = [];
   List selectedAttr = [];
   MST_Cart currentCart = new MST_Cart();
+  List<MSTCartdetails> cartItems = [];
   List<ModifireData> selectedModifier = [];
   double product_qty = 1.0;
   double price = 0.0;
   bool isEditing = false;
   List<BranchTax> taxlist = [];
+  double taxvalues = 0;
   TextStyle attrStyle = TextStyle(color: Colors.black, fontSize: 20.0);
   @override
   void initState() {
@@ -55,11 +57,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     getTaxs();
     if (widget.cartID != null) {
       getCartData();
+      getcartItemsDetails();
     }
   }
 
   getTaxs() async {
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var branchid =  await CommunFun.getbranchId();
     List<BranchTax> taxlists = await localAPI.getTaxList(branchid);
     if (taxlists.length > 0) {
       setState(() {
@@ -94,7 +97,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           if (modifireList.length > 0) {
             for (var j = 0; j < modifireList.length; j++) {
               if (modifireList[j].modifierId == item.modifierId) {
-                setModifire(modifireList[i]);
+                setModifire(modifireList[j]);
               }
             }
           }
@@ -135,6 +138,16 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (cartval.length != 0) {
       setState(() {
         currentCart = cartval[0];
+      });
+    }
+  }
+
+  getcartItemsDetails() async {
+    List<MSTCartdetails> cartItemslist =
+        await localAPI.getCurrentCartItems(widget.cartID);
+    if (cartItemslist.length != 0) {
+      setState(() {
+        cartItems = cartItemslist;
       });
     }
   }
@@ -228,7 +241,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   setModifire(mod) {
     var isSelected = selectedModifier.any((item) => item.pmId == mod.pmId);
-
     if (isSelected) {
       selectedModifier.removeWhere((item) => item.pmId == mod);
       setState(() {
@@ -247,36 +259,78 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     produtAddTocart();
   }
 
-  produtAddTocart() async {
-    MST_Cart cart = new MST_Cart();
-    SaveOrder orderData = new SaveOrder();
-    MSTSubCartdetails subCartData = new MSTSubCartdetails();
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
-    var table = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
-    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
-    var customerData =
-        await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
-    var loginData = await json.decode(loginUser);
-    var disc = currentCart.discount != null
-        ? double.parse(currentCart.discount.toStringAsFixed(2))
-        : 0.0;
-    double qty = currentCart.total_qty != null
-        ? currentCart.total_qty + product_qty.toDouble()
-        : product_qty.toDouble();
-    double subT =
-        currentCart.sub_total != null ? currentCart.sub_total + price : price;
+  countTotalQty() {
+    double qty = 0;
+    if (cartItems.length > 0) {
+      for (var i = 0; i < cartItems.length; i++) {
+        var item = cartItems[i];
+        if (item.productId == productItem.productId) {
+          item.productQty = product_qty;
+        }
+        qty += item.productQty;
+      }
+      if (!isEditing) {
+        qty += product_qty;
+      }
+    } else {
+      qty += product_qty;
+    }
+    return qty;
+  }
+
+  countSubtotal() {
+    double subT = 0;
+    if (cartItems.length > 0) {
+      for (var i = 0; i < cartItems.length; i++) {
+        var item = cartItems[i];
+        if (item.productId == productItem.productId) {
+          item.productPrice = price;
+        }
+        subT += item.productPrice;
+      }
+      if (!isEditing) {
+        subT += price;
+      }
+    } else {
+      subT += price;
+    }
+    return subT;
+  }
+
+  countGrandtotal(tax, dis) {
+    double grandTotal = 0;
+    if (cartItems.length > 0) {
+      for (var i = 0; i < cartItems.length; i++) {
+        var item = cartItems[i];
+        if (item.productId == productItem.productId) {
+          item.productPrice = price;
+        }
+        grandTotal += item.productPrice;
+      }
+      if (!isEditing) {
+        grandTotal += price;
+      }
+    } else {
+      grandTotal += price;
+    }
+    return grandTotal = ((grandTotal + tax) - dis);
+  }
+
+  countTax(subT) {
     var totalTax = [];
-    double taxvalues = 0;
+    double taxvalue = taxvalues;
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
         // Tax tax = await localAPI.getTaxName(taxlistitem.taxId);
         var taxval = taxlistitem.rate != null
-            ? subT * double.parse(taxlistitem.rate) / 10
+            ? subT * double.parse(taxlistitem.rate) / 100
             : 0.0;
         taxval = double.parse(taxval.toStringAsFixed(2));
-        taxvalues += taxval;
-
+        taxvalue += taxval;
+        setState(() {
+          taxvalues = taxvalue;
+        });
         var taxmap = {
           "id": taxlistitem.id,
           "tax_id": taxlistitem.taxId,
@@ -291,15 +345,35 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         totalTax.add(taxmap);
       }
     }
+    return totalTax;
+  }
 
-    double grandTotal = currentCart.grand_total != null
-        ? currentCart.grand_total + price
-        : price + taxvalues - disc;
+  countDiscount() {
+    return currentCart.discount != null
+        ? double.parse(currentCart.discount.toStringAsFixed(2))
+        : 0.0;
+  }
+
+  produtAddTocart() async {
+    MST_Cart cart = new MST_Cart();
+    SaveOrder orderData = new SaveOrder();
+    MSTSubCartdetails subCartData = new MSTSubCartdetails();
+    var branchid =  await CommunFun.getbranchId();
+    var table = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var customerData =
+        await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
+    var loginData = await json.decode(loginUser);
+    var qty = await countTotalQty();
+    var disc = await countDiscount();
+    var subtotal = countSubtotal();
+    var totalTax = countTax(subtotal);
+    var grandTotal = countGrandtotal(taxvalues, disc);
 
     //cart data
     cart.user_id = customerData != null ? customerData["customer_id"] : 0;
     cart.branch_id = int.parse(branchid);
-    cart.sub_total = double.parse(subT.toStringAsFixed(2));
+    cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
     cart.discount = disc;
     cart.discount_type = currentCart.discount_type;
     cart.total_qty = qty;
@@ -345,6 +419,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.productNetPrice = productdata.price;
     cartdetails.createdBy = loginData["id"];
     cartdetails.discount = 0;
+    cartdetails.taxValue = taxvalues;
     cartdetails.createdAt = DateTime.now().toString();
     var detailID = await localAPI.addintoCartDetails(cartdetails);
 
@@ -386,6 +461,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      contentPadding: EdgeInsets.all(0),
       titlePadding: EdgeInsets.all(0),
       title: Stack(
         overflow: Overflow.visible,
@@ -476,30 +552,29 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   Widget mainContent() {
-    return SafeArea(
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      width: MediaQuery.of(context).size.width / 2.8,
+      height: MediaQuery.of(context).size.height / 1.8,
       child: SingleChildScrollView(
-        child: Container(
-          width: MediaQuery.of(context).size.width / 2.8,
-          //height: MediaQuery.of(context).size.height /2.5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              getAttributeList(),
-              modifireList.length != 0
-                  ? Text(
-                      Strings.modifier,
-                      style: TextStyle(fontSize: 20),
-                    )
-                  : SizedBox(),
-              SizedBox(height: 5),
-              modifireList.length != 0 ? modifireItmeList() : SizedBox(),
-              SizedBox(height: 15),
-              _extraNotesTitle(),
-              SizedBox(height: 10),
-              inputNotesView(),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            getAttributeList(),
+            modifireList.length != 0
+                ? Text(
+                    Strings.modifier,
+                    style: TextStyle(fontSize: 20),
+                  )
+                : SizedBox(),
+            SizedBox(height: 5),
+            modifireList.length != 0 ? modifireItmeList() : SizedBox(),
+            SizedBox(height: 15),
+            _extraNotesTitle(),
+            SizedBox(height: 5),
+            inputNotesView(),
+          ],
         ),
       ),
     );
@@ -528,7 +603,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               ),
               Container(
                   margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10.0),
-                  height: 60,
+                  height: 50,
                   child: ListView(
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,

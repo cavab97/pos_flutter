@@ -453,7 +453,7 @@ class CreateTables {
         "order_status INTEGER," +
         "order_item_count INTEGER," +
         "order_date TEXT," +
-        "server_id INTEGER,"+
+        "server_id INTEGER," +
         "order_by INTEGER," +
         "updated_at TEXT," +
         "updated_by INTEGER" +
@@ -471,6 +471,7 @@ class CreateTables {
         "product_id INTEGER," +
         "product_price REAL," +
         "product_old_price INTEGER," +
+        "product_discount REAL," +
         "category_id INTEGER," +
         "detail_amount REAL," +
         "detail_qty REAL," +
@@ -526,11 +527,28 @@ class CreateTables {
         "op_method_id INTEGER," +
         "op_amount REAL," +
         "op_method_response TEXT," +
-        "op_status INTEGER," +
+        "op_status INTEGER," + // 1 placed , 2 cancel 3,refund
         "op_datetime TEXT," +
         "op_by INTEGER," +
         "updated_at TEXT," +
         "updated_by INTEGER" +
+        ")");
+// TABLE order_payment
+    datatables = db.execute("CREATE TABLE order_cancel (" +
+        "id INTEGER ," +
+        "invoice_id INTEGER," +
+        "localID TEXT," +
+        "reason TEXT," +
+        "status INTEGER," +
+        "created_by INTEGER," +
+        "updated_by INTEGER," +
+        "created_at TEXT," +
+        "updated_at TEXT," +
+        "sync NUMERIC," +
+        "serverId INTEGER," +
+        "terminal_id INTEGER," +
+        "invoice_unique_id TEXT," +
+        "invoice_terminal_id INTEGER" +
         ")");
 
     //Table customer

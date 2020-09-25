@@ -1,3 +1,4 @@
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
@@ -24,6 +25,7 @@ import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Voucher.dart';
+import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
@@ -45,7 +47,7 @@ class LocalAPI {
   }
 
   Future<List<Category>> getAllCategory() async {
-    var branchID = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var branchID = await CommunFun.getbranchId();
     var query = "select * from category left join category_branch on " +
         " category_branch.category_id = category.category_id where " +
         " category_branch.branch_id =" +
@@ -65,7 +67,7 @@ class LocalAPI {
   Future<List<ProductDetails>> getProduct(String id, String branchID) async {
     var query = "SELECT product.*,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 ,product_store_inventory.qty , price_type.name as price_type_Name FROM `product` " +
         " LEFT join product_category on product_category.product_id = product.product_id " +
-        " LEFT join  product_branch on product_branch.product_id = product.product_id " +
+        " LEFT join product_branch on product_branch.product_id = product.product_id " +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
         " LEFT join product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
@@ -173,11 +175,24 @@ class LocalAPI {
     return result;
   }
 
+  Future updateTableIdInOrder(orderid, tableid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "UPDATE orders SET table_id =" +
+        tableid.toString() +
+        "table_no = " +
+        tableid.toString() +
+        " where app_id =" +
+        orderid.toString();
+    var res = await db.rawQuery(qry);
+    await SyncAPICalls.logActivity(
+        "assign table", "assing table to web order", "orders", tableid);
+  }
+
   Future<int> insertTablePrinter(Printer table_printer) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from printer where printer_ip = 1"; //+
     // table_printer.printerIp.toString();
-    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    var res = await db.rawQuery(qry);
     List<Printer> list =
         res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
     var result;
@@ -204,10 +219,8 @@ class LocalAPI {
     List<Printer> list =
         res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
 
-    await SyncAPICalls.logActivity(
-        "Printer",
-        list.length > 0 ? "Print KOT" : "Print KOT",
-        "printerId","1");
+    await SyncAPICalls.logActivity("Printer",
+        list.length > 0 ? "Print KOT" : "Print KOT", "printerId", "1");
 
     print("=====================================");
     print(list[0].printerIp);
@@ -398,6 +411,17 @@ class LocalAPI {
     return list;
   }
 
+  Future<List<MSTCartdetails>> getCurrentCartItems(cartID) async {
+    var query = "SELECT * from mst_cart_detail where id=" + cartID.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+    List<MSTCartdetails> list = res.isNotEmpty
+        ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "product", "get cart details list", "mst_cart_details", 1);
+    return list;
+  }
+
   Future<List<Payments>> getPaymentMethods() async {
     var query = "SELECT * from payment where status = 1";
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
@@ -417,6 +441,16 @@ class LocalAPI {
     return list[0];
   }
 
+  Future<List<Orders>> getLastOrderAppid() async {
+    var qey =
+        "SELECT orders.app_id from orders ORDER BY order_date DESC  LIMIT 1";
+    var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
+    List<Orders> list = checkisExit.isNotEmpty
+        ? checkisExit.map((c) => Orders.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
   Future<int> placeOrder(Orders orderData) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var checkisExitqry =
@@ -427,9 +461,7 @@ class LocalAPI {
       List<Orders> list = checkisExit.isNotEmpty
           ? checkisExit.map((c) => Orders.fromJson(c)).toList()
           : [];
-      orderData.app_id = list[0].app_id + 1;
     }
-    orderData.invoice_no = orderData.invoice_no + orderData.app_id.toString();
     var orderid = await db.insert("orders", orderData.toJson());
     await SyncAPICalls.logActivity("orders", "place order", "orders", orderid);
     return orderData.app_id;
@@ -883,7 +915,28 @@ class LocalAPI {
     }
   }
 
-  Future<int> updateInvetory() async {}
+  Future<int> updateInvetory(OrderDetail produtdata) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var inventoryProd = await db.query("product",
+        where: 'product_id = ?', whereArgs: [produtdata.product_id]);
+    List<Product> list = inventoryProd.isNotEmpty
+        ? inventoryProd.map((c) => Product.fromJson(c)).toList()
+        : [];
+
+    if (list[0].hasInventory == 1) {
+      var intupdate = "Update product_store_inventory set qty = (qty - " +
+          produtdata.detail_qty.toString() +
+          ") WHERE product_id = " +
+          produtdata.product_id.toString();
+      var updateed = await db.rawQuery(intupdate);
+      await SyncAPICalls.logActivity("Order", "update InventoryTable",
+          "product_store_inventory", produtdata.product_id);
+    }
+  }
+
+  Future<int> updateStoreInvetory(ProductDetails produtdata, orderdata) async {
+    // UPDAte
+  }
 
   Future<Branch> getBranchData(branchID) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
@@ -905,10 +958,42 @@ class LocalAPI {
         " where app_id = " +
         orderid.toString();
     var result = db.rawUpdate(qry);
+    await SyncAPICalls.logActivity(
+        "order staus change", "update order status", "order_status", orderid);
     if (result != null) {
       return 1;
     } else {
       return 0;
     }
+  }
+
+  Future<int> updatePaymentStatus(paymentid, status) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var qry = "UPDATE order_payment SET op_status = " +
+        status.toString() +
+        " where app_id = " +
+        paymentid.toString();
+    var result = db.rawUpdate(qry);
+    if (result != null) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+  Future<int> insertCancelOrder(CancelOrder order) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var result = db.insert('order_cancel', order.toJson());
+    return result;
+  }
+
+  Future<List<Table_order>> getTableOrders(tableid) async {
+    var qry =
+        "SELECT * from table_order where table_id = " + tableid.toString();
+    var tableList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<Table_order> list = tableList.isNotEmpty
+        ? tableList.map((c) => Table_order.fromJson(c)).toList()
+        : [];
+    return list;
   }
 }
