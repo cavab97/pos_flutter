@@ -179,7 +179,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "UPDATE orders SET table_id =" +
         tableid.toString() +
-        "table_no = " +
+        " table_no = " +
         tableid.toString() +
         " where app_id =" +
         orderid.toString();
@@ -283,18 +283,7 @@ class LocalAPI {
       await SyncAPICalls.logActivity(
           "product", "Product add in to cart", "mst_cart", cartid);
       orderData.cartId = cartid; //cartid
-      var response = await db.insert("save_order", orderData.toJson());
-      await SyncAPICalls.logActivity(
-          "product", "save item into save order table", "save_order", 1);
-      if (tableiD != null) {
-        var rawQuery = 'UPDATE table_order set save_order_id = ' +
-            response.toString() +
-            " WHERE table_id = " +
-            tableiD.toString();
-        await db.rawQuery(rawQuery);
-        await SyncAPICalls.logActivity("product", "update save_order_id",
-            "table_order", response.toString());
-      }
+      await insertSaveOrders(orderData, tableiD);
     } else {
       cartData.id = cartidd;
       var res_cartid = await db.update("mst_cart", cartData.toJson(),
@@ -305,6 +294,23 @@ class LocalAPI {
     }
 
     return cartid;
+  }
+
+  Future<int> insertSaveOrders(orderData, tableiD) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var response = await db.insert("save_order", orderData.toJson());
+    await SyncAPICalls.logActivity(
+        "product", "save item into save order table", "save_order", 1);
+    if (tableiD != null) {
+      var rawQuery = 'UPDATE table_order set save_order_id = ' +
+          response.toString() +
+          " WHERE table_id = " +
+          tableiD.toString();
+      await db.rawQuery(rawQuery);
+      await SyncAPICalls.logActivity("product", "update save_order_id",
+          "table_order", response.toString());
+    }
+    return 1;
   }
 
   Future<int> addintoCartDetails(cartdetails) async {
@@ -766,20 +772,18 @@ class LocalAPI {
     return list;
   }
 
-  Future<Tax> getTaxName(taxId) async {
-    var tax = await DatabaseHelper.dbHelper
-        .getDatabse()
-        .query('tax', where: 'tax_id =?', whereArgs: [taxId.toString()]);
+  Future<List<Tax>> getTaxName(taxId) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var tax = await db.query('tax');
     List<Tax> list =
         tax.isNotEmpty ? tax.map((c) => Tax.fromJson(c)).toList() : [];
-    return list[0];
+    return list;
   }
 
   Future<Payments> getOrderpaymentmethod(methodID) async {
-    var paymentMeth = await DatabaseHelper.dbHelper.getDatabse().query(
-        'payment',
-        where: 'payment_id = ?',
-        whereArgs: [methodID.toString()]);
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var paymentMeth = await db.query('payment',
+        where: 'payment_id = ?', whereArgs: [methodID.toString()]);
     List<Payments> list = paymentMeth.isNotEmpty
         ? paymentMeth.map((c) => Payments.fromJson(c)).toList()
         : [];
@@ -787,8 +791,8 @@ class LocalAPI {
   }
 
   Future<User> getPaymentUser(userid) async {
-    var user = await DatabaseHelper.dbHelper
-        .getDatabse()
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var user = await db
         .query('users', where: 'id = ?', whereArgs: [userid.toString()]);
     List<User> list =
         user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
@@ -802,12 +806,13 @@ class LocalAPI {
   //   return count;
   // }
   Future<List<Orders>> getOrdersList(branchid, terminalid) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from orders where branch_id = " +
         branchid.toString() +
         " AND terminal_id = " +
         terminalid.toString();
 
-    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    var ordersList = await db.rawQuery(qry);
     List<Orders> list = ordersList.isNotEmpty
         ? ordersList.map((c) => Orders.fromJson(c)).toList()
         : [];
@@ -817,8 +822,9 @@ class LocalAPI {
   }
 
   Future<List<Orders>> getOrdersListTable(branchid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from orders where branch_id = " + branchid.toString();
-    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    var ordersList = await db.rawQuery(qry);
     List<Orders> list = ordersList.isNotEmpty
         ? ordersList.map((c) => Orders.fromJson(c)).toList()
         : [];
@@ -1003,6 +1009,23 @@ class LocalAPI {
     var user = await db.rawQuery(qry);
     List<User> list =
         user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
+    return list;
+  }
+
+  Future<int> deleteOrderItem(detailid) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var result =
+        db.rawDelete("DELETE FROM order_detail WHERE app_id = ?", [detailid]);
+    return result;
+  }
+
+  Future<List<MST_Cart>> getCartList(branchid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var result = await db.rawQuery(
+        "SELECT * FROM mst_cart WHERE branch_id = " + branchid.toString());
+    List<MST_Cart> list = result.isNotEmpty
+        ? result.map((c) => MST_Cart.fromJson(c)).toList()
+        : [];
     return list;
   }
 }

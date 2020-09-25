@@ -22,6 +22,7 @@ class Orders {
   int order_by;
   // int server_id;
   String tax_json;
+  String voucher_detail;
   String updated_at;
   int updated_by;
 
@@ -47,6 +48,7 @@ class Orders {
     this.order_item_count,
     this.order_date,
     this.order_by,
+    this.voucher_detail,
     // this.server_id,
     this.tax_json,
     this.updated_at,
@@ -76,6 +78,7 @@ class Orders {
     order_date = json["order_date"];
     order_by = json["order_by"];
     //server_id = json['server_id'];
+    voucher_detail = json['voucher_detail'];
     tax_json = json['tax_json'];
     updated_at = json["updated_at"];
     updated_by = json["updated_by"];
@@ -104,6 +107,7 @@ class Orders {
     data["order_item_count"] = this.order_item_count;
     data["order_date"] = this.order_date;
     //  data["server_id"] = this.server_id;
+    data['voucher_detail'] = this.voucher_detail;
     data["tax_json"] = this.tax_json;
     data["order_by"] = this.order_by;
     data["updated_at"] = this.updated_at;

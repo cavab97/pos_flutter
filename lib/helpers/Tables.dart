@@ -445,6 +445,7 @@ class CreateTables {
         "tax_amount REAL," +
         "tax_json TEXT," +
         "voucher_id INTEGER," +
+        "voucher_detail TEXT," +
         "voucher_amount REAL," +
         "sub_total REAL," +
         "sub_total_after_discount REAL," +
@@ -472,6 +473,7 @@ class CreateTables {
         "product_price REAL," +
         "product_old_price INTEGER," +
         "product_discount REAL," +
+        "product_detail TEXT," +
         "category_id INTEGER," +
         "detail_amount REAL," +
         "detail_qty REAL," +
@@ -615,9 +617,16 @@ class CreateTables {
         'is_deleted   REAL,' +
         'created_by  INTEGER,' +
         'created_at  TEXT,' +
-        'voucher_id INTEGER,' +
         'sync NUMERIC,' +
-        'customer_terminal INTEGER' +
+        'customer_terminal INTEGER,' +
+        'voucher_id INTEGER,' +
+        'voucher_detail TEXT,' +
+        'sub_total_after_discount REAL,' +
+        'source NUMERIC,' + //1 For Web, 2 For App
+        'total_item REAL,' +
+        'cart_payment_id INTEGER,' +
+        'cart_payment_response TEXT,' +
+        'cart_payment_status NUMERIC' + //0 For Pending, 1 For complete
         ')');
 
     datatables = db.execute("CREATE TABLE mst_cart_sub_detail (" +
@@ -647,15 +656,13 @@ class CreateTables {
         'discount REAL,' + //DOUBLE
         'discount_type  INTEGER,' + //int
         'remark TEXT,' +
+        'cart_detail TEXT,' +
         'is_deleted   INTEGER,' +
         'created_by  INTEGER,' +
         'created_at  TEXT,' +
-        // 'sync  NUMERIC,' +
         'is_send_kichen NUMERIC,' +
         'item_unit TEXT,' +
         'has_composite_inventory NUMERIC' + //BOOLEAN
-        // 'product_points INTEGER,' +
-        // 'product_total_points INTEGER' +
         ')');
 
     datatables = db.execute("CREATE TABLE shift(" +

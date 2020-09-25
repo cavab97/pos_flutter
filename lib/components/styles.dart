@@ -20,6 +20,14 @@ class Styles {
         fontWeight: FontWeight.w800,
         fontFamily: Strings.fontFamily);
   }
+  static blackBoldsmall() {
+    return TextStyle(
+        // White text
+        color: Color(0xFF000000),
+        fontSize: 18,
+        fontWeight: FontWeight.w800,
+        fontFamily: Strings.fontFamily);
+  }
 
   static whiteSimpleSmall() {
     return TextStyle(

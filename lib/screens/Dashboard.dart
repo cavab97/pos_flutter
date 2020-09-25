@@ -188,8 +188,8 @@ class _DashboradPageState extends State<DashboradPage>
     //   grandtotal = (subTotal + taxval) - dis;
     // }
     Voucher vaocher;
-    if (cart.voucherId != null) {
-      vaocher = await localAPI.getvoucher(cart.voucherId);
+    if (cart.voucher_id != null) {
+      vaocher = await localAPI.getvoucher(cart.voucher_id);
     }
     setState(() {
       allcartData = cart;
@@ -226,7 +226,10 @@ class _DashboradPageState extends State<DashboradPage>
     // Causes the app to rebuild with the new _selectedChoice.
 
     switch (choice) {
-      case 0:
+      case 1:
+        selectTable();
+        break;
+      case 1:
         closeTable();
         break;
       case 2:
@@ -562,7 +565,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.table_id = tables.table_id;
     order.table_no = tables.table_id;
     order.invoice_no = invoiceNo;
-    order.customer_id = customer.customerId;
+    order.customer_id = cartData.user_id;
     order.sub_total = cartData.sub_total;
     order.sub_total_after_discount = cartData.sub_total;
     order.grand_total = cartData.grand_total;
@@ -758,6 +761,11 @@ class _DashboradPageState extends State<DashboradPage>
     Navigator.pushNamed(context, Constant.TransactionScreen);
   }
 
+  gotoWebCart() {
+    Navigator.of(context).pop();
+    Navigator.pushNamed(context, Constant.WebOrderPages);
+  }
+
   @override
   Widget build(BuildContext context) {
     Future<bool> _willPopCallback() async {
@@ -788,27 +796,29 @@ class _DashboradPageState extends State<DashboradPage>
           );
         }));
     final _subtabs = TabBar(
-        controller: _subtabController,
-        indicatorSize: TabBarIndicatorSize.label,
-        unselectedLabelColor: Colors.white,
-        labelColor: Colors.white,
-        isScrollable: true,
-        indicator: BoxDecoration(
-            borderRadius: BorderRadius.circular(30), color: Colors.deepOrange),
-        labelStyle: TextStyle(fontSize: 16),
-        tabs: List<Widget>.generate(subCatList.length, (int index) {
-          return new Tab(
-            child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 15),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: Text(
-                  subCatList[index].name.toUpperCase(),
-                  style: Styles.whiteSimpleSmall(),
-                ),),
-          );
-        }),);
+      controller: _subtabController,
+      indicatorSize: TabBarIndicatorSize.label,
+      unselectedLabelColor: Colors.white,
+      labelColor: Colors.white,
+      isScrollable: true,
+      indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(30), color: Colors.deepOrange),
+      labelStyle: TextStyle(fontSize: 16),
+      tabs: List<Widget>.generate(subCatList.length, (int index) {
+        return new Tab(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+            ),
+            child: Text(
+              subCatList[index].name.toUpperCase(),
+              style: Styles.whiteSimpleSmall(),
+            ),
+          ),
+        );
+      }),
+    );
 
     return WillPopScope(
       child: Scaffold(
@@ -964,6 +974,16 @@ class _DashboradPageState extends State<DashboradPage>
                     size: 30,
                   ),
                   title: Text("Transaction", style: Styles.communBlack())),
+              ListTile(
+                  onTap: () {
+                    gotoWebCart();
+                  },
+                  leading: Icon(
+                    Icons.shopping_cart,
+                    color: Colors.black,
+                    size: 30,
+                  ),
+                  title: Text("Web Orders", style: Styles.communBlack())),
               ListTile(
                   onTap: () {
                     Navigator.of(context).pop();
@@ -1288,6 +1308,23 @@ class _DashboradPageState extends State<DashboradPage>
                   child: Row(
                     children: <Widget>[
                       Icon(
+                        Icons.add,
+                        color: Colors.black,
+                        size: 30,
+                      ),
+                      SizedBox(width: 20),
+                      Text(Strings.select_table, style: Styles.communBlack()),
+                    ],
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 1,
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
                         Icons.close,
                         color: Colors.black,
                         size: 30,
@@ -1299,7 +1336,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                value: 1,
+                value: 2,
                 child: Padding(
                   padding: EdgeInsets.all(20),
                   child: Row(
@@ -1316,7 +1353,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                value: 2,
+                value: 3,
                 child: Padding(
                   padding: EdgeInsets.all(20),
                   child: Row(
