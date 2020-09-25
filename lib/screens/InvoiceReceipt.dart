@@ -28,7 +28,7 @@ class InvoiceReceiptDailog extends StatefulWidget {
 class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
   DatabaseHelper databaseHelper = DatabaseHelper();
   LocalAPI localAPI = LocalAPI();
-  Printer printReceipt = Printer();
+  PrintReceipt printReceipt = PrintReceipt();
 
   int orderid;
 
