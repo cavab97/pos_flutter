@@ -96,7 +96,7 @@ class LocalAPI {
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
         " LEFT join product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
-        " where product.name  LIKE '%$searchText%'" +
+        " where product.name LIKE '%$searchText%'" +
         " AND product_branch.branch_id = " +
         branchID +
         " AND product_store_inventory.branch_id  = " +
@@ -109,7 +109,7 @@ class LocalAPI {
         ? res.map((c) => ProductDetails.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
-        "Product", "geting Product List", "product", searchText);
+        "Product", "geting Product List", "product", "1");
     return list;
   }
 

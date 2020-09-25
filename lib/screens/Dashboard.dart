@@ -89,6 +89,10 @@ class _DashboradPageState extends State<DashboradPage>
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
+
+    searchTextFieldController.addListener(() {
+      getSearchList(searchTextFieldController.text.toString());
+    });
   }
 
   checkisInit() async {
@@ -277,16 +281,14 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getSearchList(seachText) async {
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
-    List<ProductDetails> product =
-        await localAPI.getSeachProduct(seachText.toString(), branchid);
+    var branchid = await CommunFun.getbranchId();
+    List<ProductDetails> product = await localAPI.getSeachProduct(seachText.toString(), branchid);
 
     setState(() {
       SearchProductList.clear();
       SearchProductList =
           product.length != 0 && product[0].productId != null ? product : [];
     });
-    // return SearchProductList;
   }
 
   void _handleTabSelection() {
@@ -375,6 +377,8 @@ class _DashboradPageState extends State<DashboradPage>
   //   //   sendPayment();
   //   // }
   // }
+
+  /*This method used for print KOT receipt print*/
   opnePrinterPop(cartLists) {
     showDialog(
         context: context,
@@ -1108,7 +1112,7 @@ class _DashboradPageState extends State<DashboradPage>
                     fillColor: Colors.white),
               ),
               suggestionsCallback: (pattern) async {
-                return productList; //getSearchList(pattern);
+                return SearchProductList;
               },
               itemBuilder: (context, productList) {
                 var image_Arr =
