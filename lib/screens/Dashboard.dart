@@ -89,6 +89,10 @@ class _DashboradPageState extends State<DashboradPage>
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
+
+    searchTextFieldController.addListener(() {
+      getSearchList(searchTextFieldController.text.toString());
+    });
   }
 
   checkisInit() async {
@@ -274,16 +278,14 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getSearchList(seachText) async {
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
-    List<ProductDetails> product =
-        await localAPI.getSeachProduct(seachText.toString(), branchid);
+    var branchid = await CommunFun.getbranchId();
+    List<ProductDetails> product = await localAPI.getSeachProduct(seachText.toString(), branchid);
 
     setState(() {
       SearchProductList.clear();
       SearchProductList =
           product.length != 0 && product[0].productId != null ? product : [];
     });
-    // return SearchProductList;
   }
 
   void _handleTabSelection() {
@@ -372,6 +374,8 @@ class _DashboradPageState extends State<DashboradPage>
   //   //   sendPayment();
   //   // }
   // }
+
+  /*This method used for print KOT receipt print*/
   opnePrinterPop(cartLists) {
     showDialog(
         context: context,
@@ -788,27 +792,29 @@ class _DashboradPageState extends State<DashboradPage>
           );
         }));
     final _subtabs = TabBar(
-        controller: _subtabController,
-        indicatorSize: TabBarIndicatorSize.label,
-        unselectedLabelColor: Colors.white,
-        labelColor: Colors.white,
-        isScrollable: true,
-        indicator: BoxDecoration(
-            borderRadius: BorderRadius.circular(30), color: Colors.deepOrange),
-        labelStyle: TextStyle(fontSize: 16),
-        tabs: List<Widget>.generate(subCatList.length, (int index) {
-          return new Tab(
-            child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 15),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: Text(
-                  subCatList[index].name.toUpperCase(),
-                  style: Styles.whiteSimpleSmall(),
-                ),),
-          );
-        }),);
+      controller: _subtabController,
+      indicatorSize: TabBarIndicatorSize.label,
+      unselectedLabelColor: Colors.white,
+      labelColor: Colors.white,
+      isScrollable: true,
+      indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(30), color: Colors.deepOrange),
+      labelStyle: TextStyle(fontSize: 16),
+      tabs: List<Widget>.generate(subCatList.length, (int index) {
+        return new Tab(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+            ),
+            child: Text(
+              subCatList[index].name.toUpperCase(),
+              style: Styles.whiteSimpleSmall(),
+            ),
+          ),
+        );
+      }),
+    );
 
     return WillPopScope(
       child: Scaffold(
@@ -1088,7 +1094,7 @@ class _DashboradPageState extends State<DashboradPage>
                     fillColor: Colors.white),
               ),
               suggestionsCallback: (pattern) async {
-                return productList; //getSearchList(pattern);
+                return SearchProductList;
               },
               itemBuilder: (context, productList) {
                 var image_Arr =
