@@ -161,6 +161,13 @@ class _DashboradPageState extends State<DashboradPage>
     await Navigator.of(context).pop();
   }
 
+  getsetWebOrders() async {
+    await CommunFun.opneSyncPop(context);
+    var res = await SyncAPICalls.getWebOrders(context);
+    print(res);
+    Navigator.of(context).pop();
+  }
+
   checkshift() async {
     var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
     setState(() {
@@ -1017,6 +1024,7 @@ class _DashboradPageState extends State<DashboradPage>
               ListTile(
                   onTap: () {
                     Navigator.of(context).pop();
+                    getsetWebOrders();
                     syncOrdersTodatabase();
                   },
                   leading: Icon(
@@ -1035,7 +1043,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.black,
                     size: 30,
                   ),
-                  title: Text("Attendce System", style: Styles.communBlack())),
+                  title: Text("Sync", style: Styles.communBlack())),
               ListTile(
                   onTap: () {
                     Navigator.of(context).pop();

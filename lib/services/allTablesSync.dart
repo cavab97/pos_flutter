@@ -30,7 +30,7 @@ class SyncAPICalls {
 
   static getDataServerBulk2_1(context) async {
     var apiurl = Configrations.appdata2_1;
-    var terminalId =  await CommunFun.getTeminalKey();
+    var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
@@ -45,7 +45,7 @@ class SyncAPICalls {
 
   static getDataServerBulk2_2(context) async {
     var apiurl = Configrations.appdata2_2;
-    var terminalId =  await CommunFun.getTeminalKey();
+    var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
@@ -59,7 +59,7 @@ class SyncAPICalls {
 
   static getDataServerBulk2_3(context) async {
     var apiurl = Configrations.appdata2_3;
-    var terminalId =  await CommunFun.getTeminalKey();
+    var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
@@ -73,7 +73,7 @@ class SyncAPICalls {
 
   static getDataServerBulk3(context) async {
     var apiurl = Configrations.appdata3;
-    var terminalId =  await CommunFun.getTeminalKey();
+    var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
@@ -87,7 +87,7 @@ class SyncAPICalls {
 
   static getDataServerBulk4_1(context) async {
     var apiurl = Configrations.appdata4_1;
-    var terminalId =  await CommunFun.getTeminalKey();
+    var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
@@ -102,7 +102,7 @@ class SyncAPICalls {
   static getDataServerBulk4_2(context) async {
     var apiurl = Configrations.appdata4_2;
     var branchid = await CommunFun.getbranchId();
-    var terminalId =  await CommunFun.getTeminalKey();
+    var terminalId = await CommunFun.getTeminalKey();
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
 
@@ -116,7 +116,7 @@ class SyncAPICalls {
 
   static getAssets(context) async {
     var apiurl = Configrations.product_image;
-    var terminalId =  await CommunFun.getTeminalKey();
+    var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
@@ -132,7 +132,7 @@ class SyncAPICalls {
     TerminalLog log = new TerminalLog();
     LocalAPI localAPI = LocalAPI();
     var uuid = await CommunFun.getLocalID();
-    var terminalId =  await CommunFun.getTeminalKey();
+    var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     User userdata = await CommunFun.getuserDetails();
     final DateTime now = DateTime.now();
@@ -157,8 +157,7 @@ class SyncAPICalls {
 
   static syncOrderstoDatabase(context) async {
     try {
-      var terminalId =
-           await CommunFun.getTeminalKey();
+      var terminalId = await CommunFun.getTeminalKey();
       var branchid = await CommunFun.getbranchId();
       LocalAPI localAPI = LocalAPI();
       var apiurl = Configrations.order_sync;
@@ -235,6 +234,23 @@ class SyncAPICalls {
       }
     } catch (e) {
       print(e);
+    }
+  }
+
+  static getWebOrders(context) async {
+    try {
+      var apiurl = Configrations.web_orders;
+      var terminalId = await CommunFun.getTeminalKey();
+      var serverTime =
+          await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+      var stringParams = {
+        'datetime': serverTime != null ? serverTime : '',
+        'terminal_id': terminalId
+      };
+      return await APICalls.apiCall(apiurl, context, stringParams);
+    } catch (e) {
+      print(e);
+      CommunFun.showToast(context, e.message);
     }
   }
 }

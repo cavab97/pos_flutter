@@ -216,9 +216,9 @@ class CommunFun {
   static setServerTime(data, lastSync) async {
     if (data != null) {
       await Preferences.setStringToSF(
-          Constant.SERVER_DATE_TIME, data["data"]["serverdatetime"]);
-      await Preferences.setStringToSF(
           Constant.SERVER_TIME_ZONE, data["data"]["timezone"]);
+      await Preferences.setStringToSF(
+          Constant.SERVER_DATE_TIME, data["data"]["serverdatetime"]);
     }
     await Preferences.setStringToSF(Constant.LastSync_Table, lastSync);
   }
