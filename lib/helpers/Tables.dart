@@ -619,6 +619,8 @@ class CreateTables {
         'created_by  INTEGER,' +
         'created_at  TEXT,' +
         'sync NUMERIC,' +
+        'cust_mobile TEXT,' +
+        'cust_email TEXT,' +
         'customer_terminal INTEGER,' +
         'voucher_id INTEGER,' +
         'voucher_detail TEXT,' +
@@ -695,7 +697,7 @@ class CreateTables {
         "uuid TEXT," +
         "code TEXT," +
         "description TEXT," +
-        "rate  INTEGER," +
+        "rate TEXT," +
         "is_fixed NUMERIC," +
         "status  INTEGER," +
         "updated_by INTEGER," +
