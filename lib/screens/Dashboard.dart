@@ -1524,7 +1524,7 @@ class _DashboradPageState extends State<DashboradPage>
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
-                //opnePrinterPop(cartList);
+                openPrinterPop(cartList);
               },
               child: Text(
                 "SEND",

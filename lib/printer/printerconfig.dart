@@ -418,7 +418,6 @@ class PrintReceipt {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
-    ticket.text("", linesAfter: 1);
     ticket.text(printerName + " Tested",
         styles: PosStyles(
             fontType: PosFontType.fontA,
