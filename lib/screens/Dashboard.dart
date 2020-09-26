@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -48,10 +47,7 @@ class DashboradPage extends StatefulWidget {
 
 class _DashboradPageState extends State<DashboradPage>
     with TickerProviderStateMixin {
-  GlobalKey<AutoCompleteTextFieldState<ProductDetails>> keyAutoSuggestion =
-      new GlobalKey();
-  TextEditingController searchTextFieldController = new TextEditingController();
-  AutoCompleteTextField searchTextField;
+
   TabController _tabController;
   TabController _subtabController;
   GlobalKey<ScaffoldState> scaffoldKey;
@@ -95,9 +91,7 @@ class _DashboradPageState extends State<DashboradPage>
       },
     );
 
-    searchTextFieldController.addListener(() {
-      getSearchList(searchTextFieldController.text.toString());
-    });
+
   }
 
   checkisInit() async {
@@ -1135,7 +1129,6 @@ class _DashboradPageState extends State<DashboradPage>
             width: MediaQuery.of(context).size.width / 3.8,
             child: TypeAheadField(
               textFieldConfiguration: TextFieldConfiguration(
-                controller: searchTextFieldController,
                 style: Styles.communBlacksmall(),
                 decoration: InputDecoration(
                     contentPadding:
