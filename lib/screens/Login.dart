@@ -80,7 +80,6 @@ class _LoginPageState extends State<LoginPage> {
       user.terminalId = terkey != null ? terkey : '1'; //widget.terminalId;
       await repo.login(user).then((value) async {
         if (value != null && value["status"] == Constant.STATUS200) {
-          print(value);
           await Preferences.setStringToSF(
               Constant.LOIGN_USER, json.encode(value["data"]));
           user = User.fromJson(value["data"]);
@@ -125,7 +124,6 @@ class _LoginPageState extends State<LoginPage> {
                   SizedBox(height: 50),
                   // username input
                   emailInput((e) {
-                    print("on changes");
                     if (e.length > 0) {
                       setState(() {
                         errormessage = "";

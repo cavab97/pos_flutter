@@ -42,7 +42,6 @@ class _PINPageState extends State<PINPage> {
     if (pinNumber.length < 6) {
       var currentpinNumber = pinNumber;
       currentpinNumber += val;
-      print(currentpinNumber);
       setState(() {
         pinNumber = currentpinNumber;
       });

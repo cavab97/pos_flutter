@@ -65,20 +65,16 @@ class LocalAPI {
   }
 
   Future<List<ProductDetails>> getProduct(String id, String branchID) async {
-    var query = "SELECT product.*,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 ,product_store_inventory.qty , price_type.name as price_type_Name FROM `product` " +
+    var query = "SELECT product.*,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 , price_type.name as price_type_Name FROM `product` " +
         " LEFT join product_category on product_category.product_id = product.product_id " +
         " LEFT join product_branch on product_branch.product_id = product.product_id " +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
-        " LEFT join product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
         " where product_category.category_id = " +
         id +
         " AND product_branch.branch_id = " +
         branchID +
-        " AND product_store_inventory.branch_id  = " +
-        branchID +
-        " AND product.status = 1"
-            " GROUP By product.product_id";
+        " AND product.status = 1 GROUP By product.product_id";
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<ProductDetails> list = res.isNotEmpty
         ? res.map((c) => ProductDetails.fromJson(c)).toList()

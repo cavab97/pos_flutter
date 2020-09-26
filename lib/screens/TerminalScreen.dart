@@ -43,7 +43,6 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
   }
 
   setTerminalkey() async {
-    //Navigator.pushNamed(context, '/Login');
     var isValid = await validateFields(); // validate fields
     var deviceinfo = await CommunFun.deviceInfo();
     TemimalKey terminal = new TemimalKey();
@@ -55,7 +54,6 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
       terminal.deviceid = deviceinfo["deviceId"];
       terminal.terDeviceToken = deviceinfo["deviceToken"];
       await repo.sendTerminalKey(terminal).then((value) async {
-        print(value);
         if (value != null && value["status"] == Constant.STATUS200) {
           Preferences.setStringToSF(
               Constant.TERMINAL_KEY, value["terminal_id"].toString());
