@@ -58,12 +58,12 @@ class _PINPageState extends State<PINPage> {
   clockInwithPIN() async {
     if (!isCheckIn) {
       if (pinNumber.length >= 6) {
-        setState(() {
-          isLoading = true;
-        });
         List<User> checkUserExit = await localAPI.checkUserExit(pinNumber);
         User user;
         if (checkUserExit.length != 0) {
+          setState(() {
+            isLoading = true;
+          });
           user = checkUserExit[0];
           CheckinOut checkIn = new CheckinOut();
           var terminalId = await CommunFun.getTeminalKey();
@@ -87,6 +87,9 @@ class _PINPageState extends State<PINPage> {
             isLoading = false;
           });
         } else {
+          setState(() {
+            isLoading = false;
+          });
           CommunFun.showToast(context, Strings.invalid_pin_msg);
         }
       } else {
@@ -233,25 +236,26 @@ class _PINPageState extends State<PINPage> {
         child: Center(
           child: Column(
             children: <Widget>[
-              isCheckIn
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: <Widget>[
-                        IconButton(
-                            padding: EdgeInsets.only(
-                              left: 100,
-                            ),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            icon: Icon(
-                              Icons.close,
-                              color: Colors.black,
-                              size: 50,
-                            )),
-                      ],
-                    )
-                  : SizedBox(height: 20),
+              // isCheckIn
+              //     ? Row(
+              //         mainAxisAlignment: MainAxisAlignment.end,
+              //         children: <Widget>[
+              //           IconButton(
+              //               padding: EdgeInsets.only(
+              //                 left: 100,
+              //               ),
+              //               onPressed: () {
+              //                 Navigator.of(context).pop();
+              //               },
+              //               icon: Icon(
+              //                 Icons.close,
+              //                 color: Colors.black,
+              //                 size: 50,
+              //               )),
+              //         ],
+              //       )
+              //     : SizedBox(height: 20),
+              SizedBox(height: 20),
               Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[

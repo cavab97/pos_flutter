@@ -65,7 +65,8 @@ class TableData {
             var result = await db.insert("branch", branch.toJson());
             print(result);
           } else {
-            var result = await db.update("branch", branch.toJson());
+            var result = await db.update("branch", branch.toJson(),
+                where: "branch_id =?", whereArgs: [branch.branchId]);
             print(result);
           }
         }
@@ -84,7 +85,8 @@ class TableData {
             var result = await db.insert("users", user.toJson());
             print(result);
           } else {
-            var result = await db.update("users", user.toJson());
+            var result = await db.update("users", user.toJson(),
+                where: "id =?", whereArgs: [user.id]);
             print(result);
           }
         }
@@ -103,7 +105,8 @@ class TableData {
             var result = await db.insert("role", role.toJson());
             print(result);
           } else {
-            var result = await db.update("role", role.toJson());
+            var result = await db.update("role", role.toJson(),
+                where: "role_id = ?", whereArgs: [role.roleId]);
             print(result);
           }
         }
@@ -122,7 +125,8 @@ class TableData {
             var result = await db.insert("branch_tax", branchTax.toJson());
             print(result);
           } else {
-            var result = await db.update("branch_tax", branchTax.toJson());
+            var result = await db.update("branch_tax", branchTax.toJson(),
+                where: "id =?", whereArgs: [branchTax.id]);
             print(result);
           }
         }
@@ -141,7 +145,8 @@ class TableData {
             var result = await db.insert("tax", taxval.toJson());
             print(result);
           } else {
-            var result = await db.update("tax", taxval.toJson());
+            var result = await db.update("tax", taxval.toJson(),
+                where: 'tax_id =?', whereArgs: [taxval.taxId]);
             print(result);
           }
         }
@@ -178,7 +183,8 @@ class TableData {
             var result = await db.insert("category", category.toJson());
             print(result);
           } else {
-            var result = await db.update("category", category.toJson());
+            var result = await db.update("category", category.toJson(),
+                where: "category_id = ?", whereArgs: [category.categoryId]);
             print(result);
           }
         }
@@ -199,8 +205,9 @@ class TableData {
                 await db.insert("category_branch", categroyBranch.toJson());
             print(result);
           } else {
-            var result =
-                await db.update("category_branch", categroyBranch.toJson());
+            var result = await db.update(
+                "category_branch", categroyBranch.toJson(),
+                where: "cb_id =?", whereArgs: [categroyBranch.cbId]);
             print(result);
           }
         }
@@ -219,7 +226,8 @@ class TableData {
             var result = await db.insert("product", product.toJson());
             print(result);
           } else {
-            var result = await db.update("product", product.toJson());
+            var result = await db.update("product", product.toJson(),
+                where: "product_id =?", whereArgs: [product.productId]);
             print(result);
           }
         }
@@ -239,7 +247,8 @@ class TableData {
             var result = await db.insert("attributes", attribute.toJson());
             print(result);
           } else {
-            var result = await db.update("attributes", attribute.toJson());
+            var result = await db.update("attributes", attribute.toJson(),
+                where: "attribute_id =?", whereArgs: [attribute.attributeId]);
             print(result);
           }
         }
@@ -260,8 +269,9 @@ class TableData {
                 await db.insert("category_attribute", catattribute.toJson());
             print(result);
           } else {
-            var result =
-                await db.update("category_attribute", catattribute.toJson());
+            var result = await db.update(
+                "category_attribute", catattribute.toJson(),
+                where: "ca_id =?", whereArgs: [catattribute.caId]);
             print(result);
           }
         }
@@ -280,7 +290,8 @@ class TableData {
             var result = await db.insert("modifier", modifier.toJson());
             print(result);
           } else {
-            var result = await db.update("modifier", modifier.toJson());
+            var result = await db.update("modifier", modifier.toJson(),
+                where: "modifier_id", whereArgs: [modifier.modifierId]);
             print(result);
           }
         }
@@ -313,10 +324,14 @@ class TableData {
           };
           var count = await ifExists(db, data);
           if (count == 0) {
-            var result = await db.insert("product_attribute", product.toJson());
+            var result = await db.insert(
+              "product_attribute",
+              product.toJson(),
+            );
             print(result);
           } else {
-            var result = await db.update("product_attribute", product.toJson());
+            var result = await db.update("product_attribute", product.toJson(),
+                where: "pa_id =?", whereArgs: [product.paId]);
             print(result);
           }
         }
@@ -339,8 +354,9 @@ class TableData {
                 await db.insert("product_modifier", productmodifire.toJson());
             print(result);
           } else {
-            var result =
-                await db.update("product_modifier", productmodifire.toJson());
+            var result = await db.update(
+                "product_modifier", productmodifire.toJson(),
+                where: "pm_id =?", whereArgs: [productmodifire.pmId]);
             print(result);
           }
         }
@@ -361,8 +377,9 @@ class TableData {
                 await db.insert("product_category", productcategory.toJson());
             print(result);
           } else {
-            var result =
-                await db.update("product_category", productcategory.toJson());
+            var result = await db.update(
+                "product_category", productcategory.toJson(),
+                where: "pc_id =?", whereArgs: [productcategory.pcId]);
             print(result);
           }
         }
@@ -383,8 +400,9 @@ class TableData {
                 await db.insert("product_branch", productbranch.toJson());
             print(result);
           } else {
-            var result =
-                await db.update("product_branch", productbranch.toJson());
+            var result = await db.update(
+                "product_branch", productbranch.toJson(),
+                where: "pb_id =?", whereArgs: [productbranch.pbId]);
             print(result);
           }
         }
@@ -406,7 +424,9 @@ class TableData {
             print(result);
           } else {
             var result = await db.update(
-                "product_store_inventory", producatstore.toJson());
+                "product_store_inventory", producatstore.toJson(),
+                where: "inventory_id =?",
+                whereArgs: [producatstore.inventoryId]);
             print(result);
           }
         }
@@ -437,7 +457,8 @@ class TableData {
             var result = await db.insert("price_type", priceType.toJson());
             print(result);
           } else {
-            var result = await db.update("price_type", priceType.toJson());
+            var result = await db.update("price_type", priceType.toJson(),
+                where: "pt_id =?", whereArgs: [priceType.ptId]);
             print(result);
           }
         }
@@ -456,7 +477,8 @@ class TableData {
             var result = await db.insert("printer", printer.toJson());
             print(result);
           } else {
-            var result = await db.update("printer", printer.toJson());
+            var result = await db.update("printer", printer.toJson(),
+                where: "printer_id =?", whereArgs: [printer.printerId]);
             print(result);
           }
         }
@@ -489,7 +511,8 @@ class TableData {
             var result = await db.insert("customer", customer.toJson());
             print(result);
           } else {
-            var result = await db.update("customer", customer.toJson());
+            var result = await db.update("customer", customer.toJson(),
+                where: "customer_id =?", whereArgs: [customer.customerId]);
             print(result);
           }
         }
@@ -508,7 +531,8 @@ class TableData {
           var result = await db.insert("terminal", terminal.toJson());
           print(result);
         } else {
-          var result = await db.update("terminal", terminal.toJson());
+          var result = await db.update("terminal", terminal.toJson(),
+              where: "terminal_id =?", whereArgs: [terminal.terminalId]);
           print(result);
         }
       }
@@ -526,7 +550,8 @@ class TableData {
             var result = await db.insert("tables", table.toJson());
             print(result);
           } else {
-            var result = await db.update("tables", table.toJson());
+            var result = await db.update("tables", table.toJson(),
+                where: "table_id", whereArgs: [table.tableId]);
             print(result);
           }
         }
@@ -546,7 +571,8 @@ class TableData {
             var result = await db.insert("payment", payments.toJson());
             print(result);
           } else {
-            var result = await db.update("payment", payments.toJson());
+            var result = await db.update("payment", payments.toJson(),
+                where: "payment_id =?", whereArgs: [payments.paymentId]);
             print(result);
           }
         }

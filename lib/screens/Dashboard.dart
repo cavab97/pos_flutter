@@ -30,7 +30,6 @@ import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/InvoiceReceipt.dart';
-import 'package:mcncashier/screens/PrinterList.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
@@ -160,6 +159,13 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
+  syncAllTables() async {
+    Navigator.of(context).pop();
+    await Preferences.removeSinglePref(Constant.LastSync_Table);
+    await CommunFun.syncAfterSuccess(context);
+    getCategoryList();
+  }
+
   syncOrdersTodatabase() async {
     await CommunFun.opneSyncPop(context);
     var res = await SyncAPICalls.syncOrderstoDatabase(context);
@@ -171,6 +177,8 @@ class _DashboradPageState extends State<DashboradPage>
     await CommunFun.opneSyncPop(context);
     var res = await SyncAPICalls.getWebOrders(context);
     print(res);
+    var cartdata = res["data"]["cart"];
+    await CommunFun.savewebOrdersintoCart(cartdata);
     Navigator.of(context).pop();
   }
 
@@ -1064,8 +1072,7 @@ class _DashboradPageState extends State<DashboradPage>
                   title: Text("Sync Orders", style: Styles.communBlack())),
               ListTile(
                   onTap: () async {
-                    await Preferences.removeSinglePref(Constant.LastSync_Table);
-                    await CommunFun.syncAfterSuccess(context);
+                    syncAllTables();
                   },
                   leading: Icon(
                     Icons.sync,

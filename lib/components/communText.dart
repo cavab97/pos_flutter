@@ -279,8 +279,6 @@ class CommunFun {
       print(result);
       if (result == 1) {
         await CommunFun.setServerTime(null, "4");
-        Navigator.of(context).pop();
-        Navigator.pushNamed(context, Constant.PINScreen);
       } else {
         print("Error when getting data4_3");
       }
@@ -290,6 +288,12 @@ class CommunFun {
     var aceets = await SyncAPICalls.getAssets(context);
     if (aceets != null) {
       databaseHelper.accetsData(aceets["data"]);
+      var serverTime =
+          await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+      Navigator.of(context).pop();
+      if (serverTime == null) {
+        Navigator.pushNamed(context, Constant.PINScreen);
+      }
       await CommunFun.setServerTime(aceets, "4");
     } else {
       // handle Exaption
@@ -504,5 +508,9 @@ class CommunFun {
             ),
           );
         });
+  }
+
+  static savewebOrdersintoCart(cart) {
+    print(cart);
   }
 }

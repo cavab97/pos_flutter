@@ -5,7 +5,7 @@ class CreateTables {
     // Role Table
     var datatables;
     datatables = db.execute("CREATE TABLE role (" +
-        "role_id	INTEGER," +
+        "role_id	INTEGER PRIMARY KEY," +
         "role_name TEXT," +
         "uuid TEXT," +
         "role_status INTEGER," +
@@ -25,14 +25,14 @@ class CreateTables {
 
     // // module table
     datatables = db.execute("CREATE TABLE module(" +
-        "module_id	INTEGER," +
+        "module_id	INTEGER PRIMARY KEY," +
         "module_name TEXT," +
         "module_updated_at TEXT," +
         "module_updated_by INTEGER);");
 
     // Table role_permission table
     datatables = db.execute("CREATE TABLE role_permission(" +
-        "rp_id INTEGER," +
+        "rp_id INTEGER PRIMARY KEY," +
         "rp_uuid TEXT," +
         "rp_role_id	INTEGER ," +
         "rp_module_id INTEGER," +
@@ -42,7 +42,7 @@ class CreateTables {
     // user  table
 
     datatables = db.execute("CREATE TABLE users (" +
-        "id INTEGER," +
+        "id INTEGER PRIMARY KEY," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
         "uuid TEXT," +
@@ -86,7 +86,7 @@ class CreateTables {
     //TODO : table create address
 
     datatables = db.execute("CREATE TABLE customer_address(" +
-        "address_id INTEGER," +
+        "address_id INTEGER PRIMARY KEY," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
         "uuid TEXT" +
@@ -103,7 +103,7 @@ class CreateTables {
 
     // user_permission table
     datatables = db.execute("CREATE TABLE user_permission(" +
-        "up_id INTEGER," +
+        "up_id INTEGER PRIMARY KEY," +
         "up_uuid TEXT ," +
         "user_id  INTEGER," +
         "status INTEGER," +
@@ -113,7 +113,7 @@ class CreateTables {
 
     // Branch TABLE
     datatables = db.execute("CREATE TABLE branch (" +
-        "branch_id	INTEGER," +
+        "branch_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "name	TEXT," +
         "address	TEXT," +
@@ -138,7 +138,7 @@ class CreateTables {
 
     // Table	category
     datatables = db.execute("CREATE TABLE category (" +
-        "category_id INTEGER," +
+        "category_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
         "name TEXT," +
         "category_icon TEXT," +
@@ -154,7 +154,7 @@ class CreateTables {
 
     // Table	category_branch
     datatables = db.execute("CREATE TABLE category_branch(" +
-        "cb_id INTEGER," +
+        "cb_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
         "status INTEGER," +
         "category_id INTEGER," +
@@ -166,7 +166,7 @@ class CreateTables {
     //  Table	attributes
 
     datatables = db.execute("CREATE TABLE attributes (" +
-        "attribute_id INTEGER," +
+        "attribute_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
         "is_default INTEGER," +
         "ca_id INTEGER," +
@@ -181,7 +181,7 @@ class CreateTables {
     //Table	modifier
 
     datatables = db.execute("CREATE TABLE modifier(" +
-        "modifier_id INTEGER," +
+        "modifier_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
         "name TEXT," +
         "is_default INTEGER," +
@@ -195,7 +195,7 @@ class CreateTables {
     //  Table	price_type
 
     datatables = db.execute("CREATE TABLE price_type(" +
-        "pt_id INTEGER," +
+        "pt_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
         "name TEXT," +
         // "is_default INTEGER ," +
@@ -209,7 +209,7 @@ class CreateTables {
     // Table product
 
     datatables = db.execute("CREATE TABLE product(" +
-        "product_id INTEGER," +
+        "product_id INTEGER PRIMARY KEY," +
         "name TEXT," +
         "uuid TEXT," +
         "description TEXT," +
@@ -228,7 +228,7 @@ class CreateTables {
 
     // Table product_category
     datatables = db.execute("CREATE TABLE product_category(" +
-        "pc_id INTEGER," +
+        "pc_id INTEGER PRIMARY KEY," +
         "product_id INTEGER," +
         "category_id INTEGER," +
         "branch_id INTEGER," +
@@ -240,7 +240,7 @@ class CreateTables {
 
     // Table product_attribute
     datatables = db.execute("CREATE TABLE product_attribute(" +
-        "pa_id INTEGER," +
+        "pa_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
         "product_id INTEGER," +
         "attribute_id INTEGER," +
@@ -253,7 +253,7 @@ class CreateTables {
 
     // Table product_modifier
     datatables = db.execute("CREATE TABLE product_modifier(" +
-        "pm_id INTEGER," +
+        "pm_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
         "product_id INTEGER," +
         "modifier_id INTEGER," +
@@ -265,7 +265,7 @@ class CreateTables {
 
     // Table product_branch
     datatables = db.execute("CREATE TABLE product_branch(" +
-        "pb_id INTEGER," +
+        "pb_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
         "product_id INTEGER," +
         "branch_id INTEGER," +
@@ -279,7 +279,7 @@ class CreateTables {
 
     // Table asset
     datatables = db.execute("CREATE TABLE asset (" +
-        "asset_id	INTEGER," +
+        "asset_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "asset_type	INTEGER," +
         "asset_type_id	INTEGER," +
@@ -292,7 +292,7 @@ class CreateTables {
 
     // Table product_store_inventor
     datatables = db.execute("CREATE TABLE product_store_inventory (" +
-        "inventory_id	INTEGER," +
+        "inventory_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "product_id	INTEGER," +
         "branch_id	INTEGER," +
@@ -307,7 +307,7 @@ class CreateTables {
 
     // Table product_store_inventory_log
     datatables = db.execute("CREATE TABLE product_store_inventory_log (" +
-        "il_id	INTEGER," +
+        "il_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "inventory_id	INTEGER," +
         "branch_id	INTEGER," +
@@ -323,7 +323,7 @@ class CreateTables {
 
     // Table printer
     datatables = db.execute("CREATE TABLE printer (" +
-        "printer_id	INTEGER," +
+        "printer_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "branch_id	INTEGER," +
         "printer_name	TEXT," +
@@ -338,7 +338,7 @@ class CreateTables {
 
     // Table kitchen_department
     datatables = db.execute("CREATE TABLE kitchen_department (" +
-        "kitchen_id	INTEGER," +
+        "kitchen_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "branch_id	INTEGER," +
         "kitchen_name	TEXT," +
@@ -350,7 +350,7 @@ class CreateTables {
 
     // TABLE payment_master
     datatables = db.execute("CREATE TABLE payment (" +
-        "payment_id	INTEGER," +
+        "payment_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "name	TEXT," +
         "status	INTEGER," +
@@ -360,7 +360,7 @@ class CreateTables {
 
     // TABLE table
     datatables = db.execute("CREATE TABLE tables (" +
-        "table_id	INTEGER," +
+        "table_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "branch_id	INTEGER," +
         "table_type	INTEGER," +
@@ -379,7 +379,7 @@ class CreateTables {
     //type :  1 = Cashier , 2 For Waiter , 3 For Attendance
     // is mother = 1  = Yes , 0 = No
     datatables = db.execute("CREATE TABLE terminal (" +
-        "terminal_id INTEGER," +
+        "terminal_id INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "terminal_device_id	TEXT," +
         "terminal_device_token TEXT," +
@@ -408,7 +408,7 @@ class CreateTables {
 
     // TABLE voucher
     datatables = db.execute("CREATE TABLE voucher (" +
-        "voucher_id	INTEGER," +
+        "voucher_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "voucher_name	TEXT," +
         "voucher_banner	TEXT," +
@@ -690,7 +690,7 @@ class CreateTables {
         ")");
 
     datatables = db.execute("CREATE TABLE tax(" +
-        "tax_id INTEGER," +
+        "tax_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
         "code TEXT," +
         "description TEXT," +
