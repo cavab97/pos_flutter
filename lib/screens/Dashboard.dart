@@ -244,7 +244,7 @@ class _DashboradPageState extends State<DashboradPage>
     // Causes the app to rebuild with the new _selectedChoice.
 
     switch (choice) {
-      case 1:
+      case 0:
         selectTable();
         break;
       case 1:
@@ -474,15 +474,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   openDrawer() {
-    // Drawer Open close event
-    if (isDrawerOpen) {
-      // Navigator.of(context).pop();
-    } else {
-      scaffoldKey.currentState.openDrawer();
-    }
-    setState(() {
-      isDrawerOpen = !isDrawerOpen;
-    });
+    scaffoldKey.currentState.openDrawer();
   }
 
   showQuantityDailog(product) async {
@@ -958,7 +950,9 @@ class _DashboradPageState extends State<DashboradPage>
       padding: EdgeInsets.only(left: 10, right: 10),
       onPressed: () {
         Navigator.pushNamed(context, Constant.PINScreen);
-        //  Preferences.removeSinglePref(Constant.TERMINAL_KEY);
+
+        Preferences.removeSinglePref(Constant.LOIGN_USER);
+        Preferences.removeSinglePref(Constant.IS_CHECKIN);
       },
       child: Text(
         Strings.checkout,
@@ -1114,7 +1108,7 @@ class _DashboradPageState extends State<DashboradPage>
               SizedBox(
                 height: 50.0,
                 child: Image.asset(
-                  "assets/headerlogo.png",
+                  Strings.asset_headerLogo,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -1282,7 +1276,10 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       SizedBox(width: 10),
                       Text(
-                        selectedTable.number_of_pax.toString(),
+                        tableName +
+                            " (" +
+                            selectedTable.number_of_pax.toString() +
+                            ")",
                         style: Styles.whiteBoldsmall(),
                       ),
                     ],
@@ -1351,7 +1348,7 @@ class _DashboradPageState extends State<DashboradPage>
                   child: Row(
                     children: <Widget>[
                       Icon(
-                        Icons.add,
+                        Icons.select_all,
                         color: Colors.black,
                         size: 30,
                       ),
@@ -1524,7 +1521,7 @@ class _DashboradPageState extends State<DashboradPage>
                 openPrinterPop(cartList);
               },
               child: Text(
-                "SEND",
+                Strings.send,
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,

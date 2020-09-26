@@ -55,7 +55,7 @@ class CreateTables {
         "mobile TEXT," +
         "profile TEXT," +
         "commision_percent REAL," +
-        "user_pin TEXT," +
+        "user_pin INTEGER," +
         "api_token TEXT," +
         "status INTEGER," +
         "is_admin INTEGER," +
