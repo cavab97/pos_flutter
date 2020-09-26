@@ -61,8 +61,8 @@ class PrintReceipt {
     return ticket;
   }
 
-  void checkKOTPrint(
-      String printerIp,String tableName, BuildContext ctx, List<MSTCartdetails> cartList) async {
+  void checkKOTPrint(String printerIp, String tableName, BuildContext ctx,
+      List<MSTCartdetails> cartList) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
