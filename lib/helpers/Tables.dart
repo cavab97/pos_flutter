@@ -610,11 +610,12 @@ class CreateTables {
         'discount REAL,' +
         'discount_type INTEGER,' +
         'remark TEXT,' +
+        'table_id INTEGER,' +
         'tax REAL,' +
         'tax_json TEXT,' +
         'grand_total REAL,' +
         'total_qty  REAL,' +
-        'is_deleted   REAL,' +
+        'is_deleted   INTEGER,' +
         'created_by  INTEGER,' +
         'created_at  TEXT,' +
         'sync NUMERIC,' +

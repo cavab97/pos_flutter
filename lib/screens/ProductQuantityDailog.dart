@@ -355,7 +355,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           "updated_at": taxlistitem.updatedAt,
           "updated_by": taxlistitem.updatedBy,
           "taxAmount": taxval.toString(),
-          "taxName": tax.length > 0 ? tax[0].code : "" //tax.code
+          "taxCode": tax.length > 0 ? tax[0].code : "" //tax.code
         };
         totalTax.add(taxmap);
       }
@@ -378,6 +378,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
     var customerData =
         await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
+    var tableData = await json.decode(table); // table data
     var loginData = await json.decode(loginUser);
     var qty = await countTotalQty();
     var disc = await countDiscount();
@@ -390,6 +391,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cart.branch_id = int.parse(branchid);
     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
     cart.discount = disc;
+    cart.table_id = tableData["table_id"];
     cart.discount_type = currentCart.discount_type;
     cart.total_qty = qty;
     cart.tax = taxvalues;
@@ -403,7 +405,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     cart.created_by = loginData["id"];
     cart.localID = await CommunFun.getLocalID();
-    var tableData = await json.decode(table); // table data
+
     orderData.orderName = tableData != null ? "" : "test";
     if (!isEditing) {
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());

@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
+import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 
@@ -37,11 +41,11 @@ class _WebOrderPagesState extends State<WebOrderPages>
     var branchid = await CommunFun.getbranchId();
     List<MST_Cart> cart = await localAPI.getCartList(branchid);
     if (cart.length > 0) {
-      //var offlineList = cart.where((x) => x.source == 2).toList();
-      //var onlineList = cart.where((x) => x.source == 1).toList();
+      var offlineListitem = cart.where((x) => x.source != 1).toList();
+      var onlineListitem = cart.where((x) => x.source == 1).toList();
       setState(() {
-        offlineList = cart;
-        onlineList = cart;
+        offlineList = offlineListitem;
+        onlineList = onlineListitem;
       });
     }
   }
@@ -49,6 +53,22 @@ class _WebOrderPagesState extends State<WebOrderPages>
   assignTable(cart) {
     Navigator.pushNamed(context, Constant.SelectTableScreen,
         arguments: {'isAssign': true, 'orderID': cart.id});
+  }
+
+  checkTableAssigned(cart) async {
+    if (cart.table_id == null) {
+      assignTable(cart);
+    } else {
+      List<Table_order> tableorder =
+          await localAPI.getTableOrders(cart.table_id);
+      if (tableorder.length > 0) {
+        await Preferences.setStringToSF(
+            Constant.TABLE_DATA, json.encode(tableorder[0]));
+        Navigator.pushNamed(context, Constant.DashboardScreen);
+      } else {
+        assignTable(cart);
+      }
+    }
   }
 
   @override
@@ -104,11 +124,11 @@ class _WebOrderPagesState extends State<WebOrderPages>
             Container(
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
-                child: offlineListwidget()),
+                child: onlineListwidget()),
             Container(
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
-                child: onlineListwidget())
+                child: offlineListwidget()),
           ],
         ),
       ),
@@ -139,6 +159,9 @@ class _WebOrderPagesState extends State<WebOrderPages>
       crossAxisCount: 6,
       children: offlineList.map((cart) {
         return InkWell(
+          onTap: () {
+            checkTableAssigned(cart);
+          },
           borderRadius: BorderRadius.all(Radius.circular(30.0)),
           child: Container(
             width: itemHeight,
@@ -213,7 +236,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
       children: onlineList.map((cart) {
         return InkWell(
           onTap: () {
-            assignTable(cart);
+            checkTableAssigned(cart);
           },
           borderRadius: BorderRadius.all(Radius.circular(30.0)),
           child: Container(
@@ -245,25 +268,27 @@ class _WebOrderPagesState extends State<WebOrderPages>
                         ]),
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.only(top: itemHeight / 2.1),
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                      color: Colors.deepOrange,
-                      borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(20.0),
-                          bottomRight: Radius.circular(20.0))),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      // Text("Sub Total:" + cart.sub_total.toString(),
-                      //     style: Styles.whiteSimpleSmall()),
-                      // Text("Grand Total:" + cart.grand_total.toString(),
-                      //     style: Styles.whiteSimpleSmall())
-
-                      Text("Assing Table", style: Styles.whiteSimpleSmall())
-                    ],
+                GestureDetector(
+                  onTap: () {
+                    checkTableAssigned(cart);
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(top: itemHeight / 2.1),
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                        color: cart.table_id == null
+                            ? Colors.deepOrange
+                            : Colors.grey,
+                        borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(20.0),
+                            bottomRight: Radius.circular(20.0))),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text("Assing Table", style: Styles.whiteSimpleSmall())
+                      ],
+                    ),
                   ),
                 ),
                 Positioned(

@@ -59,12 +59,12 @@ class _PINPageState extends State<PINPage> {
     if (!isCheckIn) {
       if (pinNumber.length >= 6) {
         List<User> checkUserExit = await localAPI.checkUserExit(pinNumber);
-        User user;
+
         if (checkUserExit.length != 0) {
           setState(() {
             isLoading = true;
           });
-          user = checkUserExit[0];
+          User user = checkUserExit[0];
           CheckinOut checkIn = new CheckinOut();
           var terminalId = await CommunFun.getTeminalKey();
           var branchid = await CommunFun.getbranchId();

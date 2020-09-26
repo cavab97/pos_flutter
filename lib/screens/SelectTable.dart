@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -105,8 +106,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
       tableorder.number_of_pax = int.parse(paxController.text);
       await localAPI.insertTableOrder(tableorder);
       await localAPI.insertSaveOrders(orderData, selectedTable.tableId);
+      await localAPI.updateTableidintocart(orderid, selectedTable.tableId);
       Navigator.of(context).pop();
-      Navigator.pushNamed(context, Constant.TransactionScreen);
+      Navigator.pushNamed(context, Constant.WebOrderPages);
     } else {
       CommunFun.showToast(context, "Please enter pax minimum table capcity.");
     }
@@ -219,6 +221,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
     return TextField(
       controller: paxController,
       keyboardType: TextInputType.number,
+      inputFormatters: <TextInputFormatter>[
+        WhitelistingTextInputFormatter.digitsOnly
+      ],
       decoration: InputDecoration(
         enabledBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: Colors.grey),

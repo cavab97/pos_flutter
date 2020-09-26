@@ -56,12 +56,22 @@ class MSTCartdetails {
     productId = json["product_id"];
     printer_id = json["printer_id"];
     productName = json["product_name"];
-    productPrice = json["product_price"] as double;
-    productQty = json["product_qty"] as double;
-    productNetPrice = json["product_net_price"] as double;
+    productPrice = json["product_price"] is int
+        ? (json['product_price'] as int).toDouble()
+        : json["product_price"];
+    productQty = json["product_qty"] is int
+        ? (json['product_qty'] as int).toDouble()
+        : json["product_qty"];
+    productNetPrice = json["product_net_price"] is int
+        ? (json['product_net_price'] as int).toDouble()
+        : json["product_net_price"];
     taxId = json["tax_id"];
-    taxValue = json["tax_value"] as double;
-    discount = json["discount"] as double;
+    taxValue = json["tax_value"] is int
+        ? (json['tax_value'] as int).toDouble()
+        : json["tax_value"];
+    discount = json["discount"] is int
+        ? (json['discount'] as int).toDouble()
+        : json["discount"];
     discountType = json["discount_type"];
     remark = json["remark"];
     isDeleted = json["is_deleted"];
