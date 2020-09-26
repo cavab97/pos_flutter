@@ -114,7 +114,7 @@ packages:
     source: hosted
     version: "3.2.9"
   esc_pos_utils:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: esc_pos_utils
       url: "https://pub.dartlang.org"
