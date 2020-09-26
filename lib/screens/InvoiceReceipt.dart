@@ -111,7 +111,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
             top: 10,
             child: IconButton(
               onPressed: () {
-                testPrint("192.168.0.130", context);
+                testPrint("192.168.0.108", context);
               },
               icon: Icon(
                 Icons.print,

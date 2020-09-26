@@ -38,9 +38,9 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
   void discover(BuildContext ctx) async {
     setState(() {
       isDiscovering = true;
-      //devices.clear();
-      //found = -1;
-      devices.add("192.168.109");
+      devices.clear();
+      found = -1;
+    //  devices.add("192.168.109");
     });
 
     String ip;

@@ -68,6 +68,7 @@ class _DashboradPageState extends State<DashboradPage>
   bool isTableSelected = false;
   Table_order selectedTable;
   double subtotal = 0;
+  String tableName = "";
   double discount = 0;
   double tax = 0;
   List taxJson = [];
@@ -119,6 +120,7 @@ class _DashboradPageState extends State<DashboradPage>
       setState(() {
         isTableSelected = true;
         selectedTable = table;
+        tableName = tabledata[0].tableName;
       });
       if (selectedTable.save_order_id != null &&
           selectedTable.save_order_id != 0) {
@@ -409,7 +411,7 @@ class _DashboradPageState extends State<DashboradPage>
   // }
 
   /*This method used for print KOT receipt print*/
-  opnePrinterPop(cartLists) {
+  openPrinterPop(cartLists) {
     for (int i = 0; i < printerList.length; i++) {
       List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
       tempCart.clear();
@@ -422,7 +424,7 @@ class _DashboradPageState extends State<DashboradPage>
       }
       if (tempCart.length > 0) {
         printKOT.checkKOTPrint(
-            printerList[i].printerIp.toString(), context, tempCart);
+            printerList[i].printerIp.toString(), tableName, context, tempCart);
       }
     }
     /*showDialog(
@@ -776,7 +778,7 @@ class _DashboradPageState extends State<DashboradPage>
       if (cartitem.isSendKichen == 1) {
         var deletedlist = [];
         deletedlist.add(cartitem);
-        opnePrinterPop(deletedlist);
+        openPrinterPop(deletedlist);
       }
       if (cartList.length > 1) {
         await getCartItem(currentCart);
@@ -1553,7 +1555,7 @@ class _DashboradPageState extends State<DashboradPage>
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () {
-                      opnePrinterPop(cartList);
+                      //opnePrinterPop(cartList);
                     },
                     child: Text(
                       "SEND",
@@ -1570,7 +1572,7 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                 )
               : SizedBox(),
-          Container(
+         Container(
             margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height / 1.3 + 10),
             height: 50,
@@ -1578,7 +1580,7 @@ class _DashboradPageState extends State<DashboradPage>
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
-                if (!isWebOrder) {
+                 if (!isWebOrder) {
                   sendPayment();
                 } else {
                   //weborder payment

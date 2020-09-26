@@ -7,6 +7,7 @@ import 'package:mcncashier/screens/PrinteTypeDailog.dart';
 import 'package:mcncashier/screens/SelectPrinterDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 
 class SettingsPage extends StatefulWidget {
   // Transactions list
@@ -19,6 +20,8 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   LocalAPI localAPI = LocalAPI();
+  PrintReceipt testPrint = PrintReceipt();
+
   List<Printer> printerList = new List<Printer>();
 
   bool isPrinterSettings = false;
@@ -296,7 +299,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   itemCount: printerList.length,
                   itemBuilder: (BuildContext context, int index) {
                     return InkWell(
-                    //  onTap: () => testPrint(devices[index], context),
+                      onTap: () => testPrint.testReceiptPrint(
+                          printerList[index].printerIp,
+                          context,
+                          printerList[index].printerName),
                       child: Column(
                         children: <Widget>[
                           Container(
@@ -309,7 +315,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                 SizedBox(width: 10),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
                                       Text(
@@ -319,7 +326,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                       ),
                                       Text(
                                         'Click to print a test receipt',
-                                        style: TextStyle(color: Colors.grey[700]),
+                                        style:
+                                            TextStyle(color: Colors.grey[700]),
                                       ),
                                     ],
                                   ),
