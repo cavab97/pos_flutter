@@ -184,7 +184,7 @@ class TableData {
             print(result);
           } else {
             var result = await db.update("category", category.toJson(),
-                where: "category_id = ?", whereArgs: [category.categoryId]);
+                where: "category_id =?", whereArgs: [category.categoryId]);
             print(result);
           }
         }

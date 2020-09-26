@@ -47,7 +47,6 @@ class DashboradPage extends StatefulWidget {
 
 class _DashboradPageState extends State<DashboradPage>
     with TickerProviderStateMixin {
-
   TabController _tabController;
   TabController _subtabController;
   GlobalKey<ScaffoldState> scaffoldKey;
@@ -90,8 +89,6 @@ class _DashboradPageState extends State<DashboradPage>
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
-
-
   }
 
   checkisInit() async {
@@ -117,7 +114,7 @@ class _DashboradPageState extends State<DashboradPage>
       setState(() {
         isTableSelected = true;
         selectedTable = table;
-        tableName=tabledata[0].tableName;
+        tableName = tabledata[0].tableName;
       });
       if (selectedTable.save_order_id != null &&
           selectedTable.save_order_id != 0) {
@@ -418,7 +415,7 @@ class _DashboradPageState extends State<DashboradPage>
       }
       if (tempCart.length > 0) {
         printKOT.checkKOTPrint(
-            printerList[i].printerIp.toString(), tableName,context, tempCart);
+            printerList[i].printerIp.toString(), tableName, context, tempCart);
       }
     }
     /*showDialog(
