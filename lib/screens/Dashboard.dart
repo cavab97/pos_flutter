@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -18,6 +17,7 @@ import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
+import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Shift.dart';
@@ -48,16 +48,12 @@ class DashboradPage extends StatefulWidget {
 
 class _DashboradPageState extends State<DashboradPage>
     with TickerProviderStateMixin {
-  GlobalKey<AutoCompleteTextFieldState<ProductDetails>> keyAutoSuggestion =
-      new GlobalKey();
   TextEditingController searchTextFieldController = new TextEditingController();
-  AutoCompleteTextField searchTextField;
   TabController _tabController;
   TabController _subtabController;
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
   PrintReceipt printKOT = PrintReceipt();
-
   List<Category> allCaterories = new List<Category>();
   List<Category> tabsList = new List<Category>();
   List<Printer> printerList = new List<Printer>();
@@ -67,6 +63,7 @@ class _DashboradPageState extends State<DashboradPage>
   List<MSTCartdetails> cartList = new List<MSTCartdetails>();
   bool isDrawerOpen = false;
   bool isShiftOpen = false;
+  bool isWebOrder = false;
   var userDetails;
   bool isTableSelected = false;
   Table_order selectedTable;
@@ -137,6 +134,7 @@ class _DashboradPageState extends State<DashboradPage>
       cartList = [];
       selectedTable = null;
       grandTotal = 0.0;
+      isWebOrder = false;
       discount = 0.0;
       tax = 0.0;
       subtotal = 0.0;
@@ -212,6 +210,7 @@ class _DashboradPageState extends State<DashboradPage>
     //   taxval = cart.taxValue;
     //   grandtotal = (subTotal + taxval) - dis;
     // }
+
     Voucher vaocher;
     if (cart.voucher_id != null) {
       vaocher = await localAPI.getvoucher(cart.voucher_id);
@@ -220,6 +219,7 @@ class _DashboradPageState extends State<DashboradPage>
       allcartData = cart;
       subtotal = cart.sub_total;
       discount = cart.discount;
+      isWebOrder = cart.source == 1 ? true : false;
       tax = cart.tax;
       taxJson = json.decode(cart.tax_json);
       grandTotal = cart.grand_total;
@@ -445,6 +445,17 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
+  checkoutWebOrder() async {
+    if (cartList.length != 0) {
+      CommunFun.processingPopup(context);
+
+      sendPaymentByCash(null);
+      Navigator.of(context).pop();
+    } else {
+      CommunFun.showToast(context, Strings.cart_empty);
+    }
+  }
+
   sendOpenShft(ammount) async {
     setState(() {
       isShiftOpen = true;
@@ -481,12 +492,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   openDrawer() {
-    // Drawer Open close event
-    if (isDrawerOpen) {
-      // Navigator.of(context).pop();
-    } else {
-      scaffoldKey.currentState.openDrawer();
-    }
+    scaffoldKey.currentState.openDrawer();
     setState(() {
       isDrawerOpen = !isDrawerOpen;
     });
@@ -581,13 +587,13 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   paymentWithMethod(mehtod) async {
-    var cartData = await getcartData();
-    var branchdata = await getbranch();
-    sendPaymentByCash(cartData, mehtod, branchdata);
+    sendPaymentByCash(mehtod);
   }
 
-  sendPaymentByCash(cartData, payment, branchdata) async {
+  sendPaymentByCash(payment) async {
     Orders order = new Orders();
+    var cartData = await getcartData();
+    var branchdata = await getbranch();
     Customer customer = await getCustomer();
     Table_order tables = await getTableData();
     User userdata = await CommunFun.getuserDetails();
@@ -608,7 +614,7 @@ class _DashboradPageState extends State<DashboradPage>
       invoiceNo =
           branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
-
+    // Order table
     order.uuid = uuid;
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
@@ -629,6 +635,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.voucher_amount = cartData.discount;
     var orderid = await localAPI.placeOrder(order);
     print(orderid);
+    //Voucher history
     if (cartData.voucher_id != 0 && cartData.voucher_id != null) {
       VoucherHistory history = new VoucherHistory();
       history.voucher_id = cartData.voucher_id;
@@ -640,6 +647,7 @@ class _DashboradPageState extends State<DashboradPage>
       print(hisID);
     }
     var orderDetailid;
+    // ORder details
     if (orderid > 0) {
       if (cartList.length > 0) {
         var orderId = orderid;
@@ -661,6 +669,7 @@ class _DashboradPageState extends State<DashboradPage>
         }
       }
     }
+    // ORder modifire
     List<MSTSubCartdetails> modifireList = await getmodifireList();
     if (modifireList.length > 0) {
       var orderId = orderid;
@@ -682,6 +691,7 @@ class _DashboradPageState extends State<DashboradPage>
           var ordermodifreid = await localAPI.sendModifireData(modifireData);
           print(ordermodifreid);
         } else {
+          //Order Attributes
           OrderAttributes attributes = new OrderAttributes();
           attributes.uuid = uuid;
           attributes.order_id = orderId;
@@ -1001,98 +1011,107 @@ class _DashboradPageState extends State<DashboradPage>
   Widget drawerWidget() {
     return Drawer(
       child: Container(
-          padding: EdgeInsets.only(top: 30),
-          color: Colors.white,
-          child: ListView(
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[checkoutbtn(), nameBtn()],
+        padding: EdgeInsets.only(top: 30),
+        color: Colors.white,
+        child: ListView(
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[checkoutbtn(), nameBtn()],
+            ),
+            CommunFun.divider(),
+            ListTile(
+                onTap: () {
+                  if (isShiftOpen) {
+                    gotoTansactionPage();
+                  } else {
+                    CommunFun.showToast(context, Strings.shift_closed);
+                  }
+                },
+                leading: Icon(
+                  Icons.art_track,
+                  color: Colors.black,
+                  size: 30,
+                ),
+                title: Text("Transaction", style: Styles.communBlack())),
+            ListTile(
+                onTap: () {
+                  gotoWebCart();
+                },
+                leading: Icon(
+                  Icons.shopping_cart,
+                  color: Colors.black,
+                  size: 30,
+                ),
+                title: Text("Current Orders", style: Styles.communBlack())),
+            ListTile(
+                onTap: () {
+                  Navigator.of(context).pop();
+                  if (isShiftOpen) {
+                    closeShift();
+                  } else {
+                    openOpningAmmountPop(Strings.title_opening_amount);
+                  }
+                },
+                leading: Icon(
+                  Icons.open_in_new,
+                  color: Colors.black,
+                  size: 30,
+                ),
+                title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
+                    style: Styles.communBlack())),
+            ListTile(
+                leading: Icon(
+                  Icons.filter_tilt_shift,
+                  color: Colors.black,
+                  size: 30,
+                ),
+                title: Text("Shift Report", style: Styles.communBlack())),
+            ListTile(
+              onTap: () async {
+                syncAllTables();
+              },
+              leading: Icon(
+                Icons.sync,
+                color: Colors.black,
+                size: 30,
               ),
-              CommunFun.divider(),
-              ListTile(
-                  onTap: () {
-                    if (isShiftOpen) {
-                      gotoTansactionPage();
-                    } else {
-                      CommunFun.showToast(context, Strings.shift_closed);
-                    }
-                  },
-                  leading: Icon(
-                    Icons.art_track,
-                    color: Colors.black,
-                    size: 30,
-                  ),
-                  title: Text("Transaction", style: Styles.communBlack())),
-              ListTile(
-                  onTap: () {
-                    gotoWebCart();
-                  },
-                  leading: Icon(
-                    Icons.shopping_cart,
-                    color: Colors.black,
-                    size: 30,
-                  ),
-                  title: Text("Web Orders", style: Styles.communBlack())),
-              ListTile(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    if (isShiftOpen) {
-                      closeShift();
-                    } else {
-                      openOpningAmmountPop(Strings.title_opening_amount);
-                    }
-                  },
-                  leading: Icon(
-                    Icons.open_in_new,
-                    color: Colors.black,
-                    size: 30,
-                  ),
-                  title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
-                      style: Styles.communBlack())),
-              ListTile(
-                  leading: Icon(
-                    Icons.filter_tilt_shift,
-                    color: Colors.black,
-                    size: 30,
-                  ),
-                  title: Text("Shift Report", style: Styles.communBlack())),
-              ListTile(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    getsetWebOrders();
-                    syncOrdersTodatabase();
-                  },
-                  leading: Icon(
-                    Icons.transform,
-                    color: Colors.black,
-                    size: 40,
-                  ),
-                  title: Text("Sync Orders", style: Styles.communBlack())),
-              ListTile(
-                  onTap: () async {
-                    syncAllTables();
-                  },
-                  leading: Icon(
-                    Icons.sync,
-                    color: Colors.black,
-                    size: 30,
-                  ),
-                  title: Text("Sync", style: Styles.communBlack())),
-              ListTile(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    Navigator.pushNamed(context, Constant.SettingsScreen);
-                  },
-                  leading: Icon(
-                    Icons.settings,
-                    color: Colors.black,
-                    size: 30,
-                  ),
-                  title: Text("Settings", style: Styles.communBlack())),
-            ],
-          )),
+              title: Text(
+                "Sync",
+                style: Styles.communBlack(),
+              ),
+            ),
+            ListTile(
+              onTap: () {
+                Navigator.of(context).pop();
+                getsetWebOrders();
+                syncOrdersTodatabase();
+              },
+              leading: Icon(
+                Icons.transform,
+                color: Colors.black,
+                size: 40,
+              ),
+              title: Text(
+                "Sync Orders",
+                style: Styles.communBlack(),
+              ),
+            ),
+            ListTile(
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.pushNamed(context, Constant.SettingsScreen);
+                },
+                leading: Icon(
+                  Icons.settings,
+                  color: Colors.black,
+                  size: 30,
+                ),
+                title: Text("Settings", style: Styles.communBlack())),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1441,10 +1460,12 @@ class _DashboradPageState extends State<DashboradPage>
           return InkWell(
             onTap: () {
               if (isShiftOpen) {
-                if (isTableSelected) {
+                if (isTableSelected && !isWebOrder) {
                   showQuantityDailog(product);
                 } else {
-                  selectTable();
+                  if (!isWebOrder) {
+                    selectTable();
+                  }
                 }
               } else {
                 CommunFun.showToast(context, Strings.shift_open_message);
@@ -1519,8 +1540,36 @@ class _DashboradPageState extends State<DashboradPage>
   Widget paybutton(context) {
     // Payment button
     return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: !isWebOrder
+            ? MainAxisAlignment.spaceAround
+            : MainAxisAlignment.center,
         children: <Widget>[
+          !isWebOrder
+              ? Container(
+                  margin: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height / 1.3 + 10),
+                  height: 50,
+                  width: 200,
+                  child: RaisedButton(
+                    padding: EdgeInsets.only(top: 5, bottom: 5),
+                    onPressed: () {
+                      opnePrinterPop(cartList);
+                    },
+                    child: Text(
+                      "SEND",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    color: Colors.deepOrange,
+                    textColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                    ),
+                  ),
+                )
+              : SizedBox(),
           Container(
             margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height / 1.3 + 10),
@@ -1529,34 +1578,15 @@ class _DashboradPageState extends State<DashboradPage>
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
-                opnePrinterPop(cartList);
+                if (!isWebOrder) {
+                  sendPayment();
+                } else {
+                  //weborder payment
+                  checkoutWebOrder();
+                }
               },
               child: Text(
-                "SEND",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-              ),
-              color: Colors.deepOrange,
-              textColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50.0),
-              ),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(
-                top: MediaQuery.of(context).size.height / 1.3 + 10),
-            height: 50,
-            width: 200,
-            child: RaisedButton(
-              padding: EdgeInsets.only(top: 5, bottom: 5),
-              onPressed: () {
-                sendPayment();
-              },
-              child: Text(
-                Strings.title_pay,
+                !isWebOrder ? Strings.title_pay : "CheckOut",
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -1713,7 +1743,9 @@ class _DashboradPageState extends State<DashboradPage>
                 child: new IconButton(
                   padding: EdgeInsets.all(0),
                   onPressed: () {
-                    itememovefromCart(cart);
+                    if (!isWebOrder) {
+                      itememovefromCart(cart);
+                    }
                   },
                   icon: new Icon(Icons.delete, size: 30, color: Colors.white),
                 ),
@@ -1722,7 +1754,9 @@ class _DashboradPageState extends State<DashboradPage>
                 child: new IconButton(
                   padding: EdgeInsets.all(0),
                   onPressed: () {
-                    editCartItem(cart);
+                    if (!isWebOrder) {
+                      editCartItem(cart);
+                    }
                   },
                   icon: new Icon(Icons.edit, size: 30, color: Colors.white),
                 ),
@@ -1732,57 +1766,6 @@ class _DashboradPageState extends State<DashboradPage>
         }),
       ).toList(),
     );
-    /* Table(
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            border: TableBorder(
-                bottom: BorderSide(
-                    width: 1,
-                    color: Colors.grey[400],
-                    style: BorderStyle.solid),
-                horizontalInside: BorderSide(
-                    width: 1,
-                    color: Colors.grey[400],
-                    style: BorderStyle.solid)),
-            columnWidths: {
-              0: FractionColumnWidth(.6),
-              1: FractionColumnWidth(.2),
-              2: FractionColumnWidth(.2),
-            },
-            children: cartList.map((cart) {
-              return TableRow(children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                  child: Text(
-                    cart.productName.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                ),
-                Padding(
-                    padding: EdgeInsets.only(top: 10, bottom: 10),
-                    child: Text(
-                      cart.productQty.toString(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                    )),
-                Padding(
-                    padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                    child: Text(
-                      cart.productPrice.toString(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                    )),
-              ]);
-            }).toList());*/
 
     final totalPriceTable = Table(
         border: TableBorder(
@@ -1848,7 +1831,7 @@ class _DashboradPageState extends State<DashboradPage>
                               child: Text(
                                 Strings.tax.toUpperCase() +
                                     " " +
-                                    taxitem["taxName"] +
+                                    taxitem["taxCode"] +
                                     "(" +
                                     taxitem["rate"] +
                                     "%)",
@@ -1930,7 +1913,9 @@ class _DashboradPageState extends State<DashboradPage>
                         padding: EdgeInsets.only(
                             left: 10, right: 10, top: 5, bottom: 5),
                         onPressed: () {
-                          openVoucherPop();
+                          if (!isWebOrder) {
+                            openVoucherPop();
+                          }
                         },
                         child: Row(
                           children: <Widget>[

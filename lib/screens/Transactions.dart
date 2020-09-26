@@ -615,7 +615,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               child: Text(
                                 Strings.tax.toUpperCase() +
                                     " " +
-                                    taxitem["taxName"] +
+                                    taxitem["taxCode"] +
                                     "(" +
                                     taxitem["rate"] +
                                     "%)",

@@ -7,6 +7,7 @@ class MST_Cart {
   double discount;
   int discount_type;
   String remark;
+  int table_id;
   double tax;
   String tax_json;
   double grand_total;
@@ -34,6 +35,7 @@ class MST_Cart {
     this.discount,
     this.discount_type,
     this.remark,
+    this.table_id,
     this.tax,
     this.tax_json,
     this.voucher_id,
@@ -64,11 +66,16 @@ class MST_Cart {
         ? (json['discount'] as int).toDouble()
         : json['discount'];
     discount_type = json["discount_type"];
+    table_id = json["table_id"];
     remark = json["remark"];
     tax = json["tax"] is int ? (json['tax'] as int).toDouble() : json['tax'];
     tax_json = json["tax_json"];
-    grand_total = json["grand_total"] as double;
-    total_qty = json["total_qty"] as double;
+    grand_total = json["grand_total"] is int
+        ? (json['grand_total'] as int).toDouble()
+        : json['grand_total'];
+    total_qty = json["total_qty"] is int
+        ? (json['total_qty'] as int).toDouble()
+        : json['total_qty'];
     voucher_id = json["voucher_id"];
     is_deleted = json["is_deleted"];
     created_by = json["created_by"];
@@ -94,6 +101,7 @@ class MST_Cart {
     data["discount"] = this.discount;
     data["discount_type "] = this.discount_type;
     data["remark"] = this.remark;
+    data["table_id"] = this.table_id;
     data["tax"] = this.tax;
     data["tax_json"] = this.tax_json;
     data["grand_total"] = this.grand_total;
