@@ -75,6 +75,15 @@ class _WebOrderPagesState extends State<WebOrderPages>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: new IconButton(
+          icon: new Icon(
+            Icons.arrow_back,
+            size: 30.0,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
         backgroundColor: Colors.white,
         iconTheme: IconThemeData(color: Colors.black, size: 60),
         elevation: 0.0,

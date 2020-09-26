@@ -104,4 +104,5 @@ class Strings {
   static String voucher_expired = "Voucher already expired.";
   static String stock_not_valilable = "Product is Out of stock.";
   static String procesing = "Processing";
+  static String send = "SEND";
 }
