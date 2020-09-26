@@ -39,7 +39,7 @@ dependencies:
   wifi: ^0.1.5
   ping_discover_network: ^0.2.0+1
   intl: ^0.16.1
-
+  esc_pos_utils: ^0.4.9
 
 dev_dependencies:
   flutter_test:
