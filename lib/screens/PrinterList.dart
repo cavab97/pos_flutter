@@ -113,7 +113,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
 
   void testPrint(String printerIp, BuildContext ctx) async {
     sendTokitched();
-    printKOT.checkKOTPrint(printerIp, ctx, itemList);
+  //  printKOT.checkKOTPrint(printerIp, ctx, itemList);
 
   }
 
