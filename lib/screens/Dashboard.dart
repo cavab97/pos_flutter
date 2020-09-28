@@ -8,6 +8,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
@@ -49,6 +50,7 @@ class _DashboradPageState extends State<DashboradPage>
     with TickerProviderStateMixin {
   TabController _tabController;
   TabController _subtabController;
+  var _textController = TextEditingController();
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
   PrintReceipt printKOT = PrintReceipt();
@@ -64,6 +66,7 @@ class _DashboradPageState extends State<DashboradPage>
   bool isShiftOpen = false;
   var userDetails;
   bool isTableSelected = false;
+  Branch branchData;
   Table_order selectedTable;
   double subtotal = 0;
   String tableName = "";
@@ -89,6 +92,9 @@ class _DashboradPageState extends State<DashboradPage>
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
+    _textController.addListener(() {
+      getSearchList(_textController.text.toString());
+    });
   }
 
   checkisInit() async {
@@ -105,6 +111,7 @@ class _DashboradPageState extends State<DashboradPage>
   checkidTableSelected() async {
     var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
     var branchid = await CommunFun.getbranchId();
+    Branch branchAddress = await localAPI.getBranchData(branchid);
     if (tableid != null) {
       var tableddata = json.decode(tableid);
       Table_order table = Table_order.fromJson(tableddata);
@@ -112,6 +119,7 @@ class _DashboradPageState extends State<DashboradPage>
           await localAPI.getTableData(branchid, table.table_id);
       table.save_order_id = tabledata[0].saveorderid;
       setState(() {
+        branchData = branchAddress;
         isTableSelected = true;
         selectedTable = table;
         tableName = tabledata[0].tableName;
@@ -254,10 +262,10 @@ class _DashboradPageState extends State<DashboradPage>
         closeShift();
         break;
       case 3:
-      /*  if (cartList.length > 0) {
-          printKOT.DraftReceipt(printerList[i].printerIp.toString(), tableName,
-              context, tempCart);
-        }*/
+        if (cartList.length > 0) {
+          printKOT.checkDraftPrint(printerList[0].printerIp.toString(), context,
+              cartList, tableName, subtotal, grandTotal, tax, branchData);
+        }
         break;
     }
   }
@@ -1126,6 +1134,7 @@ class _DashboradPageState extends State<DashboradPage>
             width: MediaQuery.of(context).size.width / 3.8,
             child: TypeAheadField(
               textFieldConfiguration: TextFieldConfiguration(
+                controller: _textController,
                 style: Styles.communBlacksmall(),
                 decoration: InputDecoration(
                     contentPadding:

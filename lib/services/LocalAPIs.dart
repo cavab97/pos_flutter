@@ -1059,6 +1059,26 @@ class LocalAPI {
     return list;
   }
 
+  Future<List<Printer>> getAllPrinterForKOT() async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from printer whee printer_is_cashier = 0";
+    var result = await db.rawQuery(qry);
+    List<Printer> list = result.isNotEmpty
+        ? result.map((c) => Printer.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<Printer>> getAllPrinterForecipt() async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from printer whee printer_is_cashier = 1";
+    var result = await db.rawQuery(qry);
+    List<Printer> list = result.isNotEmpty
+        ? result.map((c) => Printer.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
   Future updateWebCart(MST_Cart cart) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT id from mst_cart where id = " + cart.id.toString();
