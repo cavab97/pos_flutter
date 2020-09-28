@@ -1061,7 +1061,7 @@ class LocalAPI {
 
   Future<List<Printer>> getAllPrinterForKOT() async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from printer whee printer_is_cashier = 0";
+    var qry = "SELECT * from printer where printer_is_cashier = 0";
     var result = await db.rawQuery(qry);
     List<Printer> list = result.isNotEmpty
         ? result.map((c) => Printer.fromJson(c)).toList()
@@ -1071,7 +1071,7 @@ class LocalAPI {
 
   Future<List<Printer>> getAllPrinterForecipt() async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from printer whee printer_is_cashier = 1";
+    var qry = "SELECT * from printer where printer_is_cashier = 1";
     var result = await db.rawQuery(qry);
     List<Printer> list = result.isNotEmpty
         ? result.map((c) => Printer.fromJson(c)).toList()
