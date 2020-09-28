@@ -8,6 +8,7 @@ import 'package:mcncashier/screens/Settings.dart';
 import 'package:mcncashier/screens/TerminalScreen.dart';
 import 'package:mcncashier/screens/Transactions.dart';
 import 'package:mcncashier/screens/WebOrdersPage.dart';
+import 'package:mcncashier/screens/Shift_Reports.dart';
 
 final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   Constant.TerminalScreen: (BuildContext context) => TerminalKeyPage(),
@@ -18,4 +19,5 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   Constant.SelectTableScreen: (BuildContext context) => SelectTablePage(),
   Constant.SettingsScreen: (BuildContext context) => SettingsPage(),
   Constant.WebOrderPages: (BuildContext context) => WebOrderPages(),
+  Constant.ShiftOrders: (BuildContext context) => ShiftReports(),
 };

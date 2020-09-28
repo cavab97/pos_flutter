@@ -175,6 +175,11 @@ class _DashboradPageState extends State<DashboradPage>
     Navigator.of(context).pop();
   }
 
+  gotoShiftReport() {
+    Navigator.of(context).pop();
+    Navigator.pushNamed(context, Constant.ShiftOrders);
+  }
+
   checkshift() async {
     var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
     setState(() {
@@ -194,17 +199,6 @@ class _DashboradPageState extends State<DashboradPage>
 
   countTotals(cartId) async {
     MST_Cart cart = await localAPI.getCartData(cartId);
-    // var subTotal = 0.0;
-    // var dis = 0.0;
-    // var taxval = 0.0;
-    // var grandtotal = 0.0;
-    // for (var i = 0; i < cartList.length; i++) {
-    //   var cart = cartList[i];
-    //   subTotal += cart.productPrice;
-    //   dis += cart.discount;
-    //   taxval = cart.taxValue;
-    //   grandtotal = (subTotal + taxval) - dis;
-    // }
     Voucher vaocher;
     if (cart.voucher_id != null) {
       vaocher = await localAPI.getvoucher(cart.voucher_id);
@@ -946,32 +940,31 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   Widget checkoutbtn() {
-    return RaisedButton(
-      padding: EdgeInsets.only(left: 10, right: 10),
-      onPressed: () {
-        Navigator.pushNamed(context, Constant.PINScreen);
-
-        Preferences.removeSinglePref(Constant.LOIGN_USER);
-        Preferences.removeSinglePref(Constant.IS_CHECKIN);
-      },
-      child: Text(
-        Strings.checkout,
-        style: TextStyle(color: Colors.white, fontSize: 18),
-      ),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50.0),
+    return Expanded(
+      child: RaisedButton(
+        padding: EdgeInsets.all(10),
+        onPressed: () {
+          Navigator.pushNamed(context, Constant.PINScreen);
+        },
+        child: Text(
+          Strings.checkout,
+          style: TextStyle(color: Colors.white, fontSize: 18),
+        ),
+        color: Colors.deepOrange,
+        textColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50.0),
+        ),
       ),
     );
   }
 
   Widget nameBtn() {
-    return RaisedButton(
-      padding: EdgeInsets.only(left: 10, right: 10),
+    return Expanded(
+        child: RaisedButton(
+      padding: EdgeInsets.all(10),
       onPressed: () {
         Navigator.pushNamed(context, Constant.PINScreen);
-        //  Preferences.removeSinglePref(Constant.TERMINAL_KEY);
       },
       child: Text(
         userDetails != null ? userDetails["name"] : "",
@@ -982,20 +975,24 @@ class _DashboradPageState extends State<DashboradPage>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(50.0),
       ),
-    );
+    ));
   }
 
   Widget drawerWidget() {
     return Drawer(
       child: Container(
-          padding: EdgeInsets.only(top: 30),
+          padding: EdgeInsets.only(top: 10, left: 10, right: 10),
           color: Colors.white,
           child: ListView(
             children: <Widget>[
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[checkoutbtn(), nameBtn()],
+                children: <Widget>[
+                  checkoutbtn(),
+                  SizedBox(width: 10),
+                  nameBtn()
+                ],
               ),
               CommunFun.divider(),
               ListTile(
@@ -1039,6 +1036,9 @@ class _DashboradPageState extends State<DashboradPage>
                   title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
                       style: Styles.communBlack())),
               ListTile(
+                  onTap: () {
+                    gotoShiftReport();
+                  },
                   leading: Icon(
                     Icons.filter_tilt_shift,
                     color: Colors.black,
@@ -1487,11 +1487,9 @@ class _DashboradPageState extends State<DashboradPage>
                       color: Colors.deepOrange,
                       child: Center(
                         child: Text(
-                            product.hasInventory == 1 && product.qty == 0
-                                ? Strings.out_of_stoke
-                                : product.priceTypeName +
-                                    ' ' +
-                                    product.price.toString(),
+                            product.priceTypeName +
+                                ' ' +
+                                product.price.toString(),
                             style: Styles.whiteSimpleSmall()),
                       ),
                     ),
@@ -1837,7 +1835,7 @@ class _DashboradPageState extends State<DashboradPage>
                               child: Text(
                                 Strings.tax.toUpperCase() +
                                     " " +
-                                    taxitem["taxName"] +
+                                    taxitem["taxCode"] +
                                     "(" +
                                     taxitem["rate"] +
                                     "%)",
@@ -1913,7 +1911,7 @@ class _DashboradPageState extends State<DashboradPage>
                             ),
                           ))
                       : SizedBox(),
-                  Padding(
+                 Padding(
                       padding: EdgeInsets.only(top: 10),
                       child: RaisedButton(
                         padding: EdgeInsets.only(
