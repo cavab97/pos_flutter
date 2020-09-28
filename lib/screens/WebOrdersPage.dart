@@ -286,36 +286,59 @@ class _WebOrderPagesState extends State<WebOrderPages>
                         ]),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    checkTableAssigned(cart);
-                  },
-                  child: Container(
-                    margin: EdgeInsets.only(top: itemHeight / 2.1),
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                        color: cart.table_id == null
-                            ? Colors.deepOrange
-                            : Colors.grey,
-                        borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(20.0),
-                            bottomRight: Radius.circular(20.0))),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                            cart.table_id == null ? "Assing Table" : "Table id",
-                            style: Styles.whiteSimpleSmall())
-                      ],
-                    ),
-                  ),
-                ),
+                cart.table_id == null
+                    ? GestureDetector(
+                        onTap: () {
+                          checkTableAssigned(cart);
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(top: itemHeight / 2.1),
+                          width: MediaQuery.of(context).size.width,
+                          decoration: BoxDecoration(
+                              color: cart.table_id == null
+                                  ? Colors.deepOrange
+                                  : Colors.grey,
+                              borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(20.0),
+                                  bottomRight: Radius.circular(20.0))),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Text(
+                                  cart.table_id == null
+                                      ? "Assing Table"
+                                      : "Table id",
+                                  style: Styles.whiteSimpleSmall())
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(
+                        margin: EdgeInsets.only(top: itemHeight / 2.1),
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(20.0),
+                                bottomRight: Radius.circular(20.0))),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text("Grand Total : " + cart.grand_total.toString(),
+                                style: Styles.whiteSimpleSmall())
+                          ],
+                        ),
+                      ),
                 Positioned(
-                    top: 10,
-                    left: 10,
-                    child: Text("Cart :" + cart.id.toString(),
-                        style: Styles.communBlack()))
+                  top: 10,
+                  left: 10,
+                  child: Text(
+                    "Cart :" + cart.id.toString(),
+                    style: Styles.communBlack(),
+                  ),
+                )
               ],
             ),
           ),

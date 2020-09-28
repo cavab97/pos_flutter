@@ -183,14 +183,26 @@ class _SelectTablePageState extends State<SelectTablePage> {
                   child: ListView(
                     shrinkWrap: true,
                     children: <Widget>[
-                      ListTile(
-                        title: neworder_button(context),
-                      ),
-                      Divider(),
-                      ListTile(
-                        title: viewOrderBtn(context),
-                      ),
-                      Divider(),
+                      selectedTable.numberofpax == null
+                          ? Column(
+                              children: <Widget>[
+                                ListTile(
+                                  title: neworder_button(context),
+                                ),
+                                Divider(),
+                              ],
+                            )
+                          : SizedBox(),
+                      selectedTable.numberofpax != null
+                          ? Column(
+                              children: <Widget>[
+                                ListTile(
+                                  title: viewOrderBtn(context),
+                                ),
+                                Divider(),
+                              ],
+                            )
+                          : SizedBox(),
                       ListTile(
                         title: Text(
                           Strings.merge_order,

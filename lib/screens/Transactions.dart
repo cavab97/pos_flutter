@@ -81,21 +81,23 @@ class _TransactionsPageState extends State<TransactionsPage> {
         orderItemList = orderItem;
       });
     }
-    OrderPayment orderpaymentdata =
-        await localAPI.getOrderpaymentData(order.app_id);
-    setState(() {
-      orderpayment = orderpaymentdata;
-    });
-    Payments paument_method =
-        await localAPI.getOrderpaymentmethod(orderpayment.op_method_id);
-    setState(() {
-      paumentMethod = paument_method;
-    });
-    User user = await localAPI.getPaymentUser(orderpayment.op_by);
-    if (user != null) {
+    if (order.order_source == 2) {
+      OrderPayment orderpaymentdata =
+          await localAPI.getOrderpaymentData(order.app_id);
       setState(() {
-        paymemtUser = user;
+        orderpayment = orderpaymentdata;
       });
+      Payments paument_method =
+          await localAPI.getOrderpaymentmethod(orderpayment.op_method_id);
+      setState(() {
+        paumentMethod = paument_method;
+      });
+      User user = await localAPI.getPaymentUser(orderpayment.op_by);
+      if (user != null) {
+        setState(() {
+          paymemtUser = user;
+        });
+      }
     }
   }
 
@@ -227,9 +229,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   returnPayment(paymentMehtod) {
     // TODO : update payment tables
+
+    CommunFun.showToast(context, "Refund table insert data.. work in progress");
   }
+
   deleteItemFormList(product) async {
     var result = await localAPI.deleteOrderItem(product.app_id);
+    CommunFun.showToast(context, "Refund table insert data.. work in progress");
   }
 
   @override
@@ -670,6 +676,39 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     ),
                     child: Text(
                       Strings.grand_total,
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.grey),
+                    ),
+                  ),
+                  SizedBox(width: 70),
+                  Padding(
+                      padding: EdgeInsets.only(
+                        top: 10,
+                      ),
+                      child: Text(
+                        selectedOrder.grand_total != null
+                            ? selectedOrder.grand_total.toString()
+                            : "00:00",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700, color: Colors.grey),
+                      )),
+                ],
+              ),
+            ),
+          ]),
+          TableRow(children: [
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: 10,
+                    ),
+                    child: Text(
+                      paumentMethod.name,
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,

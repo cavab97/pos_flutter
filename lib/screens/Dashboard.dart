@@ -17,6 +17,7 @@ import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
+import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Shift.dart';
@@ -444,7 +445,8 @@ class _DashboradPageState extends State<DashboradPage>
   checkoutWebOrder() async {
     if (cartList.length != 0) {
       CommunFun.processingPopup(context);
-      sendPaymentByCash(null);
+      Payments payment = new Payments();
+      sendPaymentByCash(payment);
       Navigator.of(context).pop();
     } else {
       CommunFun.showToast(context, Strings.cart_empty);
@@ -585,8 +587,10 @@ class _DashboradPageState extends State<DashboradPage>
   sendPaymentByCash(payment) async {
     var cartData = await getcartData();
     var branchdata = await getbranch();
+    if (isWebOrder) {
+      payment.paymentId = cartData.cart_payment_id;
+    }
     Orders order = new Orders();
-    Customer customer = await getCustomer();
     Table_order tables = await getTableData();
     User userdata = await CommunFun.getuserDetails();
     List<MSTCartdetails> cartList = await getcartDetails();
@@ -622,6 +626,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.tax_json = cartData.tax_json;
     order.order_date = datetime;
     order.order_status = 1;
+    order.order_source = cartData.source;
     order.order_by = userdata.id;
     order.voucher_id = cartData.voucher_id;
     order.voucher_amount = cartData.discount;
@@ -716,10 +721,12 @@ class _DashboradPageState extends State<DashboradPage>
     orderpayment.op_by = userdata.id;
     orderpayment.updated_at = datetime;
     orderpayment.updated_by = userdata.id;
-    var paymentid = await localAPI.sendtoOrderPayment(orderpayment);
-    print(paymentid);
+    var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
+    print(paymentd);
     await clearCartAfterSuccess();
-    await Navigator.of(context).pop();
+    if (!isWebOrder) {
+      Navigator.of(context).pop();
+    }
     await showDialog(
         // Opning Ammount Popup
         context: context,
@@ -1308,7 +1315,7 @@ class _DashboradPageState extends State<DashboradPage>
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                addCustomerBtn(context),
+                !isWebOrder ? addCustomerBtn(context) : SizedBox(),
                 Padding(
                     padding: EdgeInsets.only(bottom: 15),
                     child: menubutton(() {
@@ -1946,7 +1953,7 @@ class _DashboradPageState extends State<DashboradPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  selectedvoucher != null
+                  !isWebOrder && selectedvoucher != null
                       ? Padding(
                           padding: EdgeInsets.only(top: 10),
                           child: Chip(
@@ -1963,33 +1970,42 @@ class _DashboradPageState extends State<DashboradPage>
                               selectedvoucher.voucherName,
                               style: Styles.whiteBoldsmall(),
                             ),
-                          ))
-                      : SizedBox(),
-                  Padding(
-                      padding: EdgeInsets.only(top: 10),
-                      child: RaisedButton(
-                        padding: EdgeInsets.only(
-                            left: 10, right: 10, top: 5, bottom: 5),
-                        onPressed: () {
-                          if (!isWebOrder) {
-                            openVoucherPop();
-                          }
-                        },
-                        child: Row(
-                          children: <Widget>[
-                            Text(Strings.apply_promocode,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                )),
-                          ],
+                          ),
+                        )
+                      : Padding(
+                          padding: EdgeInsets.only(top: 10, bottom: 10),
+                          child: Text("CASH : ", style: Styles.darkBlue()),
                         ),
-                        color: Colors.deepOrange,
-                        textColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50.0),
-                        ),
-                      ))
+                  !isWebOrder
+                      ? Padding(
+                          padding: EdgeInsets.only(top: 10),
+                          child: RaisedButton(
+                            padding: EdgeInsets.only(
+                                left: 10, right: 10, top: 5, bottom: 5),
+                            onPressed: () {
+                              openVoucherPop();
+                            },
+                            child: Row(
+                              children: <Widget>[
+                                Text(Strings.apply_promocode,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    )),
+                              ],
+                            ),
+                            color: Colors.deepOrange,
+                            textColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                          ),
+                        )
+                      : Padding(
+                          padding:
+                              EdgeInsets.only(right: 20, top: 10, bottom: 10),
+                          child: Text(grandTotal.toString(),
+                              style: Styles.darkBlue())),
                 ],
               ),
             ),
