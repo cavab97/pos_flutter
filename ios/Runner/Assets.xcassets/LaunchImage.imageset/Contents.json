@@ -2,17 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "iTunesArtwork@1x.png",
+      "filename" : "screen-ipad-landscape.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "iTunesArtwork@2x.png",
+      "filename" : "screen-ipad-landscape-2x.png",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "filename" : "iTunesArtwork@3x.png",
+      "filename" : "screen-iphone-landscape-736h.png",
       "scale" : "3x"
     }
   ],
