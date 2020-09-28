@@ -1133,5 +1133,16 @@ class LocalAPI {
     return result;
   }
 
-  Future checkTableAssign(cartid) async {}
+  Future<int> updateInvoice(Orders order) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var result;
+    if (order.order_item_count > 0) {
+      result = await db
+          .delete("orders", where: "app_id =?", whereArgs: [order.app_id]);
+    } else {
+      result = await db.update("orders", order.toJson(),
+          where: "app_id =?", whereArgs: [order.app_id]);
+    }
+    return result;
+  }
 }

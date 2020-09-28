@@ -66,12 +66,23 @@ class Orders {
     invoice_no = json["invoice_no"];
     customer_id = json["customer_id"];
     tax_percent = json["tax_percent"];
-    tax_amount = json["tax_amount"];
+    tax_amount = json["tax_amount"] is int
+        ? (json['tax_amount'] as int).toDouble()
+        : json['tax_amount'];
     voucher_id = json["voucher_id"];
-    voucher_amount = json["voucher_amount"];
-    sub_total = json["sub_total"];
-    sub_total_after_discount = json["sub_total_after_discount"];
-    grand_total = json["grand_total"];
+    voucher_amount = json["voucher_amount"] is int
+        ? (json['voucher_amount'] as int).toDouble()
+        : json['voucher_amount'];
+    sub_total = json["sub_total"] is int
+        ? (json['sub_total'] as int).toDouble()
+        : json['sub_total'];
+    sub_total_after_discount = json["sub_total_after_discount"] is int
+        ? (json['sub_total_after_discount'] as int).toDouble()
+        : json['sub_total_after_discount'];
+    grand_total = json["grand_total"] is int
+        ? (json['grand_total'] as int).toDouble()
+        : json['grand_total'];
+
     order_source = json["order_source"];
     order_status = json["order_status"];
     order_item_count = json["order_item_count"];

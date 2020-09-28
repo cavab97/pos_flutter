@@ -39,7 +39,9 @@ class OrderPayment {
     terminal_id = json["terminal_id"];
     app_id = json["app_id"];
     op_method_id = json["op_method_id"];
-    op_amount = json["op_amount"];
+    op_amount = json["op_amount"] is int
+        ? (json['op_amount'] as int).toDouble()
+        : json['op_amount'];
     op_method_response = json["op_method_response"];
     op_status = json["op_status"];
     op_datetime = json["op_datetime"];

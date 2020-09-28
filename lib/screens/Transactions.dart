@@ -221,21 +221,50 @@ class _TransactionsPageState extends State<TransactionsPage> {
             subTotal: selectedOrder.sub_total,
             grandTotal: selectedOrder.grand_total,
             onClose: (mehtod) {
+              Navigator.of(context).pop();
               returnPayment(mehtod);
             },
           );
         });
   }
 
-  returnPayment(paymentMehtod) {
+  returnPayment(paymentMehtod) async {
     // TODO : update payment tables
-
+    var orderid = await localAPI.updateOrderStatus(selectedOrder.app_id, 5);
+    var payment = await localAPI.updatePaymentStatus(orderpayment.app_id, 5);
+    var terID = await CommunFun.getTeminalKey();
+    // TODO update store inventory
+    setState(() {
+      isRefunding = false;
+    });
+    getTansactionList();
     CommunFun.showToast(context, "Refund table insert data.. work in progress");
   }
 
   deleteItemFormList(product) async {
-    var result = await localAPI.deleteOrderItem(product.app_id);
-    CommunFun.showToast(context, "Refund table insert data.. work in progress");
+    Orders order = selectedOrder;
+    if (order.order_item_count > 1) {
+      OrderDetail details = product;
+      var subtotal = order.sub_total - details.product_price;
+      var qty = order.order_item_count - details.detail_qty;
+      var grandtotal = subtotal;
+      order.sub_total = subtotal;
+      order.order_item_count = qty.toInt();
+      order.grand_total = grandtotal;
+      var result = await localAPI.deleteOrderItem(product.app_id);
+      var result1 = await localAPI.updateInvoice(order);
+      setState(() {
+        isRefunding = false;
+      });
+      getTansactionList();
+      // Updated ORder table data
+      // CommunFun.showToast(
+      //     context, "Refund table insert data.. work in progress");
+    } else {
+      setState(() {
+        isRefunding = false;
+      });
+    }
   }
 
   @override
@@ -708,7 +737,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       top: 10,
                     ),
                     child: Text(
-                      paumentMethod.name,
+                      paumentMethod.name != null ? paumentMethod.name : "",
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -903,6 +932,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                 style: Styles.whiteBoldsmall(),
                               ),
                             )
+                          : SizedBox(),
+                      item.order_status == 5
+                          ? Container(
+                              padding: EdgeInsets.all(3),
+                              color: Colors.red,
+                              child: Text(
+                                "Refunded",
+                                style: Styles.whiteBoldsmall(),
+                              ),
+                            )
                           : SizedBox()
                     ],
                   ),
@@ -950,6 +989,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               color: Colors.red,
                               child: Text(
                                 "Cancel",
+                                style: Styles.whiteBoldsmall(),
+                              ),
+                            )
+                          : SizedBox(),
+                      item.order_status == 5
+                          ? Container(
+                              padding: EdgeInsets.all(3),
+                              color: Colors.red,
+                              child: Text(
+                                "Refunded",
                                 style: Styles.whiteBoldsmall(),
                               ),
                             )

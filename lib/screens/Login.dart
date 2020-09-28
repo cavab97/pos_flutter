@@ -59,6 +59,10 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<bool> _willPopCallback() async {
+    return false;
+  }
+
   sendlogin() async {
     // Login click fun
 
@@ -80,8 +84,7 @@ class _LoginPageState extends State<LoginPage> {
         user.terminalId = terkey != null ? terkey : '1'; //widget.terminalId;
         await repo.login(user).then((value) async {
           if (value != null && value["status"] == Constant.STATUS200) {
-            await Preferences.setStringToSF(
-                Constant.LOIGN_USER, json.encode(value["data"]));
+            await Preferences.setStringToSF(Constant.IS_LOGIN, "true");
             user = User.fromJson(value["data"]);
             await CommunFun.syncAfterSuccess(context);
             setState(() {
@@ -108,65 +111,68 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      body: SafeArea(
-        child: Center(
-          // Login main part
-          child: Container(
-            width: MediaQuery.of(context).size.width / 1.8,
-            padding: EdgeInsets.only(left: 30, right: 30),
-            child: new SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  loginlogo(), // logo
-                  SizedBox(height: 40),
-                  CommunFun.loginText(),
-                  SizedBox(height: 50),
-                  // username input
-                  emailInput((e) {
-                    if (e.length > 0) {
+    return WillPopScope(
+      child: Scaffold(
+        key: scaffoldKey,
+        body: SafeArea(
+          child: Center(
+            // Login main part
+            child: Container(
+              width: MediaQuery.of(context).size.width / 1.8,
+              padding: EdgeInsets.only(left: 30, right: 30),
+              child: new SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    loginlogo(), // logo
+                    SizedBox(height: 40),
+                    CommunFun.loginText(),
+                    SizedBox(height: 50),
+                    // username input
+                    emailInput((e) {
+                      if (e.length > 0) {
+                        setState(() {
+                          errormessage = "";
+                          isValidateEmail = true;
+                        });
+                      }
+                    }),
+                    SizedBox(height: 50),
+                    // password input
+                    passwordInput((e) {
                       setState(() {
                         errormessage = "";
-                        isValidateEmail = true;
+                        isValidatePassword = true;
                       });
-                    }
-                  }),
-                  SizedBox(height: 50),
-                  // password input
-                  passwordInput((e) {
-                    setState(() {
-                      errormessage = "";
-                      isValidatePassword = true;
-                    });
-                  }),
-                  SizedBox(height: 80),
-                  // GestureDetector(
-                  //   // forgot password btn
-                  //   onTap: () {
-                  //     // TODO : goto Forgot password
-                  //   },
-                  //   child: CommunFun.forgotPasswordText(context),
-                  // ),
-                  // SizedBox(height: 50),
-                  isLoading
-                      ? CommunFun.loader(context)
-                      : Container(
-                          // Login button
-                          width: MediaQuery.of(context).size.width,
-                          child: CommunFun.roundedButton("LOGIN", () {
-                            // LOGIN API
-                            sendlogin();
-                          }),
-                        )
-                ],
+                    }),
+                    SizedBox(height: 80),
+                    // GestureDetector(
+                    //   // forgot password btn
+                    //   onTap: () {
+                    //     // TODO : goto Forgot password
+                    //   },
+                    //   child: CommunFun.forgotPasswordText(context),
+                    // ),
+                    // SizedBox(height: 50),
+                    isLoading
+                        ? CommunFun.loader(context)
+                        : Container(
+                            // Login button
+                            width: MediaQuery.of(context).size.width,
+                            child: CommunFun.roundedButton("LOGIN", () {
+                              // LOGIN API
+                              sendlogin();
+                            }),
+                          )
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
+      onWillPop: _willPopCallback,
     );
   }
 
@@ -221,9 +227,9 @@ class _LoginPageState extends State<LoginPage> {
       controller: userPin,
       obscureText: true,
       keyboardType: TextInputType.number,
-      // inputFormatters: <TextInputFormatter>[
-      //    FilteringTextInputFormatter.digitsOnly
-      //  ],
+      inputFormatters: <TextInputFormatter>[
+        WhitelistingTextInputFormatter.digitsOnly
+      ],
       decoration: InputDecoration(
         prefixIcon: Padding(
           padding: EdgeInsets.only(left: 20, right: 20),

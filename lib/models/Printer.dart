@@ -8,8 +8,8 @@ class Printer {
   int status;
   String updatedAt;
   int updatedBy;
-  Null deletedAt;
-  Null deletedBy;
+  String deletedAt;
+  int deletedBy;
 
   Printer(
       {this.printerId,

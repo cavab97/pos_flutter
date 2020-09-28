@@ -41,7 +41,7 @@ class CommunFun {
     }
   }
   static isLogged() async {
-    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var loginUser = await Preferences.getStringValuesSF(Constant.IS_LOGIN);
     if (loginUser != null) {
       return true;
     } else {

@@ -86,6 +86,7 @@ class _DashboradPageState extends State<DashboradPage>
     super.initState();
     checkisInit();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
+    checkISlogin();
     checkshift();
     checkidTableSelected();
     getUserData();
@@ -97,6 +98,13 @@ class _DashboradPageState extends State<DashboradPage>
     _textController.addListener(() {
       getSearchList(_textController.text.toString());
     });
+  }
+
+  checkISlogin() async {
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    if (loginUser == null) {
+       Navigator.pushNamed(context, Constant.PINScreen);
+    }
   }
 
   checkisInit() async {
@@ -174,7 +182,6 @@ class _DashboradPageState extends State<DashboradPage>
     await CommunFun.opneSyncPop(context);
     var res = await SyncAPICalls.syncOrderstoDatabase(context);
     print(res);
-
     await Navigator.of(context).pop();
   }
 
@@ -264,8 +271,8 @@ class _DashboradPageState extends State<DashboradPage>
         closeShift();
         break;
       case 3:
-        if (cartList.length > 0 ){
-          if(printerreceiptList.length > 0) {
+        if (cartList.length > 0) {
+          if (printerreceiptList.length > 0) {
             printKOT.checkDraftPrint(
                 printerreceiptList[0].printerIp.toString(),
                 context,
@@ -275,10 +282,10 @@ class _DashboradPageState extends State<DashboradPage>
                 grandTotal,
                 tax,
                 branchData);
-          }else {
+          } else {
             CommunFun.showToast(context, Strings.printer_not_available);
           }
-        }else {
+        } else {
           CommunFun.showToast(context, Strings.cart_empty);
         }
 
@@ -741,7 +748,8 @@ class _DashboradPageState extends State<DashboradPage>
     orderpayment.terminal_id = int.parse(terminalId);
     orderpayment.app_id = int.parse(terminalId);
     orderpayment.op_method_id = payment != "" ? payment.paymentId : 0;
-    orderpayment.op_amount = (cartData.grand_total - cartData.discount).toDouble();
+    orderpayment.op_amount =
+        (cartData.grand_total - cartData.discount).toDouble();
     orderpayment.op_method_response = '';
     orderpayment.op_status = 1;
     orderpayment.op_datetime = datetime;
@@ -752,7 +760,7 @@ class _DashboradPageState extends State<DashboradPage>
     print(paymentd);
     await clearCartAfterSuccess(orderid);
 
-   /* await Navigator.of(context).pop();
+    /* await Navigator.of(context).pop();
     await showDialog(
         // Opning Ammount Popup
         context: context,
@@ -767,7 +775,7 @@ class _DashboradPageState extends State<DashboradPage>
     Branch branchAddress = await localAPI.getBranchData(branchID);
     OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
     Payments paument_method =
-    await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
+        await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
     List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
@@ -779,8 +787,8 @@ class _DashboradPageState extends State<DashboradPage>
     print(itemsList);
     print(order);
 
-    printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context, branchData,
-        itemsList, orderitem, order, orderpaymentdata);
+    printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
+        branchData, itemsList, orderitem, order, orderpaymentdata);
   }
 
   clearCartAfterSuccess(orderid) async {

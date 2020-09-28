@@ -43,16 +43,24 @@ class OrderDetail {
     terminal_id = json["terminal_id"];
     app_id = json["app_id"];
     product_id = json["product_id"];
-    product_price = json["product_price"];
+    product_price = json["product_price"] is int
+        ? (json['product_price'] as int).toDouble()
+        : json['product_price'];
     product_old_price = json["product_old_price"] is int
         ? (json['product_old_price'] as int).toDouble()
         : json['product_old_price'];
     category_id = json["category_id"];
-    detail_amount = json["detail_amount"];
-    detail_qty = json["detail_qty"];
+    detail_amount = json["detail_amount"] is int
+        ? (json['detail_amount'] as int).toDouble()
+        : json['detail_amount'];
+    detail_qty = json["detail_qty"] is int
+        ? (json['detail_qty'] as int).toDouble()
+        : json['detail_qty'];
     detail_status = json["detail_status"];
     detail_by = json["detail_by"];
-    product_discount = json["product_discount"];
+    product_discount = json["product_discount"] is int
+        ? (json['product_discount'] as int).toDouble()
+        : json['product_discount'];
     product_detail = json["product_detail"];
   }
 

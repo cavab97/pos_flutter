@@ -59,7 +59,6 @@ class _PINPageState extends State<PINPage> {
     if (!isCheckIn) {
       if (pinNumber.length >= 6) {
         List<User> checkUserExit = await localAPI.checkUserExit(pinNumber);
-
         if (checkUserExit.length != 0) {
           setState(() {
             isLoading = true;
@@ -147,44 +146,51 @@ class _PINPageState extends State<PINPage> {
     }
   }
 
+  Future<bool> _willPopCallback() async {
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        key: scaffoldKey,
-        body: Center(
-          child: Container(
-            //page background image
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage(Strings.assetsBG), fit: BoxFit.cover),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30.0),
-                      color: Colors.white),
-                  width: MediaQuery.of(context).size.width / 1.2,
-                  height: MediaQuery.of(context).size.height / 1.2,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      imageview(context), // Part 1 image with logo
-                      getNumbers(context), // Part 2  Muber keypade
-                    ],
+    return WillPopScope(
+      child: SafeArea(
+        child: Scaffold(
+          key: scaffoldKey,
+          body: Center(
+            child: Container(
+              //page background image
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage(Strings.assetsBG), fit: BoxFit.cover),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30.0),
+                        color: Colors.white),
+                    width: MediaQuery.of(context).size.width / 1.2,
+                    height: MediaQuery.of(context).size.height / 1.2,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        imageview(context), // Part 1 image with logo
+                        getNumbers(context), // Part 2  Muber keypade
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
+      onWillPop: _willPopCallback,
     );
   }
 

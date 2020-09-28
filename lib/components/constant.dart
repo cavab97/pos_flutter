@@ -18,6 +18,7 @@ class Constant {
   static final String IS_CHECKOUT = "Checkout";
   static final String SHIFT_ID = "Shift_Id";
   static final String DASH_SHIFT = "dashShift";
+  static final String IS_LOGIN = "IsLogin";
   /*==============================================================================
                               Manage API status
   =================================================================================*/
