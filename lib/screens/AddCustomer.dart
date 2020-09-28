@@ -6,7 +6,6 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 
 class AddCustomerPage extends StatefulWidget {
   AddCustomerPage({Key key}) : super(key: key);
-
   @override
   _AddCustomerPageState createState() => _AddCustomerPageState();
 }
