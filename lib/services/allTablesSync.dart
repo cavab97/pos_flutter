@@ -242,7 +242,7 @@ class SyncAPICalls {
       var apiurl = Configrations.web_orders;
       var terminalId = await CommunFun.getTeminalKey();
       var serverTime =
-          await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+          await Preferences.getStringValuesSF(Constant.ORDER_SERVER_DATE_TIME);
       var stringParams = {
         'datetime': serverTime != null ? serverTime : '',
         'terminal_id': terminalId

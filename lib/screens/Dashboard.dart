@@ -55,7 +55,6 @@ class _DashboradPageState extends State<DashboradPage>
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
   PrintReceipt printKOT = PrintReceipt();
-
   List<Category> allCaterories = new List<Category>();
   List<Category> tabsList = new List<Category>();
   List<Printer> printerList = new List<Printer>();
@@ -174,6 +173,7 @@ class _DashboradPageState extends State<DashboradPage>
     await CommunFun.opneSyncPop(context);
     var res = await SyncAPICalls.syncOrderstoDatabase(context);
     print(res);
+
     await Navigator.of(context).pop();
   }
 
@@ -181,6 +181,9 @@ class _DashboradPageState extends State<DashboradPage>
     await CommunFun.opneSyncPop(context);
     var res = await SyncAPICalls.getWebOrders(context);
     print(res);
+    var sertvertime = res["data"]["serverdatetime"];
+    await Preferences.setStringToSF(
+        Constant.ORDER_SERVER_DATE_TIME, sertvertime);
     var cartdata = res["data"]["cart"];
     await CommunFun.savewebOrdersintoCart(cartdata);
     Navigator.of(context).pop();
@@ -260,7 +263,6 @@ class _DashboradPageState extends State<DashboradPage>
         closeShift();
         break;
       case 3:
-
         if (cartList.length > 0) {
           printKOT.checkDraftPrint(printerList[0].printerIp.toString(), context,
               cartList, tableName, subtotal, grandTotal, tax, branchData);
@@ -733,24 +735,25 @@ class _DashboradPageState extends State<DashboradPage>
     orderpayment.updated_by = userdata.id;
     var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
     print(paymentd);
-    await clearCartAfterSuccess();
     if (!isWebOrder) {
       Navigator.of(context).pop();
     }
+    await clearCartAfterSuccess(orderid);
+  }
+
+  clearCartAfterSuccess(orderid) async {
+    Table_order tables = await getTableData();
+    var result = await localAPI.removeCartItem(currentCart, tables.table_id);
+    print(result);
+    await Preferences.removeSinglePref(Constant.TABLE_DATA);
+    clearCart();
+    Navigator.pushNamed(context, Constant.DashboardScreen);
     await showDialog(
         // Opning Ammount Popup
         context: context,
         builder: (BuildContext context) {
           return InvoiceReceiptDailog(orderid: orderid);
         });
-  }
-
-  clearCartAfterSuccess() async {
-    Table_order tables = await getTableData();
-    var result = await localAPI.removeCartItem(currentCart, tables.table_id);
-    print(result);
-    await Preferences.removeSinglePref(Constant.TABLE_DATA);
-    Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
   removeTax(cartdata, item) {
@@ -1205,88 +1208,12 @@ class _DashboradPageState extends State<DashboradPage>
               },
               onSuggestionSelected: (suggestion) {
                 print(suggestion);
+
                 // Navigator.of(context).push(MaterialPageRoute(
                 //     //builder: (context) => ProductPage(product: suggestion)
                 //     ));
               },
             ),
-
-            //For single suggestion
-            /*SimpleAutoCompleteTextField(
-              suggestions: [
-                "Apple",
-                "Armidillo",
-                "Actual",
-                "Actuary",
-                "America",
-                "Apple",
-                "Armidillo",
-                "Actual",
-                "Actuary",
-                "America",
-                "Argentina",
-                "Australia",
-                "Antarctica",
-                "Blueberry",
-              ],
-              keyboardType: TextInputType.text,
-              decoration: InputDecoration(
-                suffixIcon: Padding(
-                  padding: EdgeInsets.only(right: 25),
-                  child: Icon(
-                    Icons.search,
-                    color: Colors.deepOrange,
-                    size: 30,
-                  ),
-                ),
-                hintText: Strings.search_bar_text,
-                hintStyle: TextStyle(fontSize: 18.0, color: Colors.black),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(50),
-                  borderSide: BorderSide(
-                    width: 0,
-                    style: BorderStyle.none,
-                  ),
-                ),
-                filled: true,
-                contentPadding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
-                fillColor: Colors.white,
-              ),
-              style: TextStyle(color: Colors.black, fontSize: 20.0),
-              key: keyAutoSuggestion,
-
-            ),*/
-
-            //Old one
-            /*TextField(
-              keyboardType: TextInputType.text,
-              decoration: InputDecoration(
-                suffixIcon: Padding(
-                  padding: EdgeInsets.only(right: 25),
-                  child: Icon(
-                    Icons.search,
-                    color: Colors.deepOrange,
-                    size: 40,
-                  ),
-                ),
-                hintText: Strings.search_bar_text,
-                hintStyle: TextStyle(fontSize: 18.0, color: Colors.black),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(50),
-                  borderSide: BorderSide(
-                    width: 0,
-                    style: BorderStyle.none,
-                  ),
-                ),
-                filled: true,
-                contentPadding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
-                fillColor: Colors.white,
-              ),
-              style: TextStyle(color: Colors.black, fontSize: 25.0),
-              onChanged: (e) {
-                print(e);
-              },
-            ),*/
           )
         ],
       ),
@@ -1964,7 +1891,13 @@ class _DashboradPageState extends State<DashboradPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  !isWebOrder && selectedvoucher != null
+                  isWebOrder
+                      ? Padding(
+                          padding: EdgeInsets.only(top: 10, bottom: 10),
+                          child: Text("CASH : ", style: Styles.darkBlue()),
+                        )
+                      : SizedBox(),
+                  selectedvoucher != null
                       ? Padding(
                           padding: EdgeInsets.only(top: 10),
                           child: Chip(
@@ -1983,10 +1916,7 @@ class _DashboradPageState extends State<DashboradPage>
                             ),
                           ),
                         )
-                      : Padding(
-                          padding: EdgeInsets.only(top: 10, bottom: 10),
-                          child: Text("CASH : ", style: Styles.darkBlue()),
-                        ),
+                      : SizedBox(),
                   !isWebOrder
                       ? Padding(
                           padding: EdgeInsets.only(top: 10),

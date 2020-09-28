@@ -7,6 +7,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/CheckInout.dart';
+import 'package:mcncashier/models/Role.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
@@ -77,6 +78,7 @@ class _PINPageState extends State<PINPage> {
           checkIn.createdAt = date.toString();
           checkIn.sync = 0;
           var result = await localAPI.userCheckInOut(checkIn);
+          //Role rolData =  await localAPI.getRoldata();
           await Preferences.setStringToSF(
               Constant.LOIGN_USER, json.encode(user));
           await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
@@ -171,6 +173,7 @@ class _PINPageState extends State<PINPage> {
                   height: MediaQuery.of(context).size.height / 1.2,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       imageview(context), // Part 1 image with logo
                       getNumbers(context), // Part 2  Muber keypade
@@ -231,175 +234,160 @@ class _PINPageState extends State<PINPage> {
     // Numbers buttons
     return SingleChildScrollView(
       child: Container(
-        width: MediaQuery.of(context).size.width / 2.8,
-        margin: EdgeInsets.only(left: 70, right: 70),
-        child: Center(
-          child: Column(
-            children: <Widget>[
-              // isCheckIn
-              //     ? Row(
-              //         mainAxisAlignment: MainAxisAlignment.end,
-              //         children: <Widget>[
-              //           IconButton(
-              //               padding: EdgeInsets.only(
-              //                 left: 100,
-              //               ),
-              //               onPressed: () {
-              //                 Navigator.of(context).pop();
-              //               },
-              //               icon: Icon(
-              //                 Icons.close,
-              //                 color: Colors.black,
-              //                 size: 50,
-              //               )),
-              //         ],
-              //       )
-              //     : SizedBox(height: 20),
-              SizedBox(height: 20),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Text(
-                      Strings.pin_Number,
-                      style: Styles.blackBoldLarge(),
-                    )
-                  ]),
-              SizedBox(
-                height: 20,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    pinNumber.length >= 1
-                        ? Icons.lens
-                        : Icons.panorama_fish_eye,
-                    color: Colors.deepOrange,
-                    size: 40,
-                  ),
-                  Icon(
-                    pinNumber.length >= 2
-                        ? Icons.lens
-                        : Icons.panorama_fish_eye,
-                    color: Colors.deepOrange,
-                    size: 40,
-                  ),
-                  Icon(
-                    pinNumber.length >= 3
-                        ? Icons.lens
-                        : Icons.panorama_fish_eye,
-                    color: Colors.deepOrange,
-                    size: 40,
-                  ),
-                  Icon(
-                    pinNumber.length >= 4
-                        ? Icons.lens
-                        : Icons.panorama_fish_eye,
-                    color: Colors.deepOrange,
-                    size: 40,
-                  ),
-                  Icon(
-                    pinNumber.length >= 5
-                        ? Icons.lens
-                        : Icons.panorama_fish_eye,
-                    color: Colors.deepOrange,
-                    size: 40,
-                  ),
-                  Icon(
-                    pinNumber.length >= 6
-                        ? Icons.lens
-                        : Icons.panorama_fish_eye,
-                    color: Colors.deepOrange,
-                    size: 40,
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Row(
+        margin: EdgeInsets.only(right: 90),
+        child: Column(
+          children: <Widget>[
+            // isCheckIn
+            //     ? Row(
+            //         mainAxisAlignment: MainAxisAlignment.end,
+            //         children: <Widget>[
+            //           IconButton(
+            //               padding: EdgeInsets.only(
+            //                 left: 100,
+            //               ),
+            //               onPressed: () {
+            //                 Navigator.of(context).pop();
+            //               },
+            //               icon: Icon(
+            //                 Icons.close,
+            //                 color: Colors.black,
+            //                 size: 50,
+            //               )),
+            //         ],
+            //       )
+            //     : SizedBox(height: 20),
+            SizedBox(height: 20),
+            Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  _button("1", () {
-                    addINPin("1");
-                  }), // using custom widget _button
-                  _button("2", () {
-                    addINPin("2");
-                  }),
-                  _button("3", () {
-                    addINPin("3");
-                  }),
-                ],
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  _button("4", () {
-                    addINPin("4");
-                  }), // using custom widget _button
-                  _button("5", () {
-                    addINPin("5");
-                  }),
-                  _button("6", () {
-                    addINPin("6");
-                  }),
-                ],
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  _button("7", () {
-                    addINPin("7");
-                  }), // using custom widget _button
-                  _button("8", () {
-                    addINPin("8");
-                  }),
-                  _button("9", () {
-                    addINPin("9");
-                  }),
-                ],
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  _button(Strings.btnclockin, () {
-                    clockInwithPIN();
-                  }),
-                  _button("0", () {
-                    addINPin("0");
-                  }),
-                  _button(Strings.btnclockout, () {
-                    clockOutwithPIN();
-                  }),
-                ],
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              isLoading
-                  ? CommunFun.loader(context)
-                  : Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                          FlatButton(
-                              onPressed: () {
-                                clearPin();
-                              },
-                              child: Text(Strings.clear,
-                                  style: Styles.orangeLarge()))
-                        ])
-            ],
-          ),
+                  Text(
+                    Strings.pin_Number,
+                    style: Styles.blackBoldLarge(),
+                  )
+                ]),
+            SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  pinNumber.length >= 1 ? Icons.lens : Icons.panorama_fish_eye,
+                  color: Colors.deepOrange,
+                  size: 40,
+                ),
+                Icon(
+                  pinNumber.length >= 2 ? Icons.lens : Icons.panorama_fish_eye,
+                  color: Colors.deepOrange,
+                  size: 40,
+                ),
+                Icon(
+                  pinNumber.length >= 3 ? Icons.lens : Icons.panorama_fish_eye,
+                  color: Colors.deepOrange,
+                  size: 40,
+                ),
+                Icon(
+                  pinNumber.length >= 4 ? Icons.lens : Icons.panorama_fish_eye,
+                  color: Colors.deepOrange,
+                  size: 40,
+                ),
+                Icon(
+                  pinNumber.length >= 5 ? Icons.lens : Icons.panorama_fish_eye,
+                  color: Colors.deepOrange,
+                  size: 40,
+                ),
+                Icon(
+                  pinNumber.length >= 6 ? Icons.lens : Icons.panorama_fish_eye,
+                  color: Colors.deepOrange,
+                  size: 40,
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                _button("1", () {
+                  addINPin("1");
+                }), // using custom widget _button
+                _button("2", () {
+                  addINPin("2");
+                }),
+                _button("3", () {
+                  addINPin("3");
+                }),
+              ],
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                _button("4", () {
+                  addINPin("4");
+                }), // using custom widget _button
+                _button("5", () {
+                  addINPin("5");
+                }),
+                _button("6", () {
+                  addINPin("6");
+                }),
+              ],
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                _button("7", () {
+                  addINPin("7");
+                }), // using custom widget _button
+                _button("8", () {
+                  addINPin("8");
+                }),
+                _button("9", () {
+                  addINPin("9");
+                }),
+              ],
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                _button(Strings.btnclockin, () {
+                  clockInwithPIN();
+                }),
+                _button("0", () {
+                  addINPin("0");
+                }),
+                _button(Strings.btnclockout, () {
+                  clockOutwithPIN();
+                }),
+              ],
+            ),
+            SizedBox(
+              height: 15,
+            ),
+            isLoading
+                ? CommunFun.loader(context)
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                        FlatButton(
+                            onPressed: () {
+                              clearPin();
+                            },
+                            child: Text(Strings.clear,
+                                style: Styles.orangeLarge()))
+                      ])
+          ],
         ),
       ),
     );

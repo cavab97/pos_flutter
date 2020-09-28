@@ -81,24 +81,24 @@ class _TransactionsPageState extends State<TransactionsPage> {
         orderItemList = orderItem;
       });
     }
-    if (order.order_source == 2) {
-      OrderPayment orderpaymentdata =
-          await localAPI.getOrderpaymentData(order.app_id);
+    //  if (order.order_source == 2) {
+    OrderPayment orderpaymentdata =
+        await localAPI.getOrderpaymentData(order.app_id);
+    setState(() {
+      orderpayment = orderpaymentdata;
+    });
+    Payments paument_method =
+        await localAPI.getOrderpaymentmethod(orderpayment.op_method_id);
+    setState(() {
+      paumentMethod = paument_method;
+    });
+    User user = await localAPI.getPaymentUser(orderpayment.op_by);
+    if (user != null) {
       setState(() {
-        orderpayment = orderpaymentdata;
+        paymemtUser = user;
       });
-      Payments paument_method =
-          await localAPI.getOrderpaymentmethod(orderpayment.op_method_id);
-      setState(() {
-        paumentMethod = paument_method;
-      });
-      User user = await localAPI.getPaymentUser(orderpayment.op_by);
-      if (user != null) {
-        setState(() {
-          paymemtUser = user;
-        });
-      }
     }
+    //}
   }
 
   startFilter() {

@@ -439,7 +439,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.createdBy = loginData["id"];
     cartdetails.discount = 0;
     cartdetails.taxValue = taxvalues;
-    cartdetails.printer_id = printer.printerId;
+    cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = DateTime.now().toString();
     var detailID = await localAPI.addintoCartDetails(cartdetails);
 
