@@ -1257,6 +1257,18 @@ class _DashboradPageState extends State<DashboradPage>
                 );
               },
               onSuggestionSelected: (suggestion) {
+                if (isShiftOpen) {
+                  if (isTableSelected && !isWebOrder) {
+                    showQuantityDailog(suggestion);
+                  } else {
+                    if (!isWebOrder) {
+                      selectTable();
+                    }
+                  }
+                } else {
+                  CommunFun.showToast(context, Strings.shift_open_message);
+                }
+
                 print(suggestion);
 
                 // Navigator.of(context).push(MaterialPageRoute(

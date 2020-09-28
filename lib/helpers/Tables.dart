@@ -751,6 +751,18 @@ class CreateTables {
         "updated_by INTEGER" +
         ")");
 
+    // This table used fo store language
+    datatables = db.execute("CREATE TABLE app_language( " +
+        "language_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "name TEXT," +
+        "code TEXT," +
+        "country_id INTEGER," +
+        "icon TEXT," +
+        "currency TEXT," +
+        "currency_sign TEXT," +
+        "created_at TEXT" +
+        ")");
+
     //  datatables = db.execute("CREATE TABLE voucher_log ( " +
     //     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
     //     ")");
