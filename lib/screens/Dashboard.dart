@@ -259,17 +259,12 @@ class _DashboradPageState extends State<DashboradPage>
         closeShift();
         break;
       case 3:
-<<<<<<< HEAD
+
         if (cartList.length > 0) {
           printKOT.checkDraftPrint(printerList[0].printerIp.toString(), context,
               cartList, tableName, subtotal, grandTotal, tax, branchData);
         }
-=======
-        /*  if (cartList.length > 0) {
-          printKOT.DraftReceipt(printerList[i].printerIp.toString(), tableName,
-              context, tempCart);
-        }*/
->>>>>>> origin/API_Integration
+
         break;
     }
   }
