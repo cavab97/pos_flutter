@@ -1,5 +1,7 @@
+import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
@@ -10,20 +12,15 @@ import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/User.dart';
-import 'package:mcncashier/services/LocalAPIs.dart';
-
-import 'package:intl/intl.dart';
-import 'package:mcncashier/helpers/sqlDatahelper.dart';
-import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:ping_discover_network/ping_discover_network.dart';
 import 'package:wifi/wifi.dart';
-import 'package:esc_pos_printer/esc_pos_printer.dart';
-import 'package:esc_pos_utils/esc_pos_utils.dart';
 
 class InvoiceReceiptDailog extends StatefulWidget {
   InvoiceReceiptDailog({Key key, this.orderid}) : super(key: key);
   final int orderid;
+
   @override
   _InvoiceReceiptDailogState createState() => _InvoiceReceiptDailogState();
 }
@@ -31,6 +28,8 @@ class InvoiceReceiptDailog extends StatefulWidget {
 class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
   DatabaseHelper databaseHelper = DatabaseHelper();
   LocalAPI localAPI = LocalAPI();
+  PrintReceipt printReceipt = PrintReceipt();
+
   int orderid;
 
   /*For printer */
@@ -49,6 +48,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
   List<ProductDetails> orderdItem;
   List<OrderDetail> orderdetail;
   Orders orderData;
+
   @override
   void initState() {
     super.initState();
@@ -60,7 +60,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
   }
 
   getOederData() async {
-    var branchID = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var branchID =  await CommunFun.getbranchId();
     Branch branchAddress = await localAPI.getBranchData(branchID);
     OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
     Payments paument_method =
@@ -109,10 +109,15 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
           Positioned(
             right: 30,
             top: 10,
-            child: Icon(
-              Icons.print,
-              color: Colors.white,
-              size: 50,
+            child: IconButton(
+              onPressed: () {
+                testPrint("192.168.0.109", context);
+              },
+              icon: Icon(
+                Icons.print,
+                color: Colors.white,
+                size: 50,
+              ),
             ),
           ),
           closeButton(context),
@@ -269,149 +274,8 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
       });
   }
 
-  Future<Ticket> Receipt(PaperSize paper) async {
-    final profile = await CapabilityProfile.load();
-    final Ticket ticket = Ticket(paper, profile);
-
-    /* // Print image
-    final ByteData data = await rootBundle.load('assets/headerlogo.png');
-    final Uint8List bytes = data.buffer.asUint8List();
-    final image = decodeImage(bytes);
-    ticket.image(image, align: PosAlign.center);
-*/
-    ticket.text("", linesAfter: 1);
-    ticket.text(branchData.address,
-        styles: PosStyles(
-            fontType: PosFontType.fontA,
-            align: PosAlign.center,
-            bold: true,
-            width: PosTextSize.size1));
-    ticket.text("Contact No : " + branchData.contactNo,
-        linesAfter: 2,
-        styles: PosStyles(
-            fontType: PosFontType.fontA, align: PosAlign.center, bold: true));
-
-    ticket.emptyLines(1);
-
-    final now = DateTime.parse(orderData.updated_at);
-    final formatter = DateFormat('MM/dd/yyyy H:m');
-    final String timestamp = formatter.format(now);
-
-    ticket.text('Processed by  : ' + branchData.contactPerson,
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text("Invoice Date : " + timestamp,
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text("Invoice No : " + orderData.invoice_no,
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text('Terminal Name : MCN002',
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text('Name : Walk-in Customer',
-        styles: PosStyles(align: PosAlign.left));
-
-    ticket.hr();
-    ticket.row([
-      PosColumn(
-          text: 'ITEM', width: 7, styles: PosStyles(align: PosAlign.left)),
-      PosColumn(
-          text: 'QTY', width: 1, styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: 'PRICE', width: 2, styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: 'AMT', width: 2, styles: PosStyles(align: PosAlign.right)),
-    ]);
-    ticket.hr();
-
-    for (var i = 0; i < orderdetail.length; i++) {
-      var item = orderdetail[i];
-      var name = orderdItem[i];
-      ticket.row([
-        PosColumn(
-            text: name.name, width: 7, styles: PosStyles(align: PosAlign.left)),
-        PosColumn(
-            text: item.detail_qty.toString(),
-            width: 1,
-            styles: PosStyles(align: PosAlign.right)),
-        PosColumn(
-            text: item.product_old_price.toString(),
-            width: 2,
-            styles: PosStyles(align: PosAlign.right)),
-        PosColumn(
-            text: item.product_price.toString(),
-            width: 2,
-            styles: PosStyles(align: PosAlign.right)),
-      ]);
-    }
-    ticket.hr();
-    ticket.row([
-      PosColumn(
-          text: "SUBTOTAL(MYR)",
-          width: 8,
-          styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: orderData.sub_total.toString(),
-          width: 4,
-          styles: PosStyles(align: PosAlign.right)),
-    ]);
-    ticket.hr();
-
-    ticket.row([
-      PosColumn(
-          text: "TAX(MYR)", width: 8, styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: orderData.tax_amount.toString(),
-          width: 4,
-          styles: PosStyles(align: PosAlign.right)),
-    ]);
-    ticket.hr();
-    ticket.row([
-      PosColumn(
-          text: "GRANDTOTAL(MYR)",
-          width: 8,
-          styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: orderData.grand_total.toString(),
-          width: 4,
-          styles: PosStyles(align: PosAlign.right)),
-    ]);
-    ticket.row([
-      PosColumn(
-          text: "CASH(MYR)",
-          width: 8,
-          styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: paymentdata.op_amount.toString(),
-          width: 4,
-          styles: PosStyles(align: PosAlign.right)),
-    ]);
-
-    ticket.feed(2);
-    ticket.text('Thank you!',
-        styles: PosStyles(align: PosAlign.center, bold: true));
-    ticket.text('Please visit us again',
-        styles: PosStyles(align: PosAlign.center, bold: true));
-
-    ticket.feed(2);
-    ticket.cut();
-    return ticket;
-  }
-
   void testPrint(String printerIp, BuildContext ctx) async {
-    final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter(printerIp, port: 9100);
-
-    // TODO Don't forget to choose printer's paper size
-    // const PaperSize paper = PaperSize.mm80;
-
-    // TEST PRINT
-    // final PosPrintResult res =
-    //     await printerManager.printTicket(await testTicket(paper));
-
-    // DEMO RECEIPT
-    final PosPrintResult res =
-        await printerManager.printTicket(await Receipt(paper));
-
-    final snackBar =
-        SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
-    Scaffold.of(ctx).showSnackBar(snackBar);
+    printReceipt.checkReceiptPrint(printerIp, ctx, paper, branchData,
+        orderdItem, orderdetail, orderData, paymentdata);
   }
 }

@@ -3,6 +3,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:mcncashier/services/teminalkey.dart' as repo;
 
@@ -42,7 +43,6 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
   }
 
   setTerminalkey() async {
-    //Navigator.pushNamed(context, '/Login');
     var isValid = await validateFields(); // validate fields
     var deviceinfo = await CommunFun.deviceInfo();
     TemimalKey terminal = new TemimalKey();
@@ -51,21 +51,20 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
         isLoading = true;
       });
       terminal.terminalKey = terminalKey.text;
-      terminal.deviceid = deviceinfo.id;
-      terminal.terDeviceToken = deviceinfo.androidId;
+      terminal.deviceid = deviceinfo["deviceId"];
+      terminal.terDeviceToken = deviceinfo["deviceToken"];
       await repo.sendTerminalKey(terminal).then((value) async {
-        print(value);
-        if (value != null && value.status == Constant.STATUS200) {
+        if (value != null && value["status"] == Constant.STATUS200) {
           Preferences.setStringToSF(
-              Constant.TERMINAL_KEY, value.terminalId.toString());
+              Constant.TERMINAL_KEY, value["terminal_id"].toString());
           Preferences.setStringToSF(
-              Constant.BRANCH_ID, value.branchId.toString());
+              Constant.BRANCH_ID, value["branch_id"].toString());
           Navigator.pushNamed(context, Constant.LoginScreen,
-              arguments: {"terminalId": value.terminalId});
-        } else if (value != null && value.status == Constant.STATUS422) {
-          CommunFun.showToast(context, value.message);
+              arguments: {"terminalId": value["terminal_id"]});
+        } else if (value != null && value["status"] == Constant.STATUS422) {
+          CommunFun.showToast(context, value["message"]);
         } else {
-          CommunFun.showToast(context, value.message);
+          CommunFun.showToast(context, value["message"]);
         }
       }).catchError((e) {
         print(e);
@@ -112,7 +111,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
                           // Key add button
                           width: MediaQuery.of(context).size.width,
                           child: CommunFun.roundedButton(
-                              Strings.set_terminal_key, () {
+                              Strings.set_terminal_key.toUpperCase(), () {
                             setTerminalkey();
                           }),
                         )
@@ -151,19 +150,15 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
         errorText: !isValidatekey ? errormessage : null,
         errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
         hintText: Strings.terminalKey,
-        hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
+        hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(50),
-          borderSide: BorderSide(
-            width: 0,
-            style: BorderStyle.none,
-          ),
+          borderRadius: BorderRadius.circular(100),
         ),
         filled: true,
-        contentPadding: EdgeInsets.only(top: 25, bottom: 25),
+        contentPadding: EdgeInsets.only(top: 20, bottom: 20),
         fillColor: Colors.white,
       ),
-      style: TextStyle(color: Colors.black, fontSize: 25.0),
+      style: Styles.normalBlack(),
       onChanged: onChange,
     );
   }

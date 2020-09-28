@@ -48,7 +48,8 @@ class Strings {
   static String customer_Search_Hint =
       "Search Customer Name,Email,Phone or Memeber id";
   static String select_table = "Select Table";
-  static String new_order = " New Order";
+  static String new_order = "New Order";
+  static String view_order = "View Order";
   static String merge_order = "Merge Order";
   static String enterPax = "Enter Pax";
   static String open_shift = "Open Shift";
@@ -68,6 +69,7 @@ class Strings {
   static String close_table = "Close Table";
   static String split_order = "Split Order";
   static String close_shift = "Close Shift";
+  static String draft_report = "Draft Report";
   static String no_image = "assets/no_image.png";
   static String out_of_stoke = "OUT OF STOCK";
   static String apply_promocode = "Apply Promocode";
@@ -84,7 +86,7 @@ class Strings {
   static String occupied = "Occupied : ";
   static String vacant = "Vacant : ";
   static String orders = "Orders :";
-  static String set_terminal_key = "Set Teminal Key";
+  static String set_terminal_key = "Set Terminal Key";
   static String terminalKey = "Terminal Key";
 
   static String transaction = "Transaction";
@@ -102,4 +104,6 @@ class Strings {
   static String voucher_already_used = "Voucher already used 5 times.";
   static String voucher_expired = "Voucher already expired.";
   static String stock_not_valilable = "Product is Out of stock.";
+  static String procesing = "Processing";
+  static String send = "SEND";
 }

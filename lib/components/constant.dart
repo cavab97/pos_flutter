@@ -14,9 +14,9 @@ class Constant {
   static final String TABLE_DATA = "table_id";
   static final String CUSTOMER_DATA = "customerData";
   static final String IS_CHECKIN = "Checkin";
- static final String IS_CHECKOUT = "Checkout";
+  static final String IS_CHECKOUT = "Checkout";
   static final String SHIFT_ID = "Shift_Id";
-   static final String DASH_SHIFT = "dashShift";
+  static final String DASH_SHIFT = "dashShift";
   /*==============================================================================
                               Manage API status
   =================================================================================*/
@@ -34,7 +34,9 @@ class Constant {
   static final String TransactionScreen = "/TansactionsPage";
   static final String TerminalScreen = "/TerminalKeyPage";
   static final String SelectTableScreen = "/TableSelection";
-
+  static final String SettingsScreen = "/Settings";
+  static final String WebOrderPages = "/WebOrders";
+  static final String ShiftOrders = "/ShiftReport";
 /*==============================================================================
                                   Error messages
   =================================================================================*/

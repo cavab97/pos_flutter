@@ -7,6 +7,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/CheckInout.dart';
+import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class PINPage extends StatefulWidget {
@@ -41,7 +42,6 @@ class _PINPageState extends State<PINPage> {
     if (pinNumber.length < 6) {
       var currentpinNumber = pinNumber;
       currentpinNumber += val;
-      print(currentpinNumber);
       setState(() {
         pinNumber = currentpinNumber;
       });
@@ -55,39 +55,42 @@ class _PINPageState extends State<PINPage> {
   }
 
   clockInwithPIN() async {
-    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
-    var user = json.decode(loginUser);
-    var pin = user["user_pin"];
     if (!isCheckIn) {
-      if (pinNumber.length >= 6 && pin.toString() == pinNumber) {
-        //TODO : API CALL for clockin
-        setState(() {
-          isLoading = true;
-        });
-        CheckinOut checkIn = new CheckinOut();
-        var deviceInfo = await CommunFun.deviceInfo();
-        var terminalId =
-            await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
-        var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
-        var loginUser =
-            await Preferences.getStringValuesSF(Constant.LOIGN_USER);
-        var date = DateTime.now();
-        var user = json.decode(loginUser);
-        checkIn.localID = "Android" + deviceInfo.androidId + terminalId;
-        checkIn.terminalId = int.parse(terminalId);
-        checkIn.userId = user["id"];
-        checkIn.branchId = int.parse(branchid);
-        checkIn.status = "IN";
-        checkIn.timeInOut = date.toString();
-        checkIn.createdAt = date.toString();
-        checkIn.sync = 0;
-        var result = await localAPI.userCheckInOut(checkIn);
-        await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
-        await Preferences.setStringToSF(Constant.SHIFT_ID, result.toString());
-        Navigator.pushNamed(context, Constant.DashboardScreen);
-        setState(() {
-          isLoading = false;
-        });
+      if (pinNumber.length >= 6) {
+        List<User> checkUserExit = await localAPI.checkUserExit(pinNumber);
+
+        if (checkUserExit.length != 0) {
+          setState(() {
+            isLoading = true;
+          });
+          User user = checkUserExit[0];
+          CheckinOut checkIn = new CheckinOut();
+          var terminalId = await CommunFun.getTeminalKey();
+          var branchid = await CommunFun.getbranchId();
+          var date = DateTime.now();
+          checkIn.localID = await CommunFun.getLocalID();
+          checkIn.terminalId = int.parse(terminalId);
+          checkIn.userId = user.id;
+          checkIn.branchId = int.parse(branchid);
+          checkIn.status = "IN";
+          checkIn.timeInOut = date.toString();
+          checkIn.createdAt = date.toString();
+          checkIn.sync = 0;
+          var result = await localAPI.userCheckInOut(checkIn);
+          await Preferences.setStringToSF(
+              Constant.LOIGN_USER, json.encode(user));
+          await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
+          await Preferences.setStringToSF(Constant.SHIFT_ID, result.toString());
+          Navigator.pushNamed(context, Constant.DashboardScreen);
+          setState(() {
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            isLoading = false;
+          });
+          CommunFun.showToast(context, Strings.invalid_pin_msg);
+        }
       } else {
         if (pinNumber.length >= 6) {
           CommunFun.showToast(context, Strings.invalid_pin_msg);
@@ -105,22 +108,17 @@ class _PINPageState extends State<PINPage> {
     var user = json.decode(loginUser);
     var pin = user["user_pin"];
     if (isCheckIn) {
-      if (pinNumber.length >= 6 && pinNumber == pin.toString()) {
+      if (pinNumber.length >= 6 && pin.toString() == pinNumber) {
         setState(() {
           isLoading = true;
         });
         CheckinOut checkIn = new CheckinOut();
-        var deviceInfo = await CommunFun.deviceInfo();
         var shiftid = await Preferences.getStringValuesSF(Constant.SHIFT_ID);
-        var terminalId =
-            await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
-        var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
-        var loginUser =
-            await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+        var terminalId = await CommunFun.getTeminalKey();
+        var branchid = await CommunFun.getbranchId();
         var date = DateTime.now();
-        var user = json.decode(loginUser);
         checkIn.id = int.parse(shiftid);
-        checkIn.localID = "Android" + deviceInfo.androidId + terminalId;
+        checkIn.localID = await CommunFun.getLocalID();
         checkIn.terminalId = int.parse(terminalId);
         checkIn.userId = user["id"];
         checkIn.branchId = int.parse(branchid);
@@ -130,6 +128,7 @@ class _PINPageState extends State<PINPage> {
         var result = await localAPI.userCheckInOut(checkIn);
         await Preferences.removeSinglePref(Constant.IS_CHECKIN);
         await Preferences.removeSinglePref(Constant.SHIFT_ID);
+        await Preferences.removeSinglePref(Constant.LOIGN_USER);
         Navigator.pushNamed(context, Constant.PINScreen);
         setState(() {
           isLoading = false;
@@ -237,25 +236,26 @@ class _PINPageState extends State<PINPage> {
         child: Center(
           child: Column(
             children: <Widget>[
-              isCheckIn
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: <Widget>[
-                        IconButton(
-                            padding: EdgeInsets.only(
-                              left: 100,
-                            ),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            icon: Icon(
-                              Icons.close,
-                              color: Colors.black,
-                              size: 50,
-                            )),
-                      ],
-                    )
-                  : SizedBox(height: 20),
+              // isCheckIn
+              //     ? Row(
+              //         mainAxisAlignment: MainAxisAlignment.end,
+              //         children: <Widget>[
+              //           IconButton(
+              //               padding: EdgeInsets.only(
+              //                 left: 100,
+              //               ),
+              //               onPressed: () {
+              //                 Navigator.of(context).pop();
+              //               },
+              //               icon: Icon(
+              //                 Icons.close,
+              //                 color: Colors.black,
+              //                 size: 50,
+              //               )),
+              //         ],
+              //       )
+              //     : SizedBox(height: 20),
+              SizedBox(height: 20),
               Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
@@ -395,7 +395,8 @@ class _PINPageState extends State<PINPage> {
                               onPressed: () {
                                 clearPin();
                               },
-                              child: Text(Strings.clear, style: Styles.orangeLarge()))
+                              child: Text(Strings.clear,
+                                  style: Styles.orangeLarge()))
                         ])
             ],
           ),

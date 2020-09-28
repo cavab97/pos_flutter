@@ -13,4 +13,6 @@ class StaticColor {
 //dark
   static Color colorDarkLine = Color(0xff4f4f4f);
   static Color colorDarkResult = Color(0xffe0e0e0);
+
+  static Color backgroundColor = Color(0xFF434449);
 }

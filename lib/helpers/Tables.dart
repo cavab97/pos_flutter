@@ -55,7 +55,7 @@ class CreateTables {
         "mobile TEXT," +
         "profile TEXT," +
         "commision_percent REAL," +
-        "user_pin TEXT," +
+        "user_pin INTEGER," +
         "api_token TEXT," +
         "status INTEGER," +
         "is_admin INTEGER," +
@@ -228,7 +228,7 @@ class CreateTables {
 
     // Table product_category
     datatables = db.execute("CREATE TABLE product_category(" +
-        "pc_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "pc_id INTEGER PRIMARY KEY," +
         "product_id INTEGER," +
         "category_id INTEGER," +
         "branch_id INTEGER," +
@@ -269,6 +269,7 @@ class CreateTables {
         "uuid TEXT," +
         "product_id INTEGER," +
         "branch_id INTEGER," +
+        "printer_id INTEGER," +
         "warningStockLevel INTEGER," +
         "display_order INTEGER," +
         "status INTEGER," +
@@ -444,15 +445,16 @@ class CreateTables {
         "tax_amount REAL," +
         "tax_json TEXT," +
         "voucher_id INTEGER," +
+        "voucher_detail TEXT," +
         "voucher_amount REAL," +
         "sub_total REAL," +
         "sub_total_after_discount REAL," +
         "grand_total REAL," +
-        "order_source INTEGER," +
+        "order_source INTEGER," + // 1  web, 2  app
         "order_status INTEGER," +
         "order_item_count INTEGER," +
         "order_date TEXT," +
-        "server_id INTEGER,"+
+        "server_id INTEGER," +
         "order_by INTEGER," +
         "updated_at TEXT," +
         "updated_by INTEGER" +
@@ -470,6 +472,8 @@ class CreateTables {
         "product_id INTEGER," +
         "product_price REAL," +
         "product_old_price INTEGER," +
+        "product_discount REAL," +
+        "product_detail TEXT," +
         "category_id INTEGER," +
         "detail_amount REAL," +
         "detail_qty REAL," +
@@ -525,11 +529,28 @@ class CreateTables {
         "op_method_id INTEGER," +
         "op_amount REAL," +
         "op_method_response TEXT," +
-        "op_status INTEGER," +
+        "op_status INTEGER," + // 1 placed , 2 cancel 3,refund
         "op_datetime TEXT," +
         "op_by INTEGER," +
         "updated_at TEXT," +
         "updated_by INTEGER" +
+        ")");
+// TABLE order_payment
+    datatables = db.execute("CREATE TABLE order_cancel (" +
+        "id INTEGER ," +
+        "invoice_id INTEGER," +
+        "localID TEXT," +
+        "reason TEXT," +
+        "status INTEGER," +
+        "created_by INTEGER," +
+        "updated_by INTEGER," +
+        "created_at TEXT," +
+        "updated_at TEXT," +
+        "sync NUMERIC," +
+        "serverId INTEGER," +
+        "terminal_id INTEGER," +
+        "invoice_unique_id TEXT," +
+        "invoice_terminal_id INTEGER" +
         ")");
 
     //Table customer
@@ -589,15 +610,26 @@ class CreateTables {
         'discount REAL,' +
         'discount_type INTEGER,' +
         'remark TEXT,' +
+        'table_id INTEGER,' +
         'tax REAL,' +
         'tax_json TEXT,' +
         'grand_total REAL,' +
         'total_qty  REAL,' +
-        'is_deleted   REAL,' +
+        'is_deleted   INTEGER,' +
         'created_by  INTEGER,' +
         'created_at  TEXT,' +
+        'sync NUMERIC,' +
+        'cust_mobile TEXT,' +
+        'cust_email TEXT,' +
+        'customer_terminal INTEGER,' +
         'voucher_id INTEGER,' +
-        'customer_terminal INTEGER' +
+        'voucher_detail TEXT,' +
+        'sub_total_after_discount REAL,' +
+        'source NUMERIC,' + //1 For Web, 2 For App
+        'total_item REAL,' +
+        'cart_payment_id INTEGER,' +
+        'cart_payment_response TEXT,' +
+        'cart_payment_status NUMERIC' + //0 For Pending, 1 For complete
         ')');
 
     datatables = db.execute("CREATE TABLE mst_cart_sub_detail (" +
@@ -617,6 +649,7 @@ class CreateTables {
         'cart_id INTEGER,' +
         'localID INTEGER,' +
         'product_id INTEGER,' +
+        'printer_id INTEGER,' +
         'product_name TEXT,' +
         'product_price REAL,' +
         'product_net_price REAL,' +
@@ -626,15 +659,13 @@ class CreateTables {
         'discount REAL,' + //DOUBLE
         'discount_type  INTEGER,' + //int
         'remark TEXT,' +
+        'cart_detail TEXT,' +
         'is_deleted   INTEGER,' +
         'created_by  INTEGER,' +
         'created_at  TEXT,' +
-        // 'sync  NUMERIC,' +
         'is_send_kichen NUMERIC,' +
         'item_unit TEXT,' +
         'has_composite_inventory NUMERIC' + //BOOLEAN
-        // 'product_points INTEGER,' +
-        // 'product_total_points INTEGER' +
         ')');
 
     datatables = db.execute("CREATE TABLE shift(" +
@@ -662,11 +693,11 @@ class CreateTables {
         ")");
 
     datatables = db.execute("CREATE TABLE tax(" +
-        "tax_id INTEGER," +
+        "tax_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
         "code TEXT," +
         "description TEXT," +
-        "rate  INTEGER," +
+        "rate TEXT," +
         "is_fixed NUMERIC," +
         "status  INTEGER," +
         "updated_by INTEGER," +

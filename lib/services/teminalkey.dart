@@ -4,7 +4,7 @@ import 'package:mcncashier/helpers/config.dart';
 import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:http/http.dart' as http;
 
-Future<TemimalKey> sendTerminalKey(TemimalKey terminal) async {
+Future<dynamic> sendTerminalKey(TemimalKey terminal) async {
   try {
     Uri url = Uri.parse(Configrations.base_URL + Configrations.terminalKey);
     final client = new http.Client();
@@ -19,9 +19,11 @@ Future<TemimalKey> sendTerminalKey(TemimalKey terminal) async {
       headers: headers,
       body: json.encode(params),
     );
-    return TemimalKey.fromJson(json.decode(response.body));
+    var data = json.decode(response.body);
+    return data;
   } catch (e) {
     print(e);
-    return TemimalKey.fromJson({});
+    var res = {"status": -1, "message": e.message.toString()};
+    return res;
   }
 }

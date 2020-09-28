@@ -1,4 +1,8 @@
 import 'dart:convert';
+import 'package:mcncashier/models/MST_Cart.dart';
+import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/models/mst_sub_cart_details.dart';
+import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter/cupertino.dart';
@@ -107,15 +111,25 @@ class CommunFun {
     );
   }
 
-  static deviceInfo() {
+  static deviceInfo() async {
     // Device Info
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     var deviceData;
     try {
       if (Platform.isAndroid) {
-        deviceData = deviceInfo.androidInfo;
+        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+        deviceData = {
+          "deviceId": androidInfo.device,
+          "deviceToken": androidInfo.androidId,
+          "deviceType": androidInfo.type
+        };
       } else if (Platform.isIOS) {
-        deviceData = deviceInfo.iosInfo;
+        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+        deviceData = {
+          "deviceId": iosInfo.identifierForVendor,
+          "deviceToken": iosInfo.utsname.machine,
+          "deviceType": iosInfo.name
+        };
       }
     } on PlatformException {
       deviceData = <String, dynamic>{
@@ -206,9 +220,9 @@ class CommunFun {
   static setServerTime(data, lastSync) async {
     if (data != null) {
       await Preferences.setStringToSF(
-          Constant.SERVER_DATE_TIME, data["data"]["serverdatetime"]);
-      await Preferences.setStringToSF(
           Constant.SERVER_TIME_ZONE, data["data"]["timezone"]);
+      await Preferences.setStringToSF(
+          Constant.SERVER_DATE_TIME, data["data"]["serverdatetime"]);
     }
     await Preferences.setStringToSF(Constant.LastSync_Table, lastSync);
   }
@@ -269,8 +283,6 @@ class CommunFun {
       print(result);
       if (result == 1) {
         await CommunFun.setServerTime(null, "4");
-        Navigator.of(context).pop();
-        Navigator.pushNamed(context, Constant.PINScreen);
       } else {
         print("Error when getting data4_3");
       }
@@ -280,6 +292,12 @@ class CommunFun {
     var aceets = await SyncAPICalls.getAssets(context);
     if (aceets != null) {
       databaseHelper.accetsData(aceets["data"]);
+      var serverTime =
+          await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+      Navigator.of(context).pop();
+      if (serverTime == null) {
+        Navigator.pushNamed(context, Constant.PINScreen);
+      }
       await CommunFun.setServerTime(aceets, "4");
     } else {
       // handle Exaption
@@ -445,10 +463,10 @@ class CommunFun {
 
   static getLocalID() async {
     var deviceInfo = await CommunFun.deviceInfo();
-    var terminalId = await Preferences.getStringValuesSF(Constant.TERMINAL_KEY);
+    var terminalId = await CommunFun.getTeminalKey();
     var localid = Platform.isAndroid
-        ? "ANDROID" + deviceInfo.androidId + terminalId
-        : "IOS" + deviceInfo.androidId + terminalId;
+        ? "ANDROID" + deviceInfo["deviceId"] + terminalId
+        : "IOS" + deviceInfo["deviceId"] + terminalId;
     return localid.toString();
   }
 
@@ -460,6 +478,125 @@ class CommunFun {
       return user = User.fromJson(user1);
     } else {
       return user;
+    }
+  }
+
+  static processingPopup(context) {
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(30.0))),
+            content: Builder(
+              builder: (context) {
+                return Container(
+                  height: 150,
+                  width: 150,
+                  child: Center(
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      CommunFun.loader(context),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Text(Strings.procesing, style: TextStyle(fontSize: 30))
+                    ],
+                  )),
+                );
+              },
+            ),
+          );
+        });
+  }
+
+  static savewebOrdersintoCart(cartdata) async {
+    print(cartdata);
+    LocalAPI localAPI = LocalAPI();
+    for (var i = 0; i < cartdata.length; i++) {
+      var cart = cartdata[i];
+      var cartdataitem = {
+        "id": cart["cart_id"],
+        "localID": cart["localID"],
+        "user_id": cart["user_id"],
+        "branch_id": cart["branch_id"],
+        "sub_total": cart["sub_total"],
+        "discount": cart["discount"],
+        "discount_type": cart["discount_type"],
+        "remark": cart["remark"],
+        "tax": cart["tax"],
+        "tax_json": cart["tax_json"],
+        "voucher_id": cart["voucher_id"],
+        "grand_total": cart["grand_total"],
+        "total_qty": cart["total_qty"],
+        "is_deleted": cart["is_deleted"],
+        "created_by": cart["created_by"],
+        "created_at": cart["created_at"],
+        "customer_terminal": cart["customer_terminal"],
+        "voucher_detail": cart["voucher_detail"],
+        "sub_total_after_discount": cart["sub_total_after_discount"],
+        "source": cart["source"],
+        "total_item": cart["total_item"],
+        "cart_payment_id": cart["cart_payment_id"],
+        "cart_payment_response": cart["cart_payment_response"],
+        "cart_payment_status": cart["cart_payment_status"],
+      };
+      var cartJson = MST_Cart.fromJson(cartdataitem);
+      print(cartJson);
+      var detaildata = cart["cart_detail"];
+      for (var j = 0; j < detaildata.length; j++) {
+        var detailitem = detaildata[j];
+        var cartDeatils = {
+          "id": detailitem["cart_detail_id"],
+          "cart_id": detailitem["cart_id"],
+          "localID": detailitem["localID"],
+          "product_id": detailitem["product_id"],
+          "printer_id": detailitem["printer_id"],
+          "product_name": detailitem["product_name"],
+          "product_price": detailitem["product_price"],
+          "product_qty": detailitem["product_qty"],
+          "product_net_price": detailitem["product_net_price"],
+          "tax_id": detailitem["tax_id"],
+          "tax_value": detailitem["tax_value"],
+          "discount": detailitem["discount"],
+          "discount_type": detailitem["discount_type"],
+          "remark": detailitem["remark"],
+          "is_deleted": detailitem["is_deleted"],
+          "is_send_kichen": detailitem["is_send_kichen"],
+          "cart_detail": detailitem["cart_detail"],
+          "has_composite_inventory": detailitem["has_composite_inventory"],
+          "item_unit": detailitem["item_unit"],
+          "created_by": detailitem["created_by"],
+          "created_at": detailitem["created_at"]
+        };
+        var cartdetailJson = MSTCartdetails.fromJson(cartDeatils);
+        print(cartdetailJson);
+        await localAPI.updateWebCartdetails(cartdetailJson);
+        var cartSubData = detailitem["cart_sub_detail"];
+        for (var p = 0; p < cartSubData.length; p++) {
+          var subdetailitem = cartSubData[p];
+          var subdata = {
+            "id": subdetailitem["cart_sub_detail_id"],
+            "cart_details_id": subdetailitem["cart_detail_id"],
+            "localID": subdetailitem["localID"],
+            "product_id": subdetailitem["product_id"],
+            "modifier_id": subdetailitem["modifier_id"],
+            "modifier_price": subdetailitem["modifier_price"],
+            "ca_id": subdetailitem["ca_id"],
+            "attr_price": subdetailitem["attr_price"],
+          };
+          var subjson = MSTSubCartdetails.fromJson(subdata);
+          print(subjson);
+          await localAPI.updateWebCartsubdetails(subjson);
+        }
+      }
+
+      // Insert cart json
+      await localAPI.updateWebCart(cartJson);
     }
   }
 }

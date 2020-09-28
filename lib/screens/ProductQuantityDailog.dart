@@ -9,6 +9,7 @@ import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Tax.dart';
@@ -18,11 +19,12 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
-  ProductQuantityDailog({Key key, this.product, this.cartID, this.iscartItem})
+  ProductQuantityDailog({Key key, this.product, this.cartID, this.cartItem})
       : super(key: key);
   final product;
   final int cartID;
-  final iscartItem;
+  final cartItem;
+
   @override
   _ProductQuantityDailogState createState() => _ProductQuantityDailogState();
 }
@@ -36,31 +38,46 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   List<ModifireData> modifireList = [];
   List selectedAttr = [];
   MST_Cart currentCart = new MST_Cart();
+  List<MSTCartdetails> cartItems = [];
   List<ModifireData> selectedModifier = [];
-  double product_qty = 1;
+  double product_qty = 1.0;
   double price = 0.0;
+  Printer printer;
   bool isEditing = false;
   List<BranchTax> taxlist = [];
+  double taxvalues = 0;
   TextStyle attrStyle = TextStyle(color: Colors.black, fontSize: 20.0);
+
   @override
   void initState() {
     super.initState();
     setState(() {
-      isEditing = widget.iscartItem != null;
+      isEditing = widget.cartItem != null;
       productItem = widget.product;
       price = productItem.price;
-      cartitem = widget.iscartItem;
+      cartitem = widget.cartItem;
     });
     getAttributes();
     getTaxs();
-
+    getPrinter();
     if (widget.cartID != null) {
       getCartData();
+      getcartItemsDetails();
+    }
+  }
+
+  getPrinter() async {
+    List<Printer> printerlist =
+        await localAPI.getPrinter(productItem.productId.toString());
+    if (printerlist.length > 0) {
+      setState(() {
+        printer = printerlist[0];
+      });
     }
   }
 
   getTaxs() async {
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var branchid = await CommunFun.getbranchId();
     List<BranchTax> taxlists = await localAPI.getTaxList(branchid);
     if (taxlists.length > 0) {
       setState(() {
@@ -72,7 +89,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   setEditingData() async {
     List<MSTSubCartdetails> details =
         await localAPI.getItemModifire(cartitem.id);
-
     if (details.length > 0) {
       for (var i = 0; i < details.length; i++) {
         var item = details[i];
@@ -96,17 +112,20 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           if (modifireList.length > 0) {
             for (var j = 0; j < modifireList.length; j++) {
               if (modifireList[j].modifierId == item.modifierId) {
-                setModifire(modifireList[i]);
+                setModifire(modifireList[j]);
               }
             }
           }
         }
       }
     }
-    product_qty = cartitem.productQty is int
-        ? cartitem.productQty.toDouble()
-        : cartitem.productQty;
-    price = cartitem.productPrice;
+
+    setState(() {
+      product_qty = cartitem.productQty is int
+          ? cartitem.productQty.toDouble()
+          : cartitem.productQty;
+      price = cartitem.productPrice;
+    });
   }
 
   getAttributes() async {
@@ -138,8 +157,18 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
+  getcartItemsDetails() async {
+    List<MSTCartdetails> cartItemslist =
+        await localAPI.getCurrentCartItems(widget.cartID);
+    if (cartItemslist.length != 0) {
+      setState(() {
+        cartItems = cartItemslist;
+      });
+    }
+  }
+
   increaseQty() async {
-    if (productItem.hasInventory == 0) {
+    if (productItem.hasInventory == 1) {
       ProductStoreInventory cartval =
           await localAPI.checkItemAvailableinStore(productItem.productId);
       if (int.parse(cartval.qty) >= product_qty) {
@@ -227,7 +256,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   setModifire(mod) {
     var isSelected = selectedModifier.any((item) => item.pmId == mod.pmId);
-
     if (isSelected) {
       selectedModifier.removeWhere((item) => item.pmId == mod);
       setState(() {
@@ -246,35 +274,78 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     produtAddTocart();
   }
 
-  produtAddTocart() async {
-    MST_Cart cart = new MST_Cart();
-    SaveOrder orderData = new SaveOrder();
-    MSTSubCartdetails subCartData = new MSTSubCartdetails();
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
-    var table = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
-    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
-    var customerData =
-        await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
-    var loginData = await json.decode(loginUser);
+  countTotalQty() {
+    double qty = 0;
+    if (cartItems.length > 0) {
+      for (var i = 0; i < cartItems.length; i++) {
+        var item = cartItems[i];
+        if (item.productId == productItem.productId) {
+          item.productQty = product_qty;
+        }
+        qty += item.productQty;
+      }
+      if (!isEditing) {
+        qty += product_qty;
+      }
+    } else {
+      qty += product_qty;
+    }
+    return qty;
+  }
 
-    var disc = currentCart.discount != null ? currentCart.discount : 0.0;
-    double qty = currentCart.total_qty != null
-        ? currentCart.total_qty + product_qty.toDouble()
-        : product_qty.toDouble();
-    double subT =
-        currentCart.sub_total != null ? currentCart.sub_total + price : price;
+  countSubtotal() {
+    double subT = 0;
+    if (cartItems.length > 0) {
+      for (var i = 0; i < cartItems.length; i++) {
+        var item = cartItems[i];
+        if (item.productId == productItem.productId) {
+          item.productPrice = price;
+        }
+        subT += item.productPrice;
+      }
+      if (!isEditing) {
+        subT += price;
+      }
+    } else {
+      subT += price;
+    }
+    return subT;
+  }
 
+  countGrandtotal(tax, dis) {
+    double grandTotal = 0;
+    if (cartItems.length > 0) {
+      for (var i = 0; i < cartItems.length; i++) {
+        var item = cartItems[i];
+        if (item.productId == productItem.productId) {
+          item.productPrice = price;
+        }
+        grandTotal += item.productPrice;
+      }
+      if (!isEditing) {
+        grandTotal += price;
+      }
+    } else {
+      grandTotal += price;
+    }
+    return grandTotal = ((grandTotal + tax) - dis);
+  }
+
+  countTax(subT) async {
     var totalTax = [];
-    double taxvalues = 0;
+    double taxvalue = taxvalues;
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
-        // Tax tax = await localAPI.getTaxName(taxlistitem.taxId);
+        List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
         var taxval = taxlistitem.rate != null
             ? subT * double.parse(taxlistitem.rate) / 100
             : 0.0;
-        taxvalues += taxval;
-
+        taxval = double.parse(taxval.toStringAsFixed(2));
+        taxvalue += taxval;
+        setState(() {
+          taxvalues = taxvalue;
+        });
         var taxmap = {
           "id": taxlistitem.id,
           "tax_id": taxlistitem.taxId,
@@ -284,26 +355,49 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           "updated_at": taxlistitem.updatedAt,
           "updated_by": taxlistitem.updatedBy,
           "taxAmount": taxval.toString(),
-          "taxName": "GST" //tax.code
+          "taxCode": tax.length > 0 ? tax[0].code : "" //tax.code
         };
         totalTax.add(taxmap);
       }
     }
+    return totalTax;
+  }
 
-    double grandTotal = currentCart.grand_total != null
-        ? currentCart.grand_total + price
-        : price + taxvalues - disc;
+  countDiscount() {
+    return currentCart.discount != null
+        ? double.parse(currentCart.discount.toStringAsFixed(2))
+        : 0.0;
+  }
+
+  produtAddTocart() async {
+    MST_Cart cart = new MST_Cart();
+    SaveOrder orderData = new SaveOrder();
+    MSTSubCartdetails subCartData = new MSTSubCartdetails();
+    var branchid = await CommunFun.getbranchId();
+    var table = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var customerData =
+        await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
+    var tableData = await json.decode(table); // table data
+    var loginData = await json.decode(loginUser);
+    var qty = await countTotalQty();
+    var disc = await countDiscount();
+    var subtotal = await countSubtotal();
+    var totalTax = await countTax(subtotal);
+    var grandTotal = await countGrandtotal(taxvalues, disc);
 
     //cart data
     cart.user_id = customerData != null ? customerData["customer_id"] : 0;
     cart.branch_id = int.parse(branchid);
-    cart.sub_total = subT;
+    cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
     cart.discount = disc;
+    cart.table_id = tableData["table_id"];
     cart.discount_type = currentCart.discount_type;
     cart.total_qty = qty;
     cart.tax = taxvalues;
+    cart.source = 2;
     cart.tax_json = json.encode(totalTax);
-    cart.grand_total = grandTotal;
+    cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
     cart.customer_terminal =
         customerData != null ? customerData["terminal_id"] : 0;
     if (!isEditing) {
@@ -311,7 +405,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     cart.created_by = loginData["id"];
     cart.localID = await CommunFun.getLocalID();
-    var tableData = await json.decode(table); // table data
+
     orderData.orderName = tableData != null ? "" : "test";
     if (!isEditing) {
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
@@ -337,10 +431,15 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.cartId = cartid;
     cartdetails.productId = productdata.productId;
     cartdetails.productName = productdata.name;
-    cartdetails.productPrice = productdata.price;
+    cartdetails.productPrice =
+        double.parse(productdata.price.toStringAsFixed(2));
     cartdetails.productQty = productdata.qty;
-    cartdetails.productNetPrice = productdata.oldPrice;
+    cartdetails.productNetPrice = productdata.price;
+
     cartdetails.createdBy = loginData["id"];
+    cartdetails.discount = 0;
+    cartdetails.taxValue = taxvalues;
+    cartdetails.printer_id = printer.printerId;
     cartdetails.createdAt = DateTime.now().toString();
     var detailID = await localAPI.addintoCartDetails(cartdetails);
 
@@ -369,13 +468,18 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         print(res);
       }
     }
-
+    if (isEditing && cartitem.isSendKichen == 1) {
+      var items = [];
+      items.add(cartitem);
+      //  senditemtoKitchen(items);
+    }
     await Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      contentPadding: EdgeInsets.all(0),
       titlePadding: EdgeInsets.all(0),
       title: Stack(
         overflow: Overflow.visible,
@@ -396,7 +500,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           closeButton(context), // close button
         ],
       ),
-      content: mainContent(), //main part of the popup
+      content: mainContent(),
+      //main part of the popup
       actions: <Widget>[
         // Button div + - buttons
         Stack(
@@ -466,30 +571,29 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   Widget mainContent() {
-    return SafeArea(
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20),
+      width: MediaQuery.of(context).size.width / 2.8,
+      height: MediaQuery.of(context).size.height / 1.8,
       child: SingleChildScrollView(
-        child: Container(
-          width: MediaQuery.of(context).size.width / 2.8,
-          //height: MediaQuery.of(context).size.height /2.5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              getAttributeList(),
-              modifireList.length != 0
-                  ? Text(
-                      Strings.modifier,
-                      style: TextStyle(fontSize: 20),
-                    )
-                  : SizedBox(),
-              SizedBox(height: 5),
-              modifireList.length != 0 ? modifireItmeList() : SizedBox(),
-              SizedBox(height: 15),
-              _extraNotesTitle(),
-              SizedBox(height: 10),
-              inputNotesView(),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            getAttributeList(),
+            modifireList.length != 0
+                ? Text(
+                    Strings.modifier,
+                    style: TextStyle(fontSize: 20),
+                  )
+                : SizedBox(),
+            SizedBox(height: 5),
+            modifireList.length != 0 ? modifireItmeList() : SizedBox(),
+            SizedBox(height: 15),
+            _extraNotesTitle(),
+            SizedBox(height: 5),
+            inputNotesView(),
+          ],
         ),
       ),
     );
@@ -518,7 +622,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               ),
               Container(
                   margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10.0),
-                  height: 60,
+                  height: 50,
                   child: ListView(
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,

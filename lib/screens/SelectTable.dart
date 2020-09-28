@@ -1,14 +1,14 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
-import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -28,6 +28,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
   List<TablesDetails> tableList = new List<TablesDetails>();
   var selectedTable;
   var number_of_pax;
+  var orderid;
+  bool isLoading = false;
+  bool isAssigning = false;
   @override
   void initState() {
     super.initState();
@@ -41,24 +44,165 @@ class _SelectTablePageState extends State<SelectTablePage> {
   }
 
   getTables() async {
+    setState(() {
+      isLoading = true;
+    });
     var branchid = await CommunFun.getbranchId();
     List<TablesDetails> tables = await localAPI.getTables(branchid);
     setState(() {
       tableList = tables;
+      isLoading = false;
     });
   }
 
-  selectTableForNewOrder() async {
-    Table_order table_order = new Table_order();
-    table_order.table_id = selectedTable.tableId;
-    table_order.number_of_pax = int.parse(paxController.text);
-    table_order.save_order_id = selectedTable.saveorderid;
-    var result = await localAPI.insertTableOrder(table_order);
-    print(result);
-    await Preferences.setStringToSF(
-        Constant.TABLE_DATA, json.encode(table_order));
+  viewOrder() async {
+    var tableid = selectedTable.tableId;
+    List<Table_order> order = await localAPI.getTableOrders(tableid);
+    await Preferences.setStringToSF(Constant.TABLE_DATA, json.encode(order[0]));
     Navigator.of(context).pop();
     Navigator.pushNamed(context, Constant.DashboardScreen);
+  }
+
+  ontableTap(table) {
+    setState(() {
+      selectedTable = table;
+    });
+    if (isAssigning) {
+      opnPaxDailog();
+    } else {
+      paxController.text =
+          table.numberofpax != null ? table.numberofpax.toString() : "";
+      openSelectTablePop();
+    }
+  }
+
+  selectTableForNewOrder() async {
+    if (int.parse(paxController.text) <= selectedTable.tableCapacity) {
+      Table_order table_order = new Table_order();
+      table_order.table_id = selectedTable.tableId;
+      table_order.number_of_pax = int.parse(paxController.text);
+      table_order.save_order_id = selectedTable.saveorderid;
+      var result = await localAPI.insertTableOrder(table_order);
+      print(result);
+      await Preferences.setStringToSF(
+          Constant.TABLE_DATA, json.encode(table_order));
+      Navigator.of(context).pop();
+      Navigator.pushNamed(context, Constant.DashboardScreen);
+    } else {
+      CommunFun.showToast(context, "Please enter pax minimum table capcity.");
+    }
+  }
+
+  assignTabletoOrder() async {
+    if (int.parse(paxController.text) <= selectedTable.tableCapacity) {
+      SaveOrder orderData = new SaveOrder();
+      orderData.orderName = selectedTable.tableName;
+      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+      orderData.numberofPax = int.parse(paxController.text);
+      orderData.cartId = orderid;
+
+      Table_order tableorder = new Table_order();
+      tableorder.table_id = selectedTable.tableId;
+      tableorder.number_of_pax = int.parse(paxController.text);
+      await localAPI.insertTableOrder(tableorder);
+      await localAPI.insertSaveOrders(orderData, selectedTable.tableId);
+      await localAPI.updateTableidintocart(orderid, selectedTable.tableId);
+      Navigator.of(context).pop();
+      Navigator.pushNamed(context, Constant.WebOrderPages);
+    } else {
+      CommunFun.showToast(context, "Please enter pax minimum table capcity.");
+    }
+  }
+
+  openSelectTablePop() {
+    showDialog(
+      context: context,
+      // barrierDismissible: false,
+      builder: (BuildContext context) {
+        return alertDailog(context);
+      },
+    );
+  }
+
+  opnPaxDailog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return paxalertDailog(context);
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Map arguments = ModalRoute.of(context).settings.arguments as Map;
+    print(arguments['isAssign']);
+    setState(() {
+      isAssigning = arguments['isAssign'];
+      orderid = arguments['orderID'];
+    });
+    return Scaffold(
+      key: scaffoldKey,
+      appBar: AppBar(
+          leading: new IconButton(
+            icon: new Icon(
+              Icons.arrow_back,
+              size: 30.0,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          centerTitle: true,
+          iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: Text(Strings.select_table, style: Styles.whiteBold())),
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            children: <Widget>[
+              !isLoading ? tablesListwidget() : CommunFun.loader(context)
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget alertDailog(context) {
+    return AlertDialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10.0))),
+        content: Builder(
+          builder: (context) {
+            return Container(
+                height: 200,
+                width: 250,
+                child: Center(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: <Widget>[
+                      ListTile(
+                        title: neworder_button(context),
+                      ),
+                      Divider(),
+                      ListTile(
+                        title: viewOrderBtn(context),
+                      ),
+                      Divider(),
+                      ListTile(
+                        title: Text(
+                          Strings.merge_order,
+                          textAlign: TextAlign.center,
+                          style: Styles.bluesmall(),
+                        ),
+                      )
+                    ],
+                  ),
+                ));
+          },
+        ));
   }
 
   Widget neworder_button(context) {
@@ -72,10 +216,23 @@ class _SelectTablePageState extends State<SelectTablePage> {
     );
   }
 
+  Widget viewOrderBtn(context) {
+    return GestureDetector(
+      onTap: () {
+        viewOrder();
+      },
+      child: Text(Strings.view_order,
+          textAlign: TextAlign.center, style: Styles.bluesmall()),
+    );
+  }
+
   Widget paxTextInput() {
     return TextField(
       controller: paxController,
       keyboardType: TextInputType.number,
+      inputFormatters: <TextInputFormatter>[
+        WhitelistingTextInputFormatter.digitsOnly
+      ],
       decoration: InputDecoration(
         enabledBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: Colors.grey),
@@ -134,6 +291,11 @@ class _SelectTablePageState extends State<SelectTablePage> {
         title: Text(Strings.enterPax),
         content: Builder(
           builder: (context) {
+            KeyboardVisibilityNotification().addNewListener(
+              onHide: () {
+                FocusScope.of(context).requestFocus(new FocusNode());
+              },
+            );
             return SingleChildScrollView(
               child: Container(
                 height: 200,
@@ -146,7 +308,11 @@ class _SelectTablePageState extends State<SelectTablePage> {
                         height: 50,
                       ),
                       enterButton(() {
-                        selectTableForNewOrder();
+                        if (isAssigning) {
+                          assignTabletoOrder();
+                        } else {
+                          selectTableForNewOrder();
+                        }
                       }),
                     ],
                   ),
@@ -157,80 +323,19 @@ class _SelectTablePageState extends State<SelectTablePage> {
         ));
   }
 
-  openSelectTablePop() {
-    showDialog(
-      context: context,
-      // barrierDismissible: false,
-      builder: (BuildContext context) {
-        return alertDailog(context);
-      },
-    );
-  }
-
-  Widget alertDailog(context) {
-    return AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0))),
-        content: Builder(
-          builder: (context) {
-            return Container(
-                height: 100,
-                width: 150,
-                child: Center(
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      neworder_button(context),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      CommunFun.divider(),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text(Strings.merge_order,
-                          textAlign: TextAlign.center,
-                          style: Styles.bluesmall())
-                    ],
-                  ),
-                ));
-          },
-        ));
-  }
-
-  opnPaxDailog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return paxalertDailog(context);
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-          centerTitle: true,
-          iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text(Strings.select_table, style: Styles.whiteBold())),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            children: <Widget>[tablesListwidget()],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget tablesListwidget() {
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2.4;
     final double itemWidth = size.width / 4.2;
+    if (isAssigning) {
+      var list = tableList
+          .where((x) => x.numberofpax == 0 || x.numberofpax == null)
+          .toList();
+      setState(() {
+        tableList = list;
+      });
+    }
+
     return GridView.count(
       shrinkWrap: true,
       childAspectRatio: (itemWidth / itemHeight),
@@ -239,12 +344,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
         return InkWell(
           borderRadius: BorderRadius.all(Radius.circular(30.0)),
           onTap: () {
-            setState(() {
-              selectedTable = table;
-            });
-            paxController.text =
-                table.numberofpax != null ? table.numberofpax.toString() : "";
-            openSelectTablePop();
+            ontableTap(table);
           },
           child: Container(
             width: itemHeight,

@@ -10,8 +10,10 @@ class OrderDetail {
   double product_old_price;
   int category_id;
   double detail_amount;
+  double product_discount;
   double detail_qty;
   int detail_status;
+  String product_detail;
   int detail_by;
 
   OrderDetail({
@@ -24,9 +26,11 @@ class OrderDetail {
     this.product_id,
     this.product_price,
     this.product_old_price,
+    this.product_discount,
     this.category_id,
     this.detail_amount,
     this.detail_qty,
+    this.product_detail,
     this.detail_status,
     this.detail_by,
   });
@@ -48,6 +52,8 @@ class OrderDetail {
     detail_qty = json["detail_qty"];
     detail_status = json["detail_status"];
     detail_by = json["detail_by"];
+    product_discount = json["product_discount"];
+    product_detail = json["product_detail"];
   }
 
   Map<String, dynamic> toJson() {
@@ -67,6 +73,8 @@ class OrderDetail {
     data["detail_qty"] = this.detail_qty;
     data["detail_status"] = this.detail_status;
     data["detail_by"] = this.detail_by;
+    data["product_discount"] = this.product_discount;
+    data["product_detail"] = this.product_detail;
     return data;
   }
 }

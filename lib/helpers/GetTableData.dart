@@ -1,36 +1,45 @@
-import 'package:flutter/services.dart';
 import 'package:mcncashier/models/Asset.dart';
 import 'package:mcncashier/models/Attributes.dart';
 import 'package:mcncashier/models/Branch.dart';
+import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Category.dart';
+import 'package:mcncashier/models/Category_Attributes.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Modifier.dart';
 import 'package:mcncashier/models/Payment.dart';
-import 'package:mcncashier/models/Pinter.dart';
 import 'package:mcncashier/models/Price_Type.dart';
+import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/Product_Attribute.dart';
 import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Product_Modifire.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/Product_branch.dart';
-import 'package:mcncashier/models/Category_Attributes.dart';
 import 'package:mcncashier/models/Role.dart';
-import 'package:mcncashier/models/Modifier.dart';
+import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/models/User.dart';
-import 'package:mcncashier/models/BranchTax.dart';
-import 'package:mcncashier/models/Table.dart';
-import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/category_branch.dart';
 import 'package:sqflite/sqflite.dart';
 
 class TableData {
   Future<int> ifExists(Database db, dynamic data) async {
-    int count = Sqflite.firstIntValue(await db.rawQuery(
-        "SELECT COUNT(*) FROM $data['table'] WHERE $data['key'] =$data['value']"));
-    return count;
+    try {
+      int count = Sqflite.firstIntValue(await db.rawQuery(
+          "SELECT COUNT(*) FROM " +
+              data['table'] +
+              " WHERE " +
+              data['key'] +
+              " = " +
+              data['value'].toString() +
+              ""));
+      return count;
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<dynamic> insertDatatable1(Database db, dynamic tablesData) async {
@@ -46,51 +55,100 @@ class TableData {
         for (var i = 0; i < branchData.length; i++) {
           var branchDataitem = branchData[i];
           Branch branch = Branch.fromJson(branchDataitem);
-          // var data = {
-          //   'table': "branch",
-          //   'key': "branch_id",
-          //   'value': branch.branchId,
-          // };
-          // var count = await ifExists(db, data);
-          // if (count == 0) {
-          var result = await db.insert("branch", branch.toJson());
-          print(result);
-          // } else {
-          //   var result = await db.update("branch", branch.toJson());
-          //   print(result);
-          // }
+          var data = {
+            'table': "branch",
+            'key': "branch_id",
+            'value': branch.branchId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("branch", branch.toJson());
+            print(result);
+          } else {
+            var result = await db.update("branch", branch.toJson(),
+                where: "branch_id =?", whereArgs: [branch.branchId]);
+            print(result);
+          }
         }
       }
       if (userData.length != 0) {
         for (var i = 0; i < userData.length; i++) {
           var userDataitem = userData[i];
           User user = User.fromJson(userDataitem);
-          var result = await db.insert("users", user.toJson());
-          print(result);
+          var data = {
+            'table': "users",
+            'key': "id",
+            'value': user.id,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("users", user.toJson());
+            print(result);
+          } else {
+            var result = await db.update("users", user.toJson(),
+                where: "id =?", whereArgs: [user.id]);
+            print(result);
+          }
         }
       }
       if (roleData.length != 0) {
         for (var i = 0; i < roleData.length; i++) {
           var roleDataitem = roleData[i];
           Role role = Role.fromJson(roleDataitem);
-          var result = await db.insert("role", role.toJson());
-          print(result);
+          var data = {
+            'table': "role",
+            'key': "role_id",
+            'value': role.roleId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("role", role.toJson());
+            print(result);
+          } else {
+            var result = await db.update("role", role.toJson(),
+                where: "role_id = ?", whereArgs: [role.roleId]);
+            print(result);
+          }
         }
       }
       if (taxData.length != 0) {
         for (var i = 0; i < taxData.length; i++) {
           var taxDataitem = taxData[i];
-          BranchTax role = BranchTax.fromJson(taxDataitem);
-          var result = await db.insert("branch_tax", role.toJson());
-          print(result);
+          BranchTax branchTax = BranchTax.fromJson(taxDataitem);
+          var data = {
+            'table': "branch_tax",
+            'key': "id",
+            'value': branchTax.id,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("branch_tax", branchTax.toJson());
+            print(result);
+          } else {
+            var result = await db.update("branch_tax", branchTax.toJson(),
+                where: "id =?", whereArgs: [branchTax.id]);
+            print(result);
+          }
         }
       }
       if (taxList.length != 0) {
         for (var i = 0; i < taxList.length; i++) {
           var taxListitem = taxList[i];
           Tax taxval = Tax.fromJson(taxListitem);
-          var result = await db.insert("tax", taxval.toJson());
-          print(result);
+          var data = {
+            'table': "tax",
+            'key': "tax_id",
+            'value': taxval.taxId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("tax", taxval.toJson());
+            print(result);
+          } else {
+            var result = await db.update("tax", taxval.toJson(),
+                where: 'tax_id =?', whereArgs: [taxval.taxId]);
+            print(result);
+          }
         }
       }
       return 1;
@@ -115,8 +173,20 @@ class TableData {
         for (var i = 0; i < categoryData.length; i++) {
           var categoryDataitem = categoryData[i];
           Category category = Category.fromJson(categoryDataitem);
-          var result = await db.insert("category", category.toJson());
-          print(result);
+          var data = {
+            'table': "category",
+            'key': "category_id",
+            'value': category.categoryId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("category", category.toJson());
+            print(result);
+          } else {
+            var result = await db.update("category", category.toJson(),
+                where: "category_id =?", whereArgs: [category.categoryId]);
+            print(result);
+          }
         }
       }
       if (categorybranchData.length != 0) {
@@ -124,17 +194,42 @@ class TableData {
           var categorybranchDataitem = categorybranchData[i];
           CategroyBranch categroyBranch =
               CategroyBranch.fromJson(categorybranchDataitem);
-          var result =
-              await db.insert("category_branch", categroyBranch.toJson());
-          print(result);
+          var data = {
+            'table': "category_branch",
+            'key': "cb_id",
+            'value': categroyBranch.cbId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result =
+                await db.insert("category_branch", categroyBranch.toJson());
+            print(result);
+          } else {
+            var result = await db.update(
+                "category_branch", categroyBranch.toJson(),
+                where: "cb_id =?", whereArgs: [categroyBranch.cbId]);
+            print(result);
+          }
         }
       }
       if (productData.length != 0) {
         for (var i = 0; i < productData.length; i++) {
           var productDataitem = productData[i];
           Product product = Product.fromJson(productDataitem);
-          var result = await db.insert("product", product.toJson());
-          print(result);
+          var data = {
+            'table': "product",
+            'key': "product_id",
+            'value': product.productId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("product", product.toJson());
+            print(result);
+          } else {
+            var result = await db.update("product", product.toJson(),
+                where: "product_id =?", whereArgs: [product.productId]);
+            print(result);
+          }
         }
       }
 
@@ -142,8 +237,20 @@ class TableData {
         for (var i = 0; i < attributeData.length; i++) {
           var attributeDataitem = attributeData[i];
           Attributes attribute = Attributes.fromJson(attributeDataitem);
-          var result = await db.insert("attributes", attribute.toJson());
-          print(result);
+          var data = {
+            'table': "attributes",
+            'key': "attribute_id",
+            'value': attribute.attributeId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("attributes", attribute.toJson());
+            print(result);
+          } else {
+            var result = await db.update("attributes", attribute.toJson(),
+                where: "attribute_id =?", whereArgs: [attribute.attributeId]);
+            print(result);
+          }
         }
       }
       if (catAttributeData.length != 0) {
@@ -151,17 +258,42 @@ class TableData {
           var categoryattributeDataitem = catAttributeData[i];
           CategoryAttribute catattribute =
               CategoryAttribute.fromJson(categoryattributeDataitem);
-          var result =
-              await db.insert("category_attribute", catattribute.toJson());
-          print(result);
+          var data = {
+            'table': "category_attribute",
+            'key': "ca_id",
+            'value': catattribute.caId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result =
+                await db.insert("category_attribute", catattribute.toJson());
+            print(result);
+          } else {
+            var result = await db.update(
+                "category_attribute", catattribute.toJson(),
+                where: "ca_id =?", whereArgs: [catattribute.caId]);
+            print(result);
+          }
         }
       }
       if (modifierData.length != 0) {
         for (var i = 0; i < modifierData.length; i++) {
           var modifierDataitem = modifierData[i];
           Modifier modifier = Modifier.fromJson(modifierDataitem);
-          var result = await db.insert("modifier", modifier.toJson());
-          print(result);
+          var data = {
+            'table': "modifier",
+            'key': "modifier_id",
+            'value': modifier.modifierId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("modifier", modifier.toJson());
+            print(result);
+          } else {
+            var result = await db.update("modifier", modifier.toJson(),
+                where: "modifier_id", whereArgs: [modifier.modifierId]);
+            print(result);
+          }
         }
       }
       return 1;
@@ -185,8 +317,23 @@ class TableData {
           var productattrDataItem = productattributeData[i];
           ProductAttribute product =
               ProductAttribute.fromJson(productattrDataItem);
-          var result = await db.insert("product_attribute", product.toJson());
-          print(result);
+          var data = {
+            'table': "product_attribute",
+            'key': "pa_id",
+            'value': product.paId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert(
+              "product_attribute",
+              product.toJson(),
+            );
+            print(result);
+          } else {
+            var result = await db.update("product_attribute", product.toJson(),
+                where: "pa_id =?", whereArgs: [product.paId]);
+            print(result);
+          }
         }
       }
 
@@ -195,9 +342,23 @@ class TableData {
           var productmodifireDataitem = productmodifireData[i];
           ProductModifier productmodifire =
               ProductModifier.fromJson(productmodifireDataitem);
-          var result =
-              await db.insert("product_modifier", productmodifire.toJson());
-          print(result);
+
+          var data = {
+            'table': "product_modifier",
+            'key': "pm_id",
+            'value': productmodifire.pmId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result =
+                await db.insert("product_modifier", productmodifire.toJson());
+            print(result);
+          } else {
+            var result = await db.update(
+                "product_modifier", productmodifire.toJson(),
+                where: "pm_id =?", whereArgs: [productmodifire.pmId]);
+            print(result);
+          }
         }
       }
       if (productcategoryData.length != 0) {
@@ -205,9 +366,22 @@ class TableData {
           var productcategoryDataitem = productcategoryData[i];
           ProductCategory productcategory =
               ProductCategory.fromJson(productcategoryDataitem);
-          var result =
-              await db.insert("product_category", productcategory.toJson());
-          print(result);
+          var data = {
+            'table': "product_category",
+            'key': "pc_id",
+            'value': productcategory.pcId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result =
+                await db.insert("product_category", productcategory.toJson());
+            print(result);
+          } else {
+            var result = await db.update(
+                "product_category", productcategory.toJson(),
+                where: "pc_id =?", whereArgs: [productcategory.pcId]);
+            print(result);
+          }
         }
       }
       if (productbranchData.length != 0) {
@@ -215,9 +389,22 @@ class TableData {
           var productbranchDataitem = productbranchData[i];
           ProductBranch productbranch =
               ProductBranch.fromJson(productbranchDataitem);
-          var result =
-              await db.insert("product_branch", productbranch.toJson());
-          print(result);
+          var data = {
+            'table': "product_branch",
+            'key': "pb_id",
+            'value': productbranch.pbId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result =
+                await db.insert("product_branch", productbranch.toJson());
+            print(result);
+          } else {
+            var result = await db.update(
+                "product_branch", productbranch.toJson(),
+                where: "pb_id =?", whereArgs: [productbranch.pbId]);
+            print(result);
+          }
         }
       }
       if (productstoreData.length != 0) {
@@ -225,9 +412,23 @@ class TableData {
           var productstoreDataitem = productstoreData[i];
           ProductStoreInventory producatstore =
               ProductStoreInventory.fromJson(productstoreDataitem);
-          var result = await db.insert(
-              "product_store_inventory", producatstore.toJson());
-          print(result);
+          var data = {
+            'table': "product_store_inventory",
+            'key': "inventory_id",
+            'value': producatstore.inventoryId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert(
+                "product_store_inventory", producatstore.toJson());
+            print(result);
+          } else {
+            var result = await db.update(
+                "product_store_inventory", producatstore.toJson(),
+                where: "inventory_id =?",
+                whereArgs: [producatstore.inventoryId]);
+            print(result);
+          }
         }
       }
       return 1;
@@ -246,16 +447,40 @@ class TableData {
         for (var i = 0; i < pricetypeData.length; i++) {
           var pricetypeDataitem = pricetypeData[i];
           Pricetype priceType = Pricetype.fromJson(pricetypeDataitem);
-          var result = await db.insert("price_type", priceType.toJson());
-          print(result);
+          var data = {
+            'table': "price_type",
+            'key': "pt_id",
+            'value': priceType.ptId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("price_type", priceType.toJson());
+            print(result);
+          } else {
+            var result = await db.update("price_type", priceType.toJson(),
+                where: "pt_id =?", whereArgs: [priceType.ptId]);
+            print(result);
+          }
         }
       }
       if (printerData.length != 0) {
         for (var i = 0; i < printerData.length; i++) {
           var printerDataitem = printerData[i];
           Printer printer = Printer.fromJson(printerDataitem);
-          var result = await db.insert("printer", printer.toJson());
-          print(result);
+          var data = {
+            'table': "printer",
+            'key': "printer_id",
+            'value': printer.printerId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("printer", printer.toJson());
+            print(result);
+          } else {
+            var result = await db.update("printer", printer.toJson(),
+                where: "printer_id =?", whereArgs: [printer.printerId]);
+            print(result);
+          }
         }
       }
       return 1;
@@ -276,23 +501,59 @@ class TableData {
         for (var i = 0; i < customerData.length; i++) {
           var customerDataitem = customerData[i];
           Customer customer = Customer.fromJson(customerDataitem);
-          var result = await db.insert("customer", customer.toJson());
-          print(result);
+          var data = {
+            'table': "customer",
+            'key': "customer_id",
+            'value': customer.customerId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("customer", customer.toJson());
+            print(result);
+          } else {
+            var result = await db.update("customer", customer.toJson(),
+                where: "customer_id =?", whereArgs: [customer.customerId]);
+            print(result);
+          }
         }
       }
 
       if (terminalData != null) {
         var terminalDataitem = terminalData;
         Terminal terminal = Terminal.fromJson(terminalDataitem);
-        var result = await db.insert("terminal", terminal.toJson());
-        print(result);
+        var data = {
+          'table': "terminal",
+          'key': "terminal_id",
+          'value': terminal.terminalId,
+        };
+        var count = await ifExists(db, data);
+        if (count == 0) {
+          var result = await db.insert("terminal", terminal.toJson());
+          print(result);
+        } else {
+          var result = await db.update("terminal", terminal.toJson(),
+              where: "terminal_id =?", whereArgs: [terminal.terminalId]);
+          print(result);
+        }
       }
       if (tableData.length != 0) {
         for (var i = 0; i < tableData.length; i++) {
           var tableDataitem = tableData[i];
           Tables table = Tables.fromJson(tableDataitem);
-          var result = await db.insert("tables", table.toJson());
-          print(result);
+          var data = {
+            'table': "tables",
+            'key': "table_id",
+            'value': table.tableId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("tables", table.toJson());
+            print(result);
+          } else {
+            var result = await db.update("tables", table.toJson(),
+                where: "table_id", whereArgs: [table.tableId]);
+            print(result);
+          }
         }
       }
       if (paymentData.length != 0) {
@@ -300,8 +561,20 @@ class TableData {
         for (var i = 0; i < paymentData.length; i++) {
           var paymentDataitem = paymentData[i];
           Payments payments = Payments.fromJson(paymentDataitem);
-          var result = await db.insert("payment", payments.toJson());
-          print(result);
+          var data = {
+            'table': "payment",
+            'key': "payment_id",
+            'value': payments.paymentId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("payment", payments.toJson());
+            print(result);
+          } else {
+            var result = await db.update("payment", payments.toJson(),
+                where: "payment_id =?", whereArgs: [payments.paymentId]);
+            print(result);
+          }
         }
       }
       return 1;
@@ -320,8 +593,19 @@ class TableData {
         for (var i = 0; i < voucherData.length; i++) {
           var voucherDataitem = voucherData[i];
           Voucher vouchers = Voucher.fromJson(voucherDataitem);
-          var result = await db.insert("voucher", vouchers.toJson());
-          print(result);
+          var data = {
+            'table': "voucher",
+            'key': "voucher_id",
+            'value': vouchers.voucherId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("voucher", vouchers.toJson());
+            print(result);
+          } else {
+            var result = await db.update("voucher", vouchers.toJson());
+            print(result);
+          }
         }
       }
       return 1;
@@ -340,8 +624,19 @@ class TableData {
         for (var i = 0; i < shiftdata.length; i++) {
           var shiftdataitem = shiftdata[i];
           Shift shift = Shift.fromJson(shiftdataitem);
-          var result = await db.insert("shift", shift.toJson());
-          print(result);
+          var data = {
+            'table': "shift",
+            'key': "shift_id",
+            'value': shift.shiftId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("shift", shift.toJson());
+            print(result);
+          } else {
+            var result = await db.update("shift", shift.toJson());
+            print(result);
+          }
         }
       }
       return 1;
@@ -360,8 +655,19 @@ class TableData {
         for (var i = 0; i < imageData.length; i++) {
           var imageDataitem = imageData[i];
           Assets accet = Assets.fromJson(imageDataitem);
-          var result = await db.insert("asset", accet.toJson());
-          print(result);
+          var data = {
+            'table': "asset",
+            'key': "asset_id",
+            'value': accet.assetId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("asset", accet.toJson());
+            print(result);
+          } else {
+            var result = await db.update("asset", accet.toJson());
+            print(result);
+          }
         }
       }
       return 1;

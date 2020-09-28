@@ -3,6 +3,7 @@ class ProductBranch {
   String uuid;
   int productId;
   int branchId;
+  int printerId;
   int displayOrder;
   int warningStockLevel;
   int status;
@@ -14,6 +15,7 @@ class ProductBranch {
       this.uuid,
       this.productId,
       this.branchId,
+      this.printerId,
       this.displayOrder,
       this.warningStockLevel,
       this.status,
@@ -25,6 +27,7 @@ class ProductBranch {
     uuid = json['uuid'];
     productId = json['product_id'];
     branchId = json['branch_id'];
+    printerId = json['printer_id'];
     displayOrder = json['display_order'];
     warningStockLevel =
         json["warningStockLevel"] != null ? json["warningStockLevel"] : 0;
@@ -39,6 +42,7 @@ class ProductBranch {
     data['uuid'] = this.uuid;
     data['product_id'] = this.productId;
     data['branch_id'] = this.branchId;
+    data['printer_id'] = this.printerId;
     data['warningStockLevel'] = this.warningStockLevel;
     data['display_order'] = this.displayOrder;
     data['status'] = this.status;
