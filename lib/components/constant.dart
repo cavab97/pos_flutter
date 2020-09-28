@@ -36,6 +36,7 @@ class Constant {
   static final String SelectTableScreen = "/TableSelection";
   static final String SettingsScreen = "/Settings";
   static final String WebOrderPages = "/WebOrders";
+  static final String ShiftOrders = "/ShiftReport";
 /*==============================================================================
                                   Error messages
   =================================================================================*/

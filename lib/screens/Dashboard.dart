@@ -70,6 +70,7 @@ class _DashboradPageState extends State<DashboradPage>
   Table_order selectedTable;
   double subtotal = 0;
   String tableName = "";
+  bool isWebOrder = false;
   double discount = 0;
   double tax = 0;
   List taxJson = [];
@@ -138,6 +139,7 @@ class _DashboradPageState extends State<DashboradPage>
       cartList = [];
       selectedTable = null;
       grandTotal = 0.0;
+      isWebOrder = false;
       discount = 0.0;
       tax = 0.0;
       subtotal = 0.0;
@@ -183,6 +185,11 @@ class _DashboradPageState extends State<DashboradPage>
     Navigator.of(context).pop();
   }
 
+  gotoShiftReport() {
+    Navigator.of(context).pop();
+    Navigator.pushNamed(context, Constant.ShiftOrders);
+  }
+
   checkshift() async {
     var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
     setState(() {
@@ -202,17 +209,6 @@ class _DashboradPageState extends State<DashboradPage>
 
   countTotals(cartId) async {
     MST_Cart cart = await localAPI.getCartData(cartId);
-    // var subTotal = 0.0;
-    // var dis = 0.0;
-    // var taxval = 0.0;
-    // var grandtotal = 0.0;
-    // for (var i = 0; i < cartList.length; i++) {
-    //   var cart = cartList[i];
-    //   subTotal += cart.productPrice;
-    //   dis += cart.discount;
-    //   taxval = cart.taxValue;
-    //   grandtotal = (subTotal + taxval) - dis;
-    // }
     Voucher vaocher;
     if (cart.voucher_id != null) {
       vaocher = await localAPI.getvoucher(cart.voucher_id);
@@ -222,6 +218,7 @@ class _DashboradPageState extends State<DashboradPage>
       subtotal = cart.sub_total;
       discount = cart.discount;
       tax = cart.tax;
+      isWebOrder = cart.source == 1 ? true : false;
       taxJson = json.decode(cart.tax_json);
       grandTotal = cart.grand_total;
       selectedvoucher = vaocher;
@@ -452,6 +449,16 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
+  checkoutWebOrder() async {
+    if (cartList.length != 0) {
+      CommunFun.processingPopup(context);
+      sendPaymentByCash(null);
+      Navigator.of(context).pop();
+    } else {
+      CommunFun.showToast(context, Strings.cart_empty);
+    }
+  }
+
   sendOpenShft(ammount) async {
     setState(() {
       isShiftOpen = true;
@@ -580,12 +587,12 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   paymentWithMethod(mehtod) async {
-    var cartData = await getcartData();
-    var branchdata = await getbranch();
-    sendPaymentByCash(cartData, mehtod, branchdata);
+    sendPaymentByCash(mehtod);
   }
 
-  sendPaymentByCash(cartData, payment, branchdata) async {
+  sendPaymentByCash(payment) async {
+    var cartData = await getcartData();
+    var branchdata = await getbranch();
     Orders order = new Orders();
     Customer customer = await getCustomer();
     Table_order tables = await getTableData();
@@ -960,32 +967,31 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   Widget checkoutbtn() {
-    return RaisedButton(
-      padding: EdgeInsets.only(left: 10, right: 10),
-      onPressed: () {
-        Navigator.pushNamed(context, Constant.PINScreen);
-
-        Preferences.removeSinglePref(Constant.LOIGN_USER);
-        Preferences.removeSinglePref(Constant.IS_CHECKIN);
-      },
-      child: Text(
-        Strings.checkout,
-        style: TextStyle(color: Colors.white, fontSize: 18),
-      ),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50.0),
+    return Expanded(
+      child: RaisedButton(
+        padding: EdgeInsets.all(10),
+        onPressed: () {
+          Navigator.pushNamed(context, Constant.PINScreen);
+        },
+        child: Text(
+          Strings.checkout,
+          style: TextStyle(color: Colors.white, fontSize: 18),
+        ),
+        color: Colors.deepOrange,
+        textColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50.0),
+        ),
       ),
     );
   }
 
   Widget nameBtn() {
-    return RaisedButton(
-      padding: EdgeInsets.only(left: 10, right: 10),
+    return Expanded(
+        child: RaisedButton(
+      padding: EdgeInsets.all(10),
       onPressed: () {
         Navigator.pushNamed(context, Constant.PINScreen);
-        //  Preferences.removeSinglePref(Constant.TERMINAL_KEY);
       },
       child: Text(
         userDetails != null ? userDetails["name"] : "",
@@ -996,20 +1002,24 @@ class _DashboradPageState extends State<DashboradPage>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(50.0),
       ),
-    );
+    ));
   }
 
   Widget drawerWidget() {
     return Drawer(
       child: Container(
-          padding: EdgeInsets.only(top: 30),
+          padding: EdgeInsets.only(top: 10, left: 10, right: 10),
           color: Colors.white,
           child: ListView(
             children: <Widget>[
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[checkoutbtn(), nameBtn()],
+                children: <Widget>[
+                  checkoutbtn(),
+                  SizedBox(width: 10),
+                  nameBtn()
+                ],
               ),
               CommunFun.divider(),
               ListTile(
@@ -1053,6 +1063,9 @@ class _DashboradPageState extends State<DashboradPage>
                   title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
                       style: Styles.communBlack())),
               ListTile(
+                  onTap: () {
+                    gotoShiftReport();
+                  },
                   leading: Icon(
                     Icons.filter_tilt_shift,
                     color: Colors.black,
@@ -1431,7 +1444,7 @@ class _DashboradPageState extends State<DashboradPage>
                   child: Row(
                     children: <Widget>[
                       Icon(
-                        Icons.print_sharp,
+                        Icons.print,
                         color: Colors.black,
                         size: 30,
                       ),
@@ -1462,10 +1475,12 @@ class _DashboradPageState extends State<DashboradPage>
           return InkWell(
             onTap: () {
               if (isShiftOpen) {
-                if (isTableSelected) {
+                if (isTableSelected && !isWebOrder) {
                   showQuantityDailog(product);
                 } else {
-                  selectTable();
+                  if (!isWebOrder) {
+                    selectTable();
+                  }
                 }
               } else {
                 CommunFun.showToast(context, Strings.shift_open_message);
@@ -1519,11 +1534,9 @@ class _DashboradPageState extends State<DashboradPage>
                       color: Colors.deepOrange,
                       child: Center(
                         child: Text(
-                            product.hasInventory == 1 && product.qty == 0
-                                ? Strings.out_of_stoke
-                                : product.priceTypeName +
-                                    ' ' +
-                                    product.price.toString(),
+                            product.priceTypeName +
+                                ' ' +
+                                product.price.toString(),
                             style: Styles.whiteSimpleSmall()),
                       ),
                     ),
@@ -1540,8 +1553,36 @@ class _DashboradPageState extends State<DashboradPage>
   Widget paybutton(context) {
     // Payment button
     return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: !isWebOrder
+            ? MainAxisAlignment.spaceAround
+            : MainAxisAlignment.center,
         children: <Widget>[
+          !isWebOrder
+              ? Container(
+                  margin: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height / 1.3 + 10),
+                  height: 50,
+                  width: 200,
+                  child: RaisedButton(
+                    padding: EdgeInsets.only(top: 5, bottom: 5),
+                    onPressed: () {
+                      openPrinterPop(cartList);
+                    },
+                    child: Text(
+                      Strings.send,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    color: Colors.deepOrange,
+                    textColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                    ),
+                  ),
+                )
+              : SizedBox(),
           Container(
             margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height / 1.3 + 10),
@@ -1550,34 +1591,16 @@ class _DashboradPageState extends State<DashboradPage>
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
-                openPrinterPop(cartList);
+                if (!isWebOrder) {
+                  sendPayment();
+                  openPrinterPop(cartList);
+                } else {
+                  //weborder payment
+                  checkoutWebOrder();
+                }
               },
               child: Text(
-                Strings.send,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-              ),
-              color: Colors.deepOrange,
-              textColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50.0),
-              ),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(
-                top: MediaQuery.of(context).size.height / 1.3 + 10),
-            height: 50,
-            width: 200,
-            child: RaisedButton(
-              padding: EdgeInsets.only(top: 5, bottom: 5),
-              onPressed: () {
-                sendPayment();
-              },
-              child: Text(
-                Strings.title_pay,
+                !isWebOrder ? Strings.title_pay : "CheckOut",
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
@@ -1734,7 +1757,11 @@ class _DashboradPageState extends State<DashboradPage>
                 child: new IconButton(
                   padding: EdgeInsets.all(0),
                   onPressed: () {
-                    itememovefromCart(cart);
+                    if (!isWebOrder) {
+                      itememovefromCart(cart);
+
+                      itememovefromCart(cart);
+                    }
                   },
                   icon: new Icon(Icons.delete, size: 30, color: Colors.white),
                 ),
@@ -1743,7 +1770,9 @@ class _DashboradPageState extends State<DashboradPage>
                 child: new IconButton(
                   padding: EdgeInsets.all(0),
                   onPressed: () {
-                    editCartItem(cart);
+                    if (!isWebOrder) {
+                      editCartItem(cart);
+                    }
                   },
                   icon: new Icon(Icons.edit, size: 30, color: Colors.white),
                 ),
@@ -1869,7 +1898,7 @@ class _DashboradPageState extends State<DashboradPage>
                               child: Text(
                                 Strings.tax.toUpperCase() +
                                     " " +
-                                    taxitem["taxName"] +
+                                    taxitem["taxCode"] +
                                     "(" +
                                     taxitem["rate"] +
                                     "%)",
@@ -1951,7 +1980,9 @@ class _DashboradPageState extends State<DashboradPage>
                         padding: EdgeInsets.only(
                             left: 10, right: 10, top: 5, bottom: 5),
                         onPressed: () {
-                          openVoucherPop();
+                          if (!isWebOrder) {
+                            openVoucherPop();
+                          }
                         },
                         child: Row(
                           children: <Widget>[

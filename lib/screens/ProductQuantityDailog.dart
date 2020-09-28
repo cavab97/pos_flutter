@@ -168,7 +168,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   increaseQty() async {
-    if (productItem.hasInventory == 0) {
+    if (productItem.hasInventory == 1) {
       ProductStoreInventory cartval =
           await localAPI.checkItemAvailableinStore(productItem.productId);
       if (int.parse(cartval.qty) >= product_qty) {

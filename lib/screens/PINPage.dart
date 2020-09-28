@@ -128,6 +128,7 @@ class _PINPageState extends State<PINPage> {
         var result = await localAPI.userCheckInOut(checkIn);
         await Preferences.removeSinglePref(Constant.IS_CHECKIN);
         await Preferences.removeSinglePref(Constant.SHIFT_ID);
+        await Preferences.removeSinglePref(Constant.LOIGN_USER);
         Navigator.pushNamed(context, Constant.PINScreen);
         setState(() {
           isLoading = false;

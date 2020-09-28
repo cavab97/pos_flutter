@@ -6,6 +6,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
+import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -161,6 +162,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2.4;
     final double itemWidth = size.width / 4.2;
+
     return GridView.count(
       padding: EdgeInsets.all(20),
       shrinkWrap: true,
@@ -243,6 +245,13 @@ class _WebOrderPagesState extends State<WebOrderPages>
       childAspectRatio: (itemWidth / itemHeight),
       crossAxisCount: 6,
       children: onlineList.map((cart) {
+        // List<TablesDetails> cartTable;
+        // if (cart.table_id != null) {
+        //   var branchid = CommunFun.getbranchId();
+        //   cartTable = localAPI.getTableData(branchid, cart.table_id)
+        //       as List<TablesDetails>;
+        // }
+
         return InkWell(
           onTap: () {
             checkTableAssigned(cart);
@@ -295,7 +304,9 @@ class _WebOrderPagesState extends State<WebOrderPages>
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Text("Assing Table", style: Styles.whiteSimpleSmall())
+                        Text(
+                            cart.table_id == null ? "Assing Table" : "Table id",
+                            style: Styles.whiteSimpleSmall())
                       ],
                     ),
                   ),
