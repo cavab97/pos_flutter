@@ -627,6 +627,7 @@ class CreateTables {
         'sub_total_after_discount REAL,' +
         'source NUMERIC,' + //1 For Web, 2 For App
         'total_item REAL,' +
+        'cart_order_number TEXT,'+
         'cart_payment_id INTEGER,' +
         'cart_payment_response TEXT,' +
         'cart_payment_status NUMERIC' + //0 For Pending, 1 For complete

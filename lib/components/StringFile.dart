@@ -107,4 +107,5 @@ class Strings {
   static String stock_not_valilable = "Product is Out of stock.";
   static String procesing = "Processing";
   static String send = "SEND";
+  static String internet_connection_lost = "Internet Connection Lost";
 }
