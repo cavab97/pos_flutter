@@ -111,7 +111,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
             top: 10,
             child: IconButton(
               onPressed: () {
-                testPrint("192.168.0.108", context);
+                testPrint("192.168.0.109", context);
               },
               icon: Icon(
                 Icons.print,
@@ -175,7 +175,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
               itemCount: devices.length,
               itemBuilder: (BuildContext context, int index) {
                 return InkWell(
-                  onTap: () => testPrint(devices[index] + ":1900", context),
+                  onTap: () => testPrint(devices[index], context),
                   child: Column(
                     children: <Widget>[
                       Container(

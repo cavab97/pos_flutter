@@ -247,6 +247,12 @@ class _DashboradPageState extends State<DashboradPage>
       case 2:
         closeShift();
         break;
+      case 3:
+      /*  if (cartList.length > 0) {
+          printKOT.DraftReceipt(printerList[i].printerIp.toString(), tableName,
+              context, tempCart);
+        }*/
+        break;
     }
   }
 
@@ -1405,6 +1411,23 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       SizedBox(width: 20),
                       Text(Strings.close_shift, style: Styles.communBlack()),
+                    ],
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 3,
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.print_sharp,
+                        color: Colors.black,
+                        size: 30,
+                      ),
+                      SizedBox(width: 20),
+                      Text(Strings.draft_report, style: Styles.communBlack()),
                     ],
                   ),
                 ),

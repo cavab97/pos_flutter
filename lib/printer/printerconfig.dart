@@ -100,7 +100,6 @@ class PrintReceipt {
     final image = decodeImage(bytes);
     ticket.image(image, align: PosAlign.center);
 */
-    ticket.text("", linesAfter: 1);
     ticket.text(branchData.address,
         styles: PosStyles(
             fontType: PosFontType.fontA,
