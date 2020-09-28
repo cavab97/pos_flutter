@@ -65,6 +65,7 @@ class Strings {
   static String btn_exect = "Excet";
   static String cash = "CASH";
   static String cart_empty = "Cart is empty";
+  static String printer_not_available = "Printer not available for print";
   static String shift_closed = "Shift is closed.";
   static String close_table = "Close Table";
   static String split_order = "Split Order";

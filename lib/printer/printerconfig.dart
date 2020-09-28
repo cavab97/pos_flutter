@@ -86,7 +86,6 @@ class PrintReceipt {
   ========================================================================*/
 
   Future<Ticket> Receipt(
-      PaperSize paper,
       Branch branchData,
       List<ProductDetails> orderdItem,
       List<OrderDetail> orderdetail,
@@ -219,7 +218,6 @@ class PrintReceipt {
   void checkReceiptPrint(
       String printerIp,
       BuildContext ctx,
-      PaperSize paper,
       Branch branchData,
       List<ProductDetails> orderdItem,
       List<OrderDetail> orderdetail,
@@ -229,7 +227,7 @@ class PrintReceipt {
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(await Receipt(
-        paper, branchData, orderdItem, orderdetail, orderData, paymentdata));
+         branchData, orderdItem, orderdetail, orderData, paymentdata));
 
     CommunFun.showToast(ctx, res.msg);
 

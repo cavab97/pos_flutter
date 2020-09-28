@@ -58,6 +58,7 @@ class _DashboradPageState extends State<DashboradPage>
   List<Category> allCaterories = new List<Category>();
   List<Category> tabsList = new List<Category>();
   List<Printer> printerList = new List<Printer>();
+  List<Printer> printerreceiptList = new List<Printer>();
   List<Category> subCatList = new List<Category>();
   List<ProductDetails> productList = new List<ProductDetails>();
   List<ProductDetails> SearchProductList = new List<ProductDetails>();
@@ -263,9 +264,22 @@ class _DashboradPageState extends State<DashboradPage>
         closeShift();
         break;
       case 3:
-        if (cartList.length > 0) {
-          printKOT.checkDraftPrint(printerList[0].printerIp.toString(), context,
-              cartList, tableName, subtotal, grandTotal, tax, branchData);
+        if (cartList.length > 0 ){
+          if(printerreceiptList.length > 0) {
+            printKOT.checkDraftPrint(
+                printerreceiptList[0].printerIp.toString(),
+                context,
+                cartList,
+                tableName,
+                subtotal,
+                grandTotal,
+                tax,
+                branchData);
+          }else {
+            CommunFun.showToast(context, Strings.printer_not_available);
+          }
+        }else {
+          CommunFun.showToast(context, Strings.cart_empty);
         }
 
         break;
@@ -287,10 +301,12 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getAllPrinter() async {
-    List<Printer> printer = await localAPI.getAllPrinter();
+    List<Printer> printer = await localAPI.getAllPrinterForKOT();
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
     print(printer);
     setState(() {
       printerList = printer;
+      printerreceiptList = printerDraft;
     });
   }
 
@@ -725,8 +741,7 @@ class _DashboradPageState extends State<DashboradPage>
     orderpayment.terminal_id = int.parse(terminalId);
     orderpayment.app_id = int.parse(terminalId);
     orderpayment.op_method_id = payment != "" ? payment.paymentId : 0;
-    orderpayment.op_amount =
-        (cartData.grand_total - cartData.discount).toDouble();
+    orderpayment.op_amount = (cartData.grand_total - cartData.discount).toDouble();
     orderpayment.op_method_response = '';
     orderpayment.op_status = 1;
     orderpayment.op_datetime = datetime;
@@ -735,10 +750,37 @@ class _DashboradPageState extends State<DashboradPage>
     orderpayment.updated_by = userdata.id;
     var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
     print(paymentd);
-    if (!isWebOrder) {
-      Navigator.of(context).pop();
-    }
     await clearCartAfterSuccess(orderid);
+
+   /* await Navigator.of(context).pop();
+    await showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return InvoiceReceiptDailog(orderid: orderid);
+        });*/
+    await getOrderData(orderid);
+  }
+
+  getOrderData(int orderid) async {
+    var branchID = await CommunFun.getbranchId();
+    Branch branchAddress = await localAPI.getBranchData(branchID);
+    OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
+    Payments paument_method =
+    await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
+    User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
+    List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
+    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
+    Orders order = await localAPI.getcurrentOrders(orderid);
+    print(branchAddress);
+    print(orderpaymentdata);
+    print(paument_method);
+    print(user);
+    print(itemsList);
+    print(order);
+
+    printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context, branchData,
+        itemsList, orderitem, order, orderpaymentdata);
   }
 
   clearCartAfterSuccess(orderid) async {
