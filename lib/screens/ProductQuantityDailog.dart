@@ -378,6 +378,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
     var customerData =
         await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
+    var customer =
+        customerData != null ? json.decode(customerData) : customerData;
+    var customerid = customer != null ? customer["customer_id"] : 0;
     var tableData = await json.decode(table); // table data
     var loginData = await json.decode(loginUser);
     var qty = await countTotalQty();
@@ -387,7 +390,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var grandTotal = await countGrandtotal(taxvalues, disc);
 
     //cart data
-    cart.user_id = customerData != null ? customerData["customer_id"] : 0;
+    cart.user_id = customerid;
     cart.branch_id = int.parse(branchid);
     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
     cart.discount = disc;
@@ -398,8 +401,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cart.source = 2;
     cart.tax_json = json.encode(totalTax);
     cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
-    cart.customer_terminal =
-        customerData != null ? customerData["terminal_id"] : 0;
+    cart.customer_terminal = customer != null ? customer["terminal_id"] : 0;
     if (!isEditing) {
       cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
     }

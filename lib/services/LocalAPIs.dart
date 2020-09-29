@@ -458,7 +458,7 @@ class LocalAPI {
 
   Future<List<Orders>> getLastOrderAppid() async {
     var qey =
-        "SELECT orders.app_id from orders ORDER BY order_date DESC  LIMIT 1";
+        "SELECT orders.app_id from orders ORDER BY order_date DESC LIMIT 1";
     var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
     List<Orders> list = checkisExit.isNotEmpty
         ? checkisExit.map((c) => Orders.fromJson(c)).toList()
@@ -647,7 +647,7 @@ class LocalAPI {
         "SELECT P.product_id,P.name,P.price,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 FROM order_detail O " +
             " LEFT JOIN product P ON O.product_id = P.product_id" +
             " LEFT join asset on asset.asset_type_id = P.product_id " +
-            " WHERE asset.asset_type = 1 and order_id = " +
+            " WHERE asset.asset_type = 1 and app_id = " +
             orderid.toString() +
             " group by p.product_id";
 
@@ -664,7 +664,7 @@ class LocalAPI {
     var db = await DatabaseHelper.dbHelper.getDatabse();
 
     var ordersList = await db
-        .query("order_detail", where: "order_id = ?", whereArgs: [orderid]);
+        .query("order_detail", where: "app_id = ?", whereArgs: [orderid]);
     List<OrderDetail> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
         : [];
@@ -1144,5 +1144,20 @@ class LocalAPI {
           where: "app_id =?", whereArgs: [order.app_id]);
     }
     return result;
+  }
+
+  Future<List<ProductDetails>> productdData(productid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry =
+        "SELECT product.*, price_type.name as price_type_Name  from product " +
+            " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1  where product_id = " +
+            productid.toString();
+
+    var res = await db.rawQuery(qry);
+    List<ProductDetails> list = res.isNotEmpty
+        ? res.map((c) => ProductDetails.fromJson(c)).toList()
+        : [];
+
+    return list;
   }
 }

@@ -42,7 +42,6 @@ import 'package:mcncashier/services/allTablesSync.dart';
 class DashboradPage extends StatefulWidget {
   // main Product list page
   DashboradPage({Key key}) : super(key: key);
-
   @override
   _DashboradPageState createState() => _DashboradPageState();
 }
@@ -103,7 +102,7 @@ class _DashboradPageState extends State<DashboradPage>
   checkISlogin() async {
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
     if (loginUser == null) {
-       Navigator.pushNamed(context, Constant.PINScreen);
+      Navigator.pushNamed(context, Constant.PINScreen);
     }
   }
 
@@ -637,9 +636,15 @@ class _DashboradPageState extends State<DashboradPage>
     int length = branchdata.invoiceStart.length;
     var invoiceNo;
     if (lastappid.length > 0) {
-      order.app_id = lastappid[0].app_id + 1;
-      invoiceNo =
-          branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
+      if (lastappid[0].app_id != null) {
+        order.app_id = lastappid[0].app_id + 1;
+        invoiceNo = branchdata.orderPrefix +
+            order.app_id.toString().padLeft(length, "0");
+      } else {
+        order.app_id = int.parse(terminalId);
+        invoiceNo = branchdata.orderPrefix +
+            order.app_id.toString().padLeft(length, "0");
+      }
     } else {
       order.app_id = int.parse(terminalId);
       invoiceNo =
@@ -855,19 +860,24 @@ class _DashboradPageState extends State<DashboradPage>
 
   editCartItem(cart) async {
     ProductDetails product;
-    for (int i = 0; i < productList.length; i++) {
-      if (productList[i].productId == cart.productId) {
-        product = productList[i];
-        await showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext context) {
-              return ProductQuantityDailog(
-                  product: product, cartID: currentCart, cartItem: cart);
-            });
-        return false;
-      }
+    // for (int i = 0; i < productList.length; i++) {
+    //   if (productList[i].productId == cart.productId) {
+    //     product = productList[i];
+    List<ProductDetails> productdt =
+        await localAPI.productdData(cart.productId);
+    if (productdt.length > 0) {
+      product = productdt[0];
     }
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return ProductQuantityDailog(
+              product: product, cartID: currentCart, cartItem: cart);
+        });
+    //     return false;
+    //   }
+    // }
   }
 
   selectTable() {
