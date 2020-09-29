@@ -830,7 +830,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from orders where branch_id = " +
         branchid.toString() +
-        " AND order_source = 2";
+        " AND order_source = 2 AND server_id = null";
     var ordersList = await db.rawQuery(qry);
     List<Orders> list = ordersList.isNotEmpty
         ? ordersList.map((c) => Orders.fromJson(c)).toList()
@@ -1167,5 +1167,80 @@ class LocalAPI {
     List<Role> list =
         res.isNotEmpty ? res.map((c) => Role.fromJson(c)).toList() : [];
     return list;
+  }
+
+  Future saveSyncOrder(Orders orderData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM orders where order_id =" +
+        orderData.order_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var orderid;
+    if (checkisExit.length > 0) {
+      orderid = await db.update("orders", orderData.toJson(),
+          where: "order_id =?", whereArgs: [orderData.order_id]);
+    } else {
+      orderid = await db.insert("orders", orderData.toJson());
+    }
+    return orderid;
+  }
+
+  Future saveSyncOrderDetails(OrderDetail orderData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM order_detail where detail_id =" +
+        orderData.detailId.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var orderid;
+    if (checkisExit.length > 0) {
+      orderid = await db.update("order_detail", orderData.toJson(),
+          where: "detail_id =?", whereArgs: [orderData.detailId]);
+    } else {
+      orderid = await db.insert("order_detail", orderData.toJson());
+    }
+    return orderid;
+  }
+
+  Future saveSyncOrderPaymet(OrderPayment paymentdata) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM order_payment where op_id =" +
+        paymentdata.op_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var orderid;
+    if (checkisExit.length > 0) {
+      orderid = await db.update("order_payment", paymentdata.toJson(),
+          where: "op_id =?", whereArgs: [paymentdata.op_id]);
+    } else {
+      orderid = await db.insert("order_payment", paymentdata.toJson());
+    }
+    return orderid;
+  }
+
+  Future saveSyncOrderModifire(OrderModifire orderData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM order_modifier where om_id =" +
+        orderData.om_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var orderid;
+    if (checkisExit.length > 0) {
+      orderid = await db.update("order_modifier", orderData.toJson(),
+          where: "om_id =?", whereArgs: [orderData.om_id]);
+    } else {
+      orderid = await db.insert("order_modifier", orderData.toJson());
+    }
+    return orderid;
+  }
+
+  Future saveSyncOrderAttribute(OrderAttributes orderData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM order_attributes where oa_id =" +
+        orderData.oa_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var orderid;
+    if (checkisExit.length > 0) {
+      orderid = await db.update("order_attributes", orderData.toJson(),
+          where: "oa_id =?", whereArgs: [orderData.oa_id]);
+    } else {
+      orderid = await db.insert("order_attributes", orderData.toJson());
+    }
+    return orderid;
   }
 }

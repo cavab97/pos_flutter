@@ -179,23 +179,8 @@ class _DashboradPageState extends State<DashboradPage>
 
   syncOrdersTodatabase() async {
     await CommunFun.opneSyncPop(context);
-    var res = await SyncAPICalls.syncOrderstoDatabase(context);
-    print(res);
-    if (res["status"] == Constant.STATUS200) {
-      savesyncORderData(res["data"]);
-    }
-  }
-
-  savesyncORderData(data) async {
-    var orders = data["orders"];
-    
-    if (orders.length > 0) {
-      for (var i = 0; i < orders.length; i++) {
-
-      }
-    }
-    //var result = await saveSyncOrder();
-    await Navigator.of(context).pop();
+    await SyncAPICalls.syncOrderstoDatabase(context);
+    await getsetWebOrders();
   }
 
   getsetWebOrders() async {
@@ -1189,7 +1174,6 @@ class _DashboradPageState extends State<DashboradPage>
                   onTap: () {
                     Navigator.of(context).pop();
                     syncOrdersTodatabase();
-                    // getsetWebOrders();
                   },
                   leading: Icon(
                     Icons.transform,
