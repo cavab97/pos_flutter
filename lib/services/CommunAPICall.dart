@@ -15,7 +15,8 @@ class APICalls {
         Uri url = Uri.parse(Configrations.base_URL + apiurl);
         final client = new http.Client();
         final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
-        var params = json.encode(stringParams);
+       var params = json.encode(stringParams);
+       print(params);
         final response = await client.post(
           url,
           headers: headers,

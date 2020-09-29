@@ -9,11 +9,12 @@ class OrderAttributes {
   int attribute_id;
   double attr_price;
   int ca_id;
-
   String oa_datetime;
   int oa_by;
   String updated_at;
   int updated_by;
+  int oa_status;
+
   OrderAttributes({
     this.oa_id,
     this.uuid,
@@ -27,6 +28,7 @@ class OrderAttributes {
     this.ca_id,
     this.oa_datetime,
     this.oa_by,
+    this.oa_status,
     this.updated_at,
     this.updated_by,
   });
@@ -46,6 +48,7 @@ class OrderAttributes {
     ca_id = json["ca_id"];
     oa_datetime = json["oa_datetime"];
     oa_by = json["oa_by"];
+    oa_status = json['oa_status'];
     updated_at = json["updated_at"];
     updated_by = json["updated_by"];
   }
@@ -64,6 +67,7 @@ class OrderAttributes {
     data["ca_id"] = this.ca_id;
     data["oa_datetime"] = this.oa_datetime;
     data["oa_by"] = this.oa_by;
+    data["oa_status"] = this.oa_status;
     data["updated_at"] = this.updated_at;
     data["updated_by"] = this.updated_by;
 

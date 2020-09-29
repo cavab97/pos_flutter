@@ -643,7 +643,7 @@ class LocalAPI {
         "SELECT P.product_id,P.name,P.price,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 FROM order_detail O " +
             " LEFT JOIN product P ON O.product_id = P.product_id" +
             " LEFT join asset on asset.asset_type_id = P.product_id " +
-            " WHERE asset.asset_type = 1 and app_id = " +
+            " WHERE asset.asset_type = 1 and O.app_id = " +
             orderid.toString() +
             " group by p.product_id";
 
@@ -828,7 +828,9 @@ class LocalAPI {
 
   Future<List<Orders>> getOrdersListTable(branchid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from orders where branch_id = " + branchid.toString();
+    var qry = "SELECT * from orders where branch_id = " +
+        branchid.toString() +
+        " AND order_source = 2";
     var ordersList = await db.rawQuery(qry);
     List<Orders> list = ordersList.isNotEmpty
         ? ordersList.map((c) => Orders.fromJson(c)).toList()
@@ -1047,7 +1049,7 @@ class LocalAPI {
 
   Future<List<Printer>> getAllPrinter() async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from printer";
+    var qry = "SELECT * from printer where status = 1";
     var result = await db.rawQuery(qry);
     List<Printer> list = result.isNotEmpty
         ? result.map((c) => Printer.fromJson(c)).toList()
@@ -1057,7 +1059,7 @@ class LocalAPI {
 
   Future<List<Printer>> getAllPrinterForKOT() async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from printer where printer_is_cashier = 0";
+    var qry = "SELECT * from printer where status = 1 ";
     var result = await db.rawQuery(qry);
     List<Printer> list = result.isNotEmpty
         ? result.map((c) => Printer.fromJson(c)).toList()
@@ -1067,7 +1069,8 @@ class LocalAPI {
 
   Future<List<Printer>> getAllPrinterForecipt() async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from printer where printer_is_cashier = 1";
+    var qry =
+        "SELECT * from printer where printer_is_cashier = 1 AND status = 1";
     var result = await db.rawQuery(qry);
     List<Printer> list = result.isNotEmpty
         ? result.map((c) => Printer.fromJson(c)).toList()
@@ -1150,7 +1153,7 @@ class LocalAPI {
             productid.toString();
 
     var res = await db.rawQuery(qry);
-    List<ProductDetails> list = res.isNotEmpty
+    List<ProductDetails> list = res.length > 0
         ? res.map((c) => ProductDetails.fromJson(c)).toList()
         : [];
 

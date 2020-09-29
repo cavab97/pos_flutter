@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
-import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
@@ -328,154 +327,138 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   // Part 2 transactions list
                   child: Center(
                     child: SingleChildScrollView(
-                        child: orderItemList.length != 0
-                            ? Stack(children: <Widget>[
-                                // Padding(
-                                //     padding: EdgeInsets.only(right: 10, top: 10),
-                                //     child: Row(
-                                //       crossAxisAlignment: CrossAxisAlignment.center,
-                                //       mainAxisAlignment: MainAxisAlignment.end,
-                                //       children: <Widget>[
-                                //         isWeborder
-                                //             ? assingTableButton(() {
-                                //                 assignTable();
-                                //               })
-                                //             : SizedBox()
-                                //       ],
-                                //     )),
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 50),
-                                  height: MediaQuery.of(context).size.height,
-                                  margin: EdgeInsets.only(top: 5),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.start,
+                        child: Stack(children: <Widget>[
+                      // Padding(
+                      //     padding: EdgeInsets.only(right: 10, top: 10),
+                      //     child: Row(
+                      //       crossAxisAlignment: CrossAxisAlignment.center,
+                      //       mainAxisAlignment: MainAxisAlignment.end,
+                      //       children: <Widget>[
+                      //         isWeborder
+                      //             ? assingTableButton(() {
+                      //                 assignTable();
+                      //               })
+                      //             : SizedBox()
+                      //       ],
+                      //     )),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 50),
+                        height: MediaQuery.of(context).size.height,
+                        margin: EdgeInsets.only(top: 5),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            SizedBox(height: 15),
+                            Text(
+                                DateFormat('EEE, MMM d yyyy, hh:mm aaa').format(
+                                    DateTime.parse(
+                                        selectedOrder.order_date != null
+                                            ? selectedOrder.order_date
+                                            : DateTime.now().toString())),
+                                style: Styles.whiteSimpleSmall()),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Text(
+                              orderpayment.op_amount.toString(),
+                              style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).accentColor),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            selectedOrder != null &&
+                                    paymemtUser.username != null
+                                ? Text(
+                                    selectedOrder.invoice_no +
+                                        " - Processed by " +
+                                        paymemtUser.username,
+                                    style: Styles.whiteBoldsmall(),
+                                  )
+                                : SizedBox(),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Container(
+                              height: 50,
+                              width: MediaQuery.of(context).size.width,
+                              child: Center(
+                                child: Text(
+                                  customer.firstName != null
+                                      ? customer.firstName
+                                      : "Walk-In Customer",
+                                  style: TextStyle(
+                                      fontSize: 23,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).accentColor),
+                                ),
+                              ),
+                              color: Colors.grey[900].withOpacity(0.4),
+                            ),
+                            productList(),
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 40,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 50),
+                          child: Column(children: <Widget>[
+                            Divider(),
+                            totalAmountValues(),
+                            Divider(),
+                            paumentMethod != null
+                                ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
                                     children: <Widget>[
-                                      SizedBox(height: 15),
-                                      Text(
-                                          DateFormat(
-                                                  'EEE, MMM d yyyy, hh:mm aaa')
-                                              .format(DateTime.parse(
-                                                  selectedOrder.order_date !=
-                                                          null
-                                                      ? selectedOrder.order_date
-                                                      : DateTime.now()
-                                                          .toString())),
-                                          style: Styles.whiteSimpleSmall()),
-                                      SizedBox(
-                                        height: 20,
-                                      ),
-                                      Text(
-                                        orderpayment.op_amount.toString(),
-                                        style: TextStyle(
-                                            fontSize: 28,
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                Theme.of(context).accentColor),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      selectedOrder != null &&
-                                              paymemtUser.username != null
-                                          ? Text(
-                                              selectedOrder.invoice_no +
-                                                  " - Processed by " +
-                                                  paymemtUser.username,
-                                              style: Styles.whiteBoldsmall(),
-                                            )
-                                          : SizedBox(),
-                                      SizedBox(
-                                        height: 20,
-                                      ),
-                                      Container(
-                                        height: 50,
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        child: Center(
-                                          child: Text(
-                                            customer.firstName != null
-                                                ? customer.firstName
-                                                : "Walk-In Customer",
-                                            style: TextStyle(
-                                                fontSize: 23,
-                                                fontWeight: FontWeight.bold,
-                                                color: Theme.of(context)
-                                                    .accentColor),
-                                          ),
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                          top: 10,
                                         ),
-                                        color:
-                                            Colors.grey[900].withOpacity(0.4),
+                                        child: Text(
+                                          paumentMethod.name != null
+                                              ? paumentMethod.name.toUpperCase()
+                                              : "",
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.grey),
+                                        ),
                                       ),
-                                      productList(),
+                                      SizedBox(width: 70),
+                                      Padding(
+                                          padding: EdgeInsets.only(
+                                            top: 10,
+                                          ),
+                                          child: Text(
+                                            selectedOrder.grand_total != null
+                                                ? selectedOrder.grand_total
+                                                    .toString()
+                                                : "00:00",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.grey),
+                                          )),
                                     ],
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 40,
-                                  left: 0,
-                                  right: 0,
-                                  child: Container(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 50),
-                                    child: Column(children: <Widget>[
-                                      Divider(),
-                                      totalAmountValues(),
-                                      Divider(),
-                                      paumentMethod != null
-                                          ? Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: <Widget>[
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                    top: 10,
-                                                  ),
-                                                  child: Text(
-                                                    paumentMethod.name != null
-                                                        ? paumentMethod.name
-                                                            .toUpperCase()
-                                                        : "",
-                                                    style: TextStyle(
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                        color: Colors.grey),
-                                                  ),
-                                                ),
-                                                SizedBox(width: 70),
-                                                Padding(
-                                                    padding: EdgeInsets.only(
-                                                      top: 10,
-                                                    ),
-                                                    child: Text(
-                                                      selectedOrder
-                                                                  .grand_total !=
-                                                              null
-                                                          ? selectedOrder
-                                                              .grand_total
-                                                              .toString()
-                                                          : "00:00",
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          color: Colors.grey),
-                                                    )),
-                                              ],
-                                            )
-                                          : SizedBox(),
-                                      isRefunding
-                                          ? refundButtons(context)
-                                          : transationsButton()
-                                    ]),
-                                  ),
-                                ),
-                              ])
-                            : Text(
-                                "No Transations Found",
-                                style: Styles.whiteBold(),
-                              )),
+                                  )
+                                : SizedBox(),
+                            isRefunding
+                                ? refundButtons(context)
+                                : transationsButton()
+                          ]),
+                        ),
+                      ),
+                    ])
+                        // : Text(
+                        //     "No Transations Found",
+                        //     style: Styles.whiteBold(),
+                        //   )
+                        ),
                   ),
                 )
               ]),

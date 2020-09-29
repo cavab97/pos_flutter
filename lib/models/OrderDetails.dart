@@ -15,6 +15,9 @@ class OrderDetail {
   int detail_status;
   String product_detail;
   int detail_by;
+  int updated_by;
+  String updated_at;
+  String detail_datetime;
 
   OrderDetail({
     this.detailId,
@@ -33,6 +36,9 @@ class OrderDetail {
     this.product_detail,
     this.detail_status,
     this.detail_by,
+    this.updated_by,
+    this.updated_at,
+    this.detail_datetime,
   });
 
   OrderDetail.fromJson(Map<String, dynamic> json) {
@@ -62,6 +68,9 @@ class OrderDetail {
         ? (json['product_discount'] as int).toDouble()
         : json['product_discount'];
     product_detail = json["product_detail"];
+    updated_by = json["updated_by"];
+    updated_at = json["updated_at"];
+    detail_datetime = json["detail_datetime"];
   }
 
   Map<String, dynamic> toJson() {
@@ -83,6 +92,9 @@ class OrderDetail {
     data["detail_by"] = this.detail_by;
     data["product_discount"] = this.product_discount;
     data["product_detail"] = this.product_detail;
+    data["updated_by"] = this.updated_by;
+    data["updated_at"] = this.updated_at;
+    data["detail_datetime"] = this.detail_datetime;
     return data;
   }
 }

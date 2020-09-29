@@ -102,8 +102,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               var attrtypesPrice =
                   attribute.attr_types_price.split(',').asMap();
               for (var a = 0; a < attributType.length; a++) {
-                onSelectAttr(attribute.ca_id, attributType[a], attrIDs[a],
-                    attrtypesPrice[a]);
+                // onSelectAttr(attribute.ca_id, attributType[a], attrIDs[a],
+                //     attrtypesPrice[a]);
               }
             }
           }

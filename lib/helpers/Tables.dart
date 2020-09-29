@@ -477,8 +477,10 @@ class CreateTables {
         "category_id INTEGER," +
         "detail_amount REAL," +
         "detail_qty REAL," +
-        "detail_status INTEGER" +
+        "detail_status INTEGER," +
         "detail_datetime TEXT," +
+        'updated_at TEXT,' +
+        'updated_by INTEGER,' +
         "detail_by INTEGER" +
         ")");
 
@@ -510,7 +512,7 @@ class CreateTables {
         "product_id INTEGER," +
         "attribute_id INTEGER," +
         "attr_price INTEGER," +
-        "ca_id INTEGER" +
+        "ca_id INTEGER," +
         "oa_status INTEGER," +
         "oa_datetime TEXT," +
         "oa_by INTEGER," +
@@ -627,7 +629,7 @@ class CreateTables {
         'sub_total_after_discount REAL,' +
         'source NUMERIC,' + //1 For Web, 2 For App
         'total_item REAL,' +
-        'cart_order_number TEXT,'+
+        'cart_order_number TEXT,' +
         'cart_payment_id INTEGER,' +
         'cart_payment_response TEXT,' +
         'cart_payment_status NUMERIC' + //0 For Pending, 1 For complete

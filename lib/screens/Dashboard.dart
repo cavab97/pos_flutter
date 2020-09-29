@@ -181,6 +181,20 @@ class _DashboradPageState extends State<DashboradPage>
     await CommunFun.opneSyncPop(context);
     var res = await SyncAPICalls.syncOrderstoDatabase(context);
     print(res);
+    if (res["status"] == Constant.STATUS200) {
+      savesyncORderData(res["data"]);
+    }
+  }
+
+  savesyncORderData(data) async {
+    var orders = data["orders"];
+    
+    if (orders.length > 0) {
+      for (var i = 0; i < orders.length; i++) {
+
+      }
+    }
+    //var result = await saveSyncOrder();
     await Navigator.of(context).pop();
   }
 
@@ -341,11 +355,10 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getSearchList(seachText) async {
-    if (seachText.toString().length > 0) {
+    if (seachText != "") {
       var branchid = await CommunFun.getbranchId();
       List<ProductDetails> product =
           await localAPI.getSeachProduct(seachText.toString(), branchid);
-
       setState(() {
         SearchProductList.clear();
         SearchProductList =
@@ -354,6 +367,7 @@ class _DashboradPageState extends State<DashboradPage>
     } else {
       setState(() {
         SearchProductList.clear();
+        SearchProductList = [];
       });
     }
   }
@@ -639,6 +653,7 @@ class _DashboradPageState extends State<DashboradPage>
     var uuid = await CommunFun.getLocalID();
     var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
     List<Orders> lastappid = await localAPI.getLastOrderAppid();
+
     int length = branchdata.invoiceStart.length;
     var invoiceNo;
     if (lastappid.length > 0) {
@@ -676,6 +691,8 @@ class _DashboradPageState extends State<DashboradPage>
     order.order_by = userdata.id;
     order.voucher_id = cartData.voucher_id;
     order.voucher_amount = cartData.discount;
+    order.updated_at = datetime;
+    order.updated_by = userdata.id;
     var orderid = await localAPI.placeOrder(order);
     print(orderid);
     if (cartData.voucher_id != 0 && cartData.voucher_id != null) {
@@ -695,6 +712,11 @@ class _DashboradPageState extends State<DashboradPage>
         for (var i = 0; i < cartList.length; i++) {
           OrderDetail orderDetail = new OrderDetail();
           var cartItem = cartList[i];
+          var productdata = await localAPI.productdData(cartItem.productId);
+          ProductDetails pdata;
+          if (productdata.length > 0) {
+            pdata = productdata[0];
+          }
           orderDetail.uuid = uuid;
           orderDetail.order_id = orderId;
           orderDetail.branch_id = int.parse(branchid);
@@ -704,6 +726,15 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.product_price = cartItem.productPrice;
           orderDetail.product_old_price = cartItem.productNetPrice;
           orderDetail.detail_qty = cartItem.productQty;
+          orderDetail.product_discount = cartItem.discount;
+          orderDetail.product_detail = json.encode(pdata);
+          orderDetail.updated_at = datetime;
+          orderDetail.detail_amount =
+              (cartItem.productPrice * cartItem.productQty);
+          orderDetail.detail_datetime = datetime;
+          orderDetail.updated_by = userdata.id;
+          orderDetail.detail_status = 1;
+          orderDetail.detail_by = userdata.id;
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
           print(orderDetailid);
           await localAPI.removeFromInventory(orderDetail);
@@ -726,6 +757,9 @@ class _DashboradPageState extends State<DashboradPage>
           modifireData.product_id = modifire.productId;
           modifireData.modifier_id = modifire.modifierId;
           modifireData.om_amount = modifire.modifirePrice;
+          modifireData.om_by = userdata.id;
+          modifireData.om_datetime = datetime;
+          modifireData.om_status = 1;
           modifireData.updated_at = datetime;
           modifireData.updated_by = userdata.id;
           var ordermodifreid = await localAPI.sendModifireData(modifireData);
@@ -743,6 +777,7 @@ class _DashboradPageState extends State<DashboradPage>
           attributes.ca_id = modifire.caId;
           attributes.oa_datetime = datetime;
           attributes.oa_by = userdata.id;
+          attributes.oa_status = 1;
           attributes.updated_at = datetime;
           attributes.updated_by = userdata.id;
           var orderAttri = await localAPI.sendAttrData(attributes);
@@ -809,12 +844,12 @@ class _DashboradPageState extends State<DashboradPage>
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     clearCart();
     Navigator.pushNamed(context, Constant.DashboardScreen);
-    await showDialog(
-        // Opning Ammount Popup
-        context: context,
-        builder: (BuildContext context) {
-          return InvoiceReceiptDailog(orderid: orderid);
-        });
+    // await showDialog(
+    //     // Opning Ammount Popup
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       return InvoiceReceiptDailog(orderid: orderid);
+    //     });
   }
 
   removeTax(cartdata, item) {
@@ -1153,8 +1188,8 @@ class _DashboradPageState extends State<DashboradPage>
               ListTile(
                   onTap: () {
                     Navigator.of(context).pop();
-                    getsetWebOrders();
                     syncOrdersTodatabase();
+                    // getsetWebOrders();
                   },
                   leading: Icon(
                     Icons.transform,
@@ -1607,7 +1642,7 @@ class _DashboradPageState extends State<DashboradPage>
               onPressed: () {
                 if (!isWebOrder) {
                   sendPayment();
-                  openPrinterPop(cartList);
+                  //  openPrinterPop(cartList);
                 } else {
                   //weborder payment
                   checkoutWebOrder();
