@@ -47,6 +47,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   List<BranchTax> taxlist = [];
   double taxvalues = 0;
   TextStyle attrStyle = TextStyle(color: Colors.black, fontSize: 20.0);
+  int isSelectedAttr = -1;
 
   @override
   void initState() {
@@ -102,8 +103,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               var attrtypesPrice =
                   attribute.attr_types_price.split(',').asMap();
               for (var a = 0; a < attributType.length; a++) {
-                // onSelectAttr(attribute.ca_id, attributType[a], attrIDs[a],
-                //     attrtypesPrice[a]);
+                if (item.attributeId == attrIDs[a]) {
+                  onSelectAttr(a, attribute.ca_id, attributType[a], attrIDs[a],
+                      attrtypesPrice[a]);
+                  break;
+                }
               }
             }
           }
@@ -203,22 +207,43 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
-  onSelectAttr(id, attribute, attrTypeIDs, attrPrice) {
-    // var array = [];
-    var prvSeelected = selectedAttr;
-    var isSelected = selectedAttr.any((item) => item['ca_id'] == id);
-    if (isSelected) {
-      selectedAttr.removeWhere((item) => item['ca_id'] == id);
-      prvSeelected.add({
+  onSelectAttr(i, id, attribute, attrTypeIDs, attrPrice) {
+    if (isSelectedAttr == i) {
+      isSelectedAttr = -1;
+    } else {
+      isSelectedAttr = i;
+    }
+
+    selectedAttr.clear();
+    if (isSelectedAttr != -1) {
+      selectedAttr.add({
         'ca_id': id,
         'attribute': attribute,
         'attrType_ID': attrTypeIDs,
         'attr_price': attrPrice
       });
+    }
+    setState(() {
+      selectedAttr = selectedAttr;
+    });
+
+    /*// var array = [];
+    var prvSeelected = selectedAttr;
+    var isSelected =
+        selectedAttr.any((item) => item['attrType_ID'] == attrTypeIDs);
+    if (isSelected) {
+      selectedAttr.removeWhere((item) => item['attrType_ID'] == attrTypeIDs);
+      */ /* prvSeelected.add({
+        'ca_id': id,
+        'attribute': attribute,
+        'attrType_ID': attrTypeIDs,
+        'attr_price': attrPrice
+      });*/ /*
       setState(() {
         selectedAttr = prvSeelected;
       });
     } else {
+      prvSeelected.removeWhere((item) => item['attrType_ID'] == attrTypeIDs);
       prvSeelected.add({
         'ca_id': id,
         'attribute': attribute,
@@ -228,7 +253,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       setState(() {
         selectedAttr = prvSeelected;
       });
-    }
+    }*/
     setPrice();
   }
 
@@ -640,10 +665,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                           borderRadius:
                                               BorderRadius.circular(10.0),
                                           side: BorderSide(
-                                            color: selectedAttr.any((item) =>
-                                                    item['ca_id'] ==
-                                                        attribute.ca_id &&
-                                                    item['attribute'] == attr)
+                                            color: i == isSelectedAttr
                                                 ? Colors.green
                                                 : Colors.grey[300],
                                             width: 4,
@@ -655,7 +677,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                       textColor: Colors.black,
                                       color: Colors.grey[300],
                                       onPressed: () {
-                                        onSelectAttr(attribute.ca_id, attr,
+                                        onSelectAttr(i, attribute.ca_id, attr,
                                             attrIDs[i], attrtypesPrice[i]);
                                       },
                                     )));
