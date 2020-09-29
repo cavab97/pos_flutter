@@ -673,6 +673,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.tax_json = cartData.tax_json;
     order.order_date = datetime;
     order.order_status = 1;
+    order.server_id = 0;
     order.order_source = cartData.source;
     order.order_by = userdata.id;
     order.voucher_id = cartData.voucher_id;
@@ -799,10 +800,10 @@ class _DashboradPageState extends State<DashboradPage>
         builder: (BuildContext context) {
           return InvoiceReceiptDailog(orderid: orderid);
         });*/
-    await getOrderData(orderid,int.parse(terminalId));
+    await getOrderData(orderid, int.parse(terminalId));
   }
 
-  getOrderData(int orderid,int terminalId) async {
+  getOrderData(int orderid, int terminalId) async {
     var branchID = await CommunFun.getbranchId();
     Branch branchAddress = await localAPI.getBranchData(branchID);
     OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
@@ -810,7 +811,8 @@ class _DashboradPageState extends State<DashboradPage>
         await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
     List<ProductDetails> itemsList = await localAPI.getOrderDetails(terminalId);
-    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(terminalId);
+    List<OrderDetail> orderitem =
+        await localAPI.getOrderDetailsList(terminalId);
     Orders order = await localAPI.getcurrentOrders(terminalId);
     print(branchAddress);
     print(orderpaymentdata);
@@ -820,7 +822,7 @@ class _DashboradPageState extends State<DashboradPage>
     print(itemsList);
     print(order);
 
-     printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
+    printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
         branchData, itemsList, orderitem, order, paument_method);
   }
 

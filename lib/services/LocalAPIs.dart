@@ -376,7 +376,7 @@ class LocalAPI {
       shiftid = await db.insert("user_checkinout", clockinOutData.toJson());
     } else {
       shiftid = await db.update("user_checkinout", clockinOutData.toJson(),
-          where: '${clockinOutData.id} = ?', whereArgs: [clockinOutData.id]);
+          where: 'id = ?', whereArgs: [clockinOutData.id]);
     }
     var dis = clockinOutData.status == "IN" ? "User checkin" : "user checkout";
     await SyncAPICalls.logActivity(
@@ -643,7 +643,7 @@ class LocalAPI {
         "SELECT P.product_id,P.name,P.price,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 FROM order_detail O " +
             " LEFT JOIN product P ON O.product_id = P.product_id" +
             " LEFT join asset on asset.asset_type_id = P.product_id " +
-            " WHERE asset.asset_type = 1 and O.app_id = " +
+            " WHERE  O.order_id = " +
             orderid.toString() +
             " group by p.product_id";
 
@@ -660,7 +660,7 @@ class LocalAPI {
     var db = await DatabaseHelper.dbHelper.getDatabse();
 
     var ordersList = await db
-        .query("order_detail", where: "app_id = ?", whereArgs: [orderid]);
+        .query("order_detail", where: "order_id =?", whereArgs: [orderid]);
     List<OrderDetail> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
         : [];
@@ -815,7 +815,8 @@ class LocalAPI {
     var qry = "SELECT * from orders where branch_id = " +
         branchid.toString() +
         " AND terminal_id = " +
-        terminalid.toString();
+        terminalid.toString() +
+        " AND order_source = 2";
 
     var ordersList = await db.rawQuery(qry);
     List<Orders> list = ordersList.isNotEmpty
@@ -830,7 +831,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from orders where branch_id = " +
         branchid.toString() +
-        " AND order_source = 2 AND server_id = null";
+        " AND order_source = 2 AND server_id = 0";
     var ordersList = await db.rawQuery(qry);
     List<Orders> list = ordersList.isNotEmpty
         ? ordersList.map((c) => Orders.fromJson(c)).toList()
@@ -1186,13 +1187,13 @@ class LocalAPI {
 
   Future saveSyncOrderDetails(OrderDetail orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_detail where detail_id =" +
-        orderData.detailId.toString();
+    var checkisExitqry = "SELECT *  FROM order_detail where app_id =" +
+        orderData.app_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var orderid;
     if (checkisExit.length > 0) {
       orderid = await db.update("order_detail", orderData.toJson(),
-          where: "detail_id =?", whereArgs: [orderData.detailId]);
+          where: "app_id =?", whereArgs: [orderData.app_id]);
     } else {
       orderid = await db.insert("order_detail", orderData.toJson());
     }
