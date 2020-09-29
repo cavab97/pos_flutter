@@ -11,6 +11,7 @@ import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 
 class PrintReceipt {
@@ -90,7 +91,7 @@ class PrintReceipt {
       List<ProductDetails> orderdItem,
       List<OrderDetail> orderdetail,
       Orders orderData,
-      OrderPayment paymentdata) async {
+      Payments paymentdata) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
@@ -186,21 +187,22 @@ class PrintReceipt {
     ticket.row([
       PosColumn(
           text: "GRANDTOTAL(MYR)",
-          width: 8,
+          width: 7,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
           text: orderData.grand_total.toString(),
-          width: 4,
+          width: 5,
           styles: PosStyles(align: PosAlign.right)),
     ]);
+    ticket.hr();
     ticket.row([
       PosColumn(
           text: "CASH(MYR)",
-          width: 8,
+          width: 7,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
-          text: paymentdata.op_amount.toString(),
-          width: 4,
+          text: paymentdata.name.toString(),
+          width: 5,
           styles: PosStyles(align: PosAlign.right)),
     ]);
 
@@ -222,7 +224,7 @@ class PrintReceipt {
       List<ProductDetails> orderdItem,
       List<OrderDetail> orderdetail,
       Orders orderData,
-      OrderPayment paymentdata) async {
+      Payments paymentdata) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 

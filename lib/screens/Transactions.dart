@@ -73,7 +73,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
     List<OrderDetail> orderItem =
         await localAPI.getOrderDetailsList(order.app_id);
-    List<ProductDetails> details = await localAPI.getOrderDetails(order.app_id);
+    List<ProductDetails> details = await localAPI.getOrderDetails(order.order);
     if (details.length > 0) {
       setState(() {
         detailsList = details;

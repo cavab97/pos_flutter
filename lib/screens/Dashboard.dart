@@ -42,6 +42,7 @@ import 'package:mcncashier/services/allTablesSync.dart';
 class DashboradPage extends StatefulWidget {
   // main Product list page
   DashboradPage({Key key}) : super(key: key);
+
   @override
   _DashboradPageState createState() => _DashboradPageState();
 }
@@ -188,11 +189,9 @@ class _DashboradPageState extends State<DashboradPage>
 
   savesyncORderData(data) async {
     var orders = data["orders"];
-    
-    if (orders.length > 0) {
-      for (var i = 0; i < orders.length; i++) {
 
-      }
+    if (orders.length > 0) {
+      for (var i = 0; i < orders.length; i++) {}
     }
     //var result = await saveSyncOrder();
     await Navigator.of(context).pop();
@@ -813,28 +812,29 @@ class _DashboradPageState extends State<DashboradPage>
         builder: (BuildContext context) {
           return InvoiceReceiptDailog(orderid: orderid);
         });*/
-    await getOrderData(orderid);
+    await getOrderData(orderid,int.parse(terminalId));
   }
 
-  getOrderData(int orderid) async {
+  getOrderData(int orderid,int terminalId) async {
     var branchID = await CommunFun.getbranchId();
     Branch branchAddress = await localAPI.getBranchData(branchID);
     OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
     Payments paument_method =
         await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
-    List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
-    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
-    Orders order = await localAPI.getcurrentOrders(orderid);
+    List<ProductDetails> itemsList = await localAPI.getOrderDetails(terminalId);
+    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(terminalId);
+    Orders order = await localAPI.getcurrentOrders(terminalId);
     print(branchAddress);
     print(orderpaymentdata);
     print(paument_method);
+    print(orderitem);
     print(user);
     print(itemsList);
     print(order);
 
-    printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
-        branchData, itemsList, orderitem, order, orderpaymentdata);
+     printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
+        branchData, itemsList, orderitem, order, paument_method);
   }
 
   clearCartAfterSuccess(orderid) async {
