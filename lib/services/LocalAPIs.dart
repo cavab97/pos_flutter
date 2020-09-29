@@ -1,6 +1,4 @@
 import 'package:mcncashier/components/communText.dart';
-import 'package:mcncashier/components/constant.dart';
-import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
 import 'package:mcncashier/models/Branch.dart';
@@ -17,6 +15,7 @@ import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/BranchTax.dart';
+import 'package:mcncashier/models/Role.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
@@ -86,17 +85,10 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getSeachProduct(
       String searchText, String branchID) async {
-    var query = "SELECT product.*,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 ,product_store_inventory.qty , price_type.name as price_type_Name FROM `product` " +
-        " LEFT join product_category on product_category.product_id = product.product_id " +
-        " LEFT join  product_branch on product_branch.product_id = product.product_id " +
+    var query = "SELECT product.*,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 , price_type.name as price_type_Name FROM `product` " +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
-        " LEFT join product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
         " where product.name LIKE '%$searchText%'" +
-        " AND product_branch.branch_id = " +
-        branchID +
-        " AND product_store_inventory.branch_id  = " +
-        branchID +
         " AND product.status = 1"
             " GROUP By product.product_id";
 
@@ -244,9 +236,13 @@ class LocalAPI {
         " FROM product LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1" +
         " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1" +
         " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1 " +
-        " WHERE product.product_id = 3  GROUP by category_attribute.ca_id";
+        " WHERE product.product_id = " +
+        product.productId.toString() +
+        " AND product_attribute.product_id = " +
+        product.productId.toString() +
+        "   GROUP by category_attribute.ca_id";
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    List<Attribute_Data> list = res.isNotEmpty
+    List<Attribute_Data> list = res.length > 0
         ? res.map((c) => Attribute_Data.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
@@ -1158,6 +1154,15 @@ class LocalAPI {
         ? res.map((c) => ProductDetails.fromJson(c)).toList()
         : [];
 
+    return list;
+  }
+
+  Future<List<Role>> getRoldata(roleID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from role WHERE role_id = " + roleID.toString();
+    var res = await db.rawQuery(qry);
+    List<Role> list =
+        res.isNotEmpty ? res.map((c) => Role.fromJson(c)).toList() : [];
     return list;
   }
 }

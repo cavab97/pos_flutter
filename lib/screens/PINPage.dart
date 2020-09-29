@@ -77,11 +77,18 @@ class _PINPageState extends State<PINPage> {
           checkIn.createdAt = date.toString();
           checkIn.sync = 0;
           var result = await localAPI.userCheckInOut(checkIn);
-          //Role rolData =  await localAPI.getRoldata();
+          List<Role> rolData = await localAPI.getRoldata(user.role);
+
+          if (rolData.length > 0) {
+            Role rolda = rolData[0];
+            await Preferences.setStringToSF(
+                Constant.USER_ROLE, json.encode(rolda));
+          }
           await Preferences.setStringToSF(
               Constant.LOIGN_USER, json.encode(user));
           await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
           await Preferences.setStringToSF(Constant.SHIFT_ID, result.toString());
+
           Navigator.pushNamed(context, Constant.DashboardScreen);
           setState(() {
             isLoading = false;

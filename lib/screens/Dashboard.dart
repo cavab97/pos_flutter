@@ -341,15 +341,21 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getSearchList(seachText) async {
-    var branchid = await CommunFun.getbranchId();
-    List<ProductDetails> product =
-        await localAPI.getSeachProduct(seachText.toString(), branchid);
+    if (seachText.toString().length > 0) {
+      var branchid = await CommunFun.getbranchId();
+      List<ProductDetails> product =
+          await localAPI.getSeachProduct(seachText.toString(), branchid);
 
-    setState(() {
-      SearchProductList.clear();
-      SearchProductList =
-          product.length != 0 && product[0].productId != null ? product : [];
-    });
+      setState(() {
+        SearchProductList.clear();
+        SearchProductList =
+            product.length != 0 && product[0].productId != null ? product : [];
+      });
+    } else {
+      setState(() {
+        SearchProductList.clear();
+      });
+    }
   }
 
   void _handleTabSelection() {
@@ -1247,9 +1253,9 @@ class _DashboradPageState extends State<DashboradPage>
               suggestionsCallback: (pattern) async {
                 return SearchProductList;
               },
-              itemBuilder: (context, productList) {
+              itemBuilder: (context, SearchProductList) {
                 var image_Arr =
-                    productList.base64.split(" groupconcate_Image ");
+                    SearchProductList.base64.split(" groupconcate_Image ");
                 return ListTile(
                   leading: Container(
                     color: Colors.grey,
@@ -1262,8 +1268,8 @@ class _DashboradPageState extends State<DashboradPage>
                             fit: BoxFit.cover,
                           ),
                   ),
-                  title: Text(productList.name),
-                  subtitle: Text(productList.price.toString()),
+                  title: Text(SearchProductList.name),
+                  subtitle: Text(SearchProductList.price.toString()),
                 );
               },
               onSuggestionSelected: (suggestion) {

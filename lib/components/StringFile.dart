@@ -5,7 +5,7 @@ class Strings {
   static String title_opening_amount = "Opening Amount";
   static String title_closing_amount = "Closing Amount";
   static String forgot_password = "Forgot password?";
-  static String login_text = "YOU CAN ENTER YOUR USERNAME & PASSWORD HERE";
+  static String login_text = "YOU CAN ENTER YOUR USERNAME & PIN HERE";
   static String cancel_tansaction = "Cancel Transaction";
   static String username_validation_msg = "username must be required.";
   static String userPin_validation_msg = "Pin must be required.";
@@ -74,7 +74,7 @@ class Strings {
   static String no_image = "assets/no_image.png";
   static String out_of_stoke = "OUT OF STOCK";
   static String apply_promocode = "Apply Promocode";
-  static String item_not_available = "No item Available";
+  static String item_not_available = "No item available";
   static String asset_headerLogo = "assets/headerlogo.png";
   static String assetsBG = "assets/bg.jpg";
   static String no_imageAsset = 'assets/no_image.png';
