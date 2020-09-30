@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 class CommonUtils {
   /*load image from base64*/
   static Image imageFromBase64String(String base64) {
-    if (base64 != null) {
+    if (base64 != null) { 
       return Image.memory(base64Decode(base64),
           fit: BoxFit.cover, gaplessPlayback: true);
     }

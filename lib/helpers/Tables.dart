@@ -768,6 +768,34 @@ class CreateTables {
     //  datatables = db.execute("CREATE TABLE voucher_log ( " +
     //     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
     //     ")");
+
+//POS ROle USer Table
+    datatables = db.execute("CREATE TABLE pos_permission ( " +
+        'pos_permission_id INTEGER,' +
+        'pos_permission_name TEXT,' +
+        'pos_permission_updated_at TEXT,' +
+        'pos_permission_updated_by INTEGER' +
+        ")");
+
+    datatables = db.execute("CREATE TABLE pos_role_permission ( " +
+        "pos_rp_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "pos_rp_uuid TEXT," +
+        "pos_rp_role_id INTEGER," +
+        "pos_rp_permission_id INTEGER," +
+        "pos_rp_permission_status NUMERIC," +
+        "pos_rp_updated_at TEXT," +
+        "pos_rp_updated_by INTEGER" +
+        ")");
+
+    datatables = db.execute("CREATE TABLE user_pos_permission ( " +
+        "up_pos_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "up_pos_uuid TEXT," +
+        "user_id INTEGER," +
+        "status NUMERIC," +
+        "pos_permission_id INTEGER," +
+        "updated_at TEXT," +
+        "updated_by INTEGER" +
+        ")");
     return datatables;
   }
 }

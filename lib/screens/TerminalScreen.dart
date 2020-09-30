@@ -135,6 +135,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
       child: Image.asset(
         Strings.asset_headerLogo,
         fit: BoxFit.contain,
+         gaplessPlayback:true,
       ),
     );
   }

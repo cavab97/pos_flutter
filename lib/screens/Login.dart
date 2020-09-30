@@ -182,6 +182,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Image.asset(
         Strings.asset_headerLogo,
         fit: BoxFit.contain,
+         gaplessPlayback:true,
       ),
     );
   }
