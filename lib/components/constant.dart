@@ -10,6 +10,7 @@ class Constant {
   static final String LastSync_Table = "LastSync_Table";
   static final String IS_SHIFT_OPEN = "IS_SHIFT_OPENE";
   static final String SERVER_DATE_TIME = "ServertDateTime";
+  static final String ORDER_SERVER_DATE_TIME = "orderServerTime";
   static final String SERVER_TIME_ZONE = "ServertTimeZone";
   static final String TABLE_DATA = "table_id";
   static final String CUSTOMER_DATA = "customerData";
@@ -17,6 +18,8 @@ class Constant {
   static final String IS_CHECKOUT = "Checkout";
   static final String SHIFT_ID = "Shift_Id";
   static final String DASH_SHIFT = "dashShift";
+  static final String IS_LOGIN = "IsLogin";
+  static final String USER_ROLE = "Roledata";
   /*==============================================================================
                               Manage API status
   =================================================================================*/

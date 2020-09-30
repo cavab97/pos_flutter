@@ -15,7 +15,7 @@ class MST_Cart {
   int is_deleted;
   int created_by;
   String created_at;
-  // int sync;
+  String cart_order_number;
   int customer_terminal;
   int voucher_id;
   String voucher_detail;
@@ -49,6 +49,7 @@ class MST_Cart {
     this.sub_total_after_discount,
     this.source,
     this.total_item,
+    this.cart_order_number,
     this.cart_payment_id,
     this.cart_payment_response,
     this.cart_payment_status,
@@ -84,7 +85,10 @@ class MST_Cart {
     voucher_detail = json["voucher_detail"];
     sub_total_after_discount = json["sub_total_after_discount"];
     source = json["source"];
-    total_item = json["total_item"];
+    total_item = json["total_item"] is int
+        ? (json['total_item'] as int).toDouble()
+        : json['total_item'];
+    cart_order_number = json["cart_order_number"];
     cart_payment_id = json["cart_payment_id"];
     cart_payment_response = json["cart_payment_response"];
     cart_payment_status = json["cart_payment_status"];
@@ -114,6 +118,7 @@ class MST_Cart {
     data["sub_total_after_discount"] = this.sub_total_after_discount;
     data["source"] = this.source;
     data["total_item"] = this.total_item;
+    data["cart_order_number"] = this.cart_order_number;
     data["cart_payment_id"] = this.cart_payment_id;
     data["cart_payment_response"] = this.cart_payment_response;
     data["cart_payment_status"] = this.cart_payment_status;

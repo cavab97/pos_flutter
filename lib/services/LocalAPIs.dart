@@ -1,6 +1,4 @@
 import 'package:mcncashier/components/communText.dart';
-import 'package:mcncashier/components/constant.dart';
-import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
 import 'package:mcncashier/models/Branch.dart';
@@ -17,6 +15,7 @@ import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/BranchTax.dart';
+import 'package:mcncashier/models/Role.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
@@ -86,17 +85,10 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getSeachProduct(
       String searchText, String branchID) async {
-    var query = "SELECT product.*,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 ,product_store_inventory.qty , price_type.name as price_type_Name FROM `product` " +
-        " LEFT join product_category on product_category.product_id = product.product_id " +
-        " LEFT join  product_branch on product_branch.product_id = product.product_id " +
+    var query = "SELECT product.*,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 , price_type.name as price_type_Name FROM `product` " +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
-        " LEFT join product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
         " where product.name LIKE '%$searchText%'" +
-        " AND product_branch.branch_id = " +
-        branchID +
-        " AND product_store_inventory.branch_id  = " +
-        branchID +
         " AND product.status = 1"
             " GROUP By product.product_id";
 
@@ -244,9 +236,13 @@ class LocalAPI {
         " FROM product LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1" +
         " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1" +
         " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1 " +
-        " WHERE product.product_id = 3  GROUP by category_attribute.ca_id";
+        " WHERE product.product_id = " +
+        product.productId.toString() +
+        " AND product_attribute.product_id = " +
+        product.productId.toString() +
+        "   GROUP by category_attribute.ca_id";
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    List<Attribute_Data> list = res.isNotEmpty
+    List<Attribute_Data> list = res.length > 0
         ? res.map((c) => Attribute_Data.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
@@ -380,7 +376,7 @@ class LocalAPI {
       shiftid = await db.insert("user_checkinout", clockinOutData.toJson());
     } else {
       shiftid = await db.update("user_checkinout", clockinOutData.toJson(),
-          where: '${clockinOutData.id} = ?', whereArgs: [clockinOutData.id]);
+          where: 'id = ?', whereArgs: [clockinOutData.id]);
     }
     var dis = clockinOutData.status == "IN" ? "User checkin" : "user checkout";
     await SyncAPICalls.logActivity(
@@ -456,9 +452,10 @@ class LocalAPI {
     return list[0];
   }
 
-  Future<List<Orders>> getLastOrderAppid() async {
-    var qey =
-        "SELECT orders.app_id from orders ORDER BY order_date DESC  LIMIT 1";
+  Future<List<Orders>> getLastOrderAppid(terminalid) async {
+    var qey = "SELECT orders.app_id from orders where terminal_id =" +
+        terminalid +
+        "  ORDER BY order_date DESC LIMIT 1";
     var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
     List<Orders> list = checkisExit.isNotEmpty
         ? checkisExit.map((c) => Orders.fromJson(c)).toList()
@@ -647,7 +644,7 @@ class LocalAPI {
         "SELECT P.product_id,P.name,P.price,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 FROM order_detail O " +
             " LEFT JOIN product P ON O.product_id = P.product_id" +
             " LEFT join asset on asset.asset_type_id = P.product_id " +
-            " WHERE asset.asset_type = 1 and order_id = " +
+            " WHERE  O.order_id = " +
             orderid.toString() +
             " group by p.product_id";
 
@@ -664,12 +661,12 @@ class LocalAPI {
     var db = await DatabaseHelper.dbHelper.getDatabse();
 
     var ordersList = await db
-        .query("order_detail", where: "order_id = ?", whereArgs: [orderid]);
+        .query("order_detail", where: "order_id =?", whereArgs: [orderid]);
     List<OrderDetail> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
-        "invoice", "get Orders  details list", "ProductDetails", orderid);
+        "invoice", "get Orders details list", "ProductDetails", orderid);
     return list;
   }
 
@@ -819,7 +816,8 @@ class LocalAPI {
     var qry = "SELECT * from orders where branch_id = " +
         branchid.toString() +
         " AND terminal_id = " +
-        terminalid.toString();
+        terminalid.toString() +
+        " AND order_source = 2";
 
     var ordersList = await db.rawQuery(qry);
     List<Orders> list = ordersList.isNotEmpty
@@ -832,7 +830,9 @@ class LocalAPI {
 
   Future<List<Orders>> getOrdersListTable(branchid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from orders where branch_id = " + branchid.toString();
+    var qry = "SELECT * from orders where branch_id = " +
+        branchid.toString() +
+        " AND order_source = 2 AND server_id = 0";
     var ordersList = await db.rawQuery(qry);
     List<Orders> list = ordersList.isNotEmpty
         ? ordersList.map((c) => Orders.fromJson(c)).toList()
@@ -901,14 +901,15 @@ class LocalAPI {
     return ordersList;
   }
 
-  Future<ProductStoreInventory> checkItemAvailableinStore(productId) async {
+  Future<List<ProductStoreInventory>> checkItemAvailableinStore(
+      productId) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var inventoryProd = await db.query("product_store_inventory",
         where: 'product_id = ?', whereArgs: [productId]);
-    List<ProductStoreInventory> list = inventoryProd.isNotEmpty
+    List<ProductStoreInventory> list = inventoryProd.length > 0
         ? inventoryProd.map((c) => ProductStoreInventory.fromJson(c)).toList()
         : [];
-    return list[0];
+    return list;
   }
 
   Future removeFromInventory(OrderDetail produtdata) async {
@@ -1051,7 +1052,28 @@ class LocalAPI {
 
   Future<List<Printer>> getAllPrinter() async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from printer";
+    var qry = "SELECT * from printer where status = 1";
+    var result = await db.rawQuery(qry);
+    List<Printer> list = result.isNotEmpty
+        ? result.map((c) => Printer.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<Printer>> getAllPrinterForKOT() async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from printer where status = 1 ";
+    var result = await db.rawQuery(qry);
+    List<Printer> list = result.isNotEmpty
+        ? result.map((c) => Printer.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<Printer>> getAllPrinterForecipt() async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry =
+        "SELECT * from printer where printer_is_cashier = 1 AND status = 1";
     var result = await db.rawQuery(qry);
     List<Printer> list = result.isNotEmpty
         ? result.map((c) => Printer.fromJson(c)).toList()
@@ -1113,5 +1135,115 @@ class LocalAPI {
     return result;
   }
 
-  Future checkTableAssign(cartid) async {}
+  Future<int> updateInvoice(Orders order) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var result;
+    if (order.order_item_count > 0) {
+      result = await db
+          .delete("orders", where: "app_id =?", whereArgs: [order.app_id]);
+    } else {
+      result = await db.update("orders", order.toJson(),
+          where: "app_id =?", whereArgs: [order.app_id]);
+    }
+    return result;
+  }
+
+  Future<List<ProductDetails>> productdData(productid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry =
+        "SELECT product.*, price_type.name as price_type_Name  from product " +
+            " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1  where product_id = " +
+            productid.toString();
+
+    var res = await db.rawQuery(qry);
+    List<ProductDetails> list = res.length > 0
+        ? res.map((c) => ProductDetails.fromJson(c)).toList()
+        : [];
+
+    return list;
+  }
+
+  Future<List<Role>> getRoldata(roleID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from role WHERE role_id = " + roleID.toString();
+    var res = await db.rawQuery(qry);
+    List<Role> list =
+        res.isNotEmpty ? res.map((c) => Role.fromJson(c)).toList() : [];
+    return list;
+  }
+
+  Future saveSyncOrder(Orders orderData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM orders where order_id =" +
+        orderData.order_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var orderid;
+    if (checkisExit.length > 0) {
+      orderid = await db.update("orders", orderData.toJson(),
+          where: "order_id =?", whereArgs: [orderData.order_id]);
+    } else {
+      orderid = await db.insert("orders", orderData.toJson());
+    }
+    return orderid;
+  }
+
+  Future saveSyncOrderDetails(OrderDetail orderData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM order_detail where app_id =" +
+        orderData.app_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var orderid;
+    if (checkisExit.length > 0) {
+      orderid = await db.update("order_detail", orderData.toJson(),
+          where: "app_id =?", whereArgs: [orderData.app_id]);
+    } else {
+      orderid = await db.insert("order_detail", orderData.toJson());
+    }
+    return orderid;
+  }
+
+  Future saveSyncOrderPaymet(OrderPayment paymentdata) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM order_payment where op_id =" +
+        paymentdata.op_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var orderid;
+    if (checkisExit.length > 0) {
+      orderid = await db.update("order_payment", paymentdata.toJson(),
+          where: "op_id =?", whereArgs: [paymentdata.op_id]);
+    } else {
+      orderid = await db.insert("order_payment", paymentdata.toJson());
+    }
+    return orderid;
+  }
+
+  Future saveSyncOrderModifire(OrderModifire orderData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM order_modifier where om_id =" +
+        orderData.om_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var orderid;
+    if (checkisExit.length > 0) {
+      orderid = await db.update("order_modifier", orderData.toJson(),
+          where: "om_id =?", whereArgs: [orderData.om_id]);
+    } else {
+      orderid = await db.insert("order_modifier", orderData.toJson());
+    }
+    return orderid;
+  }
+
+  Future saveSyncOrderAttribute(OrderAttributes orderData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM order_attributes where oa_id =" +
+        orderData.oa_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var orderid;
+    if (checkisExit.length > 0) {
+      orderid = await db.update("order_attributes", orderData.toJson(),
+          where: "oa_id =?", whereArgs: [orderData.oa_id]);
+    } else {
+      orderid = await db.insert("order_attributes", orderData.toJson());
+    }
+    return orderid;
+  }
 }

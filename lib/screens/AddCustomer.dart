@@ -6,7 +6,6 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 
 class AddCustomerPage extends StatefulWidget {
   AddCustomerPage({Key key}) : super(key: key);
-
   @override
   _AddCustomerPageState createState() => _AddCustomerPageState();
 }
@@ -40,7 +39,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
     if (isvalid) {
       var terminalkey = await CommunFun.getTeminalKey();
       Customer customer = new Customer();
-      customer.terminalId = terminalkey;
+      customer.terminalId = int.parse(terminalkey);
       customer.firstName = firstname_controller.text;
       customer.lastName = lastname_controller.text;
       customer.email = email_controller.text;

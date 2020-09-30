@@ -46,37 +46,42 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
     var isValid = await validateFields(); // validate fields
     var deviceinfo = await CommunFun.deviceInfo();
     TemimalKey terminal = new TemimalKey();
-    if (isValid) {
-      setState(() {
-        isLoading = true;
-      });
-      terminal.terminalKey = terminalKey.text;
-      terminal.deviceid = deviceinfo["deviceId"];
-      terminal.terDeviceToken = deviceinfo["deviceToken"];
-      await repo.sendTerminalKey(terminal).then((value) async {
-        if (value != null && value["status"] == Constant.STATUS200) {
-          Preferences.setStringToSF(
-              Constant.TERMINAL_KEY, value["terminal_id"].toString());
-          Preferences.setStringToSF(
-              Constant.BRANCH_ID, value["branch_id"].toString());
-          Navigator.pushNamed(context, Constant.LoginScreen,
-              arguments: {"terminalId": value["terminal_id"]});
-        } else if (value != null && value["status"] == Constant.STATUS422) {
-          CommunFun.showToast(context, value["message"]);
-        } else {
-          CommunFun.showToast(context, value["message"]);
-        }
-      }).catchError((e) {
-        print(e);
-        CommunFun.showToast(context, e.message);
+    var connected = await CommunFun.checkConnectivity();
+    if (connected) {
+      if (isValid) {
         setState(() {
-          isLoading = false;
+          isLoading = true;
         });
-      }).whenComplete(() {
-        setState(() {
-          isLoading = false;
+        terminal.terminalKey = terminalKey.text;
+        terminal.deviceid = deviceinfo["deviceId"];
+        terminal.terDeviceToken = deviceinfo["deviceToken"];
+        await repo.sendTerminalKey(terminal).then((value) async {
+          if (value != null && value["status"] == Constant.STATUS200) {
+            Preferences.setStringToSF(
+                Constant.TERMINAL_KEY, value["terminal_id"].toString());
+            Preferences.setStringToSF(
+                Constant.BRANCH_ID, value["branch_id"].toString());
+            Navigator.pushNamed(context, Constant.LoginScreen,
+                arguments: {"terminalId": value["terminal_id"]});
+          } else if (value != null && value["status"] == Constant.STATUS422) {
+            CommunFun.showToast(context, value["message"]);
+          } else {
+            CommunFun.showToast(context, value["message"]);
+          }
+        }).catchError((e) {
+          print(e);
+          CommunFun.showToast(context, e.message);
+          setState(() {
+            isLoading = false;
+          });
+        }).whenComplete(() {
+          setState(() {
+            isLoading = false;
+          });
         });
-      });
+      }
+    } else {
+      CommunFun.showToast(context, Strings.internet_connection_lost);
     }
   }
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:esc_pos_printer/esc_pos_printer.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
@@ -10,6 +11,7 @@ import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 
 class PrintReceipt {
@@ -85,12 +87,11 @@ class PrintReceipt {
   ========================================================================*/
 
   Future<Ticket> Receipt(
-      PaperSize paper,
       Branch branchData,
       List<ProductDetails> orderdItem,
       List<OrderDetail> orderdetail,
       Orders orderData,
-      OrderPayment paymentdata) async {
+      Payments paymentdata) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
@@ -186,21 +187,22 @@ class PrintReceipt {
     ticket.row([
       PosColumn(
           text: "GRANDTOTAL(MYR)",
-          width: 8,
+          width: 7,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
           text: orderData.grand_total.toString(),
-          width: 4,
+          width: 5,
           styles: PosStyles(align: PosAlign.right)),
     ]);
+    ticket.hr();
     ticket.row([
       PosColumn(
           text: "CASH(MYR)",
-          width: 8,
+          width: 7,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
-          text: paymentdata.op_amount.toString(),
-          width: 4,
+          text: paymentdata.name.toString(),
+          width: 5,
           styles: PosStyles(align: PosAlign.right)),
     ]);
 
@@ -218,17 +220,16 @@ class PrintReceipt {
   void checkReceiptPrint(
       String printerIp,
       BuildContext ctx,
-      PaperSize paper,
       Branch branchData,
       List<ProductDetails> orderdItem,
       List<OrderDetail> orderdetail,
       Orders orderData,
-      OrderPayment paymentdata) async {
+      Payments paymentdata) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(await Receipt(
-        paper, branchData, orderdItem, orderdetail, orderData, paymentdata));
+         branchData, orderdItem, orderdetail, orderData, paymentdata));
 
     CommunFun.showToast(ctx, res.msg);
 
@@ -241,13 +242,8 @@ class PrintReceipt {
   ===========================Print Draft print==================================
   ========================================================================*/
 
-  Future<Ticket> DraftReceipt(
-      PaperSize paper,
-      Branch branchData,
-      List<ProductDetails> orderdItem,
-      List<OrderDetail> orderdetail,
-      Orders orderData,
-      OrderPayment paymentdata) async {
+  Future<Ticket> DraftReceipt(List<MSTCartdetails> cartList, String tableName,
+      double subTotal, double grandTotal, double tax, Branch branchData) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
@@ -257,7 +253,6 @@ class PrintReceipt {
     final image = decodeImage(bytes);
     ticket.image(image, align: PosAlign.center);
 */
-    ticket.text("", linesAfter: 1);
     ticket.text(branchData.address,
         styles: PosStyles(
             fontType: PosFontType.fontA,
@@ -297,22 +292,24 @@ class PrintReceipt {
     ]);
     ticket.hr();
 
-    for (var i = 0; i < orderdetail.length; i++) {
-      var item = orderdetail[i];
-      var name = orderdItem[i];
+    for (var i = 0; i < cartList.length; i++) {
+      var total = cartList[i].productQty * cartList[i].productPrice;
+
       ticket.row([
         PosColumn(
-            text: name.name, width: 6, styles: PosStyles(align: PosAlign.left)),
+            text: cartList[i].productName,
+            width: 6,
+            styles: PosStyles(align: PosAlign.left)),
         PosColumn(
-            text: item.detail_qty.toString(),
+            text: cartList[i].productQty.toString(),
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
         PosColumn(
-            text: item.product_old_price.toString(),
+            text: cartList[i].productPrice.toString(),
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
         PosColumn(
-            text: item.product_price.toString(),
+            text: total.toString(),
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
       ]);
@@ -324,7 +321,7 @@ class PrintReceipt {
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
-          text: orderData.sub_total.toString(),
+          text: subTotal.toString(),
           width: 4,
           styles: PosStyles(align: PosAlign.right)),
     ]);
@@ -334,7 +331,7 @@ class PrintReceipt {
       PosColumn(
           text: "TAX(MYR)", width: 8, styles: PosStyles(align: PosAlign.right)),
       PosColumn(
-          text: orderData.tax_amount.toString(),
+          text: tax.toString(),
           width: 4,
           styles: PosStyles(align: PosAlign.right)),
     ]);
@@ -345,11 +342,11 @@ class PrintReceipt {
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
-          text: orderData.grand_total.toString(),
+          text: grandTotal.toString(),
           width: 4,
           styles: PosStyles(align: PosAlign.right)),
     ]);
-    ticket.row([
+    /* ticket.row([
       PosColumn(
           text: "CASH(MYR)",
           width: 8,
@@ -358,7 +355,7 @@ class PrintReceipt {
           text: paymentdata.op_amount.toString(),
           width: 4,
           styles: PosStyles(align: PosAlign.right)),
-    ]);
+    ]);*/
 
     ticket.feed(2);
     ticket.text('Thank you!',
@@ -374,18 +371,18 @@ class PrintReceipt {
   void checkDraftPrint(
       String printerIp,
       BuildContext ctx,
-      PaperSize paper,
-      Branch branchData,
-      List<ProductDetails> orderdItem,
-      List<OrderDetail> orderdetail,
-      Orders orderData,
-      OrderPayment paymentdata) async {
+      List<MSTCartdetails> cartList,
+      String tableName,
+      double subTotal,
+      double grandTotal,
+      double tax,
+      Branch branchData) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
-        await DraftReceipt(paper, branchData, orderdItem, orderdetail,
-            orderData, paymentdata));
+        await DraftReceipt(
+            cartList, tableName, subTotal, grandTotal, tax, branchData));
 
     CommunFun.showToast(ctx, res.msg);
 

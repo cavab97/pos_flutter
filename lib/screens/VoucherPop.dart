@@ -1,9 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
-import 'package:mcncashier/components/constant.dart';
-import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Product_Categroy.dart';
@@ -31,8 +30,12 @@ class VoucherPopState extends State<VoucherPop> {
   var errorMSG = "";
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    KeyboardVisibilityNotification().addNewListener(
+      onHide: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+    );
   }
 
   checkMinMaxValue(vaocher) async {

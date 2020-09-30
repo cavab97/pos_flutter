@@ -60,7 +60,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
   }
 
   getOederData() async {
-    var branchID =  await CommunFun.getbranchId();
+    var branchID = await CommunFun.getbranchId();
     Branch branchAddress = await localAPI.getBranchData(branchID);
     OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
     Payments paument_method =
@@ -275,7 +275,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
   }
 
   void testPrint(String printerIp, BuildContext ctx) async {
-    printReceipt.checkReceiptPrint(printerIp, ctx, paper, branchData,
-        orderdItem, orderdetail, orderData, paymentdata);
+    /*printReceipt.checkReceiptPrint(printerIp, ctx, paper, branchData,
+        orderdItem, orderdetail, orderData, paymentdata);*/
   }
 }

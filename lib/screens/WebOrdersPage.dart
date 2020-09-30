@@ -1,12 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
-import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -286,36 +284,59 @@ class _WebOrderPagesState extends State<WebOrderPages>
                         ]),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    checkTableAssigned(cart);
-                  },
-                  child: Container(
-                    margin: EdgeInsets.only(top: itemHeight / 2.1),
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                        color: cart.table_id == null
-                            ? Colors.deepOrange
-                            : Colors.grey,
-                        borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(20.0),
-                            bottomRight: Radius.circular(20.0))),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                            cart.table_id == null ? "Assing Table" : "Table id",
-                            style: Styles.whiteSimpleSmall())
-                      ],
-                    ),
-                  ),
-                ),
+                cart.table_id == null
+                    ? GestureDetector(
+                        onTap: () {
+                          checkTableAssigned(cart);
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(top: itemHeight / 2.1),
+                          width: MediaQuery.of(context).size.width,
+                          decoration: BoxDecoration(
+                              color: cart.table_id == null
+                                  ? Colors.deepOrange
+                                  : Colors.grey,
+                              borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(20.0),
+                                  bottomRight: Radius.circular(20.0))),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Text(
+                                  cart.table_id == null
+                                      ? "Assing Table"
+                                      : "Table id",
+                                  style: Styles.whiteSimpleSmall())
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(
+                        margin: EdgeInsets.only(top: itemHeight / 2.1),
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(20.0),
+                                bottomRight: Radius.circular(20.0))),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text("Grand Total : " + cart.grand_total.toString(),
+                                style: Styles.whiteSimpleSmall())
+                          ],
+                        ),
+                      ),
                 Positioned(
-                    top: 10,
-                    left: 10,
-                    child: Text("Cart :" + cart.id.toString(),
-                        style: Styles.communBlack()))
+                  top: 10,
+                  left: 10,
+                  child: Text(
+                    "Cart :" + cart.id.toString(),
+                    style: Styles.communBlack(),
+                  ),
+                )
               ],
             ),
           ),

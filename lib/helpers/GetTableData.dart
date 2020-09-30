@@ -21,6 +21,8 @@ import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/category_branch.dart';
 import 'package:sqflite/sqflite.dart';
@@ -588,6 +590,8 @@ class TableData {
     print(db);
     print(tablesData);
     var voucherData = tablesData["voucher"];
+    var orders = tablesData["order"];
+    var orderdetail = tablesData["order_detail"];
     try {
       if (voucherData.length != 0) {
         for (var i = 0; i < voucherData.length; i++) {
@@ -604,6 +608,44 @@ class TableData {
             print(result);
           } else {
             var result = await db.update("voucher", vouchers.toJson());
+            print(result);
+          }
+        }
+      }
+      if (orders.length != 0) {
+        for (var i = 0; i < orders.length; i++) {
+          var ordersitem = orders[i];
+          Orders order = Orders.fromJson(ordersitem);
+          var data = {
+            'table': "orders",
+            'key': "order_id",
+            'value': order.order_id,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("orders", order.toJson());
+            print(result);
+          } else {
+            var result = await db.update("orders", order.toJson());
+            print(result);
+          }
+        }
+      }
+      if (orderdetail.length != 0) {
+        for (var i = 0; i < orderdetail.length; i++) {
+          var orderdetailitem = orderdetail[i];
+          OrderDetail orderdeta = OrderDetail.fromJson(orderdetailitem);
+          var data = {
+            'table': "order_detail",
+            'key': "detail_id",
+            'value': orderdeta.detailId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("order_detail", orderdeta.toJson());
+            print(result);
+          } else {
+            var result = await db.update("order_detail", orderdeta.toJson());
             print(result);
           }
         }

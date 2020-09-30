@@ -9,7 +9,7 @@ class User {
   String countryCode;
   String mobile;
   String profile;
-  String commisionPercent;
+  double commisionPercent;
   int userPin;
   String apiToken;
   int status;
@@ -67,7 +67,11 @@ class User {
     countryCode = json['country_code'];
     mobile = json['mobile'];
     profile = json['profile'];
-    commisionPercent = json['commision_percent'];
+    commisionPercent = json['commision_percent'] != ""
+        ? json['commision_percent'] is int
+            ? (json['commision_percent'] as int).toDouble()
+            : json['commision_percent']
+        : null;
     userPin = json['user_pin'];
     apiToken = json['api_token'];
     status = json['status'];

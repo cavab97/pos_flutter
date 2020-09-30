@@ -19,11 +19,13 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
-  ProductQuantityDailog({Key key, this.product, this.cartID, this.cartItem})
+  ProductQuantityDailog(
+      {Key key, this.product, this.cartID, this.cartItem, this.onClose})
       : super(key: key);
   final product;
   final int cartID;
   final cartItem;
+  Function onClose;
 
   @override
   _ProductQuantityDailogState createState() => _ProductQuantityDailogState();
@@ -47,6 +49,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   List<BranchTax> taxlist = [];
   double taxvalues = 0;
   TextStyle attrStyle = TextStyle(color: Colors.black, fontSize: 20.0);
+  int isSelectedAttr = -1;
 
   @override
   void initState() {
@@ -102,8 +105,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               var attrtypesPrice =
                   attribute.attr_types_price.split(',').asMap();
               for (var a = 0; a < attributType.length; a++) {
-                onSelectAttr(attribute.ca_id, attributType[a], attrIDs[a],
-                    attrtypesPrice[a]);
+                if (item.attributeId == attrIDs[a]) {
+                  onSelectAttr(a, attribute.ca_id, attributType[a], attrIDs[a],
+                      attrtypesPrice[a]);
+                  break;
+                }
               }
             }
           }
@@ -169,15 +175,22 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   increaseQty() async {
     if (productItem.hasInventory == 1) {
-      ProductStoreInventory cartval =
+      List<ProductStoreInventory> cartval =
           await localAPI.checkItemAvailableinStore(productItem.productId);
-      if (int.parse(cartval.qty) >= product_qty) {
+      if (cartval.length > 0) {
+        if (int.parse(cartval[0].qty) >= product_qty) {
+          var prevproductqty = product_qty;
+          setState(() {
+            product_qty = prevproductqty + 1;
+          });
+        } else {
+          CommunFun.showToast(context, Strings.stock_not_valilable);
+        }
+      } else {
         var prevproductqty = product_qty;
         setState(() {
           product_qty = prevproductqty + 1;
         });
-      } else {
-        CommunFun.showToast(context, Strings.stock_not_valilable);
       }
     } else {
       if (product_qty <= productItem.qty) {
@@ -203,22 +216,43 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
-  onSelectAttr(id, attribute, attrTypeIDs, attrPrice) {
-    // var array = [];
-    var prvSeelected = selectedAttr;
-    var isSelected = selectedAttr.any((item) => item['ca_id'] == id);
-    if (isSelected) {
-      selectedAttr.removeWhere((item) => item['ca_id'] == id);
-      prvSeelected.add({
+  onSelectAttr(i, id, attribute, attrTypeIDs, attrPrice) {
+    if (isSelectedAttr == i) {
+      isSelectedAttr = -1;
+    } else {
+      isSelectedAttr = i;
+    }
+
+    selectedAttr.clear();
+    if (isSelectedAttr != -1) {
+      selectedAttr.add({
         'ca_id': id,
         'attribute': attribute,
         'attrType_ID': attrTypeIDs,
         'attr_price': attrPrice
       });
+    }
+    setState(() {
+      selectedAttr = selectedAttr;
+    });
+
+    /*// var array = [];
+    var prvSeelected = selectedAttr;
+    var isSelected =
+        selectedAttr.any((item) => item['attrType_ID'] == attrTypeIDs);
+    if (isSelected) {
+      selectedAttr.removeWhere((item) => item['attrType_ID'] == attrTypeIDs);
+      */ /* prvSeelected.add({
+        'ca_id': id,
+        'attribute': attribute,
+        'attrType_ID': attrTypeIDs,
+        'attr_price': attrPrice
+      });*/ /*
       setState(() {
         selectedAttr = prvSeelected;
       });
     } else {
+      prvSeelected.removeWhere((item) => item['attrType_ID'] == attrTypeIDs);
       prvSeelected.add({
         'ca_id': id,
         'attribute': attribute,
@@ -228,7 +262,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       setState(() {
         selectedAttr = prvSeelected;
       });
-    }
+    }*/
     setPrice();
   }
 
@@ -378,6 +412,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
     var customerData =
         await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
+    var customer =
+        customerData != null ? json.decode(customerData) : customerData;
+    var customerid = customer != null ? customer["customer_id"] : 0;
     var tableData = await json.decode(table); // table data
     var loginData = await json.decode(loginUser);
     var qty = await countTotalQty();
@@ -387,7 +424,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var grandTotal = await countGrandtotal(taxvalues, disc);
 
     //cart data
-    cart.user_id = customerData != null ? customerData["customer_id"] : 0;
+    cart.user_id = customerid;
     cart.branch_id = int.parse(branchid);
     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
     cart.discount = disc;
@@ -398,8 +435,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cart.source = 2;
     cart.tax_json = json.encode(totalTax);
     cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
-    cart.customer_terminal =
-        customerData != null ? customerData["terminal_id"] : 0;
+    cart.customer_terminal = customer != null ? customer["terminal_id"] : 0;
     if (!isEditing) {
       cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
     }
@@ -439,7 +475,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.createdBy = loginData["id"];
     cartdetails.discount = 0;
     cartdetails.taxValue = taxvalues;
-    cartdetails.printer_id = printer.printerId;
+    cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = DateTime.now().toString();
     var detailID = await localAPI.addintoCartDetails(cartdetails);
 
@@ -473,7 +509,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       items.add(cartitem);
       //  senditemtoKitchen(items);
     }
-    await Navigator.pushNamed(context, Constant.DashboardScreen);
+    widget.onClose();
+    Navigator.of(context).pop();
   }
 
   @override
@@ -638,10 +675,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                           borderRadius:
                                               BorderRadius.circular(10.0),
                                           side: BorderSide(
-                                            color: selectedAttr.any((item) =>
-                                                    item['ca_id'] ==
-                                                        attribute.ca_id &&
-                                                    item['attribute'] == attr)
+                                            color: i == isSelectedAttr
                                                 ? Colors.green
                                                 : Colors.grey[300],
                                             width: 4,
@@ -653,7 +687,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                       textColor: Colors.black,
                                       color: Colors.grey[300],
                                       onPressed: () {
-                                        onSelectAttr(attribute.ca_id, attr,
+                                        onSelectAttr(i, attribute.ca_id, attr,
                                             attrIDs[i], attrtypesPrice[i]);
                                       },
                                     )));

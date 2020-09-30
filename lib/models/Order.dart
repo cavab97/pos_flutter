@@ -20,7 +20,7 @@ class Orders {
   int order_item_count;
   String order_date;
   int order_by;
-  // int server_id;
+  int server_id;
   String tax_json;
   String voucher_detail;
   String updated_at;
@@ -49,7 +49,7 @@ class Orders {
     this.order_date,
     this.order_by,
     this.voucher_detail,
-    // this.server_id,
+    this.server_id,
     this.tax_json,
     this.updated_at,
     this.updated_by,
@@ -66,18 +66,29 @@ class Orders {
     invoice_no = json["invoice_no"];
     customer_id = json["customer_id"];
     tax_percent = json["tax_percent"];
-    tax_amount = json["tax_amount"];
+    tax_amount = json["tax_amount"] is int
+        ? (json['tax_amount'] as int).toDouble()
+        : json['tax_amount'];
     voucher_id = json["voucher_id"];
-    voucher_amount = json["voucher_amount"];
-    sub_total = json["sub_total"];
-    sub_total_after_discount = json["sub_total_after_discount"];
-    grand_total = json["grand_total"];
+    voucher_amount = json["voucher_amount"] is int
+        ? (json['voucher_amount'] as int).toDouble()
+        : json['voucher_amount'];
+    sub_total = json["sub_total"] is int
+        ? (json['sub_total'] as int).toDouble()
+        : json['sub_total'];
+    sub_total_after_discount = json["sub_total_after_discount"] is int
+        ? (json['sub_total_after_discount'] as int).toDouble()
+        : json['sub_total_after_discount'];
+    grand_total = json["grand_total"] is int
+        ? (json['grand_total'] as int).toDouble()
+        : json['grand_total'];
+
     order_source = json["order_source"];
     order_status = json["order_status"];
     order_item_count = json["order_item_count"];
     order_date = json["order_date"];
     order_by = json["order_by"];
-    //server_id = json['server_id'];
+    server_id = json['server_id'];
     voucher_detail = json['voucher_detail'];
     tax_json = json['tax_json'];
     updated_at = json["updated_at"];
@@ -106,7 +117,7 @@ class Orders {
     data["order_status"] = this.order_status;
     data["order_item_count"] = this.order_item_count;
     data["order_date"] = this.order_date;
-    //  data["server_id"] = this.server_id;
+    data["server_id"] = this.server_id;
     data['voucher_detail'] = this.voucher_detail;
     data["tax_json"] = this.tax_json;
     data["order_by"] = this.order_by;

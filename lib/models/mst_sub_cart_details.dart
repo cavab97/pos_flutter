@@ -30,6 +30,7 @@ class MSTSubCartdetails {
     modifirePrice = json["modifier_price"];
     caId = json["ca_id"];
     attrPrice = json["attr_price"];
+    attributeId = json["attribute_id"];
   }
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
@@ -41,6 +42,7 @@ class MSTSubCartdetails {
     data["modifier_price"] = this.modifirePrice;
     data["ca_id"] = this.caId;
     data["attr_price"] = this.attrPrice;
+    data["attribute_id"] = this.attributeId;
     return data;
   }
 }

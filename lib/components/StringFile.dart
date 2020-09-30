@@ -5,7 +5,7 @@ class Strings {
   static String title_opening_amount = "Opening Amount";
   static String title_closing_amount = "Closing Amount";
   static String forgot_password = "Forgot password?";
-  static String login_text = "YOU CAN ENTER YOUR USERNAME & PASSWORD HERE";
+  static String login_text = "YOU CAN ENTER YOUR USERNAME & PIN HERE";
   static String cancel_tansaction = "Cancel Transaction";
   static String username_validation_msg = "username must be required.";
   static String userPin_validation_msg = "Pin must be required.";
@@ -59,12 +59,13 @@ class Strings {
   static String shift_open_message = "Shift is not Opened";
   static String modifier = "Modifier";
   static String notesAndQty = "Notes and Quantity";
-  static String btnclockin = "Clock\nIN";
-  static String btnclockout = "Clock\nOUT";
+  static String btnclockin = "Check\nIN";
+  static String btnclockout = "Check\nOUT";
   static String select_Payment_type = "Select Payment Method";
   static String btn_exect = "Excet";
   static String cash = "CASH";
   static String cart_empty = "Cart is empty";
+  static String printer_not_available = "Printer not available for print";
   static String shift_closed = "Shift is closed.";
   static String close_table = "Close Table";
   static String split_order = "Split Order";
@@ -73,7 +74,7 @@ class Strings {
   static String no_image = "assets/no_image.png";
   static String out_of_stoke = "OUT OF STOCK";
   static String apply_promocode = "Apply Promocode";
-  static String item_not_available = "No item Available";
+  static String item_not_available = "No item available";
   static String asset_headerLogo = "assets/headerlogo.png";
   static String assetsBG = "assets/bg.jpg";
   static String no_imageAsset = 'assets/no_image.png';
@@ -106,4 +107,5 @@ class Strings {
   static String stock_not_valilable = "Product is Out of stock.";
   static String procesing = "Processing";
   static String send = "SEND";
+  static String internet_connection_lost = "Internet Connection Lost";
 }
