@@ -423,7 +423,8 @@ class LocalAPI {
   }
 
   Future<List<MSTCartdetails>> getCurrentCartItems(cartID) async {
-    var query = "SELECT * from mst_cart_detail where cart_id = " + cartID.toString();
+    var query =
+        "SELECT * from mst_cart_detail where cart_id = " + cartID.toString();
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<MSTCartdetails> list = res.isNotEmpty
         ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
@@ -457,40 +458,69 @@ class LocalAPI {
         terminalid +
         "  ORDER BY order_date DESC LIMIT 1";
     var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
-    List<Orders> list = checkisExit.isNotEmpty
+    List<Orders> list = checkisExit.length > 0
         ? checkisExit.map((c) => Orders.fromJson(c)).toList()
         : [];
     return list;
   }
 
+  Future<List<OrderDetail>> getLastOrdeDetailAppid(terminalid) async {
+    var qey =
+        "SELECT order_detail.app_id from order_detail where terminal_id =" +
+            terminalid +
+            "  ORDER BY detail_datetime DESC LIMIT 1";
+    var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
+    List<OrderDetail> list = checkisExit.length > 0
+        ? checkisExit.map((c) => OrderDetail.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<OrderModifire>> getLastOrderModifireAppid(terminalid) async {
+    var qey =
+        "SELECT order_modifier.app_id from order_modifier where terminal_id =" +
+            terminalid +
+            "  ORDER BY om_datetime DESC LIMIT 1";
+    var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
+    List<OrderModifire> list = checkisExit.length > 0
+        ? checkisExit.map((c) => OrderModifire.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<OrderAttributes>> getLastOrderAttrAppid(terminalid) async {
+    var qey =
+        "SELECT order_attributes.app_id from order_attributes where terminal_id =" +
+            terminalid +
+            "  ORDER BY oa_datetime DESC LIMIT 1";
+    var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
+    List<OrderAttributes> list = checkisExit.length > 0
+        ? checkisExit.map((c) => OrderAttributes.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<OrderPayment>> getLastOrderPaymentAppid(terminalid) async {
+    var qey =
+        "SELECT order_payment.app_id from order_payment where terminal_id =" +
+            terminalid +
+            "  ORDER BY op_datetime DESC LIMIT 1";
+    var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
+    List<OrderPayment> list = checkisExit.length > 0
+        ? checkisExit.map((c) => OrderPayment.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
   Future<int> placeOrder(Orders orderData) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry =
-        "SELECT *  FROM orders where app_id =" + orderData.app_id.toString();
-    var checkisExit =
-        await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
-    if (checkisExit.length > 0) {
-      List<Orders> list = checkisExit.isNotEmpty
-          ? checkisExit.map((c) => Orders.fromJson(c)).toList()
-          : [];
-    }
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var orderid = await db.insert("orders", orderData.toJson());
     await SyncAPICalls.logActivity("orders", "place order", "orders", orderid);
     return orderData.app_id;
   }
 
   Future<int> sendOrderDetails(OrderDetail orderDetailData) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_detail where app_id =" +
-        orderDetailData.app_id.toString();
-    var checkisExit =
-        await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
-    if (checkisExit.length > 0) {
-      List<OrderDetail> list = checkisExit.isNotEmpty
-          ? checkisExit.map((c) => OrderDetail.fromJson(c)).toList()
-          : [];
-      orderDetailData.app_id = list[0].app_id + 1;
-    }
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var orderid = await db.insert("order_detail", orderDetailData.toJson());
     await SyncAPICalls.logActivity(
         "orders", "insert order details", "order_detail", orderid);
@@ -498,17 +528,7 @@ class LocalAPI {
   }
 
   Future<int> sendModifireData(OrderModifire orderDetailData) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_modifier where app_id =" +
-        orderDetailData.app_id.toString();
-    var checkisExit =
-        await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
-    if (checkisExit.length > 0) {
-      List<OrderModifire> list = checkisExit.isNotEmpty
-          ? checkisExit.map((c) => OrderModifire.fromJson(c)).toList()
-          : [];
-      orderDetailData.app_id = list[0].app_id + 1;
-    }
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var orderid = await db.insert("order_modifier", orderDetailData.toJson());
     await SyncAPICalls.logActivity(
         "orders", "insert order modifier", "order_modifier", orderid);
@@ -516,17 +536,7 @@ class LocalAPI {
   }
 
   Future<int> sendAttrData(OrderAttributes orderDetailData) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_attributes where app_id =" +
-        orderDetailData.app_id.toString();
-    var checkisExit =
-        await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
-    if (checkisExit.length > 0) {
-      List<OrderAttributes> list = checkisExit.isNotEmpty
-          ? checkisExit.map((c) => OrderAttributes.fromJson(c)).toList()
-          : [];
-      orderDetailData.app_id = list[0].app_id + 1;
-    }
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var orderid = await db.insert("order_attributes", orderDetailData.toJson());
     await SyncAPICalls.logActivity(
         "orders", "insert order attributes", "order_attributes", orderid);
@@ -534,17 +544,7 @@ class LocalAPI {
   }
 
   Future<int> sendtoOrderPayment(OrderPayment paymentData) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_payment where app_id =" +
-        paymentData.app_id.toString();
-    var checkisExit =
-        await DatabaseHelper.dbHelper.getDatabse().rawQuery(checkisExitqry);
-    if (checkisExit.length > 0) {
-      List<OrderPayment> list = checkisExit.isNotEmpty
-          ? checkisExit.map((c) => OrderPayment.fromJson(c)).toList()
-          : [];
-      paymentData.app_id = list[0].app_id + 1;
-    }
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var orderid = await db.insert("order_payment", paymentData.toJson());
     await SyncAPICalls.logActivity(
         "orders", "insert order payment", "order_payment", orderid);
@@ -672,7 +672,7 @@ class LocalAPI {
 
   Future<OrderPayment> getOrderpaymentData(orderid) async {
     var qry =
-        "SELECT * from order_payment where order_id = " + orderid.toString();
+        "SELECT * from order_payment where app_id = " + orderid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderPayment> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
@@ -1174,13 +1174,13 @@ class LocalAPI {
 
   Future saveSyncOrder(Orders orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM orders where order_id =" +
-        orderData.order_id.toString();
+    var checkisExitqry =
+        "SELECT *  FROM orders where app_id =" + orderData.app_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var orderid;
     if (checkisExit.length > 0) {
       orderid = await db.update("orders", orderData.toJson(),
-          where: "order_id =?", whereArgs: [orderData.order_id]);
+          where: "app_id =?", whereArgs: [orderData.app_id]);
     } else {
       orderid = await db.insert("orders", orderData.toJson());
     }
@@ -1204,13 +1204,13 @@ class LocalAPI {
 
   Future saveSyncOrderPaymet(OrderPayment paymentdata) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_payment where op_id =" +
-        paymentdata.op_id.toString();
+    var checkisExitqry = "SELECT *  FROM order_payment where app_id =" +
+        paymentdata.app_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var orderid;
     if (checkisExit.length > 0) {
       orderid = await db.update("order_payment", paymentdata.toJson(),
-          where: "op_id =?", whereArgs: [paymentdata.op_id]);
+          where: "app_id =?", whereArgs: [paymentdata.app_id]);
     } else {
       orderid = await db.insert("order_payment", paymentdata.toJson());
     }
@@ -1219,13 +1219,13 @@ class LocalAPI {
 
   Future saveSyncOrderModifire(OrderModifire orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_modifier where om_id =" +
-        orderData.om_id.toString();
+    var checkisExitqry = "SELECT *  FROM order_modifier where app_id =" +
+        orderData.app_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var orderid;
     if (checkisExit.length > 0) {
       orderid = await db.update("order_modifier", orderData.toJson(),
-          where: "om_id =?", whereArgs: [orderData.om_id]);
+          where: "app_id =?", whereArgs: [orderData.app_id]);
     } else {
       orderid = await db.insert("order_modifier", orderData.toJson());
     }
@@ -1234,13 +1234,13 @@ class LocalAPI {
 
   Future saveSyncOrderAttribute(OrderAttributes orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_attributes where oa_id =" +
-        orderData.oa_id.toString();
+    var checkisExitqry = "SELECT *  FROM order_attributes where app_id =" +
+        orderData.app_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var orderid;
     if (checkisExit.length > 0) {
       orderid = await db.update("order_attributes", orderData.toJson(),
-          where: "oa_id =?", whereArgs: [orderData.oa_id]);
+          where: "app_id =?", whereArgs: [orderData.app_id]);
     } else {
       orderid = await db.insert("order_attributes", orderData.toJson());
     }

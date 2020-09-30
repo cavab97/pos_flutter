@@ -720,11 +720,17 @@ class _DashboradPageState extends State<DashboradPage>
           if (productdata.length > 0) {
             pdata = productdata[0];
           }
+          List<OrderDetail> lappid =
+              await localAPI.getLastOrdeDetailAppid(terminalId);
+          if (lappid.length > 0) {
+            orderDetail.app_id = lappid[0].app_id + 1;
+          } else {
+            orderDetail.app_id = int.parse(terminalId);
+          }
           orderDetail.uuid = uuid;
           orderDetail.order_id = orderId;
           orderDetail.branch_id = int.parse(branchid);
           orderDetail.terminal_id = int.parse(terminalId);
-          orderDetail.app_id = int.parse(terminalId);
           orderDetail.product_id = cartItem.productId;
           orderDetail.product_price = cartItem.productPrice;
           orderDetail.product_old_price = cartItem.productNetPrice;
@@ -751,12 +757,19 @@ class _DashboradPageState extends State<DashboradPage>
       for (var i = 0; i < modifireList.length; i++) {
         OrderModifire modifireData = new OrderModifire();
         var modifire = modifireList[i];
+
         if (modifire.caId == null) {
+          List<OrderModifire> lapMpid =
+              await localAPI.getLastOrderModifireAppid(terminalId);
+          if (lapMpid.length > 0) {
+            modifireData.app_id = lapMpid[0].app_id + 1;
+          } else {
+            modifireData.app_id = int.parse(terminalId);
+          }
           modifireData.uuid = uuid;
           modifireData.order_id = orderId;
           modifireData.detail_id = orderDetailid;
           modifireData.terminal_id = int.parse(terminalId);
-          modifireData.app_id = int.parse(terminalId);
           modifireData.product_id = modifire.productId;
           modifireData.modifier_id = modifire.modifierId;
           modifireData.om_amount = modifire.modifirePrice;
@@ -769,11 +782,17 @@ class _DashboradPageState extends State<DashboradPage>
           print(ordermodifreid);
         } else {
           OrderAttributes attributes = new OrderAttributes();
+          List<OrderAttributes> lapApid =
+              await localAPI.getLastOrderAttrAppid(terminalId);
+          if (lapApid.length > 0) {
+            attributes.app_id = lapApid[0].app_id + 1;
+          } else {
+            attributes.app_id = int.parse(terminalId);
+          }
           attributes.uuid = uuid;
           attributes.order_id = orderId;
           attributes.detail_id = orderDetailid;
           attributes.terminal_id = int.parse(terminalId);
-          attributes.app_id = int.parse(terminalId);
           attributes.product_id = modifire.productId;
           attributes.attribute_id = modifire.attributeId;
           attributes.attr_price = modifire.attrPrice;
@@ -790,12 +809,17 @@ class _DashboradPageState extends State<DashboradPage>
     }
 
     OrderPayment orderpayment = new OrderPayment();
-
+    List<OrderPayment> lapPpid =
+        await localAPI.getLastOrderPaymentAppid(terminalId);
+    if (lapPpid.length > 0) {
+      orderpayment.app_id = lapPpid[0].app_id + 1;
+    } else {
+      orderpayment.app_id = int.parse(terminalId);
+    }
     orderpayment.uuid = uuid;
     orderpayment.order_id = orderid;
     orderpayment.branch_id = int.parse(branchid);
     orderpayment.terminal_id = int.parse(terminalId);
-    orderpayment.app_id = int.parse(terminalId);
     orderpayment.op_method_id = payment != "" ? payment.paymentId : 0;
     orderpayment.op_amount =
         (cartData.grand_total - cartData.discount).toDouble();
@@ -1257,11 +1281,8 @@ class _DashboradPageState extends State<DashboradPage>
               SizedBox(width: 20),
               SizedBox(
                 height: 50.0,
-                child: Image.asset(
-                  Strings.asset_headerLogo,
-                  fit: BoxFit.contain,
-                  gaplessPlayback:true
-                ),
+                child: Image.asset(Strings.asset_headerLogo,
+                    fit: BoxFit.contain, gaplessPlayback: true),
               ),
             ],
           ),
@@ -1311,6 +1332,7 @@ class _DashboradPageState extends State<DashboradPage>
                         ? CommonUtils.imageFromBase64String(image_Arr[0])
                         : new Image.asset(
                             Strings.no_image,
+                            gaplessPlayback: true,
                             fit: BoxFit.cover,
                           ),
                   ),
@@ -1564,6 +1586,7 @@ class _DashboradPageState extends State<DashboradPage>
                             : new Image.asset(
                                 Strings.no_image,
                                 fit: BoxFit.cover,
+                                gaplessPlayback: true,
                               ),
                       )),
                   Container(
@@ -1769,7 +1792,7 @@ class _DashboradPageState extends State<DashboradPage>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                     Padding(
-                      padding: EdgeInsets.only(top: 5, bottom: 5),
+                      padding: EdgeInsets.only(top:0, bottom: 0),
                       child: Text(
                         cart.productName.toUpperCase(),
                         style: TextStyle(
@@ -1812,7 +1835,7 @@ class _DashboradPageState extends State<DashboradPage>
             ),
             menuItems: <Widget>[
               new Container(
-                padding: EdgeInsets.only(top: 5, bottom: 5),
+                padding: EdgeInsets.only(top: 0, bottom:0),
                 color: Colors.red,
                 child: new IconButton(
                   padding: EdgeInsets.all(0),
@@ -1954,7 +1977,7 @@ class _DashboradPageState extends State<DashboradPage>
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Padding(
-                              padding: EdgeInsets.only(top: 10, bottom: 10),
+                              padding: EdgeInsets.only(top: 0, bottom: 0),
                               child: Text(
                                 Strings.tax.toUpperCase() +
                                     " " +

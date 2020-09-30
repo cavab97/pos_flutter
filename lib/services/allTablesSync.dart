@@ -298,7 +298,7 @@ class SyncAPICalls {
           order.grand_total = orderdata["grand_total"] is int
               ? (orderdata['grand_total'] as int).toDouble()
               : orderdata['grand_total'];
-          order.server_id = orderdata["serverId"];
+          order.server_id = orderdata["server_id"];
           order.order_source = orderdata["order_source"];
           order.order_status = orderdata["order_status"];
           order.order_item_count = orderdata["order_item_count"];
@@ -374,23 +374,23 @@ class SyncAPICalls {
                 for (var a = 0; a < attribute.length; a++) {
                   var attributeDt = attribute[a];
                   OrderAttributes attr = new OrderAttributes();
-                  attr.oa_id = attributeDt["this.oa_id"];
-                  attr.uuid = attributeDt["this.uuid"];
-                  attr.order_id = attributeDt["this.order_id"];
-                  attr.detail_id = attributeDt["this.detail_id"];
-                  attr.terminal_id = attributeDt["this.terminal_id"];
-                  attr.app_id = attributeDt["this.app_id"];
-                  attr.product_id = attributeDt["this.product_id"];
-                  attr.attribute_id = attributeDt["this.attribute_id"];
+                  attr.oa_id = attributeDt["oa_id"];
+                  attr.uuid = attributeDt["uuid"];
+                  attr.order_id = attributeDt["order_id"];
+                  attr.detail_id = attributeDt["detail_id"];
+                  attr.terminal_id = attributeDt["terminal_id"];
+                  attr.app_id = attributeDt["app_id"];
+                  attr.product_id = attributeDt["product_id"];
+                  attr.attribute_id = attributeDt["attribute_id"];
                   attr.attr_price = attributeDt["attr_price"] is int
                       ? (attributeDt["attr_price"] as int).toDouble()
                       : attributeDt["attr_price"];
-                  attr.ca_id = attributeDt["this.ca_id"];
-                  attr.oa_datetime = attributeDt["this.oa_datetime"];
-                  attr.oa_by = attributeDt["this.oa_by"];
-                  attr.oa_status = attributeDt["this.oa_status"];
-                  attr.updated_at = attributeDt["this.updated_at"];
-                  attr.updated_by = attributeDt["this.updated_by"];
+                  attr.ca_id = attributeDt["ca_id"];
+                  attr.oa_datetime = attributeDt["oa_datetime"];
+                  attr.oa_by = attributeDt["oa_by"];
+                  attr.oa_status = attributeDt["oa_status"];
+                  attr.updated_at = attributeDt["updated_at"];
+                  attr.updated_by = attributeDt["updated_by"];
                   var attrres = await localAPI.saveSyncOrderAttribute(attr);
                   print(attrres);
                 }

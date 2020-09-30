@@ -844,6 +844,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             : new Image.asset(
                                 Strings.no_imageAsset,
                                 fit: BoxFit.cover,
+                                gaplessPlayback: true,
                               ),
                       ),
                     ),
