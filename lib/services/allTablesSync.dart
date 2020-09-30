@@ -229,6 +229,7 @@ class SyncAPICalls {
             "order_item_count": order.order_item_count,
             "order_date": order.order_date,
             "order_by": order.order_by,
+            "server_id": order.server_id,
             "updated_at": order.updated_at,
             "updated_by": order.updated_by,
             "order_detail": detailList,

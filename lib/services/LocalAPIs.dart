@@ -452,9 +452,10 @@ class LocalAPI {
     return list[0];
   }
 
-  Future<List<Orders>> getLastOrderAppid() async {
-    var qey =
-        "SELECT orders.app_id from orders ORDER BY order_date DESC LIMIT 1";
+  Future<List<Orders>> getLastOrderAppid(terminalid) async {
+    var qey = "SELECT orders.app_id from orders where terminal_id =" +
+        terminalid +
+        "  ORDER BY order_date DESC LIMIT 1";
     var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
     List<Orders> list = checkisExit.isNotEmpty
         ? checkisExit.map((c) => Orders.fromJson(c)).toList()
@@ -665,7 +666,7 @@ class LocalAPI {
         ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
-        "invoice", "get Orders  details list", "ProductDetails", orderid);
+        "invoice", "get Orders details list", "ProductDetails", orderid);
     return list;
   }
 
@@ -900,14 +901,15 @@ class LocalAPI {
     return ordersList;
   }
 
-  Future<ProductStoreInventory> checkItemAvailableinStore(productId) async {
+  Future<List<ProductStoreInventory>> checkItemAvailableinStore(
+      productId) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var inventoryProd = await db.query("product_store_inventory",
         where: 'product_id = ?', whereArgs: [productId]);
-    List<ProductStoreInventory> list = inventoryProd.isNotEmpty
+    List<ProductStoreInventory> list = inventoryProd.length > 0
         ? inventoryProd.map((c) => ProductStoreInventory.fromJson(c)).toList()
         : [];
-    return list[0];
+    return list;
   }
 
   Future removeFromInventory(OrderDetail produtdata) async {

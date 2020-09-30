@@ -11,8 +11,8 @@ import 'package:mcncashier/screens/AddCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class SearchCustomerPage extends StatefulWidget {
-  SearchCustomerPage({Key key}) : super(key: key);
-
+  SearchCustomerPage({Key key, this.onClose}) : super(key: key);
+  Function onClose;
   @override
   _SearchCustomerPageState createState() => _SearchCustomerPageState();
 }
@@ -53,7 +53,9 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
   saveCustomerTolocal(customer) async {
     await Preferences.setStringToSF(
         Constant.CUSTOMER_DATA, json.encode(customer));
-    await Navigator.pushNamed(context, Constant.DashboardScreen);
+    widget.onClose();
+    Navigator.of(context).pop();
+    // await Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
   filterCustomer(val) {

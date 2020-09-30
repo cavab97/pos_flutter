@@ -88,7 +88,6 @@ class _PINPageState extends State<PINPage> {
               Constant.LOIGN_USER, json.encode(user));
           await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
           await Preferences.setStringToSF(Constant.SHIFT_ID, result.toString());
-
           Navigator.pushNamed(context, Constant.DashboardScreen);
           setState(() {
             isLoading = false;

@@ -19,11 +19,13 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
-  ProductQuantityDailog({Key key, this.product, this.cartID, this.cartItem})
+  ProductQuantityDailog(
+      {Key key, this.product, this.cartID, this.cartItem, this.onClose})
       : super(key: key);
   final product;
   final int cartID;
   final cartItem;
+  Function onClose;
 
   @override
   _ProductQuantityDailogState createState() => _ProductQuantityDailogState();
@@ -173,15 +175,22 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   increaseQty() async {
     if (productItem.hasInventory == 1) {
-      ProductStoreInventory cartval =
+      List<ProductStoreInventory> cartval =
           await localAPI.checkItemAvailableinStore(productItem.productId);
-      if (int.parse(cartval.qty) >= product_qty) {
+      if (cartval.length > 0) {
+        if (int.parse(cartval[0].qty) >= product_qty) {
+          var prevproductqty = product_qty;
+          setState(() {
+            product_qty = prevproductqty + 1;
+          });
+        } else {
+          CommunFun.showToast(context, Strings.stock_not_valilable);
+        }
+      } else {
         var prevproductqty = product_qty;
         setState(() {
           product_qty = prevproductqty + 1;
         });
-      } else {
-        CommunFun.showToast(context, Strings.stock_not_valilable);
       }
     } else {
       if (product_qty <= productItem.qty) {
@@ -500,7 +509,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       items.add(cartitem);
       //  senditemtoKitchen(items);
     }
-    await Navigator.pushNamed(context, Constant.DashboardScreen);
+    widget.onClose();
+    Navigator.of(context).pop();
   }
 
   @override

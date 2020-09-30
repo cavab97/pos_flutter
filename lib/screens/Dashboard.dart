@@ -30,7 +30,6 @@ import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
-import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
@@ -85,19 +84,13 @@ class _DashboradPageState extends State<DashboradPage>
   void initState() {
     super.initState();
     checkisInit();
-    this.scaffoldKey = new GlobalKey<ScaffoldState>();
     checkISlogin();
-    checkshift();
+  }
+
+  refreshAfterAction() {
+    //checkshift();
+    clearCart();
     checkidTableSelected();
-    getUserData();
-    KeyboardVisibilityNotification().addNewListener(
-      onHide: () {
-        FocusScope.of(context).requestFocus(new FocusNode());
-      },
-    );
-    _textController.addListener(() {
-      getSearchList(_textController.text.toString());
-    });
   }
 
   checkISlogin() async {
@@ -116,6 +109,20 @@ class _DashboradPageState extends State<DashboradPage>
       await databaseHelper.initializeDatabase();
       await getCategoryList();
     }
+
+    await checkshift();
+    await checkidTableSelected();
+    await getUserData();
+
+    _textController.addListener(() {
+      getSearchList(_textController.text.toString());
+    });
+    this.scaffoldKey = new GlobalKey<ScaffoldState>();
+    KeyboardVisibilityNotification().addNewListener(
+      onHide: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+    );
   }
 
   checkidTableSelected() async {
@@ -538,7 +545,12 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return ProductQuantityDailog(product: product, cartID: currentCart);
+          return ProductQuantityDailog(
+              product: product,
+              cartID: currentCart,
+              onClose: () {
+                refreshAfterAction();
+              });
         });
   }
 
@@ -552,7 +564,11 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return SearchCustomerPage();
+          return SearchCustomerPage(
+            onClose: () {
+              refreshAfterAction();
+            },
+          );
         });
   }
 
@@ -638,7 +654,7 @@ class _DashboradPageState extends State<DashboradPage>
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
     var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
-    List<Orders> lastappid = await localAPI.getLastOrderAppid();
+    List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
 
     int length = branchdata.invoiceStart.length;
     var invoiceNo;
@@ -792,14 +808,13 @@ class _DashboradPageState extends State<DashboradPage>
     var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
     print(paymentd);
     await clearCartAfterSuccess(orderid);
-
-    /* await Navigator.of(context).pop();
-    await showDialog(
-        // Opning Ammount Popup
-        context: context,
-        builder: (BuildContext context) {
-          return InvoiceReceiptDailog(orderid: orderid);
-        });*/
+    await Navigator.of(context).pop();
+    // await showDialog(
+    //     // Opning Ammount Popup
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       return InvoiceReceiptDailog(orderid: orderid);
+    //     });*/
     await getOrderData(orderid, int.parse(terminalId));
   }
 
@@ -832,7 +847,9 @@ class _DashboradPageState extends State<DashboradPage>
     print(result);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     clearCart();
-    Navigator.pushNamed(context, Constant.DashboardScreen);
+    Navigator.of(context).pop();
+    refreshAfterAction();
+    // Navigator.pushNamed(context, Constant.DashboardScreen);
     // await showDialog(
     //     // Opning Ammount Popup
     //     context: context,
@@ -903,7 +920,12 @@ class _DashboradPageState extends State<DashboradPage>
         barrierDismissible: false,
         builder: (BuildContext context) {
           return ProductQuantityDailog(
-              product: product, cartID: currentCart, cartItem: cart);
+              product: product,
+              cartID: currentCart,
+              cartItem: cart,
+              onClose: () {
+                refreshAfterAction();
+              });
         });
     //     return false;
     //   }
