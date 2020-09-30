@@ -240,8 +240,8 @@ class CommunFun {
     // start with 1 tables
     var data1 = await SyncAPICalls.getDataServerBulk1(context); //api call 1
     if (data1 != null) {
-      await databaseHelper.insertData1(data1["data"]);
-      await CommunFun.setServerTime(null, "1");
+       databaseHelper.insertData1(data1["data"]);
+       CommunFun.setServerTime(null, "1");
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
@@ -249,8 +249,8 @@ class CommunFun {
     var data2_1 =
         await SyncAPICalls.getDataServerBulk2_1(context); //api call 2_1
     if (data2_1 != null) {
-      await databaseHelper.insertData2_1(data2_1["data"]);
-      await CommunFun.setServerTime(null, "1");
+       databaseHelper.insertData2_1(data2_1["data"]);
+       CommunFun.setServerTime(null, "1");
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
@@ -258,40 +258,40 @@ class CommunFun {
     var data2_2 =
         await SyncAPICalls.getDataServerBulk2_2(context); //api call 2_2
     if (data2_2 != null) {
-      await databaseHelper.insertData2_2(data2_2["data"]);
-      await CommunFun.setServerTime(null, "1");
+       databaseHelper.insertData2_2(data2_2["data"]);
+       CommunFun.setServerTime(null, "1");
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
     var data2_3 =
         await SyncAPICalls.getDataServerBulk2_3(context); //api call 2_3
     if (data2_3 != null) {
-      await databaseHelper.insertData2_3(data2_3["data"]);
-      await CommunFun.setServerTime(null, "2");
+       databaseHelper.insertData2_3(data2_3["data"]);
+       CommunFun.setServerTime(null, "2");
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
 
     var data3 = await SyncAPICalls.getDataServerBulk3(context); // call 3
     if (data3 != null) {
-      await databaseHelper.insertData3(data3["data"]);
-      await CommunFun.setServerTime(null, "3");
+       databaseHelper.insertData3(data3["data"]);
+       CommunFun.setServerTime(null, "3");
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
     var data4_1 = await SyncAPICalls.getDataServerBulk4_1(context);
     if (data4_1 != null) {
-      await databaseHelper.insertData4_1(data4_1["data"]);
-      await CommunFun.setServerTime(null, "3");
+       databaseHelper.insertData4_1(data4_1["data"]);
+       CommunFun.setServerTime(null, "3");
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
     var data4_2 = await SyncAPICalls.getDataServerBulk4_2(context);
     if (data4_2 != null) {
-      var result = await databaseHelper.insertData4_2(data4_2["data"]);
+      var result =  databaseHelper.insertData4_2(data4_2["data"]);
       print(result);
       if (result == 1) {
-        await CommunFun.setServerTime(null, "4");
+         CommunFun.setServerTime(null, "4");
       } else {
         print("Error when getting data4_3");
       }

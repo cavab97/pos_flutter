@@ -63,7 +63,7 @@ class _DashboradPageState extends State<DashboradPage>
   List<ProductDetails> SearchProductList = new List<ProductDetails>();
   List<MSTCartdetails> cartList = new List<MSTCartdetails>();
   bool isDrawerOpen = false;
-  bool isShiftOpen = false;
+  bool isShiftOpen = true;
   var userDetails;
   bool isTableSelected = false;
   Branch branchData;
@@ -1260,6 +1260,7 @@ class _DashboradPageState extends State<DashboradPage>
                 child: Image.asset(
                   Strings.asset_headerLogo,
                   fit: BoxFit.contain,
+                  gaplessPlayback:true
                 ),
               ),
             ],

@@ -235,7 +235,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     setState(() {
       selectedAttr = selectedAttr;
     });
-
+    setPrice();
     /*// var array = [];
     var prvSeelected = selectedAttr;
     var isSelected =
@@ -263,7 +263,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         selectedAttr = prvSeelected;
       });
     }*/
-    setPrice();
   }
 
   setPrice() {

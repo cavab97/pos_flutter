@@ -423,7 +423,7 @@ class LocalAPI {
   }
 
   Future<List<MSTCartdetails>> getCurrentCartItems(cartID) async {
-    var query = "SELECT * from mst_cart_detail where id=" + cartID.toString();
+    var query = "SELECT * from mst_cart_detail where cart_id = " + cartID.toString();
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<MSTCartdetails> list = res.isNotEmpty
         ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
