@@ -4,7 +4,7 @@ class Orders {
   int branch_id;
   int terminal_id;
   int app_id;
-  int table_no;
+  String table_no;
   int table_id;
   String invoice_no;
   int customer_id;

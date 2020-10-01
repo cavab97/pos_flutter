@@ -12,6 +12,7 @@ import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/TerminalLog.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/services/CommunAPICall.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -211,7 +212,7 @@ class SyncAPICalls {
             "branch_id": order.branch_id,
             "terminal_id": order.terminal_id,
             "app_id": order.app_id,
-            "table_no": order.table_no,
+           // "table_no": order.table_no,
             "table_id": order.table_id,
             "invoice_no": order.invoice_no,
             "customer_id": order.customer_id,
@@ -245,14 +246,14 @@ class SyncAPICalls {
         };
         var res = await APICalls.apiCall(apiurl, context, stringParams);
         print(res);
-        await Navigator.of(context).pop();
+        Navigator.of(context).pop();
         if (res["status"] == Constant.STATUS200) {
           await savesyncORderData(res["data"]);
           await CommunFun.showToast(context, "All orders upto dates.");
         }
       } else {
         CommunFun.showToast(context, "All orders upto dates.");
-        await Navigator.of(context).pop();
+        Navigator.of(context).pop();
       }
     } catch (e) {
       print(e);
@@ -273,7 +274,7 @@ class SyncAPICalls {
           order.branch_id = orderdata["branch_id"];
           order.terminal_id = orderdata["terminal_id"];
           order.app_id = orderdata["app_id"];
-          order.table_no = int.parse(orderdata["table_no"]);
+          //order.table_no = orderdata["table_no"];
           order.table_id = orderdata["table_id"];
           order.invoice_no = orderdata["invoice_no"];
           order.customer_id = orderdata["customer_id"];
@@ -294,7 +295,6 @@ class SyncAPICalls {
               orderdata["sub_total_after_discount"] is int
                   ? (orderdata['sub_total_after_discount'] as int).toDouble()
                   : orderdata['sub_total_after_discount'];
-          ;
           order.grand_total = orderdata["grand_total"] is int
               ? (orderdata['grand_total'] as int).toDouble()
               : orderdata['grand_total'];
@@ -440,6 +440,31 @@ class SyncAPICalls {
         'terminal_id': terminalId
       };
       return await APICalls.apiCall(apiurl, context, stringParams);
+    } catch (e) {
+      print(e);
+      CommunFun.showToast(context, e.message);
+    }
+  }
+
+  static sendCancledOrderTable(context) async {
+    try {
+      var apiurl = Configrations.cancle_order;
+      var terminalId = await CommunFun.getTeminalKey();
+      var branchid = await CommunFun.getbranchId();
+      LocalAPI localAPI = LocalAPI();
+      List<CancelOrder> orderdata = await localAPI.getCancleOrder(terminalId);
+      if (orderdata.length > 0) {
+        var stringParams = {
+          'branch_id': branchid,
+          'terminal_id': terminalId,
+          'order_cancel': json.encode(orderdata)
+        };
+        var res = await APICalls.apiCall(apiurl, context, stringParams);
+        print(res);
+        CommunFun.showToast(context, "Sync sucessfully done.");
+      } else {
+        CommunFun.showToast(context, "all cancel tables up to dates.");
+      }
     } catch (e) {
       print(e);
       CommunFun.showToast(context, e.message);

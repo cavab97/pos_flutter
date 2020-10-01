@@ -19,7 +19,18 @@ class Constant {
   static final String SHIFT_ID = "Shift_Id";
   static final String DASH_SHIFT = "dashShift";
   static final String IS_LOGIN = "IsLogin";
-  static final String USER_ROLE = "Roledata";
+  // static final String USER_ROLE = "Roledata";
+  static final String USER_PERMISSION = "user_permission";
+
+  /*==============================================================================
+                              Manage Permission  status
+  =================================================================================*/
+
+  static final String VIEW_ORDER = "view_order";
+  static final String ADD_ORDER = "add_order";
+  static final String EDIT_ORDER = "edit_order";
+  static final String DELETE_ORDER = "delete_order";
+
   /*==============================================================================
                               Manage API status
   =================================================================================*/

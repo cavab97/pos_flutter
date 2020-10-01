@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:ffi';
-
+import 'dart:typed_data';
+import 'package:image/image.dart';
 import 'package:esc_pos_printer/esc_pos_printer.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
-import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 
@@ -95,12 +96,12 @@ class PrintReceipt {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
-    /* // Print image
+    // Print image
     final ByteData data = await rootBundle.load('assets/headerlogo.png');
     final Uint8List bytes = data.buffer.asUint8List();
     final image = decodeImage(bytes);
     ticket.image(image, align: PosAlign.center);
-*/
+
     ticket.text(branchData.address,
         styles: PosStyles(
             fontType: PosFontType.fontA,
@@ -247,12 +248,12 @@ class PrintReceipt {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
-    /* // Print image
+     // Print image
     final ByteData data = await rootBundle.load('assets/headerlogo.png');
     final Uint8List bytes = data.buffer.asUint8List();
     final image = decodeImage(bytes);
     ticket.image(image, align: PosAlign.center);
-*/
+
     ticket.text(branchData.address,
         styles: PosStyles(
             fontType: PosFontType.fontA,

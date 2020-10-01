@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
@@ -39,17 +40,26 @@ class _TransactionsPageState extends State<TransactionsPage> {
   bool isFiltering = false;
   bool isRefunding = false;
   bool isWeborder = true;
+  var permissions = "";
   Customer customer = new Customer();
   Payments paumentMethod = new Payments();
   @override
   void initState() {
     super.initState();
     getTansactionList();
+    setPermissons();
     KeyboardVisibilityNotification().addNewListener(
       onHide: () {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
+  }
+
+  setPermissons() async {
+    var permission = await CommunFun.getPemission();
+    setState(() {
+      permissions = permission;
+    });
   }
 
   getTansactionList() async {
@@ -198,14 +208,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
     User userdata = await CommunFun.getuserDetails();
     CancelOrder order = new CancelOrder();
     order.id = selectedOrder.order_id;
-    order.invoiceId = selectedOrder.app_id;
+    order.orderId = selectedOrder.app_id;
     order.localID = await CommunFun.getLocalID();
     order.reason = reason;
     order.status = 3;
     order.createdBy = userdata.id;
     order.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     order.terminalId = int.parse(terID);
-    order.invoiceTerminalId = int.parse(terID);
+
     var addTocancle = await localAPI.insertCancelOrder(order);
     // TODO update store inventory
     getTansactionList();
@@ -282,47 +292,49 @@ class _TransactionsPageState extends State<TransactionsPage> {
             children: [
               TableRow(children: [
                 TableCell(
-                    // Part 1 white
-                    child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        color: Colors.white,
-                        child: ListView(
-                          padding: EdgeInsets.all(20),
+                  // Part 1 white
+                  child: Container(
+                    padding: EdgeInsets.only(top: 20, left: 20, right: 20),
+                    color: Colors.white,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                IconButton(
-                                  padding: EdgeInsets.all(0),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  icon: Icon(
-                                    Icons.keyboard_arrow_left,
-                                    size: 50,
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Text(Strings.transaction,
-                                    style: TextStyle(
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.grey[800])),
-                              ],
+                            IconButton(
+                              padding: EdgeInsets.all(0),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              icon: Icon(
+                                Icons.keyboard_arrow_left,
+                                size: 50,
+                              ),
                             ),
-                            transationsSearchBox(),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            orderLists.length > 0
-                                ? searchTransationList()
-                                : Center(
-                                    child: Text(Strings.no_order_found,
-                                        style: Styles.darkBlue()))
+                            SizedBox(width: 10),
+                            Text(Strings.transaction,
+                                style: TextStyle(
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[800])),
                           ],
-                        ))),
+                        ),
+                        transationsSearchBox(),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        orderLists.length > 0
+                            ? searchTransationList()
+                            : Center(
+                                child: Text(Strings.no_order_found,
+                                    style: Styles.darkBlue()))
+                      ],
+                    ),
+                  ),
+                ),
                 TableCell(
                   // Part 2 transactions list
                   child: Center(
@@ -449,7 +461,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                 : SizedBox(),
                             isRefunding
                                 ? refundButtons(context)
-                                : transationsButton()
+                                : permissions.contains(Constant.DELETE_ORDER)
+                                    ? transationsButton()
+                                    : SizedBox()
                           ]),
                         ),
                       ),
@@ -904,68 +918,79 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget searchTransationList() {
     if (isFiltering) {
-      return ListView(
+      return Container(
+        height: MediaQuery.of(context).size.height,
+        child: ListView(
           shrinkWrap: true,
+          // physics: AlwaysScrollableScrollPhysics(),
           children: filterList.map((item) {
             return Container(
-                decoration: new BoxDecoration(
-                    color: selectedOrder.app_id == item.app_id
-                        ? Colors.grey[200]
-                        : Colors.white),
-                child: ListTile(
-                  dense: false,
-                  selected: selectedOrder.app_id == item.app_id,
-                  onTap: () {
-                    getOrderDetails(item);
-                  },
-                  title: Row(
-                    children: <Widget>[
-                      Text(
-                          DateFormat('hh:mm aaa')
-                              .format(DateTime.parse(item.order_date)),
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[600])),
-                      SizedBox(width: 10),
-                      item.order_status == 3
-                          ? Container(
-                              padding: EdgeInsets.all(3),
-                              color: Colors.red,
-                              child: Text(
-                                "Cancel",
-                                style: Styles.whiteBoldsmall(),
-                              ),
-                            )
-                          : SizedBox(),
-                      item.order_status == 5
-                          ? Container(
-                              padding: EdgeInsets.all(3),
-                              color: Colors.red,
-                              child: Text(
-                                "Refunded",
-                                style: Styles.whiteBoldsmall(),
-                              ),
-                            )
-                          : SizedBox()
-                    ],
-                  ),
-                  subtitle: Text(Strings.invoice + item.invoice_no.toString(),
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[600])),
-                  isThreeLine: true,
-                  trailing: Text(item.grand_total.toString(),
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[600])),
-                ));
-          }).toList());
+              decoration: new BoxDecoration(
+                  color: selectedOrder.app_id == item.app_id
+                      ? Colors.grey[200]
+                      : Colors.white),
+              child: ListTile(
+                dense: false,
+                selected: selectedOrder.app_id == item.app_id,
+                onTap: () {
+                  getOrderDetails(item);
+                },
+                title: Row(
+                  children: <Widget>[
+                    Text(
+                        DateFormat('hh:mm aaa')
+                            .format(DateTime.parse(item.order_date)),
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[600])),
+                    SizedBox(width: 10),
+                    item.order_status == 3
+                        ? Container(
+                            padding: EdgeInsets.all(3),
+                            color: Colors.red,
+                            child: Text(
+                              "Cancel",
+                              style: Styles.whiteBoldsmall(),
+                            ),
+                          )
+                        : SizedBox(),
+                    item.order_status == 5
+                        ? Container(
+                            padding: EdgeInsets.all(3),
+                            color: Colors.red,
+                            child: Text(
+                              "Refunded",
+                              style: Styles.whiteBoldsmall(),
+                            ),
+                          )
+                        : SizedBox()
+                  ],
+                ),
+                subtitle: Text(Strings.invoice + item.invoice_no.toString(),
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[600])),
+                isThreeLine: true,
+                trailing: Text(
+                  item.grand_total.toString(),
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[600]),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      );
     } else {
-      return ListView(
+      return Container(
+        height: MediaQuery.of(context).size.height,
+        child: ListView(
           shrinkWrap: true,
+          physics: AlwaysScrollableScrollPhysics(),
           children: orderLists.map((item) {
             return Container(
                 decoration: new BoxDecoration(
@@ -1022,7 +1047,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           fontWeight: FontWeight.w500,
                           color: Colors.grey[600])),
                 ));
-          }).toList());
+          }).toList(),
+        ),
+      );
     }
   }
 }

@@ -11,6 +11,7 @@ import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
@@ -166,8 +167,6 @@ class LocalAPI {
   Future updateTableIdInOrder(orderid, tableid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "UPDATE orders SET table_id =" +
-        tableid.toString() +
-        " table_no = " +
         tableid.toString() +
         " where app_id =" +
         orderid.toString();
@@ -843,7 +842,8 @@ class LocalAPI {
   }
 
   Future<List<OrderDetail>> getOrderDetailTable(orderid) async {
-    var qry = "SELECT * from order_detail where app_id = " + orderid.toString();
+    var qry =
+        "SELECT * from order_detail where order_id = " + orderid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderDetail> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
@@ -950,9 +950,8 @@ class LocalAPI {
     }
   }
 
-  Future<int> updateStoreInvetory(ProductDetails produtdata, orderdata) async {
-    // UPDAte
-  }
+  Future<int> updateStoreInvetoryLogTable(
+      ProductDetails produtdata, orderdata) async {}
 
   Future<Branch> getBranchData(branchID) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
@@ -1245,5 +1244,36 @@ class LocalAPI {
       orderid = await db.insert("order_attributes", orderData.toJson());
     }
     return orderid;
+  }
+
+  Future<List<CancelOrder>> getCancleOrder(branchid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from order_cancel where terminal_id = " +
+        branchid.toString() +
+        "AND server_id = 0";
+    var ordersList = await db.rawQuery(qry);
+    List<CancelOrder> list = ordersList.length > 0
+        ? ordersList.map((c) => CancelOrder.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Order sync", "get Orders list", "Orders", branchid);
+    return list;
+  }
+
+  Future<List<PosPermission>> getUserPermissions(userid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = " SELECT  group_concat(pos_permission.pos_permission_name) as pos_permission_name  from users" +
+        " Left join user_pos_permission on user_pos_permission.user_id = users.id" +
+        " left join pos_permission on pos_permission.pos_permission_id = user_pos_permission.pos_permission_id" +
+        " WHERE user_id  =" +
+        userid.toString();
+
+    var permissionList = await db.rawQuery(qry);
+    List<PosPermission> list = permissionList.length > 0
+        ? permissionList.map((c) => PosPermission.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity("get PosPermission",
+        "get PosPermission list", "pos_permission", userid);
+    return list;
   }
 }

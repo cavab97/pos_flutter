@@ -7,7 +7,6 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/CheckInout.dart';
-import 'package:mcncashier/models/Role.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
@@ -77,18 +76,18 @@ class _PINPageState extends State<PINPage> {
           checkIn.createdAt = date.toString();
           checkIn.sync = 0;
           var result = await localAPI.userCheckInOut(checkIn);
-          List<Role> rolData = await localAPI.getRoldata(user.role);
-
-          if (rolData.length > 0) {
-            Role rolda = rolData[0];
-            await Preferences.setStringToSF(
-                Constant.USER_ROLE, json.encode(rolda));
-          }
+          // List<Role> rolData = await localAPI.getRoldata(user.role);
+          // if (rolData.length > 0) {
+          //   Role rolda = rolData[0];
+          //   await Preferences.setStringToSF(
+          //       Constant.USER_ROLE, json.encode(rolda));
+          // }
           await Preferences.setStringToSF(
               Constant.LOIGN_USER, json.encode(user));
+          await CommunFun.checkUserPermission(user.id);
           await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
           await Preferences.setStringToSF(Constant.SHIFT_ID, result.toString());
-          Navigator.pushNamed(context, Constant.DashboardScreen);
+          await Navigator.pushNamed(context, Constant.DashboardScreen);
           setState(() {
             isLoading = false;
           });
@@ -133,13 +132,7 @@ class _PINPageState extends State<PINPage> {
         checkIn.timeInOut = date.toString();
         checkIn.sync = 0;
         var result = await localAPI.userCheckInOut(checkIn);
-        await Preferences.removeSinglePref(Constant.IS_CHECKIN);
-        await Preferences.removeSinglePref(Constant.SHIFT_ID);
-        await Preferences.removeSinglePref(Constant.LOIGN_USER);
-        Navigator.pushNamed(context, Constant.PINScreen);
-        setState(() {
-          isLoading = false;
-        });
+        clearAfterCheckout();
       } else {
         if (pinNumber.length >= 6) {
           CommunFun.showToast(context, Strings.invalid_pin_msg);
@@ -150,6 +143,17 @@ class _PINPageState extends State<PINPage> {
     } else {
       CommunFun.showToast(context, Strings.already_clockout_msg);
     }
+  }
+
+  clearAfterCheckout() async {
+    await Preferences.removeSinglePref(Constant.IS_CHECKIN);
+    await Preferences.removeSinglePref(Constant.SHIFT_ID);
+    await Preferences.removeSinglePref(Constant.LOIGN_USER);
+    await Preferences.removeSinglePref(Constant.USER_PERMISSION);
+    await Navigator.pushNamed(context, Constant.PINScreen);
+    setState(() {
+      isLoading = false;
+    });
   }
 
   Future<bool> _willPopCallback() async {
@@ -202,26 +206,29 @@ class _PINPageState extends State<PINPage> {
 
   Widget imageview(context) {
     return Container(
-        width: MediaQuery.of(context).size.width / 2.9,
-        decoration: BoxDecoration(
-          color: Colors.grey,
-          borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(30), topLeft: Radius.circular(30)),
-          // image: DecorationImage(
-          //     image: AssetImage("assets/bg.jpg"), fit: BoxFit.cover)
+      width: MediaQuery.of(context).size.width / 2.9,
+      decoration: BoxDecoration(
+        color: Colors.grey,
+        borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(30), topLeft: Radius.circular(30)),
+        // image: DecorationImage(
+        //     image: AssetImage("assets/bg.jpg"), fit: BoxFit.cover)
+      ),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.all(10),
+          child: SizedBox(
+            // login logo
+            height: 110.0,
+            child: Image.asset(
+              Strings.asset_headerLogo,
+              fit: BoxFit.contain,
+              gaplessPlayback: true,
+            ),
+          ),
         ),
-        child: Center(
-            child: Padding(
-                padding: EdgeInsets.all(10),
-                child: SizedBox(
-                  // login logo
-                  height: 110.0,
-                  child: Image.asset(
-                    Strings.asset_headerLogo,
-                    fit: BoxFit.contain,
-                     gaplessPlayback:true,
-                  ),
-                ))));
+      ),
+    );
   }
 
   Widget _button(String number, Function() f) {

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -30,7 +31,8 @@ class CommunFun {
         style: TextStyle(
             color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold));
   }
-   static checkConnectivity() async {
+
+  static checkConnectivity() async {
     try {
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
@@ -40,6 +42,7 @@ class CommunFun {
       return false;
     }
   }
+
   static isLogged() async {
     var loginUser = await Preferences.getStringValuesSF(Constant.IS_LOGIN);
     if (loginUser != null) {
@@ -240,8 +243,8 @@ class CommunFun {
     // start with 1 tables
     var data1 = await SyncAPICalls.getDataServerBulk1(context); //api call 1
     if (data1 != null) {
-       databaseHelper.insertData1(data1["data"]);
-       CommunFun.setServerTime(null, "1");
+      databaseHelper.insertData1(data1["data"]);
+      CommunFun.setServerTime(null, "1");
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
@@ -249,8 +252,8 @@ class CommunFun {
     var data2_1 =
         await SyncAPICalls.getDataServerBulk2_1(context); //api call 2_1
     if (data2_1 != null) {
-       databaseHelper.insertData2_1(data2_1["data"]);
-       CommunFun.setServerTime(null, "1");
+      databaseHelper.insertData2_1(data2_1["data"]);
+      CommunFun.setServerTime(null, "1");
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
@@ -258,40 +261,40 @@ class CommunFun {
     var data2_2 =
         await SyncAPICalls.getDataServerBulk2_2(context); //api call 2_2
     if (data2_2 != null) {
-       databaseHelper.insertData2_2(data2_2["data"]);
-       CommunFun.setServerTime(null, "1");
+      databaseHelper.insertData2_2(data2_2["data"]);
+      CommunFun.setServerTime(null, "1");
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
     var data2_3 =
         await SyncAPICalls.getDataServerBulk2_3(context); //api call 2_3
     if (data2_3 != null) {
-       databaseHelper.insertData2_3(data2_3["data"]);
-       CommunFun.setServerTime(null, "2");
+      databaseHelper.insertData2_3(data2_3["data"]);
+      CommunFun.setServerTime(null, "2");
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
 
     var data3 = await SyncAPICalls.getDataServerBulk3(context); // call 3
     if (data3 != null) {
-       databaseHelper.insertData3(data3["data"]);
-       CommunFun.setServerTime(null, "3");
+      databaseHelper.insertData3(data3["data"]);
+      CommunFun.setServerTime(null, "3");
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
     var data4_1 = await SyncAPICalls.getDataServerBulk4_1(context);
     if (data4_1 != null) {
-       databaseHelper.insertData4_1(data4_1["data"]);
-       CommunFun.setServerTime(null, "3");
+      databaseHelper.insertData4_1(data4_1["data"]);
+      CommunFun.setServerTime(null, "3");
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
     var data4_2 = await SyncAPICalls.getDataServerBulk4_2(context);
     if (data4_2 != null) {
-      var result =  databaseHelper.insertData4_2(data4_2["data"]);
+      var result = databaseHelper.insertData4_2(data4_2["data"]);
       print(result);
       if (result == 1) {
-         CommunFun.setServerTime(null, "4");
+        CommunFun.setServerTime(null, "4");
       } else {
         print("Error when getting data4_3");
       }
@@ -606,6 +609,25 @@ class CommunFun {
 
       // Insert cart json
       await localAPI.updateWebCart(cartJson);
+    }
+  }
+
+  static checkUserPermission(userid) async {
+    LocalAPI localAPI = LocalAPI();
+    List<PosPermission> permissions = await localAPI.getUserPermissions(userid);
+    if (permissions.length > 0) {
+      await Preferences.setStringToSF(
+          Constant.USER_PERMISSION, permissions[0].posPermissionName);
+    }
+  }
+
+  static getPemission() async {
+    var permission =
+        await Preferences.getStringValuesSF(Constant.USER_PERMISSION);
+    if (permission != null) {
+      return permission;
+    } else {
+      return "";
     }
   }
 }

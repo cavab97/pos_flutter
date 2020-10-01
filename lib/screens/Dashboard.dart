@@ -41,7 +41,6 @@ import 'package:mcncashier/services/allTablesSync.dart';
 class DashboradPage extends StatefulWidget {
   // main Product list page
   DashboradPage({Key key}) : super(key: key);
-
   @override
   _DashboradPageState createState() => _DashboradPageState();
 }
@@ -79,7 +78,8 @@ class _DashboradPageState extends State<DashboradPage>
   Voucher selectedvoucher;
   int currentCart;
   bool isLoading = false;
-
+  User checkInUser;
+  var permissions = "";
   @override
   void initState() {
     super.initState();
@@ -88,7 +88,6 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   refreshAfterAction() {
-    //checkshift();
     clearCart();
     checkidTableSelected();
   }
@@ -97,6 +96,11 @@ class _DashboradPageState extends State<DashboradPage>
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
     if (loginUser == null) {
       Navigator.pushNamed(context, Constant.PINScreen);
+    } else {
+      User userdata = User.fromJson(json.decode(loginUser));
+      setState(() {
+        checkInUser = userdata;
+      });
     }
   }
 
@@ -113,7 +117,7 @@ class _DashboradPageState extends State<DashboradPage>
     await checkshift();
     await checkidTableSelected();
     await getUserData();
-
+    await setPermissons();
     _textController.addListener(() {
       getSearchList(_textController.text.toString());
     });
@@ -123,6 +127,13 @@ class _DashboradPageState extends State<DashboradPage>
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
+  }
+
+  setPermissons() async {
+    var permission = await CommunFun.getPemission();
+    setState(() {
+      permissions = permission;
+    });
   }
 
   checkidTableSelected() async {
@@ -182,17 +193,18 @@ class _DashboradPageState extends State<DashboradPage>
     Navigator.of(context).pop();
     await Preferences.removeSinglePref(Constant.LastSync_Table);
     await CommunFun.syncAfterSuccess(context);
-    getCategoryList();
+    await getCategoryList();
+    await CommunFun.checkUserPermission(checkInUser.id);
   }
 
   syncOrdersTodatabase() async {
     await CommunFun.opneSyncPop(context);
-    await SyncAPICalls.syncOrderstoDatabase(context);
     await getsetWebOrders();
+    await SyncAPICalls.syncOrderstoDatabase(context);
+    await SyncAPICalls.sendCancledOrderTable(context);
   }
 
   getsetWebOrders() async {
-    await CommunFun.opneSyncPop(context);
     var res = await SyncAPICalls.getWebOrders(context);
     print(res);
     var sertvertime = res["data"]["serverdatetime"];
@@ -200,7 +212,6 @@ class _DashboradPageState extends State<DashboradPage>
         Constant.ORDER_SERVER_DATE_TIME, sertvertime);
     var cartdata = res["data"]["cart"];
     await CommunFun.savewebOrdersintoCart(cartdata);
-    Navigator.of(context).pop();
   }
 
   gotoShiftReport() {
@@ -659,15 +670,9 @@ class _DashboradPageState extends State<DashboradPage>
     int length = branchdata.invoiceStart.length;
     var invoiceNo;
     if (lastappid.length > 0) {
-      if (lastappid[0].app_id != null) {
-        order.app_id = lastappid[0].app_id + 1;
-        invoiceNo = branchdata.orderPrefix +
-            order.app_id.toString().padLeft(length, "0");
-      } else {
-        order.app_id = int.parse(terminalId);
-        invoiceNo = branchdata.orderPrefix +
-            order.app_id.toString().padLeft(length, "0");
-      }
+      order.app_id = lastappid[0].app_id + 1;
+      invoiceNo =
+          branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     } else {
       order.app_id = int.parse(terminalId);
       invoiceNo =
@@ -678,7 +683,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
     order.table_id = tables.table_id;
-    order.table_no = tables.table_id;
+    //order.table_no = tables.table_id;
     order.invoice_no = invoiceNo;
     order.customer_id = cartData.user_id;
     order.sub_total = cartData.sub_total;
@@ -1184,16 +1189,22 @@ class _DashboradPageState extends State<DashboradPage>
                     size: 30,
                   ),
                   title: Text("Transaction", style: Styles.communBlack())),
-              ListTile(
-                  onTap: () {
-                    gotoWebCart();
-                  },
-                  leading: Icon(
-                    Icons.shopping_cart,
-                    color: Colors.black,
-                    size: 30,
-                  ),
-                  title: Text("Web Orders", style: Styles.communBlack())),
+              permissions.contains(Constant.VIEW_ORDER)
+                  ? ListTile(
+                      onTap: () {
+                        gotoWebCart();
+                      },
+                      leading: Icon(
+                        Icons.shopping_cart,
+                        color: Colors.black,
+                        size: 30,
+                      ),
+                      title: Text(
+                        "Web Orders",
+                        style: Styles.communBlack(),
+                      ),
+                    )
+                  : SizedBox(),
               ListTile(
                   onTap: () {
                     Navigator.of(context).pop();
@@ -1792,7 +1803,7 @@ class _DashboradPageState extends State<DashboradPage>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                     Padding(
-                      padding: EdgeInsets.only(top:0, bottom: 0),
+                      padding: EdgeInsets.only(top: 0, bottom: 0),
                       child: Text(
                         cart.productName.toUpperCase(),
                         style: TextStyle(
@@ -1835,7 +1846,7 @@ class _DashboradPageState extends State<DashboradPage>
             ),
             menuItems: <Widget>[
               new Container(
-                padding: EdgeInsets.only(top: 0, bottom:0),
+                padding: EdgeInsets.only(top: 0, bottom: 0),
                 color: Colors.red,
                 child: new IconButton(
                   padding: EdgeInsets.all(0),
