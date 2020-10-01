@@ -145,15 +145,8 @@ class _LoginPageState extends State<LoginPage> {
                         isValidatePassword = true;
                       });
                     }),
-                    SizedBox(height: 80),
-                    // GestureDetector(
-                    //   // forgot password btn
-                    //   onTap: () {
-                    //     // TODO : goto Forgot password
-                    //   },
-                    //   child: CommunFun.forgotPasswordText(context),
-                    // ),
-                    // SizedBox(height: 50),
+                    SizedBox(height: 50),
+
                     isLoading
                         ? CommunFun.loader(context)
                         : Container(
@@ -182,7 +175,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Image.asset(
         Strings.asset_headerLogo,
         fit: BoxFit.contain,
-         gaplessPlayback:true,
+        gaplessPlayback: true,
       ),
     );
   }

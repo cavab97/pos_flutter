@@ -166,36 +166,45 @@ class _PINPageState extends State<PINPage> {
       child: SafeArea(
         child: Scaffold(
           key: scaffoldKey,
-          body: Center(
-            child: Container(
-              //page background image
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage(Strings.assetsBG), fit: BoxFit.cover),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30.0),
-                        color: Colors.white),
-                    width: MediaQuery.of(context).size.width / 1.2,
-                    height: MediaQuery.of(context).size.height / 1.2,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        imageview(context), // Part 1 image with logo
-                        getNumbers(context), // Part 2  Muber keypade
-                      ],
-                    ),
+          body: Container(
+            //page background image
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage(Strings.assetsBG), fit: BoxFit.cover),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30.0),
+                      color: Colors.white),
+                  width: MediaQuery.of(context).size.width / 1.2,
+                  height: MediaQuery.of(context).size.height / 1.2,
+                  child: Table(
+                    defaultVerticalAlignment: TableCellVerticalAlignment.top,
+                    border: TableBorder(
+                        horizontalInside: BorderSide(
+                            width: 1,
+                            color: Colors.grey,
+                            style: BorderStyle.solid)),
+                    columnWidths: {
+                      0: FractionColumnWidth(.2),
+                      1: FractionColumnWidth(.4),
+                    },
+                    children: [
+                      TableRow(children: [
+                        imageview(context),
+                        getNumbers(context)
+                      ]) // Part 1 image with logo
+                      , // Part 2  Muber keypade
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -206,7 +215,8 @@ class _PINPageState extends State<PINPage> {
 
   Widget imageview(context) {
     return Container(
-      width: MediaQuery.of(context).size.width / 2.9,
+      // width: MediaQuery.of(context).size.width / 2.9,
+      height: MediaQuery.of(context).size.height / 1.2,
       decoration: BoxDecoration(
         color: Colors.grey,
         borderRadius: BorderRadius.only(
@@ -231,6 +241,182 @@ class _PINPageState extends State<PINPage> {
     );
   }
 
+  Widget getNumbers(context) {
+    // Numbers buttons
+    return Container(
+        padding: EdgeInsets.symmetric(horizontal: 80),
+        height: MediaQuery.of(context).size.height / 1.2,
+        width: MediaQuery.of(context).size.width / 2,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+              bottomRight: Radius.circular(30), topRight: Radius.circular(30)),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(
+                        Icons.close,
+                        color: Colors.black,
+                        size: 40,
+                      )),
+                ],
+              ),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Text(
+                      Strings.pin_Number,
+                      style: Styles.blackBoldLarge(),
+                    )
+                  ]),
+              SizedBox(
+                height: 20,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    pinNumber.length >= 1
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
+                    color: Colors.deepOrange,
+                    size: 40,
+                  ),
+                  Icon(
+                    pinNumber.length >= 2
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
+                    color: Colors.deepOrange,
+                    size: 40,
+                  ),
+                  Icon(
+                    pinNumber.length >= 3
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
+                    color: Colors.deepOrange,
+                    size: 40,
+                  ),
+                  Icon(
+                    pinNumber.length >= 4
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
+                    color: Colors.deepOrange,
+                    size: 40,
+                  ),
+                  Icon(
+                    pinNumber.length >= 5
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
+                    color: Colors.deepOrange,
+                    size: 40,
+                  ),
+                  Icon(
+                    pinNumber.length >= 6
+                        ? Icons.lens
+                        : Icons.panorama_fish_eye,
+                    color: Colors.deepOrange,
+                    size: 40,
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  _button("1", () {
+                    addINPin("1");
+                  }), // using custom widget _button
+                  _button("2", () {
+                    addINPin("2");
+                  }),
+                  _button("3", () {
+                    addINPin("3");
+                  }),
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  _button("4", () {
+                    addINPin("4");
+                  }), // using custom widget _button
+                  _button("5", () {
+                    addINPin("5");
+                  }),
+                  _button("6", () {
+                    addINPin("6");
+                  }),
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  _button("7", () {
+                    addINPin("7");
+                  }), // using custom widget _button
+                  _button("8", () {
+                    addINPin("8");
+                  }),
+                  _button("9", () {
+                    addINPin("9");
+                  }),
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  _buttonCN(Strings.btnclockin, () {
+                    clockInwithPIN();
+                  }),
+                  _button("0", () {
+                    addINPin("0");
+                  }),
+                  _buttonCN(Strings.btnclockout, () {
+                    clockOutwithPIN();
+                  }),
+                ],
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              isLoading
+                  ? CommunFun.loader(context)
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                          FlatButton(
+                              onPressed: () {
+                                clearPin();
+                              },
+                              child: Text(Strings.clear,
+                                  style: Styles.orangeLarge()))
+                        ])
+            ],
+          ),
+        ));
+  }
+
   Widget _button(String number, Function() f) {
     // Creating a method of return type Widget with number and function f as a parameter
     return Padding(
@@ -239,8 +425,8 @@ class _PINPageState extends State<PINPage> {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
             side: BorderSide(color: Colors.grey)),
-        height: MediaQuery.of(context).size.height / 8.7,
-        minWidth: MediaQuery.of(context).size.width / 9.9,
+        height: MediaQuery.of(context).size.height / 9,
+        // minWidth: MediaQuery.of(context).size.width / 9.9,
         child: Text(number,
             textAlign: TextAlign.center, style: Styles.blackBoldLarge()),
         textColor: Colors.black,
@@ -250,165 +436,21 @@ class _PINPageState extends State<PINPage> {
     );
   }
 
-  Widget getNumbers(context) {
-    // Numbers buttons
-    return SingleChildScrollView(
-      child: Container(
-        margin: EdgeInsets.only(right: 90),
-        child: Column(
-          children: <Widget>[
-            // isCheckIn
-            //     ? Row(
-            //         mainAxisAlignment: MainAxisAlignment.end,
-            //         children: <Widget>[
-            //           IconButton(
-            //               padding: EdgeInsets.only(
-            //                 left: 100,
-            //               ),
-            //               onPressed: () {
-            //                 Navigator.of(context).pop();
-            //               },
-            //               icon: Icon(
-            //                 Icons.close,
-            //                 color: Colors.black,
-            //                 size: 50,
-            //               )),
-            //         ],
-            //       )
-            //     : SizedBox(height: 20),
-            SizedBox(height: 20),
-            Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  Text(
-                    Strings.pin_Number,
-                    style: Styles.blackBoldLarge(),
-                  )
-                ]),
-            SizedBox(
-              height: 20,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(
-                  pinNumber.length >= 1 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
-                  size: 40,
-                ),
-                Icon(
-                  pinNumber.length >= 2 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
-                  size: 40,
-                ),
-                Icon(
-                  pinNumber.length >= 3 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
-                  size: 40,
-                ),
-                Icon(
-                  pinNumber.length >= 4 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
-                  size: 40,
-                ),
-                Icon(
-                  pinNumber.length >= 5 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
-                  size: 40,
-                ),
-                Icon(
-                  pinNumber.length >= 6 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
-                  size: 40,
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                _button("1", () {
-                  addINPin("1");
-                }), // using custom widget _button
-                _button("2", () {
-                  addINPin("2");
-                }),
-                _button("3", () {
-                  addINPin("3");
-                }),
-              ],
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                _button("4", () {
-                  addINPin("4");
-                }), // using custom widget _button
-                _button("5", () {
-                  addINPin("5");
-                }),
-                _button("6", () {
-                  addINPin("6");
-                }),
-              ],
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                _button("7", () {
-                  addINPin("7");
-                }), // using custom widget _button
-                _button("8", () {
-                  addINPin("8");
-                }),
-                _button("9", () {
-                  addINPin("9");
-                }),
-              ],
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                _button(Strings.btnclockin, () {
-                  clockInwithPIN();
-                }),
-                _button("0", () {
-                  addINPin("0");
-                }),
-                _button(Strings.btnclockout, () {
-                  clockOutwithPIN();
-                }),
-              ],
-            ),
-            SizedBox(
-              height: 15,
-            ),
-            isLoading
-                ? CommunFun.loader(context)
-                : Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                        FlatButton(
-                            onPressed: () {
-                              clearPin();
-                            },
-                            child: Text(Strings.clear,
-                                style: Styles.orangeLarge()))
-                      ])
-          ],
-        ),
+  Widget _buttonCN(String number, Function() f) {
+    // Creating a method of return type Widget with number and function f as a parameter
+    return Padding(
+      padding: EdgeInsets.all(5),
+      child: MaterialButton(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18.0),
+            side: BorderSide(color: Colors.grey)),
+        height: MediaQuery.of(context).size.height / 8.7,
+        // minWidth: MediaQuery.of(context).size.width / 9.9,
+        child: Text(number,
+            textAlign: TextAlign.center, style: Styles.blackBoldsmall()),
+        textColor: Colors.black,
+        color: Colors.grey[100],
+        onPressed: f,
       ),
     );
   }

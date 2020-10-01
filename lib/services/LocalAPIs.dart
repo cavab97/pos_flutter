@@ -89,9 +89,9 @@ class LocalAPI {
     var query = "SELECT product.*,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 , price_type.name as price_type_Name FROM `product` " +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
-        " where product.name LIKE '%$searchText%'" +
-        " AND product.status = 1"
-            " GROUP By product.product_id";
+        " where product.name LIKE '%$searchText%' OR product.sku LIKE '%$searchText%'" +
+        " AND product.status = 1" +
+        " GROUP By product.product_id";
 
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<ProductDetails> list = res.isNotEmpty
