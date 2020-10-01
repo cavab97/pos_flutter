@@ -1106,7 +1106,7 @@ class _DashboradPageState extends State<DashboradPage>
                           color: Colors.white,
                           child: cartITems(),
                         ),
-                        paybutton(context),
+                        Container(child: paybutton(context)),
                         !isShiftOpen ? openShiftButton(context) : SizedBox()
                       ],
                     )),
@@ -1656,7 +1656,7 @@ class _DashboradPageState extends State<DashboradPage>
                   margin: EdgeInsets.only(
                       top: MediaQuery.of(context).size.height / 1.3 + 10),
                   height: 50,
-                  width: 200,
+                   width: MediaQuery.of(context).size.width/7,
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () {
@@ -1681,7 +1681,7 @@ class _DashboradPageState extends State<DashboradPage>
             margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height / 1.3 + 10),
             height: 50,
-            width: 200,
+            width: MediaQuery.of(context).size.width/7,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
@@ -2115,7 +2115,7 @@ class _DashboradPageState extends State<DashboradPage>
       children: <Widget>[
         Container(
             height: MediaQuery.of(context).size.height / 1.3,
-            width: MediaQuery.of(context).size.width,
+            //width: MediaQuery.of(context).size.width,
             color: Colors.grey[300],
             padding: EdgeInsets.all(10),
             child: Stack(
