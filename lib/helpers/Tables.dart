@@ -437,7 +437,7 @@ class CreateTables {
         "branch_id INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
-        "table_no INTEGER," +
+        "table_no TEXT," +
         "table_id INTEGER," +
         "invoice_no TEXT," +
         "customer_id INTEGER," +
@@ -451,7 +451,7 @@ class CreateTables {
         "sub_total_after_discount REAL," +
         "grand_total REAL," +
         "order_source INTEGER," + // 1  web, 2  app
-        "order_status INTEGER," +
+        "order_status INTEGER," + //1 New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
         "order_item_count INTEGER," +
         "order_date TEXT," +
         "server_id INTEGER," +
@@ -531,7 +531,7 @@ class CreateTables {
         "op_method_id INTEGER," +
         "op_amount REAL," +
         "op_method_response TEXT," +
-        "op_status INTEGER," + // 1 placed , 2 cancel 3,refund
+        "op_status INTEGER," + // 1 New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
         "op_datetime TEXT," +
         "op_by INTEGER," +
         "updated_at TEXT," +
@@ -540,19 +540,16 @@ class CreateTables {
 // TABLE order_payment
     datatables = db.execute("CREATE TABLE order_cancel (" +
         "id INTEGER ," +
-        "invoice_id INTEGER," +
+        "order_id INTEGER," +
         "localID TEXT," +
         "reason TEXT," +
-        "status INTEGER," +
+        "status INTEGER," +  // New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
         "created_by INTEGER," +
         "updated_by INTEGER," +
         "created_at TEXT," +
         "updated_at TEXT," +
-        "sync NUMERIC," +
-        "serverId INTEGER," +
-        "terminal_id INTEGER," +
-        "invoice_unique_id TEXT," +
-        "invoice_terminal_id INTEGER" +
+        "server_id INTEGER," +
+        "terminal_id INTEGER" +
         ")");
 
     //Table customer
@@ -768,6 +765,34 @@ class CreateTables {
     //  datatables = db.execute("CREATE TABLE voucher_log ( " +
     //     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
     //     ")");
+
+//POS ROle USer Table
+    datatables = db.execute("CREATE TABLE pos_permission ( " +
+        'pos_permission_id INTEGER,' +
+        'pos_permission_name TEXT,' +
+        'pos_permission_updated_at TEXT,' +
+        'pos_permission_updated_by INTEGER' +
+        ")");
+
+    datatables = db.execute("CREATE TABLE pos_role_permission ( " +
+        "pos_rp_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "pos_rp_uuid TEXT," +
+        "pos_rp_role_id INTEGER," +
+        "pos_rp_permission_id INTEGER," +
+        "pos_rp_permission_status NUMERIC," +
+        "pos_rp_updated_at TEXT," +
+        "pos_rp_updated_by INTEGER" +
+        ")");
+
+    datatables = db.execute("CREATE TABLE user_pos_permission ( " +
+        "up_pos_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "up_pos_uuid TEXT," +
+        "user_id INTEGER," +
+        "status NUMERIC," +
+        "pos_permission_id INTEGER," +
+        "updated_at TEXT," +
+        "updated_by INTEGER" +
+        ")");
     return datatables;
   }
 }

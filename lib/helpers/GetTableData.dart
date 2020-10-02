@@ -7,6 +7,9 @@ import 'package:mcncashier/models/Category_Attributes.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Modifier.dart';
 import 'package:mcncashier/models/Payment.dart';
+import 'package:mcncashier/models/PosPermission.dart';
+import 'package:mcncashier/models/PosRolePermission.dart';
+import 'package:mcncashier/models/PosUserPermission.dart';
 import 'package:mcncashier/models/Price_Type.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product.dart';
@@ -52,6 +55,9 @@ class TableData {
     var roleData = tablesData["role"];
     var taxData = tablesData["branch_tax"];
     var taxList = tablesData["tax"];
+    var posPermission = tablesData["pos_permission"];
+    var posRolPermission = tablesData["pos_role_permission"];
+    var userPosPermission = tablesData["user_pos_permission"];
     try {
       if (branchData.length != 0) {
         for (var i = 0; i < branchData.length; i++) {
@@ -153,6 +159,74 @@ class TableData {
           }
         }
       }
+      if (posPermission.length != 0) {
+        for (var i = 0; i < posPermission.length; i++) {
+          var posPermissionitem = posPermission[i];
+          PosPermission permission = PosPermission.fromJson(posPermissionitem);
+          var data = {
+            'table': "pos_permission",
+            'key': "pos_permission_id",
+            'value': permission.posPermissionId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("pos_permission", permission.toJson());
+            print(result);
+          } else {
+            var result = await db.update("pos_permission", permission.toJson(),
+                where: 'pos_permission_id =?',
+                whereArgs: [permission.posPermissionId]);
+            print(result);
+          }
+        }
+      }
+      if (posRolPermission.length != 0) {
+        for (var i = 0; i < posRolPermission.length; i++) {
+          var posPermissionitem = posRolPermission[i];
+          PosRolePermission permissionPOSrole =
+              PosRolePermission.fromJson(posPermissionitem);
+          var data = {
+            'table': "pos_role_permission",
+            'key': "pos_rp_id",
+            'value': permissionPOSrole.posRpId
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert(
+                "pos_role_permission", permissionPOSrole.toJson());
+            print(result);
+          } else {
+            var result = await db.update(
+                "pos_role_permission", permissionPOSrole.toJson(),
+                where: 'pos_rp_id =?', whereArgs: [permissionPOSrole.posRpId]);
+            print(result);
+          }
+        }
+      }
+      if (userPosPermission.length != 0) {
+        for (var i = 0; i < userPosPermission.length; i++) {
+          var userPosPermissionitem = userPosPermission[i];
+          UserPosPermission userpermissionPOS =
+              UserPosPermission.fromJson(userPosPermissionitem);
+          var data = {
+            'table': "user_pos_permission",
+            'key': "up_pos_id",
+            'value': userpermissionPOS.upPosId
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert(
+                "user_pos_permission", userpermissionPOS.toJson());
+            print(result);
+          } else {
+            var result = await db.update(
+                "user_pos_permission", userpermissionPOS.toJson(),
+                where: 'up_pos_id =?', whereArgs: [userpermissionPOS.upPosId]);
+            print(result);
+          }
+        }
+      }
+
       return 1;
     } catch (e) {
       print(e);

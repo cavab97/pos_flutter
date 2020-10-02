@@ -19,8 +19,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController emailAddress = new TextEditingController(text: "");
-  TextEditingController userPin = new TextEditingController(text: "");
+  TextEditingController emailAddress = new TextEditingController(text: "jack");
+  TextEditingController userPin = new TextEditingController(text: "672907");
   GlobalKey<ScaffoldState> scaffoldKey;
   // DatabaseHelper databaseHelper = DatabaseHelper();
   var errormessage = "";
@@ -145,15 +145,8 @@ class _LoginPageState extends State<LoginPage> {
                         isValidatePassword = true;
                       });
                     }),
-                    SizedBox(height: 80),
-                    // GestureDetector(
-                    //   // forgot password btn
-                    //   onTap: () {
-                    //     // TODO : goto Forgot password
-                    //   },
-                    //   child: CommunFun.forgotPasswordText(context),
-                    // ),
-                    // SizedBox(height: 50),
+                    SizedBox(height: 50),
+
                     isLoading
                         ? CommunFun.loader(context)
                         : Container(
@@ -182,6 +175,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Image.asset(
         Strings.asset_headerLogo,
         fit: BoxFit.contain,
+        gaplessPlayback: true,
       ),
     );
   }

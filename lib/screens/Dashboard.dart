@@ -30,7 +30,6 @@ import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
-import 'package:mcncashier/screens/InvoiceReceipt.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
@@ -42,7 +41,6 @@ import 'package:mcncashier/services/allTablesSync.dart';
 class DashboradPage extends StatefulWidget {
   // main Product list page
   DashboradPage({Key key}) : super(key: key);
-
   @override
   _DashboradPageState createState() => _DashboradPageState();
 }
@@ -64,7 +62,7 @@ class _DashboradPageState extends State<DashboradPage>
   List<ProductDetails> SearchProductList = new List<ProductDetails>();
   List<MSTCartdetails> cartList = new List<MSTCartdetails>();
   bool isDrawerOpen = false;
-  bool isShiftOpen = false;
+  bool isShiftOpen = true;
   var userDetails;
   bool isTableSelected = false;
   Branch branchData;
@@ -80,30 +78,29 @@ class _DashboradPageState extends State<DashboradPage>
   Voucher selectedvoucher;
   int currentCart;
   bool isLoading = false;
-
+  User checkInUser;
+  var permissions = "";
   @override
   void initState() {
     super.initState();
     checkisInit();
-    this.scaffoldKey = new GlobalKey<ScaffoldState>();
     checkISlogin();
-    checkshift();
+  }
+
+  refreshAfterAction() {
+    clearCart();
     checkidTableSelected();
-    getUserData();
-    KeyboardVisibilityNotification().addNewListener(
-      onHide: () {
-        FocusScope.of(context).requestFocus(new FocusNode());
-      },
-    );
-    _textController.addListener(() {
-      getSearchList(_textController.text.toString());
-    });
   }
 
   checkISlogin() async {
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
     if (loginUser == null) {
       Navigator.pushNamed(context, Constant.PINScreen);
+    } else {
+      User userdata = User.fromJson(json.decode(loginUser));
+      setState(() {
+        checkInUser = userdata;
+      });
     }
   }
 
@@ -116,6 +113,27 @@ class _DashboradPageState extends State<DashboradPage>
       await databaseHelper.initializeDatabase();
       await getCategoryList();
     }
+
+    await checkshift();
+    await checkidTableSelected();
+    await getUserData();
+    await setPermissons();
+    _textController.addListener(() {
+      getSearchList(_textController.text.toString());
+    });
+    this.scaffoldKey = new GlobalKey<ScaffoldState>();
+    KeyboardVisibilityNotification().addNewListener(
+      onHide: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+      },
+    );
+  }
+
+  setPermissons() async {
+    var permission = await CommunFun.getPemission();
+    setState(() {
+      permissions = permission;
+    });
   }
 
   checkidTableSelected() async {
@@ -175,30 +193,18 @@ class _DashboradPageState extends State<DashboradPage>
     Navigator.of(context).pop();
     await Preferences.removeSinglePref(Constant.LastSync_Table);
     await CommunFun.syncAfterSuccess(context);
-    getCategoryList();
+    await getCategoryList();
+    await CommunFun.checkUserPermission(checkInUser.id);
   }
 
   syncOrdersTodatabase() async {
     await CommunFun.opneSyncPop(context);
-    var res = await SyncAPICalls.syncOrderstoDatabase(context);
-    print(res);
-    if (res["status"] == Constant.STATUS200) {
-      savesyncORderData(res["data"]);
-    }
-  }
-
-  savesyncORderData(data) async {
-    var orders = data["orders"];
-
-    if (orders.length > 0) {
-      for (var i = 0; i < orders.length; i++) {}
-    }
-    //var result = await saveSyncOrder();
-    await Navigator.of(context).pop();
+    await getsetWebOrders();
+    await SyncAPICalls.syncOrderstoDatabase(context);
+    await SyncAPICalls.sendCancledOrderTable(context);
   }
 
   getsetWebOrders() async {
-    await CommunFun.opneSyncPop(context);
     var res = await SyncAPICalls.getWebOrders(context);
     print(res);
     var sertvertime = res["data"]["serverdatetime"];
@@ -206,7 +212,6 @@ class _DashboradPageState extends State<DashboradPage>
         Constant.ORDER_SERVER_DATE_TIME, sertvertime);
     var cartdata = res["data"]["cart"];
     await CommunFun.savewebOrdersintoCart(cartdata);
-    Navigator.of(context).pop();
   }
 
   gotoShiftReport() {
@@ -550,7 +555,12 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return ProductQuantityDailog(product: product, cartID: currentCart);
+          return ProductQuantityDailog(
+              product: product,
+              cartID: currentCart,
+              onClose: () {
+                refreshAfterAction();
+              });
         });
   }
 
@@ -564,7 +574,11 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return SearchCustomerPage();
+          return SearchCustomerPage(
+            onClose: () {
+              refreshAfterAction();
+            },
+          );
         });
   }
 
@@ -650,20 +664,14 @@ class _DashboradPageState extends State<DashboradPage>
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
     var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
-    List<Orders> lastappid = await localAPI.getLastOrderAppid();
+    List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
 
     int length = branchdata.invoiceStart.length;
     var invoiceNo;
     if (lastappid.length > 0) {
-      if (lastappid[0].app_id != null) {
-        order.app_id = lastappid[0].app_id + 1;
-        invoiceNo = branchdata.orderPrefix +
-            order.app_id.toString().padLeft(length, "0");
-      } else {
-        order.app_id = int.parse(terminalId);
-        invoiceNo = branchdata.orderPrefix +
-            order.app_id.toString().padLeft(length, "0");
-      }
+      order.app_id = lastappid[0].app_id + 1;
+      invoiceNo =
+          branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     } else {
       order.app_id = int.parse(terminalId);
       invoiceNo =
@@ -674,7 +682,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
     order.table_id = tables.table_id;
-    order.table_no = tables.table_id;
+    //order.table_no = tables.table_id;
     order.invoice_no = invoiceNo;
     order.customer_id = cartData.user_id;
     order.sub_total = cartData.sub_total;
@@ -685,6 +693,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.tax_json = cartData.tax_json;
     order.order_date = datetime;
     order.order_status = 1;
+    order.server_id = 0;
     order.order_source = cartData.source;
     order.order_by = userdata.id;
     order.voucher_id = cartData.voucher_id;
@@ -715,11 +724,17 @@ class _DashboradPageState extends State<DashboradPage>
           if (productdata.length > 0) {
             pdata = productdata[0];
           }
+          List<OrderDetail> lappid =
+              await localAPI.getLastOrdeDetailAppid(terminalId);
+          if (lappid.length > 0) {
+            orderDetail.app_id = lappid[0].app_id + 1;
+          } else {
+            orderDetail.app_id = int.parse(terminalId);
+          }
           orderDetail.uuid = uuid;
           orderDetail.order_id = orderId;
           orderDetail.branch_id = int.parse(branchid);
           orderDetail.terminal_id = int.parse(terminalId);
-          orderDetail.app_id = int.parse(terminalId);
           orderDetail.product_id = cartItem.productId;
           orderDetail.product_price = cartItem.productPrice;
           orderDetail.product_old_price = cartItem.productNetPrice;
@@ -746,12 +761,19 @@ class _DashboradPageState extends State<DashboradPage>
       for (var i = 0; i < modifireList.length; i++) {
         OrderModifire modifireData = new OrderModifire();
         var modifire = modifireList[i];
+
         if (modifire.caId == null) {
+          List<OrderModifire> lapMpid =
+              await localAPI.getLastOrderModifireAppid(terminalId);
+          if (lapMpid.length > 0) {
+            modifireData.app_id = lapMpid[0].app_id + 1;
+          } else {
+            modifireData.app_id = int.parse(terminalId);
+          }
           modifireData.uuid = uuid;
           modifireData.order_id = orderId;
           modifireData.detail_id = orderDetailid;
           modifireData.terminal_id = int.parse(terminalId);
-          modifireData.app_id = int.parse(terminalId);
           modifireData.product_id = modifire.productId;
           modifireData.modifier_id = modifire.modifierId;
           modifireData.om_amount = modifire.modifirePrice;
@@ -764,11 +786,17 @@ class _DashboradPageState extends State<DashboradPage>
           print(ordermodifreid);
         } else {
           OrderAttributes attributes = new OrderAttributes();
+          List<OrderAttributes> lapApid =
+              await localAPI.getLastOrderAttrAppid(terminalId);
+          if (lapApid.length > 0) {
+            attributes.app_id = lapApid[0].app_id + 1;
+          } else {
+            attributes.app_id = int.parse(terminalId);
+          }
           attributes.uuid = uuid;
           attributes.order_id = orderId;
           attributes.detail_id = orderDetailid;
           attributes.terminal_id = int.parse(terminalId);
-          attributes.app_id = int.parse(terminalId);
           attributes.product_id = modifire.productId;
           attributes.attribute_id = modifire.attributeId;
           attributes.attr_price = modifire.attrPrice;
@@ -785,12 +813,17 @@ class _DashboradPageState extends State<DashboradPage>
     }
 
     OrderPayment orderpayment = new OrderPayment();
-
+    List<OrderPayment> lapPpid =
+        await localAPI.getLastOrderPaymentAppid(terminalId);
+    if (lapPpid.length > 0) {
+      orderpayment.app_id = lapPpid[0].app_id + 1;
+    } else {
+      orderpayment.app_id = int.parse(terminalId);
+    }
     orderpayment.uuid = uuid;
     orderpayment.order_id = orderid;
     orderpayment.branch_id = int.parse(branchid);
     orderpayment.terminal_id = int.parse(terminalId);
-    orderpayment.app_id = int.parse(terminalId);
     orderpayment.op_method_id = payment != "" ? payment.paymentId : 0;
     orderpayment.op_amount =
         (cartData.grand_total - cartData.discount).toDouble();
@@ -803,18 +836,17 @@ class _DashboradPageState extends State<DashboradPage>
     var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
     print(paymentd);
     await clearCartAfterSuccess(orderid);
-
-    /* await Navigator.of(context).pop();
-    await showDialog(
-        // Opning Ammount Popup
-        context: context,
-        builder: (BuildContext context) {
-          return InvoiceReceiptDailog(orderid: orderid);
-        });*/
-    await getOrderData(orderid,int.parse(terminalId));
+    await Navigator.of(context).pop();
+    // await showDialog(
+    //     // Opning Ammount Popup
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       return InvoiceReceiptDailog(orderid: orderid);
+    //     });*/
+    await getOrderData(orderid, int.parse(terminalId));
   }
 
-  getOrderData(int orderid,int terminalId) async {
+  getOrderData(int orderid, int terminalId) async {
     var branchID = await CommunFun.getbranchId();
     Branch branchAddress = await localAPI.getBranchData(branchID);
     OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
@@ -822,7 +854,8 @@ class _DashboradPageState extends State<DashboradPage>
         await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
     List<ProductDetails> itemsList = await localAPI.getOrderDetails(terminalId);
-    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(terminalId);
+    List<OrderDetail> orderitem =
+        await localAPI.getOrderDetailsList(terminalId);
     Orders order = await localAPI.getcurrentOrders(terminalId);
     print(branchAddress);
     print(orderpaymentdata);
@@ -832,7 +865,7 @@ class _DashboradPageState extends State<DashboradPage>
     print(itemsList);
     print(order);
 
-     printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
+    printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
         branchData, itemsList, orderitem, order, paument_method);
   }
 
@@ -842,7 +875,9 @@ class _DashboradPageState extends State<DashboradPage>
     print(result);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     clearCart();
-    Navigator.pushNamed(context, Constant.DashboardScreen);
+    Navigator.of(context).pop();
+    refreshAfterAction();
+    // Navigator.pushNamed(context, Constant.DashboardScreen);
     // await showDialog(
     //     // Opning Ammount Popup
     //     context: context,
@@ -913,7 +948,12 @@ class _DashboradPageState extends State<DashboradPage>
         barrierDismissible: false,
         builder: (BuildContext context) {
           return ProductQuantityDailog(
-              product: product, cartID: currentCart, cartItem: cart);
+              product: product,
+              cartID: currentCart,
+              cartItem: cart,
+              onClose: () {
+                refreshAfterAction();
+              });
         });
     //     return false;
     //   }
@@ -991,9 +1031,13 @@ class _DashboradPageState extends State<DashboradPage>
 
     return WillPopScope(
       child: Scaffold(
-          key: scaffoldKey,
-          drawer: drawerWidget(),
-          body: SafeArea(
+        key: scaffoldKey,
+        drawer: drawerWidget(),
+        body: SafeArea(
+          child: new GestureDetector(
+            onTap: () {
+              FocusScope.of(context).requestFocus(new FocusNode());
+            },
             child: Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
@@ -1065,7 +1109,7 @@ class _DashboradPageState extends State<DashboradPage>
                           color: Colors.white,
                           child: cartITems(),
                         ),
-                        paybutton(context),
+                        Container(child: paybutton(context)),
                         !isShiftOpen ? openShiftButton(context) : SizedBox()
                       ],
                     )),
@@ -1073,7 +1117,9 @@ class _DashboradPageState extends State<DashboradPage>
                 ],
               ),
             ),
-          )),
+          ),
+        ),
+      ),
       onWillPop: _willPopCallback,
     );
   }
@@ -1148,16 +1194,22 @@ class _DashboradPageState extends State<DashboradPage>
                     size: 30,
                   ),
                   title: Text("Transaction", style: Styles.communBlack())),
-              ListTile(
-                  onTap: () {
-                    gotoWebCart();
-                  },
-                  leading: Icon(
-                    Icons.shopping_cart,
-                    color: Colors.black,
-                    size: 30,
-                  ),
-                  title: Text("Web Orders", style: Styles.communBlack())),
+              permissions.contains(Constant.VIEW_ORDER)
+                  ? ListTile(
+                      onTap: () {
+                        gotoWebCart();
+                      },
+                      leading: Icon(
+                        Icons.shopping_cart,
+                        color: Colors.black,
+                        size: 30,
+                      ),
+                      title: Text(
+                        "Web Orders",
+                        style: Styles.communBlack(),
+                      ),
+                    )
+                  : SizedBox(),
               ListTile(
                   onTap: () {
                     Navigator.of(context).pop();
@@ -1188,7 +1240,6 @@ class _DashboradPageState extends State<DashboradPage>
                   onTap: () {
                     Navigator.of(context).pop();
                     syncOrdersTodatabase();
-                    // getsetWebOrders();
                   },
                   leading: Icon(
                     Icons.transform,
@@ -1246,10 +1297,8 @@ class _DashboradPageState extends State<DashboradPage>
               SizedBox(width: 20),
               SizedBox(
                 height: 50.0,
-                child: Image.asset(
-                  Strings.asset_headerLogo,
-                  fit: BoxFit.contain,
-                ),
+                child: Image.asset(Strings.asset_headerLogo,
+                    fit: BoxFit.contain, gaplessPlayback: true),
               ),
             ],
           ),
@@ -1299,6 +1348,7 @@ class _DashboradPageState extends State<DashboradPage>
                         ? CommonUtils.imageFromBase64String(image_Arr[0])
                         : new Image.asset(
                             Strings.no_image,
+                            gaplessPlayback: true,
                             fit: BoxFit.cover,
                           ),
                   ),
@@ -1552,24 +1602,22 @@ class _DashboradPageState extends State<DashboradPage>
                             : new Image.asset(
                                 Strings.no_image,
                                 fit: BoxFit.cover,
+                                gaplessPlayback: true,
                               ),
                       )),
                   Container(
                     margin: EdgeInsets.only(top: itemHeight / 2),
                     width: MediaQuery.of(context).size.width,
+                    //height: 70,
                     decoration: BoxDecoration(
                       color: Colors.grey[600],
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          product.name.toString().toUpperCase(),
-                          textAlign: TextAlign.center,
-                          style: Styles.whiteSimpleSmall(),
-                        ),
-                      ],
+                    child: Center(
+                      child: Text(
+                        product.name.toString().toUpperCase(),
+                        textAlign: TextAlign.center,
+                        style: Styles.whiteSimpleSmall(),
+                      ),
                     ),
                   ),
                   Positioned(
@@ -1610,7 +1658,7 @@ class _DashboradPageState extends State<DashboradPage>
                   margin: EdgeInsets.only(
                       top: MediaQuery.of(context).size.height / 1.3 + 10),
                   height: 50,
-                  width: 200,
+                  width: MediaQuery.of(context).size.width / 7,
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () {
@@ -1635,7 +1683,7 @@ class _DashboradPageState extends State<DashboradPage>
             margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height / 1.3 + 10),
             height: 50,
-            width: 200,
+            width: MediaQuery.of(context).size.width / 7,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
@@ -1753,61 +1801,64 @@ class _DashboradPageState extends State<DashboradPage>
           return new SlideMenu(
             child: new ListTile(
               title: new Container(
-                  child: new Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                    Padding(
-                      padding: EdgeInsets.only(top: 5, bottom: 5),
-                      child: Text(
-                        cart.productName.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[700],
+                child: new Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(top: 0, bottom: 0),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width / 6,
+                          child: Text(
+                            cart.productName.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[700],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    Container(
-                        // color: Colors.red,
-                        width: MediaQuery.of(context).size.width / 8.2,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Padding(
-                                padding: EdgeInsets.only(top: 0, bottom: 0),
-                                child: Text(
-                                  cart.productQty.toString(),
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey[700],
-                                  ),
-                                )),
-                            Padding(
-                                padding: EdgeInsets.only(
-                                    right: 10, top: 0, bottom: 0),
-                                child: Text(
-                                  cart.productPrice.toString(),
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey[700],
-                                  ),
-                                )),
-                          ],
-                        ))
-                  ])),
+                      Container(
+                          // color: Colors.red,
+                          width: MediaQuery.of(context).size.width / 8.2,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Padding(
+                                  padding: EdgeInsets.only(top: 0, bottom: 0),
+                                  child: Text(
+                                    cart.productQty.toString(),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey[700],
+                                    ),
+                                  )),
+                              Padding(
+                                  padding: EdgeInsets.only(
+                                      right: 10, top: 0, bottom: 0),
+                                  child: Text(
+                                    cart.productPrice.toString(),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey[700],
+                                    ),
+                                  )),
+                            ],
+                          ))
+                    ]),
+              ),
             ),
             menuItems: <Widget>[
               new Container(
-                padding: EdgeInsets.only(top: 5, bottom: 5),
+                height: MediaQuery.of(context).size.height,
                 color: Colors.red,
                 child: new IconButton(
                   padding: EdgeInsets.all(0),
                   onPressed: () {
                     if (!isWebOrder) {
                       itememovefromCart(cart);
-
                       itememovefromCart(cart);
                     }
                   },
@@ -1816,7 +1867,6 @@ class _DashboradPageState extends State<DashboradPage>
               ),
               new Container(
                 child: new IconButton(
-                  padding: EdgeInsets.all(0),
                   onPressed: () {
                     if (!isWebOrder) {
                       editCartItem(cart);
@@ -1942,7 +1992,7 @@ class _DashboradPageState extends State<DashboradPage>
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Padding(
-                              padding: EdgeInsets.only(top: 10, bottom: 10),
+                              padding: EdgeInsets.only(top: 0, bottom: 0),
                               child: Text(
                                 Strings.tax.toUpperCase() +
                                     " " +
@@ -2069,7 +2119,7 @@ class _DashboradPageState extends State<DashboradPage>
       children: <Widget>[
         Container(
             height: MediaQuery.of(context).size.height / 1.3,
-            width: MediaQuery.of(context).size.width,
+            //width: MediaQuery.of(context).size.width,
             color: Colors.grey[300],
             padding: EdgeInsets.all(10),
             child: Stack(

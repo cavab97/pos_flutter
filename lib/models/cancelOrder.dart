@@ -1,6 +1,6 @@
 class CancelOrder {
   int id;
-  int invoiceId;
+  int orderId;
   String localID;
   String reason;
   int status;
@@ -8,31 +8,26 @@ class CancelOrder {
   int updatedBy;
   String createdAt;
   String updatedAt;
-  int sync;
   int serverId;
   int terminalId;
-  String invoiceUniqueId;
-  int invoiceTerminalId;
 
-  CancelOrder(
-      {this.id,
-      this.invoiceId,
-      this.localID,
-      this.reason,
-      this.status,
-      this.createdBy,
-      this.updatedBy,
-      this.createdAt,
-      this.updatedAt,
-      this.sync,
-      this.serverId,
-      this.terminalId,
-      this.invoiceUniqueId,
-      this.invoiceTerminalId});
+  CancelOrder({
+    this.id,
+    this.orderId,
+    this.localID,
+    this.reason,
+    this.status,
+    this.createdBy,
+    this.updatedBy,
+    this.createdAt,
+    this.updatedAt,
+    this.serverId,
+    this.terminalId,
+  });
 
   CancelOrder.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    invoiceId = json['invoice_id'];
+    orderId = json['order_id'];
     localID = json['localID'];
     reason = json['reason'];
     status = json['status'];
@@ -40,17 +35,14 @@ class CancelOrder {
     updatedBy = json['updated_by'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    sync = json['sync'];
-    serverId = json['serverId'];
+    serverId = json['server_id'];
     terminalId = json['terminal_id'];
-    invoiceUniqueId = json['invoice_unique_id'];
-    invoiceTerminalId = json['invoice_terminal_id'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
-    data['invoice_id'] = this.invoiceId;
+    data['order_id'] = this.orderId;
     data['localID'] = this.localID;
     data['reason'] = this.reason;
     data['status'] = this.status;
@@ -58,11 +50,8 @@ class CancelOrder {
     data['updated_by'] = this.updatedBy;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
-    data['sync'] = this.sync;
-    data['serverId'] = this.serverId;
+    data['server_id'] = this.serverId;
     data['terminal_id'] = this.terminalId;
-    data['invoice_unique_id'] = this.invoiceUniqueId;
-    data['invoice_terminal_id'] = this.invoiceTerminalId;
     return data;
   }
 }

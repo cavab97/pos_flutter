@@ -39,7 +39,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
     if (isvalid) {
       var terminalkey = await CommunFun.getTeminalKey();
       Customer customer = new Customer();
-      customer.terminalId = terminalkey;
+      customer.terminalId = int.parse(terminalkey);
       customer.firstName = firstname_controller.text;
       customer.lastName = lastname_controller.text;
       customer.email = email_controller.text;

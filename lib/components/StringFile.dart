@@ -58,7 +58,7 @@ class Strings {
   static String syncText = "Syncing...";
   static String shift_open_message = "Shift is not Opened";
   static String modifier = "Modifier";
-  static String notesAndQty = "Notes and Quantity";
+  static String notesAndQty = "Notes";
   static String btnclockin = "Check\nIN";
   static String btnclockout = "Check\nOUT";
   static String select_Payment_type = "Select Payment Method";
