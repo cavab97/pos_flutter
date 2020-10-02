@@ -470,7 +470,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         double.parse(productdata.price.toStringAsFixed(2));
     cartdetails.productQty = productdata.qty;
     cartdetails.productNetPrice = productdata.price;
-
     cartdetails.createdBy = loginData["id"];
     cartdetails.discount = 0;
     cartdetails.taxValue = taxvalues;

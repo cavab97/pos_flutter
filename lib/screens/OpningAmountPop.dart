@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/styles.dart';
 
 class OpeningAmmountPage extends StatefulWidget {
   // Opning ammount popup
@@ -110,42 +111,43 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
   }
 
   Widget _button(String number, Function() f) {
-    // Creating a method of return type Widget with number and function f as a parameter
-    return Padding(
-      padding: EdgeInsets.only(top: 10, bottom: 10),
+    var size = MediaQuery.of(context).size.width / 2.5;
+    double resize = size / 6;
+    return Container(
+      width: (number == "00") ? (resize * 2) : resize,
+      padding: EdgeInsets.all(5),
+      height: (number == "Enter") ? (resize * 2) : resize,
       child: MaterialButton(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
-            side: BorderSide(color: Colors.black, width: 3.0)),
-        height: MediaQuery.of(context).size.height / 9.7,
-        //minWidth: MediaQuery.of(context).size.width / 9.9,
+            side: BorderSide(color: Colors.grey)),
         child: Text(number,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 40.0)),
+            textAlign: TextAlign.center, style: Styles.blackBoldLarge()),
         textColor: Colors.black,
-        color: Colors.white,
+        color: Colors.grey[100],
         onPressed: f,
       ),
     );
   }
 
   Widget _backbutton(Function() f) {
-    // Creating a method of return type Widget with number and function f as a parameter
-    return Padding(
-      padding: EdgeInsets.only(top: 10, bottom: 10),
+    var size = MediaQuery.of(context).size.width / 2.5;
+    double resize = size / 6;
+    return Container(
+      width: resize,
+      padding: EdgeInsets.all(5),
+      height: resize,
       child: MaterialButton(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
-            side: BorderSide(color: Colors.black, width: 3.0)),
-        height: MediaQuery.of(context).size.height / 9.7,
-        // minWidth: MediaQuery.of(context).size.width / 9.9,
+            side: BorderSide(color: Colors.grey)),
         child: Icon(
           Icons.backspace,
           color: Colors.black,
-          size: 40,
+          size: 30,
         ),
         textColor: Colors.black,
-        color: Colors.white,
+        color: Colors.grey[100],
         onPressed: f,
       ),
     );
@@ -158,24 +160,22 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(currentNumber,
-              style: TextStyle(
-                  fontSize: 60,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold)),
+          Text(
+            currentNumber,
+            style: Styles.blackBoldLarge(),
+          ),
         ],
       ),
     );
   }
 
   Widget getNumbers(context) {
-    return Center(
-      child: Container(
-        width: MediaQuery.of(context).size.width / 2.5,
+    return Container(
+      child: Center(
         child: Column(
           children: <Widget>[
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 _button("1", () {
                   numberClick('1');
@@ -191,11 +191,8 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                 }),
               ],
             ),
-            SizedBox(
-              height: 10,
-            ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 _button("4", () {
                   numberClick('4');
@@ -213,90 +210,41 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                 }),
               ],
             ),
-            Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
+            Row(children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    //mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Padding(
-                              padding: EdgeInsets.only(left: 20, top: 10),
-                              child: _button("7", () {
-                                numberClick('7');
-                              })),
-                          // using custom widget button
-                          Padding(
-                              padding: EdgeInsets.only(left: 30, top: 10),
-                              child: _button("8", () {
-                                numberClick('8');
-                              })),
-                          Padding(
-                              padding: EdgeInsets.only(left: 30, top: 10),
-                              child: _button("9", () {
-                                numberClick('9');
-                              })),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: <Widget>[
-                          Padding(
-                              padding: EdgeInsets.only(left: 20, top: 10),
-                              child: _button("0", () {
-                                numberClick('0');
-                              })),
-                          Padding(
-                            padding: EdgeInsets.only(left: 25, top: 10),
-                            child: MaterialButton(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18.0),
-                                  side: BorderSide(
-                                      color: Colors.black, width: 3.0)),
-                              height: MediaQuery.of(context).size.height / 9.5,
-                              minWidth: MediaQuery.of(context).size.width / 6.1,
-                              child: Text("00".toUpperCase(),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 40.0)),
-                              textColor: Colors.black,
-                              color: Colors.white,
-                              onPressed: () {
-                                numberClick('00');
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+                      _button("7", () {
+                        numberClick('7');
+                      }),
+                      _button("8", () {
+                        numberClick('8');
+                      }),
+                      _button("9", () {
+                        numberClick('9');
+                      }),
                     ],
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-                    child: MaterialButton(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                          side: BorderSide(color: Colors.black, width: 3.0)),
-                      height: MediaQuery.of(context).size.height / 4.2,
-                      // minWidth: MediaQuery.of(context).size.width / 9.9
-                      minWidth: 50,
-                      child: Text(Strings.enter.toUpperCase(),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20.0)),
-                      textColor: Colors.black,
-                      color: Colors.white,
-                      onPressed: () {
-                        widget.onEnter(currentNumber);
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  )
-                ]),
+                  Row(
+                    children: <Widget>[
+                      _button("0", () {
+                        numberClick('0');
+                      }),
+                      _button("00", () {
+                        numberClick('00');
+                      }),
+                    ],
+                  ),
+                ],
+              ),
+              _button("Enter", () {
+                widget.onEnter(currentNumber);
+                Navigator.of(context).pop();
+              })
+            ])
           ],
         ),
       ),

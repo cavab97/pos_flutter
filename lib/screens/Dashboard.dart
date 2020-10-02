@@ -487,7 +487,8 @@ class _DashboradPageState extends State<DashboradPage>
         }
       }
       if (tempCart.length > 0) {
-        printKOT.checkKOTPrint(printerList[i].printerIp.toString(), tableName, context, tempCart);
+        printKOT.checkKOTPrint(
+            printerList[i].printerIp.toString(), tableName, context, tempCart);
       }
     }
     /*showDialog(
@@ -674,7 +675,7 @@ class _DashboradPageState extends State<DashboradPage>
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
-    var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
+    //var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
     List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
 
     int length = branchdata.invoiceStart.length;
@@ -702,14 +703,14 @@ class _DashboradPageState extends State<DashboradPage>
     order.order_item_count = cartData.total_qty.toInt();
     order.tax_amount = cartData.tax;
     order.tax_json = cartData.tax_json;
-    order.order_date = datetime;
+    order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
     order.order_status = 1;
     order.server_id = 0;
     order.order_source = cartData.source;
     order.order_by = userdata.id;
     order.voucher_id = cartData.voucher_id;
     order.voucher_amount = cartData.discount;
-    order.updated_at = datetime;
+    order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
     order.updated_by = userdata.id;
     var orderid = await localAPI.placeOrder(order);
     print(orderid);
@@ -717,7 +718,7 @@ class _DashboradPageState extends State<DashboradPage>
       VoucherHistory history = new VoucherHistory();
       history.voucher_id = cartData.voucher_id;
       history.amount = cartData.discount;
-      history.created_at = datetime;
+      history.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
       history.order_id = orderid;
       history.uuid = uuid;
       var hisID = await localAPI.saveVoucherHistory(history);
@@ -733,6 +734,8 @@ class _DashboradPageState extends State<DashboradPage>
           var productdata = await localAPI.productdData(cartItem.productId);
           ProductDetails pdata;
           if (productdata.length > 0) {
+            productdata[0].qty = cartItem.productQty;
+            productdata[0].price = cartItem.productPrice;
             pdata = productdata[0];
           }
           List<OrderDetail> lappid =
@@ -752,10 +755,12 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.detail_qty = cartItem.productQty;
           orderDetail.product_discount = cartItem.discount;
           orderDetail.product_detail = json.encode(pdata);
-          orderDetail.updated_at = datetime;
+          orderDetail.updated_at =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           orderDetail.detail_amount =
               (cartItem.productPrice * cartItem.productQty);
-          orderDetail.detail_datetime = datetime;
+          orderDetail.detail_datetime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           orderDetail.updated_by = userdata.id;
           orderDetail.detail_status = 1;
           orderDetail.detail_by = userdata.id;
@@ -789,9 +794,11 @@ class _DashboradPageState extends State<DashboradPage>
           modifireData.modifier_id = modifire.modifierId;
           modifireData.om_amount = modifire.modifirePrice;
           modifireData.om_by = userdata.id;
-          modifireData.om_datetime = datetime;
+          modifireData.om_datetime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           modifireData.om_status = 1;
-          modifireData.updated_at = datetime;
+          modifireData.updated_at =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           modifireData.updated_by = userdata.id;
           var ordermodifreid = await localAPI.sendModifireData(modifireData);
           print(ordermodifreid);
@@ -812,10 +819,12 @@ class _DashboradPageState extends State<DashboradPage>
           attributes.attribute_id = modifire.attributeId;
           attributes.attr_price = modifire.attrPrice;
           attributes.ca_id = modifire.caId;
-          attributes.oa_datetime = datetime;
+          attributes.oa_datetime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           attributes.oa_by = userdata.id;
           attributes.oa_status = 1;
-          attributes.updated_at = datetime;
+          attributes.updated_at =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           attributes.updated_by = userdata.id;
           var orderAttri = await localAPI.sendAttrData(attributes);
           print(orderAttri);
@@ -840,9 +849,11 @@ class _DashboradPageState extends State<DashboradPage>
         (cartData.grand_total - cartData.discount).toDouble();
     orderpayment.op_method_response = '';
     orderpayment.op_status = 1;
-    orderpayment.op_datetime = datetime;
+    orderpayment.op_datetime =
+        await CommunFun.getCurrentDateTime(DateTime.now());
     orderpayment.op_by = userdata.id;
-    orderpayment.updated_at = datetime;
+    orderpayment.updated_at =
+        await CommunFun.getCurrentDateTime(DateTime.now());
     orderpayment.updated_by = userdata.id;
     var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
     print(paymentd);

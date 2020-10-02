@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -39,7 +40,8 @@ class PrintReceipt {
         ),
         linesAfter: 1);
 
-    ticket.setStyles(PosStyles(align: PosAlign.left, fontType: PosFontType.fontB));
+    ticket.setStyles(
+        PosStyles(align: PosAlign.left, fontType: PosFontType.fontB));
     final now = DateTime.now();
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
@@ -156,16 +158,19 @@ class PrintReceipt {
     ticket.hr();
     for (var i = 0; i < orderdetail.length; i++) {
       var item = orderdetail[i];
-      var name = orderdItem[i];
+      var name = json.decode(item.product_detail);
+      print(name);
       ticket.row([
         PosColumn(
-            text: name.name, width: 6, styles: PosStyles(align: PosAlign.left)),
+            text: name["name"],
+            width: 6,
+            styles: PosStyles(align: PosAlign.left)),
         PosColumn(
-            text: item.detail_qty.toString(),
+            text: name["qty"].toString(),
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
         PosColumn(
-            text: item.product_old_price.toString(),
+            text: name["old_price"].toString(),
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
         PosColumn(
