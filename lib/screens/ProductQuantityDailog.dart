@@ -101,11 +101,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             for (var i = 0; i < attributeList.length; i++) {
               var attribute = attributeList[i];
               var attributType = attribute.attr_types.split(',');
-              var attrIDs = attribute.attributeId.split(',').asMap();
-              var attrtypesPrice =
-                  attribute.attr_types_price.split(',').asMap();
+              var attrIDs = attribute.attributeId.split(',');
+              var attrtypesPrice = attribute.attr_types_price.split(',');
               for (var a = 0; a < attributType.length; a++) {
-                if (item.attributeId == attrIDs[a]) {
+                var aattrid = int.parse(attrIDs[a]);
+                if (item.attributeId == aattrid) {
                   onSelectAttr(a, attribute.ca_id, attributType[a], attrIDs[a],
                       attrtypesPrice[a]);
                   break;
@@ -431,7 +431,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cart.table_id = tableData["table_id"];
     cart.discount_type = currentCart.discount_type;
     cart.total_qty = qty;
-    cart.tax = taxvalues;
+    cart.tax = double.parse(taxvalues.toStringAsFixed(2));
     cart.source = 2;
     cart.tax_json = json.encode(totalTax);
     cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
@@ -441,7 +441,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     cart.created_by = loginData["id"];
     cart.localID = await CommunFun.getLocalID();
-
     orderData.orderName = tableData != null ? "" : "test";
     if (!isEditing) {
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
