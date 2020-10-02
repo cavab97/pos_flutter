@@ -440,16 +440,16 @@ class PrintReceipt {
     ticket.setStyles(
         PosStyles(align: PosAlign.center, fontType: PosFontType.fontB));
     ticket.text(printerName + " Tested",
-        styles: PosStyles(bold: true, width: PosTextSize.size1));
+        styles: PosStyles(align: PosAlign.center,bold: true, width: PosTextSize.size1));
 
     ticket.text("Printer IP : " + printerIp,
-        styles: PosStyles(bold: true, width: PosTextSize.size1));
+        styles: PosStyles(align: PosAlign.center,bold: true, width: PosTextSize.size1));
 
     final now = DateTime.now();
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
 
-    ticket.text("Test Date time : " + timestamp, styles: PosStyles(bold: true));
+    ticket.text("Test Date time : " + timestamp, styles: PosStyles(align: PosAlign.center,bold: true));
 
     ticket.feed(2);
     ticket.cut();
