@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:ffi';
+import 'dart:typed_data';
 
 import 'package:esc_pos_printer/esc_pos_printer.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/Branch.dart';
@@ -13,6 +15,7 @@ import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:image/image.dart';
 
 class PrintReceipt {
   PaperSize paper = PaperSize.mm80;
@@ -23,29 +26,32 @@ class PrintReceipt {
 
     final Ticket ticket = Ticket(paper, profile);
 
+    ticket.setStyles(
+        PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
     ticket.text('K.O.T',
         styles: PosStyles(
           fontType: PosFontType.fontA,
-          align: PosAlign.center,
           bold: true,
+          align: PosAlign.center,
           height: PosTextSize.size2,
           width: PosTextSize.size2,
         ),
         linesAfter: 1);
 
+    ticket.setStyles(PosStyles(align: PosAlign.left, fontType: PosFontType.fontB));
     final now = DateTime.now();
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
     ticket.text("Date : " + timestamp, styles: PosStyles(align: PosAlign.left));
-    //ticket.text('Pax : ', styles: PosStyles(align: PosAlign.left));
     ticket.text('Table No : ' + tableName,
         styles: PosStyles(align: PosAlign.left));
-    //ticket.text('Terminal Name : MCN002', styles: PosStyles(align: PosAlign.left));
 
     ticket.hr();
+    ticket.setStyles(PosStyles(align: null));
     ticket.row([
-      PosColumn(text: 'Qty', width: 2),
-      PosColumn(text: 'Item', width: 10),
+      PosColumn(text: 'Qty', width: 2, styles: PosStyles(align: PosAlign.left)),
+      PosColumn(
+          text: 'Item', width: 10, styles: PosStyles(align: PosAlign.left)),
     ]);
     ticket.hr();
 
@@ -53,8 +59,14 @@ class PrintReceipt {
       var item = cartList[i];
       if (item.isSendKichen == null) {
         ticket.row([
-          PosColumn(text: item.productQty.toString(), width: 2),
-          PosColumn(text: item.productName, width: 10),
+          PosColumn(
+              text: item.productQty.toString(),
+              width: 2,
+              styles: PosStyles(align: PosAlign.left)),
+          PosColumn(
+              text: item.productName,
+              width: 10,
+              styles: PosStyles(align: PosAlign.left)),
         ]);
       }
     }
@@ -71,15 +83,7 @@ class PrintReceipt {
     final PosPrintResult res = await printerManager
         .printTicket(await KOTReceipt(paper, tableName, cartList));
 
-    print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
-    print(res.msg);
-    print(printerIp);
-
     CommunFun.showToast(ctx, res.msg);
-
-    /*final snackBar =
-        SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
-    Scaffold.of(ctx).showSnackBar(snackBar);*/
   }
 
   /*========================================================================
@@ -95,25 +99,32 @@ class PrintReceipt {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
-    /* // Print image
-    final ByteData data = await rootBundle.load('assets/headerlogo.png');
+    // Print image
+    ticket.setStyles(
+        PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
+
+    final ByteData data =
+        await rootBundle.load('assets/headerlogo_receipt.png');
     final Uint8List bytes = data.buffer.asUint8List();
     final image = decodeImage(bytes);
-    ticket.image(image, align: PosAlign.center);
-*/
+    ticket.image(image);
+
+    ticket.emptyLines(1);
+
     ticket.text(branchData.address,
         styles: PosStyles(
             fontType: PosFontType.fontA,
-            align: PosAlign.center,
             bold: true,
-            width: PosTextSize.size1));
+            width: PosTextSize.size1,
+            align: PosAlign.center));
     ticket.text("Contact No : " + branchData.contactNo,
-        linesAfter: 2,
         styles: PosStyles(
             fontType: PosFontType.fontA, align: PosAlign.center, bold: true));
 
     ticket.emptyLines(1);
 
+    ticket.setStyles(
+        PosStyles(align: PosAlign.left, fontType: PosFontType.fontB));
     final now = DateTime.now();
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
@@ -130,6 +141,7 @@ class PrintReceipt {
         styles: PosStyles(align: PosAlign.left));
 
     ticket.hr();
+    ticket.setStyles(PosStyles(align: null));
     ticket.row([
       PosColumn(
           text: 'ITEM', width: 6, styles: PosStyles(align: PosAlign.left)),
@@ -141,7 +153,6 @@ class PrintReceipt {
           text: 'AMT', width: 2, styles: PosStyles(align: PosAlign.right)),
     ]);
     ticket.hr();
-
     for (var i = 0; i < orderdetail.length; i++) {
       var item = orderdetail[i];
       var name = orderdItem[i];
@@ -163,6 +174,7 @@ class PrintReceipt {
       ]);
     }
     ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
           text: "SUBTOTAL(MYR)",
@@ -181,20 +193,18 @@ class PrintReceipt {
       PosColumn(
           text: orderData.tax_amount.toString(),
           width: 4,
-          styles: PosStyles(align: PosAlign.right)),
+          styles: PosStyles(align: PosAlign.right))
     ]);
-    ticket.hr();
     ticket.row([
       PosColumn(
           text: "GRANDTOTAL(MYR)",
-          width: 7,
+          width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
           text: orderData.grand_total.toString(),
-          width: 5,
-          styles: PosStyles(align: PosAlign.right)),
+          width: 4,
+          styles: PosStyles(align: PosAlign.right))
     ]);
-    ticket.hr();
     ticket.row([
       PosColumn(
           text: "CASH(MYR)",
@@ -203,16 +213,21 @@ class PrintReceipt {
       PosColumn(
           text: paymentdata.name.toString(),
           width: 5,
-          styles: PosStyles(align: PosAlign.right)),
+          styles: PosStyles(align: PosAlign.right))
     ]);
 
-    ticket.feed(2);
-    ticket.text('Thank you!',
-        styles: PosStyles(align: PosAlign.center, bold: true));
-    ticket.text('Please visit us again',
-        styles: PosStyles(align: PosAlign.center, bold: true));
+    ticket.setStyles(PosStyles(align: PosAlign.center));
+    ticket.emptyLines(1);
+    ticket.qrcode('www.example.com',
+        size: QRSize.Size5, align: PosAlign.center);
+    ticket.emptyLines(1);
 
-    ticket.feed(2);
+    ticket.text('Thank you!',
+        styles: PosStyles(bold: true, align: PosAlign.center));
+    ticket.text('Please visit us again',
+        styles: PosStyles(bold: true, align: PosAlign.center));
+
+    ticket.feed(1);
     ticket.cut();
     return ticket;
   }
@@ -229,7 +244,7 @@ class PrintReceipt {
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(await Receipt(
-         branchData, orderdItem, orderdetail, orderData, paymentdata));
+        branchData, orderdItem, orderdetail, orderData, paymentdata));
 
     CommunFun.showToast(ctx, res.msg);
 
@@ -246,21 +261,23 @@ class PrintReceipt {
       double subTotal, double grandTotal, double tax, Branch branchData) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
-
-    /* // Print image
-    final ByteData data = await rootBundle.load('assets/headerlogo.png');
+    // Print image
+    ticket.setStyles(
+        PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
+    final ByteData data =
+        await rootBundle.load('assets/headerlogo_receipt.png');
     final Uint8List bytes = data.buffer.asUint8List();
     final image = decodeImage(bytes);
-    ticket.image(image, align: PosAlign.center);
-*/
+    ticket.image(image);
+    ticket.emptyLines(1);
+
     ticket.text(branchData.address,
         styles: PosStyles(
             fontType: PosFontType.fontA,
-            align: PosAlign.center,
             bold: true,
+            align: PosAlign.center,
             width: PosTextSize.size1));
     ticket.text("Contact No : " + branchData.contactNo,
-        linesAfter: 2,
         styles: PosStyles(
             fontType: PosFontType.fontA, align: PosAlign.center, bold: true));
 
@@ -270,6 +287,8 @@ class PrintReceipt {
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
 
+    ticket.setStyles(
+        PosStyles(align: PosAlign.left, fontType: PosFontType.fontB));
     ticket.text('Processed by  : ' + branchData.contactPerson,
         styles: PosStyles(align: PosAlign.left));
     ticket.text("Invoice Date : " + timestamp,
@@ -280,6 +299,7 @@ class PrintReceipt {
         styles: PosStyles(align: PosAlign.left));
 
     ticket.hr();
+    ticket.setStyles(PosStyles(align: null));
     ticket.row([
       PosColumn(
           text: 'ITEM', width: 6, styles: PosStyles(align: PosAlign.left)),
@@ -315,6 +335,7 @@ class PrintReceipt {
       ]);
     }
     ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
           text: "SUBTOTAL(MYR)",
@@ -346,22 +367,17 @@ class PrintReceipt {
           width: 4,
           styles: PosStyles(align: PosAlign.right)),
     ]);
-    /* ticket.row([
-      PosColumn(
-          text: "CASH(MYR)",
-          width: 8,
-          styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: paymentdata.op_amount.toString(),
-          width: 4,
-          styles: PosStyles(align: PosAlign.right)),
-    ]);*/
 
-    ticket.feed(2);
+    ticket.setStyles(PosStyles(align: PosAlign.center));
+    ticket.emptyLines(1);
+    ticket.qrcode('www.example.com',
+        size: QRSize.Size5, align: PosAlign.center);
+    ticket.emptyLines(1);
+
     ticket.text('Thank you!',
-        styles: PosStyles(align: PosAlign.center, bold: true));
+        styles: PosStyles(bold: true, align: PosAlign.center));
     ticket.text('Please visit us again',
-        styles: PosStyles(align: PosAlign.center, bold: true));
+        styles: PosStyles(bold: true, align: PosAlign.center));
 
     ticket.feed(2);
     ticket.cut();
@@ -414,28 +430,19 @@ class PrintReceipt {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
+    ticket.setStyles(
+        PosStyles(align: PosAlign.center, fontType: PosFontType.fontB));
     ticket.text(printerName + " Tested",
-        styles: PosStyles(
-            fontType: PosFontType.fontA,
-            align: PosAlign.center,
-            bold: true,
-            width: PosTextSize.size1));
+        styles: PosStyles(bold: true, width: PosTextSize.size1));
 
     ticket.text("Printer IP : " + printerIp,
-        styles: PosStyles(
-            fontType: PosFontType.fontA,
-            align: PosAlign.center,
-            bold: true,
-            width: PosTextSize.size1));
+        styles: PosStyles(bold: true, width: PosTextSize.size1));
 
     final now = DateTime.now();
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
 
-    ticket.text("Test Date time : " + timestamp,
-        linesAfter: 2,
-        styles: PosStyles(
-            fontType: PosFontType.fontA, align: PosAlign.center, bold: true));
+    ticket.text("Test Date time : " + timestamp, styles: PosStyles(bold: true));
 
     ticket.feed(2);
     ticket.cut();

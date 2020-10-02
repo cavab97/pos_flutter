@@ -471,8 +471,7 @@ class _DashboradPageState extends State<DashboradPage>
         }
       }
       if (tempCart.length > 0) {
-        printKOT.checkKOTPrint(
-            printerList[i].printerIp.toString(), tableName, context, tempCart);
+        printKOT.checkKOTPrint(printerList[i].printerIp.toString(), tableName, context, tempCart);
       }
     }
     /*showDialog(
