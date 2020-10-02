@@ -309,6 +309,8 @@ class CommunFun {
       Navigator.of(context).pop();
       if (serverTime == null) {
         Navigator.pushNamed(context, Constant.PINScreen);
+      } else {
+        Navigator.pushNamed(context, Constant.DashboardScreen);
       }
       await CommunFun.setServerTime(aceets, "4");
     } else {
