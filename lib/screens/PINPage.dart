@@ -244,9 +244,8 @@ class _PINPageState extends State<PINPage> {
   Widget getNumbers(context) {
     // Numbers buttons
     return Container(
-        padding: EdgeInsets.symmetric(horizontal: 80),
+        //padding: EdgeInsets.symmetric(horizontal: 80),
         height: MediaQuery.of(context).size.height / 1.2,
-        width: MediaQuery.of(context).size.width / 2,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
               bottomRight: Radius.circular(30), topRight: Radius.circular(30)),
@@ -260,6 +259,7 @@ class _PINPageState extends State<PINPage> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   IconButton(
+                      padding: EdgeInsets.only(right: 40, top: 10),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -279,7 +279,7 @@ class _PINPageState extends State<PINPage> {
                     )
                   ]),
               SizedBox(
-                height: 20,
+                height: 15,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -329,89 +329,95 @@ class _PINPageState extends State<PINPage> {
                 ],
               ),
               SizedBox(
-                height: 20,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  _button("1", () {
-                    addINPin("1");
-                  }), // using custom widget _button
-                  _button("2", () {
-                    addINPin("2");
-                  }),
-                  _button("3", () {
-                    addINPin("3");
-                  }),
-                ],
-              ),
-              SizedBox(
                 height: 10,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  _button("4", () {
-                    addINPin("4");
-                  }), // using custom widget _button
-                  _button("5", () {
-                    addINPin("5");
-                  }),
-                  _button("6", () {
-                    addINPin("6");
-                  }),
-                ],
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  _button("7", () {
-                    addINPin("7");
-                  }), // using custom widget _button
-                  _button("8", () {
-                    addINPin("8");
-                  }),
-                  _button("9", () {
-                    addINPin("9");
-                  }),
-                ],
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  _buttonCN(Strings.btnclockin, () {
-                    clockInwithPIN();
-                  }),
-                  _button("0", () {
-                    addINPin("0");
-                  }),
-                  _buttonCN(Strings.btnclockout, () {
-                    clockOutwithPIN();
-                  }),
-                ],
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              isLoading
-                  ? CommunFun.loader(context)
-                  : Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                          FlatButton(
-                              onPressed: () {
-                                clearPin();
-                              },
-                              child: Text(Strings.clear,
-                                  style: Styles.orangeLarge()))
-                        ])
+              Container(
+                  width: MediaQuery.of(context).size.width / 3,
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          _button("1", () {
+                            addINPin("1");
+                          }), // using custom widget _button
+                          _button("2", () {
+                            addINPin("2");
+                          }),
+                          _button("3", () {
+                            addINPin("3");
+                          }),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          _button("4", () {
+                            addINPin("4");
+                          }), // using custom widget _button
+                          _button("5", () {
+                            addINPin("5");
+                          }),
+                          _button("6", () {
+                            addINPin("6");
+                          }),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          _button("7", () {
+                            addINPin("7");
+                          }), // using custom widget _button
+                          _button("8", () {
+                            addINPin("8");
+                          }),
+                          _button("9", () {
+                            addINPin("9");
+                          }),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          _buttonCN(Strings.btnclockin, () {
+                            clockInwithPIN();
+                          }),
+                          _button("0", () {
+                            addINPin("0");
+                          }),
+                          _buttonCN(Strings.btnclockout, () {
+                            clockOutwithPIN();
+                          }),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      isLoading
+                          ? CommunFun.loader(context)
+                          : Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: <Widget>[
+                                  FlatButton(
+                                      onPressed: () {
+                                        clearPin();
+                                      },
+                                      child: Text(Strings.clear,
+                                          style: Styles.orangeLarge()))
+                                ])
+                    ],
+                  ))
             ],
           ),
         ));

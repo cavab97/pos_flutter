@@ -1032,9 +1032,13 @@ class _DashboradPageState extends State<DashboradPage>
 
     return WillPopScope(
       child: Scaffold(
-          key: scaffoldKey,
-          drawer: drawerWidget(),
-          body: SafeArea(
+        key: scaffoldKey,
+        drawer: drawerWidget(),
+        body: SafeArea(
+          child: new GestureDetector(
+            onTap: () {
+              FocusScope.of(context).requestFocus(new FocusNode());
+            },
             child: Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
@@ -1114,7 +1118,9 @@ class _DashboradPageState extends State<DashboradPage>
                 ],
               ),
             ),
-          )),
+          ),
+        ),
+      ),
       onWillPop: _willPopCallback,
     );
   }
@@ -1603,19 +1609,16 @@ class _DashboradPageState extends State<DashboradPage>
                   Container(
                     margin: EdgeInsets.only(top: itemHeight / 2),
                     width: MediaQuery.of(context).size.width,
+                    //height: 70,
                     decoration: BoxDecoration(
                       color: Colors.grey[600],
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          product.name.toString().toUpperCase(),
-                          textAlign: TextAlign.center,
-                          style: Styles.whiteSimpleSmall(),
-                        ),
-                      ],
+                    child: Center(
+                      child: Text(
+                        product.name.toString().toUpperCase(),
+                        textAlign: TextAlign.center,
+                        style: Styles.whiteSimpleSmall(),
+                      ),
                     ),
                   ),
                   Positioned(
@@ -1656,7 +1659,7 @@ class _DashboradPageState extends State<DashboradPage>
                   margin: EdgeInsets.only(
                       top: MediaQuery.of(context).size.height / 1.3 + 10),
                   height: 50,
-                   width: MediaQuery.of(context).size.width/7,
+                  width: MediaQuery.of(context).size.width / 7,
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () {
@@ -1681,7 +1684,7 @@ class _DashboradPageState extends State<DashboradPage>
             margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height / 1.3 + 10),
             height: 50,
-            width: MediaQuery.of(context).size.width/7,
+            width: MediaQuery.of(context).size.width / 7,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
@@ -1799,61 +1802,64 @@ class _DashboradPageState extends State<DashboradPage>
           return new SlideMenu(
             child: new ListTile(
               title: new Container(
-                  child: new Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                    Padding(
-                      padding: EdgeInsets.only(top: 0, bottom: 0),
-                      child: Text(
-                        cart.productName.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[700],
+                child: new Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(top: 0, bottom: 0),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width / 6,
+                          child: Text(
+                            cart.productName.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[700],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    Container(
-                        // color: Colors.red,
-                        width: MediaQuery.of(context).size.width / 8.2,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Padding(
-                                padding: EdgeInsets.only(top: 0, bottom: 0),
-                                child: Text(
-                                  cart.productQty.toString(),
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey[700],
-                                  ),
-                                )),
-                            Padding(
-                                padding: EdgeInsets.only(
-                                    right: 10, top: 0, bottom: 0),
-                                child: Text(
-                                  cart.productPrice.toString(),
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey[700],
-                                  ),
-                                )),
-                          ],
-                        ))
-                  ])),
+                      Container(
+                          // color: Colors.red,
+                          width: MediaQuery.of(context).size.width / 8.2,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Padding(
+                                  padding: EdgeInsets.only(top: 0, bottom: 0),
+                                  child: Text(
+                                    cart.productQty.toString(),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey[700],
+                                    ),
+                                  )),
+                              Padding(
+                                  padding: EdgeInsets.only(
+                                      right: 10, top: 0, bottom: 0),
+                                  child: Text(
+                                    cart.productPrice.toString(),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey[700],
+                                    ),
+                                  )),
+                            ],
+                          ))
+                    ]),
+              ),
             ),
             menuItems: <Widget>[
               new Container(
-                padding: EdgeInsets.only(top: 0, bottom: 0),
+                height: MediaQuery.of(context).size.height,
                 color: Colors.red,
                 child: new IconButton(
                   padding: EdgeInsets.all(0),
                   onPressed: () {
                     if (!isWebOrder) {
                       itememovefromCart(cart);
-
                       itememovefromCart(cart);
                     }
                   },
@@ -1862,7 +1868,6 @@ class _DashboradPageState extends State<DashboradPage>
               ),
               new Container(
                 child: new IconButton(
-                  padding: EdgeInsets.all(0),
                   onPressed: () {
                     if (!isWebOrder) {
                       editCartItem(cart);

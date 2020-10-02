@@ -295,199 +295,210 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   // Part 1 white
                   child: Container(
                     padding: EdgeInsets.only(top: 20, left: 20, right: 20),
+                    height: MediaQuery.of(context).size.height,
                     color: Colors.white,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            IconButton(
-                              padding: EdgeInsets.all(0),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              icon: Icon(
-                                Icons.keyboard_arrow_left,
-                                size: 50,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              IconButton(
+                                padding: EdgeInsets.all(0),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                icon: Icon(
+                                  Icons.keyboard_arrow_left,
+                                  size: 50,
+                                ),
                               ),
-                            ),
-                            SizedBox(width: 10),
-                            Text(Strings.transaction,
-                                style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey[800])),
-                          ],
-                        ),
-                        transationsSearchBox(),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        orderLists.length > 0
-                            ? searchTransationList()
-                            : Center(
-                                child: Text(Strings.no_order_found,
-                                    style: Styles.darkBlue()))
-                      ],
+                              SizedBox(width: 10),
+                              Text(Strings.transaction,
+                                  style: TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[800])),
+                            ],
+                          ),
+                          transationsSearchBox(),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          orderLists.length > 0
+                              ? searchTransationList()
+                              : Center(
+                                  child: Text(Strings.no_order_found,
+                                      style: Styles.darkBlue()))
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 TableCell(
                   // Part 2 transactions list
                   child: Center(
-                    child: orderLists.length > 0
-                        ? SingleChildScrollView(
-                            child: Stack(children: <Widget>[
-                            // Padding(
-                            //     padding: EdgeInsets.only(right: 10, top: 10),
-                            //     child: Row(
-                            //       crossAxisAlignment: CrossAxisAlignment.center,
-                            //       mainAxisAlignment: MainAxisAlignment.end,
-                            //       children: <Widget>[
-                            //         isWeborder
-                            //             ? assingTableButton(() {
-                            //                 assignTable();
-                            //               })
-                            //             : SizedBox()
-                            //       ],
-                            //     )),
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 50),
-                              height: MediaQuery.of(context).size.height,
-                              margin: EdgeInsets.only(top: 5),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  SizedBox(height: 15),
-                                  Text(
-                                      DateFormat('EEE, MMM d yyyy, hh:mm aaa')
-                                          .format(DateTime.parse(
-                                              selectedOrder.order_date != null
-                                                  ? selectedOrder.order_date
-                                                  : DateTime.now().toString())),
-                                      style: Styles.whiteSimpleSmall()),
-                                  SizedBox(
-                                    height: 20,
-                                  ),
-                                  Text(
-                                    orderpayment.op_amount.toString(),
-                                    style: TextStyle(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.bold,
-                                        color: Theme.of(context).accentColor),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  selectedOrder != null &&
-                                          paymemtUser.username != null
-                                      ? Text(
-                                          selectedOrder.invoice_no +
-                                              " - Processed by " +
-                                              paymemtUser.username,
-                                          style: Styles.whiteBoldsmall(),
-                                        )
-                                      : SizedBox(),
-                                  SizedBox(
-                                    height: 20,
-                                  ),
-                                  Container(
-                                    height: 50,
-                                    width: MediaQuery.of(context).size.width,
-                                    child: Center(
-                                      child: Text(
-                                        customer.firstName != null
-                                            ? customer.firstName
-                                            : "Walk-In Customer",
-                                        style: TextStyle(
-                                            fontSize: 23,
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                Theme.of(context).accentColor),
-                                      ),
-                                    ),
-                                    color: Colors.grey[900].withOpacity(0.4),
-                                  ),
-                                  productList(),
-                                ],
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 40,
-                              left: 0,
-                              right: 0,
-                              child: Container(
+                      child: orderLists.length > 0
+                          ? SingleChildScrollView(
+                              child: Stack(children: <Widget>[
+                              // Padding(
+                              //     padding: EdgeInsets.only(right: 10, top: 10),
+                              //     child: Row(
+                              //       crossAxisAlignment: CrossAxisAlignment.center,
+                              //       mainAxisAlignment: MainAxisAlignment.end,
+                              //       children: <Widget>[
+                              //         isWeborder
+                              //             ? assingTableButton(() {
+                              //                 assignTable();
+                              //               })
+                              //             : SizedBox()
+                              //       ],
+                              //     )),
+                              Container(
                                 padding: EdgeInsets.symmetric(horizontal: 50),
-                                child: Column(children: <Widget>[
-                                  Divider(),
-                                  totalAmountValues(),
-                                  Divider(),
-                                  paumentMethod != null
-                                      ? Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Padding(
-                                              padding: EdgeInsets.only(
-                                                top: 10,
-                                              ),
-                                              child: Text(
-                                                paumentMethod.name != null
-                                                    ? paumentMethod.name
-                                                        .toUpperCase()
-                                                    : "",
-                                                style: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: Colors.grey),
-                                              ),
-                                            ),
-                                            SizedBox(width: 70),
-                                            Padding(
+                                height: MediaQuery.of(context).size.height,
+                                margin: EdgeInsets.only(top: 5),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    SizedBox(height: 15),
+                                    Text(
+                                        DateFormat('EEE, MMM d yyyy, hh:mm aaa')
+                                            .format(DateTime.parse(
+                                                selectedOrder.order_date != null
+                                                    ? selectedOrder.order_date
+                                                    : DateTime.now()
+                                                        .toString())),
+                                        style: Styles.whiteSimpleSmall()),
+                                    SizedBox(
+                                      height: 20,
+                                    ),
+                                    Text(
+                                      orderpayment.op_amount.toString(),
+                                      style: TextStyle(
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context).accentColor),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    selectedOrder != null &&
+                                            paymemtUser.username != null
+                                        ? Text(
+                                            selectedOrder.invoice_no +
+                                                " - Processed by " +
+                                                paymemtUser.username,
+                                            style: Styles.whiteBoldsmall(),
+                                          )
+                                        : SizedBox(),
+                                    SizedBox(
+                                      height: 20,
+                                    ),
+                                    Container(
+                                      height: 50,
+                                      width: MediaQuery.of(context).size.width,
+                                      child: Center(
+                                        child: Text(
+                                          customer.firstName != null
+                                              ? customer.firstName
+                                              : "Walk-In Customer",
+                                          style: TextStyle(
+                                              fontSize: 23,
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context)
+                                                  .accentColor),
+                                        ),
+                                      ),
+                                      color: Colors.grey[900].withOpacity(0.4),
+                                    ),
+                                    productList(),
+                                  ],
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 40,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 50),
+                                  child: Column(children: <Widget>[
+                                    Divider(),
+                                    totalAmountValues(),
+                                    Divider(),
+                                    paumentMethod != null
+                                        ? Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: <Widget>[
+                                              Padding(
                                                 padding: EdgeInsets.only(
                                                   top: 10,
                                                 ),
                                                 child: Text(
-                                                  selectedOrder.grand_total !=
-                                                          null
-                                                      ? selectedOrder
-                                                          .grand_total
-                                                          .toString()
-                                                      : "00:00",
+                                                  paumentMethod.name != null
+                                                      ? paumentMethod.name
+                                                          .toUpperCase()
+                                                      : "",
                                                   style: TextStyle(
+                                                      fontSize: 18,
                                                       fontWeight:
                                                           FontWeight.w700,
                                                       color: Colors.grey),
-                                                )),
-                                          ],
-                                        )
-                                      : SizedBox(),
-                                  isRefunding
-                                      ? refundButtons(context)
-                                      : permissions
-                                              .contains(Constant.DELETE_ORDER)
-                                          ? transationsButton()
-                                          : SizedBox()
-                                ]),
+                                                ),
+                                              ),
+                                              SizedBox(width: 70),
+                                              Padding(
+                                                  padding: EdgeInsets.only(
+                                                    top: 10,
+                                                  ),
+                                                  child: Text(
+                                                    selectedOrder.grand_total !=
+                                                            null
+                                                        ? selectedOrder
+                                                            .grand_total
+                                                            .toString()
+                                                        : "00:00",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        color: Colors.grey),
+                                                  )),
+                                            ],
+                                          )
+                                        : SizedBox(),
+                                    isRefunding
+                                        ? refundButtons(context)
+                                        : permissions
+                                                .contains(Constant.DELETE_ORDER)
+                                            ? transationsButton()
+                                            : SizedBox()
+                                  ]),
+                                ),
                               ),
-                            ),
-                          ])
-                            // : Text(
-                            //     "No Transations Found",
-                            //     style: Styles.whiteBold(),
-                            //   )
-                            )
-                        : Center(
-                            child: Text(
-                              Strings.no_order_found,
-                              style: Styles.darkBlue(),
-                            ),
-                          ),
-                  ),
+                            ])
+                              // : Text(
+                              //     "No Transations Found",
+                              //     style: Styles.whiteBold(),
+                              //   )
+                              )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                SizedBox(
+                                  height: 50,
+                                ),
+                                Text(
+                                  Strings.no_order_found,
+                                  style: Styles.whiteBold(),
+                                ),
+                              ],
+                            )),
                 )
               ]),
             ],

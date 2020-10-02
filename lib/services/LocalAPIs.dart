@@ -640,12 +640,12 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getOrderDetails(orderid) async {
     var qry =
-        "SELECT P.product_id,P.name,P.price,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 FROM order_detail O " +
+        "SELECT P.product_id,P.name,P.price,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 " +
+            " FROM order_detail O " +
             " LEFT JOIN product P ON O.product_id = P.product_id" +
             " LEFT join asset on asset.asset_type_id = P.product_id " +
             " WHERE  O.order_id = " +
-            orderid.toString() +
-            " group by p.product_id";
+            orderid.toString();
 
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<ProductDetails> list = ordersList.isNotEmpty
