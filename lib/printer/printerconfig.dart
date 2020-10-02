@@ -50,7 +50,7 @@ class PrintReceipt {
         styles: PosStyles(align: PosAlign.left));
 
     ticket.hr();
-    ticket.setStyles(PosStyles(align: null));
+    ticket.setStyles(PosStyles(align: PosAlign.left));
     ticket.row([
       PosColumn(text: 'Qty', width: 2, styles: PosStyles(align: PosAlign.left)),
       PosColumn(
@@ -183,7 +183,7 @@ class PrintReceipt {
     ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
-          text: "SUBTOTAL(MYR)",
+          text: "SUB TOTAL(MYR)",
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
@@ -203,7 +203,7 @@ class PrintReceipt {
     ]);
     ticket.row([
       PosColumn(
-          text: "GRANDTOTAL(MYR)",
+          text: "GRAND TOTAL(MYR)",
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
@@ -345,7 +345,7 @@ class PrintReceipt {
     ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
-          text: "SUBTOTAL(MYR)",
+          text: "SUB TOTAL(MYR)",
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
@@ -363,10 +363,10 @@ class PrintReceipt {
           width: 4,
           styles: PosStyles(align: PosAlign.right)),
     ]);
-    ticket.hr();
+    //ticket.hr();
     ticket.row([
       PosColumn(
-          text: "GRANDTOTAL(MYR)",
+          text: "GRAND TOTAL(MYR)",
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
@@ -440,16 +440,16 @@ class PrintReceipt {
     ticket.setStyles(
         PosStyles(align: PosAlign.center, fontType: PosFontType.fontB));
     ticket.text(printerName + " Tested",
-        styles: PosStyles(bold: true, width: PosTextSize.size1));
+        styles: PosStyles(align: PosAlign.center,bold: true, width: PosTextSize.size1));
 
     ticket.text("Printer IP : " + printerIp,
-        styles: PosStyles(bold: true, width: PosTextSize.size1));
+        styles: PosStyles(align: PosAlign.center,bold: true, width: PosTextSize.size1));
 
     final now = DateTime.now();
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
 
-    ticket.text("Test Date time : " + timestamp, styles: PosStyles(bold: true));
+    ticket.text("Test Date time : " + timestamp, styles: PosStyles(align: PosAlign.center,bold: true));
 
     ticket.feed(2);
     ticket.cut();
