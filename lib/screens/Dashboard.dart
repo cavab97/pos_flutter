@@ -274,6 +274,15 @@ class _DashboradPageState extends State<DashboradPage>
     openOpningAmmountPop(Strings.title_closing_amount);
   }
 
+  deleteCurrentCart() async {
+    //TODO : Delete current order
+    Table_order tables = await getTableData();
+    var result = await localAPI.removeCartItem(currentCart, tables.table_id);
+    print(result);
+    clearCart();
+    refreshAfterAction();
+  }
+
   void selectOption(choice) {
     // Causes the app to rebuild with the new _selectedChoice.
 
@@ -305,7 +314,9 @@ class _DashboradPageState extends State<DashboradPage>
         } else {
           CommunFun.showToast(context, Strings.cart_empty);
         }
-
+        break;
+      case 4:
+        deleteCurrentCart();
         break;
     }
   }
@@ -1537,7 +1548,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                value: 3,
+                value: 4,
                 child: Padding(
                   padding: EdgeInsets.all(20),
                   child: Row(
@@ -1549,6 +1560,23 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       SizedBox(width: 20),
                       Text(Strings.draft_report, style: Styles.communBlack()),
+                    ],
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 5,
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.delete,
+                        color: Colors.black,
+                        size: 30,
+                      ),
+                      SizedBox(width: 20),
+                      Text(Strings.delete_order, style: Styles.communBlack()),
                     ],
                   ),
                 ),
