@@ -866,8 +866,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
           var index = orderItemList.indexOf(product);
           var item = orderItemList[index];
           var producrdata = json.decode(item.product_detail);
-          var image_Arr =
-              producrdata["base64"].replaceAll("data:image/jpg;base64,", '');
+          // var image_Arr =
+          //     producrdata["base64"].replaceAll("data:image/jpg;base64,", '');
           return InkWell(
               onTap: () {},
               child: Container(
@@ -883,8 +883,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         decoration: new BoxDecoration(
                           color: Colors.greenAccent,
                         ),
-                        child: image_Arr != ""
-                            ? CommonUtils.imageFromBase64String(image_Arr)
+                        child: producrdata["base64"] != ""
+                            ? CommonUtils.imageFromBase64String(
+                                producrdata["base64"])
                             : new Image.asset(
                                 Strings.no_imageAsset,
                                 fit: BoxFit.cover,

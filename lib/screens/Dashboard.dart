@@ -1358,15 +1358,16 @@ class _DashboradPageState extends State<DashboradPage>
                 return SearchProductList;
               },
               itemBuilder: (context, SearchProductList) {
-                var image_Arr = SearchProductList.base64
-                    .replaceAll("data:image/jpg;base64,", '');
+                // var image_Arr = SearchProductList.base64
+                //     .replaceAll("data:image/jpg;base64,", '');
                 return ListTile(
                   leading: Container(
                     color: Colors.grey,
                     width: 50,
                     height: 50,
-                    child: image_Arr != ""
-                        ? CommonUtils.imageFromBase64String(image_Arr)
+                    child: SearchProductList.base64 != ""
+                        ? CommonUtils.imageFromBase64String(
+                            SearchProductList.base64)
                         : new Image.asset(
                             Strings.no_image,
                             gaplessPlayback: true,
@@ -1607,8 +1608,8 @@ class _DashboradPageState extends State<DashboradPage>
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
         children: productList.map((product) {
-          var image_Arr =
-              product.base64.replaceAll("data:image/jpg;base64,", '');
+          // var image_Arr =
+          //     product.base64.replaceAll("data:image/jpg;base64,", '');
           return InkWell(
             onTap: () {
               if (isShiftOpen) {
@@ -1636,8 +1637,8 @@ class _DashboradPageState extends State<DashboradPage>
                         color: Colors.grey,
                         width: MediaQuery.of(context).size.width,
                         height: itemHeight / 2,
-                        child: image_Arr != ""
-                            ? CommonUtils.imageFromBase64String(image_Arr)
+                        child: product.base64 != ""
+                            ? CommonUtils.imageFromBase64String(product.base64)
                             : new Image.asset(
                                 Strings.no_image,
                                 fit: BoxFit.cover,
