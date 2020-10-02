@@ -91,7 +91,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
 
   Widget mainContent() {
     return Container(
-      height: 300,
+      height: MediaQuery.of(context).size.height / 2.2,
       width: MediaQuery.of(context).size.width / 2.2,
       child: Column(
         children: <Widget>[

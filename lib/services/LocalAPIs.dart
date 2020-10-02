@@ -65,7 +65,7 @@ class LocalAPI {
   }
 
   Future<List<ProductDetails>> getProduct(String id, String branchID) async {
-    var query = "SELECT product.*,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 , price_type.name as price_type_Name FROM `product` " +
+    var query = "SELECT product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64, price_type.name as price_type_Name FROM `product` " +
         " LEFT join product_category on product_category.product_id = product.product_id " +
         " LEFT join product_branch on product_branch.product_id = product.product_id " +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
@@ -86,7 +86,7 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getSeachProduct(
       String searchText, String branchID) async {
-    var query = "SELECT product.*,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 , price_type.name as price_type_Name FROM `product` " +
+    var query = "SELECT product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64 , price_type.name as price_type_Name FROM `product` " +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
         " where product.name LIKE '%$searchText%' OR product.sku LIKE '%$searchText%'" +
@@ -640,7 +640,7 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getOrderDetails(orderid) async {
     var qry =
-        "SELECT P.product_id,P.name,P.price,group_concat(replace(asset.base64,'data:image/jpg;base64,','') , ' groupconcate_Image ') as base64 " +
+        "SELECT P.product_id,P.name,P.price,replace(asset.base64,'data:image/jpg;base64,','') as base64" +
             " FROM order_detail O " +
             " LEFT JOIN product P ON O.product_id = P.product_id" +
             " LEFT join asset on asset.asset_type_id = P.product_id " +
@@ -671,7 +671,7 @@ class LocalAPI {
 
   Future<OrderPayment> getOrderpaymentData(orderid) async {
     var qry =
-        "SELECT * from order_payment where app_id = " + orderid.toString();
+        "SELECT * from order_payment where order_id = " + orderid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderPayment> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
@@ -1150,8 +1150,10 @@ class LocalAPI {
   Future<List<ProductDetails>> productdData(productid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry =
-        "SELECT product.*, price_type.name as price_type_Name  from product " +
-            " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1  where product_id = " +
+        " SELECT product.*, price_type.name as price_type_Name ,replace(asset.base64,'data:image/jpg;base64,','')  as base64   from product " +
+            " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
+            " LEFT join asset on asset.asset_type_id = product.product_id " +
+            " where product_id = " +
             productid.toString();
 
     var res = await db.rawQuery(qry);

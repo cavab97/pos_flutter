@@ -178,7 +178,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       List<ProductStoreInventory> cartval =
           await localAPI.checkItemAvailableinStore(productItem.productId);
       if (cartval.length > 0) {
-        if (int.parse(cartval[0].qty) >= product_qty) {
+        double storeqty = double.parse(cartval[0].qty);
+        if (storeqty >= product_qty) {
           var prevproductqty = product_qty;
           setState(() {
             product_qty = prevproductqty + 1;
@@ -470,7 +471,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         double.parse(productdata.price.toStringAsFixed(2));
     cartdetails.productQty = productdata.qty;
     cartdetails.productNetPrice = productdata.price;
-
     cartdetails.createdBy = loginData["id"];
     cartdetails.discount = 0;
     cartdetails.taxValue = taxvalues;

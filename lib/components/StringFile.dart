@@ -72,6 +72,7 @@ class Strings {
   static String close_shift = "Close Shift";
   static String draft_report = "Draft Report";
   static String no_image = "assets/no_image.png";
+  static String delete_order = "Delete Order";
   static String out_of_stoke = "OUT OF STOCK";
   static String apply_promocode = "Apply Promocode";
   static String item_not_available = "No item available";

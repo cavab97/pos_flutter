@@ -274,6 +274,15 @@ class _DashboradPageState extends State<DashboradPage>
     openOpningAmmountPop(Strings.title_closing_amount);
   }
 
+  deleteCurrentCart() async {
+    //TODO : Delete current order
+    Table_order tables = await getTableData();
+    var result = await localAPI.removeCartItem(currentCart, tables.table_id);
+    print(result);
+    clearCart();
+    refreshAfterAction();
+  }
+
   void selectOption(choice) {
     // Causes the app to rebuild with the new _selectedChoice.
 
@@ -305,7 +314,9 @@ class _DashboradPageState extends State<DashboradPage>
         } else {
           CommunFun.showToast(context, Strings.cart_empty);
         }
-
+        break;
+      case 4:
+        deleteCurrentCart();
         break;
     }
   }
@@ -476,7 +487,8 @@ class _DashboradPageState extends State<DashboradPage>
         }
       }
       if (tempCart.length > 0) {
-        printKOT.checkKOTPrint(printerList[i].printerIp.toString(), tableName, context, tempCart);
+        printKOT.checkKOTPrint(
+            printerList[i].printerIp.toString(), tableName, context, tempCart);
       }
     }
     /*showDialog(
@@ -663,7 +675,7 @@ class _DashboradPageState extends State<DashboradPage>
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
-    var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
+    //var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
     List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
 
     int length = branchdata.invoiceStart.length;
@@ -691,14 +703,14 @@ class _DashboradPageState extends State<DashboradPage>
     order.order_item_count = cartData.total_qty.toInt();
     order.tax_amount = cartData.tax;
     order.tax_json = cartData.tax_json;
-    order.order_date = datetime;
+    order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
     order.order_status = 1;
     order.server_id = 0;
     order.order_source = cartData.source;
     order.order_by = userdata.id;
     order.voucher_id = cartData.voucher_id;
     order.voucher_amount = cartData.discount;
-    order.updated_at = datetime;
+    order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
     order.updated_by = userdata.id;
     var orderid = await localAPI.placeOrder(order);
     print(orderid);
@@ -706,7 +718,7 @@ class _DashboradPageState extends State<DashboradPage>
       VoucherHistory history = new VoucherHistory();
       history.voucher_id = cartData.voucher_id;
       history.amount = cartData.discount;
-      history.created_at = datetime;
+      history.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
       history.order_id = orderid;
       history.uuid = uuid;
       var hisID = await localAPI.saveVoucherHistory(history);
@@ -722,6 +734,8 @@ class _DashboradPageState extends State<DashboradPage>
           var productdata = await localAPI.productdData(cartItem.productId);
           ProductDetails pdata;
           if (productdata.length > 0) {
+            productdata[0].qty = cartItem.productQty;
+            productdata[0].price = cartItem.productPrice;
             pdata = productdata[0];
           }
           List<OrderDetail> lappid =
@@ -741,10 +755,12 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.detail_qty = cartItem.productQty;
           orderDetail.product_discount = cartItem.discount;
           orderDetail.product_detail = json.encode(pdata);
-          orderDetail.updated_at = datetime;
+          orderDetail.updated_at =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           orderDetail.detail_amount =
               (cartItem.productPrice * cartItem.productQty);
-          orderDetail.detail_datetime = datetime;
+          orderDetail.detail_datetime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           orderDetail.updated_by = userdata.id;
           orderDetail.detail_status = 1;
           orderDetail.detail_by = userdata.id;
@@ -778,9 +794,11 @@ class _DashboradPageState extends State<DashboradPage>
           modifireData.modifier_id = modifire.modifierId;
           modifireData.om_amount = modifire.modifirePrice;
           modifireData.om_by = userdata.id;
-          modifireData.om_datetime = datetime;
+          modifireData.om_datetime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           modifireData.om_status = 1;
-          modifireData.updated_at = datetime;
+          modifireData.updated_at =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           modifireData.updated_by = userdata.id;
           var ordermodifreid = await localAPI.sendModifireData(modifireData);
           print(ordermodifreid);
@@ -801,10 +819,12 @@ class _DashboradPageState extends State<DashboradPage>
           attributes.attribute_id = modifire.attributeId;
           attributes.attr_price = modifire.attrPrice;
           attributes.ca_id = modifire.caId;
-          attributes.oa_datetime = datetime;
+          attributes.oa_datetime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           attributes.oa_by = userdata.id;
           attributes.oa_status = 1;
-          attributes.updated_at = datetime;
+          attributes.updated_at =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           attributes.updated_by = userdata.id;
           var orderAttri = await localAPI.sendAttrData(attributes);
           print(orderAttri);
@@ -829,9 +849,11 @@ class _DashboradPageState extends State<DashboradPage>
         (cartData.grand_total - cartData.discount).toDouble();
     orderpayment.op_method_response = '';
     orderpayment.op_status = 1;
-    orderpayment.op_datetime = datetime;
+    orderpayment.op_datetime =
+        await CommunFun.getCurrentDateTime(DateTime.now());
     orderpayment.op_by = userdata.id;
-    orderpayment.updated_at = datetime;
+    orderpayment.updated_at =
+        await CommunFun.getCurrentDateTime(DateTime.now());
     orderpayment.updated_by = userdata.id;
     var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
     print(paymentd);
@@ -864,7 +886,6 @@ class _DashboradPageState extends State<DashboradPage>
     print(user);
     print(itemsList);
     print(order);
-
     printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
         branchData, itemsList, orderitem, order, paument_method);
   }
@@ -1337,15 +1358,16 @@ class _DashboradPageState extends State<DashboradPage>
                 return SearchProductList;
               },
               itemBuilder: (context, SearchProductList) {
-                var image_Arr =
-                    SearchProductList.base64.split(" groupconcate_Image ");
+                // var image_Arr = SearchProductList.base64
+                //     .replaceAll("data:image/jpg;base64,", '');
                 return ListTile(
                   leading: Container(
                     color: Colors.grey,
                     width: 50,
                     height: 50,
-                    child: image_Arr.length != 0 && image_Arr[0] != ""
-                        ? CommonUtils.imageFromBase64String(image_Arr[0])
+                    child: SearchProductList.base64 != ""
+                        ? CommonUtils.imageFromBase64String(
+                            SearchProductList.base64)
                         : new Image.asset(
                             Strings.no_image,
                             gaplessPlayback: true,
@@ -1536,7 +1558,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                value: 3,
+                value: 4,
                 child: Padding(
                   padding: EdgeInsets.all(20),
                   child: Row(
@@ -1548,6 +1570,23 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       SizedBox(width: 20),
                       Text(Strings.draft_report, style: Styles.communBlack()),
+                    ],
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                value: 5,
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.delete,
+                        color: Colors.black,
+                        size: 30,
+                      ),
+                      SizedBox(width: 20),
+                      Text(Strings.delete_order, style: Styles.communBlack()),
                     ],
                   ),
                 ),
@@ -1569,7 +1608,8 @@ class _DashboradPageState extends State<DashboradPage>
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
         children: productList.map((product) {
-          var image_Arr = product.base64.split(" groupconcate_Image ");
+          // var image_Arr =
+          //     product.base64.replaceAll("data:image/jpg;base64,", '');
           return InkWell(
             onTap: () {
               if (isShiftOpen) {
@@ -1597,8 +1637,8 @@ class _DashboradPageState extends State<DashboradPage>
                         color: Colors.grey,
                         width: MediaQuery.of(context).size.width,
                         height: itemHeight / 2,
-                        child: image_Arr.length != 0 && image_Arr[0] != ""
-                            ? CommonUtils.imageFromBase64String(image_Arr[0])
+                        child: product.base64 != ""
+                            ? CommonUtils.imageFromBase64String(product.base64)
                             : new Image.asset(
                                 Strings.no_image,
                                 fit: BoxFit.cover,
@@ -2132,7 +2172,6 @@ class _DashboradPageState extends State<DashboradPage>
                       )
                     : SizedBox(),
                 Container(
-                    //color: Colors.white,
                     height: MediaQuery.of(context).size.height / 3.2,
                     margin: EdgeInsets.only(top: 50),
                     child: cartTable),
