@@ -48,7 +48,7 @@ class PrintReceipt {
         styles: PosStyles(align: PosAlign.left));
 
     ticket.hr();
-    ticket.setStyles(PosStyles(align: null));
+    ticket.setStyles(PosStyles(align: PosAlign.left));
     ticket.row([
       PosColumn(text: 'Qty', width: 2, styles: PosStyles(align: PosAlign.left)),
       PosColumn(
@@ -178,7 +178,7 @@ class PrintReceipt {
     ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
-          text: "SUBTOTAL(MYR)",
+          text: "SUB TOTAL(MYR)",
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
@@ -198,7 +198,7 @@ class PrintReceipt {
     ]);
     ticket.row([
       PosColumn(
-          text: "GRANDTOTAL(MYR)",
+          text: "GRAND TOTAL(MYR)",
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
@@ -340,7 +340,7 @@ class PrintReceipt {
     ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
-          text: "SUBTOTAL(MYR)",
+          text: "SUB TOTAL(MYR)",
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
@@ -358,10 +358,10 @@ class PrintReceipt {
           width: 4,
           styles: PosStyles(align: PosAlign.right)),
     ]);
-    ticket.hr();
+    //ticket.hr();
     ticket.row([
       PosColumn(
-          text: "GRANDTOTAL(MYR)",
+          text: "GRAND TOTAL(MYR)",
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
