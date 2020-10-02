@@ -193,8 +193,6 @@ class _DashboradPageState extends State<DashboradPage>
     Navigator.of(context).pop();
     await Preferences.removeSinglePref(Constant.LastSync_Table);
     await CommunFun.syncAfterSuccess(context);
-    await getCategoryList();
-    await CommunFun.checkUserPermission(checkInUser.id);
   }
 
   syncOrdersTodatabase() async {
