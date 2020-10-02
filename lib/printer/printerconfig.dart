@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:typed_data';
-<<<<<<< HEAD
 
-=======
 import 'package:image/image.dart';
->>>>>>> origin/API_Integration
+
 import 'package:esc_pos_printer/esc_pos_printer.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
@@ -103,7 +101,6 @@ class PrintReceipt {
     final Ticket ticket = Ticket(paper, profile);
 
     // Print image
-<<<<<<< HEAD
     ticket.setStyles(
         PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
 
@@ -114,12 +111,6 @@ class PrintReceipt {
     ticket.image(image);
 
     ticket.emptyLines(1);
-=======
-    final ByteData data = await rootBundle.load('assets/headerlogo.png');
-    final Uint8List bytes = data.buffer.asUint8List();
-    final image = decodeImage(bytes);
-    ticket.image(image, align: PosAlign.center);
->>>>>>> origin/API_Integration
 
     ticket.text(branchData.address,
         styles: PosStyles(
@@ -271,7 +262,7 @@ class PrintReceipt {
       double subTotal, double grandTotal, double tax, Branch branchData) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
-<<<<<<< HEAD
+
     // Print image
     ticket.setStyles(
         PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
@@ -281,14 +272,6 @@ class PrintReceipt {
     final image = decodeImage(bytes);
     ticket.image(image);
     ticket.emptyLines(1);
-=======
-
-     // Print image
-    final ByteData data = await rootBundle.load('assets/headerlogo.png');
-    final Uint8List bytes = data.buffer.asUint8List();
-    final image = decodeImage(bytes);
-    ticket.image(image, align: PosAlign.center);
->>>>>>> origin/API_Integration
 
     ticket.text(branchData.address,
         styles: PosStyles(
