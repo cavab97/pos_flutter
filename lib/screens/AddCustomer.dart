@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
@@ -77,15 +78,15 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             ),
           ),
           Positioned(
-            right: 30,
-            top: 15,
+            left: 40,
+            top: 20,
             child: GestureDetector(
               onTap: () {
                 addCustomer();
               },
               child: Text(
                 Strings.add.toUpperCase(),
-                style: TextStyle(fontSize: 30, color: Colors.white),
+                style: Styles.whiteBoldsmall(),
               ),
             ),
           ),
@@ -98,24 +99,30 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
 
   Widget closeButton(context) {
     return Positioned(
-        top: -30,
-        right: -20,
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).pop();
-          },
-          child: Container(
-            width: 50.0,
-            height: 50.0,
-            decoration: BoxDecoration(
-                color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
-            child: Icon(
+      top: -30,
+      right: -20,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          width: 50.0,
+          height: 50.0,
+          decoration: BoxDecoration(
+              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+          child: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: Icon(
               Icons.clear,
               color: Colors.white,
               size: 30,
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   Widget countryselect() {
@@ -219,20 +226,21 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
         keyboardType: type,
         obscureText: isPassword,
         decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
-            ),
-            // errorText: !isValidateEmail ? errormessage : null,
-            // errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
-            labelText: isCompal ? lable + "*" : lable,
-            labelStyle: TextStyle(
-              fontSize: 22.0,
-              color: Colors.grey,
-            )),
+          border: OutlineInputBorder(),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.grey),
+          ),
+          labelText: isCompal ? lable + "*" : lable,
+          labelStyle: TextStyle(
+            fontSize: 22.0,
+            color: Colors.grey,
+          ),
+        ),
         style: TextStyle(height: 2, color: Colors.black, fontSize: 23.0),
         onChanged: _onchnage,
       ),

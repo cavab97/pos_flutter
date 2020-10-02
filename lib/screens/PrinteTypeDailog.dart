@@ -7,7 +7,8 @@ import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class ChoosePrinterDailog extends StatefulWidget {
-  ChoosePrinterDailog({Key key, this.selectedIP,this.onClose}) : super(key: key);
+  ChoosePrinterDailog({Key key, this.selectedIP, this.onClose})
+      : super(key: key);
   final selectedIP;
   Function onClose;
   @override
@@ -15,7 +16,6 @@ class ChoosePrinterDailog extends StatefulWidget {
 }
 
 class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
-
   @override
   void initState() {
     super.initState();
@@ -58,24 +58,30 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
 
   Widget closeButton(context) {
     return Positioned(
-        top: -30,
-        right: -20,
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).pop();
-          },
-          child: Container(
-            width: 50.0,
-            height: 50.0,
-            decoration: BoxDecoration(
-                color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
-            child: Icon(
+      top: -30,
+      right: -20,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          width: 50.0,
+          height: 50.0,
+          decoration: BoxDecoration(
+              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+          child: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: Icon(
               Icons.clear,
               color: Colors.white,
               size: 30,
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   //widget.onPress;

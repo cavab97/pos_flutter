@@ -77,24 +77,30 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
 
   Widget closeButton(context) {
     return Positioned(
-        top: -30,
-        right: -20,
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).pop();
-          },
-          child: Container(
-            width: 50.0,
-            height: 50.0,
-            decoration: BoxDecoration(
-                color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
-            child: Icon(
+      top: -30,
+      right: -20,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          width: 50.0,
+          height: 50.0,
+          decoration: BoxDecoration(
+              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+          child: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: Icon(
               Icons.clear,
               color: Colors.white,
               size: 30,
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   Widget mainContent() {
@@ -111,7 +117,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
   }
 
   Widget _button(String number, Function() f) {
-    var size = MediaQuery.of(context).size.width / 2.5;
+    var size = MediaQuery.of(context).size.width / 2;
     double resize = size / 6;
     return Container(
       width: (number == "00") ? (resize * 2) : resize,
@@ -122,7 +128,10 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
             borderRadius: BorderRadius.circular(18.0),
             side: BorderSide(color: Colors.grey)),
         child: Text(number,
-            textAlign: TextAlign.center, style: Styles.blackBoldLarge()),
+            textAlign: TextAlign.center,
+            style: number == "Enter"
+                ? Styles.blackBoldsmall()
+                : Styles.blackBoldLarge()),
         textColor: Colors.black,
         color: Colors.grey[100],
         onPressed: f,
@@ -131,7 +140,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
   }
 
   Widget _backbutton(Function() f) {
-    var size = MediaQuery.of(context).size.width / 2.5;
+    var size = MediaQuery.of(context).size.width / 2;
     double resize = size / 6;
     return Container(
       width: resize,
@@ -144,7 +153,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         child: Icon(
           Icons.backspace,
           color: Colors.black,
-          size: 30,
+          size: 25,
         ),
         textColor: Colors.black,
         color: Colors.grey[100],

@@ -129,24 +129,30 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
 
   Widget closeButton(context) {
     return Positioned(
-        top: -30,
-        right: -20,
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).pop();
-          },
-          child: Container(
-            width: 50.0,
-            height: 50.0,
-            decoration: BoxDecoration(
-                color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
-            child: Icon(
+      top: -30,
+      right: -20,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          width: 50.0,
+          height: 50.0,
+          decoration: BoxDecoration(
+              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+          child: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: Icon(
               Icons.clear,
               color: Colors.white,
               size: 30,
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   //widget.onPress;

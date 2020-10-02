@@ -37,6 +37,7 @@ import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class DashboradPage extends StatefulWidget {
   // main Product list page
@@ -61,6 +62,7 @@ class _DashboradPageState extends State<DashboradPage>
   List<ProductDetails> productList = new List<ProductDetails>();
   List<ProductDetails> SearchProductList = new List<ProductDetails>();
   List<MSTCartdetails> cartList = new List<MSTCartdetails>();
+  SlidableController slidableController = SlidableController();
   bool isDrawerOpen = false;
   bool isShiftOpen = true;
   var userDetails;
@@ -127,8 +129,15 @@ class _DashboradPageState extends State<DashboradPage>
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
+    slidableController = SlidableController(
+      onSlideAnimationChanged: handleSlideAnimationChanged,
+      onSlideIsOpenChanged: handleSlideIsOpenChanged,
+    );
   }
 
+  void handleSlideAnimationChanged(Animation<double> slideAnimation) {}
+
+  void handleSlideIsOpenChanged(bool isOpen) {}
   setPermissons() async {
     var permission = await CommunFun.getPemission();
     setState(() {
@@ -246,7 +255,7 @@ class _DashboradPageState extends State<DashboradPage>
       discount = cart.discount;
       tax = cart.tax;
       isWebOrder = cart.source == 1 ? true : false;
-      taxJson = json.decode(cart.tax_json);
+      //taxJson = json.decode(cart.tax_json);
       grandTotal = cart.grand_total;
       selectedvoucher = vaocher;
     });
@@ -275,10 +284,9 @@ class _DashboradPageState extends State<DashboradPage>
   deleteCurrentCart() async {
     //TODO : Delete current order
     Table_order tables = await getTableData();
-    var result = await localAPI.removeCartItem(currentCart, tables.table_id);
+    var result = await localAPI.clearCartItem(currentCart, tables.table_id);
     print(result);
-    clearCart();
-    refreshAfterAction();
+    await refreshAfterAction();
   }
 
   void selectOption(choice) {
@@ -313,7 +321,7 @@ class _DashboradPageState extends State<DashboradPage>
           CommunFun.showToast(context, Strings.cart_empty);
         }
         break;
-      case 4:
+      case 5:
         deleteCurrentCart();
         break;
     }
@@ -910,7 +918,7 @@ class _DashboradPageState extends State<DashboradPage>
     for (var i = 0; i < taxjson.length; i++) {
       taxjson[i]["taxAmount"] =
           double.parse(taxjson[i]["taxAmount"]) - item.taxValue;
-      return false;
+      return taxjson;
     }
     return taxjson;
   }
@@ -926,8 +934,8 @@ class _DashboradPageState extends State<DashboradPage>
           : 0;
       cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
       cart.grand_total = allcartData.grand_total - cartitemdata.productPrice;
-      cart.tax_json =
-          json.encode(removeTax(allcartData.tax_json, cartitemdata));
+      // cart.tax_json =
+          // json.encode(removeTax(allcartData.tax_json, cartitemdata));
       await localAPI.deleteCartItem(
           cartitem, currentCart, cart, cartList.length == 1);
       if (cartitem.isSendKichen == 1) {
@@ -1056,6 +1064,7 @@ class _DashboradPageState extends State<DashboradPage>
           child: new GestureDetector(
             onTap: () {
               FocusScope.of(context).requestFocus(new FocusNode());
+              slidableController.activeState?.close();
             },
             child: Container(
               width: MediaQuery.of(context).size.width,
@@ -1122,7 +1131,6 @@ class _DashboradPageState extends State<DashboradPage>
                     ),
                     TableCell(
                         child: Stack(
-                      fit: StackFit.loose,
                       children: <Widget>[
                         Container(
                           color: Colors.white,
@@ -1832,86 +1840,90 @@ class _DashboradPageState extends State<DashboradPage>
         ]);
 
     final cartTable = ListView(
+      primary: true,
       shrinkWrap: true,
       children: ListTile.divideTiles(
         context: context,
         tiles: cartList.map((cart) {
-          return new SlideMenu(
-            child: new ListTile(
-              title: new Container(
-                child: new Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(top: 0, bottom: 0),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width / 6,
-                          child: Text(
-                            cart.productName.toUpperCase(),
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey[700],
+          return new Slidable(
+            key: Key(cart.id.toString()),
+            controller: slidableController,
+            actionPane: SlidableDrawerActionPane(),
+            actionExtentRatio: 0.15,
+            child: Container(
+              child: new ListTile(
+                title: new Container(
+                  child: new Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(top: 0, bottom: 0),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width / 6,
+                            child: Text(
+                              cart.productName.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[700],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Container(
-                          // color: Colors.red,
-                          width: MediaQuery.of(context).size.width / 8.2,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Padding(
-                                  padding: EdgeInsets.only(top: 0, bottom: 0),
-                                  child: Text(
-                                    cart.productQty.toString(),
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.grey[700],
-                                    ),
-                                  )),
-                              Padding(
-                                  padding: EdgeInsets.only(
-                                      right: 10, top: 0, bottom: 0),
-                                  child: Text(
-                                    cart.productPrice.toString(),
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.grey[700],
-                                    ),
-                                  )),
-                            ],
-                          ))
-                    ]),
+                        Container(
+                            // color: Colors.red,
+                            width: MediaQuery.of(context).size.width / 8.2,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Padding(
+                                    padding: EdgeInsets.only(top: 0, bottom: 0),
+                                    child: Text(
+                                      cart.productQty.toString(),
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey[700],
+                                      ),
+                                    )),
+                                Padding(
+                                    padding: EdgeInsets.only(
+                                        right: 10, top: 0, bottom: 0),
+                                    child: Text(
+                                      cart.productPrice.toString(),
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey[700],
+                                      ),
+                                    )),
+                              ],
+                            ))
+                      ]),
+                ),
               ),
             ),
-            menuItems: <Widget>[
-              new Container(
-                height: MediaQuery.of(context).size.height,
-                color: Colors.red,
-                child: new IconButton(
-                  padding: EdgeInsets.all(0),
-                  onPressed: () {
-                    if (!isWebOrder) {
-                      itememovefromCart(cart);
-                      itememovefromCart(cart);
-                    }
-                  },
-                  icon: new Icon(Icons.delete, size: 30, color: Colors.white),
-                ),
+            secondaryActions: <Widget>[
+              IconSlideAction(
+                // caption: 'Edit',
+                color: Colors.black45,
+                icon: Icons.edit,
+                onTap: () {
+                  if (!isWebOrder) {
+                    editCartItem(cart);
+                  }
+                },
               ),
-              new Container(
-                child: new IconButton(
-                  onPressed: () {
-                    if (!isWebOrder) {
-                      editCartItem(cart);
-                    }
-                  },
-                  icon: new Icon(Icons.edit, size: 30, color: Colors.white),
-                ),
+              IconSlideAction(
+                // caption: 'Delete',
+                color: Colors.red,
+                icon: Icons.delete,
+                onTap: () {
+                  if (!isWebOrder) {
+                    itememovefromCart(cart);
+                    itememovefromCart(cart);
+                  }
+                },
               ),
             ],
           );
@@ -2157,7 +2169,8 @@ class _DashboradPageState extends State<DashboradPage>
       children: <Widget>[
         Container(
             height: MediaQuery.of(context).size.height / 1.3,
-            //width: MediaQuery.of(context).size.width,
+            // width: MediaQuery.of(context).size.width,
+
             color: Colors.grey[300],
             padding: EdgeInsets.all(10),
             child: Stack(

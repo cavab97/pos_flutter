@@ -550,8 +550,34 @@ class LocalAPI {
     return paymentData.app_id;
   }
 
+  Future<int> clearCartItem(cartid, tableID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var cart = // cart table
+        await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
+    print(cart);
+    await SyncAPICalls.logActivity("orders", "clear cart", "mst_cart", 1);
+    await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartid]);
+    var cartDetail = await db
+        .query("mst_cart_detail", where: 'cart_id = ?', whereArgs: [cartid]);
+    await SyncAPICalls.logActivity(
+        "orders", "clear cart detail", "mst_cart_detail", cartid);
+    List<MSTCartdetails> list = cartDetail.isNotEmpty
+        ? cartDetail.map((c) => MSTCartdetails.fromJson(c)).toList()
+        : [];
+    if (list.length > 0) {
+      for (var i = 0; i < list.length; i++) {
+        var cartsubdatad = await db.delete("mst_cart_sub_detail",
+            where: 'cart_details_id = ?', whereArgs: [list[i].id]);
+        print(cartsubdatad);
+      }
+      await SyncAPICalls.logActivity(
+          "orders", "clear cart detail", "mst_cart_sub_detail", cartid);
+    }
+    return cartid;
+  }
+
   Future<int> removeCartItem(cartid, tableID) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
 
     var cart = // cart table
         await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
@@ -1252,7 +1278,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from order_cancel where terminal_id = " +
         branchid.toString() +
-        "AND server_id = 0";
+        " AND server_id = 0";
     var ordersList = await db.rawQuery(qry);
     List<CancelOrder> list = ordersList.length > 0
         ? ordersList.map((c) => CancelOrder.fromJson(c)).toList()
