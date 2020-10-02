@@ -174,7 +174,7 @@ class PrintReceipt {
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
         PosColumn(
-            text: item.product_price.toString(),
+            text: name["price"].toString(),
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
       ]);

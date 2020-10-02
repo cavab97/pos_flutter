@@ -886,7 +886,6 @@ class _DashboradPageState extends State<DashboradPage>
     print(user);
     print(itemsList);
     print(order);
-
     printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
         branchData, itemsList, orderitem, order, paument_method);
   }
@@ -1359,15 +1358,15 @@ class _DashboradPageState extends State<DashboradPage>
                 return SearchProductList;
               },
               itemBuilder: (context, SearchProductList) {
-                var image_Arr =
-                    SearchProductList.base64.split(" groupconcate_Image ");
+                var image_Arr = SearchProductList.base64
+                    .replaceAll("data:image/jpg;base64,", '');
                 return ListTile(
                   leading: Container(
                     color: Colors.grey,
                     width: 50,
                     height: 50,
-                    child: image_Arr.length != 0 && image_Arr[0] != ""
-                        ? CommonUtils.imageFromBase64String(image_Arr[0])
+                    child: image_Arr != ""
+                        ? CommonUtils.imageFromBase64String(image_Arr)
                         : new Image.asset(
                             Strings.no_image,
                             gaplessPlayback: true,
@@ -1608,7 +1607,8 @@ class _DashboradPageState extends State<DashboradPage>
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
         children: productList.map((product) {
-          var image_Arr = product.base64.split(" groupconcate_Image ");
+          var image_Arr =
+              product.base64.replaceAll("data:image/jpg;base64,", '');
           return InkWell(
             onTap: () {
               if (isShiftOpen) {
@@ -1636,8 +1636,8 @@ class _DashboradPageState extends State<DashboradPage>
                         color: Colors.grey,
                         width: MediaQuery.of(context).size.width,
                         height: itemHeight / 2,
-                        child: image_Arr.length != 0 && image_Arr[0] != ""
-                            ? CommonUtils.imageFromBase64String(image_Arr[0])
+                        child: image_Arr != ""
+                            ? CommonUtils.imageFromBase64String(image_Arr)
                             : new Image.asset(
                                 Strings.no_image,
                                 fit: BoxFit.cover,
@@ -2171,7 +2171,6 @@ class _DashboradPageState extends State<DashboradPage>
                       )
                     : SizedBox(),
                 Container(
-                    //color: Colors.white,
                     height: MediaQuery.of(context).size.height / 3.2,
                     margin: EdgeInsets.only(top: 50),
                     child: cartTable),

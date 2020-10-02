@@ -281,6 +281,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
     return Scaffold(
       drawer: transactionsDrawer(), // page Drawer
       body: SafeArea(
+          child: new GestureDetector(
+        onTap: () {
+          FocusScope.of(context).requestFocus(new FocusNode());
+          setState(() {
+            isFiltering = false;
+          });
+        },
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
@@ -504,7 +511,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 
@@ -857,8 +864,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
         child: Column(
             children: orderItemList.map((product) {
           var index = orderItemList.indexOf(product);
-          var item = detailsList[index];
-          var image_Arr = item.base64.split(" groupconcate_Image ");
+          var item = orderItemList[index];
+          var producrdata = json.decode(item.product_detail);
+          var image_Arr =
+              producrdata["base64"].replaceAll("data:image/jpg;base64,", '');
           return InkWell(
               onTap: () {},
               child: Container(
@@ -873,13 +882,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         width: 100,
                         decoration: new BoxDecoration(
                           color: Colors.greenAccent,
-                          // image: new DecorationImage(
-                          //   image: new ExactAssetImage("assets/image1.jfif"),
-                          //   fit: BoxFit.cover,
-                          // ),
                         ),
-                        child: image_Arr.length != 0 && image_Arr[0] != ""
-                            ? CommonUtils.imageFromBase64String(image_Arr[0])
+                        child: image_Arr != ""
+                            ? CommonUtils.imageFromBase64String(image_Arr)
                             : new Image.asset(
                                 Strings.no_imageAsset,
                                 fit: BoxFit.cover,
@@ -896,7 +901,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text(item.name.toString().toUpperCase(),
+                                Text(
+                                    producrdata["name"]
+                                        .toString()
+                                        .toUpperCase(),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 2,
                                     style: TextStyle(
