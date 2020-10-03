@@ -232,8 +232,12 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   gotoShiftReport() {
-    Navigator.of(context).pop();
-    Navigator.pushNamed(context, Constant.ShiftOrders);
+    if (isShiftOpen) {
+      Navigator.of(context).pop();
+      Navigator.pushNamed(context, Constant.ShiftOrders);
+    } else {
+      CommunFun.showToast(context, Strings.shift_opne_alert_msg);
+    }
   }
 
   checkshift() async {
@@ -1018,13 +1022,21 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   gotoTansactionPage() {
-    Navigator.of(context).pop();
-    Navigator.pushNamed(context, Constant.TransactionScreen);
+    if (isShiftOpen) {
+      Navigator.of(context).pop();
+      Navigator.pushNamed(context, Constant.TransactionScreen);
+    } else {
+      CommunFun.showToast(context, Strings.shift_opne_alert_msg_transaction);
+    }
   }
 
   gotoWebCart() {
-    Navigator.of(context).pop();
-    Navigator.pushNamed(context, Constant.WebOrderPages);
+    if (isShiftOpen) {
+      Navigator.of(context).pop();
+      Navigator.pushNamed(context, Constant.WebOrderPages);
+    } else {
+      CommunFun.showToast(context, Strings.shift_opne_alert_msg_webOrder);
+    }
   }
 
   @override
@@ -1234,11 +1246,7 @@ class _DashboradPageState extends State<DashboradPage>
               CommunFun.divider(),
               ListTile(
                 onTap: () {
-                  if (isShiftOpen) {
-                    gotoTansactionPage();
-                  } else {
-                    CommunFun.showToast(context, Strings.shift_closed);
-                  }
+                  gotoTansactionPage();
                 },
                 leading: Icon(
                   Icons.art_track,
@@ -2181,11 +2189,12 @@ class _DashboradPageState extends State<DashboradPage>
           padding: EdgeInsets.all(10),
           child: Stack(
             children: <Widget>[
-              Container(
-                  height: 50,
-                  width: MediaQuery.of(context).size.width / 1.2,
-                  // margin: EdgeInsets.only(top: customer != null  0),
-                  child: customerdatawidget),
+              customer != null
+                  ? Container(
+                      height: 50,
+                      width: MediaQuery.of(context).size.width / 1.2,
+                      child: customerdatawidget)
+                  : SizedBox(),
               cartList.length != 0
                   ? Container(
                       width: MediaQuery.of(context).size.width / 1.2,

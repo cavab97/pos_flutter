@@ -55,7 +55,7 @@ class Strings {
   static String open_shift = "Open Shift";
   static String shiftTextLable = "Sorry,we're";
   static String shiftTextLableOpen = "Yes,we're\nOpen";
-   static String opened_at = "OPENED AT";
+  static String opened_at = "OPENED AT";
   static String closed = "CLOSED";
   static String syncText = "Syncing...";
   static String shift_open_message = "Shift is not Opened";
@@ -110,5 +110,12 @@ class Strings {
   static String stock_not_valilable = "Product is Out of stock.";
   static String procesing = "Processing";
   static String send = "SEND";
+  static String open = "OPEN";
   static String internet_connection_lost = "Internet Connection Lost";
+  static String shift_opne_alert_msg =
+      "Currently shift was closed,Please opne shift after you can see shift report.";
+  static String shift_opne_alert_msg_transaction =
+      "Currently shift was closed,Please opne shift after you  can see Transactions.";
+      static String shift_opne_alert_msg_webOrder=
+      "Currently shift was closed,Please opne shift after you  can see web Orders.";
 }

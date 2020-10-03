@@ -20,6 +20,7 @@ class Styles {
         fontWeight: FontWeight.w800,
         fontFamily: Strings.fontFamily);
   }
+
   static blackBoldsmall() {
     return TextStyle(
         // White text
@@ -35,6 +36,24 @@ class Styles {
         color: Color(0xFFffffff),
         fontSize: 18,
         fontWeight: FontWeight.w600,
+        fontFamily: Strings.fontFamily);
+  }
+
+  static whiteSimpleLarge() {
+    return TextStyle(
+        // White text
+        color: Color(0xFFffffff),
+        fontSize: 30,
+        fontWeight: FontWeight.normal,
+        fontFamily: Strings.fontFamily);
+  }
+
+  static blackSimpleLarge() {
+    return TextStyle(
+        // White text
+        color: Color(0xFF0000000),
+        fontSize: 30,
+        fontWeight: FontWeight.normal,
         fontFamily: Strings.fontFamily);
   }
 
