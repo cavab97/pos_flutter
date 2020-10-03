@@ -43,6 +43,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   var permissions = "";
   Customer customer = new Customer();
   Payments paumentMethod = new Payments();
+
   @override
   void initState() {
     super.initState();
@@ -131,20 +132,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
     setState(() {
       isRefunding = true;
     });
-  }
-
-  cancleAlertpopOpne() {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return TrancationCancleAlert(
-            onClose: () {
-              Navigator.of(context).pop();
-              showReasontypePop();
-            },
-          );
-        });
   }
 
   showReasontypePop() {
@@ -653,7 +640,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
         SizedBox(width: 10),
         cancelButton(() {
           if (orderpayment.op_status == 1) {
-            cancleAlertpopOpne();
+            CommonUtils.showAlertDialog(context, () {
+              Navigator.of(context).pop();
+            }, () {
+              Navigator.of(context).pop();
+              showReasontypePop();
+            },
+                "Warning",
+                "This action can not be undone. Do you want to avoid this transaction?",
+                "Yes",
+                "No",
+                true);
           }
         }),
       ],
@@ -936,7 +933,18 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     size: 40,
                                   ),
                                   onPressed: () {
-                                    deleteItemFormList(product);
+                                    CommonUtils.showAlertDialog(context, () {
+                                      Navigator.of(context).pop();
+                                    }, () {
+                                      Navigator.of(context).pop();
+                                      deleteItemFormList(product);
+                                    },
+                                        "Alert",
+                                        "Are you sure you want to delete this item?",
+                                        "Yes",
+                                        "No",
+                                        true);
+                                    //deleteItemFormList(product);
                                   })
                               : SizedBox(),
                         ],
@@ -1088,47 +1096,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 }
 
-class TrancationCancleAlert extends StatefulWidget {
-  TrancationCancleAlert({Key key, this.onClose}) : super(key: key);
-  Function onClose;
-  @override
-  TrancationCancleAlertState createState() => TrancationCancleAlertState();
-}
-
-class TrancationCancleAlertState extends State<TrancationCancleAlert> {
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      titlePadding: EdgeInsets.all(20),
-      title: Center(child: Text("Warning")),
-      content: Container(
-          width: MediaQuery.of(context).size.width / 3.4,
-          child: Text(
-              "This action can not be undone.Do you want to void the trancation?")),
-      actions: <Widget>[
-        FlatButton(
-          onPressed: () {
-            widget.onClose();
-          },
-          child: Text("Yes", style: Styles.orangeSmall()),
-        ),
-        FlatButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Text("No", style: Styles.orangeSmall()),
-        )
-      ],
-    );
-  }
-}
-
 class ChooseReasonType extends StatefulWidget {
   ChooseReasonType({Key key, this.onClose}) : super(key: key);
   Function onClose;
+
   @override
   ChooseReasonTypeState createState() => ChooseReasonTypeState();
 }
@@ -1255,12 +1226,14 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
 class AddOtherReason extends StatefulWidget {
   AddOtherReason({Key key, this.onClose}) : super(key: key);
   Function onClose;
+
   @override
   AddOtherReasonState createState() => AddOtherReasonState();
 }
 
 class AddOtherReasonState extends State<AddOtherReason> {
   TextEditingController reasonController = new TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -1268,7 +1241,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
       content: Container(
           height: MediaQuery.of(context).size.height / 4,
           width: MediaQuery.of(context).size.width / 3.4,
-          child: Column(
+          child: SingleChildScrollView(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
@@ -1292,7 +1265,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
                 ),
               ),
             ],
-          )),
+          )),),
       actions: <Widget>[canclebutton(context), confirmBtn(context)],
     );
   }
