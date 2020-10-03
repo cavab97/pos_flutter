@@ -53,9 +53,8 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
   saveCustomerTolocal(customer) async {
     await Preferences.setStringToSF(
         Constant.CUSTOMER_DATA, json.encode(customer));
-    widget.onClose();
     Navigator.of(context).pop();
-    // await Navigator.pushNamed(context, Constant.DashboardScreen);
+    widget.onClose();
   }
 
   filterCustomer(val) {

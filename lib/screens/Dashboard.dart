@@ -30,6 +30,7 @@ import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
+import 'package:mcncashier/screens/CloseShiftPage.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
@@ -70,6 +71,7 @@ class _DashboradPageState extends State<DashboradPage>
   Branch branchData;
   Table_order selectedTable;
   double subtotal = 0;
+  Customer customer;
   String tableName = "";
   bool isWebOrder = false;
   double discount = 0;
@@ -92,6 +94,7 @@ class _DashboradPageState extends State<DashboradPage>
   refreshAfterAction() {
     clearCart();
     checkidTableSelected();
+    checkCustomerSelected();
   }
 
   checkISlogin() async {
@@ -142,6 +145,13 @@ class _DashboradPageState extends State<DashboradPage>
     var permission = await CommunFun.getPemission();
     setState(() {
       permissions = permission;
+    });
+  }
+
+  checkCustomerSelected() async {
+    Customer customerData = await getCustomer();
+    setState(() {
+      customer = customerData;
     });
   }
 
@@ -261,6 +271,13 @@ class _DashboradPageState extends State<DashboradPage>
     });
   }
 
+  removeCutomer() async {
+    await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
+    setState(() {
+      customer = null;
+    });
+  }
+
   getUserData() async {
     var user = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
     if (user != null) {
@@ -278,7 +295,14 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   closeShift() {
-    openOpningAmmountPop(Strings.title_closing_amount);
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return CloseShiftPage(onClose: () {
+            openOpningAmmountPop(Strings.title_closing_amount);
+          });
+        });
   }
 
   deleteCurrentCart() async {
@@ -594,7 +618,8 @@ class _DashboradPageState extends State<DashboradPage>
         builder: (BuildContext context) {
           return SearchCustomerPage(
             onClose: () {
-              refreshAfterAction();
+              //refreshAfterAction();
+              checkCustomerSelected();
             },
           );
         });
@@ -617,7 +642,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   Future<Customer> getCustomer() async {
-    Customer customer = new Customer();
+    Customer customer;
     var customerData =
         await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
     if (customerData != null) {
@@ -935,7 +960,7 @@ class _DashboradPageState extends State<DashboradPage>
       cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
       cart.grand_total = allcartData.grand_total - cartitemdata.productPrice;
       // cart.tax_json =
-          // json.encode(removeTax(allcartData.tax_json, cartitemdata));
+      // json.encode(removeTax(allcartData.tax_json, cartitemdata));
       await localAPI.deleteCartItem(
           cartitem, currentCart, cart, cartList.length == 1);
       if (cartitem.isSendKichen == 1) {
@@ -1208,19 +1233,23 @@ class _DashboradPageState extends State<DashboradPage>
               ),
               CommunFun.divider(),
               ListTile(
-                  onTap: () {
-                    if (isShiftOpen) {
-                      gotoTansactionPage();
-                    } else {
-                      CommunFun.showToast(context, Strings.shift_closed);
-                    }
-                  },
-                  leading: Icon(
-                    Icons.art_track,
-                    color: Colors.black,
-                    size: 30,
-                  ),
-                  title: Text("Transaction", style: Styles.communBlack())),
+                onTap: () {
+                  if (isShiftOpen) {
+                    gotoTansactionPage();
+                  } else {
+                    CommunFun.showToast(context, Strings.shift_closed);
+                  }
+                },
+                leading: Icon(
+                  Icons.art_track,
+                  color: Colors.black,
+                  size: 30,
+                ),
+                title: Text(
+                  "Transaction",
+                  style: Styles.communBlack(),
+                ),
+              ),
               permissions.contains(Constant.VIEW_ORDER)
                   ? ListTile(
                       onTap: () {
@@ -1396,9 +1425,7 @@ class _DashboradPageState extends State<DashboradPage>
                 } else {
                   CommunFun.showToast(context, Strings.shift_open_message);
                 }
-
                 print(suggestion);
-
                 // Navigator.of(context).push(MaterialPageRoute(
                 //     //builder: (context) => ProductPage(product: suggestion)
                 //     ));
@@ -1413,7 +1440,7 @@ class _DashboradPageState extends State<DashboradPage>
   Widget tableHeader2() {
     // products Header part 2
     return Container(
-        padding: EdgeInsets.only(left: 10, right: 20),
+        padding: EdgeInsets.only(left: 10, right: 10),
         height: 80,
         // color: Colors.blue,
         child: Row(
@@ -1428,7 +1455,7 @@ class _DashboradPageState extends State<DashboradPage>
                         color: Colors.white,
                         size: 30,
                       ),
-                      SizedBox(width: 10),
+                      SizedBox(width: 5),
                       Text(
                         tableName +
                             " (" +
@@ -1441,7 +1468,7 @@ class _DashboradPageState extends State<DashboradPage>
                 : SizedBox(),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 !isWebOrder ? addCustomerBtn(context) : SizedBox(),
                 Padding(
@@ -1456,36 +1483,38 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   Widget addCustomerBtn(context) {
-    return RaisedButton(
-      padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
-      onPressed: () {
-        if (isShiftOpen) {
-          opneShowAddCustomerDailog();
-        } else {
-          CommunFun.showToast(context, Strings.shift_open_message);
-        }
-      },
-      child: Row(
-        children: <Widget>[
-          Icon(
-            Icons.add_circle_outline,
-            color: Colors.white,
-            size: 30,
-          ),
-          SizedBox(width: 5),
-          Text(Strings.btn_Add_customer,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-              )),
-        ],
-      ),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50.0),
-      ),
-    );
+    return customer == null
+        ? RaisedButton(
+            padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+            onPressed: () {
+              if (isShiftOpen) {
+                opneShowAddCustomerDailog();
+              } else {
+                CommunFun.showToast(context, Strings.shift_open_message);
+              }
+            },
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.add_circle_outline,
+                  color: Colors.white,
+                  size: 30,
+                ),
+                SizedBox(width: 5),
+                Text(Strings.btn_Add_customer,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    )),
+              ],
+            ),
+            color: Colors.deepOrange,
+            textColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(50.0),
+            ),
+          )
+        : SizedBox();
   }
 
   Widget menubutton(Function _onPress) {
@@ -1767,28 +1796,29 @@ class _DashboradPageState extends State<DashboradPage>
       bottom: 0,
       child: Center(
         child: Container(
-            color: Colors.white.withOpacity(0.7),
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  Strings.shiftTextLable,
-                  style: TextStyle(fontSize: 30),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  Strings.closed,
-                  style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 30),
-                shiftbtn(() {
-                  openOpningAmmountPop(Strings.title_opening_amount);
-                })
-              ],
-            )),
+          color: Colors.white.withOpacity(0.7),
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                Strings.shiftTextLable,
+                style: TextStyle(fontSize: 30),
+              ),
+              SizedBox(height: 20),
+              Text(
+                Strings.closed,
+                style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 30),
+              shiftbtn(() {
+                openOpningAmmountPop(Strings.title_opening_amount);
+              })
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1812,6 +1842,33 @@ class _DashboradPageState extends State<DashboradPage>
 
   Widget cartITems() {
     // selected item list and total price calculations
+    final customerdatawidget = Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Icon(
+          Icons.account_circle,
+          color: Colors.grey,
+          size: 40,
+        ),
+        Column(
+          children: <Widget>[
+            Text(customer != null ? customer.name : ""),
+            Text(customer != null ? customer.email : ""),
+          ],
+        ),
+        IconButton(
+            icon: Icon(
+              Icons.delete_outline,
+              color: Colors.red,
+              size: 40,
+            ),
+            onPressed: () {
+              removeCutomer();
+            })
+      ],
+    );
+
     final carttitle = Table(
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         border: TableBorder(
@@ -1904,83 +1961,34 @@ class _DashboradPageState extends State<DashboradPage>
               ),
             ),
             secondaryActions: <Widget>[
-              IconSlideAction(
-                // caption: 'Edit',
-                color: Colors.black45,
-                icon: Icons.edit,
-                onTap: () {
-                  if (!isWebOrder) {
-                    editCartItem(cart);
-                  }
-                },
-              ),
-              IconSlideAction(
-                // caption: 'Delete',
-                color: Colors.red,
-                icon: Icons.delete,
-                onTap: () {
-                  if (!isWebOrder) {
-                    itememovefromCart(cart);
-                    itememovefromCart(cart);
-                  }
-                },
-              ),
+              permissions.contains(Constant.EDIT_ORDER)
+                  ? IconSlideAction(
+                      color: Colors.black45,
+                      icon: Icons.edit,
+                      onTap: () {
+                        if (!isWebOrder) {
+                          editCartItem(cart);
+                        }
+                      },
+                    )
+                  : SizedBox(),
+              permissions.contains(Constant.DELETE_ORDER)
+                  ? IconSlideAction(
+                      color: Colors.red,
+                      icon: Icons.delete_outline,
+                      onTap: () {
+                        if (!isWebOrder) {
+                          itememovefromCart(cart);
+                          itememovefromCart(cart);
+                        }
+                      },
+                    )
+                  : SizedBox(),
             ],
           );
         }),
       ).toList(),
     );
-    /* Table(
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            border: TableBorder(
-                bottom: BorderSide(
-                    width: 1,
-                    color: Colors.grey[400],
-                    style: BorderStyle.solid),
-                horizontalInside: BorderSide(
-                    width: 1,
-                    color: Colors.grey[400],
-                    style: BorderStyle.solid)),
-            columnWidths: {
-              0: FractionColumnWidth(.6),
-              1: FractionColumnWidth(.2),
-              2: FractionColumnWidth(.2),
-            },
-            children: cartList.map((cart) {
-              return TableRow(children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                  child: Text(
-                    cart.productName.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                ),
-                Padding(
-                    padding: EdgeInsets.only(top: 10, bottom: 10),
-                    child: Text(
-                      cart.productQty.toString(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                    )),
-                Padding(
-                    padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-                    child: Text(
-                      cart.productPrice.toString(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                      ),
-                    )),
-              ]);
-            }).toList());*/
 
     final totalPriceTable = Table(
         border: TableBorder(
@@ -2168,128 +2176,42 @@ class _DashboradPageState extends State<DashboradPage>
     return Column(
       children: <Widget>[
         Container(
-            height: MediaQuery.of(context).size.height / 1.3,
-            // width: MediaQuery.of(context).size.width,
-
-            color: Colors.grey[300],
-            padding: EdgeInsets.all(10),
-            child: Stack(
-              children: <Widget>[
-                cartList.length != 0
-                    ? Container(
-                        width: MediaQuery.of(context).size.width / 1.2,
-                        color: Colors.white,
-                        child: carttitle,
-                      )
-                    : SizedBox(),
-                Container(
-                    height: MediaQuery.of(context).size.height / 3.2,
-                    margin: EdgeInsets.only(top: 50),
-                    child: cartTable),
-                cartList.length != 0
-                    ? Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(child: totalPriceTable),
-                      )
-                    : Center(
-                        child: Text(Strings.item_not_available,
-                            style: Styles.communBlack()))
-              ],
-            )),
+          height: MediaQuery.of(context).size.height / 1.3,
+          color: Colors.grey[300],
+          padding: EdgeInsets.all(10),
+          child: Stack(
+            children: <Widget>[
+              Container(
+                  height: 50,
+                  width: MediaQuery.of(context).size.width / 1.2,
+                  // margin: EdgeInsets.only(top: customer != null  0),
+                  child: customerdatawidget),
+              cartList.length != 0
+                  ? Container(
+                      width: MediaQuery.of(context).size.width / 1.2,
+                      margin: EdgeInsets.only(top: customer != null ? 50 : 0),
+                      color: Colors.white,
+                      child: carttitle,
+                    )
+                  : SizedBox(),
+              Container(
+                  height: MediaQuery.of(context).size.height / 3.2,
+                  margin: EdgeInsets.only(top: customer != null ? 100 : 50),
+                  child: cartTable),
+              cartList.length != 0
+                  ? Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(child: totalPriceTable),
+                    )
+                  : Center(
+                      child: Text(Strings.item_not_available,
+                          style: Styles.communBlack()))
+            ],
+          ),
+        ),
       ],
-    );
-  }
-}
-
-class SlideMenu extends StatefulWidget {
-  final Widget child;
-  final List<Widget> menuItems;
-
-  SlideMenu({this.child, this.menuItems});
-
-  @override
-  _SlideMenuState createState() => new _SlideMenuState();
-}
-
-class _SlideMenuState extends State<SlideMenu>
-    with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-
-  @override
-  initState() {
-    super.initState();
-    _controller = new AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 200));
-  }
-
-  @override
-  dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final animation = new Tween(
-            begin: const Offset(0.0, 0.0), end: const Offset(-0.2, 0.0))
-        .animate(new CurveTween(curve: Curves.decelerate).animate(_controller));
-
-    return new GestureDetector(
-      onHorizontalDragUpdate: (data) {
-        // we can access context.size here
-        setState(() {
-          _controller.value -= data.primaryDelta / context.size.width;
-        });
-      },
-      onHorizontalDragEnd: (data) {
-        if (data.primaryVelocity > 2500)
-          _controller
-              .animateTo(.0); //close menu on fast swipe in the right direction
-        else if (_controller.value >= .5 ||
-            data.primaryVelocity <
-                -2500) // fully open if dragged a lot to left or on fast swipe to left
-          _controller.animateTo(1.0);
-        else // close if none of above
-          _controller.animateTo(.0);
-      },
-      child: new Stack(
-        children: <Widget>[
-          new SlideTransition(position: animation, child: widget.child),
-          new Positioned.fill(
-            child: new LayoutBuilder(
-              builder: (context, constraint) {
-                return new AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) {
-                    return new Stack(
-                      children: <Widget>[
-                        new Positioned(
-                          right: .0,
-                          top: .0,
-                          bottom: .0,
-                          width: constraint.maxWidth * animation.value.dx * -1,
-                          child: new Container(
-                            color: Colors.black26,
-                            child: new Row(
-                              children: widget.menuItems.map((child) {
-                                return new Expanded(
-                                  child: child,
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-          )
-        ],
-      ),
     );
   }
 }

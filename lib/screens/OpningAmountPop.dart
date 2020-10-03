@@ -171,7 +171,8 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         children: <Widget>[
           Text(
             currentNumber,
-            style: Styles.blackBoldLarge(),
+            style: TextStyle(
+                color: Colors.black, fontWeight: FontWeight.bold, fontSize: 30),
           ),
         ],
       ),

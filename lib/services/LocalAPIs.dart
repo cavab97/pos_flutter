@@ -229,6 +229,15 @@ class LocalAPI {
     return result;
   }
 
+  Future<List<Shift>> getShiftData(shiftId) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var result =
+        await db.query('shift', where: "shift_id = ?", whereArgs: [shiftId]);
+    List<Shift> list =
+        result.isNotEmpty ? result.map((c) => Shift.fromJson(c)).toList() : [];
+    return list;
+  }
+
   Future<List<Attribute_Data>> getProductDetails(ProductDetails product) async {
     var qry = " SELECT product.product_id, category_attribute.name as attr_name,attributes.ca_id, " +
         " group_concat(product_attribute.price) as attr_types_price,group_concat(attributes.name) as attr_types ,group_concat(attributes.attribute_id) as attributeId" +
@@ -239,7 +248,7 @@ class LocalAPI {
         product.productId.toString() +
         " AND product_attribute.product_id = " +
         product.productId.toString() +
-        "   GROUP by category_attribute.ca_id";
+        " GROUP by category_attribute.ca_id";
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<Attribute_Data> list = res.length > 0
         ? res.map((c) => Attribute_Data.fromJson(c)).toList()

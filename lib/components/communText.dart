@@ -172,6 +172,8 @@ class CommunFun {
       context,
       duration: Toast.LENGTH_LONG,
       gravity: Toast.BOTTOM,
+      backgroundColor: Colors.black,
+      textColor: Colors.white,
     );
   }
 
