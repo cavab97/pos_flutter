@@ -152,24 +152,10 @@ class _WebOrderPagesState extends State<WebOrderPages>
     );
   }
 
-  Widget assingTableButton(onPress) {
-    return RaisedButton(
-      padding: EdgeInsets.all(10),
-      onPressed: onPress,
-      child: Text("Assign Table", style: Styles.whiteSimpleSmall()),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-    );
-  }
-
   Widget offlineListwidget() {
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2.4;
     final double itemWidth = size.width / 4.2;
-
     return GridView.count(
       padding: EdgeInsets.all(20),
       shrinkWrap: true,
@@ -293,7 +279,8 @@ class _WebOrderPagesState extends State<WebOrderPages>
                         ]),
                   ),
                 ),
-                cart.table_id == null
+                permissions.contains(Constant.EDIT_ORDER) &&
+                        cart.table_id == null
                     ? GestureDetector(
                         onTap: () {
                           checkTableAssigned(cart);

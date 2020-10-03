@@ -127,6 +127,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
   opnPaxDailog() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return paxalertDailog(context);
       },
@@ -142,28 +143,60 @@ class _SelectTablePageState extends State<SelectTablePage> {
       orderid = arguments['orderID'];
     });
     return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-          leading: new IconButton(
-            icon: new Icon(
-              Icons.arrow_back,
-              size: 30.0,
+        key: scaffoldKey,
+        appBar: AppBar(
+            leading: new IconButton(
+              icon: new Icon(
+                Icons.arrow_back,
+                size: 30.0,
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
+            centerTitle: true,
+            iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            title: Text(Strings.select_table, style: Styles.whiteBold())),
+        body: new GestureDetector(
+          onTap: () {
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
+          child: SingleChildScrollView(
+            child: Container(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                children: <Widget>[
+                  !isLoading ? tablesListwidget() : CommunFun.loader(context)
+                ],
+              ),
+            ),
+          ),
+        ));
+  }
+
+  Widget closeButton(context) {
+    return Positioned(
+      top: -30,
+      right: -20,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          width: 50.0,
+          height: 50.0,
+          decoration: BoxDecoration(
+              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+          child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
-          ),
-          centerTitle: true,
-          iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: Text(Strings.select_table, style: Styles.whiteBold())),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            children: <Widget>[
-              !isLoading ? tablesListwidget() : CommunFun.loader(context)
-            ],
+            icon: Icon(
+              Icons.clear,
+              color: Colors.white,
+              size: 30,
+            ),
           ),
         ),
       ),
@@ -177,42 +210,47 @@ class _SelectTablePageState extends State<SelectTablePage> {
         content: Builder(
           builder: (context) {
             return Container(
-                height: 200,
-                width: 250,
-                child: Center(
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: <Widget>[
-                      selectedTable.numberofpax == null
-                          ? Column(
-                              children: <Widget>[
-                                ListTile(
-                                  title: neworder_button(context),
-                                ),
-                                Divider(),
-                              ],
-                            )
-                          : SizedBox(),
-                      selectedTable.numberofpax != null
-                          ? Column(
-                              children: <Widget>[
-                                ListTile(
-                                  title: viewOrderBtn(context),
-                                ),
-                                Divider(),
-                              ],
-                            )
-                          : SizedBox(),
-                      ListTile(
-                        title: Text(
-                          Strings.merge_order,
-                          textAlign: TextAlign.center,
-                          style: Styles.bluesmall(),
-                        ),
-                      )
-                    ],
-                  ),
-                ));
+              height: 200,
+              width: 250,
+              child: Center(
+                child: Stack(
+                  children: <Widget>[
+                    ListView(
+                      shrinkWrap: true,
+                      children: <Widget>[
+                        selectedTable.numberofpax == null
+                            ? Column(
+                                children: <Widget>[
+                                  ListTile(
+                                    title: neworder_button(context),
+                                  ),
+                                  Divider(),
+                                ],
+                              )
+                            : SizedBox(),
+                        selectedTable.numberofpax != null
+                            ? Column(
+                                children: <Widget>[
+                                  ListTile(
+                                    title: viewOrderBtn(context),
+                                  ),
+                                  Divider(),
+                                ],
+                              )
+                            : SizedBox(),
+                        ListTile(
+                          title: Text(
+                            Strings.merge_order,
+                            textAlign: TextAlign.center,
+                            style: Styles.bluesmall(),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
           },
         ));
   }
@@ -300,7 +338,34 @@ class _SelectTablePageState extends State<SelectTablePage> {
     return AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10.0))),
-        title: Text(Strings.enterPax),
+        titlePadding: EdgeInsets.all(0),
+        title: Stack(
+          // popup header
+          overflow: Overflow.visible,
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10.0),
+                  topRight: Radius.circular(10.0),
+                ),
+              ),
+              padding:
+                  EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
+              height: 70,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(Strings.enterPax,
+                      style: TextStyle(fontSize: 20, color: Colors.white)),
+                ],
+              ),
+            ),
+            closeButton(context), //popup close btn
+          ],
+        ),
         content: Builder(
           builder: (context) {
             KeyboardVisibilityNotification().addNewListener(
@@ -308,11 +373,11 @@ class _SelectTablePageState extends State<SelectTablePage> {
                 FocusScope.of(context).requestFocus(new FocusNode());
               },
             );
-            return SingleChildScrollView(
-              child: Container(
-                height: 200,
-                width: 200,
-                child: Center(
+            return Container(
+              height: MediaQuery.of(context).size.height / 4,
+              width: MediaQuery.of(context).size.width / 4,
+              child: Center(
+                child: SingleChildScrollView(
                   child: Column(
                     children: <Widget>[
                       paxTextInput(),
