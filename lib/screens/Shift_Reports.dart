@@ -19,18 +19,22 @@ class ShiftReports extends StatefulWidget {
 class _ShiftReportsState extends State<ShiftReports> {
   LocalAPI localAPI = LocalAPI();
   Shift shifittem = new Shift();
+  var screenArea = 1.5;
+  int _current = 0;
+
   final List<String> imgList = [
     'Summary',
     'Cash Drawer Summary',
     'Payment Summary'
   ];
+
   @override
   void initState() {
     super.initState();
-    getshiftData();
+    getShiftData();
   }
 
-  getshiftData() async {
+  getShiftData() async {
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     if (shiftid != null) {
       List<Shift> shift = await localAPI.getShiftData(shiftid);
@@ -101,19 +105,25 @@ class _ShiftReportsState extends State<ShiftReports> {
             padding: EdgeInsets.all(20),
             //width: MediaQuery.of(context).size.width / 1.2,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                SizedBox(
-                  height: 10,
-                ),
-                shifttitles(),
+                shiftTitles(),
                 Container(
+                  color: Colors.green,
                   child: CarouselSlider(
                     options: CarouselOptions(
-                      disableCenter: false,
-                      autoPlay: false,
-                      initialPage: 0,
-                      scrollDirection: Axis.horizontal,
-                    ),
+                     //   height: double.maxFinite,
+                        disableCenter: false,
+                        autoPlay: false,
+                        initialPage: 0,
+                        aspectRatio: 2.0,
+                        scrollDirection: Axis.horizontal,
+                        onPageChanged: (index, reason) {
+                          setState(() {
+                            _current = index;
+                          });
+                        }),
                     items: imgList
                         .map(
                           (item) => Column(
@@ -127,8 +137,8 @@ class _ShiftReportsState extends State<ShiftReports> {
                               ),
                               SizedBox(height: 10),
                               Container(
-                                  width:
-                                      MediaQuery.of(context).size.width / 1.8,
+                                  width: MediaQuery.of(context).size.width /
+                                      screenArea,
                                   //  color: Colors.green,
                                   child: ListView(
                                     shrinkWrap: true,
@@ -138,11 +148,11 @@ class _ShiftReportsState extends State<ShiftReports> {
                                         child: ListTile(
                                           title: Text(
                                             "Gross Sales",
-                                            style: Styles.whiteSimpleLarge(),
+                                            style: Styles.whiteMediumBold(),
                                           ),
                                           trailing: Text(
                                             "0.00",
-                                            style: Styles.whiteSimpleLarge(),
+                                            style: Styles.whiteMediumBold(),
                                           ),
                                         ),
                                       ),
@@ -151,11 +161,11 @@ class _ShiftReportsState extends State<ShiftReports> {
                                         child: ListTile(
                                           title: Text(
                                             "Refunds",
-                                            style: Styles.blackSimpleLarge(),
+                                            style: Styles.blackMediumBold(),
                                           ),
                                           trailing: Text(
                                             "0.00",
-                                            style: Styles.blackSimpleLarge(),
+                                            style: Styles.blackMediumBold(),
                                           ),
                                         ),
                                       ),
@@ -164,11 +174,11 @@ class _ShiftReportsState extends State<ShiftReports> {
                                         child: ListTile(
                                           title: Text(
                                             "Discount",
-                                            style: Styles.whiteSimpleLarge(),
+                                            style: Styles.whiteMediumBold(),
                                           ),
                                           trailing: Text(
                                             "0.00",
-                                            style: Styles.whiteSimpleLarge(),
+                                            style: Styles.whiteMediumBold(),
                                           ),
                                         ),
                                       ),
@@ -177,11 +187,11 @@ class _ShiftReportsState extends State<ShiftReports> {
                                         child: ListTile(
                                           title: Text(
                                             "Net Sales",
-                                            style: Styles.blackSimpleLarge(),
+                                            style: Styles.blackMediumBold(),
                                           ),
                                           trailing: Text(
                                             "0.00",
-                                            style: Styles.blackSimpleLarge(),
+                                            style: Styles.blackMediumBold(),
                                           ),
                                         ),
                                       ),
@@ -190,11 +200,11 @@ class _ShiftReportsState extends State<ShiftReports> {
                                         child: ListTile(
                                           title: Text(
                                             "Rounding",
-                                            style: Styles.whiteSimpleLarge(),
+                                            style: Styles.whiteMediumBold(),
                                           ),
                                           trailing: Text(
                                             "0.00",
-                                            style: Styles.whiteSimpleLarge(),
+                                            style: Styles.whiteMediumBold(),
                                           ),
                                         ),
                                       ),
@@ -203,11 +213,11 @@ class _ShiftReportsState extends State<ShiftReports> {
                                         child: ListTile(
                                           title: Text(
                                             "Tax/Service Charge",
-                                            style: Styles.blackSimpleLarge(),
+                                            style: Styles.blackMediumBold(),
                                           ),
                                           trailing: Text(
                                             "0.00/0.00",
-                                            style: Styles.blackSimpleLarge(),
+                                            style: Styles.blackMediumBold(),
                                           ),
                                         ),
                                       ),
@@ -219,7 +229,8 @@ class _ShiftReportsState extends State<ShiftReports> {
                         .toList(),
                   ),
                 ),
-                bottomButtons()
+                scrollIndicator(),
+                squareActionButton()
               ],
             ),
           ),
@@ -233,20 +244,20 @@ class _ShiftReportsState extends State<ShiftReports> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        squareBtn("Pay In"),
+        /*squareBtn("Pay In"),
         squareBtn("Pay Out"),
-        squareBtn("Open Cash Drawer"),
+        squareBtn("Open Cash Drawer"),*/
       ],
     );
   }
 
   Widget squareBtn(name) {
     return RaisedButton(
-      padding: EdgeInsets.all(0),
+      padding: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
       onPressed: () {},
       child: Text(
         name,
-        style: TextStyle(color: Colors.deepOrange, fontSize: 15),
+        style: TextStyle(color: Colors.deepOrange, fontSize: 20),
       ),
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -255,6 +266,89 @@ class _ShiftReportsState extends State<ShiftReports> {
         borderRadius: BorderRadius.circular(5.0),
       ),
     );
+  }
+
+  Widget scrollIndicator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: imgList.map((url) {
+        int index = imgList.indexOf(url);
+        return Container(
+          width: 15.0,
+          height: 15.0,
+          margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: _current == index ? Colors.deepOrange : Colors.white,
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget squareActionButton() {
+    return Container(
+        width: MediaQuery.of(context).size.width / screenArea,
+        child: Center(
+          child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Expanded(
+                  child: RaisedButton(
+                    padding: EdgeInsets.all(20),
+                    onPressed: () {},
+                    child: Text(
+                      "Pay In",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                    color: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      side: BorderSide(color: Colors.white, width: 2),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                  child: RaisedButton(
+                    padding: EdgeInsets.all(20),
+                    onPressed: () {},
+                    child: Text(
+                      "Pay Out",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                    color: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      side: BorderSide(color: Colors.white, width: 2),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                  child: RaisedButton(
+                    padding: EdgeInsets.all(20),
+                    onPressed: () {},
+                    child: Text(
+                      "Open Cash Drawer",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                    color: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      side: BorderSide(color: Colors.white, width: 2),
+                    ),
+                  ),
+                ),
+              ]),
+        ));
   }
 
   Widget shiftbtn() {
@@ -274,7 +368,7 @@ class _ShiftReportsState extends State<ShiftReports> {
     );
   }
 
-  shifttitles() {
+  shiftTitles() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -287,38 +381,38 @@ class _ShiftReportsState extends State<ShiftReports> {
               "Total Net Sales",
               style: Styles.whiteSimpleSmall(),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             Text(
               "0.00",
-              style: Styles.whiteSimpleSmall(),
+              style: Styles.orangeLarge(),
             )
           ],
         ),
-        SizedBox(width: 20),
+        SizedBox(width: 50),
         Column(
           children: <Widget>[
             Text(
-              "Transations",
+              "Transactions",
               style: Styles.whiteSimpleSmall(),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             Text(
               "0.00",
-              style: Styles.whiteSimpleSmall(),
+              style: Styles.orangeLarge(),
             )
           ],
         ),
-        SizedBox(width: 20),
+        SizedBox(width: 50),
         Column(
           children: <Widget>[
             Text(
               "Average Order Value",
               style: Styles.whiteSimpleSmall(),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             Text(
               "0.00",
-              style: Styles.whiteSimpleSmall(),
+              style: Styles.orangeLarge(),
             )
           ],
         )
