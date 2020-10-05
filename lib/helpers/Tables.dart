@@ -543,7 +543,7 @@ class CreateTables {
         "order_id INTEGER," +
         "localID TEXT," +
         "reason TEXT," +
-        "status INTEGER," +  // New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
+        "status INTEGER," + // New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
         "created_by INTEGER," +
         "updated_by INTEGER," +
         "created_at TEXT," +

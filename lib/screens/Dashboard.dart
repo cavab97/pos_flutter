@@ -220,7 +220,11 @@ class _DashboradPageState extends State<DashboradPage>
     await CommunFun.opneSyncPop(context);
     await getsetWebOrders();
     await SyncAPICalls.syncOrderstoDatabase(context);
-    await SyncAPICalls.sendCancledOrderTable(context);
+  }
+
+  syncStoreTables() async {
+    await CommunFun.opneSyncPop(context);
+    await SyncAPICalls.sendInvenotryTable(context);
   }
 
   getsetWebOrders() async {
@@ -1363,6 +1367,16 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                   title: Text("Sync", style: Styles.communBlack())),
               ListTile(
+                  onTap: () async {
+                    syncStoreTables();
+                  },
+                  leading: Icon(
+                    Icons.sync,
+                    color: Colors.black,
+                    size: 30,
+                  ),
+                  title: Text("Sync Store", style: Styles.communBlack())),
+              ListTile(
                   onTap: () {
                     Navigator.of(context).pop();
                     Navigator.pushNamed(context, Constant.SettingsScreen);
@@ -1958,6 +1972,7 @@ class _DashboradPageState extends State<DashboradPage>
             actionExtentRatio: 0.15,
             child: Container(
               child: new ListTile(
+                dense: false,
                 title: new Container(
                   child: new Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

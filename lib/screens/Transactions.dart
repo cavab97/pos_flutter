@@ -204,7 +204,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
     order.localID = await CommunFun.getLocalID();
     order.reason = reason;
     order.status = 3;
+    order.serverId = 0;
     order.createdBy = userdata.id;
+    order.updatedBy = userdata.id;
+    order.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     order.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     order.terminalId = int.parse(terID);
     var addTocancle = await localAPI.insertCancelOrder(order);
