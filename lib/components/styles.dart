@@ -3,11 +3,28 @@ import 'package:flutter/widgets.dart';
 import 'package:mcncashier/components/StringFile.dart';
 
 class Styles {
+
   static whiteBold() {
     return TextStyle(
         // White text
         color: Color(0xFFffffff),
         fontSize: 25,
+        fontWeight: FontWeight.w800,
+        fontFamily: Strings.fontFamily);
+  }
+  static whiteMediumBold() {
+    return TextStyle(
+        // White text
+        color: Color(0xFFffffff),
+        fontSize: 20,
+        fontWeight: FontWeight.w800,
+        fontFamily: Strings.fontFamily);
+  }
+  static blackMediumBold() {
+    return TextStyle(
+        // White text
+        color: Color(0xFF000000),
+        fontSize: 20,
         fontWeight: FontWeight.w800,
         fontFamily: Strings.fontFamily);
   }

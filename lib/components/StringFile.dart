@@ -55,7 +55,7 @@ class Strings {
   static String open_shift = "Open Shift";
   static String shiftTextLable = "Sorry,we're";
   static String shiftTextLableOpen = "Yes,we're\nOpen";
-  static String opened_at = "OPENED AT";
+  static String opened_at = "Open at";
   static String closed = "CLOSED";
   static String syncText = "Syncing...";
   static String shift_open_message = "Shift is not Opened";
