@@ -3,7 +3,7 @@ class ProductStoreInventory {
   String uuid;
   int productId;
   int branchId;
-  String qty;
+  double qty;
   int warningStockLevel;
   int status;
   String updatedAt;
@@ -25,7 +25,7 @@ class ProductStoreInventory {
     uuid = json['uuid'];
     productId = json['product_id'];
     branchId = json['branch_id'];
-    qty = json['qty'];
+    qty = json['qty'] is int ? (json['qty'] as int).toDouble() : json['qty'];
     warningStockLevel = json['warningStockLevel'];
     status = json['status'];
     updatedAt = json['updated_at'];

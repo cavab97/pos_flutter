@@ -35,9 +35,13 @@ class ProductStoreInventoryLog {
     product_id = json["product_id"];
     employe_id = json["employe_id"];
     il_type = json["il_type"];
-    qty = json["qty"];
-    qty_before_change = json["qty_before_change"];
-    qty_after_change = json["qty_after_change"];
+    qty = json["qty"] is int ? (json['qty'] as int).toDouble() : json['qty'];
+    qty_before_change = json["qty_before_change"] is int
+        ? (json['qty_before_change'] as int).toDouble()
+        : json['qty_before_change'];
+    qty_after_change = json["qty_after_change"] is int
+        ? (json['qty_after_change'] as int).toDouble()
+        : json['qty_after_change'];
     updated_at = json["updated_at"];
     updated_by = json["updated_by"];
   }

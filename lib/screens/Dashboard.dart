@@ -21,6 +21,8 @@ import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
+import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
@@ -294,6 +296,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   closeTable() async {
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
+    await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     checkidTableSelected();
     clearCart();
   }
@@ -586,6 +589,7 @@ class _DashboradPageState extends State<DashboradPage>
     } else {
       await Preferences.removeSinglePref(Constant.DASH_SHIFT);
       await Preferences.removeSinglePref(Constant.IS_SHIFT_OPEN);
+      await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
       checkshift();
       clearCart();
     }
@@ -801,7 +805,43 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.detail_by = userdata.id;
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
           print(orderDetailid);
-          await localAPI.removeFromInventory(orderDetail);
+
+          if (productdata[0].hasInventory == 1) {
+            //update invnotory
+            // List<ProductStoreInventory> inventory =
+            //     await localAPI.removeFromInventory(orderDetail);
+            List<ProductStoreInventory> inventory =
+                await localAPI.getStoreInventoryData(orderDetail.product_id);
+            if (inventory.length > 0) {
+              ProductStoreInventory invData = new ProductStoreInventory();
+              invData = inventory[0];
+              var prev = inventory[0];
+              var qty = (invData.qty - orderDetail.detail_qty);
+              invData.qty = qty;
+              invData.updatedAt =
+                  await CommunFun.getCurrentDateTime(DateTime.now());
+              invData.updatedBy = userdata.id;
+              var ulog = await localAPI.updateInvetory(invData);
+              print(ulog);
+
+              //Inventory log update
+              ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+              log.uuid = uuid;
+              log.inventory_id = prev.inventoryId;
+              log.branch_id = int.parse(branchid);
+              log.product_id = cartItem.productId;
+              log.employe_id = userdata.id;
+              log.qty = prev.qty;
+              log.qty_before_change = prev.qty;
+              log.qty_after_change = qty;
+              log.updated_at =
+                  await CommunFun.getCurrentDateTime(DateTime.now());
+              log.updated_by = userdata.id;
+              var inventoryLog =
+                  await localAPI.updateStoreInvetoryLogTable(log);
+              print(inventoryLog);
+            }
+          }
         }
       }
     }
@@ -930,6 +970,7 @@ class _DashboradPageState extends State<DashboradPage>
     var result = await localAPI.removeCartItem(currentCart, tables.table_id);
     print(result);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
+    await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     clearCart();
     Navigator.of(context).pop();
     refreshAfterAction();

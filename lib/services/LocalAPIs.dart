@@ -14,6 +14,7 @@ import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product.dart';
+import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Role.dart';
@@ -947,49 +948,59 @@ class LocalAPI {
     return list;
   }
 
-  Future removeFromInventory(OrderDetail produtdata) async {
+  Future<List<ProductStoreInventory>> removeFromInventory(
+      OrderDetail produtdata) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var inventoryProd = await db.query("product",
         where: 'product_id = ?', whereArgs: [produtdata.product_id]);
     List<Product> list = inventoryProd.isNotEmpty
         ? inventoryProd.map((c) => Product.fromJson(c)).toList()
         : [];
-
-    if (list[0].hasInventory == 1) {
-      var intupdate = "Update product_store_inventory set qty = (qty - " +
-          produtdata.detail_qty.toString() +
-          ") WHERE product_id = " +
-          produtdata.product_id.toString();
-      var updateed = await db.rawQuery(intupdate);
-      await SyncAPICalls.logActivity("Order", "update InventoryTable",
-          "product_store_inventory", produtdata.product_id);
-    }
-  }
-
-  Future<int> updateInvetory(OrderDetail produtdata) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
-    var inventoryProd = await db.query("product",
+    var intupdate = "Update product_store_inventory set qty = (qty - " +
+        produtdata.detail_qty.toString() +
+        ") WHERE product_id = " +
+        produtdata.product_id.toString();
+    var updateed = await db.rawUpdate(intupdate);
+    var productitem = await db.query("product_store_inventory",
         where: 'product_id = ?', whereArgs: [produtdata.product_id]);
-    List<Product> list = inventoryProd.isNotEmpty
-        ? inventoryProd.map((c) => Product.fromJson(c)).toList()
+    List<ProductStoreInventory> inventory = productitem.length > 0
+        ? productitem.map((c) => ProductStoreInventory.fromJson(c)).toList()
         : [];
-
-    if (list[0].hasInventory == 1) {
-      var intupdate = "Update product_store_inventory set qty = (qty - " +
-          produtdata.detail_qty.toString() +
-          ") WHERE product_id = " +
-          produtdata.product_id.toString();
-      var updateed = await db.rawQuery(intupdate);
-      await SyncAPICalls.logActivity("Order", "update InventoryTable",
-          "product_store_inventory", produtdata.product_id);
-    }
+    await SyncAPICalls.logActivity("Order", "update InventoryTable",
+        "product_store_inventory", produtdata.product_id);
+    return inventory;
   }
 
-  Future<int> updateStoreInvetoryLogTable(
-      ProductDetails produtdata, orderdata) async {}
+  Future<List<ProductStoreInventory>> getStoreInventoryData(productID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var inventoryProd = await db.query("product_store_inventory",
+        where: 'product_id = ?', whereArgs: [productID]);
+    List<ProductStoreInventory> list = inventoryProd.length > 0
+        ? inventoryProd.map((c) => ProductStoreInventory.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<int> updateInvetory(ProductStoreInventory data) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var inventory = await db.update("product_store_inventory", data.toJson(),
+        where: "inventory_id =?", whereArgs: [data.inventoryId]);
+    await SyncAPICalls.logActivity("Order", "update InventoryTable",
+        "product_store_inventory", data.productId);
+    return inventory;
+  }
+
+  Future<int> updateStoreInvetoryLogTable(ProductStoreInventoryLog log) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var inventory =
+        await db.insert("product_store_inventory_log", log.toJson());
+    await SyncAPICalls.logActivity("product_store_inventory_log insert",
+        "insert", "product_store_inventory_log", log.inventory_id);
+    return inventory;
+  }
 
   Future<Branch> getBranchData(branchID) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var result =
         await db.query("branch", where: 'branch_id = ?', whereArgs: [branchID]);
     List<Branch> list =

@@ -212,7 +212,7 @@ class SyncAPICalls {
             "branch_id": order.branch_id,
             "terminal_id": order.terminal_id,
             "app_id": order.app_id,
-           // "table_no": order.table_no,
+            // "table_no": order.table_no,
             "table_id": order.table_id,
             "invoice_no": order.invoice_no,
             "customer_id": order.customer_id,
@@ -458,6 +458,31 @@ class SyncAPICalls {
           'branch_id': branchid,
           'terminal_id': terminalId,
           'order_cancel': json.encode(orderdata)
+        };
+        var res = await APICalls.apiCall(apiurl, context, stringParams);
+        print(res);
+        CommunFun.showToast(context, "Sync sucessfully done.");
+      } else {
+        CommunFun.showToast(context, "all cancel tables up to dates.");
+      }
+    } catch (e) {
+      print(e);
+      CommunFun.showToast(context, e.message);
+    }
+  }
+
+  static sendInvenotryTable(context) async {
+    try {
+      var apiurl = Configrations.update_inventory_table;
+      var terminalId = await CommunFun.getTeminalKey();
+      var branchid = await CommunFun.getbranchId();
+      LocalAPI localAPI = LocalAPI();
+      List<CancelOrder> orderdata = await localAPI.getCancleOrder(terminalId);
+      if (orderdata.length > 0) {
+        var stringParams = {
+          'branch_id': branchid,
+          'terminal_id': terminalId,
+          'store_inventory': json.encode(orderdata)
         };
         var res = await APICalls.apiCall(apiurl, context, stringParams);
         print(res);
