@@ -296,7 +296,7 @@ class CreateTables {
         "uuid	TEXT," +
         "product_id	INTEGER," +
         "branch_id	INTEGER," +
-        "qty	TEXT," +
+        "qty	REAL," +
         "rac_id INTEGER," +
         "box_id INTEGER," +
         "warningStockLevel	INTEGER," +
@@ -307,16 +307,16 @@ class CreateTables {
 
     // Table product_store_inventory_log
     datatables = db.execute("CREATE TABLE product_store_inventory_log (" +
-        "il_id	INTEGER PRIMARY KEY," +
+        "il_id INTEGER PRIMARY KEY AUTOINCREMENT," +
         "uuid	TEXT," +
         "inventory_id	INTEGER," +
         "branch_id	INTEGER," +
         "product_id	INTEGER," +
         "employe_id	INTEGER," +
         "il_type	INTEGER," +
-        "qty	TEXT," +
-        "qty_before_change	TEXT," +
-        "qty_after_change	TEXT," +
+        "qty	REAL," +
+        "qty_before_change	REAL," +
+        "qty_after_change	REAL," +
         "updated_at	TEXT," + // 1 = Add , 2 = Deduct
         "updated_by	INTEGER" +
         ")");

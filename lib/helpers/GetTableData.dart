@@ -13,6 +13,7 @@ import 'package:mcncashier/models/PosUserPermission.dart';
 import 'package:mcncashier/models/Price_Type.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product.dart';
+import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Attribute.dart';
 import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Product_Modifire.dart';
@@ -387,6 +388,7 @@ class TableData {
     var productcategoryData = tablesData["product_category"];
     var productbranchData = tablesData["product_branch"];
     var productstoreData = tablesData["product_store_inventory"];
+    var productstoreLogData = tablesData["product_store_inventory_log"];
     try {
       if (productattributeData.length != 0) {
         for (var i = 0; i < productattributeData.length; i++) {
@@ -503,6 +505,29 @@ class TableData {
                 "product_store_inventory", producatstore.toJson(),
                 where: "inventory_id =?",
                 whereArgs: [producatstore.inventoryId]);
+            print(result);
+          }
+        }
+      }
+      if (productstoreLogData.length != 0) {
+        for (var i = 0; i < productstoreLogData.length; i++) {
+          var productstoreLogDataitem = productstoreLogData[i];
+          ProductStoreInventoryLog producatstorelog =
+              ProductStoreInventoryLog.fromJson(productstoreLogDataitem);
+          var data = {
+            'table': "product_store_inventory_log",
+            'key': "il_id",
+            'value': producatstorelog.il_id,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert(
+                "product_store_inventory_log", producatstorelog.toJson());
+            print(result);
+          } else {
+            var result = await db.update(
+                "product_store_inventory_log", producatstorelog.toJson(),
+                where: "il_id =?", whereArgs: [producatstorelog.il_id]);
             print(result);
           }
         }

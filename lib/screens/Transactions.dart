@@ -9,6 +9,8 @@ import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
+import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
@@ -191,6 +193,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
     //TODO :Cancle Transation Pop // 1 for  cancle
     var orderid = await localAPI.updateOrderStatus(selectedOrder.app_id, 3);
     var payment = await localAPI.updatePaymentStatus(orderpayment.app_id, 3);
+    var terminalId = await CommunFun.getTeminalKey();
+    var branchid = await CommunFun.getbranchId();
+    var uuid = await CommunFun.getLocalID();
     var terID = await CommunFun.getTeminalKey();
     User userdata = await CommunFun.getuserDetails();
     CancelOrder order = new CancelOrder();
@@ -202,9 +207,45 @@ class _TransactionsPageState extends State<TransactionsPage> {
     order.createdBy = userdata.id;
     order.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     order.terminalId = int.parse(terID);
-
     var addTocancle = await localAPI.insertCancelOrder(order);
-    // TODO update store inventory
+    List<OrderDetail> orderItem = orderItemList;
+    if (orderItem.length > 0) {
+      for (var i = 0; i < orderItem.length; i++) {
+        OrderDetail productDetail = orderItem[i];
+        var productData = productDetail.product_detail;
+        var jsonProduct = json.decode(productData);
+        if (jsonProduct["has_inventory"] == 1) {
+          List<ProductStoreInventory> inventory =
+              await localAPI.getStoreInventoryData(productDetail.product_id);
+          if (inventory.length > 0) {
+            ProductStoreInventory invData;
+            invData = inventory[0];
+            invData.qty = invData.qty + productDetail.detail_qty;
+            invData.updatedAt =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            invData.updatedBy = userdata.id;
+            var ulog = await localAPI.updateInvetory(invData);
+            ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+            if (inventory.length > 0) {
+              log.uuid = uuid;
+              log.inventory_id = inventory[0].inventoryId;
+              log.branch_id = int.parse(branchid);
+              log.product_id = productDetail.product_id;
+              log.employe_id = userdata.id;
+              // log.il_type = '';
+              log.qty = invData.qty;
+              log.qty_before_change = invData.qty;
+              log.qty_after_change = invData.qty + productDetail.detail_qty;
+              log.updated_at =
+                  await CommunFun.getCurrentDateTime(DateTime.now());
+              log.updated_by = userdata.id;
+              var ulog = await localAPI.updateStoreInvetoryLogTable(log);
+            }
+          }
+        }
+      }
+    }
+
     getTansactionList();
   }
 
@@ -1239,33 +1280,35 @@ class AddOtherReasonState extends State<AddOtherReason> {
     return AlertDialog(
       titlePadding: EdgeInsets.all(0),
       content: Container(
-          height: MediaQuery.of(context).size.height / 4,
-          width: MediaQuery.of(context).size.width / 3.4,
-          child: SingleChildScrollView(child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                "Reason",
-                style: Styles.communBlack(),
-              ),
-              SizedBox(height: 10),
-              TextField(
-                controller: reasonController,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(width: 1, color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(width: 1, color: Colors.grey),
-                  ),
+        height: MediaQuery.of(context).size.height / 4,
+        width: MediaQuery.of(context).size.width / 3.4,
+        child: SingleChildScrollView(
+            child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              "Reason",
+              style: Styles.communBlack(),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: reasonController,
+              maxLines: 4,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(width: 1, color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(width: 1, color: Colors.grey),
                 ),
               ),
-            ],
-          )),),
+            ),
+          ],
+        )),
+      ),
       actions: <Widget>[canclebutton(context), confirmBtn(context)],
     );
   }

@@ -178,8 +178,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       List<ProductStoreInventory> cartval =
           await localAPI.checkItemAvailableinStore(productItem.productId);
       if (cartval.length > 0) {
-        double storeqty = double.parse(cartval[0].qty);
-        if (storeqty >= product_qty) {
+        double storeqty = cartval[0].qty;
+        if (storeqty > product_qty) {
           var prevproductqty = product_qty;
           setState(() {
             product_qty = prevproductqty + 1;

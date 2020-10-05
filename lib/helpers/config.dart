@@ -14,4 +14,5 @@ class Configrations {
   static String order_sync = "create-order-data";
   static String web_orders = "web-order-table-data";
   static String cancle_order = "create-cancel-order-data";
+   static String update_inventory_table = "update-product-inventory-data";
 }
