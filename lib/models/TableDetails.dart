@@ -1,9 +1,13 @@
+import 'package:mcncashier/components/StringFile.dart';
+
 class TablesDetails {
   int tableId;
   String uuid;
   int branchId;
   String tableName;
   int saveorderid;
+  String is_merge_table;
+  int merged_table_id;
   int numberofpax;
   int tableType;
   String tableQr;
@@ -24,6 +28,8 @@ class TablesDetails {
     this.tableQr,
     this.tableCapacity,
     this.status,
+    this.is_merge_table,
+    this.merged_table_id,
     this.updatedAt,
     this.availableStatus,
     this.updatedBy,
@@ -45,6 +51,8 @@ class TablesDetails {
     tableCapacity = json['table_capacity'];
     status = json['status'];
     availableStatus = json["available_status"];
+    is_merge_table = json["is_merged"];
+    merged_table_id = json["merged_table_id"];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
     deletedAt = json['deleted_at'];
@@ -61,6 +69,8 @@ class TablesDetails {
     data['table_qr'] = this.tableQr;
     data['table_capacity'] = this.tableCapacity;
     data['status'] = this.status;
+    data["is_merge_table"] = this.is_merge_table;
+    data['merged_table_id'] = this.merged_table_id;
     data["available_status"] = this.availableStatus;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;

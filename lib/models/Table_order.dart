@@ -1,7 +1,7 @@
 class Table_order {
   int table_id;
   String is_merge_table;
-  String merged_table_id;
+  int merged_table_id;
   int number_of_pax;
   String table_seat;
   int save_order_id;

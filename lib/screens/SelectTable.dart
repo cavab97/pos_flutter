@@ -29,7 +29,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
   var selectedTable;
   var number_of_pax;
   var orderid;
+  var mergeInTable;
   bool isLoading = false;
+  bool isMergeing = false;
   bool isAssigning = false;
   @override
   void initState() {
@@ -74,6 +76,30 @@ class _SelectTablePageState extends State<SelectTablePage> {
           table.numberofpax != null ? table.numberofpax.toString() : "";
       openSelectTablePop();
     }
+  }
+
+  mergeTabledata(table) async {
+    Table_order table_order = new Table_order();
+    table_order.table_id = mergeInTable.tableId;
+    table_order.is_merge_table = "1";
+    table_order.merged_table_id = selectedTable.tableId;
+    var result = await localAPI.insertTableOrder(table_order);
+
+    setState(() {
+      isMergeing = false;
+      mergeInTable = null;
+    });
+    CommunFun.showToast(context, "Table merged");
+    getTables();
+  }
+
+  mergeTable(table) {
+    setState(() {
+      isMergeing = true;
+      mergeInTable = table;
+    });
+    Navigator.of(context).pop();
+    //opnPaxDailog();
   }
 
   selectTableForNewOrder() async {
@@ -151,13 +177,21 @@ class _SelectTablePageState extends State<SelectTablePage> {
                 size: 30.0,
               ),
               onPressed: () {
-                Navigator.of(context).pop();
+                if (isMergeing) {
+                  setState(() {
+                    isMergeing = false;
+                    mergeInTable = null;
+                  });
+                } else {
+                  Navigator.of(context).pop();
+                }
               },
             ),
             centerTitle: true,
             iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            title: Text(Strings.select_table, style: Styles.whiteBold())),
+            title: Text(isMergeing ? Strings.merge_table : Strings.select_table,
+                style: Styles.whiteBold())),
         body: new GestureDetector(
           onTap: () {
             FocusScope.of(context).requestFocus(new FocusNode());
@@ -239,6 +273,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
                               )
                             : SizedBox(),
                         ListTile(
+                          onTap: () {
+                            mergeTable(selectedTable);
+                          },
                           title: Text(
                             Strings.merge_order,
                             textAlign: TextAlign.center,
@@ -385,10 +422,12 @@ class _SelectTablePageState extends State<SelectTablePage> {
                         height: 50,
                       ),
                       enterButton(() {
-                        if (isAssigning) {
-                          assignTabletoOrder();
-                        } else {
-                          selectTableForNewOrder();
+                        if (!isMergeing) {
+                          if (isAssigning) {
+                            assignTabletoOrder();
+                          } else {
+                            selectTableForNewOrder();
+                          }
                         }
                       }),
                     ],
@@ -421,7 +460,11 @@ class _SelectTablePageState extends State<SelectTablePage> {
         return InkWell(
           borderRadius: BorderRadius.all(Radius.circular(30.0)),
           onTap: () {
-            ontableTap(table);
+            if (isMergeing) {
+              mergeTabledata(table);
+            } else {
+              ontableTap(table);
+            }
           },
           child: Container(
             width: itemHeight,
@@ -446,7 +489,11 @@ class _SelectTablePageState extends State<SelectTablePage> {
                         children: <Widget>[
                           SizedBox(height: 30),
                           Text(
-                            table.tableName,
+                            table.is_merge_table == "1"
+                                ? table.tableName +
+                                    ":" +
+                                    table.merged_table_id.toString()
+                                : table.tableName,
                             style: Styles.blackBoldLarge(),
                           ),
                         ]),

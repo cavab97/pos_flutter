@@ -5,7 +5,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/config.dart';
 import 'package:http/http.dart' as http;
 
-class APICalls {
+class APICalls { 
   static apiCall(apiurl, context, stringParams) async {
     try {
       print(apiurl);

@@ -127,7 +127,7 @@ class LocalAPI {
 
   Future<List<TablesDetails>> getTables(branchid) async {
     var query =
-        "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax from tables " +
+        "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax ,table_order.is_merge_table , table_order.merged_table_id from tables " +
             " LEFT JOIN table_order on table_order.table_id = tables.table_id " +
             " WHERE tables.status = 1 AND branch_id = " +
             branchid +

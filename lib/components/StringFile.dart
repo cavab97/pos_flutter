@@ -48,6 +48,7 @@ class Strings {
   static String customer_Search_Hint =
       "Search Customer Name,Email,Phone or Memeber id";
   static String select_table = "Select Table";
+    static String merge_table = "Merge Table";
   static String new_order = "New Order";
   static String view_order = "View Order";
   static String merge_order = "Merge Order";
