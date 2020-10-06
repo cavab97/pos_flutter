@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -19,6 +20,8 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
+
+import 'package:mcncashier/theme/Sized_Config.dart';
 
 class TransactionsPage extends StatefulWidget {
   // Transactions list
@@ -309,6 +312,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return Scaffold(
       drawer: transactionsDrawer(), // page Drawer
       body: SafeArea(
@@ -332,7 +336,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 TableCell(
                   // Part 1 white
                   child: Container(
-                    padding: EdgeInsets.only(top: 20, left: 20, right: 20),
+                //    padding: EdgeInsets.only(top: 20, left: 20, right: 20),
                     height: MediaQuery.of(context).size.height,
                     color: Colors.white,
                     child: SingleChildScrollView(
@@ -351,21 +355,18 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                 },
                                 icon: Icon(
                                   Icons.keyboard_arrow_left,
-                                  size: 50,
+                                  size: SizeConfig.safeBlockVertical * 7,
                                 ),
                               ),
                               SizedBox(width: 10),
                               Text(Strings.transaction,
                                   style: TextStyle(
-                                      fontSize: 30,
+                                      fontSize: SizeConfig.safeBlockVertical * 5,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.grey[800])),
                             ],
                           ),
                           transationsSearchBox(),
-                          SizedBox(
-                            height: 15,
-                          ),
                           orderLists.length > 0
                               ? searchTransationList()
                               : Center(
@@ -398,12 +399,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               Container(
                                 padding: EdgeInsets.symmetric(horizontal: 50),
                                 height: MediaQuery.of(context).size.height,
-                                margin: EdgeInsets.only(top: 5),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: <Widget>[
-                                    SizedBox(height: 15),
+                                    SizedBox(height: 10),
                                     Text(
                                         DateFormat('EEE, MMM d yyyy, hh:mm aaa')
                                             .format(DateTime.parse(
@@ -411,14 +411,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                                     ? selectedOrder.order_date
                                                     : DateTime.now()
                                                         .toString())),
-                                        style: Styles.whiteSimpleSmall()),
+                                        style: Styles.whiteMediumBold()),
                                     SizedBox(
-                                      height: 20,
+                                      height: 10,
                                     ),
                                     Text(
                                       orderpayment.op_amount.toString(),
                                       style: TextStyle(
-                                          fontSize: 28,
+                                          fontSize: SizeConfig.safeBlockVertical * 4,
                                           fontWeight: FontWeight.bold,
                                           color: Theme.of(context).accentColor),
                                     ),
@@ -435,21 +435,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                           )
                                         : SizedBox(),
                                     SizedBox(
-                                      height: 20,
+                                      height: 10,
                                     ),
                                     Container(
-                                      height: 50,
+                                      height: SizeConfig.safeBlockVertical * 8,
                                       width: MediaQuery.of(context).size.width,
                                       child: Center(
                                         child: Text(
                                           customer.firstName != null
                                               ? customer.firstName
                                               : "Walk-In Customer",
-                                          style: TextStyle(
-                                              fontSize: 23,
-                                              fontWeight: FontWeight.bold,
-                                              color: Theme.of(context)
-                                                  .accentColor),
+                                          style: Styles.orangeSmall(),
                                         ),
                                       ),
                                       color: Colors.grey[900].withOpacity(0.4),
@@ -463,6 +459,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                 left: 0,
                                 right: 0,
                                 child: Container(
+                                  color: StaticColor.backgroundColor,
                                   padding: EdgeInsets.symmetric(horizontal: 50),
                                   child: Column(children: <Widget>[
                                     Divider(),
@@ -475,24 +472,20 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                             children: <Widget>[
                                               Padding(
                                                 padding: EdgeInsets.only(
-                                                  top: 10,
+                                                  top: 0,
                                                 ),
                                                 child: Text(
                                                   paumentMethod.name != null
                                                       ? paumentMethod.name
                                                           .toUpperCase()
                                                       : "",
-                                                  style: TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      color: Colors.grey),
+                                                  style: Styles.darkGray(),
                                                 ),
                                               ),
                                               SizedBox(width: 70),
                                               Padding(
                                                   padding: EdgeInsets.only(
-                                                    top: 10,
+                                                    top: 0,
                                                   ),
                                                   child: Text(
                                                     selectedOrder.grand_total !=
@@ -501,10 +494,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                                             .grand_total
                                                             .toString()
                                                         : "00:00",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                        color: Colors.grey),
+                                                    style: Styles.darkGray(),
                                                   )),
                                             ],
                                           )
@@ -567,8 +557,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget transationsSearchBox() {
     return Container(
-      height: 70,
-      margin: EdgeInsets.only(top: 10),
+      height: SizeConfig.safeBlockVertical * 11,
       padding: EdgeInsets.all(10),
       color: Colors.grey[400],
       child: TextField(
@@ -579,12 +568,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
             child: Icon(
               Icons.search,
               color: Colors.grey[400],
-              size: 40,
+              size: SizeConfig.safeBlockVertical * 5,
             ),
           ),
           hintText: Strings.searchbox_hint,
           hintStyle: TextStyle(
-              fontSize: 18.0,
+              fontSize: SizeConfig.safeBlockVertical * 3,
               fontWeight: FontWeight.bold,
               color: Colors.grey[400]),
           border: OutlineInputBorder(
@@ -595,10 +584,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
             ),
           ),
           filled: true,
-          contentPadding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
+          contentPadding: EdgeInsets.only(left: 20),
           fillColor: Colors.white,
         ),
-        style: TextStyle(color: Colors.black, fontSize: 25.0),
+        style: Styles.blackMediumBold(),
         onTap: () {
           startFilter();
         },
@@ -715,20 +704,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 children: <Widget>[
                   Text(
                     Strings.sub_total.toUpperCase(),
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.grey),
+                    style: Styles.darkGray(),
                   ),
                   SizedBox(width: 70),
                   Padding(
-                      padding: EdgeInsets.only(top: 10, bottom: 10),
+                      padding: EdgeInsets.only(top: 0, bottom: 5),
                       child: Text(
                         selectedOrder.sub_total != null
                             ? selectedOrder.sub_total.toString()
                             : "00:00",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w700, color: Colors.grey),
+                        style: Styles.darkGray(),
                       )),
                 ],
               ),
@@ -744,7 +729,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       child: Text(
                         Strings.discount.toUpperCase(),
                         style: TextStyle(
-                            fontSize: 18,
+                            fontSize: SizeConfig.safeBlockVertical * 2.8,
                             fontWeight: FontWeight.w700,
                             color: Theme.of(context).accentColor),
                       )),
@@ -780,19 +765,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     "(" +
                                     taxitem["rate"] +
                                     "%)",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.grey),
+                                style: Styles.darkGray(),
                               ),
                             ),
                             SizedBox(width: 70),
                             Padding(
                               padding: EdgeInsets.symmetric(vertical: 5),
                               child: Text(taxitem["taxAmount"].toString(),
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.grey)),
+                                  style: Styles.darkGray()),
                             )
                           ]);
                     }).toList())
@@ -803,19 +783,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             padding: EdgeInsets.symmetric(vertical: 5),
                             child: Text(
                               Strings.tax.toUpperCase(),
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.grey),
+                              style: Styles.darkGray(),
                             ),
                           ),
                           SizedBox(width: 70),
                           Padding(
                             padding: EdgeInsets.symmetric(vertical: 5),
                             child: Text(selectedOrder.tax_amount.toString(),
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.grey)),
+                                style: Styles.darkGray()),
                           )
                         ]),
             ),
@@ -831,10 +806,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     ),
                     child: Text(
                       Strings.grand_total,
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.grey),
+                      style: Styles.darkGray(),
                     ),
                   ),
                   SizedBox(width: 70),
@@ -844,8 +816,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         selectedOrder.grand_total != null
                             ? selectedOrder.grand_total.toString()
                             : "00:00",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w700, color: Colors.grey),
+                        style: Styles.darkGray(),
                       )),
                 ],
               ),
@@ -919,8 +890,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     Hero(
                       tag: product.product_id,
                       child: Container(
-                        height: 80,
-                        width: 100,
+                        height: SizeConfig.safeBlockVertical * 8,
+                        width: SizeConfig.safeBlockVertical * 9,
                         decoration: new BoxDecoration(
                           color: Colors.greenAccent,
                         ),
@@ -950,7 +921,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 2,
                                     style: TextStyle(
-                                        fontSize: 20,
+                                        fontSize: SizeConfig.safeBlockVertical * 2.8,
                                         color: Theme.of(context).primaryColor)),
                               ],
                             ),
@@ -960,21 +931,19 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           ),
                           Text(product.detail_qty.toString(),
                               style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: SizeConfig.safeBlockVertical * 2.8,
                                   color: Theme.of(context).primaryColor)),
                           SizedBox(width: 90),
                           Text(product.product_price.toString(),
                               style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: SizeConfig.safeBlockVertical * 2.8,
                                   color: Theme.of(context).primaryColor)),
                           isRefunding
                               ? IconButton(
-                                  padding:
-                                      EdgeInsets.only(left: 10, bottom: 20),
                                   icon: Icon(
                                     Icons.remove_circle_outline,
                                     color: Colors.red,
-                                    size: 40,
+                                    size: SizeConfig.safeBlockVertical * 5,
                                   ),
                                   onPressed: () {
                                     CommonUtils.showAlertDialog(context, () {
@@ -1055,14 +1024,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 ),
                 subtitle: Text(Strings.invoice + item.invoice_no.toString(),
                     style: TextStyle(
-                        fontSize: 18,
+                        fontSize: SizeConfig.safeBlockVertical * 3,
                         fontWeight: FontWeight.w500,
                         color: Colors.grey[600])),
                 isThreeLine: true,
                 trailing: Text(
                   item.grand_total.toString(),
                   style: TextStyle(
-                      fontSize: 18,
+                      fontSize: SizeConfig.safeBlockVertical * 3,
                       fontWeight: FontWeight.w500,
                       color: Colors.grey[600]),
                 ),
@@ -1095,7 +1064,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           DateFormat('hh:mm aaa')
                               .format(DateTime.parse(item.order_date)),
                           style: TextStyle(
-                              fontSize: 18,
+                              fontSize: SizeConfig.safeBlockVertical * 3,
                               fontWeight: FontWeight.w500,
                               color: Colors.grey[600])),
                       SizedBox(width: 10),
@@ -1123,13 +1092,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   ),
                   subtitle: Text(Strings.invoice + item.invoice_no.toString(),
                       style: TextStyle(
-                          fontSize: 18,
+                          fontSize: SizeConfig.safeBlockVertical * 3,
                           fontWeight: FontWeight.w500,
                           color: Colors.grey[600])),
                   isThreeLine: true,
                   trailing: Text(item.grand_total.toString(),
                       style: TextStyle(
-                          fontSize: 18,
+                          fontSize: SizeConfig.safeBlockVertical * 3,
                           fontWeight: FontWeight.w500,
                           color: Colors.grey[600])),
                 ));

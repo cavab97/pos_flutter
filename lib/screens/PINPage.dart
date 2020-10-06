@@ -9,6 +9,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/CheckInout.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/theme/Sized_Config.dart';
 
 class PINPage extends StatefulWidget {
   // PIN Enter PAGE
@@ -24,6 +25,7 @@ class _PINPageState extends State<PINPage> {
   bool isCheckIn = false;
   bool isLoading = false;
   LocalAPI localAPI = LocalAPI();
+
   @override
   void initState() {
     super.initState();
@@ -162,6 +164,7 @@ class _PINPageState extends State<PINPage> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return WillPopScope(
       child: SafeArea(
         child: Scaffold(
@@ -229,7 +232,7 @@ class _PINPageState extends State<PINPage> {
           padding: EdgeInsets.all(10),
           child: SizedBox(
             // login logo
-            height: 110.0,
+            height: SizeConfig.safeBlockVertical * 10,
             child: Image.asset(
               Strings.asset_headerLogo,
               fit: BoxFit.contain,
@@ -255,31 +258,61 @@ class _PINPageState extends State<PINPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  IconButton(
-                      padding: EdgeInsets.only(right: 40, top: 10),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      icon: Icon(
-                        Icons.close,
-                        color: Colors.black,
-                        size: 40,
-                      )),
-                ],
-              ),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              /* isCheckIn
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        IconButton(
+                            padding: EdgeInsets.only(right: 40, top: 10),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            icon: Icon(
+                              Icons.close,
+                              color: Colors.black,
+                              size: SizeConfig.safeBlockVertical * 7,
+                            )),
+                      ],
+                    )
+                  : SizedBox(),*/
+
+              Container(
+                  child: new Stack(children: [
+                Container(margin: EdgeInsets.only(top: SizeConfig.safeBlockVertical * 3),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      Strings.pin_Number,
+                      style: Styles.blackBoldLarge(),
+                    ),
+                  ),
+                ),
+                isCheckIn
+                    ? Align(
+                        alignment: Alignment.topRight,
+                        child: IconButton(
+                            padding: EdgeInsets.only(
+                                right: SizeConfig.safeBlockVertical * 5),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            icon: Icon(
+                              Icons.close,
+                              color: Colors.black,
+                              size: SizeConfig.safeBlockVertical * 7,
+                            )),
+                      )
+                    : SizedBox(),
+              ])),
+              /* mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Text(
                       Strings.pin_Number,
                       style: Styles.blackBoldLarge(),
                     )
-                  ]),
+                  ]),*/
               SizedBox(
-                height: 15,
+                height: SizeConfig.safeBlockVertical * 2,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -289,47 +322,47 @@ class _PINPageState extends State<PINPage> {
                         ? Icons.lens
                         : Icons.panorama_fish_eye,
                     color: Colors.deepOrange,
-                    size: 40,
+                    size: SizeConfig.safeBlockVertical * 5,
                   ),
                   Icon(
                     pinNumber.length >= 2
                         ? Icons.lens
                         : Icons.panorama_fish_eye,
                     color: Colors.deepOrange,
-                    size: 40,
+                    size: SizeConfig.safeBlockVertical * 5,
                   ),
                   Icon(
                     pinNumber.length >= 3
                         ? Icons.lens
                         : Icons.panorama_fish_eye,
                     color: Colors.deepOrange,
-                    size: 40,
+                    size: SizeConfig.safeBlockVertical * 5,
                   ),
                   Icon(
                     pinNumber.length >= 4
                         ? Icons.lens
                         : Icons.panorama_fish_eye,
                     color: Colors.deepOrange,
-                    size: 40,
+                    size: SizeConfig.safeBlockVertical * 5,
                   ),
                   Icon(
                     pinNumber.length >= 5
                         ? Icons.lens
                         : Icons.panorama_fish_eye,
                     color: Colors.deepOrange,
-                    size: 40,
+                    size: SizeConfig.safeBlockVertical * 5,
                   ),
                   Icon(
                     pinNumber.length >= 6
                         ? Icons.lens
                         : Icons.panorama_fish_eye,
                     color: Colors.deepOrange,
-                    size: 40,
+                    size: SizeConfig.safeBlockVertical * 5,
                   ),
                 ],
               ),
               SizedBox(
-                height: 10,
+                height: SizeConfig.safeBlockVertical * 4,
               ),
               Container(
                   width: MediaQuery.of(context).size.width / 3,
@@ -350,7 +383,7 @@ class _PINPageState extends State<PINPage> {
                         ],
                       ),
                       SizedBox(
-                        height: 10,
+                        height: SizeConfig.safeBlockVertical * 2,
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -367,7 +400,7 @@ class _PINPageState extends State<PINPage> {
                         ],
                       ),
                       SizedBox(
-                        height: 10,
+                        height: SizeConfig.safeBlockVertical * 2,
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -384,7 +417,7 @@ class _PINPageState extends State<PINPage> {
                         ],
                       ),
                       SizedBox(
-                        height: 10,
+                        height: SizeConfig.safeBlockVertical * 2,
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -401,7 +434,7 @@ class _PINPageState extends State<PINPage> {
                         ],
                       ),
                       SizedBox(
-                        height: 10,
+                        height: SizeConfig.safeBlockVertical * 2,
                       ),
                       isLoading
                           ? CommunFun.loader(context)

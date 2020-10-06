@@ -6,6 +6,7 @@ import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/theme/Sized_Config.dart';
 
 class PaymentMethodPop extends StatefulWidget {
   // Opning ammount popup
@@ -26,6 +27,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   var newAmmount;
   Branch branchdata;
   MST_Cart cartData;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -64,6 +66,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return AlertDialog(
       titlePadding: EdgeInsets.all(0),
       title: Stack(
@@ -72,13 +75,14 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         children: <Widget>[
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-            height: 70,
+            height: SizeConfig.safeBlockVertical * 9,
             color: Colors.black,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(widget.grandTotal.toString(), style: Styles.whiteBold()),
+                Text(widget.grandTotal.toString(),
+                    style: Styles.whiteBoldsmall()),
               ],
             ),
           ),
@@ -91,8 +95,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
 
   Widget mainContent() {
     return Container(
-      height: MediaQuery.of(context).size.height / 2.2,
-      width: MediaQuery.of(context).size.width / 2.2,
+      height: MediaQuery.of(context).size.height / 1.8,
+      width: MediaQuery.of(context).size.width / 1.8,
       child: Column(
         children: <Widget>[
           // Row(
@@ -153,11 +157,11 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
             shrinkWrap: true,
             children: paymenttyppeList.map((payment) {
               return ListTile(
-                  contentPadding: EdgeInsets.all(10),
+                  contentPadding: EdgeInsets.all(5),
                   leading: Icon(
                     Icons.credit_card,
                     color: Colors.black,
-                    size: 50,
+                    size: SizeConfig.safeBlockVertical * 7,
                   ),
                   // Container(
                   //     height: 70,
@@ -167,8 +171,12 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                     /// sendPaymentByCash(payment);
                     widget.onClose(payment);
                   },
-                  title: Text(payment.name, style: Styles.blackBoldLarge()),
-                  trailing: Icon(Icons.arrow_forward_ios, color: Colors.black));
+                  title: Text(payment.name, style: Styles.blackMediumBold()),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.black,
+                    size: SizeConfig.safeBlockVertical * 4,
+                  ));
             }).toList(),
           )
         ],

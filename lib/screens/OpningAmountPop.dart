@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/theme/Sized_Config.dart';
 
 class OpeningAmmountPage extends StatefulWidget {
   // Opning ammount popup
@@ -9,6 +10,7 @@ class OpeningAmmountPage extends StatefulWidget {
       : super(key: key);
   Function onEnter;
   final String ammountext;
+
   @override
   _OpeningAmmountPageState createState() => _OpeningAmmountPageState();
 }
@@ -25,15 +27,17 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         overflow: Overflow.visible,
         children: <Widget>[
           Container(
-            padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-            height: 70,
+            padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 3),
+            height: SizeConfig.safeBlockVertical * 9,
             color: Colors.black,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(widget.ammountext.toString().toUpperCase(),
-                    style: TextStyle(fontSize: 20, color: Colors.white)),
+                    style: TextStyle(
+                        fontSize: SizeConfig.safeBlockVertical * 3,
+                        color: Colors.white)),
               ],
             ),
           ),
@@ -108,29 +112,26 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         child: Column(
       children: [
         getAmount(), // dynamic enter ammount
-        SizedBox(
-          height: 10,
-        ),
         getNumbers(context), // numbers buttons
       ],
     ));
   }
 
   Widget _button(String number, Function() f) {
-    var size = MediaQuery.of(context).size.width / 2;
+    var size = MediaQuery.of(context).size.width / 2.3;
     double resize = size / 6;
     return Container(
       width: (number == "00") ? (resize * 2) : resize,
-      padding: EdgeInsets.all(5),
+      padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
       height: (number == "Enter") ? (resize * 2) : resize,
       child: MaterialButton(
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18.0),
+            borderRadius: BorderRadius.circular(15.0),
             side: BorderSide(color: Colors.grey)),
         child: Text(number,
             textAlign: TextAlign.center,
             style: number == "Enter"
-                ? Styles.blackBoldsmall()
+                ? Styles.blackMediumBold()
                 : Styles.blackBoldLarge()),
         textColor: Colors.black,
         color: Colors.grey[100],
@@ -140,7 +141,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
   }
 
   Widget _backbutton(Function() f) {
-    var size = MediaQuery.of(context).size.width / 2;
+    var size = MediaQuery.of(context).size.width / 2.3;
     double resize = size / 6;
     return Container(
       width: resize,
@@ -148,12 +149,12 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
       height: resize,
       child: MaterialButton(
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18.0),
+            borderRadius: BorderRadius.circular(15.0),
             side: BorderSide(color: Colors.grey)),
         child: Icon(
           Icons.backspace,
           color: Colors.black,
-          size: 25,
+          size: SizeConfig.safeBlockVertical * 4,
         ),
         textColor: Colors.black,
         color: Colors.grey[100],
@@ -172,7 +173,9 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
           Text(
             currentNumber,
             style: TextStyle(
-                color: Colors.black, fontWeight: FontWeight.bold, fontSize: 30),
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: SizeConfig.safeBlockVertical * 8),
           ),
         ],
       ),

@@ -4,6 +4,7 @@ import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter/cupertino.dart';
@@ -76,10 +77,13 @@ class CommunFun {
     );
   }
 
-  static roundedButton(text, _onPress) {
+  static roundedButton(text,BuildContext context, _onPress) {
+    SizeConfig().init(context);
+
     //round button like Login button
     return RaisedButton(
-      padding: EdgeInsets.only(top: 20, bottom: 20),
+
+      padding: EdgeInsets.only(top: SizeConfig.safeBlockVertical * 3, bottom: SizeConfig.safeBlockVertical * 3),
       onPressed: _onPress,
       child: Text(text, style: Styles.whiteBold()),
       color: Colors.deepOrange,
