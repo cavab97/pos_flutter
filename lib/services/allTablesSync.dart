@@ -9,6 +9,8 @@ import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
+import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
+import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/TerminalLog.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Order.dart';
@@ -245,8 +247,7 @@ class SyncAPICalls {
           'orders': json.encode(ordersList)
         };
         var res = await APICalls.apiCall(apiurl, context, stringParams);
-        print(res);
-        Navigator.of(context).pop();
+
         if (res["status"] == Constant.STATUS200) {
           await savesyncORderData(res["data"]);
           await CommunFun.showToast(context, "All orders upto dates.");
@@ -255,6 +256,7 @@ class SyncAPICalls {
         CommunFun.showToast(context, "All orders upto dates.");
         Navigator.of(context).pop();
       }
+      await SyncAPICalls.sendCancledOrderTable(context);
     } catch (e) {
       print(e);
       CommunFun.showToast(context, e.message);
@@ -454,14 +456,20 @@ class SyncAPICalls {
       LocalAPI localAPI = LocalAPI();
       List<CancelOrder> orderdata = await localAPI.getCancleOrder(terminalId);
       if (orderdata.length > 0) {
-        var stringParams = {
-          'branch_id': branchid,
-          'terminal_id': terminalId,
-          'order_cancel': json.encode(orderdata)
-        };
-        var res = await APICalls.apiCall(apiurl, context, stringParams);
-        print(res);
-        CommunFun.showToast(context, "Sync sucessfully done.");
+        if (orderdata.length > 0) {
+          var stringParams = {
+            'branch_id': branchid,
+            'terminal_id': terminalId,
+            'order_cancel': json.encode(orderdata)
+          };
+          var res = await APICalls.apiCall(apiurl, context, stringParams);
+          print(res);
+          if (res["status"] == Constant.STATUS200) {
+            saveCancleORderTable(res);
+          }
+          CommunFun.showToast(context, "Sync sucessfully done.");
+          Navigator.of(context).pop();
+        }
       } else {
         CommunFun.showToast(context, "all cancel tables up to dates.");
       }
@@ -477,15 +485,39 @@ class SyncAPICalls {
       var terminalId = await CommunFun.getTeminalKey();
       var branchid = await CommunFun.getbranchId();
       LocalAPI localAPI = LocalAPI();
-      List<CancelOrder> orderdata = await localAPI.getCancleOrder(terminalId);
-      if (orderdata.length > 0) {
+      List<ProductStoreInventory> storeData =
+          await localAPI.getProductStoreInventoryTable(branchid);
+      if (storeData.length > 0) {
+        var invData = [];
+        for (var i = 0; i < storeData.length; i++) {
+          var storeitem = storeData[i];
+          List<ProductStoreInventoryLog> logData = await localAPI
+              .getProductStoreInventoryLogTable(storeitem.inventoryId);
+          var invstoreItme = {
+            'inventory_id': storeitem.inventoryId,
+            'uuid': storeitem.uuid,
+            'product_id': storeitem.productId,
+            'branch_id': storeitem.branchId,
+            'qty': storeitem.qty,
+            'warningStockLevel': storeitem.warningStockLevel,
+            'status': storeitem.status,
+            'updated_at': storeitem.updatedAt,
+            'updated_by': storeitem.updatedBy,
+            'product_store_inventory_log': logData
+          };
+          invData.add(invstoreItme);
+        }
         var stringParams = {
           'branch_id': branchid,
           'terminal_id': terminalId,
-          'store_inventory': json.encode(orderdata)
+          'store_inventory': json.encode(invData)
         };
         var res = await APICalls.apiCall(apiurl, context, stringParams);
         print(res);
+        if (res["status"] == Constant.STATUS200) {
+          saveInvToTable(context, res);
+        }
+        Navigator.of(context).pop();
         CommunFun.showToast(context, "Sync sucessfully done.");
       } else {
         CommunFun.showToast(context, "all cancel tables up to dates.");
@@ -493,6 +525,83 @@ class SyncAPICalls {
     } catch (e) {
       print(e);
       CommunFun.showToast(context, e.message);
+    }
+  }
+
+  static saveInvToTable(context, data) async {
+    try {
+      LocalAPI localAPI = LocalAPI();
+      var storeData = data["data"]["product_store_inventory"];
+      if (storeData.length > 0) {
+        for (var i = 0; i < storeData.length; i++) {
+          var storeitem = storeData[i];
+          ProductStoreInventory inventory = new ProductStoreInventory();
+          inventory.inventoryId = storeitem['inventory_id'];
+          inventory.uuid = storeitem['uuid'];
+          inventory.productId = storeitem['product_id'];
+          inventory.branchId = storeitem['branch_id'];
+          inventory.qty = storeitem['qty'] is int
+              ? (storeitem['qty'] as int).toDouble()
+              : storeitem['qty'];
+          inventory.warningStockLevel = storeitem['warningStockLevel'];
+          inventory.status = storeitem['status'];
+          inventory.updatedAt = storeitem['updated_at'];
+          inventory.updatedBy = storeitem['updated_by'];
+          var storLodGata = storeitem["product_store_inventory_log"];
+          var result1 = await localAPI.saveSyncInvStoreTable(inventory);
+          if (storLodGata.length > 0) {
+            for (var j = 0; j < storLodGata.length; j++) {
+              var storLoditem = storLodGata[j];
+              ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+              log.il_id = storLoditem["il_id"];
+              log.uuid = storLoditem["uuid"];
+              log.inventory_id = storLoditem["inventory_id"];
+              log.branch_id = storLoditem["branch_id"];
+              log.product_id = storLoditem["product_id"];
+              log.employe_id = storLoditem["employe_id"];
+              log.il_type = storLoditem["il_type"];
+              log.qty = storLoditem["qty"] is int
+                  ? (storLoditem['qty'] as int).toDouble()
+                  : storLoditem['qty'];
+              log.qty_before_change = storLoditem["qty_before_change"] is int
+                  ? (storLoditem['qty_before_change'] as int).toDouble()
+                  : storLoditem['qty_before_change'];
+              log.qty_after_change = storLoditem["qty_after_change"] is int
+                  ? (storLoditem['qty_after_change'] as int).toDouble()
+                  : storLoditem['qty_after_change'];
+              log.updated_at = storLoditem["updated_at"];
+              log.updated_by = storLoditem["updated_by"];
+              var result2 = await localAPI.saveSyncInvStoreLogTable(log);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print(e);
+      CommunFun.showToast(context, e.message);
+    }
+  }
+
+  static saveCancleORderTable(data) async {
+    LocalAPI localAPI = LocalAPI();
+    var orderdata = data["data"]["order_cancel"];
+    if (orderdata.length > 0) {
+      for (var i = 0; i < orderdata.length; i++) {
+        var order = orderdata[i];
+        CancelOrder cancle_order = new CancelOrder();
+        cancle_order.id = order['id'];
+        cancle_order.orderId = order['order_id'];
+        cancle_order.localID = order['localID'];
+        cancle_order.reason = order['reason'];
+        cancle_order.status = order['status'];
+        cancle_order.createdBy = order['created_by'];
+        cancle_order.updatedBy = order['updated_by'];
+        cancle_order.createdAt = order['created_at'];
+        cancle_order.updatedAt = order['updated_at'];
+        cancle_order.serverId = order['server_id'];
+        cancle_order.terminalId = order['terminal_id'];
+        var result2 = await localAPI.saveSyncCancelTable(cancle_order);
+      }
     }
   }
 }

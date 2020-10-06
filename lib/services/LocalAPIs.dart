@@ -1294,17 +1294,17 @@ class LocalAPI {
     return orderid;
   }
 
-  Future<List<CancelOrder>> getCancleOrder(branchid) async {
+  Future<List<CancelOrder>> getCancleOrder(terminalid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from order_cancel where terminal_id = " +
-        branchid.toString() +
-        " AND server_id = 0";
+        terminalid.toString() +
+        "  AND server_id = 0";
     var ordersList = await db.rawQuery(qry);
     List<CancelOrder> list = ordersList.length > 0
         ? ordersList.map((c) => CancelOrder.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
-        "Order sync", "get Orders list", "Orders", branchid);
+        "Order sync", "get Orders list", "Orders", terminalid);
     return list;
   }
 
@@ -1323,5 +1323,91 @@ class LocalAPI {
     await SyncAPICalls.logActivity("get PosPermission",
         "get PosPermission list", "pos_permission", userid);
     return list;
+  }
+
+  Future<List<ProductStoreInventory>> getProductStoreInventoryTable(
+      branchid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from product_store_inventory where branch_id = " +
+        branchid.toString();
+    var ordersList = await db.rawQuery(qry);
+    List<ProductStoreInventory> list = ordersList.length > 0
+        ? ordersList.map((c) => ProductStoreInventory.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "sync inventory",
+        "get product store inventory table",
+        "product_store_inventory",
+        branchid);
+    return list;
+  }
+
+  Future<List<ProductStoreInventoryLog>> getProductStoreInventoryLogTable(
+      inventoryid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry =
+        "SELECT * from product_store_inventory_log where inventory_id = " +
+            inventoryid.toString();
+    var inList = await db.rawQuery(qry);
+    List<ProductStoreInventoryLog> list = inList.length > 0
+        ? inList.map((c) => ProductStoreInventoryLog.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "sync inventory log",
+        "get product store inventory log table",
+        "product_store_inventory_log",
+        inventoryid);
+    return list;
+  }
+
+  Future<int> saveSyncInvStoreTable(
+      ProductStoreInventory storeInventory) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry =
+        "SELECT *  FROM product_store_inventory where inventory_id =" +
+            storeInventory.inventoryId.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var inveID;
+    if (checkisExit.length > 0) {
+      inveID = await db.update(
+          "product_store_inventory", storeInventory.toJson(),
+          where: "inventory_id =?", whereArgs: [storeInventory.inventoryId]);
+    } else {
+      inveID =
+          await db.insert("product_store_inventory", storeInventory.toJson());
+    }
+    return inveID;
+  }
+
+  Future<int> saveSyncInvStoreLogTable(ProductStoreInventoryLog logData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry =
+        "SELECT *  FROM product_store_inventory_log where il_id =" +
+            logData.il_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var orderid;
+    if (checkisExit.length > 0) {
+      orderid = await db.update("product_store_inventory_log", logData.toJson(),
+          where: "il_id =?", whereArgs: [logData.il_id]);
+    } else {
+      orderid =
+          await db.insert("product_store_inventory_log", logData.toJson());
+    }
+    return orderid;
+  }
+
+  Future<int> saveSyncCancelTable(CancelOrder orderData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM order_cancel where order_id =" +
+        orderData.orderId.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var inveID;
+    if (checkisExit.length > 0) {
+      inveID = await db.update("order_cancel", orderData.toJson(),
+          where: "order_id =?", whereArgs: [orderData.orderId]);
+    } else {
+      inveID = await db.insert("order_cancel", orderData.toJson());
+    }
+    return inveID;
   }
 }
