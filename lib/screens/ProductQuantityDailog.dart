@@ -4,6 +4,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
@@ -16,6 +17,7 @@ import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/theme/Sized_Config.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
@@ -48,7 +50,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   bool isEditing = false;
   List<BranchTax> taxlist = [];
   double taxvalues = 0;
-  TextStyle attrStyle = TextStyle(color: Colors.black, fontSize: 20.0);
   int isSelectedAttr = -1;
 
   @override
@@ -513,6 +514,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return AlertDialog(
       contentPadding: EdgeInsets.all(0),
       titlePadding: EdgeInsets.all(0),
@@ -521,13 +523,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         children: <Widget>[
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-            height: 70,
+            height: SizeConfig.safeBlockVertical * 9,
             color: Colors.black,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(productItem.name,
-                    style: TextStyle(fontSize: 25, color: Colors.white)),
+                    style: TextStyle(fontSize: SizeConfig.safeBlockVertical * 3, color: Colors.white)),
                 addbutton(context)
               ],
             ),
@@ -547,7 +549,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                 child: Text(productItem.priceTypeName + " " + price.toString(),
                     style: TextStyle(
                         color: Colors.deepOrange,
-                        fontSize: 25,
+                        fontSize: SizeConfig.safeBlockVertical * 4,
                         fontWeight: FontWeight.bold))),
             Container(
               width: MediaQuery.of(context).size.width / 1.4,
@@ -614,7 +616,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   Widget mainContent() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20),
-      width: MediaQuery.of(context).size.width / 2.8,
+      width: MediaQuery.of(context).size.width / 1.8,
       height: MediaQuery.of(context).size.height / 1.8,
       child: SingleChildScrollView(
         child: Column(
@@ -625,12 +627,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             modifireList.length != 0
                 ? Text(
                     Strings.modifier,
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(fontSize: SizeConfig.safeBlockVertical * 3),
                   )
                 : SizedBox(),
             SizedBox(height: 5),
             modifireList.length != 0 ? modifireItmeList() : SizedBox(),
-            SizedBox(height: 15),
+            SizedBox(height: 10),
             _extraNotesTitle(),
             SizedBox(height: 5),
             inputNotesView(),
@@ -659,11 +661,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               SizedBox(height: 10),
               Text(
                 attribute.attr_name,
-                style: TextStyle(fontSize: 20),
+                style: TextStyle(fontSize: SizeConfig.safeBlockVertical * 3),
               ),
               Container(
-                  margin: EdgeInsets.symmetric(horizontal: 0, vertical: 10.0),
-                  height: 50,
+                  margin: EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
+                  height: SizeConfig.safeBlockVertical * 9,
                   child: ListView(
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
@@ -687,7 +689,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                       height: 25,
                                       minWidth: 50,
                                       child: Text(attr.toString(),
-                                          style: attrStyle),
+                                          style: Styles.blackBoldsmall()),
                                       textColor: Colors.black,
                                       color: Colors.grey[300],
                                       onPressed: () {
@@ -707,7 +709,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   Widget modifireItmeList() {
     return Container(
-        height: 60,
+        height: SizeConfig.safeBlockVertical * 9,
         child: ListView(
             shrinkWrap: true,
             physics: AlwaysScrollableScrollPhysics(),
@@ -734,13 +736,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                       children: <Widget>[
                         Text(
                           modifier.name.toString(),
-                          style: attrStyle,
+                          style: Styles.blackBoldsmall(),
                         ),
                         SizedBox(width: 10),
                         Text(
                           modifier.price.toDouble().toString(),
                           style:
-                              TextStyle(color: Colors.deepOrange, fontSize: 15),
+                              TextStyle(color: Colors.deepOrange, fontSize: SizeConfig.safeBlockVertical * 2.5),
                         ),
                       ],
                     ),
@@ -765,7 +767,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return Text(
       Strings.notesAndQty,
       style: TextStyle(
-          fontSize: 20, fontWeight: FontWeight.w400, color: Colors.grey[800]),
+          fontSize: SizeConfig.safeBlockVertical * 3, fontWeight: FontWeight.w400, color: Colors.grey[800]),
     );
   }
 
@@ -794,8 +796,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         child: TextField(
           keyboardType: TextInputType.multiline,
           textAlignVertical: TextAlignVertical.center,
-          style: TextStyle(fontSize: 20, height: 1.4),
-          maxLines: 3,
+          style: TextStyle(fontSize: SizeConfig.safeBlockVertical * 3, height: 1.4),
+          maxLines: 2,
           decoration: new InputDecoration(
             border: InputBorder.none,
             // hintText: product_qty.toDouble().toString(),
@@ -855,18 +857,18 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               ? Icon(
                   Icons.add_circle_outline,
                   color: Colors.white,
-                  size: 30,
+                  size: SizeConfig.safeBlockVertical * 4,
                 )
               : Icon(
                   Icons.edit,
                   color: Colors.white,
-                  size: 27,
+                  size: SizeConfig.safeBlockVertical * 4,
                 ),
           SizedBox(width: 10),
           Text(isEditing ? Strings.update : Strings.add,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 20,
+                fontSize: SizeConfig.safeBlockVertical * 3,
               )),
         ],
       ),

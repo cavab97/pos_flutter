@@ -8,6 +8,7 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/user.dart' as repo;
+import 'package:mcncashier/theme/Sized_Config.dart';
 
 class LoginPage extends StatefulWidget {
   // LOGIN Page
@@ -22,8 +23,10 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController emailAddress = new TextEditingController(text: "jack");
   TextEditingController userPin = new TextEditingController(text: "672907");
   GlobalKey<ScaffoldState> scaffoldKey;
+
   // DatabaseHelper databaseHelper = DatabaseHelper();
-  var errormessage = "";
+  var errorUserName = "";
+  var errorPin = "";
   bool isValidateEmail = true;
   bool isValidatePassword = true;
   bool isLoading = false;
@@ -43,13 +46,15 @@ class _LoginPageState extends State<LoginPage> {
   validateFields() async {
     if (emailAddress.text == "" || emailAddress.text.length == 0) {
       setState(() {
-        errormessage = Strings.username_validation_msg;
+        errorUserName = Strings.username_validation_msg;
+        errorPin = "";
         isValidateEmail = false;
       });
       return false;
     } else if (userPin.text == "" || userPin.text.length == 0) {
       setState(() {
-        errormessage = Strings.userPin_validation_msg;
+        errorPin = Strings.userPin_validation_msg;
+        errorUserName = "";
         isValidatePassword = false;
       });
       return false;
@@ -110,6 +115,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return WillPopScope(
       child: Scaffold(
         key: scaffoldKey,
@@ -117,7 +123,10 @@ class _LoginPageState extends State<LoginPage> {
           child: Center(
             // Login main part
             child: Container(
-              width: MediaQuery.of(context).size.width / 1.8,
+              width: MediaQuery
+                  .of(context)
+                  .size
+                  .width / 1.8,
               padding: EdgeInsets.only(left: 30, right: 30),
               child: new SingleChildScrollView(
                 child: Column(
@@ -125,38 +134,41 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     loginlogo(), // logo
-                    SizedBox(height: 40),
+                    SizedBox(height: SizeConfig.safeBlockVertical * 5),
                     CommunFun.loginText(),
-                    SizedBox(height: 50),
+                    SizedBox(height: SizeConfig.safeBlockVertical * 6),
                     // username input
                     emailInput((e) {
                       if (e.length > 0) {
                         setState(() {
-                          errormessage = "";
+                          errorUserName = "";
                           isValidateEmail = true;
                         });
                       }
                     }),
-                    SizedBox(height: 50),
+                    SizedBox(height: SizeConfig.safeBlockVertical * 6),
                     // password input
                     passwordInput((e) {
                       setState(() {
-                        errormessage = "";
+                        errorPin = "";
                         isValidatePassword = true;
                       });
                     }),
-                    SizedBox(height: 50),
+                    SizedBox(height: SizeConfig.safeBlockVertical * 6),
 
                     isLoading
                         ? CommunFun.loader(context)
                         : Container(
-                            // Login button
-                            width: MediaQuery.of(context).size.width,
-                            child: CommunFun.roundedButton("LOGIN", () {
-                              // LOGIN API
-                              sendlogin();
-                            }),
-                          )
+                      // Login button
+                      width: MediaQuery
+                          .of(context)
+                          .size
+                          .width,
+                      child: CommunFun.roundedButton("LOGIN",context, () {
+                        // LOGIN API
+                        sendlogin();
+                      }),
+                    )
                   ],
                 ),
               ),
@@ -171,7 +183,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget loginlogo() {
     return SizedBox(
       // login logo
-      height: 110.0,
+      //height: 110.0,
+      height: SizeConfig.safeBlockVertical * 15,
       child: Image.asset(
         Strings.asset_headerLogo,
         fit: BoxFit.contain,
@@ -191,11 +204,12 @@ class _LoginPageState extends State<LoginPage> {
           child: Icon(
             Icons.perm_identity,
             color: Colors.black,
-            size: 40,
+            size: SizeConfig.safeBlockVertical * 6,
           ),
         ),
-        errorText: !isValidateEmail ? errormessage : null,
-        errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
+        errorText: !isValidateEmail ? errorUserName : null,
+        errorStyle: TextStyle(
+            color: Colors.red, fontSize: SizeConfig.safeBlockVertical * 4),
         hintText: Strings.username_hint,
         hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
@@ -206,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         filled: true,
-        contentPadding: EdgeInsets.only(top: 20, bottom: 20),
+        contentPadding: EdgeInsets.only(top: SizeConfig.safeBlockVertical * 3, bottom: SizeConfig.safeBlockVertical * 3),
         fillColor: Colors.white,
       ),
       style: Styles.normalBlack(),
@@ -229,11 +243,12 @@ class _LoginPageState extends State<LoginPage> {
           child: Icon(
             Icons.lock_outline,
             color: Colors.black,
-            size: 40,
+            size: SizeConfig.safeBlockVertical * 6,
           ),
         ),
-        errorText: !isValidatePassword ? errormessage : null,
-        errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
+        errorText: !isValidatePassword ? errorPin : null,
+        errorStyle: TextStyle(
+            color: Colors.red, fontSize: SizeConfig.safeBlockVertical * 4),
         hintText: Strings.pin_hint,
         hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
@@ -244,7 +259,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         filled: true,
-        contentPadding: EdgeInsets.only(top: 20, bottom: 20),
+        contentPadding: EdgeInsets.only(top: SizeConfig.safeBlockVertical * 3, bottom: SizeConfig.safeBlockVertical * 3),
         fillColor: Colors.white,
       ),
       //obscureText: true,

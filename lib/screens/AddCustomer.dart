@@ -4,9 +4,11 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/theme/Sized_Config.dart';
 
 class AddCustomerPage extends StatefulWidget {
   AddCustomerPage({Key key}) : super(key: key);
+
   @override
   _AddCustomerPageState createState() => _AddCustomerPageState();
 }
@@ -59,6 +61,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return AlertDialog(
       titlePadding: EdgeInsets.all(0),
       title: Stack(
@@ -66,14 +69,16 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
         children: <Widget>[
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-            height: 70,
+            height: SizeConfig.safeBlockVertical * 9,
             color: Colors.black,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(Strings.btn_Add_customer,
-                    style: TextStyle(fontSize: 30, color: Colors.white)),
+                    style: TextStyle(
+                        fontSize: SizeConfig.safeBlockVertical * 3,
+                        color: Colors.white)),
               ],
             ),
           ),
@@ -134,10 +139,10 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             children: <Widget>[
               Text(
                 Strings.countrys,
-                style: TextStyle(color: Colors.grey, fontSize: 23),
+                style: TextStyle(color: Colors.grey, fontSize: SizeConfig.safeBlockVertical * 2.5),
               ),
               Container(
-                  height: 70,
+                  height: SizeConfig.safeBlockVertical * 9,
                   width: MediaQuery.of(context).size.width,
                   child: new DropdownButton<String>(
                     isExpanded: true,
@@ -147,7 +152,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                         value: value,
                         child: new Text(
                           value,
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(color: Colors.black,fontSize: SizeConfig.safeBlockVertical * 3),
                         ),
                       );
                     }).toList(),
@@ -165,10 +170,10 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             children: <Widget>[
               Text(
                 Strings.city,
-                style: TextStyle(color: Colors.grey, fontSize: 23),
+                style: TextStyle(color: Colors.grey, fontSize: SizeConfig.safeBlockVertical * 2.5),
               ),
               Container(
-                  height: 70,
+                  height: SizeConfig.safeBlockVertical * 9,
                   width: MediaQuery.of(context).size.width,
                   child: new DropdownButton<String>(
                     isExpanded: true,
@@ -178,7 +183,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                         value: value,
                         child: new Text(
                           value,
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(color: Colors.black,fontSize: SizeConfig.safeBlockVertical * 3),
                         ),
                       );
                     }).toList(),
@@ -196,10 +201,10 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             children: <Widget>[
               Text(
                 Strings.state,
-                style: TextStyle(color: Colors.grey, fontSize: 23),
+                style: TextStyle(color: Colors.grey, fontSize: SizeConfig.safeBlockVertical * 2.5),
               ),
               Container(
-                  height: 70,
+                  height: SizeConfig.safeBlockVertical * 9,
                   width: MediaQuery.of(context).size.width,
                   child: new DropdownButton<String>(
                     isExpanded: true,
@@ -209,7 +214,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                         value: value,
                         child: new Text(
                           value,
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(color: Colors.black,fontSize: SizeConfig.safeBlockVertical * 3),
                         ),
                       );
                     }).toList(),
@@ -220,12 +225,13 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
 
   Widget inputfield(lable, type, isCompal, isPassword, Function _onchnage) {
     return Padding(
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(10),
       child: TextField(
         //controller: lable,
         keyboardType: type,
         obscureText: isPassword,
         decoration: InputDecoration(
+          contentPadding: EdgeInsets.only(left: 10,right: 10),
           border: OutlineInputBorder(),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
@@ -237,11 +243,12 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
           ),
           labelText: isCompal ? lable + "*" : lable,
           labelStyle: TextStyle(
-            fontSize: 22.0,
+            fontSize: SizeConfig.safeBlockVertical * 2.5,
             color: Colors.grey,
           ),
         ),
-        style: TextStyle(height: 2, color: Colors.black, fontSize: 23.0),
+        style: TextStyle(
+            color: Colors.black, fontSize: SizeConfig.safeBlockVertical * 3),
         onChanged: _onchnage,
       ),
     );
@@ -249,8 +256,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
 
   Widget mainContent() {
     return Container(
-      width: MediaQuery.of(context).size.width / 1.2,
-      height: MediaQuery.of(context).size.height / 1.2,
+      width: MediaQuery.of(context).size.width / 1.8,
+      height: MediaQuery.of(context).size.height / 1.8,
       child: SingleChildScrollView(
         child: Table(
           columnWidths: {

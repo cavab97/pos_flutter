@@ -116,7 +116,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
                           // Key add button
                           width: MediaQuery.of(context).size.width,
                           child: CommunFun.roundedButton(
-                              Strings.set_terminal_key.toUpperCase(), () {
+                              Strings.set_terminal_key.toUpperCase(),context, () {
                             setTerminalkey();
                           }),
                         )

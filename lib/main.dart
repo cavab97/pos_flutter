@@ -38,6 +38,7 @@ class MyAppState extends State<MyApp> {
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      //home: SplashScreen(),
       title: 'cashierApp',
       theme: appTheme(),
       initialRoute:

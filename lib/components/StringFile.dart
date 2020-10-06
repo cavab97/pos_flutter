@@ -7,8 +7,8 @@ class Strings {
   static String forgot_password = "Forgot password?";
   static String login_text = "YOU CAN ENTER YOUR USERNAME & PIN HERE";
   static String cancel_tansaction = "Cancel Transaction";
-  static String username_validation_msg = "username must be required.";
-  static String userPin_validation_msg = "Pin must be required.";
+  static String username_validation_msg = "Username must be required";
+  static String userPin_validation_msg = "Pin must be required";
   static String username_hint = "Username";
   static String pin_hint = "Pin";
   static String invoice_reciept = "Invoice receipt";

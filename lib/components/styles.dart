@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/theme/Sized_Config.dart';
 
 class Styles {
 
@@ -16,7 +17,7 @@ class Styles {
     return TextStyle(
         // White text
         color: Color(0xFFffffff),
-        fontSize: 20,
+        fontSize: SizeConfig.safeBlockVertical * 2.8,
         fontWeight: FontWeight.w800,
         fontFamily: Strings.fontFamily);
   }
@@ -42,7 +43,7 @@ class Styles {
     return TextStyle(
         // White text
         color: Color(0xFF000000),
-        fontSize: 18,
+        fontSize: SizeConfig.safeBlockVertical * 3,
         fontWeight: FontWeight.w800,
         fontFamily: Strings.fontFamily);
   }
@@ -51,7 +52,7 @@ class Styles {
     return TextStyle(
         // White text
         color: Color(0xFFffffff),
-        fontSize: 18,
+        fontSize: SizeConfig.safeBlockVertical * 2.5,
         fontWeight: FontWeight.w600,
         fontFamily: Strings.fontFamily);
   }
@@ -78,7 +79,7 @@ class Styles {
     // Back Text
     return TextStyle(
         color: Color(0xFF000000),
-        fontSize: 20,
+        fontSize: SizeConfig.safeBlockVertical * 4,
         fontWeight: FontWeight.w600,
         fontFamily: Strings.fontFamily);
   }
@@ -96,7 +97,7 @@ class Styles {
     // Back Text
     return TextStyle(
         color: Color(0xFF000000),
-        fontSize: 25,
+        fontSize: SizeConfig.safeBlockVertical * 5,
         fontWeight: FontWeight.w800,
         fontFamily: Strings.fontFamily);
   }
@@ -117,15 +118,23 @@ class Styles {
 
   static darkBlue() {
     return TextStyle(
-        fontSize: 18,
+        fontSize: SizeConfig.safeBlockVertical * 2.8,
         fontWeight: FontWeight.w700,
         color: Color(0xff100c56),
         fontFamily: Strings.fontFamily);
   }
 
+static darkGray() {
+    return TextStyle(
+        fontSize: SizeConfig.safeBlockVertical * 2.8,
+        fontWeight: FontWeight.w700,
+        color: Colors.grey,
+        fontFamily: Strings.fontFamily);
+  }
+
   static orangeLarge() {
     return TextStyle(
-        fontSize: 30,
+        fontSize: SizeConfig.safeBlockVertical * 5,
         fontWeight: FontWeight.w600,
         color: Color(0xffff531a),
         fontFamily: Strings.fontFamily);

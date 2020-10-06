@@ -9,6 +9,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/screens/AddCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/theme/Sized_Config.dart';
 
 class SearchCustomerPage extends StatefulWidget {
   SearchCustomerPage({Key key, this.onClose}) : super(key: key);
@@ -69,6 +70,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig().init(context);
     return AlertDialog(
       titlePadding: EdgeInsets.all(0),
       title: Stack(
@@ -76,19 +78,19 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
         children: <Widget>[
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-            height: 70,
+            height: SizeConfig.safeBlockVertical * 9,
             color: Colors.black,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(Strings.search_customer, style: Styles.whiteBold()),
+                Text(Strings.search_customer, style: Styles.whiteBoldsmall()),
               ],
             ),
           ),
           Positioned(
-            left: 30,
-            top: 25,
+            left: 18,
+            top: 18,
             child: GestureDetector(
               onTap: () {
                 addCustomer();
@@ -130,8 +132,8 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
 
   Widget mainContent() {
     return Container(
-      width: MediaQuery.of(context).size.width / 2,
-      height: MediaQuery.of(context).size.height / 1.4,
+      width: MediaQuery.of(context).size.width / 1.8,
+      height: MediaQuery.of(context).size.height / 1.8,
       child: Container(
         padding: EdgeInsets.all(0),
         width: MediaQuery.of(context).size.width,
@@ -140,7 +142,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
         child: Column(children: <Widget>[
           customerSearchBox(),
           SizedBox(
-            height: 15,
+            height: 10,
           ),
           customerLists()
         ]),
@@ -150,9 +152,8 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
 
   Widget customerSearchBox() {
     return Container(
-      height: 70,
-      margin: EdgeInsets.only(top: 10),
-      padding: EdgeInsets.all(10),
+      height: SizeConfig.safeBlockVertical * 10,
+      padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
       color: Colors.grey[400],
       child: TextField(
         keyboardType: TextInputType.text,
@@ -162,12 +163,12 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
             child: Icon(
               Icons.search,
               color: Colors.grey[400],
-              size: 40,
+              size: SizeConfig.safeBlockVertical * 5,
             ),
           ),
           hintText: Strings.customer_Search_Hint,
           hintStyle: TextStyle(
-              fontSize: 18.0,
+              fontSize: SizeConfig.safeBlockVertical * 2.9,
               fontWeight: FontWeight.bold,
               color: Colors.grey[400]),
           border: OutlineInputBorder(
