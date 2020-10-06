@@ -529,7 +529,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(productItem.name,
-                    style: TextStyle(fontSize: SizeConfig.safeBlockVertical * 3, color: Colors.white)),
+                    style: TextStyle(
+                        fontSize: SizeConfig.safeBlockVertical * 3,
+                        color: Colors.white)),
                 addbutton(context)
               ],
             ),
@@ -544,13 +546,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         Stack(
           children: <Widget>[
             Positioned(
-                bottom: 10,
-                right: 30,
-                child: Text(productItem.priceTypeName + " " + price.toString(),
-                    style: TextStyle(
-                        color: Colors.deepOrange,
-                        fontSize: SizeConfig.safeBlockVertical * 4,
-                        fontWeight: FontWeight.bold))),
+              bottom: 10,
+              right: 30,
+              child: Text(
+                productItem.priceTypeName + " " + price.toString(),
+                style: Styles.orangeMedium(),
+              ),
+            ),
             Container(
               width: MediaQuery.of(context).size.width / 1.4,
               child: Column(children: <Widget>[
@@ -627,7 +629,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             modifireList.length != 0
                 ? Text(
                     Strings.modifier,
-                    style: TextStyle(fontSize: SizeConfig.safeBlockVertical * 3),
+                    style:
+                        TextStyle(fontSize: SizeConfig.safeBlockVertical * 3),
                   )
                 : SizedBox(),
             SizedBox(height: 5),
@@ -686,10 +689,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                                 : Colors.grey[300],
                                             width: 4,
                                           )),
-                                      height: 25,
                                       minWidth: 50,
                                       child: Text(attr.toString(),
-                                          style: Styles.blackBoldsmall()),
+                                          style: Styles.blackMediumBold()),
                                       textColor: Colors.black,
                                       color: Colors.grey[300],
                                       onPressed: () {
@@ -730,19 +732,20 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                 ? Colors.green
                                 : Colors.grey[300],
                             width: 4)),
-                    height: 20,
+                    // height: 10,
                     minWidth: 50,
                     child: Row(
                       children: <Widget>[
                         Text(
                           modifier.name.toString(),
-                          style: Styles.blackBoldsmall(),
+                          style: Styles.blackMediumBold(),
                         ),
                         SizedBox(width: 10),
                         Text(
                           modifier.price.toDouble().toString(),
-                          style:
-                              TextStyle(color: Colors.deepOrange, fontSize: SizeConfig.safeBlockVertical * 2.5),
+                          style: TextStyle(
+                              color: Colors.deepOrange,
+                              fontSize: SizeConfig.safeBlockVertical * 2.5),
                         ),
                       ],
                     ),
@@ -767,7 +770,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return Text(
       Strings.notesAndQty,
       style: TextStyle(
-          fontSize: SizeConfig.safeBlockVertical * 3, fontWeight: FontWeight.w400, color: Colors.grey[800]),
+          fontSize: SizeConfig.safeBlockVertical * 3,
+          fontWeight: FontWeight.w400,
+          color: Colors.grey[800]),
     );
   }
 
@@ -796,7 +801,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         child: TextField(
           keyboardType: TextInputType.multiline,
           textAlignVertical: TextAlignVertical.center,
-          style: TextStyle(fontSize: SizeConfig.safeBlockVertical * 3, height: 1.4),
+          style: TextStyle(
+              fontSize: SizeConfig.safeBlockVertical * 3, height: 1.4),
           maxLines: 2,
           decoration: new InputDecoration(
             border: InputBorder.none,

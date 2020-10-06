@@ -191,7 +191,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
             iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             title: Text(isMergeing ? Strings.merge_table : Strings.select_table,
-                style: Styles.whiteBold())),
+                style: Styles.whiteMediumBold())),
         body: new GestureDetector(
           onTap: () {
             FocusScope.of(context).requestFocus(new FocusNode());
@@ -494,7 +494,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
                                     ":" +
                                     table.merged_table_id.toString()
                                 : table.tableName,
-                            style: Styles.blackBoldLarge(),
+                            style: Styles.blackMediumBold(),
                           ),
                         ]),
                   ),
@@ -537,7 +537,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
                         table.numberofpax != null
                             ? Strings.orders + " 1"
                             : Strings.orders + "0",
-                        style: Styles.communBlack()))
+                        style: Styles.blackMediumBold()))
               ],
             ),
           ),

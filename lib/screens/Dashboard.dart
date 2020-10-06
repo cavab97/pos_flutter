@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -1168,7 +1169,8 @@ class _DashboradPageState extends State<DashboradPage>
                   TableRow(children: [
                     TableCell(
                       child: Container(
-                        padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 2),
+                        padding:
+                            EdgeInsets.all(SizeConfig.safeBlockVertical * 2),
                         child: Column(
                           children: <Widget>[
                             subCatList.length == 0
@@ -1230,13 +1232,15 @@ class _DashboradPageState extends State<DashboradPage>
                           child: cartITems(),
                         ),
                         Positioned(
-                            bottom: 10,
-                            left: 0,
-                            right: 0,
-                            child: Container(
-                                padding: EdgeInsets.all(10),
-                                color: Colors.white,
-                                child: paybutton(context))),
+                          bottom: 25,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            height: 80,
+                            color: StaticColor.backgroundColor,
+                            child: paybutton(context),
+                          ),
+                        ),
                         !isShiftOpen ? openShiftButton(context) : SizedBox()
                       ],
                     )),
@@ -1258,11 +1262,7 @@ class _DashboradPageState extends State<DashboradPage>
         onPressed: () {
           Navigator.pushNamed(context, Constant.PINScreen);
         },
-        child: Text(
-          Strings.checkout,
-          style: TextStyle(
-              color: Colors.white, fontSize: SizeConfig.safeBlockVertical * 3),
-        ),
+        child: Text(Strings.checkout, style: Styles.whiteBoldsmall()),
         color: Colors.deepOrange,
         textColor: Colors.white,
         shape: RoundedRectangleBorder(
@@ -1281,8 +1281,7 @@ class _DashboradPageState extends State<DashboradPage>
       },
       child: Text(
         userDetails != null ? userDetails["name"] : "",
-        style: TextStyle(
-            color: Colors.white, fontSize: SizeConfig.safeBlockVertical * 3),
+        style: Styles.whiteBoldsmall(),
       ),
       color: Colors.deepOrange,
       textColor: Colors.white,
@@ -1320,7 +1319,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
                 title: Text(
                   "Transaction",
-                  style: Styles.communBlack(),
+                  style: Styles.blackMediumBold(),
                 ),
               ),
               permissions.contains(Constant.VIEW_ORDER)
@@ -1335,7 +1334,7 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       title: Text(
                         "Web Orders",
-                        style: Styles.communBlack(),
+                        style: Styles.blackMediumBold(),
                       ),
                     )
                   : SizedBox(),
@@ -1354,7 +1353,7 @@ class _DashboradPageState extends State<DashboradPage>
                     size: SizeConfig.safeBlockVertical * 5,
                   ),
                   title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
-                      style: Styles.communBlack())),
+                      style: Styles.blackMediumBold())),
               ListTile(
                   onTap: () {
                     gotoShiftReport();
@@ -1364,7 +1363,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.black,
                     size: SizeConfig.safeBlockVertical * 5,
                   ),
-                  title: Text("Shift Report", style: Styles.communBlack())),
+                  title: Text("Shift Report", style: Styles.blackMediumBold())),
               ListTile(
                   onTap: () {
                     Navigator.of(context).pop();
@@ -1375,7 +1374,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.black,
                     size: SizeConfig.safeBlockVertical * 5,
                   ),
-                  title: Text("Sync Orders", style: Styles.communBlack())),
+                  title: Text("Sync Orders", style: Styles.blackMediumBold())),
               ListTile(
                   onTap: () async {
                     syncAllTables();
@@ -1385,7 +1384,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.black,
                     size: SizeConfig.safeBlockVertical * 5,
                   ),
-                  title: Text("Sync", style: Styles.communBlack())),
+                  title: Text("Sync", style: Styles.blackMediumBold())),
               ListTile(
                   onTap: () {
                     Navigator.of(context).pop();
@@ -1396,7 +1395,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.black,
                     size: SizeConfig.safeBlockVertical * 5,
                   ),
-                  title: Text("Settings", style: Styles.communBlack())),
+                  title: Text("Settings", style: Styles.blackMediumBold())),
             ],
           )),
     );
@@ -1607,7 +1606,8 @@ class _DashboradPageState extends State<DashboradPage>
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                       SizedBox(width: 15),
-                      Text(Strings.select_table, style: Styles.communBlack()),
+                      Text(Strings.select_table,
+                          style: Styles.blackMediumBold()),
                     ],
                   ),
                 ),
@@ -1624,7 +1624,7 @@ class _DashboradPageState extends State<DashboradPage>
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                       SizedBox(width: 15),
-                      Text(Strings.close_table, style: Styles.communBlack())
+                      Text(Strings.close_table, style: Styles.blackMediumBold())
                     ],
                   ),
                 ),
@@ -1641,7 +1641,8 @@ class _DashboradPageState extends State<DashboradPage>
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                       SizedBox(width: 15),
-                      Text(Strings.split_order, style: Styles.communBlack()),
+                      Text(Strings.split_order,
+                          style: Styles.blackMediumBold()),
                     ],
                   ),
                 ),
@@ -1658,7 +1659,8 @@ class _DashboradPageState extends State<DashboradPage>
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                       SizedBox(width: 15),
-                      Text(Strings.close_shift, style: Styles.communBlack()),
+                      Text(Strings.close_shift,
+                          style: Styles.blackMediumBold()),
                     ],
                   ),
                 ),
@@ -1675,7 +1677,8 @@ class _DashboradPageState extends State<DashboradPage>
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                       SizedBox(width: 15),
-                      Text(Strings.draft_report, style: Styles.communBlack()),
+                      Text(Strings.draft_report,
+                          style: Styles.blackMediumBold()),
                     ],
                   ),
                 ),
@@ -1692,7 +1695,8 @@ class _DashboradPageState extends State<DashboradPage>
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                       SizedBox(width: 15),
-                      Text(Strings.delete_order, style: Styles.communBlack()),
+                      Text(Strings.delete_order,
+                          style: Styles.blackMediumBold()),
                     ],
                   ),
                 ),
@@ -1938,7 +1942,7 @@ class _DashboradPageState extends State<DashboradPage>
             icon: Icon(
               Icons.delete_outline,
               color: Colors.red,
-              size: SizeConfig.safeBlockVertical * 6,
+              size: SizeConfig.safeBlockVertical * 4,
             ),
             onPressed: () {
               removeCutomer();
@@ -1975,6 +1979,7 @@ class _DashboradPageState extends State<DashboradPage>
 
     final cartTable = ListView(
       shrinkWrap: true,
+      padding: EdgeInsets.only(bottom: 50),
       children: ListTile.divideTiles(
         context: context,
         tiles: cartList.map((cart) {
@@ -1984,7 +1989,7 @@ class _DashboradPageState extends State<DashboradPage>
             actionPane: SlidableDrawerActionPane(),
             actionExtentRatio: 0.15,
             child: Container(
-              padding: EdgeInsets.all(5),
+              padding: EdgeInsets.only(left: 5, right: 5),
               child: new ListTile(
                 contentPadding: EdgeInsets.all(0),
                 dense: false,
@@ -2275,19 +2280,23 @@ class _DashboradPageState extends State<DashboradPage>
                     )
                   : SizedBox(),
               Container(
-                  height: MediaQuery.of(context).size.height / 3.2,
+                  height: MediaQuery.of(context).size.height / 3.5,
                   margin: EdgeInsets.only(top: customer != null ? 100 : 50),
                   child: cartTable),
               cartList.length != 0
                   ? Positioned(
-                      bottom: 15,
+                      bottom: 100,
                       left: 0,
                       right: 0,
-                      child: Container(child: totalPriceTable),
+                      child: Container(
+                          color: Colors.grey[300], child: totalPriceTable),
                     )
                   : Center(
-                      child: Text(Strings.item_not_available,
-                          style: Styles.communBlack()))
+                      child: Text(
+                        Strings.item_not_available,
+                        style: Styles.communBlacksmall(),
+                      ),
+                    )
             ],
           ),
         ),

@@ -247,18 +247,18 @@ class _PINPageState extends State<PINPage> {
   Widget getNumbers(context) {
     // Numbers buttons
     return Container(
-        //padding: EdgeInsets.symmetric(horizontal: 80),
-        height: MediaQuery.of(context).size.height / 1.2,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-              bottomRight: Radius.circular(30), topRight: Radius.circular(30)),
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              /* isCheckIn
+      //padding: EdgeInsets.symmetric(horizontal: 80),
+      height: MediaQuery.of(context).size.height / 1.2,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(30), topRight: Radius.circular(30)),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            /* isCheckIn
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
@@ -276,184 +276,175 @@ class _PINPageState extends State<PINPage> {
                     )
                   : SizedBox(),*/
 
+            Container(
+                child: new Stack(children: [
               Container(
-                  child: new Stack(children: [
-                Container(margin: EdgeInsets.only(top: SizeConfig.safeBlockVertical * 3),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      Strings.pin_Number,
-                      style: Styles.blackBoldLarge(),
-                    ),
+                margin: EdgeInsets.only(top: SizeConfig.safeBlockVertical * 3),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    Strings.pin_Number,
+                    style: Styles.communBlack(),
                   ),
                 ),
-                isCheckIn
-                    ? Align(
-                        alignment: Alignment.topRight,
-                        child: IconButton(
-                            padding: EdgeInsets.only(
-                                right: SizeConfig.safeBlockVertical * 5),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            icon: Icon(
-                              Icons.close,
-                              color: Colors.black,
-                              size: SizeConfig.safeBlockVertical * 7,
-                            )),
-                      )
-                    : SizedBox(),
-              ])),
-              /* mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              ),
+              isCheckIn
+                  ? Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                          padding: EdgeInsets.only(
+                              right: SizeConfig.safeBlockVertical * 5),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          icon: Icon(
+                            Icons.close,
+                            color: Colors.black,
+                            size: SizeConfig.safeBlockVertical * 7,
+                          )),
+                    )
+                  : SizedBox(),
+            ])),
+            /* mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Text(
                       Strings.pin_Number,
                       style: Styles.blackBoldLarge(),
                     )
                   ]),*/
-              SizedBox(
-                height: SizeConfig.safeBlockVertical * 2,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+            SizedBox(
+              height: SizeConfig.safeBlockVertical * 2,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  pinNumber.length >= 1 ? Icons.lens : Icons.panorama_fish_eye,
+                  color: Colors.deepOrange,
+                  size: SizeConfig.safeBlockVertical * 5,
+                ),
+                Icon(
+                  pinNumber.length >= 2 ? Icons.lens : Icons.panorama_fish_eye,
+                  color: Colors.deepOrange,
+                  size: SizeConfig.safeBlockVertical * 5,
+                ),
+                Icon(
+                  pinNumber.length >= 3 ? Icons.lens : Icons.panorama_fish_eye,
+                  color: Colors.deepOrange,
+                  size: SizeConfig.safeBlockVertical * 5,
+                ),
+                Icon(
+                  pinNumber.length >= 4 ? Icons.lens : Icons.panorama_fish_eye,
+                  color: Colors.deepOrange,
+                  size: SizeConfig.safeBlockVertical * 5,
+                ),
+                Icon(
+                  pinNumber.length >= 5 ? Icons.lens : Icons.panorama_fish_eye,
+                  color: Colors.deepOrange,
+                  size: SizeConfig.safeBlockVertical * 5,
+                ),
+                Icon(
+                  pinNumber.length >= 6 ? Icons.lens : Icons.panorama_fish_eye,
+                  color: Colors.deepOrange,
+                  size: SizeConfig.safeBlockVertical * 5,
+                ),
+              ],
+            ),
+            SizedBox(
+              height: SizeConfig.safeBlockVertical * 4,
+            ),
+            Container(
+              width: MediaQuery.of(context).size.width / 3,
+              child: Column(
                 children: <Widget>[
-                  Icon(
-                    pinNumber.length >= 1
-                        ? Icons.lens
-                        : Icons.panorama_fish_eye,
-                    color: Colors.deepOrange,
-                    size: SizeConfig.safeBlockVertical * 5,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      _button("1", () {
+                        addINPin("1");
+                      }), // using custom widget _button
+                      _button("2", () {
+                        addINPin("2");
+                      }),
+                      _button("3", () {
+                        addINPin("3");
+                      }),
+                    ],
                   ),
-                  Icon(
-                    pinNumber.length >= 2
-                        ? Icons.lens
-                        : Icons.panorama_fish_eye,
-                    color: Colors.deepOrange,
-                    size: SizeConfig.safeBlockVertical * 5,
+                  SizedBox(
+                    height: SizeConfig.safeBlockVertical * 2,
                   ),
-                  Icon(
-                    pinNumber.length >= 3
-                        ? Icons.lens
-                        : Icons.panorama_fish_eye,
-                    color: Colors.deepOrange,
-                    size: SizeConfig.safeBlockVertical * 5,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      _button("4", () {
+                        addINPin("4");
+                      }), // using custom widget _button
+                      _button("5", () {
+                        addINPin("5");
+                      }),
+                      _button("6", () {
+                        addINPin("6");
+                      }),
+                    ],
                   ),
-                  Icon(
-                    pinNumber.length >= 4
-                        ? Icons.lens
-                        : Icons.panorama_fish_eye,
-                    color: Colors.deepOrange,
-                    size: SizeConfig.safeBlockVertical * 5,
+                  SizedBox(
+                    height: SizeConfig.safeBlockVertical * 2,
                   ),
-                  Icon(
-                    pinNumber.length >= 5
-                        ? Icons.lens
-                        : Icons.panorama_fish_eye,
-                    color: Colors.deepOrange,
-                    size: SizeConfig.safeBlockVertical * 5,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      _button("7", () {
+                        addINPin("7");
+                      }), // using custom widget _button
+                      _button("8", () {
+                        addINPin("8");
+                      }),
+                      _button("9", () {
+                        addINPin("9");
+                      }),
+                    ],
                   ),
-                  Icon(
-                    pinNumber.length >= 6
-                        ? Icons.lens
-                        : Icons.panorama_fish_eye,
-                    color: Colors.deepOrange,
-                    size: SizeConfig.safeBlockVertical * 5,
+                  SizedBox(
+                    height: SizeConfig.safeBlockVertical * 2,
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      _buttonCN(Strings.btnclockin, () {
+                        clockInwithPIN();
+                      }),
+                      _button("0", () {
+                        addINPin("0");
+                      }),
+                      _buttonCN(Strings.btnclockout, () {
+                        clockOutwithPIN();
+                      }),
+                    ],
+                  ),
+                  SizedBox(
+                    height: SizeConfig.safeBlockVertical * 2,
+                  ),
+                  isLoading
+                      ? CommunFun.loader(context)
+                      : Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                              FlatButton(
+                                  onPressed: () {
+                                    clearPin();
+                                  },
+                                  child: Text(Strings.clear,
+                                      style: Styles.orangeMedium()))
+                            ])
                 ],
               ),
-              SizedBox(
-                height: SizeConfig.safeBlockVertical * 4,
-              ),
-              Container(
-                  width: MediaQuery.of(context).size.width / 3,
-                  child: Column(
-                    children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          _button("1", () {
-                            addINPin("1");
-                          }), // using custom widget _button
-                          _button("2", () {
-                            addINPin("2");
-                          }),
-                          _button("3", () {
-                            addINPin("3");
-                          }),
-                        ],
-                      ),
-                      SizedBox(
-                        height: SizeConfig.safeBlockVertical * 2,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          _button("4", () {
-                            addINPin("4");
-                          }), // using custom widget _button
-                          _button("5", () {
-                            addINPin("5");
-                          }),
-                          _button("6", () {
-                            addINPin("6");
-                          }),
-                        ],
-                      ),
-                      SizedBox(
-                        height: SizeConfig.safeBlockVertical * 2,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          _button("7", () {
-                            addINPin("7");
-                          }), // using custom widget _button
-                          _button("8", () {
-                            addINPin("8");
-                          }),
-                          _button("9", () {
-                            addINPin("9");
-                          }),
-                        ],
-                      ),
-                      SizedBox(
-                        height: SizeConfig.safeBlockVertical * 2,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          _buttonCN(Strings.btnclockin, () {
-                            clockInwithPIN();
-                          }),
-                          _button("0", () {
-                            addINPin("0");
-                          }),
-                          _buttonCN(Strings.btnclockout, () {
-                            clockOutwithPIN();
-                          }),
-                        ],
-                      ),
-                      SizedBox(
-                        height: SizeConfig.safeBlockVertical * 2,
-                      ),
-                      isLoading
-                          ? CommunFun.loader(context)
-                          : Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: <Widget>[
-                                  FlatButton(
-                                      onPressed: () {
-                                        clearPin();
-                                      },
-                                      child: Text(Strings.clear,
-                                          style: Styles.orangeLarge()))
-                                ])
-                    ],
-                  ))
-            ],
-          ),
-        ));
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _button(String number, Function() f) {
@@ -465,7 +456,7 @@ class _PINPageState extends State<PINPage> {
       height: MediaQuery.of(context).size.height / 9,
       // minWidth: MediaQuery.of(context).size.width / 9.9,
       child: Text(number,
-          textAlign: TextAlign.center, style: Styles.blackBoldLarge()),
+          textAlign: TextAlign.center, style: Styles.communBlack()),
       textColor: Colors.black,
       color: Colors.grey[100],
       onPressed: f,
@@ -477,6 +468,7 @@ class _PINPageState extends State<PINPage> {
     return Padding(
       padding: EdgeInsets.all(5),
       child: MaterialButton(
+        padding: EdgeInsets.all(0),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18.0),
             side: BorderSide(color: Colors.grey)),

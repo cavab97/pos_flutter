@@ -35,9 +35,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(widget.ammountext.toString().toUpperCase(),
-                    style: TextStyle(
-                        fontSize: SizeConfig.safeBlockVertical * 3,
-                        color: Colors.white)),
+                    style:Styles.whiteBoldsmall()),
               ],
             ),
           ),
@@ -132,7 +130,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
             textAlign: TextAlign.center,
             style: number == "Enter"
                 ? Styles.blackMediumBold()
-                : Styles.blackBoldLarge()),
+                : Styles.blackMediumBold()),
         textColor: Colors.black,
         color: Colors.grey[100],
         onPressed: f,
@@ -172,10 +170,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         children: <Widget>[
           Text(
             currentNumber,
-            style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: SizeConfig.safeBlockVertical * 8),
+            style: Styles.blackBoldLarge()
           ),
         ],
       ),

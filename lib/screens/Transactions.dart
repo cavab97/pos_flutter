@@ -336,7 +336,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 TableCell(
                   // Part 1 white
                   child: Container(
-                //    padding: EdgeInsets.only(top: 20, left: 20, right: 20),
+                    //    padding: EdgeInsets.only(top: 20, left: 20, right: 20),
                     height: MediaQuery.of(context).size.height,
                     color: Colors.white,
                     child: SingleChildScrollView(
@@ -344,6 +344,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
+                          SizedBox(height: 10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -360,13 +361,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               ),
                               SizedBox(width: 10),
                               Text(Strings.transaction,
-                                  style: TextStyle(
-                                      fontSize: SizeConfig.safeBlockVertical * 5,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.grey[800])),
+                                  style: Styles.blackBoldsmall()),
                             ],
                           ),
+                          SizedBox(height: 10),
                           transationsSearchBox(),
+                          SizedBox(height: 5),
                           orderLists.length > 0
                               ? searchTransationList()
                               : Center(
@@ -418,7 +418,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     Text(
                                       orderpayment.op_amount.toString(),
                                       style: TextStyle(
-                                          fontSize: SizeConfig.safeBlockVertical * 4,
+                                          fontSize:
+                                              SizeConfig.safeBlockVertical * 4,
                                           fontWeight: FontWeight.bold,
                                           color: Theme.of(context).accentColor),
                                     ),
@@ -557,7 +558,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget transationsSearchBox() {
     return Container(
-      height: SizeConfig.safeBlockVertical * 11,
       padding: EdgeInsets.all(10),
       color: Colors.grey[400],
       child: TextField(
@@ -921,7 +921,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 2,
                                     style: TextStyle(
-                                        fontSize: SizeConfig.safeBlockVertical * 2.8,
+                                        fontSize:
+                                            SizeConfig.safeBlockVertical * 2.8,
                                         color: Theme.of(context).primaryColor)),
                               ],
                             ),
