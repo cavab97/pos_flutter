@@ -24,7 +24,7 @@ class SplashScreenstate extends State<SplashScreen> {
       if (isLogged) {
         await Navigator.of(context).pushNamed(Constant.DashboardScreen);
       } else {
-        await Navigator.of(context).pushNamed(Constant.TransactionScreen);
+        await Navigator.of(context).pushNamed(Constant.TerminalScreen);
       }
     });
   }
