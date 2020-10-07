@@ -1513,7 +1513,7 @@ class _DashboradPageState extends State<DashboradPage>
   Widget tableHeader2() {
     // products Header part 2
     return Container(
-      padding: EdgeInsets.only(left: 10, right: 10),
+      padding: EdgeInsets.only(left: 5, right: 5),
       height: SizeConfig.safeBlockVertical * 11,
       // color: Colors.blue,
       child: Row(
@@ -1559,7 +1559,7 @@ class _DashboradPageState extends State<DashboradPage>
   Widget addCustomerBtn(context) {
     return customer == null
         ? RaisedButton(
-            //padding: EdgeInsets.only(left: 5, right: 8, top: 5, bottom: 5),
+            padding: EdgeInsets.only(left: 5, right: 5, top: 5, bottom: 5),
             onPressed: () {
               if (isShiftOpen) {
                 opneShowAddCustomerDailog();
@@ -1588,6 +1588,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   Widget menubutton(Function _onPress) {
     return PopupMenuButton(
+      padding: EdgeInsets.all(0),
         icon: Icon(Icons.more_vert,
             color: Colors.white, size: SizeConfig.safeBlockVertical * 5),
         offset: Offset(0, 100),
@@ -1597,7 +1598,7 @@ class _DashboradPageState extends State<DashboradPage>
               PopupMenuItem(
                 value: 0,
                 child: Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.all(10),
                   child: Row(
                     children: <Widget>[
                       Icon(
@@ -1615,7 +1616,7 @@ class _DashboradPageState extends State<DashboradPage>
               PopupMenuItem(
                 value: 1,
                 child: Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.all(10),
                   child: Row(
                     children: <Widget>[
                       Icon(
@@ -1632,7 +1633,7 @@ class _DashboradPageState extends State<DashboradPage>
               PopupMenuItem(
                 value: 2,
                 child: Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.all(10),
                   child: Row(
                     children: <Widget>[
                       Icon(
@@ -1650,7 +1651,7 @@ class _DashboradPageState extends State<DashboradPage>
               PopupMenuItem(
                 value: 3,
                 child: Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.all(10),
                   child: Row(
                     children: <Widget>[
                       Icon(
@@ -1668,7 +1669,7 @@ class _DashboradPageState extends State<DashboradPage>
               PopupMenuItem(
                 value: 4,
                 child: Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.all(10),
                   child: Row(
                     children: <Widget>[
                       Icon(
@@ -1686,7 +1687,7 @@ class _DashboradPageState extends State<DashboradPage>
               PopupMenuItem(
                 value: 5,
                 child: Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.all(10),
                   child: Row(
                     children: <Widget>[
                       Icon(
@@ -2276,7 +2277,7 @@ class _DashboradPageState extends State<DashboradPage>
                   : SizedBox(),
               Container(
                   height: MediaQuery.of(context).size.height / 3.5,
-                  margin: EdgeInsets.only(top: customer != null ? 100 : 50),
+                  margin: EdgeInsets.only(top: customer != null ? 85 : 35),
                   child: cartTable),
               cartList.length != 0
                   ? Positioned(

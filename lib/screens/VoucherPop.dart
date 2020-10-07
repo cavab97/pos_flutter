@@ -181,7 +181,7 @@ class VoucherPopState extends State<VoucherPop> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(Strings.applycoupen, style: Styles.whiteBold()),
+                  Text(Strings.applycoupen, style: Styles.whiteBoldsmall()),
                 ],
               ),
             ),
@@ -242,7 +242,7 @@ class VoucherPopState extends State<VoucherPop> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(Strings.vauchercode, style: Styles.communBlack()),
+            Text(Strings.vauchercode, style: Styles.blackMediumBold()),
             SizedBox(
               height: 20,
             ),
@@ -263,7 +263,7 @@ class VoucherPopState extends State<VoucherPop> {
                   borderSide: BorderSide(width: 3, color: Colors.grey),
                 ),
                 filled: true,
-                contentPadding: EdgeInsets.only(left: 20, top: 25, bottom: 25),
+                contentPadding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
                 fillColor: Colors.white,
               ),
               style: TextStyle(color: Colors.black, fontSize: 25.0),

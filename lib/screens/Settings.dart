@@ -149,7 +149,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                             title: Text(
                               "Settings",
-                              style: Styles.blackBoldLarge(),
+                              style: Styles.blackBoldsmall(),
                             ),
                           ),
                           ListTile(
@@ -160,7 +160,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             },
                             title: Text(
                               "General",
-                              style: Styles.communBlack(),
+                              style: Styles.blackBoldsmall(),
                             ),
                           ),
                           ListTile(
@@ -172,7 +172,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             },
                             title: Text(
                               "Printer",
-                              style: Styles.communBlack(),
+                              style: Styles.blackBoldsmall(),
                             ),
                           ),
                           ListTile(
@@ -181,7 +181,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             onTap: () {},
                             title: Text(
                               "Change Language",
-                              style: Styles.communBlack(),
+                              style: Styles.blackBoldsmall(),
                             ),
                           ),
                           ListTile(
@@ -190,7 +190,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             onTap: () {},
                             title: Text(
                               "Change Theme",
-                              style: Styles.communBlack(),
+                              style: Styles.blackBoldsmall(),
                             ),
                           )
                         ],

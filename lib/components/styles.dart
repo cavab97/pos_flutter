@@ -128,7 +128,7 @@ class Styles {
 
   static darkBlue() {
     return TextStyle(
-        fontSize: SizeConfig.safeBlockVertical * 2.8,
+        fontSize: SizeConfig.safeBlockVertical * 2.5,
         fontWeight: FontWeight.w700,
         color: Color(0xff100c56),
         fontFamily: Strings.fontFamily);
