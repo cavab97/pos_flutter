@@ -77,13 +77,14 @@ class CommunFun {
     );
   }
 
-  static roundedButton(text,BuildContext context, _onPress) {
+  static roundedButton(text, BuildContext context, _onPress) {
     SizeConfig().init(context);
 
     //round button like Login button
     return RaisedButton(
-
-      padding: EdgeInsets.only(top: SizeConfig.safeBlockVertical * 3, bottom: SizeConfig.safeBlockVertical * 3),
+      padding: EdgeInsets.only(
+          top: SizeConfig.safeBlockVertical * 3,
+          bottom: SizeConfig.safeBlockVertical * 3),
       onPressed: _onPress,
       child: Text(text, style: Styles.whiteBold()),
       color: Colors.deepOrange,
@@ -159,8 +160,8 @@ class CommunFun {
     // basic Loader
     return Center(
       child: Container(
-        height: 50.0,
-        width: 50.0,
+        height: 40.0,
+        width: 40.0,
         child: CircularProgressIndicator(
           backgroundColor: Colors.white,
           valueColor:
@@ -199,7 +200,7 @@ class CommunFun {
                   SizedBox(
                     height: 30,
                   ),
-                  Text(Strings.syncText, style: TextStyle(fontSize: 30))
+                  Text(Strings.syncText, style: Styles.blackMediumBold())
                 ],
               )),
             );

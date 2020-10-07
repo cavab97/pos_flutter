@@ -1128,8 +1128,8 @@ class _DashboradPageState extends State<DashboradPage>
         return new Tab(
           child: Container(
             padding: EdgeInsets.symmetric(
-                horizontal: SizeConfig.safeBlockVertical * 2,
-                vertical: SizeConfig.safeBlockVertical * 1),
+              horizontal: SizeConfig.safeBlockVertical * 2,
+            ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(50),
             ),
@@ -1559,7 +1559,7 @@ class _DashboradPageState extends State<DashboradPage>
   Widget addCustomerBtn(context) {
     return customer == null
         ? RaisedButton(
-            padding: EdgeInsets.only(left: 5, right: 5, top: 5, bottom: 5),
+            padding: EdgeInsets.only(left: 5, right: 5, top: 10, bottom: 10),
             onPressed: () {
               if (isShiftOpen) {
                 opneShowAddCustomerDailog();
@@ -1588,7 +1588,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   Widget menubutton(Function _onPress) {
     return PopupMenuButton(
-      padding: EdgeInsets.all(0),
+        padding: EdgeInsets.all(0),
         icon: Icon(Icons.more_vert,
             color: Colors.white, size: SizeConfig.safeBlockVertical * 5),
         offset: Offset(0, 100),
@@ -1608,7 +1608,7 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       SizedBox(width: 15),
                       Text(Strings.select_table,
-                          style: Styles.blackMediumBold()),
+                          style: Styles.communBlacksmall()),
                     ],
                   ),
                 ),
@@ -1625,7 +1625,8 @@ class _DashboradPageState extends State<DashboradPage>
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                       SizedBox(width: 15),
-                      Text(Strings.close_table, style: Styles.blackMediumBold())
+                      Text(Strings.close_table,
+                          style: Styles.communBlacksmall())
                     ],
                   ),
                 ),
@@ -1643,7 +1644,7 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       SizedBox(width: 15),
                       Text(Strings.split_order,
-                          style: Styles.blackMediumBold()),
+                          style: Styles.communBlacksmall()),
                     ],
                   ),
                 ),
@@ -1661,7 +1662,7 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       SizedBox(width: 15),
                       Text(Strings.close_shift,
-                          style: Styles.blackMediumBold()),
+                          style: Styles.communBlacksmall()),
                     ],
                   ),
                 ),
@@ -1679,7 +1680,7 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       SizedBox(width: 15),
                       Text(Strings.draft_report,
-                          style: Styles.blackMediumBold()),
+                          style: Styles.communBlacksmall()),
                     ],
                   ),
                 ),
@@ -1697,7 +1698,7 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       SizedBox(width: 15),
                       Text(Strings.delete_order,
-                          style: Styles.blackMediumBold()),
+                          style: Styles.communBlacksmall()),
                     ],
                   ),
                 ),
@@ -1995,46 +1996,30 @@ class _DashboradPageState extends State<DashboradPage>
                         margin: EdgeInsets.all(0),
                         padding: EdgeInsets.all(0),
                         width: MediaQuery.of(context).size.width / 6,
-                        child: Text(
-                          cart.productName.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: SizeConfig.safeBlockVertical * 2.8,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[700],
-                          ),
-                        ),
+                        child: Text(cart.productName.toUpperCase(),
+                            style: Styles.greysmall()),
                       ),
                       Container(
-                          // color: Colors.red,
-                          width: MediaQuery.of(context).size.width / 8.2,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Padding(
-                                  padding: EdgeInsets.only(top: 0, bottom: 0),
-                                  child: Text(
-                                    cart.productQty.toString(),
-                                    style: TextStyle(
-                                      fontSize:
-                                          SizeConfig.safeBlockVertical * 2.8,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.grey[700],
-                                    ),
-                                  )),
-                              Padding(
-                                  padding: EdgeInsets.only(
-                                      right: 10, top: 0, bottom: 0),
-                                  child: Text(
-                                    cart.productPrice.toString(),
-                                    style: TextStyle(
-                                      fontSize:
-                                          SizeConfig.safeBlockVertical * 2.8,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.grey[700],
-                                    ),
-                                  )),
-                            ],
-                          ))
+                        // color: Colors.red,
+                        width: MediaQuery.of(context).size.width / 8.2,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Padding(
+                                padding: EdgeInsets.only(top: 0, bottom: 0),
+                                child: Text(cart.productQty.toString(),
+                                    style: Styles.greysmall())),
+                            Padding(
+                              padding:
+                                  EdgeInsets.only(right: 10, top: 0, bottom: 0),
+                              child: Text(
+                                cart.productPrice.toString(),
+                                style: Styles.greysmall(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
                     ]),
               ),
             ),
@@ -2085,7 +2070,7 @@ class _DashboradPageState extends State<DashboradPage>
                       child: Text(Strings.sub_total.toUpperCase(),
                           style: Styles.darkBlue())),
                   Padding(
-                      padding: EdgeInsets.all(10),
+                      padding: EdgeInsets.only(right: 15),
                       child:
                           Text(subtotal.toString(), style: Styles.darkBlue())),
                 ],
@@ -2108,7 +2093,7 @@ class _DashboradPageState extends State<DashboradPage>
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: EdgeInsets.only(right: 15),
                     child: Text(
                       discount.toString(),
                       style: TextStyle(
@@ -2142,7 +2127,7 @@ class _DashboradPageState extends State<DashboradPage>
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsets.all(10),
+                              padding: EdgeInsets.only(right: 15),
                               child: Text(taxitem["taxAmount"].toString(),
                                   style: Styles.darkBlue()),
                             )
@@ -2159,7 +2144,7 @@ class _DashboradPageState extends State<DashboradPage>
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsets.all(10),
+                            padding: EdgeInsets.only(right: 15),
                             child:
                                 Text(tax.toString(), style: Styles.darkBlue()),
                           )
@@ -2176,7 +2161,7 @@ class _DashboradPageState extends State<DashboradPage>
                     child: Text(Strings.grand_total, style: Styles.darkBlue()),
                   ),
                   Padding(
-                      padding: EdgeInsets.all(10),
+                      padding: EdgeInsets.only(right: 15),
                       child: Text(grandTotal.toString(),
                           style: Styles.darkBlue())),
                 ],
@@ -2197,7 +2182,7 @@ class _DashboradPageState extends State<DashboradPage>
                       : SizedBox(),
                   selectedvoucher != null
                       ? Padding(
-                          padding: EdgeInsets.all(10),
+                          padding: EdgeInsets.only(right: 15),
                           child: Chip(
                             backgroundColor: Colors.grey,
                             avatar: CircleAvatar(
@@ -2242,7 +2227,7 @@ class _DashboradPageState extends State<DashboradPage>
                           ),
                         )
                       : Padding(
-                          padding: EdgeInsets.all(10),
+                          padding: EdgeInsets.only(right: 15),
                           child: Text(grandTotal.toString(),
                               style: Styles.darkBlue())),
                 ],

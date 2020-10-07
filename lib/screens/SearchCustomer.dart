@@ -206,9 +206,9 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
               },
               leading: Text(
                 customer.name == null ? customer.firstName : customer.name,
-                style: Styles.communBlack(),
+                style: Styles.communBlacksmall(),
               ),
-              title: Text(customer.email, style: Styles.communBlack()),
+              title: Text(customer.email, style: Styles.communBlacksmall()),
             );
           }).toList());
     } else {
@@ -221,9 +221,9 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
             },
             leading: Text(
               customer.name == null ? customer.firstName : customer.name,
-              style: Styles.communBlack(),
+              style: Styles.communBlacksmall(),
             ),
-            title: Text(customer.email, style: Styles.communBlack()),
+            title: Text(customer.email, style: Styles.communBlacksmall()),
           );
         }).toList(),
       );

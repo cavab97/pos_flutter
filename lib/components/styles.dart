@@ -99,7 +99,7 @@ class Styles {
     return TextStyle(
         color: Color(0xFF000000),
         fontSize: 18,
-        fontWeight: FontWeight.normal,
+        fontWeight: FontWeight.w400,
         fontFamily: Strings.fontFamily);
   }
 
@@ -172,5 +172,13 @@ class Styles {
 
   static communGrey() {
     return TextStyle(color: Colors.grey, fontSize: 20.0);
+  }
+
+  static greysmall() {
+    return TextStyle(
+      fontSize: SizeConfig.safeBlockVertical * 2.5,
+      fontWeight: FontWeight.w600,
+      color: Colors.grey[700],
+    );
   }
 }
