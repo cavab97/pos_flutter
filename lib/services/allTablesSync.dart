@@ -467,14 +467,16 @@ class SyncAPICalls {
           if (res["status"] == Constant.STATUS200) {
             saveCancleORderTable(res);
           }
-          CommunFun.showToast(context, "Sync sucessfully done.");
           Navigator.of(context).pop();
+          CommunFun.showToast(context, "Sync sucessfully done.");
         }
       } else {
+        Navigator.of(context).pop();
         CommunFun.showToast(context, "all cancel tables up to dates.");
       }
     } catch (e) {
       print(e);
+      Navigator.of(context).pop();
       CommunFun.showToast(context, e.message);
     }
   }

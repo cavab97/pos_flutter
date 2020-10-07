@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
@@ -298,7 +299,9 @@ class _ShiftReportsState extends State<ShiftReports> {
                 Expanded(
                   child: RaisedButton(
                     padding: EdgeInsets.all(20),
-                    onPressed: () {},
+                    onPressed: () {
+                      CommunFun.showToast(context, "Comming Soon");
+                    },
                     child: Text(
                       "Pay In",
                       style: TextStyle(
@@ -319,7 +322,9 @@ class _ShiftReportsState extends State<ShiftReports> {
                 Expanded(
                   child: RaisedButton(
                     padding: EdgeInsets.all(20),
-                    onPressed: () {},
+                    onPressed: () {
+                      CommunFun.showToast(context, "Comming Soon");
+                    },
                     child: Text(
                       "Pay Out",
                       style: TextStyle(color: Colors.white, fontSize: 20),
@@ -337,7 +342,9 @@ class _ShiftReportsState extends State<ShiftReports> {
                 Expanded(
                   child: RaisedButton(
                     padding: EdgeInsets.all(20),
-                    onPressed: () {},
+                    onPressed: () {
+                      CommunFun.showToast(context, "Comming Soon");
+                    },
                     child: Text(
                       "Open Cash Drawer",
                       style: TextStyle(color: Colors.white, fontSize: 20),

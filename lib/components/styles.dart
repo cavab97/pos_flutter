@@ -181,4 +181,11 @@ class Styles {
       color: Colors.grey[700],
     );
   }
+   static greylight() {
+    return TextStyle(
+      fontSize: SizeConfig.safeBlockVertical * 2,
+      fontWeight: FontWeight.w600,
+      color: Colors.grey[700],
+    );
+  }
 }

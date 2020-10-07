@@ -314,7 +314,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return Scaffold(
-     // drawer: transactionsDrawer(), // page Drawer
+      // drawer: transactionsDrawer(), // page Drawer
       body: SafeArea(
           child: new GestureDetector(
         onTap: () {
@@ -741,6 +741,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             ? selectedOrder.voucher_amount.toString()
                             : "00.00",
                         style: TextStyle(
+                            fontSize: SizeConfig.safeBlockVertical * 2.8,
                             fontWeight: FontWeight.w700,
                             color: Theme.of(context).accentColor),
                       )),
@@ -996,10 +997,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     Text(
                         DateFormat('hh:mm aaa')
                             .format(DateTime.parse(item.order_date)),
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[600])),
+                        style: Styles.greysmall()),
                     SizedBox(width: 10),
                     item.order_status == 3
                         ? Container(
@@ -1024,17 +1022,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   ],
                 ),
                 subtitle: Text(Strings.invoice + item.invoice_no.toString(),
-                    style: TextStyle(
-                        fontSize: SizeConfig.safeBlockVertical * 3,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey[600])),
+                    style: Styles.greysmall()),
                 isThreeLine: true,
                 trailing: Text(
                   item.grand_total.toString(),
-                  style: TextStyle(
-                      fontSize: SizeConfig.safeBlockVertical * 3,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey[600]),
+                  style: Styles.greysmall(),
                 ),
               ),
             );
@@ -1064,10 +1056,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       Text(
                           DateFormat('hh:mm aaa')
                               .format(DateTime.parse(item.order_date)),
-                          style: TextStyle(
-                              fontSize: SizeConfig.safeBlockVertical * 3,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[600])),
+                          style: Styles.greysmall()),
                       SizedBox(width: 10),
                       item.order_status == 3
                           ? Container(
@@ -1092,16 +1081,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     ],
                   ),
                   subtitle: Text(Strings.invoice + item.invoice_no.toString(),
-                      style: TextStyle(
-                          fontSize: SizeConfig.safeBlockVertical * 3,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[600])),
+                      style: Styles.greysmall()),
                   isThreeLine: true,
                   trailing: Text(item.grand_total.toString(),
-                      style: TextStyle(
-                          fontSize: SizeConfig.safeBlockVertical * 3,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[600])),
+                      style: Styles.greysmall()),
                 ));
           }).toList(),
         ),

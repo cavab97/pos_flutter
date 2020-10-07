@@ -1984,7 +1984,7 @@ class _DashboradPageState extends State<DashboradPage>
             controller: slidableController,
             actionPane: SlidableDrawerActionPane(),
             actionExtentRatio: 0.15,
-            direction:Axis.horizontal ,
+            direction: Axis.horizontal,
             child: Container(
               margin: EdgeInsets.all(0),
               //height: SizeConfig.safeBlockVertical * 7,
@@ -2032,16 +2032,7 @@ class _DashboradPageState extends State<DashboradPage>
               permissions.contains(Constant.EDIT_ORDER)
                   ? IconSlideAction(
                       color: Colors.black45,
-                      //icon: Icons.edit,
-                      iconWidget: IconButton(
-                          icon: Icon(
-                            Icons.edit_outlined,
-                            color: Colors.white,
-                            size: SizeConfig.safeBlockVertical * 4,
-                          ),
-                          onPressed: () {
-                            removeCutomer();
-                          }),
+                      icon: Icons.edit,
                       onTap: () {
                         if (!isWebOrder) {
                           editCartItem(cart);
@@ -2052,16 +2043,7 @@ class _DashboradPageState extends State<DashboradPage>
               permissions.contains(Constant.DELETE_ORDER)
                   ? IconSlideAction(
                       color: Colors.red,
-                      //icon: Icons.delete_outline,
-                      iconWidget: IconButton(
-                          icon: Icon(
-                            Icons.delete_outline,
-                            color: Colors.white,
-                            size: SizeConfig.safeBlockVertical * 4,
-                          ),
-                          onPressed: () {
-                            removeCutomer();
-                          }),
+                      icon: Icons.delete_outline,
                       onTap: () {
                         if (!isWebOrder) {
                           itememovefromCart(cart);

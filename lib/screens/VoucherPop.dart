@@ -274,7 +274,7 @@ class VoucherPopState extends State<VoucherPop> {
                 contentPadding: EdgeInsets.all(15),
                 fillColor: Colors.white,
               ),
-              style: TextStyle(color: Colors.black, fontSize: SizeConfig.safeBlockVertical * 5),
+              style: Styles.greysmall(),
               onChanged: (e) {
                 print(e);
                 setState(() {

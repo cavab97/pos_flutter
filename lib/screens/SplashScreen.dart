@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
 
 class SplashScreen extends StatefulWidget {
 // PIN Enter PAGE
@@ -17,9 +19,14 @@ class SplashScreenstate extends State<SplashScreen> {
   }
 
   navigatePage() {
-   /* Future.delayed(const Duration(seconds: 4), () async {
-      await Navigator.of(context).pushNamed('/Login');
-    });*/
+    Future.delayed(const Duration(seconds: 4), () async {
+      final bool isLogged = await CommunFun.isLogged();
+      if (isLogged) {
+        await Navigator.of(context).pushNamed(Constant.DashboardScreen);
+      } else {
+        await Navigator.of(context).pushNamed(Constant.TransactionScreen);
+      }
+    });
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/routes.dart';
+import 'package:mcncashier/screens/SplashScreen.dart';
 import 'package:mcncashier/theme/theme.dart';
 
 import 'components/constant.dart';
@@ -38,11 +39,11 @@ class MyAppState extends State<MyApp> {
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      //home: SplashScreen(),
+      home: SplashScreen(),
       title: 'cashierApp',
       theme: appTheme(),
-      initialRoute:
-          widget.islogin ? Constant.DashboardScreen : Constant.TerminalScreen,
+      // initialRoute:
+      //     widget.islogin ? Constant.DashboardScreen : Constant.TerminalScreen,
       routes: routes,
     );
   }
