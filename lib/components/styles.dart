@@ -58,6 +58,15 @@ class Styles {
         fontFamily: Strings.fontFamily);
   }
 
+  static whiteSmall() {
+    return TextStyle(
+        // White text
+        color: Color(0xFFffffff),
+        fontSize: SizeConfig.safeBlockVertical * 2.3,
+        fontWeight: FontWeight.w500,
+        fontFamily: Strings.fontFamily);
+  }
+
   static whiteSimpleLarge() {
     return TextStyle(
         // White text

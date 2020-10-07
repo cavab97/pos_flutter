@@ -97,7 +97,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
         elevation: 0.0,
         title: Text(
           "Cart",
-          style: Styles.blackBoldLarge(),
+          style: Styles.blackBoldsmall(),
         ),
         bottom: TabBar(
           controller: _tabController,
@@ -191,7 +191,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
                           SizedBox(height: 30),
                           Text(
                             "Open Customer",
-                            style: Styles.communBlack(),
+                            style: Styles.blackBoldsmall(),
                           ),
                         ]),
                   ),
@@ -219,7 +219,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
                     top: 10,
                     left: 10,
                     child: Text("Cart :" + cart.id.toString(),
-                        style: Styles.communBlack()))
+                        style: Styles.blackBoldsmall()))
               ],
             ),
           ),
@@ -274,7 +274,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
                           SizedBox(height: 30),
                           Text(
                             "Open Customer",
-                            style: Styles.communBlack(),
+                            style: Styles.blackBoldsmall(),
                           ),
                         ]),
                   ),
@@ -330,7 +330,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
                   left: 10,
                   child: Text(
                     "Cart :" + cart.id.toString(),
-                    style: Styles.communBlack(),
+                    style: Styles.blackBoldsmall(),
                   ),
                 )
               ],

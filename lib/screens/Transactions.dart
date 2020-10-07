@@ -314,7 +314,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return Scaffold(
-      drawer: transactionsDrawer(), // page Drawer
+     // drawer: transactionsDrawer(), // page Drawer
       body: SafeArea(
           child: new GestureDetector(
         onTap: () {

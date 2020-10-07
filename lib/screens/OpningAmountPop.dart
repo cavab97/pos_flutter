@@ -35,7 +35,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(widget.ammountext.toString().toUpperCase(),
-                    style:Styles.whiteBoldsmall()),
+                    style: Styles.whiteBoldsmall()),
               ],
             ),
           ),
@@ -121,14 +121,14 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
     return Container(
       width: (number == "00") ? (resize * 2) : resize,
       padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
-      height: (number == "Enter") ? (resize * 2) : resize,
+      height: (number == Strings.enter) ? (resize * 2) : resize,
       child: MaterialButton(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
             side: BorderSide(color: Colors.grey)),
         child: Text(number,
             textAlign: TextAlign.center,
-            style: number == "Enter"
+            style: number == Strings.enter
                 ? Styles.blackMediumBold()
                 : Styles.blackMediumBold()),
         textColor: Colors.black,
@@ -168,10 +168,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(
-            currentNumber,
-            style: Styles.blackBoldLarge()
-          ),
+          Text(currentNumber, style: Styles.blackBoldLarge()),
         ],
       ),
     );
@@ -248,7 +245,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                   ),
                 ],
               ),
-              _button("Enter", () {
+              _button(Strings.enter, () {
                 widget.onEnter(currentNumber);
                 Navigator.of(context).pop();
               })

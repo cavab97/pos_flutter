@@ -1101,18 +1101,18 @@ class _DashboradPageState extends State<DashboradPage>
         isScrollable: true,
         indicator: BoxDecoration(
             borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
-        labelStyle: TextStyle(fontSize: 16),
         tabs: List<Widget>.generate(tabsList.length, (int index) {
           return new Tab(
             child: Container(
                 padding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.safeBlockVertical * 2, vertical: 0),
+                    horizontal: SizeConfig.safeBlockVertical * 2,
+                    vertical: SizeConfig.safeBlockVertical * 1),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Text(
                   tabsList[index].name.toUpperCase(),
-                  style: Styles.whiteMediumBold(),
+                  style: Styles.whiteBoldsmall(),
                 )),
           );
         }));
@@ -1124,18 +1124,18 @@ class _DashboradPageState extends State<DashboradPage>
       isScrollable: true,
       indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(30), color: Colors.deepOrange),
-      labelStyle: TextStyle(fontSize: 16),
       tabs: List<Widget>.generate(subCatList.length, (int index) {
         return new Tab(
           child: Container(
             padding: EdgeInsets.symmetric(
-                horizontal: SizeConfig.safeBlockVertical * 2),
+                horizontal: SizeConfig.safeBlockVertical * 2,
+                vertical: SizeConfig.safeBlockVertical * 1),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(50),
             ),
             child: Text(
               subCatList[index].name.toUpperCase(),
-              style: Styles.whiteMediumBold(),
+              style: Styles.whiteBoldsmall(),
             ),
           ),
         );
@@ -1177,7 +1177,7 @@ class _DashboradPageState extends State<DashboradPage>
                                 ? Container(
                                     //margin: EdgeInsets.only(left: 5, right: 5),
                                     width: MediaQuery.of(context).size.width,
-                                    height: SizeConfig.safeBlockVertical * 10,
+                                    height: SizeConfig.safeBlockVertical * 9,
                                     color: Colors.black26,
                                     padding: EdgeInsets.all(
                                         SizeConfig.safeBlockVertical * 2),
@@ -1513,52 +1513,53 @@ class _DashboradPageState extends State<DashboradPage>
   Widget tableHeader2() {
     // products Header part 2
     return Container(
-        padding: EdgeInsets.only(left: 10, right: 10),
-        height: SizeConfig.safeBlockVertical * 11,
-        // color: Colors.blue,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            selectedTable != null
-                ? Row(
-                    children: <Widget>[
-                      Icon(
-                        Icons.person,
-                        color: Colors.white,
-                        size: SizeConfig.safeBlockVertical * 5,
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        tableName +
-                            " (" +
-                            selectedTable.number_of_pax.toString() +
-                            ")",
-                        style: Styles.whiteMediumBold(),
-                      ),
-                    ],
-                  )
-                : SizedBox(),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                !isWebOrder ? addCustomerBtn(context) : SizedBox(),
-                Padding(
-                    padding: EdgeInsets.only(bottom: 0),
-                    child: menubutton(() {
-                      // opneMenuButton();
-                    }))
-              ],
-            )
-          ],
-        ));
+      padding: EdgeInsets.only(left: 10, right: 10),
+      height: SizeConfig.safeBlockVertical * 11,
+      // color: Colors.blue,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          selectedTable != null
+              ? Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: SizeConfig.safeBlockVertical * 4,
+                    ),
+                    SizedBox(width: 5),
+                    Text(
+                      tableName +
+                          " (" +
+                          selectedTable.number_of_pax.toString() +
+                          ")",
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      style: Styles.whiteBoldsmall(),
+                    ),
+                  ],
+                )
+              : SizedBox(),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              !isWebOrder ? addCustomerBtn(context) : SizedBox(),
+              menubutton(() {
+                // opneMenuButton();
+              })
+            ],
+          )
+        ],
+      ),
+    );
   }
 
   Widget addCustomerBtn(context) {
     return customer == null
         ? RaisedButton(
-            padding: EdgeInsets.only(left: 5, right: 8, top: 5, bottom: 5),
+            //padding: EdgeInsets.only(left: 5, right: 8, top: 5, bottom: 5),
             onPressed: () {
               if (isShiftOpen) {
                 opneShowAddCustomerDailog();
@@ -1571,14 +1572,13 @@ class _DashboradPageState extends State<DashboradPage>
                 Icon(
                   Icons.add_circle_outline,
                   color: Colors.white,
-                  size: SizeConfig.safeBlockVertical * 5,
+                  size: SizeConfig.safeBlockVertical * 4,
                 ),
                 SizedBox(width: 5),
-                Text(Strings.btn_Add_customer, style: Styles.whiteMediumBold()),
+                Text(Strings.btn_Add_customer, style: Styles.whiteBoldsmall()),
               ],
             ),
             color: Colors.deepOrange,
-            textColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(50.0),
             ),
@@ -1708,7 +1708,8 @@ class _DashboradPageState extends State<DashboradPage>
     // products List
     var size = MediaQuery.of(context).size;
     /*24 is for notification bar on Android*/
-    final double itemHeight = (size.height - kToolbarHeight - 24) / 1.8;
+    //final double itemHeight = (size.height - kToolbarHeight - 24) / 1.8;
+    final double itemHeight = size.width / 4.2;
     final double itemWidth = size.width / 4.2;
     return Container(
       height: MediaQuery.of(context).size.height,
@@ -1746,7 +1747,7 @@ class _DashboradPageState extends State<DashboradPage>
                       child: Container(
                         color: Colors.grey,
                         width: MediaQuery.of(context).size.width,
-                        height: itemHeight / 2,
+                        height: itemHeight / 2.2,
                         child: product.base64 != ""
                             ? CommonUtils.imageFromBase64String(product.base64)
                             : new Image.asset(
@@ -1756,9 +1757,9 @@ class _DashboradPageState extends State<DashboradPage>
                               ),
                       )),
                   Container(
-                    margin: EdgeInsets.only(top: itemHeight / 2),
+                    padding: EdgeInsets.all(2),
+                    margin: EdgeInsets.only(top: itemHeight / 2.2),
                     width: MediaQuery.of(context).size.width,
-                    //height: 70,
                     decoration: BoxDecoration(
                       color: Colors.grey[600],
                     ),
@@ -1766,12 +1767,14 @@ class _DashboradPageState extends State<DashboradPage>
                       child: Text(
                         product.name.toString().toUpperCase(),
                         textAlign: TextAlign.center,
-                        style: Styles.whiteSimpleSmall(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Styles.whiteSmall(),
                       ),
                     ),
                   ),
                   Positioned(
-                    top: itemHeight / 2 - SizeConfig.safeBlockVertical * 5,
+                    top: itemHeight / 2.2 - SizeConfig.safeBlockVertical * 5,
                     left: 0,
                     child: Container(
                       height: SizeConfig.safeBlockVertical * 5,
@@ -1962,18 +1965,9 @@ class _DashboradPageState extends State<DashboradPage>
         },
         children: [
           TableRow(children: [
-            Padding(
-              padding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-              child: Text(Strings.header_name, style: Styles.darkBlue()),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 10, bottom: 10),
-              child: Text(Strings.qty, style: Styles.darkBlue()),
-            ),
-            Padding(
-              padding: EdgeInsets.only(right: 0, top: 10, bottom: 10),
-              child: Text(Strings.amount, style: Styles.darkBlue()),
-            ),
+            Text(Strings.header_name, style: Styles.darkBlue()),
+            Text(Strings.qty, style: Styles.darkBlue()),
+            Text(Strings.amount, style: Styles.darkBlue()),
           ])
         ]);
 
@@ -2276,6 +2270,7 @@ class _DashboradPageState extends State<DashboradPage>
                       width: MediaQuery.of(context).size.width / 1.2,
                       margin: EdgeInsets.only(top: customer != null ? 50 : 0),
                       color: Colors.white,
+                      padding: EdgeInsets.all(5),
                       child: carttitle,
                     )
                   : SizedBox(),

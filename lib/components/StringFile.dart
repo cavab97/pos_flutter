@@ -82,7 +82,7 @@ class Strings {
   static String asset_headerLogo = "assets/headerlogo.png";
   static String assetsBG = "assets/bg.jpg";
   static String no_imageAsset = 'assets/no_image.png';
-  static String enter = "Enter";
+  static String enter = "E\nn\nt\ne\nr";
   static String invalid_pin_msg = "Invalid PIN.";
   static String clear = "Clear";
   static String store_Validation_message =
