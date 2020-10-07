@@ -12,6 +12,7 @@ import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:mcncashier/theme/Sized_Config.dart';
 
 class SelectTablePage extends StatefulWidget {
   // PIN Enter PAGE
@@ -33,6 +34,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
   bool isLoading = false;
   bool isMergeing = false;
   bool isAssigning = false;
+
   @override
   void initState() {
     super.initState();
@@ -330,11 +332,11 @@ class _SelectTablePageState extends State<SelectTablePage> {
         prefixIcon: Icon(
           Icons.person,
           color: Colors.grey[400],
-          size: 40,
+          size: SizeConfig.safeBlockVertical * 5,
         ),
         hintText: Strings.enter_pax,
         hintStyle: TextStyle(
-            fontSize: 18.0,
+            fontSize: SizeConfig.safeBlockVertical * 3,
             fontWeight: FontWeight.bold,
             color: Colors.grey[400]),
         border: OutlineInputBorder(
@@ -345,10 +347,10 @@ class _SelectTablePageState extends State<SelectTablePage> {
           ),
         ),
         filled: true,
-        contentPadding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
+        contentPadding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
         fillColor: Colors.white,
       ),
-      style: TextStyle(color: Colors.black, fontSize: 25.0),
+      style: TextStyle(color: Colors.black, fontSize: SizeConfig.safeBlockVertical * 4),
       onChanged: (e) {
         print(e);
       },
@@ -361,7 +363,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
       onPressed: _onPress,
       child: Text(
         Strings.enterPax,
-        style: TextStyle(color: Colors.white, fontSize: 25),
+        style: TextStyle(color: Colors.white, fontSize: SizeConfig.safeBlockVertical * 4),
       ),
       color: Colors.deepOrange,
       textColor: Colors.white,
@@ -388,15 +390,16 @@ class _SelectTablePageState extends State<SelectTablePage> {
                   topRight: Radius.circular(10.0),
                 ),
               ),
-              padding:
-                  EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-              height: 70,
+              padding: EdgeInsets.all(0),
+              height: SizeConfig.safeBlockVertical * 9,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(Strings.enterPax,
-                      style: TextStyle(fontSize: 20, color: Colors.white)),
+                      style: TextStyle(
+                          fontSize: SizeConfig.safeBlockVertical * 3,
+                          color: Colors.white)),
                 ],
               ),
             ),
@@ -411,15 +414,15 @@ class _SelectTablePageState extends State<SelectTablePage> {
               },
             );
             return Container(
-              height: MediaQuery.of(context).size.height / 4,
-              width: MediaQuery.of(context).size.width / 4,
+              height: MediaQuery.of(context).size.height / 3,
+              width: MediaQuery.of(context).size.width / 3,
               child: Center(
                 child: SingleChildScrollView(
                   child: Column(
                     children: <Widget>[
                       paxTextInput(),
                       SizedBox(
-                        height: 50,
+                        height: 30,
                       ),
                       enterButton(() {
                         if (!isMergeing) {

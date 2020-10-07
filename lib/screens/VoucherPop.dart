@@ -9,6 +9,7 @@ import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:intl/intl.dart';
+import 'package:mcncashier/theme/Sized_Config.dart';
 
 class VoucherPop extends StatefulWidget {
   // Opning ammount popup
@@ -17,6 +18,7 @@ class VoucherPop extends StatefulWidget {
   Function onEnter;
   double subTotal;
   List<MSTCartdetails> cartList;
+
   @override
   VoucherPopState createState() => VoucherPopState();
 }
@@ -28,6 +30,7 @@ class VoucherPopState extends State<VoucherPop> {
   var productIDs = '';
   List<ProductCategory> productcateIDS = [];
   var errorMSG = "";
+
   @override
   void initState() {
     super.initState();
@@ -173,15 +176,16 @@ class VoucherPopState extends State<VoucherPop> {
           overflow: Overflow.visible,
           children: <Widget>[
             Container(
-              padding:
-                  EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-              height: 70,
+              height: SizeConfig.safeBlockVertical * 9,
               color: Colors.black,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(Strings.applycoupen, style: Styles.whiteBoldsmall()),
+                  Text(Strings.applycoupen,
+                      style: TextStyle(
+                          fontSize: SizeConfig.safeBlockVertical * 3,
+                          color: Colors.white)),
                 ],
               ),
             ),
@@ -238,7 +242,7 @@ class VoucherPopState extends State<VoucherPop> {
   Widget mainContent() {
     return SingleChildScrollView(
       child: Container(
-        width: MediaQuery.of(context).size.width / 2.8,
+        width: MediaQuery.of(context).size.width / 3,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -250,10 +254,14 @@ class VoucherPopState extends State<VoucherPop> {
               controller: codeConteroller,
               keyboardType: TextInputType.text,
               decoration: InputDecoration(
-                errorStyle: TextStyle(color: Colors.red, fontSize: 20),
+                errorStyle: TextStyle(
+                    color: Colors.red,
+                    fontSize: SizeConfig.safeBlockVertical * 3),
                 errorText: errorMSG != "" ? errorMSG : "",
                 hintText: Strings.enter_Code,
-                hintStyle: TextStyle(fontSize: 25.0, color: Colors.black),
+                hintStyle: TextStyle(
+                    fontSize: SizeConfig.safeBlockVertical * 4,
+                    color: Colors.black),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(width: 3, color: Colors.grey),
@@ -263,10 +271,10 @@ class VoucherPopState extends State<VoucherPop> {
                   borderSide: BorderSide(width: 3, color: Colors.grey),
                 ),
                 filled: true,
-                contentPadding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
+                contentPadding: EdgeInsets.all(15),
                 fillColor: Colors.white,
               ),
-              style: TextStyle(color: Colors.black, fontSize: 25.0),
+              style: TextStyle(color: Colors.black, fontSize: SizeConfig.safeBlockVertical * 5),
               onChanged: (e) {
                 print(e);
                 setState(() {
