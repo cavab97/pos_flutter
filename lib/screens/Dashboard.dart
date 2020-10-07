@@ -1559,7 +1559,7 @@ class _DashboradPageState extends State<DashboradPage>
   Widget addCustomerBtn(context) {
     return customer == null
         ? RaisedButton(
-            padding: EdgeInsets.only(left: 5, right: 5, top: 10, bottom: 10),
+            padding: EdgeInsets.only(left: 5, right: 5, top: 0, bottom: 0),
             onPressed: () {
               if (isShiftOpen) {
                 opneShowAddCustomerDailog();
@@ -1984,7 +1984,10 @@ class _DashboradPageState extends State<DashboradPage>
             controller: slidableController,
             actionPane: SlidableDrawerActionPane(),
             actionExtentRatio: 0.15,
+            direction:Axis.horizontal ,
             child: Container(
+              margin: EdgeInsets.all(0),
+              //height: SizeConfig.safeBlockVertical * 7,
               padding: EdgeInsets.only(left: 5, right: 5),
               child: new ListTile(
                 contentPadding: EdgeInsets.all(0),
@@ -2001,6 +2004,8 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       Container(
                         // color: Colors.red,
+                        margin: EdgeInsets.all(0),
+                        padding: EdgeInsets.all(0),
                         width: MediaQuery.of(context).size.width / 8.2,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2027,7 +2032,16 @@ class _DashboradPageState extends State<DashboradPage>
               permissions.contains(Constant.EDIT_ORDER)
                   ? IconSlideAction(
                       color: Colors.black45,
-                      icon: Icons.edit,
+                      //icon: Icons.edit,
+                      iconWidget: IconButton(
+                          icon: Icon(
+                            Icons.edit_outlined,
+                            color: Colors.white,
+                            size: SizeConfig.safeBlockVertical * 4,
+                          ),
+                          onPressed: () {
+                            removeCutomer();
+                          }),
                       onTap: () {
                         if (!isWebOrder) {
                           editCartItem(cart);
@@ -2038,10 +2052,18 @@ class _DashboradPageState extends State<DashboradPage>
               permissions.contains(Constant.DELETE_ORDER)
                   ? IconSlideAction(
                       color: Colors.red,
-                      icon: Icons.delete_outline,
+                      //icon: Icons.delete_outline,
+                      iconWidget: IconButton(
+                          icon: Icon(
+                            Icons.delete_outline,
+                            color: Colors.white,
+                            size: SizeConfig.safeBlockVertical * 4,
+                          ),
+                          onPressed: () {
+                            removeCutomer();
+                          }),
                       onTap: () {
                         if (!isWebOrder) {
-                          itememovefromCart(cart);
                           itememovefromCart(cart);
                         }
                       },
