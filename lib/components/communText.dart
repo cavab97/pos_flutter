@@ -160,8 +160,8 @@ class CommunFun {
     // basic Loader
     return Center(
       child: Container(
-        height: 40.0,
-        width: 40.0,
+        height: 50.0,
+        width: 50.0,
         child: CircularProgressIndicator(
           backgroundColor: Colors.white,
           valueColor:
@@ -200,7 +200,7 @@ class CommunFun {
                   SizedBox(
                     height: 30,
                   ),
-                  Text(Strings.syncText, style: Styles.blackMediumBold())
+                  Text(Strings.syncText, style: Styles.normalBlack())
                 ],
               )),
             );

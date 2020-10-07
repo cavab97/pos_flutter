@@ -80,11 +80,15 @@ class _SelectTablePageState extends State<SelectTablePage> {
 
   mergeTabledata(table) async {
     Table_order table_order = new Table_order();
+    var pax = mergeInTable.numberofpax != null ? mergeInTable.numberofpax : 0;
+    pax += table.numberofpax != null ? table.numberofpax : 0;
     table_order.table_id = mergeInTable.tableId;
+    table_order.save_order_id =
+        mergeInTable.saveorderid != 0 ? mergeInTable.saveorderid : null;
     table_order.is_merge_table = "1";
-    table_order.merged_table_id = selectedTable.tableId;
+    table_order.merged_table_id = table.tableId;
+    table_order.number_of_pax = pax;
     var result = await localAPI.insertTableOrder(table_order);
-
     setState(() {
       isMergeing = false;
       mergeInTable = null;
@@ -461,7 +465,12 @@ class _SelectTablePageState extends State<SelectTablePage> {
           borderRadius: BorderRadius.all(Radius.circular(30.0)),
           onTap: () {
             if (isMergeing) {
-              mergeTabledata(table);
+              if (table.merged_table_id == null) {
+                mergeTabledata(table);
+              } else {
+                CommunFun.showToast(
+                    context, "Table already merged with other table");
+              }
             } else {
               ontableTap(table);
             }
@@ -489,10 +498,10 @@ class _SelectTablePageState extends State<SelectTablePage> {
                         children: <Widget>[
                           SizedBox(height: 30),
                           Text(
-                            table.is_merge_table == "1"
+                            table.merged_table_id != null
                                 ? table.tableName +
-                                    ":" +
-                                    table.merged_table_id.toString()
+                                    " : " +
+                                    table.merge_table_name.toString()
                                 : table.tableName,
                             style: Styles.blackMediumBold(),
                           ),

@@ -7,6 +7,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:mcncashier/theme/Sized_Config.dart';
 
 class ShiftReports extends StatefulWidget {
   // PIN Enter PAGE
@@ -99,140 +100,141 @@ class _ShiftReportsState extends State<ShiftReports> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         ),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Container(
-            padding: EdgeInsets.all(20),
-            //width: MediaQuery.of(context).size.width / 1.2,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                shiftTitles(),
-                Container(
-                  color: Colors.green,
-                  child: CarouselSlider(
-                    options: CarouselOptions(
-                     //   height: double.maxFinite,
-                        disableCenter: false,
-                        autoPlay: false,
-                        initialPage: 0,
-                        aspectRatio: 2.0,
-                        scrollDirection: Axis.horizontal,
-                        onPageChanged: (index, reason) {
-                          setState(() {
-                            _current = index;
-                          });
-                        }),
-                    items: imgList
-                        .map(
-                          (item) => Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              SizedBox(height: 20),
-                              Text(
-                                item,
-                                style: Styles.whiteBold(),
-                              ),
-                              SizedBox(height: 10),
-                              Container(
-                                  width: MediaQuery.of(context).size.width /
-                                      screenArea,
-                                  //  color: Colors.green,
-                                  child: ListView(
-                                    shrinkWrap: true,
-                                    children: <Widget>[
-                                      Container(
-                                        color: Colors.grey,
-                                        child: ListTile(
-                                          title: Text(
-                                            "Gross Sales",
-                                            style: Styles.whiteMediumBold(),
-                                          ),
-                                          trailing: Text(
-                                            "0.00",
-                                            style: Styles.whiteMediumBold(),
-                                          ),
+      body: SingleChildScrollView(
+        child: Container(
+          // height: SizeConfig.blockSizeHorizontal * 2,
+          // width: SizeConfig.blockSizeVertical* 2,
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              shiftTitles(),
+              Container(
+                height: MediaQuery.of(context).size.height / 1.8,
+                width: MediaQuery.of(context).size.width / 1.5,
+                // width: 800,
+                // color: Colors.green,
+                child: CarouselSlider(
+                  options: CarouselOptions(
+                      height: double.maxFinite,
+                      disableCenter: false,
+                      autoPlay: false,
+                      initialPage: 0,
+                      aspectRatio: 2.0,
+                      scrollDirection: Axis.horizontal,
+                      onPageChanged: (index, reason) {
+                        setState(() {
+                          _current = index;
+                        });
+                      }),
+                  items: imgList
+                      .map(
+                        (item) => Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            SizedBox(height: 20),
+                            Text(
+                              item,
+                              style: Styles.whiteBold(),
+                            ),
+                            SizedBox(height: 10),
+                            Container(
+                                width: MediaQuery.of(context).size.width /
+                                    screenArea,
+                                //  color: Colors.green,
+                                child: ListView(
+                                  shrinkWrap: true,
+                                  children: <Widget>[
+                                    Container(
+                                      color: Colors.grey,
+                                      child: ListTile(
+                                        title: Text(
+                                          "Gross Sales",
+                                          style: Styles.whiteMediumBold(),
+                                        ),
+                                        trailing: Text(
+                                          "0.00",
+                                          style: Styles.whiteMediumBold(),
                                         ),
                                       ),
-                                      Container(
-                                        color: Colors.white,
-                                        child: ListTile(
-                                          title: Text(
-                                            "Refunds",
-                                            style: Styles.blackMediumBold(),
-                                          ),
-                                          trailing: Text(
-                                            "0.00",
-                                            style: Styles.blackMediumBold(),
-                                          ),
+                                    ),
+                                    Container(
+                                      color: Colors.white,
+                                      child: ListTile(
+                                        title: Text(
+                                          "Refunds",
+                                          style: Styles.blackMediumBold(),
+                                        ),
+                                        trailing: Text(
+                                          "0.00",
+                                          style: Styles.blackMediumBold(),
                                         ),
                                       ),
-                                      Container(
-                                        color: Colors.grey,
-                                        child: ListTile(
-                                          title: Text(
-                                            "Discount",
-                                            style: Styles.whiteMediumBold(),
-                                          ),
-                                          trailing: Text(
-                                            "0.00",
-                                            style: Styles.whiteMediumBold(),
-                                          ),
+                                    ),
+                                    Container(
+                                      color: Colors.grey,
+                                      child: ListTile(
+                                        title: Text(
+                                          "Discount",
+                                          style: Styles.whiteMediumBold(),
+                                        ),
+                                        trailing: Text(
+                                          "0.00",
+                                          style: Styles.whiteMediumBold(),
                                         ),
                                       ),
-                                      Container(
-                                        color: Colors.white,
-                                        child: ListTile(
-                                          title: Text(
-                                            "Net Sales",
-                                            style: Styles.blackMediumBold(),
-                                          ),
-                                          trailing: Text(
-                                            "0.00",
-                                            style: Styles.blackMediumBold(),
-                                          ),
+                                    ),
+                                    Container(
+                                      color: Colors.white,
+                                      child: ListTile(
+                                        title: Text(
+                                          "Net Sales",
+                                          style: Styles.blackMediumBold(),
+                                        ),
+                                        trailing: Text(
+                                          "0.00",
+                                          style: Styles.blackMediumBold(),
                                         ),
                                       ),
-                                      Container(
-                                        color: Colors.grey,
-                                        child: ListTile(
-                                          title: Text(
-                                            "Rounding",
-                                            style: Styles.whiteMediumBold(),
-                                          ),
-                                          trailing: Text(
-                                            "0.00",
-                                            style: Styles.whiteMediumBold(),
-                                          ),
+                                    ),
+                                    Container(
+                                      color: Colors.grey,
+                                      child: ListTile(
+                                        title: Text(
+                                          "Rounding",
+                                          style: Styles.whiteMediumBold(),
+                                        ),
+                                        trailing: Text(
+                                          "0.00",
+                                          style: Styles.whiteMediumBold(),
                                         ),
                                       ),
-                                      Container(
-                                        color: Colors.white,
-                                        child: ListTile(
-                                          title: Text(
-                                            "Tax/Service Charge",
-                                            style: Styles.blackMediumBold(),
-                                          ),
-                                          trailing: Text(
-                                            "0.00/0.00",
-                                            style: Styles.blackMediumBold(),
-                                          ),
+                                    ),
+                                    Container(
+                                      color: Colors.white,
+                                      child: ListTile(
+                                        title: Text(
+                                          "Tax/Service Charge",
+                                          style: Styles.blackMediumBold(),
+                                        ),
+                                        trailing: Text(
+                                          "0.00/0.00",
+                                          style: Styles.blackMediumBold(),
                                         ),
                                       ),
-                                    ],
-                                  )),
-                            ],
-                          ),
-                        )
-                        .toList(),
-                  ),
+                                    ),
+                                  ],
+                                )),
+                          ],
+                        ),
+                      )
+                      .toList(),
                 ),
-                scrollIndicator(),
-                squareActionButton()
-              ],
-            ),
+              ),
+              scrollIndicator(),
+              squareActionButton()
+            ],
           ),
         ),
       ),

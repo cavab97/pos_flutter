@@ -465,21 +465,18 @@ class _PINPageState extends State<PINPage> {
 
   Widget _buttonCN(String number, Function() f) {
     // Creating a method of return type Widget with number and function f as a parameter
-    return Padding(
-      padding: EdgeInsets.all(5),
-      child: MaterialButton(
-        padding: EdgeInsets.all(0),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18.0),
-            side: BorderSide(color: Colors.grey)),
-        height: MediaQuery.of(context).size.height / 8.7,
-        // minWidth: MediaQuery.of(context).size.width / 9.9,
-        child: Text(number,
-            textAlign: TextAlign.center, style: Styles.blackBoldsmall()),
-        textColor: Colors.black,
-        color: Colors.grey[100],
-        onPressed: f,
-      ),
+    return MaterialButton(
+      padding: EdgeInsets.all(0),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18.0),
+          side: BorderSide(color: Colors.grey)),
+      height: MediaQuery.of(context).size.height / 8.7,
+      // minWidth: MediaQuery.of(context).size.width / 9.9,
+      child: Text(number,
+          textAlign: TextAlign.center, style: Styles.blackBoldsmall()),
+      textColor: Colors.black,
+      color: Colors.grey[100],
+      onPressed: f,
     );
   }
 }

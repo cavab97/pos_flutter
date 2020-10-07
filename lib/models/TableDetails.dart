@@ -7,6 +7,7 @@ class TablesDetails {
   String tableName;
   int saveorderid;
   String is_merge_table;
+  String merge_table_name;
   int merged_table_id;
   int numberofpax;
   int tableType;
@@ -19,25 +20,25 @@ class TablesDetails {
   String deletedAt;
   int deletedBy;
 
-  TablesDetails({
-    this.tableId,
-    this.uuid,
-    this.branchId,
-    this.tableName,
-    this.tableType,
-    this.tableQr,
-    this.tableCapacity,
-    this.status,
-    this.is_merge_table,
-    this.merged_table_id,
-    this.updatedAt,
-    this.availableStatus,
-    this.updatedBy,
-    this.deletedAt,
-    this.deletedBy,
-    this.saveorderid,
-    this.numberofpax,
-  });
+  TablesDetails(
+      {this.tableId,
+      this.uuid,
+      this.branchId,
+      this.tableName,
+      this.tableType,
+      this.tableQr,
+      this.tableCapacity,
+      this.status,
+      this.is_merge_table,
+      this.merged_table_id,
+      this.updatedAt,
+      this.availableStatus,
+      this.updatedBy,
+      this.deletedAt,
+      this.deletedBy,
+      this.saveorderid,
+      this.numberofpax,
+      this.merge_table_name});
 
   TablesDetails.fromJson(Map<String, dynamic> json) {
     tableId = json['table_id'];
@@ -52,6 +53,7 @@ class TablesDetails {
     status = json['status'];
     availableStatus = json["available_status"];
     is_merge_table = json["is_merged"];
+    merge_table_name = json['merge_table_name'];
     merged_table_id = json["merged_table_id"];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
@@ -71,6 +73,7 @@ class TablesDetails {
     data['status'] = this.status;
     data["is_merge_table"] = this.is_merge_table;
     data['merged_table_id'] = this.merged_table_id;
+    data['merge_table_name'] = this.merge_table_name;
     data["available_status"] = this.availableStatus;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;
