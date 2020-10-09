@@ -695,7 +695,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
         // border: TableBorder(
         //     horizontalInside: BorderSide(
         //         width: 1, color: Colors.grey, style: BorderStyle.solid)),
-
+        // columnWidths: {
+        //   0: FractionColumnWidth(.3),
+        //   1: FractionColumnWidth(.6),
+        // },
         children: [
           TableRow(children: [
             TableCell(
@@ -711,7 +714,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       padding: EdgeInsets.only(top: 0, bottom: 5),
                       child: Text(
                         selectedOrder.sub_total != null
-                            ? selectedOrder.sub_total.toString()
+                            ? selectedOrder.sub_total.toStringAsFixed(2)
                             : "00:00",
                         style: Styles.darkGray(),
                       )),
@@ -738,7 +741,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       padding: EdgeInsets.symmetric(vertical: 5),
                       child: Text(
                         selectedOrder.voucher_amount.toString() != '0.0'
-                            ? selectedOrder.voucher_amount.toString()
+                            ? selectedOrder.voucher_amount.toStringAsFixed(2)
                             : "00.00",
                         style: TextStyle(
                             fontSize: SizeConfig.safeBlockVertical * 2.8,
@@ -772,7 +775,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             SizedBox(width: 70),
                             Padding(
                               padding: EdgeInsets.symmetric(vertical: 5),
-                              child: Text(taxitem["taxAmount"].toString(),
+                              child: Text(
+                                  double.parse(taxitem["taxAmount"])
+                                      .toStringAsFixed(2),
                                   style: Styles.darkGray()),
                             )
                           ]);
@@ -790,7 +795,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           SizedBox(width: 70),
                           Padding(
                             padding: EdgeInsets.symmetric(vertical: 5),
-                            child: Text(selectedOrder.tax_amount.toString(),
+                            child: Text(
+                                selectedOrder.tax_amount.toStringAsFixed(2),
                                 style: Styles.darkGray()),
                           )
                         ]),
@@ -815,7 +821,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       padding: EdgeInsets.symmetric(vertical: 5),
                       child: Text(
                         selectedOrder.grand_total != null
-                            ? selectedOrder.grand_total.toString()
+                            ? selectedOrder.grand_total.toStringAsFixed(2)
                             : "00:00",
                         style: Styles.darkGray(),
                       )),
@@ -936,7 +942,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                   fontSize: SizeConfig.safeBlockVertical * 2.8,
                                   color: Theme.of(context).primaryColor)),
                           SizedBox(width: 90),
-                          Text(product.product_price.toString(),
+                          Text(product.product_price.toStringAsFixed(2),
                               style: TextStyle(
                                   fontSize: SizeConfig.safeBlockVertical * 2.8,
                                   color: Theme.of(context).primaryColor)),
@@ -979,6 +985,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         height: MediaQuery.of(context).size.height,
         child: ListView(
           shrinkWrap: true,
+
           // physics: AlwaysScrollableScrollPhysics(),
           children: filterList.map((item) {
             return Container(
@@ -987,6 +994,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       ? Colors.grey[200]
                       : Colors.white),
               child: ListTile(
+                contentPadding: EdgeInsets.all(0),
                 dense: false,
                 selected: selectedOrder.app_id == item.app_id,
                 onTap: () {
@@ -1025,7 +1033,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     style: Styles.greysmall()),
                 isThreeLine: true,
                 trailing: Text(
-                  item.grand_total.toString(),
+                  item.grand_total.toStringAsFixed(2),
                   style: Styles.greysmall(),
                 ),
               ),
@@ -1046,6 +1054,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         ? Colors.grey[200]
                         : Colors.white),
                 child: ListTile(
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0),
                   dense: false,
                   selected: selectedOrder.app_id == item.app_id,
                   onTap: () {

@@ -1744,8 +1744,7 @@ class _DashboradPageState extends State<DashboradPage>
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
         children: productList.map((product) {
-          // var image_Arr =
-          //     product.base64.replaceAll("data:image/jpg;base64,", '');
+          var price = product.price.toStringAsFixed(2);
           return InkWell(
             onTap: () {
               if (isShiftOpen) {
@@ -1808,9 +1807,7 @@ class _DashboradPageState extends State<DashboradPage>
                       color: Colors.deepOrange,
                       child: Center(
                         child: Text(
-                            product.priceTypeName +
-                                ' ' +
-                                product.price.toString(),
+                            product.priceTypeName + ' ' + price.toString(),
                             style: Styles.whiteSimpleSmall()),
                       ),
                     ),
@@ -2040,7 +2037,7 @@ class _DashboradPageState extends State<DashboradPage>
                               padding:
                                   EdgeInsets.only(right: 10, top: 0, bottom: 0),
                               child: Text(
-                                cart.productPrice.toString(),
+                                cart.productPrice.toStringAsFixed(2),
                                 style: Styles.greysmall(),
                               ),
                             ),
@@ -2098,7 +2095,7 @@ class _DashboradPageState extends State<DashboradPage>
                   Padding(
                       padding: EdgeInsets.only(right: 15),
                       child:
-                          Text(subtotal.toString(), style: Styles.darkBlue())),
+                          Text(subtotal.toStringAsFixed(2), style: Styles.darkBlue())),
                 ],
               ),
             ),
@@ -2121,7 +2118,7 @@ class _DashboradPageState extends State<DashboradPage>
                   Padding(
                     padding: EdgeInsets.only(right: 15),
                     child: Text(
-                      discount.toString(),
+                      discount.toStringAsFixed(2),
                       style: TextStyle(
                           fontSize: SizeConfig.safeBlockVertical * 2.8,
                           fontWeight: FontWeight.w700,
@@ -2154,7 +2151,7 @@ class _DashboradPageState extends State<DashboradPage>
                             ),
                             Padding(
                               padding: EdgeInsets.only(right: 15),
-                              child: Text(taxitem["taxAmount"].toString(),
+                              child: Text(taxitem["taxAmount"].toStringAsFixed(2),
                                   style: Styles.darkBlue()),
                             )
                           ]);
@@ -2172,7 +2169,7 @@ class _DashboradPageState extends State<DashboradPage>
                           Padding(
                             padding: EdgeInsets.only(right: 15),
                             child:
-                                Text(tax.toString(), style: Styles.darkBlue()),
+                                Text(tax.toStringAsFixed(2), style: Styles.darkBlue()),
                           )
                         ]),
             ),
@@ -2188,7 +2185,7 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                   Padding(
                       padding: EdgeInsets.only(right: 15),
-                      child: Text(grandTotal.toString(),
+                      child: Text(grandTotal.toStringAsFixed(2),
                           style: Styles.darkBlue())),
                 ],
               ),
@@ -2254,7 +2251,7 @@ class _DashboradPageState extends State<DashboradPage>
                         )
                       : Padding(
                           padding: EdgeInsets.only(right: 15),
-                          child: Text(grandTotal.toString(),
+                          child: Text(grandTotal.toStringAsFixed(2),
                               style: Styles.darkBlue())),
                 ],
               ),

@@ -81,7 +81,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(widget.grandTotal.toString(),
+                Text(widget.grandTotal.toStringAsFixed(2),
                     style: Styles.whiteBoldsmall()),
               ],
             ),

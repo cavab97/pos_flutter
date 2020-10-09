@@ -45,11 +45,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   List<MSTCartdetails> cartItems = [];
   List<ModifireData> selectedModifier = [];
   double product_qty = 1.0;
-  double price = 0.0;
+  double price = 0.00;
   Printer printer;
   bool isEditing = false;
   List<BranchTax> taxlist = [];
-  double taxvalues = 0;
+  double taxvalues = 0.00;
   int isSelectedAttr = -1;
 
   @override
@@ -401,7 +401,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   countDiscount() {
     return currentCart.discount != null
         ? double.parse(currentCart.discount.toStringAsFixed(2))
-        : 0.0;
+        : 0.00;
   }
 
   produtAddTocart() async {
@@ -549,7 +549,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               bottom: 10,
               right: 30,
               child: Text(
-                productItem.priceTypeName + " " + price.toString(),
+                productItem.priceTypeName +
+                    " " +
+                    price.toStringAsFixed(2).toString(),
                 style: Styles.orangeMedium(),
               ),
             ),
@@ -742,7 +744,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                         ),
                         SizedBox(width: 10),
                         Text(
-                          modifier.price.toDouble().toString(),
+                          modifier.price.toStringAsFixed(2).toString(),
                           style: TextStyle(
                               color: Colors.deepOrange,
                               fontSize: SizeConfig.safeBlockVertical * 2.5),
