@@ -25,6 +25,7 @@ import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/User.dart';
@@ -712,6 +713,7 @@ class _DashboradPageState extends State<DashboradPage>
     if (isWebOrder) {
       payment.paymentId = cartData.cart_payment_id;
     }
+    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     Orders order = new Orders();
     Table_order tables = await getTableData();
     User userdata = await CommunFun.getuserDetails();
@@ -768,6 +770,7 @@ class _DashboradPageState extends State<DashboradPage>
       var hisID = await localAPI.saveVoucherHistory(history);
       print(hisID);
     }
+
     var orderDetailid;
     if (orderid > 0) {
       if (cartList.length > 0) {
@@ -937,6 +940,22 @@ class _DashboradPageState extends State<DashboradPage>
     orderpayment.updated_by = userdata.id;
     var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
     print(paymentd);
+
+    // Shifr Invoice Table
+    ShiftInvoice shiftinvoice = new ShiftInvoice();
+    shiftinvoice.shift_id = int.parse(shiftid);
+    shiftinvoice.invoice_id = orderid;
+    shiftinvoice.status = 1;
+    shiftinvoice.created_by = userdata.id;
+    shiftinvoice.created_at =
+        await CommunFun.getCurrentDateTime(DateTime.now());
+    shiftinvoice.serverId = 0;
+    shiftinvoice.localID = await CommunFun.getLocalID();
+    shiftinvoice.terminal_id = int.parse(terminalId);
+    shiftinvoice.shift_terminal_id = int.parse(terminalId);
+    var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
+    print(shift);
+
     await clearCartAfterSuccess(orderid);
     await Navigator.of(context).pop();
     // await showDialog(
@@ -1228,8 +1247,12 @@ class _DashboradPageState extends State<DashboradPage>
                         child: Stack(
                       children: <Widget>[
                         Container(
-                          color: Colors.white,
-                          child: cartITems(),
+                          // color: Colors.white,
+                          child: SizedBox(
+                              height: MediaQuery.of(context).size.height -
+                                  SizeConfig.safeBlockVertical * 10,
+                              width: SizeConfig.safeBlockHorizontal * 50,
+                              child: cartITems()),
                         ),
                         Positioned(
                           bottom: 25,
@@ -1319,7 +1342,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
                 title: Text(
                   "Transaction",
-                  style: Styles.blackMediumBold(),
+                  style: Styles.drawerText(),
                 ),
               ),
               permissions.contains(Constant.VIEW_ORDER)
@@ -1334,7 +1357,7 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       title: Text(
                         "Web Orders",
-                        style: Styles.blackMediumBold(),
+                        style: Styles.drawerText(),
                       ),
                     )
                   : SizedBox(),
@@ -1353,7 +1376,7 @@ class _DashboradPageState extends State<DashboradPage>
                     size: SizeConfig.safeBlockVertical * 5,
                   ),
                   title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
-                      style: Styles.blackMediumBold())),
+                      style: Styles.drawerText())),
               ListTile(
                   onTap: () {
                     gotoShiftReport();
@@ -1363,7 +1386,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.black,
                     size: SizeConfig.safeBlockVertical * 5,
                   ),
-                  title: Text("Shift Report", style: Styles.blackMediumBold())),
+                  title: Text("Shift Report", style: Styles.drawerText())),
               ListTile(
                   onTap: () {
                     Navigator.of(context).pop();
@@ -1374,7 +1397,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.black,
                     size: SizeConfig.safeBlockVertical * 5,
                   ),
-                  title: Text("Sync Orders", style: Styles.blackMediumBold())),
+                  title: Text("Sync Orders", style: Styles.drawerText())),
               ListTile(
                   onTap: () async {
                     syncAllTables();
@@ -1384,7 +1407,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.black,
                     size: SizeConfig.safeBlockVertical * 5,
                   ),
-                  title: Text("Sync", style: Styles.blackMediumBold())),
+                  title: Text("Sync", style: Styles.drawerText())),
               ListTile(
                   onTap: () {
                     Navigator.of(context).pop();
@@ -1395,7 +1418,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.black,
                     size: SizeConfig.safeBlockVertical * 5,
                   ),
-                  title: Text("Settings", style: Styles.blackMediumBold())),
+                  title: Text("Settings", style: Styles.drawerText())),
             ],
           )),
     );
@@ -1979,7 +2002,7 @@ class _DashboradPageState extends State<DashboradPage>
       children: ListTile.divideTiles(
         context: context,
         tiles: cartList.map((cart) {
-          return new Slidable(
+          return Slidable(
             key: Key(cart.id.toString()),
             controller: slidableController,
             actionPane: SlidableDrawerActionPane(),
@@ -1987,7 +2010,6 @@ class _DashboradPageState extends State<DashboradPage>
             direction: Axis.horizontal,
             child: Container(
               margin: EdgeInsets.all(0),
-              //height: SizeConfig.safeBlockVertical * 7,
               padding: EdgeInsets.only(left: 5, right: 5),
               child: new ListTile(
                 contentPadding: EdgeInsets.all(0),

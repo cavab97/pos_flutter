@@ -18,6 +18,7 @@ import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Role.dart';
+import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
@@ -126,13 +127,14 @@ class LocalAPI {
   }
 
   Future<List<TablesDetails>> getTables(branchid) async {
-    var query =
-        "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax ,table_order.is_merge_table as is_merge_table, table_order.merged_table_id as merged_table_id, " +
-            " (select tables.table_name from tables where table_order.merged_table_id = tables.table_id) as merge_table_name from tables " +
-            " LEFT JOIN table_order on table_order.table_id = tables.table_id " +
-            " WHERE tables.status = 1 AND branch_id = " +
-            branchid +
-            " GROUP by tables.table_id";
+    var query = "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax ,table_order.is_merge_table as is_merge_table, table_order.merged_table_id as merged_table_id, " +
+        " (select tables.table_name from tables where table_order.merged_table_id = tables.table_id) as merge_table_name from tables " +
+        " LEFT JOIN table_order on table_order.table_id = tables.table_id " +
+        " WHERE tables.status = 1 AND branch_id = " +
+        branchid +
+        // " AND tables.table_id NOT IN (select table_order.merged_table_id from table_order) " +
+        " GROUP by tables.table_id";
+
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<TablesDetails> list = res.isNotEmpty
         ? res.map((c) => TablesDetails.fromJson(c)).toList()
@@ -559,6 +561,14 @@ class LocalAPI {
     await SyncAPICalls.logActivity(
         "orders", "insert order payment", "order_payment", orderid);
     return paymentData.app_id;
+  }
+
+  Future<int> sendtoShiftInvoice(ShiftInvoice shiftInvoiceData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var invoiceid = await db.insert("shift_invoice", shiftInvoiceData.toJson());
+    await SyncAPICalls.logActivity(
+        "orders", "insert shift invoice", "shift_invoice", invoiceid);
+    return shiftInvoiceData.invoice_id;
   }
 
   Future<int> clearCartItem(cartid, tableID) async {
@@ -1410,5 +1420,17 @@ class LocalAPI {
       inveID = await db.insert("order_cancel", orderData.toJson());
     }
     return inveID;
+  }
+
+  Future<List<Orders>> getShiftInvoiceData(branchid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from orders where branch_id = " + branchid.toString();
+    var ordersList = await db.rawQuery(qry);
+    List<Orders> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => Orders.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Order sync", "get Orders list", "Orders", branchid);
+    return list;
   }
 }

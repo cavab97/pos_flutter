@@ -31,6 +31,15 @@ class Styles {
         fontFamily: Strings.fontFamily);
   }
 
+  static drawerText() {
+    return TextStyle(
+        // White text
+        color: Color(0xFF000000),
+        fontSize: 20,
+        fontWeight: FontWeight.w500,
+        fontFamily: Strings.fontFamily);
+  }
+
   static whiteBoldsmall() {
     return TextStyle(
         // White text
@@ -181,7 +190,8 @@ class Styles {
       color: Colors.grey[700],
     );
   }
-   static greylight() {
+
+  static greylight() {
     return TextStyle(
       fontSize: SizeConfig.safeBlockVertical * 2,
       fontWeight: FontWeight.w600,

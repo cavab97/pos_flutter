@@ -16,8 +16,7 @@ class TerminalKeyPage extends StatefulWidget {
 }
 
 class _TerminalKeyPageState extends State<TerminalKeyPage> {
-  TextEditingController terminalKey = new TextEditingController(text: "Hmpi");
-
+  TextEditingController terminalKey = new TextEditingController(text: "");
   GlobalKey<ScaffoldState> scaffoldKey;
   var errormessage = "";
   bool isValidatekey = true;
@@ -116,7 +115,8 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
                           // Key add button
                           width: MediaQuery.of(context).size.width,
                           child: CommunFun.roundedButton(
-                              Strings.set_terminal_key.toUpperCase(),context, () {
+                              Strings.set_terminal_key.toUpperCase(), context,
+                              () {
                             setTerminalkey();
                           }),
                         )

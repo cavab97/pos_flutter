@@ -793,6 +793,24 @@ class CreateTables {
         "updated_at TEXT," +
         "updated_by INTEGER" +
         ")");
+
+// ShiftInvoice
+    datatables = db.execute("CREATE TABLE shift_invoice ( " +
+        "id INTEGER PRIMARYKEY AUTOINCREAMENT," +
+        "shift_id INTEGER," +
+        "invoice_id INTEGER," +
+        "status INTEGER," +
+        "created_by INTEGER," +
+        "updated_by INTEGER," +
+        "created_at TEXT," +
+        "updated_at TEXT," +
+        "sync NUMERIC," +
+        "serverId INTEGER," +
+        "localID TEXT," +
+        "terminal_id INTEGER," +
+        "shift_terminal_id INTEGER" +
+        ")");
+
     return datatables;
   }
 }

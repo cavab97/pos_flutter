@@ -1135,7 +1135,7 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
                 },
                 title: Text(
                   "Incorrect Item",
-                  style: Styles.communBlack(),
+                  style: Styles.communBlacksmall(),
                 )),
             ListTile(
                 onTap: () {
@@ -1143,7 +1143,7 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
                 },
                 title: Text(
                   "Incorrect variant",
-                  style: Styles.communBlack(),
+                  style: Styles.communBlacksmall(),
                 )),
             ListTile(
                 onTap: () {
@@ -1151,7 +1151,7 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
                 },
                 title: Text(
                   "Incorrect payment type",
-                  style: Styles.communBlack(),
+                  style: Styles.communBlacksmall(),
                 )),
             ListTile(
                 onTap: () {
@@ -1159,7 +1159,7 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
                 },
                 title: Text(
                   "Incorrect quantity",
-                  style: Styles.communBlack(),
+                  style: Styles.communBlacksmall(),
                 )),
             ListTile(
                 onTap: () {
@@ -1167,7 +1167,7 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
                 },
                 title: Text(
                   "Other",
-                  style: Styles.communBlack(),
+                  style: Styles.communBlacksmall(),
                 )),
           ],
         ),

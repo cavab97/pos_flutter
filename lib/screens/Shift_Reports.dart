@@ -5,10 +5,12 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:mcncashier/theme/Sized_Config.dart';
 
 class ShiftReports extends StatefulWidget {
   // PIN Enter PAGE
@@ -23,7 +25,13 @@ class _ShiftReportsState extends State<ShiftReports> {
   Shift shifittem = new Shift();
   var screenArea = 1.5;
   int _current = 0;
-
+  List<Orders> orders = [];
+  double grossSale = 0.00;
+  double netSale = 0.00;
+  double totalTender = 0.00;
+  double discount = 0.00;
+  double refund = 0.00;
+  double tax = 0.00;
   final List<String> imgList = [
     'Summary',
     'Cash Drawer Summary',
@@ -34,6 +42,30 @@ class _ShiftReportsState extends State<ShiftReports> {
   void initState() {
     super.initState();
     getShiftData();
+    getOrders();
+  }
+
+  getOrders() async {
+    var branchid = await CommunFun.getbranchId();
+    List<Orders> ordersList = await localAPI.getOrdersListTable(branchid);
+    if (orders.length > 0) {
+      setState(() {
+        orders = ordersList;
+      });
+      var grosssale = 0.00;
+      var netsale = 0.00;
+      var totaltender = 0.00;
+      var discountval = 0.00;
+      var refundval = 0.00;
+      var taxval = 0.00;
+      for (var i = 0; i < orders.length; i++) {
+        Orders order = orders[i];
+        grosssale += order.sub_total;
+        refundval += 0;
+        taxval += order.tax_amount;
+        discountval += order.voucher_amount;
+      }
+    }
   }
 
   getShiftData() async {
@@ -44,6 +76,21 @@ class _ShiftReportsState extends State<ShiftReports> {
         shifittem = shift[0];
       });
     }
+  }
+
+  openpayInOUTPop(title, amount) {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return PayInOutDailog(
+            title: title,
+            ammount: amount,
+            onClose: (amount, reson) {
+              Navigator.of(context).pop();
+            },
+          );
+        });
   }
 
   @override
@@ -300,6 +347,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                   child: RaisedButton(
                     padding: EdgeInsets.all(20),
                     onPressed: () {
+                      openpayInOUTPop("Pay In Amount", "5.00");
                       CommunFun.showToast(context, "Comming Soon");
                     },
                     child: Text(
@@ -323,6 +371,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                   child: RaisedButton(
                     padding: EdgeInsets.all(20),
                     onPressed: () {
+                      openpayInOUTPop("Pay Out Amount", "5.00");
                       CommunFun.showToast(context, "Comming Soon");
                     },
                     child: Text(
