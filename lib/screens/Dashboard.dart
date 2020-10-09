@@ -39,6 +39,7 @@ import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
+import 'package:mcncashier/screens/SplitOrder.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
@@ -337,9 +338,19 @@ class _DashboradPageState extends State<DashboradPage>
         closeTable();
         break;
       case 2:
+        showDialog(
+          // Opning Ammount Popup
+
+            barrierDismissible: false,
+            context: context,
+            builder: (BuildContext context) {
+              return SplitBillDialog(cartList: cartList);
+            });
+        break;
+     case 3:
         closeShift();
         break;
-      case 3:
+      case 4:
         if (cartList.length > 0) {
           if (printerreceiptList.length > 0) {
             printKOT.checkDraftPrint(
@@ -1619,6 +1630,7 @@ class _DashboradPageState extends State<DashboradPage>
         onSelected: selectOption,
         itemBuilder: (BuildContext context) => [
               PopupMenuItem(
+                enabled: isShiftOpen ? true : false,
                 value: 0,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -1637,6 +1649,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
+                enabled: isTableSelected ? true : false,
                 value: 1,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -1655,6 +1668,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
+                enabled: cartList.length > 1 ? true : false,
                 value: 2,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -1673,6 +1687,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
+                enabled: isShiftOpen ? true : false,
                 value: 3,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -1691,6 +1706,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
+                enabled: cartList.length > 0 ? true : false,
                 value: 4,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -1709,6 +1725,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
+                enabled: cartList.length > 0 ? true : false,
                 value: 5,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2094,8 +2111,8 @@ class _DashboradPageState extends State<DashboradPage>
                           style: Styles.darkBlue())),
                   Padding(
                       padding: EdgeInsets.only(right: 15),
-                      child:
-                          Text(subtotal.toStringAsFixed(2), style: Styles.darkBlue())),
+                      child: Text(subtotal.toStringAsFixed(2),
+                          style: Styles.darkBlue())),
                 ],
               ),
             ),
@@ -2151,7 +2168,8 @@ class _DashboradPageState extends State<DashboradPage>
                             ),
                             Padding(
                               padding: EdgeInsets.only(right: 15),
-                              child: Text(taxitem["taxAmount"].toStringAsFixed(2),
+                              child: Text(
+                                  taxitem["taxAmount"].toStringAsFixed(2),
                                   style: Styles.darkBlue()),
                             )
                           ]);
@@ -2168,8 +2186,8 @@ class _DashboradPageState extends State<DashboradPage>
                           ),
                           Padding(
                             padding: EdgeInsets.only(right: 15),
-                            child:
-                                Text(tax.toStringAsFixed(2), style: Styles.darkBlue()),
+                            child: Text(tax.toStringAsFixed(2),
+                                style: Styles.darkBlue()),
                           )
                         ]),
             ),

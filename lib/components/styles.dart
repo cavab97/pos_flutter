@@ -22,6 +22,15 @@ class Styles {
         fontFamily: Strings.fontFamily);
   }
 
+  static blackMediumbold() {
+    return TextStyle(
+        // White text
+        color: Colors.black,
+        fontSize: SizeConfig.safeBlockVertical * 2.8,
+        fontWeight: FontWeight.w800,
+        fontFamily: Strings.fontFamily);
+  }
+
   static blackMediumBold() {
     return TextStyle(
         // White text
@@ -196,6 +205,13 @@ class Styles {
       fontSize: SizeConfig.safeBlockVertical * 2,
       fontWeight: FontWeight.w600,
       color: Colors.grey[700],
+    );
+  }
+  static smallBlack() {
+    return TextStyle(
+      fontSize: SizeConfig.safeBlockVertical * 2.5,
+      fontWeight: FontWeight.w600,
+      color: Colors.black,
     );
   }
 }
