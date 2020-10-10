@@ -209,7 +209,7 @@ class _DashboradPageState extends State<DashboradPage>
   getCurrentCart() async {
     List<SaveOrder> currentOrder =
         await localAPI.getSaveOrder(selectedTable.save_order_id);
-    print(currentOrder);
+
     if (currentOrder.length != 0) {
       setState(() {
         currentCart = currentOrder[0].cartId;
@@ -235,7 +235,6 @@ class _DashboradPageState extends State<DashboradPage>
 
   getsetWebOrders() async {
     var res = await SyncAPICalls.getWebOrders(context);
-    print(res);
     var sertvertime = res["data"]["serverdatetime"];
     await Preferences.setStringToSF(
         Constant.ORDER_SERVER_DATE_TIME, sertvertime);
@@ -281,7 +280,7 @@ class _DashboradPageState extends State<DashboradPage>
       discount = cart.discount;
       tax = cart.tax;
       isWebOrder = cart.source == 1 ? true : false;
-      //taxJson = json.decode(cart.tax_json);
+      taxJson = json.decode(cart.tax_json);
       grandTotal = cart.grand_total;
       selectedvoucher = vaocher;
     });
@@ -326,7 +325,7 @@ class _DashboradPageState extends State<DashboradPage>
     //TODO : Delete current order
     Table_order tables = await getTableData();
     var result = await localAPI.clearCartItem(currentCart, tables.table_id);
-    print(result);
+
     await refreshAfterAction();
   }
 
@@ -342,7 +341,7 @@ class _DashboradPageState extends State<DashboradPage>
         break;
       case 2:
         showDialog(
-          // Opning Ammount Popup
+            // Opning Ammount Popup
 
             barrierDismissible: false,
             context: context,
@@ -350,7 +349,7 @@ class _DashboradPageState extends State<DashboradPage>
               return SplitBillDialog(cartList: cartList);
             });
         break;
-     case 3:
+      case 3:
         closeShift();
         break;
       case 4:
@@ -380,7 +379,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   getCategoryList() async {
     List<Category> categorys = await localAPI.getAllCategory();
-    print(categorys);
+
     List<Category> catList = categorys.where((i) => i.parentId == 0).toList();
     setState(() {
       tabsList = catList;
@@ -395,7 +394,6 @@ class _DashboradPageState extends State<DashboradPage>
   getAllPrinter() async {
     List<Printer> printer = await localAPI.getAllPrinterForKOT();
     List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
-    print(printer);
     setState(() {
       printerList = printer;
       printerreceiptList = printerDraft;
@@ -619,14 +617,14 @@ class _DashboradPageState extends State<DashboradPage>
     scaffoldKey.currentState.openDrawer();
   }
 
-  showQuantityDailog(product) async {
+  showQuantityDailog(selectedProduct) async {
     // Increase Decrease Quantity popup
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return ProductQuantityDailog(
-              product: product,
+              product: selectedProduct,
               cartID: currentCart,
               onClose: () {
                 refreshAfterAction();
@@ -696,13 +694,13 @@ class _DashboradPageState extends State<DashboradPage>
 
   Future<List<MSTSubCartdetails>> getmodifireList() async {
     List<MSTSubCartdetails> list = await localAPI.itemmodifireList(currentCart);
-    print(list);
+
     return list;
   }
 
   Future<List<MSTCartdetails>> getcartDetails() async {
     List<MSTCartdetails> list = await localAPI.getCartItem(currentCart);
-    print(list);
+
     return list;
   }
 
@@ -773,7 +771,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
     order.updated_by = userdata.id;
     var orderid = await localAPI.placeOrder(order);
-    print(orderid);
+
     if (cartData.voucher_id != 0 && cartData.voucher_id != null) {
       VoucherHistory history = new VoucherHistory();
       history.voucher_id = cartData.voucher_id;
@@ -782,7 +780,6 @@ class _DashboradPageState extends State<DashboradPage>
       history.order_id = orderid;
       history.uuid = uuid;
       var hisID = await localAPI.saveVoucherHistory(history);
-      print(hisID);
     }
 
     var orderDetailid;
@@ -826,7 +823,6 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.detail_status = 1;
           orderDetail.detail_by = userdata.id;
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
-          print(orderDetailid);
 
           if (productdata[0].hasInventory == 1) {
             //update invnotory
@@ -844,7 +840,6 @@ class _DashboradPageState extends State<DashboradPage>
                   await CommunFun.getCurrentDateTime(DateTime.now());
               invData.updatedBy = userdata.id;
               var ulog = await localAPI.updateInvetory(invData);
-              print(ulog);
 
               //Inventory log update
               ProductStoreInventoryLog log = new ProductStoreInventoryLog();
@@ -861,7 +856,6 @@ class _DashboradPageState extends State<DashboradPage>
               log.updated_by = userdata.id;
               var inventoryLog =
                   await localAPI.updateStoreInvetoryLogTable(log);
-              print(inventoryLog);
             }
           }
         }
@@ -898,7 +892,6 @@ class _DashboradPageState extends State<DashboradPage>
               await CommunFun.getCurrentDateTime(DateTime.now());
           modifireData.updated_by = userdata.id;
           var ordermodifreid = await localAPI.sendModifireData(modifireData);
-          print(ordermodifreid);
         } else {
           OrderAttributes attributes = new OrderAttributes();
           List<OrderAttributes> lapApid =
@@ -924,7 +917,6 @@ class _DashboradPageState extends State<DashboradPage>
               await CommunFun.getCurrentDateTime(DateTime.now());
           attributes.updated_by = userdata.id;
           var orderAttri = await localAPI.sendAttrData(attributes);
-          print(orderAttri);
         }
       }
     }
@@ -953,7 +945,6 @@ class _DashboradPageState extends State<DashboradPage>
         await CommunFun.getCurrentDateTime(DateTime.now());
     orderpayment.updated_by = userdata.id;
     var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
-    print(paymentd);
 
     // Shifr Invoice Table
     ShiftInvoice shiftinvoice = new ShiftInvoice();
@@ -968,7 +959,6 @@ class _DashboradPageState extends State<DashboradPage>
     shiftinvoice.terminal_id = int.parse(terminalId);
     shiftinvoice.shift_terminal_id = int.parse(terminalId);
     var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
-    print(shift);
 
     await clearCartAfterSuccess(orderid);
     await Navigator.of(context).pop();
@@ -992,13 +982,7 @@ class _DashboradPageState extends State<DashboradPage>
     List<OrderDetail> orderitem =
         await localAPI.getOrderDetailsList(terminalId);
     Orders order = await localAPI.getcurrentOrders(terminalId);
-    print(branchAddress);
-    print(orderpaymentdata);
-    print(paument_method);
-    print(orderitem);
-    print(user);
-    print(itemsList);
-    print(order);
+
     printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
         branchData, itemsList, orderitem, order, paument_method);
   }
@@ -1006,7 +990,7 @@ class _DashboradPageState extends State<DashboradPage>
   clearCartAfterSuccess(orderid) async {
     Table_order tables = await getTableData();
     var result = await localAPI.removeCartItem(currentCart, tables.table_id);
-    print(result);
+
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     clearCart();
@@ -1391,16 +1375,22 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                   title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
                       style: Styles.drawerText())),
-              ListTile(
-                  onTap: () {
-                    gotoShiftReport();
-                  },
-                  leading: Icon(
-                    Icons.filter_tilt_shift,
-                    color: Colors.black,
-                    size: SizeConfig.safeBlockVertical * 5,
-                  ),
-                  title: Text("Shift Report", style: Styles.drawerText())),
+              permissions.contains(Constant.VIEW_REPORT)
+                  ? ListTile(
+                      onTap: () {
+                        gotoShiftReport();
+                      },
+                      leading: Icon(
+                        Icons.filter_tilt_shift,
+                        color: Colors.black,
+                        size: SizeConfig.safeBlockVertical * 5,
+                      ),
+                      title: Text(
+                        "Shift Report",
+                        style: Styles.drawerText(),
+                      ),
+                    )
+                  : SizedBox(),
               ListTile(
                   onTap: () {
                     Navigator.of(context).pop();
@@ -1535,7 +1525,7 @@ class _DashboradPageState extends State<DashboradPage>
                 } else {
                   CommunFun.showToast(context, Strings.shift_open_message);
                 }
-                print(suggestion);
+
                 // Navigator.of(context).push(MaterialPageRoute(
                 //     //builder: (context) => ProductPage(product: suggestion)
                 //     ));
@@ -1594,7 +1584,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   Widget addCustomerBtn(context) {
-    return customer == null
+    return customer == null && permissions.contains(Constant.ADD_ORDER)
         ? RaisedButton(
             padding: EdgeInsets.only(left: 5, right: 5, top: 0, bottom: 0),
             onPressed: () {
@@ -1767,16 +1757,18 @@ class _DashboradPageState extends State<DashboradPage>
           var price = product.price.toStringAsFixed(2);
           return InkWell(
             onTap: () {
-              if (isShiftOpen) {
-                if (isTableSelected && !isWebOrder) {
-                  showQuantityDailog(product);
-                } else {
-                  if (!isWebOrder) {
-                    selectTable();
+              if (permissions.contains(Constant.EDIT_ORDER)) {
+                if (isShiftOpen) {
+                  if (isTableSelected && !isWebOrder) {
+                    showQuantityDailog(product);
+                  } else {
+                    if (!isWebOrder) {
+                      selectTable();
+                    }
                   }
+                } else {
+                  CommunFun.showToast(context, Strings.shift_open_message);
                 }
-              } else {
-                CommunFun.showToast(context, Strings.shift_open_message);
               }
             },
             child: Container(
@@ -1850,7 +1842,7 @@ class _DashboradPageState extends State<DashboradPage>
             ? MainAxisAlignment.spaceAround
             : MainAxisAlignment.center,
         children: <Widget>[
-          !isWebOrder
+          !isWebOrder && permissions.contains(Constant.EDIT_ORDER)
               ? Container(
                   //margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3),
                   height: SizeConfig.safeBlockVertical * 7,
@@ -1875,36 +1867,38 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                 )
               : SizedBox(),
-          Container(
-            /* margin: EdgeInsets.only(
+          permissions.contains(Constant.EDIT_ORDER)
+              ? Container(
+                  /* margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height / 1.3 + 10),*/
-            height: SizeConfig.safeBlockVertical * 7,
-            width: MediaQuery.of(context).size.width / 7,
-            child: RaisedButton(
-              padding: EdgeInsets.only(top: 5, bottom: 5),
-              onPressed: () {
-                if (!isWebOrder) {
-                  sendPayment();
-                  //  openPrinterPop(cartList);
-                } else {
-                  //weborder payment
-                  checkoutWebOrder();
-                }
-              },
-              child: Text(
-                !isWebOrder ? Strings.title_pay : "CheckOut",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: SizeConfig.safeBlockVertical * 2.8,
-                    fontWeight: FontWeight.bold),
-              ),
-              color: Colors.deepOrange,
-              textColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50.0),
-              ),
-            ),
-          ),
+                  height: SizeConfig.safeBlockVertical * 7,
+                  width: MediaQuery.of(context).size.width / 7,
+                  child: RaisedButton(
+                    padding: EdgeInsets.only(top: 5, bottom: 5),
+                    onPressed: () {
+                      if (!isWebOrder) {
+                        sendPayment();
+                        //  openPrinterPop(cartList);
+                      } else {
+                        //weborder payment
+                        checkoutWebOrder();
+                      }
+                    },
+                    child: Text(
+                      !isWebOrder ? Strings.title_pay : "CheckOut",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: SizeConfig.safeBlockVertical * 2.8,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    color: Colors.deepOrange,
+                    textColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                    ),
+                  ),
+                )
+              : SizedBox(),
         ]);
   }
 
@@ -2032,7 +2026,7 @@ class _DashboradPageState extends State<DashboradPage>
               padding: EdgeInsets.only(left: 5, right: 5),
               child: new ListTile(
                 contentPadding:
-                    EdgeInsets.symmetric(vertical: 0, horizontal:5),
+                    EdgeInsets.symmetric(vertical: 0, horizontal: 5),
                 // dense: false,
                 title: new Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2069,7 +2063,7 @@ class _DashboradPageState extends State<DashboradPage>
               ),
             ),
             secondaryActions: <Widget>[
-              permissions.contains(Constant.EDIT_ORDER)
+              permissions.contains(Constant.EDIT_ITEM)
                   ? IconSlideAction(
                       color: Colors.black45,
                       icon: Icons.edit,
@@ -2080,7 +2074,7 @@ class _DashboradPageState extends State<DashboradPage>
                       },
                     )
                   : SizedBox(),
-              permissions.contains(Constant.DELETE_ORDER)
+              permissions.contains(Constant.EDIT_ITEM)
                   ? IconSlideAction(
                       color: Colors.red,
                       icon: Icons.delete_outline,
@@ -2173,7 +2167,7 @@ class _DashboradPageState extends State<DashboradPage>
                             Padding(
                               padding: EdgeInsets.only(right: 15),
                               child: Text(
-                                  taxitem["taxAmount"].toStringAsFixed(2),
+                                  taxitem["taxAmount"],
                                   style: Styles.darkBlue()),
                             )
                           ]);

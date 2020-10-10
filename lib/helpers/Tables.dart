@@ -12,16 +12,6 @@ class CreateTables {
         "role_updated_at	TEXT," +
         "role_updated_by INTEGER" +
         ");");
-    // db.transaction((txn) async {
-    //   int id1 = await txn.rawInsert(
-    //       'INSERT INTO role(role_id, role_name, uuid,role_status,role_updated_at,role_updated_by)' +
-    //           'VALUES(1, "test","tetstsfsdf" ,0,"20-12-2020 11:44:32",1)');
-    //   print('inserted1: $id1');
-    //   int id2 = await txn.rawInsert(
-    //       'INSERT INTO role(role_id, role_name, uuid,role_status,role_updated_at,role_updated_by)' +
-    //           'VALUES(2, "test", "dfsdfsdfsdf",1,"20-12-2020 11:44:32",2)');
-    //   print('inserted2: $id2');
-    // });
 
     // // module table
     datatables = db.execute("CREATE TABLE module(" +
@@ -70,20 +60,6 @@ class CreateTables {
         "updated_by INTEGER," +
         "deleted_by INTEGER" +
         ")");
-
-    // db.transaction((txn) async {
-    //   int id1 = await txn.rawInsert('INSERT INTO users(' +
-    //       'id,terminal_id,app_id,uuid,name,role,username,password,country_code,' +
-    //       'mobile,profile,commision_percent,pin,status,device_id,device_token,' +
-    //       'auth_key,last_login,remember_token)' +
-    //       'VALUES(1,1,1,"uuid","name",2,"username","password","country_code","mobile",' +
-    //       '"profile",0,"013234",1,"device_id","device_token","auth_key","last_login","remember_token"'
-    //           ')');
-    //   print('inserted1: $id1');
-    // });
-
-    //customer_address TABLE
-    //TODO : table create address
 
     datatables = db.execute("CREATE TABLE customer_address(" +
         "address_id INTEGER PRIMARY KEY," +
@@ -144,6 +120,7 @@ class CreateTables {
         "category_icon TEXT," +
         "slug TEXT," +
         "parent_id INTEGER," +
+        "is_setmeal  INTEGER," + //(0 For No, 1 For Yes)
         "is_for_web INTEGER," +
         "status INTEGER," +
         "updated_at TEXT," +
@@ -811,6 +788,38 @@ class CreateTables {
         "shift_terminal_id INTEGER" +
         ")");
 
+    //set Meal Tables \
+    datatables = db.execute("CREATE TABLE setmeal ( " +
+        "setmeal_id INTIGER PRIMARYKEY," +
+        "uuid TEXT," +
+        "name TEXT," +
+        "price REAL," +
+        "status NUMERIC," +
+        "created_at TEXT," +
+        "created_by INTIGER," +
+        "updated_at TEXT," +
+        "updated_by INTIGER" +
+        ")");
+
+    datatables = db.execute("CREATE TABLE setmeal_branch ( " +
+        "setmeal_branch_id INTEGER," +
+        "uuid TEXT," +
+        "setmeal_id INTEGER," +
+        "branch_id INTEGER," +
+        "status NUMERIC," +
+        "updated_at TEXT," +
+        "updated_by INTEGER" +
+        ")");
+
+    datatables = db.execute("CREATE TABLE setmeal_product ( " +
+        "setmeal_product_id INTEGERT," +
+        "setmeal_id INTEGERT," +
+        "product_id INTEGERT," +
+        "quantity REAL," +
+        "status NUMERIC," +
+        "created_at TEXT," +
+        "updated_at INTEGERT" +
+        ")");
     return datatables;
   }
 }

@@ -159,7 +159,7 @@ class PrintReceipt {
     for (var i = 0; i < orderdetail.length; i++) {
       var item = orderdetail[i];
       var name = json.decode(item.product_detail);
-      print(name);
+     
       ticket.row([
         PosColumn(
             text: name["name"],

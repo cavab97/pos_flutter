@@ -51,7 +51,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   List<BranchTax> taxlist = [];
   double taxvalues = 0.00;
   int isSelectedAttr = -1;
-
+  var productnetprice = 0.00;
   @override
   void initState() {
     super.initState();
@@ -59,6 +59,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       isEditing = widget.cartItem != null;
       productItem = widget.product;
       price = productItem.price;
+      productnetprice = productItem.price;
       cartitem = widget.cartItem;
     });
     getAttributes();
@@ -185,6 +186,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           setState(() {
             product_qty = prevproductqty + 1;
           });
+          setPrice();
         } else {
           CommunFun.showToast(context, Strings.stock_not_valilable);
         }
@@ -193,6 +195,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         setState(() {
           product_qty = prevproductqty + 1;
         });
+        setPrice();
       }
     } else {
       if (product_qty <= productItem.qty) {
@@ -200,11 +203,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         setState(() {
           product_qty = prevproductqty + 1;
         });
+        setPrice();
       } else {
         CommunFun.showToast(context, Strings.store_Validation_message);
       }
     }
-    setPrice();
   }
 
   decreaseQty() {
@@ -268,7 +271,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   setPrice() {
-    var productPrice = productItem.price;
+    var productPrice = productnetprice;
     var newPrice = productPrice;
     if (selectedAttr.length > 0) {
       for (int i = 0; i < selectedAttr.length; i++) {
@@ -282,7 +285,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         newPrice += mprice;
       }
     }
-
     var pricewithQty = newPrice * product_qty;
     setState(() {
       price = pricewithQty;
@@ -451,26 +453,23 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (!isEditing) {
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
-    var productdata = productItem; // PRoduct Data
-    productdata.qty = product_qty.toDouble();
-    productdata.price = price;
+
     // MST Sub Cart details
 
     ///insert
     var cartid = await localAPI.insertItemTocart(currentCart.id, cart,
-        productdata, orderData, tableData["table_id"], subCartData);
+        productItem, orderData, tableData["table_id"], subCartData);
 
     MSTCartdetails cartdetails = new MSTCartdetails();
     if (isEditing) {
       cartdetails.id = cartitem.id;
     }
     cartdetails.cartId = cartid;
-    cartdetails.productId = productdata.productId;
-    cartdetails.productName = productdata.name;
-    cartdetails.productPrice =
-        double.parse(productdata.price.toStringAsFixed(2));
-    cartdetails.productQty = productdata.qty;
-    cartdetails.productNetPrice = productdata.price;
+    cartdetails.productId = productItem.productId;
+    cartdetails.productName = productItem.name;
+    cartdetails.productPrice = double.parse(price.toStringAsFixed(2));
+    cartdetails.productQty = product_qty.toDouble();
+    cartdetails.productNetPrice = price;
     cartdetails.createdBy = loginData["id"];
     cartdetails.discount = 0;
     cartdetails.taxValue = taxvalues;
@@ -483,11 +482,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         var modifire = selectedModifier[i];
         subCartData.cartdetailsId = detailID;
         subCartData.localID = cart.localID;
-        subCartData.productId = productdata.productId;
+        subCartData.productId = productItem.productId;
         subCartData.modifierId = modifire.modifierId;
         subCartData.modifirePrice = modifire.price;
         var res = await localAPI.addsubCartData(subCartData);
-        print(res);
       }
     }
     if (selectedAttr.length > 0) {
@@ -495,12 +493,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         var attr = selectedAttr[i];
         subCartData.cartdetailsId = detailID;
         subCartData.localID = cart.localID;
-        subCartData.productId = productdata.productId;
+        subCartData.productId = productItem.productId;
         subCartData.caId = attr["ca_id"];
         subCartData.attributeId = int.parse(attr["attrType_ID"]);
         subCartData.attrPrice = int.parse(attr["attr_price"]).toDouble();
         var res = await localAPI.addsubCartData(subCartData);
-        print(res);
       }
     }
     if (isEditing && cartitem.isSendKichen == 1) {

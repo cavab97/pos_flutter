@@ -74,8 +74,7 @@ class VoucherPopState extends State<VoucherPop> {
     DateTime now = new DateTime.now();
     String nowDate = DateFormat('yyyy-MM-dd').format(now);
     String fromtonow = DateFormat('yyyy-MM-dd').format(toDate);
-    print(now.isBefore(fromDate));
-    print(now.isAfter(toDate));
+   
     if (now.isBefore(toDate) && now.isAfter(fromDate) || nowDate == fromtonow) {
       return true;
     } else {
@@ -276,7 +275,7 @@ class VoucherPopState extends State<VoucherPop> {
               ),
               style: Styles.greysmall(),
               onChanged: (e) {
-                print(e);
+             
                 setState(() {
                   errorMSG = "";
                 });

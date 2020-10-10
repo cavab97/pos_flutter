@@ -115,7 +115,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
       table_order.number_of_pax = int.parse(paxController.text);
       table_order.save_order_id = selectedTable.saveorderid;
       var result = await localAPI.insertTableOrder(table_order);
-      print(result);
+    
       await Preferences.setStringToSF(
           Constant.TABLE_DATA, json.encode(table_order));
       Navigator.of(context).pop();
@@ -169,7 +169,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
   @override
   Widget build(BuildContext context) {
     final Map arguments = ModalRoute.of(context).settings.arguments as Map;
-    print(arguments['isAssign']);
+  
     setState(() {
       isAssigning = arguments['isAssign'];
       orderid = arguments['orderID'];
@@ -356,7 +356,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
       ),
       style: TextStyle(color: Colors.black, fontSize: SizeConfig.safeBlockVertical * 4),
       onChanged: (e) {
-        print(e);
+       
       },
     );
   }

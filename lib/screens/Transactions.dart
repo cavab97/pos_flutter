@@ -187,7 +187,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   cancleTransactionWithMethod(paymehtod, reason) {
-    print(paymehtod);
+ 
     cancleTransation(reason);
     Navigator.of(context).pop();
   }
@@ -592,7 +592,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           startFilter();
         },
         onChanged: (e) {
-          print(e);
+       
           if (e.length != 0) {
             filterOrders(e);
           }

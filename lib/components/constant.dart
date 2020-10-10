@@ -33,6 +33,15 @@ class Constant {
   static final String EDIT_ORDER = "edit_order";
   static final String DELETE_ORDER = "delete_order";
 
+  static final String VIEW_ITEM = "view_item";
+  static final String ADD_ITEM = "add_item";
+  static final String EDIT_ITEM = "edit_item";
+  static final String DELETE_ITEM = "delete_item";
+
+  static final String VIEW_REPORT = "view_report";
+  static final String ADD_REPORT = "add_report";
+  static final String EDIT_REPORT = "edit_report";
+  static final String DELETE_REPORT = "delete_report";
   /*==============================================================================
                               Manage API status
   =================================================================================*/

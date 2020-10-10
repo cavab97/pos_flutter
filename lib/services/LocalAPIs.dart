@@ -212,10 +212,6 @@ class LocalAPI {
 
     await SyncAPICalls.logActivity("Printer",
         list.length > 0 ? "Print KOT" : "Print KOT", "printerId", "1");
-
-    print("=====================================");
-    print(list[0].printerIp);
-    print("=====================================");
     return list;
   }
 
@@ -324,7 +320,7 @@ class LocalAPI {
         " WHERE id = " +
         cartid.toString();
     var res = await db.rawQuery(rawQuery);
-    print(res);
+
     await SyncAPICalls.logActivity(
         "weborder", "update table_id", "mst_cart", tableiD.toString());
     return 1;
@@ -348,7 +344,7 @@ class LocalAPI {
   Future<int> addsubCartData(MSTSubCartdetails data) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var result1 = await db.insert("mst_cart_sub_detail", data.toJson());
-    print(result1);
+
     await SyncAPICalls.logActivity(
         "product", "insert sub cart details", "mst_cart_sub_detail", result1);
     return result1;
@@ -575,7 +571,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var cart = // cart table
         await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
-    print(cart);
+
     await SyncAPICalls.logActivity("orders", "clear cart", "mst_cart", 1);
     await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartid]);
     var cartDetail = await db
@@ -589,7 +585,6 @@ class LocalAPI {
       for (var i = 0; i < list.length; i++) {
         var cartsubdatad = await db.delete("mst_cart_sub_detail",
             where: 'cart_details_id = ?', whereArgs: [list[i].id]);
-        print(cartsubdatad);
       }
       await SyncAPICalls.logActivity(
           "orders", "clear cart detail", "mst_cart_sub_detail", cartid);
@@ -602,7 +597,7 @@ class LocalAPI {
 
     var cart = // cart table
         await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
-    print(cart);
+
     await SyncAPICalls.logActivity("orders", "clear cart", "mst_cart", 1);
 
     await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartid]);
@@ -625,7 +620,6 @@ class LocalAPI {
       for (var i = 0; i < list.length; i++) {
         var cartsubdatad = await db.delete("mst_cart_sub_detail",
             where: 'cart_details_id = ?', whereArgs: [list[i].id]);
-        print(cartsubdatad);
       }
     }
     await SyncAPICalls.logActivity(

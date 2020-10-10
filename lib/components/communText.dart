@@ -537,7 +537,7 @@ class CommunFun {
   }
 
   static savewebOrdersintoCart(cartdata) async {
-    print(cartdata);
+    
     LocalAPI localAPI = LocalAPI();
     for (var i = 0; i < cartdata.length; i++) {
       var cart = cartdata[i];
@@ -568,7 +568,7 @@ class CommunFun {
         "cart_payment_status": cart["cart_payment_status"],
       };
       var cartJson = MST_Cart.fromJson(cartdataitem);
-      print(cartJson);
+     
       var detaildata = cart["cart_detail"];
       for (var j = 0; j < detaildata.length; j++) {
         var detailitem = detaildata[j];
@@ -596,7 +596,7 @@ class CommunFun {
           "created_at": detailitem["created_at"]
         };
         var cartdetailJson = MSTCartdetails.fromJson(cartDeatils);
-        print(cartdetailJson);
+     
         await localAPI.updateWebCartdetails(cartdetailJson);
         var cartSubData = detailitem["cart_sub_detail"];
         for (var p = 0; p < cartSubData.length; p++) {
@@ -612,7 +612,7 @@ class CommunFun {
             "attr_price": subdetailitem["attr_price"],
           };
           var subjson = MSTSubCartdetails.fromJson(subdata);
-          print(subjson);
+    
           await localAPI.updateWebCartsubdetails(subjson);
         }
       }

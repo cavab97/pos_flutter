@@ -20,6 +20,9 @@ import 'package:mcncashier/models/Product_Modifire.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/Product_branch.dart';
 import 'package:mcncashier/models/Role.dart';
+import 'package:mcncashier/models/SetMeal.dart';
+import 'package:mcncashier/models/SetMealBranch.dart';
+import 'package:mcncashier/models/SetMealProduct.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Tax.dart';
@@ -49,8 +52,7 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable1(Database db, dynamic tablesData) async {
-    print(db);
-    print(tablesData);
+   
     var branchData = tablesData["branch"];
     var userData = tablesData["user"];
     var roleData = tablesData["role"];
@@ -72,11 +74,9 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("branch", branch.toJson());
-            print(result);
           } else {
             var result = await db.update("branch", branch.toJson(),
                 where: "branch_id =?", whereArgs: [branch.branchId]);
-            print(result);
           }
         }
       }
@@ -92,11 +92,9 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("users", user.toJson());
-            print(result);
           } else {
             var result = await db.update("users", user.toJson(),
                 where: "id =?", whereArgs: [user.id]);
-            print(result);
           }
         }
       }
@@ -112,11 +110,9 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("role", role.toJson());
-            print(result);
           } else {
             var result = await db.update("role", role.toJson(),
                 where: "role_id = ?", whereArgs: [role.roleId]);
-            print(result);
           }
         }
       }
@@ -132,11 +128,9 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("branch_tax", branchTax.toJson());
-            print(result);
           } else {
             var result = await db.update("branch_tax", branchTax.toJson(),
                 where: "id =?", whereArgs: [branchTax.id]);
-            print(result);
           }
         }
       }
@@ -152,11 +146,9 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("tax", taxval.toJson());
-            print(result);
           } else {
             var result = await db.update("tax", taxval.toJson(),
                 where: 'tax_id =?', whereArgs: [taxval.taxId]);
-            print(result);
           }
         }
       }
@@ -172,12 +164,10 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("pos_permission", permission.toJson());
-            print(result);
           } else {
             var result = await db.update("pos_permission", permission.toJson(),
                 where: 'pos_permission_id =?',
                 whereArgs: [permission.posPermissionId]);
-            print(result);
           }
         }
       }
@@ -195,12 +185,10 @@ class TableData {
           if (count == 0) {
             var result = await db.insert(
                 "pos_role_permission", permissionPOSrole.toJson());
-            print(result);
           } else {
             var result = await db.update(
                 "pos_role_permission", permissionPOSrole.toJson(),
                 where: 'pos_rp_id =?', whereArgs: [permissionPOSrole.posRpId]);
-            print(result);
           }
         }
       }
@@ -218,12 +206,10 @@ class TableData {
           if (count == 0) {
             var result = await db.insert(
                 "user_pos_permission", userpermissionPOS.toJson());
-            print(result);
           } else {
             var result = await db.update(
                 "user_pos_permission", userpermissionPOS.toJson(),
                 where: 'up_pos_id =?', whereArgs: [userpermissionPOS.upPosId]);
-            print(result);
           }
         }
       }
@@ -236,14 +222,16 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable2_1(Database db, dynamic tablesData) async {
-    print(db);
-    print(tablesData);
+   
     var categoryData = tablesData["category"];
     var attributeData = tablesData["attributes"];
     var productData = tablesData["product"];
     var categorybranchData = tablesData["category_branch"];
     var catAttributeData = tablesData["category_attribute"];
     var modifierData = tablesData["modifier"];
+    var setMealData = tablesData["setmeal"];
+    var setMealBranchData = tablesData["setmeal_branch"];
+    var setMealProductData = tablesData["setmeal_product"];
 
     try {
       if (categoryData.length != 0) {
@@ -258,11 +246,9 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("category", category.toJson());
-            print(result);
           } else {
             var result = await db.update("category", category.toJson(),
                 where: "category_id =?", whereArgs: [category.categoryId]);
-            print(result);
           }
         }
       }
@@ -280,12 +266,10 @@ class TableData {
           if (count == 0) {
             var result =
                 await db.insert("category_branch", categroyBranch.toJson());
-            print(result);
           } else {
             var result = await db.update(
                 "category_branch", categroyBranch.toJson(),
                 where: "cb_id =?", whereArgs: [categroyBranch.cbId]);
-            print(result);
           }
         }
       }
@@ -301,11 +285,9 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("product", product.toJson());
-            print(result);
           } else {
             var result = await db.update("product", product.toJson(),
                 where: "product_id =?", whereArgs: [product.productId]);
-            print(result);
           }
         }
       }
@@ -322,11 +304,9 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("attributes", attribute.toJson());
-            print(result);
           } else {
             var result = await db.update("attributes", attribute.toJson(),
                 where: "attribute_id =?", whereArgs: [attribute.attributeId]);
-            print(result);
           }
         }
       }
@@ -344,12 +324,10 @@ class TableData {
           if (count == 0) {
             var result =
                 await db.insert("category_attribute", catattribute.toJson());
-            print(result);
           } else {
             var result = await db.update(
                 "category_attribute", catattribute.toJson(),
                 where: "ca_id =?", whereArgs: [catattribute.caId]);
-            print(result);
           }
         }
       }
@@ -365,14 +343,76 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("modifier", modifier.toJson());
-            print(result);
           } else {
             var result = await db.update("modifier", modifier.toJson(),
                 where: "modifier_id", whereArgs: [modifier.modifierId]);
-            print(result);
           }
         }
       }
+      if (setMealData.length != 0) {
+        for (var i = 0; i < setMealData.length; i++) {
+          var setMealDataitem = setMealData[i];
+          SetMeal setMeal = SetMeal.fromJson(setMealDataitem);
+          var data = {
+            'table': "setmeal",
+            'key': "setmeal_id",
+            'value': setMeal.setmealId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("setmeal", setMeal.toJson());
+          } else {
+            var result = await db.update("setmeal", setMeal.toJson(),
+                where: "setmeal_id", whereArgs: [setMeal.setmealId]);
+          }
+        }
+
+        if (setMealBranchData.length != 0) {
+          for (var i = 0; i < setMealBranchData.length; i++) {
+            var setMealBranchDataitem = setMealBranchData[i];
+            SetMealBranch setMealbranch =
+                SetMealBranch.fromJson(setMealBranchDataitem);
+            var data = {
+              'table': "setmeal_branch",
+              'key': "setmeal_branch_id",
+              'value': setMealbranch.setmealBranchId,
+            };
+            var count = await ifExists(db, data);
+            if (count == 0) {
+              var result =
+                  await db.insert("setmeal_branch", setMealbranch.toJson());
+            } else {
+              var result = await db.update(
+                  "setmeal_branch", setMealbranch.toJson(),
+                  where: "setmeal_branch_id",
+                  whereArgs: [setMealbranch.setmealBranchId]);
+            }
+          }
+        }
+      }
+      if (setMealProductData.length != 0) {
+        for (var i = 0; i < setMealProductData.length; i++) {
+          var setMealProductDataitem = setMealProductData[i];
+          SetMealProduct setMealProduct =
+              SetMealProduct.fromJson(setMealProductDataitem);
+          var data = {
+            'table': "setmeal_product",
+            'key': "setmeal_product_id",
+            'value': setMealProduct.setmealProductId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result =
+                await db.insert("setmeal_branch", setMealProduct.toJson());
+          } else {
+            var result = await db.update(
+                "setmeal_product", setMealProduct.toJson(),
+                where: "setmeal_product_id",
+                whereArgs: [setMealProduct.setmealProductId]);
+          }
+        }
+      }
+
       return 1;
     } catch (e) {
       print(e);
@@ -381,8 +421,8 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable2_2(Database db, dynamic tablesData) async {
-    print(db);
-    print(tablesData);
+    
+   
     var productattributeData = tablesData["product_attribute"];
     var productmodifireData = tablesData["product_modifier"];
     var productcategoryData = tablesData["product_category"];
@@ -406,11 +446,9 @@ class TableData {
               "product_attribute",
               product.toJson(),
             );
-            print(result);
           } else {
             var result = await db.update("product_attribute", product.toJson(),
                 where: "pa_id =?", whereArgs: [product.paId]);
-            print(result);
           }
         }
       }
@@ -430,12 +468,10 @@ class TableData {
           if (count == 0) {
             var result =
                 await db.insert("product_modifier", productmodifire.toJson());
-            print(result);
           } else {
             var result = await db.update(
                 "product_modifier", productmodifire.toJson(),
                 where: "pm_id =?", whereArgs: [productmodifire.pmId]);
-            print(result);
           }
         }
       }
@@ -453,12 +489,10 @@ class TableData {
           if (count == 0) {
             var result =
                 await db.insert("product_category", productcategory.toJson());
-            print(result);
           } else {
             var result = await db.update(
                 "product_category", productcategory.toJson(),
                 where: "pc_id =?", whereArgs: [productcategory.pcId]);
-            print(result);
           }
         }
       }
@@ -476,12 +510,10 @@ class TableData {
           if (count == 0) {
             var result =
                 await db.insert("product_branch", productbranch.toJson());
-            print(result);
           } else {
             var result = await db.update(
                 "product_branch", productbranch.toJson(),
                 where: "pb_id =?", whereArgs: [productbranch.pbId]);
-            print(result);
           }
         }
       }
@@ -499,13 +531,11 @@ class TableData {
           if (count == 0) {
             var result = await db.insert(
                 "product_store_inventory", producatstore.toJson());
-            print(result);
           } else {
             var result = await db.update(
                 "product_store_inventory", producatstore.toJson(),
                 where: "inventory_id =?",
                 whereArgs: [producatstore.inventoryId]);
-            print(result);
           }
         }
       }
@@ -523,12 +553,10 @@ class TableData {
           if (count == 0) {
             var result = await db.insert(
                 "product_store_inventory_log", producatstorelog.toJson());
-            print(result);
           } else {
             var result = await db.update(
                 "product_store_inventory_log", producatstorelog.toJson(),
                 where: "il_id =?", whereArgs: [producatstorelog.il_id]);
-            print(result);
           }
         }
       }
@@ -540,7 +568,7 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable2_3(Database db, dynamic tablesData) async {
-    print(tablesData);
+   
     var pricetypeData = tablesData["price_type"];
     var printerData = tablesData["printer"];
     try {
@@ -556,11 +584,9 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("price_type", priceType.toJson());
-            print(result);
           } else {
             var result = await db.update("price_type", priceType.toJson(),
                 where: "pt_id =?", whereArgs: [priceType.ptId]);
-            print(result);
           }
         }
       }
@@ -576,11 +602,9 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("printer", printer.toJson());
-            print(result);
           } else {
             var result = await db.update("printer", printer.toJson(),
                 where: "printer_id =?", whereArgs: [printer.printerId]);
-            print(result);
           }
         }
       }
@@ -592,7 +616,7 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable3(Database db, dynamic tablesData) async {
-    print(tablesData);
+   
     var customerData = tablesData["customer"];
     var terminalData = tablesData["terminal"];
     var tableData = tablesData["table"];
@@ -610,11 +634,9 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("customer", customer.toJson());
-            print(result);
           } else {
             var result = await db.update("customer", customer.toJson(),
                 where: "customer_id =?", whereArgs: [customer.customerId]);
-            print(result);
           }
         }
       }
@@ -630,11 +652,9 @@ class TableData {
         var count = await ifExists(db, data);
         if (count == 0) {
           var result = await db.insert("terminal", terminal.toJson());
-          print(result);
         } else {
           var result = await db.update("terminal", terminal.toJson(),
               where: "terminal_id =?", whereArgs: [terminal.terminalId]);
-          print(result);
         }
       }
       if (tableData.length != 0) {
@@ -649,11 +669,9 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("tables", table.toJson());
-            print(result);
           } else {
             var result = await db.update("tables", table.toJson(),
                 where: "table_id", whereArgs: [table.tableId]);
-            print(result);
           }
         }
       }
@@ -670,11 +688,9 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("payment", payments.toJson());
-            print(result);
           } else {
             var result = await db.update("payment", payments.toJson(),
                 where: "payment_id =?", whereArgs: [payments.paymentId]);
-            print(result);
           }
         }
       }
@@ -686,8 +702,7 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable4_1(Database db, dynamic tablesData) async {
-    print(db);
-    print(tablesData);
+ 
     var voucherData = tablesData["voucher"];
     var orders = tablesData["order"];
     var orderdetail = tablesData["order_detail"];
@@ -704,10 +719,8 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("voucher", vouchers.toJson());
-            print(result);
           } else {
             var result = await db.update("voucher", vouchers.toJson());
-            print(result);
           }
         }
       }
@@ -723,10 +736,8 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("orders", order.toJson());
-            print(result);
           } else {
             var result = await db.update("orders", order.toJson());
-            print(result);
           }
         }
       }
@@ -742,10 +753,8 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("order_detail", orderdeta.toJson());
-            print(result);
           } else {
             var result = await db.update("order_detail", orderdeta.toJson());
-            print(result);
           }
         }
       }
@@ -757,8 +766,7 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable4_2(Database db, dynamic tablesData) async {
-    print(db);
-    print(tablesData);
+   
     var shiftdata = tablesData["shift"];
     try {
       if (shiftdata.length != 0) {
@@ -773,10 +781,8 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("shift", shift.toJson());
-            print(result);
           } else {
             var result = await db.update("shift", shift.toJson());
-            print(result);
           }
         }
       }
@@ -788,8 +794,7 @@ class TableData {
   }
 
   Future<dynamic> insertProductImage(Database db, dynamic tablesData) async {
-    print(db);
-    print(tablesData);
+   
     var imageData = tablesData["product_image"];
     try {
       if (imageData.length != 0) {
@@ -804,10 +809,8 @@ class TableData {
           var count = await ifExists(db, data);
           if (count == 0) {
             var result = await db.insert("asset", accet.toJson());
-            print(result);
           } else {
             var result = await db.update("asset", accet.toJson());
-            print(result);
           }
         }
       }
