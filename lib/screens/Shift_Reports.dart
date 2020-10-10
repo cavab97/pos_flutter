@@ -22,7 +22,7 @@ class ShiftReports extends StatefulWidget {
 class _ShiftReportsState extends State<ShiftReports> {
   LocalAPI localAPI = LocalAPI();
   Shift shifittem = new Shift();
-  var screenArea = 1.5;
+  var screenArea = 1.6;
   int _current = 0;
   List<Orders> orders = [];
   double grossSale = 0.00;
@@ -31,6 +31,13 @@ class _ShiftReportsState extends State<ShiftReports> {
   double discount = 0.00;
   double refund = 0.00;
   double tax = 0.00;
+  double cashSale = 0.00;
+  double cashDeposit = 0.00;
+  double cashRefund = 0.00;
+  double cashRounding = 0.00;
+  double payinOut = 0.00;
+  double expectedVal = 0.00;
+  double overShort = 0.00;
   final List<String> imgList = [
     'Summary',
     'Cash Drawer Summary',
@@ -46,24 +53,34 @@ class _ShiftReportsState extends State<ShiftReports> {
 
   getOrders() async {
     var branchid = await CommunFun.getbranchId();
-    List<Orders> ordersList = await localAPI.getOrdersListTable(branchid);
-    if (orders.length > 0) {
+    List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
+    if (ordersList.length > 0) {
       setState(() {
         orders = ordersList;
       });
       var grosssale = 0.00;
       var netsale = 0.00;
-      var totaltender = 0.00;
       var discountval = 0.00;
       var refundval = 0.00;
       var taxval = 0.00;
+      var totaltend = 0.00;
       for (var i = 0; i < orders.length; i++) {
         Orders order = orders[i];
         grosssale += order.sub_total;
         refundval += 0;
+        netsale = grosssale - refundval;
         taxval += order.tax_amount;
         discountval += order.voucher_amount;
+        totaltend += (netsale + tax) - discountval;
       }
+      setState(() {
+        grossSale = grosssale;
+        netSale = netsale;
+        discount = discountval;
+        refund = refundval;
+        tax = taxval;
+        totalTender = totaltend;
+      });
     }
   }
 
@@ -73,6 +90,13 @@ class _ShiftReportsState extends State<ShiftReports> {
       List<Shift> shift = await localAPI.getShiftData(shiftid);
       setState(() {
         shifittem = shift[0];
+        cashSale = 0.00;
+        cashDeposit = 0.00;
+        cashRefund = 0.00;
+        cashRounding = 0.00;
+        payinOut = 0.00;
+        expectedVal = 0.00;
+        overShort = 0.00;
       });
     }
   }
@@ -149,141 +173,58 @@ class _ShiftReportsState extends State<ShiftReports> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          // height: SizeConfig.blockSizeHorizontal * 2,
-          // width: SizeConfig.blockSizeVertical* 2,
           padding: EdgeInsets.all(20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               shiftTitles(),
-              Container(
-                height: MediaQuery.of(context).size.height / 1.8,
-                width: MediaQuery.of(context).size.width / 1.5,
-                // width: 800,
-                // color: Colors.green,
-                child: CarouselSlider(
-                  options: CarouselOptions(
-                      height: double.maxFinite,
-                      disableCenter: false,
-                      autoPlay: false,
-                      initialPage: 0,
-                      aspectRatio: 2.0,
-                      scrollDirection: Axis.horizontal,
-                      onPageChanged: (index, reason) {
-                        setState(() {
-                          _current = index;
-                        });
-                      }),
-                  items: imgList
-                      .map(
-                        (item) => Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            SizedBox(height: 20),
-                            Text(
-                              item,
-                              style: Styles.whiteBold(),
-                            ),
-                            SizedBox(height: 10),
-                            Container(
-                                width: MediaQuery.of(context).size.width /
-                                    screenArea,
-                                //  color: Colors.green,
-                                child: ListView(
-                                  shrinkWrap: true,
-                                  children: <Widget>[
-                                    Container(
-                                      color: Colors.grey,
-                                      child: ListTile(
-                                        title: Text(
-                                          "Gross Sales",
-                                          style: Styles.whiteMediumBold(),
-                                        ),
-                                        trailing: Text(
-                                          "0.00",
-                                          style: Styles.whiteMediumBold(),
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      color: Colors.white,
-                                      child: ListTile(
-                                        title: Text(
-                                          "Refunds",
-                                          style: Styles.blackMediumBold(),
-                                        ),
-                                        trailing: Text(
-                                          "0.00",
-                                          style: Styles.blackMediumBold(),
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      color: Colors.grey,
-                                      child: ListTile(
-                                        title: Text(
-                                          "Discount",
-                                          style: Styles.whiteMediumBold(),
-                                        ),
-                                        trailing: Text(
-                                          "0.00",
-                                          style: Styles.whiteMediumBold(),
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      color: Colors.white,
-                                      child: ListTile(
-                                        title: Text(
-                                          "Net Sales",
-                                          style: Styles.blackMediumBold(),
-                                        ),
-                                        trailing: Text(
-                                          "0.00",
-                                          style: Styles.blackMediumBold(),
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      color: Colors.grey,
-                                      child: ListTile(
-                                        title: Text(
-                                          "Rounding",
-                                          style: Styles.whiteMediumBold(),
-                                        ),
-                                        trailing: Text(
-                                          "0.00",
-                                          style: Styles.whiteMediumBold(),
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      color: Colors.white,
-                                      child: ListTile(
-                                        title: Text(
-                                          "Tax/Service Charge",
-                                          style: Styles.blackMediumBold(),
-                                        ),
-                                        trailing: Text(
-                                          "0.00/0.00",
-                                          style: Styles.blackMediumBold(),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )),
-                          ],
-                        ),
-                      )
-                      .toList(),
-                ),
-              ),
+              crousalWidget(),
               scrollIndicator(),
               squareActionButton()
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget crousalWidget() {
+    return Container(
+      height: MediaQuery.of(context).size.height / screenArea,
+      width: MediaQuery.of(context).size.width,
+      child: CarouselSlider(
+        options: CarouselOptions(
+            viewportFraction: 0.8,
+            enlargeCenterPage: true,
+            aspectRatio: 16 / 9,
+            height: double.maxFinite,
+            autoPlay: false,
+            initialPage: 0,
+            scrollDirection: Axis.horizontal,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _current = index;
+              });
+            }),
+        items: imgList
+            .map((item) => Container(
+                  // color: Colors.blueGrey,
+                  width: MediaQuery.of(context).size.width / screenArea,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(height: 20),
+                      Text(
+                        item,
+                        style: Styles.whiteBold(),
+                      ),
+                      SizedBox(height: 10),
+                      Container(child: getReportList(item)),
+                    ],
+                  ),
+                ))
+            .toList(),
       ),
     );
   }
@@ -332,6 +273,243 @@ class _ShiftReportsState extends State<ShiftReports> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  Widget getReportList(name) {
+    Widget reportView = Container();
+    switch (name) {
+      case "Summary":
+        reportView = summeryView();
+        break;
+      case "Payment Summary":
+        reportView = paymentsummeryView();
+        break;
+      case "Cash Drawer Summary":
+        reportView = drawersummeryView();
+        break;
+      default:
+        break;
+    }
+    return reportView;
+  }
+
+  Widget summeryView() {
+    return ListView(
+      shrinkWrap: true,
+      children: <Widget>[
+        Container(
+          color: Colors.grey,
+          child: ListTile(
+            title: Text(
+              "Gross Sales",
+              style: Styles.whiteMediumBold(),
+            ),
+            trailing: Text(
+              grossSale.toStringAsFixed(2),
+              style: Styles.whiteMediumBold(),
+            ),
+          ),
+        ),
+        Container(
+          color: Colors.white,
+          child: ListTile(
+            title: Text(
+              "Refunds",
+              style: Styles.blackMediumBold(),
+            ),
+            trailing: Text(
+              refund.toStringAsFixed(2),
+              style: Styles.blackMediumBold(),
+            ),
+          ),
+        ),
+        Container(
+          color: Colors.grey,
+          child: ListTile(
+            title: Text(
+              "Discount",
+              style: Styles.whiteMediumBold(),
+            ),
+            trailing: Text(
+              discount.toStringAsFixed(2),
+              style: Styles.whiteMediumBold(),
+            ),
+          ),
+        ),
+        Container(
+          color: Colors.white,
+          child: ListTile(
+            title: Text(
+              "Net Sales",
+              style: Styles.blackMediumBold(),
+            ),
+            trailing: Text(
+              netSale.toStringAsFixed(2),
+              style: Styles.blackMediumBold(),
+            ),
+          ),
+        ),
+        Container(
+          color: Colors.white,
+          child: ListTile(
+            title: Text(
+              "Tax/Service Charge",
+              style: Styles.blackMediumBold(),
+            ),
+            trailing: Text(
+              tax.toStringAsFixed(2),
+              style: Styles.blackMediumBold(),
+            ),
+          ),
+        ),
+        Container(
+          color: Colors.white,
+          child: ListTile(
+            title: Text(
+              "Total Tenders :",
+              style: Styles.blackMediumBold(),
+            ),
+            trailing: Text(
+              totalTender.toStringAsFixed(2),
+              style: Styles.blackMediumBold(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget drawersummeryView() {
+    return ListView(
+      shrinkWrap: true,
+      children: <Widget>[
+        Container(
+          color: Colors.grey,
+          child: ListTile(
+            title: Text(
+              "Opnening Amount",
+              style: Styles.whiteMediumBold(),
+            ),
+            trailing: Text(
+              shifittem.startAmount.toStringAsFixed(2),
+              style: Styles.whiteMediumBold(),
+            ),
+          ),
+        ),
+        Container(
+          color: Colors.white,
+          child: ListTile(
+            title: Text(
+              "Cash Sales",
+              style: Styles.blackMediumBold(),
+            ),
+            trailing: Text(
+              cashSale.toStringAsFixed(2),
+              style: Styles.blackMediumBold(),
+            ),
+          ),
+        ),
+        Container(
+          color: Colors.grey,
+          child: ListTile(
+            title: Text(
+              "Case Deposit",
+              style: Styles.whiteMediumBold(),
+            ),
+            trailing: Text(
+              cashDeposit.toStringAsFixed(2),
+              style: Styles.whiteMediumBold(),
+            ),
+          ),
+        ),
+        Container(
+          color: Colors.white,
+          child: ListTile(
+            title: Text(
+              "Cash Refunds",
+              style: Styles.blackMediumBold(),
+            ),
+            trailing: Text(
+              cashRefund.toStringAsFixed(2),
+              style: Styles.blackMediumBold(),
+            ),
+          ),
+        ),
+        Container(
+          color: Colors.white,
+          child: ListTile(
+            title: Text(
+              "Cash Rounding",
+              style: Styles.blackMediumBold(),
+            ),
+            trailing: Text(
+              cashRounding.toStringAsFixed(2),
+              style: Styles.blackMediumBold(),
+            ),
+          ),
+        ),
+        Container(
+          color: Colors.white,
+          child: ListTile(
+            title: Text(
+              "Pay In/Out",
+              style: Styles.blackMediumBold(),
+            ),
+            trailing: Text(
+              payinOut.toStringAsFixed(2),
+              style: Styles.blackMediumBold(),
+            ),
+          ),
+        ),
+        Container(
+          color: Colors.white,
+          child: ListTile(
+            title: Text(
+              "Drawer Expected/Actual",
+              style: Styles.blackMediumBold(),
+            ),
+            trailing: Text(
+              expectedVal.toStringAsFixed(2),
+              style: Styles.blackMediumBold(),
+            ),
+          ),
+        ),
+        Container(
+          color: Colors.white,
+          child: ListTile(
+            title: Text(
+              "Over/Short",
+              style: Styles.blackMediumBold(),
+            ),
+            trailing: Text(
+              overShort.toStringAsFixed(2),
+              style: Styles.blackMediumBold(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget paymentsummeryView() {
+    return ListView(
+      shrinkWrap: true,
+      children: <Widget>[
+        Container(
+          color: Colors.grey,
+          child: ListTile(
+            title: Text(
+              "Total",
+              style: Styles.whiteMediumBold(),
+            ),
+            trailing: Text(
+              grossSale.toStringAsFixed(2),
+              style: Styles.whiteMediumBold(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -395,6 +573,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                     },
                     child: Text(
                       "Open Cash Drawer",
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
                     color: Colors.transparent,

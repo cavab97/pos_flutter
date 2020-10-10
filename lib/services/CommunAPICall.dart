@@ -5,7 +5,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/config.dart';
 import 'package:http/http.dart' as http;
 
-class APICalls { 
+class APICalls {
   static apiCall(apiurl, context, stringParams) async {
     try {
       print(apiurl);
@@ -15,8 +15,8 @@ class APICalls {
         Uri url = Uri.parse(Configrations.base_URL + apiurl);
         final client = new http.Client();
         final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
-       var params = json.encode(stringParams);
-       print(params);
+        var params = json.encode(stringParams);
+        print(params);
         final response = await client.post(
           url,
           headers: headers,

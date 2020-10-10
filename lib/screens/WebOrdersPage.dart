@@ -210,7 +210,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
                     children: <Widget>[
                       Text("Sub Total:" + cart.sub_total.toString(),
                           style: Styles.whiteSimpleSmall()),
-                      Text("Grand Total:" + cart.grand_total.toString(),
+                      Text("Grand Total:" + cart.grand_total.toStringAsFixed(2),
                           style: Styles.whiteSimpleSmall())
                     ],
                   ),
@@ -320,7 +320,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Text("Grand Total : " + cart.grand_total.toString(),
+                            Text("Grand Total : " + cart.grand_total.toStringAsFixed(2),
                                 style: Styles.whiteSimpleSmall())
                           ],
                         ),

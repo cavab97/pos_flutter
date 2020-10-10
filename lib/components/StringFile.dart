@@ -93,7 +93,6 @@ class Strings {
   static String orders = "Orders :";
   static String set_terminal_key = "Set Terminal Key";
   static String terminalKey = "Terminal Key";
-
   static String transaction = "Transaction";
   static String no_order_found = "No Orders Found";
   static String no_details_found = "No Details Found";

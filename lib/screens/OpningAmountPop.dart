@@ -126,11 +126,10 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
             side: BorderSide(color: Colors.grey)),
-        child: Text(number,
-            textAlign: TextAlign.center,
-            style: number == Strings.enter
-                ? Styles.blackMediumBold()
-                : Styles.blackMediumBold()),
+        child: number != Strings.enter
+            ? Text(number,
+                textAlign: TextAlign.center, style: Styles.blackMediumBold())
+            : Icon(Icons.subdirectory_arrow_right, size: 40),
         textColor: Colors.black,
         color: Colors.grey[100],
         onPressed: f,

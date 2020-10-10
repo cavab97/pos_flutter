@@ -1045,6 +1045,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       return Container(
         height: MediaQuery.of(context).size.height,
         child: ListView(
+          padding: EdgeInsets.symmetric(horizontal: 5),
           shrinkWrap: true,
           physics: AlwaysScrollableScrollPhysics(),
           children: orderLists.map((item) {

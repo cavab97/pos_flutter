@@ -134,6 +134,12 @@ class SyncAPICalls {
     return await APICalls.apiCall(apiurl, context, stringParams);
   }
 
+  static getConfig(context) async {
+    var apiurl = Configrations.config;
+    var stringParams = {};
+    return await APICalls.apiCall(apiurl, context, stringParams);
+  }
+
   static logActivity(moduleName, disc, tablename, eId) async {
     TerminalLog log = new TerminalLog();
     LocalAPI localAPI = LocalAPI();
