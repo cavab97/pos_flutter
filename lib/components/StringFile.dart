@@ -32,6 +32,7 @@ class Strings {
   static String add = "Add";
   static String update = "Update";
   static String add_new = "Add New";
+  static String pay = "Pay";
   static String fisrtname = "Fisrt Name";
   static String lastname = "Last Name";
   static String email = "Email";
