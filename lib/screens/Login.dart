@@ -91,6 +91,7 @@ class _LoginPageState extends State<LoginPage> {
             await Preferences.setStringToSF(Constant.IS_LOGIN, "true");
             user = User.fromJson(value["data"]);
             await CommunFun.syncAfterSuccess(context);
+
             setState(() {
               isLoading = false;
             });
@@ -123,10 +124,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Center(
             // Login main part
             child: Container(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width / 1.8,
+              width: MediaQuery.of(context).size.width / 1.8,
               padding: EdgeInsets.only(left: 30, right: 30),
               child: new SingleChildScrollView(
                 child: Column(
@@ -159,16 +157,14 @@ class _LoginPageState extends State<LoginPage> {
                     isLoading
                         ? CommunFun.loader(context)
                         : Container(
-                      // Login button
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width,
-                      child: CommunFun.roundedButton("LOGIN",context, () {
-                        // LOGIN API
-                        sendlogin();
-                      }),
-                    )
+                            // Login button
+                            width: MediaQuery.of(context).size.width,
+                            child:
+                                CommunFun.roundedButton("LOGIN", context, () {
+                              // LOGIN API
+                              sendlogin();
+                            }),
+                          )
                   ],
                 ),
               ),
@@ -220,7 +216,9 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         filled: true,
-        contentPadding: EdgeInsets.only(top: SizeConfig.safeBlockVertical * 3, bottom: SizeConfig.safeBlockVertical * 3),
+        contentPadding: EdgeInsets.only(
+            top: SizeConfig.safeBlockVertical * 3,
+            bottom: SizeConfig.safeBlockVertical * 3),
         fillColor: Colors.white,
       ),
       style: Styles.normalBlack(),
@@ -259,7 +257,9 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         filled: true,
-        contentPadding: EdgeInsets.only(top: SizeConfig.safeBlockVertical * 3, bottom: SizeConfig.safeBlockVertical * 3),
+        contentPadding: EdgeInsets.only(
+            top: SizeConfig.safeBlockVertical * 3,
+            bottom: SizeConfig.safeBlockVertical * 3),
         fillColor: Colors.white,
       ),
       //obscureText: true,

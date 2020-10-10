@@ -91,7 +91,7 @@ class _DashboradPageState extends State<DashboradPage>
   bool isLoading = false;
   User checkInUser;
   var permissions = "";
-
+  var currency;
   @override
   void initState() {
     super.initState();
@@ -126,7 +126,10 @@ class _DashboradPageState extends State<DashboradPage>
       await databaseHelper.initializeDatabase();
       await getCategoryList();
     }
-
+    var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
+    setState(() {
+      currency = curre;
+    });
     await checkshift();
     await checkidTableSelected();
     await getUserData();
@@ -1827,7 +1830,9 @@ class _DashboradPageState extends State<DashboradPage>
                       color: Colors.deepOrange,
                       child: Center(
                         child: Text(
-                            product.priceTypeName + ' ' + price.toString(),
+                            currency != null
+                                ? currency + ' ' + price.toString()
+                                : price.toString(),
                             style: Styles.whiteSimpleSmall()),
                       ),
                     ),
@@ -2029,33 +2034,32 @@ class _DashboradPageState extends State<DashboradPage>
               margin: EdgeInsets.all(0),
               padding: EdgeInsets.only(left: 5, right: 5),
               child: new ListTile(
-                contentPadding: EdgeInsets.all(0),
-                dense: false,
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 0, horizontal:5),
+                // dense: false,
                 title: new Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
                         margin: EdgeInsets.all(0),
                         padding: EdgeInsets.all(0),
-                        width: MediaQuery.of(context).size.width / 6,
+                        width: MediaQuery.of(context).size.width / 5.5,
                         child: Text(cart.productName.toUpperCase(),
                             style: Styles.greysmall()),
                       ),
                       Container(
-                        // color: Colors.red,
                         margin: EdgeInsets.all(0),
                         padding: EdgeInsets.all(0),
-                        width: MediaQuery.of(context).size.width / 8.2,
+                        width: MediaQuery.of(context).size.width / 7.5,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Padding(
-                                padding: EdgeInsets.only(top: 0, bottom: 0),
+                                padding: EdgeInsets.symmetric(vertical: 0),
                                 child: Text(cart.productQty.toString(),
                                     style: Styles.greysmall())),
                             Padding(
-                              padding:
-                                  EdgeInsets.only(right: 10, top: 0, bottom: 0),
+                              padding: EdgeInsets.symmetric(vertical: 0),
                               child: Text(
                                 cart.productPrice.toStringAsFixed(2),
                                 style: Styles.greysmall(),

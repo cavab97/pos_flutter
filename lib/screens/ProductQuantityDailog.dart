@@ -819,11 +819,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   Widget _quantityTextInput() {
     return Container(
       height: 40,
-      width: 70,
+      width: 100,
       decoration:
           BoxDecoration(border: Border.all(width: 1, color: Colors.grey)),
       child: Center(
-        child: Text(product_qty.toString(),
+        child: Text(product_qty.toString() + " " + productItem.priceTypeName,
             style: TextStyle(color: Colors.grey, fontSize: 20)),
       ),
     );
