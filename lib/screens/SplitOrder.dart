@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 
+import 'PaymentMethodPop.dart';
+
 class SplitBillDialog extends StatefulWidget {
-  SplitBillDialog({Key key, this.onClose, this.cartList}) : super(key: key);
+  SplitBillDialog({Key key, this.onClose, this.cartList, this.customer})
+      : super(key: key);
   Function onClose;
   List<MSTCartdetails> cartList;
+  String customer;
 
   @override
   _SplitBillDialog createState() => _SplitBillDialog();
@@ -20,12 +27,14 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   int selectedIndex = -1;
   List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
   double subTotal = 00.00;
-  double tax = 00.00;
+  double taxValues = 00.00;
   double grandTotal = 00.00;
+  List<BranchTax> taxlist = [];
 
   @override
   void initState() {
     super.initState();
+    getTaxs();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
   }
 
@@ -45,7 +54,11 @@ class _SplitBillDialog extends State<SplitBillDialog> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Walk-in customer", style: Styles.whiteBoldsmall()),
+                Text(
+                    widget.customer.isEmpty
+                        ? "Walk-in customer"
+                        : widget.customer,
+                    style: Styles.whiteBoldsmall()),
               ],
             ),
           ),
@@ -54,7 +67,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             top: 18,
             child: GestureDetector(
               onTap: () {
-                //addCustomer();
+                openPaymentMethod();
               },
               child: Text(
                 Strings.pay.toUpperCase(),
@@ -67,6 +80,22 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       ),
       content: mainContent(),
     );
+  }
+
+  openPaymentMethod() {
+    showDialog(
+      // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return PaymentMethodPop(
+            subTotal: subTotal,
+            grandTotal: grandTotal,
+            onClose: (mehtod) {
+              CommunFun.processingPopup(context);
+              //paymentWithMethod(mehtod);
+            },
+          );
+        });
   }
 
   Widget closeButton(context) {
@@ -93,18 +122,59 @@ class _SplitBillDialog extends State<SplitBillDialog> {
 
   setTotalSubTotal() {
     subTotal = 00.00;
-    tax = 00.00;
     grandTotal = 00.00;
 
     tempCart.forEach((element) {
       subTotal = subTotal + element.productPrice;
-      tax = tax + element.taxValue;
     });
     setState(() {
       subTotal = subTotal;
-      tax = tax;
-      grandTotal = subTotal + tax;
+      countTax(subTotal);
+      grandTotal = subTotal + taxValues;
     });
+  }
+
+  getTaxs() async {
+    var branchid = await CommunFun.getbranchId();
+    List<BranchTax> taxlists = await localAPI.getTaxList(branchid);
+    if (taxlists.length > 0) {
+      setState(() {
+        taxlist = taxlists;
+      });
+    }
+  }
+
+  countTax(subT) async {
+    taxValues = 0.00;
+    var totalTax = [];
+    double taxvalue = taxValues;
+    if (taxlist.length > 0) {
+      for (var i = 0; i < taxlist.length; i++) {
+        var taxlistitem = taxlist[i];
+        List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
+        var taxval = taxlistitem.rate != null
+            ? subT * double.parse(taxlistitem.rate) / 100
+            : 0.0;
+        taxval = double.parse(taxval.toStringAsFixed(2));
+        taxvalue += taxval;
+        setState(() {
+          taxValues = taxvalue;
+        });
+        var taxmap = {
+          "id": taxlistitem.id,
+          "tax_id": taxlistitem.taxId,
+          "branch_id": taxlistitem.branchId,
+          "rate": taxlistitem.rate,
+          "status": taxlistitem.status,
+          "updated_at": taxlistitem.updatedAt,
+          "updated_by": taxlistitem.updatedBy,
+          "taxAmount": taxval.toString(),
+          "taxCode": tax.length > 0 ? tax[0].code : "" //tax.code
+        };
+        totalTax.add(taxmap);
+      }
+    }
+    return totalTax;
   }
 
   Widget mainContent() {
@@ -174,7 +244,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                           top: 0,
                         ),
                         child: Text(
-                          tax.toStringAsFixed(2),
+                          taxValues.toStringAsFixed(2),
                           style: Styles.blackMediumbold(),
                         )),
                   ],

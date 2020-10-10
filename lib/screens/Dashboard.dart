@@ -278,7 +278,7 @@ class _DashboradPageState extends State<DashboradPage>
       discount = cart.discount;
       tax = cart.tax;
       isWebOrder = cart.source == 1 ? true : false;
-      //taxJson = json.decode(cart.tax_json);
+      taxJson = json.decode(cart.tax_json);
       grandTotal = cart.grand_total;
       selectedvoucher = vaocher;
     });
@@ -339,15 +339,18 @@ class _DashboradPageState extends State<DashboradPage>
         break;
       case 2:
         showDialog(
-          // Opning Ammount Popup
+            // Opning Ammount Popup
 
             barrierDismissible: false,
             context: context,
             builder: (BuildContext context) {
-              return SplitBillDialog(cartList: cartList);
+              return SplitBillDialog(
+                cartList: cartList,
+                customer: customer != null ? customer.name : "",
+              );
             });
         break;
-     case 3:
+      case 3:
         closeShift();
         break;
       case 4:
@@ -758,7 +761,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.sub_total_after_discount = cartData.sub_total;
     order.grand_total = cartData.grand_total;
     order.order_item_count = cartData.total_qty.toInt();
-    order.tax_amount = cartData.tax;
+    order.tax_amount = cartData.taxValues;
     order.tax_json = cartData.tax_json;
     order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
     order.order_status = 1;
@@ -2168,8 +2171,7 @@ class _DashboradPageState extends State<DashboradPage>
                             ),
                             Padding(
                               padding: EdgeInsets.only(right: 15),
-                              child: Text(
-                                  taxitem["taxAmount"].toStringAsFixed(2),
+                              child: Text(taxitem["taxAmount"],
                                   style: Styles.darkBlue()),
                             )
                           ]);
