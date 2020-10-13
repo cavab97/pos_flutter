@@ -91,7 +91,7 @@ class _DashboradPageState extends State<DashboradPage>
   double tax = 0;
   List taxJson = [];
   double grandTotal = 0;
-  MST_Cart allcartData;
+  MST_Cart allcartData = new MST_Cart();
   Voucher selectedvoucher;
   int currentCart;
   bool isLoading = false;
@@ -808,6 +808,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.server_id = 0;
     order.order_source = cartData.source;
     order.order_by = userdata.id;
+    order.voucher_detail = cartData.voucher_detail;
     order.voucher_id = cartData.voucher_id;
     order.voucher_amount = cartData.discount;
     order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
@@ -2280,7 +2281,10 @@ class _DashboradPageState extends State<DashboradPage>
         }),
       ).toList(),
     );
-    var vaucher = json.decode(allcartData.voucher_detail);
+    var vaucher = allcartData.voucher_detail != null
+        ? json.decode(allcartData.voucher_detail)
+        : null;
+
     final totalPriceTable = Table(
         border: TableBorder(
             top: BorderSide(
