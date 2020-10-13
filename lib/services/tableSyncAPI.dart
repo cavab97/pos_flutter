@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/helpers/config.dart';
 import 'package:http/http.dart' as http;
 
@@ -8,8 +7,7 @@ Future<dynamic> syncTable(dynamic data) async {
   var reqdata = data;
   try {
     Uri url = Uri.parse(Configrations.base_URL + Configrations.synch_table);
-    //print("url");
-    print(url);
+
     final client = new http.Client();
     Map<String, dynamic> params = {
       'serverdatetime': reqdata["serverdatetime"],

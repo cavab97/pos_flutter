@@ -1,18 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/helpers/config.dart';
-import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:http/http.dart' as http;
-import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 
 Future<dynamic> login(dynamic user) async {
-  print(user);
+ 
   try {
     Uri url = Uri.parse(Configrations.base_URL + Configrations.login);
-    //print("url");
-    print(url);
+    
+    
     final client = new http.Client();
     Map<String, dynamic> params = {
       'username': user.name,

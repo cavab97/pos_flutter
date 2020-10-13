@@ -69,12 +69,6 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
     List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     Orders order = await localAPI.getcurrentOrders(orderid);
-    print(branchAddress);
-    print(orderpaymentdata);
-    print(paument_method);
-    print(user);
-    print(itemsList);
-    print(order);
     setState(() {
       branchData = branchAddress;
       paymentdata = orderpaymentdata;

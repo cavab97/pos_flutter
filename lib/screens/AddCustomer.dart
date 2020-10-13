@@ -54,7 +54,6 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
       customer.stateId = 0;
       customer.countryId = 0;
       var result = await localAPI.addCustomer(customer);
-      print(result);
       Navigator.of(context).pop();
     }
   }
@@ -139,7 +138,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             children: <Widget>[
               Text(
                 Strings.countrys,
-                style: TextStyle(color: Colors.grey, fontSize: SizeConfig.safeBlockVertical * 2.5),
+                style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: SizeConfig.safeBlockVertical * 2.5),
               ),
               Container(
                   height: SizeConfig.safeBlockVertical * 9,
@@ -152,7 +153,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                         value: value,
                         child: new Text(
                           value,
-                          style: TextStyle(color: Colors.black,fontSize: SizeConfig.safeBlockVertical * 3),
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: SizeConfig.safeBlockVertical * 3),
                         ),
                       );
                     }).toList(),
@@ -170,7 +173,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             children: <Widget>[
               Text(
                 Strings.city,
-                style: TextStyle(color: Colors.grey, fontSize: SizeConfig.safeBlockVertical * 2.5),
+                style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: SizeConfig.safeBlockVertical * 2.5),
               ),
               Container(
                   height: SizeConfig.safeBlockVertical * 9,
@@ -183,7 +188,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                         value: value,
                         child: new Text(
                           value,
-                          style: TextStyle(color: Colors.black,fontSize: SizeConfig.safeBlockVertical * 3),
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: SizeConfig.safeBlockVertical * 3),
                         ),
                       );
                     }).toList(),
@@ -201,7 +208,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             children: <Widget>[
               Text(
                 Strings.state,
-                style: TextStyle(color: Colors.grey, fontSize: SizeConfig.safeBlockVertical * 2.5),
+                style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: SizeConfig.safeBlockVertical * 2.5),
               ),
               Container(
                   height: SizeConfig.safeBlockVertical * 9,
@@ -214,7 +223,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                         value: value,
                         child: new Text(
                           value,
-                          style: TextStyle(color: Colors.black,fontSize: SizeConfig.safeBlockVertical * 3),
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: SizeConfig.safeBlockVertical * 3),
                         ),
                       );
                     }).toList(),
@@ -231,7 +242,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
         keyboardType: type,
         obscureText: isPassword,
         decoration: InputDecoration(
-          contentPadding: EdgeInsets.only(left: 10,right: 10),
+          contentPadding: EdgeInsets.only(left: 10, right: 10),
           border: OutlineInputBorder(),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),

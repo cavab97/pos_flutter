@@ -187,7 +187,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   cancleTransactionWithMethod(paymehtod, reason) {
-    print(paymehtod);
     cancleTransation(reason);
     Navigator.of(context).pop();
   }
@@ -592,7 +591,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
           startFilter();
         },
         onChanged: (e) {
-          print(e);
           if (e.length != 0) {
             filterOrders(e);
           }
@@ -1044,7 +1042,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       );
     } else {
       return Container(
-        height: MediaQuery.of(context).size.height,
+        // /height: MediaQuery.of(context).size.height,
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: 5),
           shrinkWrap: true,

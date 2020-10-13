@@ -70,7 +70,7 @@ class _SettingsPageState extends State<SettingsPage> {
   /*Get all Printer from DB*/
   getAllPrinter() async {
     List<Printer> printer = await localAPI.getAllPrinter();
-    print(printer);
+   
     setState(() {
       printerList = printer;
     });
@@ -86,13 +86,12 @@ class _SettingsPageState extends State<SettingsPage> {
               onClose: (selected) async {
                 Navigator.of(context).pop();
                 //TODO: Save Printer
-                print(selected);
+               
                 Printer table_printe = new Printer();
                 table_printe.printerIp = ip;
                 table_printe.printerIsCashier = selected;
                 var result = await localAPI.insertTablePrinter(table_printe);
-                print("Printer result");
-                print(result);
+               
               });
         });
   }

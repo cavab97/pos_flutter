@@ -47,14 +47,7 @@ class DatabaseHelper {
   Future<Database> initializeDatabase() async {
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path + "/" + databaseName;
-    print(path);
-    // if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
     _database = await openDatabase(path, version: 1, onCreate: _createDb);
-    // } else {
-    //   _database = await openDatabase(path, version: 1, onCreate: _onOpen;
-    //   print("already exit\(path)" + path);
-    // }
-
     return _database;
   }
 
@@ -63,11 +56,6 @@ class DatabaseHelper {
     print(data);
   }
 
-  // Future<dynamic> getlocalData() async {
-  //   Database db = await this.database;
-  //   var result = await tableDataHelper.getRoleData(db);
-  //   return result;
-  // }
 
   Future<dynamic> insertData1(tablesData) async {
     Database db = await this.database;
@@ -112,7 +100,7 @@ class DatabaseHelper {
   }
 
   Future<dynamic> accetsData(tablesData) async {
-    print("Exception.........................tablesData");
+  
     Database db = await this.database;
     var result = await tableDataHelper.insertProductImage(db, tablesData);
     return result;

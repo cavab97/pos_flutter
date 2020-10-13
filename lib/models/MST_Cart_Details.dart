@@ -18,6 +18,7 @@ class MSTCartdetails {
   int isSendKichen;
   String itemUnit;
   String cart_detail;
+  int issetMeal;
   int hasCompositeInventory;
   int productPoints;
   int productTotalPoints;
@@ -39,13 +40,11 @@ class MSTCartdetails {
       this.discountType,
       this.remark,
       this.isDeleted,
-      // this.sync,
+      this.issetMeal,
       this.isSendKichen,
       this.itemUnit,
       this.hasCompositeInventory,
       this.cart_detail,
-      // this.productPoints,
-      // this.productTotalPoints,
       this.createdAt,
       this.createdBy});
 
@@ -78,9 +77,8 @@ class MSTCartdetails {
     cart_detail = json['cart_detail'];
     isSendKichen = json["is_send_kichen"];
     itemUnit = json["item_unit"];
+    issetMeal = json["issetMeal"];
     hasCompositeInventory = json["has_composite_inventory"];
-    // productPoints = json["product_points"];
-    // productTotalPoints = json["product_total_points"];
     createdAt = json["created_at"];
     createdBy = json["created_by"];
   }
@@ -106,6 +104,7 @@ class MSTCartdetails {
     data["cart_detail"] = this.cart_detail;
     data["has_composite_inventory"] = this.hasCompositeInventory;
     data["item_unit"] = this.itemUnit;
+    data["issetMeal"] = this.issetMeal;
     data["created_by"] = this.createdBy;
     data["created_at"] = this.createdAt;
     return data;

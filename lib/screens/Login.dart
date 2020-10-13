@@ -105,7 +105,6 @@ class _LoginPageState extends State<LoginPage> {
           setState(() {
             isLoading = false;
           });
-          print(e);
           CommunFun.showToast(context, e.message);
         }).whenComplete(() {});
       }

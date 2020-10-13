@@ -8,8 +8,6 @@ import 'package:http/http.dart' as http;
 class APICalls {
   static apiCall(apiurl, context, stringParams) async {
     try {
-      print(apiurl);
-      print(stringParams);
       var connected = await CommunFun.checkConnectivity();
       if (connected) {
         Uri url = Uri.parse(Configrations.base_URL + apiurl);
