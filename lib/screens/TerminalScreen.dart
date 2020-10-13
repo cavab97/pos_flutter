@@ -68,7 +68,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
             CommunFun.showToast(context, value["message"]);
           }
         }).catchError((e) {
-          print(e);
+        
           CommunFun.showToast(context, e.message);
           setState(() {
             isLoading = false;

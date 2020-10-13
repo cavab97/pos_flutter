@@ -43,12 +43,20 @@ class _ShiftReportsState extends State<ShiftReports> {
     'Cash Drawer Summary',
     'Payment Summary'
   ];
-
+  var permissions = "";
   @override
   void initState() {
     super.initState();
     getShiftData();
     getOrders();
+    setPermissons();
+  }
+
+  setPermissons() async {
+    var permission = await CommunFun.getPemission();
+    setState(() {
+      permissions = permission;
+    });
   }
 
   getOrders() async {
@@ -180,7 +188,9 @@ class _ShiftReportsState extends State<ShiftReports> {
               shiftTitles(),
               crousalWidget(),
               scrollIndicator(),
-              squareActionButton()
+              permissions.contains(Constant.EDIT_REPORT)
+                  ? squareActionButton()
+                  : SizedBox()
             ],
           ),
         ),

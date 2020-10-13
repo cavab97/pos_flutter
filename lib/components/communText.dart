@@ -218,7 +218,6 @@ class CommunFun {
     );
   }
 
-  
   static syncAfterSuccess(context) async {
     // sync in 4 part api call
     opneSyncPop(context);
@@ -309,18 +308,37 @@ class CommunFun {
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
+
+    getAssetsData(context);
+  }
+
+  static getAssetsData(context) async {
+    var offset = await CommunFun.getOffset();
     var aceets = await SyncAPICalls.getAssets(context);
     if (aceets != null) {
-      databaseHelper.accetsData(aceets["data"]);
-      var serverTime =
-          await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
-      Navigator.of(context).pop();
-      if (serverTime == null) {
-        Navigator.pushNamed(context, Constant.PINScreen);
+      await databaseHelper.accetsData(aceets["data"]);
+      await Preferences.setStringToSF(
+          Constant.OFFSET, aceets["data"]["next_offset"].toString());
+      print(aceets["data"]["product_image"]);
+      if (offset == null) {
+        if (aceets["data"]["next_offset"] != 0) {
+          getAssetsData(context);
+        }
+        Navigator.of(context).pop();
+        var serverTime =
+            await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+        if (serverTime == null) {
+          Navigator.pushNamed(context, Constant.PINScreen);
+        } else {
+          Navigator.pushNamed(context, Constant.DashboardScreen);
+        }
       } else {
-        Navigator.pushNamed(context, Constant.DashboardScreen);
+        if (aceets["data"]["next_offset"] != 0) {
+          getAssetsData(context);
+        } else {
+          await CommunFun.setServerTime(aceets, "4");
+        }
       }
-      await CommunFun.setServerTime(aceets, "4");
     } else {
       // handle Exaption
       print("Error when getting product image data");
@@ -463,6 +481,11 @@ class CommunFun {
     return branchid;
   }
 
+  static getOffset() async {
+    var offset = await Preferences.getStringValuesSF(Constant.OFFSET);
+    return offset;
+  }
+
   static getCurrentDateTime(dateTime) async {
     tz.initializeTimeZones();
     //converttoserver tiem
@@ -537,7 +560,6 @@ class CommunFun {
   }
 
   static savewebOrdersintoCart(cartdata) async {
-    print(cartdata);
     LocalAPI localAPI = LocalAPI();
     for (var i = 0; i < cartdata.length; i++) {
       var cart = cartdata[i];
@@ -568,7 +590,7 @@ class CommunFun {
         "cart_payment_status": cart["cart_payment_status"],
       };
       var cartJson = MST_Cart.fromJson(cartdataitem);
-      print(cartJson);
+
       var detaildata = cart["cart_detail"];
       for (var j = 0; j < detaildata.length; j++) {
         var detailitem = detaildata[j];
@@ -596,7 +618,7 @@ class CommunFun {
           "created_at": detailitem["created_at"]
         };
         var cartdetailJson = MSTCartdetails.fromJson(cartDeatils);
-        print(cartdetailJson);
+
         await localAPI.updateWebCartdetails(cartdetailJson);
         var cartSubData = detailitem["cart_sub_detail"];
         for (var p = 0; p < cartSubData.length; p++) {
@@ -612,7 +634,7 @@ class CommunFun {
             "attr_price": subdetailitem["attr_price"],
           };
           var subjson = MSTSubCartdetails.fromJson(subdata);
-          print(subjson);
+
           await localAPI.updateWebCartsubdetails(subjson);
         }
       }

@@ -158,7 +158,7 @@ class PrintReceipt {
     ticket.hr();
     for (var i = 0; i < orderdetail.length; i++) {
       var item = orderdetail[i];
-      var name = json.decode(item.product_detail);
+      var name = jsonDecode(item.product_detail);
       print(name);
       ticket.row([
         PosColumn(
@@ -440,16 +440,19 @@ class PrintReceipt {
     ticket.setStyles(
         PosStyles(align: PosAlign.center, fontType: PosFontType.fontB));
     ticket.text(printerName + " Tested",
-        styles: PosStyles(align: PosAlign.center,bold: true, width: PosTextSize.size1));
+        styles: PosStyles(
+            align: PosAlign.center, bold: true, width: PosTextSize.size1));
 
     ticket.text("Printer IP : " + printerIp,
-        styles: PosStyles(align: PosAlign.center,bold: true, width: PosTextSize.size1));
+        styles: PosStyles(
+            align: PosAlign.center, bold: true, width: PosTextSize.size1));
 
     final now = DateTime.now();
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
 
-    ticket.text("Test Date time : " + timestamp, styles: PosStyles(align: PosAlign.center,bold: true));
+    ticket.text("Test Date time : " + timestamp,
+        styles: PosStyles(align: PosAlign.center, bold: true));
 
     ticket.feed(2);
     ticket.cut();

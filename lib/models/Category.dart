@@ -6,6 +6,7 @@ class Category {
   String categoryIcon;
   int parentId;
   int isForWeb;
+  int isSetmeal;
   int status;
   String updatedAt;
   int updatedBy;
@@ -21,6 +22,7 @@ class Category {
       this.parentId,
       this.isForWeb,
       this.status,
+      this.isSetmeal,
       this.updatedAt,
       this.updatedBy,
       this.deletedAt,
@@ -34,6 +36,7 @@ class Category {
     categoryIcon = json['category_icon'];
     parentId = json['parent_id'];
     isForWeb = json['is_for_web'];
+    isSetmeal = json['is_setmeal'];
     status = json['status'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
@@ -50,6 +53,7 @@ class Category {
     data['category_icon'] = this.categoryIcon;
     data['parent_id'] = this.parentId;
     data['is_for_web'] = this.isForWeb;
+    data["is_setmeal"] = this.isSetmeal;
     data['status'] = this.status;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;

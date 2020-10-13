@@ -126,10 +126,12 @@ class SyncAPICalls {
     var branchid = await CommunFun.getbranchId();
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+    var offset = await Preferences.getStringValuesSF(Constant.OFFSET);
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
       'branchId': branchid, // serverTime,
-      'terminal_id': terminalId
+      'terminal_id': terminalId,
+      'offset': offset != null ? int.parse(offset) : 10
     };
     return await APICalls.apiCall(apiurl, context, stringParams);
   }
@@ -164,7 +166,6 @@ class SyncAPICalls {
     log.updated_at = datetime;
     log.updated_by = userdata.id;
     var logid = await localAPI.terminalLog(log);
-    print(logid);
   }
 
   static syncOrderstoDatabase(context) async {
@@ -245,7 +246,6 @@ class SyncAPICalls {
             'order_payment': ordersPayment
           };
           ordersList.add(orderMap);
-          print(ordersList);
         }
         var stringParams = {
           'terminal_id': terminalId,
@@ -315,7 +315,7 @@ class SyncAPICalls {
           order.updated_at = orderdata["updated_at"];
           order.updated_by = orderdata["updated_by"];
           var result = await localAPI.saveSyncOrder(order);
-          print(result);
+
           var orderdetail = orderdata["order_detail"];
           if (orderdetail.length > 0) {
             for (var i = 0; i < orderdetail.length; i++) {
@@ -374,7 +374,6 @@ class SyncAPICalls {
                   m_data.updated_at = modifiredata["updated_at"];
                   m_data.updated_by = modifiredata["updated_by"];
                   var datres = await localAPI.saveSyncOrderModifire(m_data);
-                  print(datres);
                 }
               }
               var attribute = detail["order_attributes"];
@@ -400,7 +399,6 @@ class SyncAPICalls {
                   attr.updated_at = attributeDt["updated_at"];
                   attr.updated_by = attributeDt["updated_by"];
                   var attrres = await localAPI.saveSyncOrderAttribute(attr);
-                  print(attrres);
                 }
               }
             }
@@ -426,7 +424,6 @@ class SyncAPICalls {
               paymentdat.updated_by = paydat["updated_by"];
               // paymentdat.serverId = paydat["serverId"];
               var paymentres = await localAPI.saveSyncOrderPaymet(paymentdat);
-              print(paymentres);
             }
           }
         }
@@ -469,7 +466,7 @@ class SyncAPICalls {
             'order_cancel': json.encode(orderdata)
           };
           var res = await APICalls.apiCall(apiurl, context, stringParams);
-          print(res);
+
           if (res["status"] == Constant.STATUS200) {
             saveCancleORderTable(res);
           }
@@ -521,7 +518,7 @@ class SyncAPICalls {
           'store_inventory': json.encode(invData)
         };
         var res = await APICalls.apiCall(apiurl, context, stringParams);
-        print(res);
+
         if (res["status"] == Constant.STATUS200) {
           saveInvToTable(context, res);
         }
