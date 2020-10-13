@@ -396,51 +396,45 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   countSubtotal() {
     double subT = 0;
     if (cartItems.length > 0) {
+      double selectedITemTotal = 0;
       for (var i = 0; i < cartItems.length; i++) {
         var item = cartItems[i];
-        if (isSetMeal) {
-          if (item.productId == setmeal.setmealId) {
-            item.productQty = product_qty;
-          }
-        } else {
-          if (item.productId == productItem.productId) {
-            item.productPrice = price;
-          }
-        }
-        subT += item.productPrice;
+        selectedITemTotal += item.productPrice;
       }
-      if (!isEditing) {
-        subT += price;
+      if (isEditing) {
+        selectedITemTotal = selectedITemTotal - cartitem.productPrice;
       }
+      subT = selectedITemTotal + price;
     } else {
       subT += price;
     }
     return subT;
   }
 
-  countGrandtotal(tax, dis) {
+  countGrandtotal(subt, tax, dis) {
     double grandTotal = 0;
-    if (cartItems.length > 0) {
-      for (var i = 0; i < cartItems.length; i++) {
-        var item = cartItems[i];
-        if (isSetMeal) {
-          if (item.productId == setmeal.setmealId) {
-            item.productQty = product_qty;
-          }
-        } else {
-          if (item.productId == productItem.productId) {
-            item.productPrice = price;
-          }
-        }
-        grandTotal += item.productPrice;
-      }
-      if (!isEditing) {
-        grandTotal += price;
-      }
-    } else {
-      grandTotal += price;
-    }
-    return grandTotal = ((grandTotal + tax) - dis);
+    // if (cartItems.length > 0) {
+    //   for (var i = 0; i < cartItems.length; i++) {
+    //     var item = cartItems[i];
+    //     if (isSetMeal) {
+    //       if (item.productId == setmeal.setmealId) {
+    //         item.productQty = product_qty;
+    //       }
+    //     } else {
+    //       if (item.productId == productItem.productId) {
+    //         item.productPrice = price;
+    //       }
+    //     }
+    //     grandTotal += item.productPrice;
+    //   }
+    //   if (!isEditing) {
+    //     grandTotal += price;
+    //   }
+    // } else {
+    //   grandTotal += price;
+    // }
+    grandTotal = ((subt - dis) + tax);
+    return grandTotal;
   }
 
   countTax(subT) async {
@@ -499,7 +493,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var disc = await countDiscount();
     var subtotal = await countSubtotal();
     var totalTax = await countTax(subtotal);
-    var grandTotal = await countGrandtotal(taxvalues, disc);
+    var grandTotal = await countGrandtotal(subtotal, taxvalues, disc);
 
     //cart data
     cart.user_id = customerid;
@@ -554,6 +548,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = DateTime.now().toString();
+    print(json.encode(cartdetails.cart_detail));
     var detailID = await localAPI.addintoCartDetails(cartdetails);
 
     if (selectedModifier.length > 0) {

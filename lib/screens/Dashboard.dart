@@ -10,6 +10,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Branch.dart';
+import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
@@ -29,6 +30,7 @@ import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
@@ -73,6 +75,8 @@ class _DashboradPageState extends State<DashboradPage>
   List<MSTCartdetails> cartList = new List<MSTCartdetails>();
   List<SetMeal> mealsList = new List<SetMeal>();
   SlidableController slidableController = SlidableController();
+  List<BranchTax> taxlist = [];
+  double taxvalues = 0.00;
   bool isDrawerOpen = false;
   bool isShiftOpen = true;
   var userDetails;
@@ -136,6 +140,7 @@ class _DashboradPageState extends State<DashboradPage>
     await checkidTableSelected();
     await getUserData();
     await setPermissons();
+    await getTaxs();
     _textController.addListener(() {
       getSearchList(_textController.text.toString());
     });
@@ -1038,29 +1043,63 @@ class _DashboradPageState extends State<DashboradPage>
     //     });
   }
 
-  removeTax(cartdata, item) {
-    var taxjson = json.decode(cartdata);
-    for (var i = 0; i < taxjson.length; i++) {
-      taxjson[i]["taxAmount"] =
-          double.parse(taxjson[i]["taxAmount"]) - item.taxValue;
-      return taxjson;
+  getTaxs() async {
+    var branchid = await CommunFun.getbranchId();
+    List<BranchTax> taxlists = await localAPI.getTaxList(branchid);
+    if (taxlists.length > 0) {
+      setState(() {
+        taxlist = taxlists;
+      });
     }
-    return taxjson;
+  }
+
+  countTax(subT) async {
+    var totalTax = [];
+    double taxvalue = taxvalues;
+    if (taxlist.length > 0) {
+      for (var i = 0; i < taxlist.length; i++) {
+        var taxlistitem = taxlist[i];
+        List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
+        var taxval = taxlistitem.rate != null
+            ? subT * double.parse(taxlistitem.rate) / 100
+            : 0.0;
+        taxval = double.parse(taxval.toStringAsFixed(2));
+        taxvalue += taxval;
+        setState(() {
+          taxvalues = taxvalue;
+        });
+        var taxmap = {
+          "id": taxlistitem.id,
+          "tax_id": taxlistitem.taxId,
+          "branch_id": taxlistitem.branchId,
+          "rate": taxlistitem.rate,
+          "status": taxlistitem.status,
+          "updated_at": taxlistitem.updatedAt,
+          "updated_by": taxlistitem.updatedBy,
+          "taxAmount": taxval.toString(),
+          "taxCode": tax.length > 0 ? tax[0].code : "" //tax.code
+        };
+        totalTax.add(taxmap);
+      }
+    }
+    return totalTax;
   }
 
   itememovefromCart(cartitem) async {
     try {
       MST_Cart cart = new MST_Cart();
       MSTCartdetails cartitemdata = cartitem;
-      cart = allcartData;
-      cart.sub_total = allcartData.sub_total - cartitemdata.productPrice;
-      cart.discount = allcartData.discount != null
+      var subt = allcartData.sub_total -  cartitemdata.productPrice;
+      var taxjson = await countTax(subt);
+      var disc = allcartData.discount != null
           ? allcartData.discount - cartitemdata.discount
           : 0;
+      cart = allcartData;
+      cart.sub_total = subt;
+      cart.discount = disc;
       cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
-      cart.grand_total = allcartData.grand_total - cartitemdata.productPrice;
-      // cart.tax_json =
-      // json.encode(removeTax(allcartData.tax_json, cartitemdata));
+      cart.grand_total = (subt - disc) + taxvalues;
+      cart.tax_json = json.encode(taxjson);
       await localAPI.deleteCartItem(
           cartitem, currentCart, cart, cartList.length == 1);
       if (cartitem.isSendKichen == 1) {
@@ -1895,13 +1934,12 @@ class _DashboradPageState extends State<DashboradPage>
     final double itemHeight = size.width / 4.2;
     final double itemWidth = size.width / 4.2;
     return Container(
-      // height: MediaQuery.of(context).size.height,
+      height: MediaQuery.of(context).size.height / 1.3,
       width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.only(top: 5),
+      padding: EdgeInsets.only(top: 5, bottom: 20),
       child: GridView.count(
-        addRepaintBoundaries: false,
+        addRepaintBoundaries: true,
         shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
         children: productList.map((product) {
