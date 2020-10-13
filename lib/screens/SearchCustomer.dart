@@ -12,8 +12,10 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 
 class SearchCustomerPage extends StatefulWidget {
-  SearchCustomerPage({Key key, this.onClose}) : super(key: key);
+  SearchCustomerPage({Key key, this.onClose, this.isFor}) : super(key: key);
   Function onClose;
+  String isFor;
+
   @override
   _SearchCustomerPageState createState() => _SearchCustomerPageState();
 }
@@ -24,6 +26,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
   List<Customer> customerList = new List<Customer>();
   List<Customer> filterList = [];
   bool isFiltring = false;
+
   @override
   void initState() {
     super.initState();
@@ -52,8 +55,13 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
   }
 
   saveCustomerTolocal(customer) async {
-    await Preferences.setStringToSF(
-        Constant.CUSTOMER_DATA, json.encode(customer));
+    if (widget.isFor == Constant.dashboard) {
+      await Preferences.setStringToSF(
+          Constant.CUSTOMER_DATA, json.encode(customer));
+    } else if (widget.isFor == Constant.splitbill) {
+      await Preferences.setStringToSF(
+          Constant.CUSTOMER_DATA_SPLIT, json.encode(customer));
+    }
     Navigator.of(context).pop();
     widget.onClose();
   }

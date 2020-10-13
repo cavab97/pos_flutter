@@ -92,6 +92,7 @@ class _DashboradPageState extends State<DashboradPage>
   User checkInUser;
   var permissions = "";
   var currency;
+
   @override
   void initState() {
     super.initState();
@@ -348,7 +349,15 @@ class _DashboradPageState extends State<DashboradPage>
             context: context,
             builder: (BuildContext context) {
               return SplitBillDialog(
-                cartList: cartList,
+                onSelectedRemove: (cart) {
+                  itememovefromCart(cart);
+                },
+                onClose: (String isFor){
+                  if(isFor=="clear") {
+                    clearCart();
+                  }
+                },
+                currentCartID: currentCart,
                 customer: customer != null ? customer.name : "",
               );
             });
@@ -651,7 +660,7 @@ class _DashboradPageState extends State<DashboradPage>
             onClose: () {
               //refreshAfterAction();
               checkCustomerSelected();
-            },
+            },isFor: Constant.dashboard
           );
         });
   }
@@ -764,7 +773,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.sub_total_after_discount = cartData.sub_total;
     order.grand_total = cartData.grand_total;
     order.order_item_count = cartData.total_qty.toInt();
-    order.tax_amount = cartData.taxValues;
+    order.tax_amount = cartData.tax;
     order.tax_json = cartData.tax_json;
     order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
     order.order_status = 1;
@@ -981,10 +990,10 @@ class _DashboradPageState extends State<DashboradPage>
     //     builder: (BuildContext context) {
     //       return InvoiceReceiptDailog(orderid: orderid);
     //     });*/
-    await getOrderData(orderid, int.parse(terminalId));
+    await printReceipt(orderid, int.parse(terminalId));
   }
 
-  getOrderData(int orderid, int terminalId) async {
+  printReceipt(int orderid, int terminalId) async {
     var branchID = await CommunFun.getbranchId();
     Branch branchAddress = await localAPI.getBranchData(branchID);
     OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
@@ -2035,7 +2044,7 @@ class _DashboradPageState extends State<DashboradPage>
               padding: EdgeInsets.only(left: 5, right: 5),
               child: new ListTile(
                 contentPadding:
-                    EdgeInsets.symmetric(vertical: 0, horizontal:5),
+                    EdgeInsets.symmetric(vertical: 0, horizontal: 5),
                 // dense: false,
                 title: new Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

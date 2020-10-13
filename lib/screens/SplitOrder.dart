@@ -1,20 +1,48 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
+import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/OrderAttributes.dart';
+import 'package:mcncashier/models/OrderDetails.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/models/Order_Modifire.dart';
+import 'package:mcncashier/models/Payment.dart';
+import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
+import 'package:mcncashier/models/Product_Store_Inventory.dart';
+import 'package:mcncashier/models/ShiftInvoice.dart';
+import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/Tax.dart';
+import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/models/Voucher_History.dart';
+import 'package:mcncashier/models/mst_sub_cart_details.dart';
+import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 
 import 'PaymentMethodPop.dart';
 
 class SplitBillDialog extends StatefulWidget {
-  SplitBillDialog({Key key, this.onClose, this.cartList, this.customer})
+  SplitBillDialog(
+      {Key key,
+      this.onSelectedRemove,
+      this.onClose,
+      this.currentCartID,
+      this.customer})
       : super(key: key);
   Function onClose;
-  List<MSTCartdetails> cartList;
+  Function onSelectedRemove;
+  int currentCartID;
   String customer;
 
   @override
@@ -24,18 +52,44 @@ class SplitBillDialog extends StatefulWidget {
 class _SplitBillDialog extends State<SplitBillDialog> {
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
-  int selectedIndex = -1;
   List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
   double subTotal = 00.00;
   double taxValues = 00.00;
   double grandTotal = 00.00;
   List<BranchTax> taxlist = [];
+  List taxJson = [];
+  List<MSTCartdetails> cartList = new List<MSTCartdetails>();
+  bool isLoading = false;
+  String selectedID = "";
 
   @override
   void initState() {
     super.initState();
     getTaxs();
+    getCartItem();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
+  }
+
+  getCartItem() async {
+    /*this is used for set user data*/
+    widget.customer.isEmpty
+        ? await Preferences.removeSinglePref(Constant.CUSTOMER_DATA_SPLIT)
+        : await Preferences.setStringToSF(
+            Constant.CUSTOMER_DATA_SPLIT,
+            json.encode(Preferences.getStringValuesSF(Constant.CUSTOMER_DATA)
+                .toString()));
+
+    setState(() {
+      isLoading = true;
+    });
+    List<MSTCartdetails> cartItem =
+        await localAPI.getCartItem(widget.currentCartID);
+    if (cartItem.length > 0) {
+      setState(() {
+        cartList = cartItem;
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -59,6 +113,38 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                         ? "Walk-in customer"
                         : widget.customer,
                     style: Styles.whiteBoldsmall()),
+                SizedBox(
+                  width: 10,
+                ),
+                widget.customer.isEmpty
+                    ? IconButton(
+                        onPressed: () {
+                          openShowAddCustomerDailog();
+                        },
+                        icon: Icon(
+                          Icons.add_circle_outline,
+                          color: Colors.white,
+                          size: 30,
+                        ))
+                    : IconButton(
+                        onPressed: () {
+                          CommonUtils.showAlertDialog(context, () {
+                            Navigator.of(context).pop();
+                          }, () {
+                            Navigator.of(context).pop();
+                            removeCustomer();
+                          },
+                              "Alert",
+                              "Are you sure you want remove this customer?",
+                              "Yes",
+                              "No",
+                              true);
+                        },
+                        icon: Icon(
+                          Icons.remove_circle_outline,
+                          color: Colors.white,
+                          size: 30,
+                        )),
               ],
             ),
           ),
@@ -67,7 +153,22 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             top: 18,
             child: GestureDetector(
               onTap: () {
-                openPaymentMethod();
+                if (tempCart.length > 0) {
+                  openPaymentMethod();
+                } else {
+                  CommunFun.showToast(context, "Please select item for split");
+                }
+                /*tempCart.forEach((element) {
+                  var contain =
+                      cartList.where((mainCart) => mainCart.id == element.id);
+
+                  if (contain.isNotEmpty) {
+                    setState(() {
+                      cartList.remove(element);
+                    });
+                  }
+                  widget.onSelectedRemove(element);
+                });*/
               },
               child: Text(
                 Strings.pay.toUpperCase(),
@@ -84,18 +185,65 @@ class _SplitBillDialog extends State<SplitBillDialog> {
 
   openPaymentMethod() {
     showDialog(
-      // Opning Ammount Popup
+        // Opning Ammount Popup
         context: context,
         builder: (BuildContext context) {
           return PaymentMethodPop(
             subTotal: subTotal,
             grandTotal: grandTotal,
             onClose: (mehtod) {
+              Navigator.of(context).pop();
               CommunFun.processingPopup(context);
-              //paymentWithMethod(mehtod);
+              paymentWithMethod(mehtod);
             },
           );
         });
+  }
+
+  paymentWithMethod(mehtod) async {
+    sendPaymentByCash(mehtod);
+  }
+
+  openShowAddCustomerDailog() {
+    // Send receipt Popup
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return SearchCustomerPage(
+            onClose: () {
+              checkCustomerSelected();
+            },
+            isFor: Constant.splitbill,
+          );
+        });
+  }
+
+  checkCustomerSelected() async {
+    Customer customerData = await getCustomer();
+    setState(() {
+      widget.customer = customerData.name;
+    });
+  }
+
+  Future<Customer> getCustomer() async {
+    Customer customer;
+    var customerData =
+        await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA_SPLIT);
+    if (customerData != null) {
+      var customers = json.decode(customerData);
+      customer = Customer.fromJson(customers);
+      return customer;
+    } else {
+      return customer;
+    }
+  }
+
+  removeCustomer() async {
+    await Preferences.removeSinglePref(Constant.CUSTOMER_DATA_SPLIT);
+    setState(() {
+      widget.customer = "";
+    });
   }
 
   Widget closeButton(context) {
@@ -120,16 +268,17 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         ));
   }
 
-  setTotalSubTotal() {
+  setTotalSubTotal() async {
     subTotal = 00.00;
     grandTotal = 00.00;
 
     tempCart.forEach((element) {
       subTotal = subTotal + element.productPrice;
     });
+    var tempTaxJSon = await countTax(subTotal);
     setState(() {
+      taxJson = tempTaxJSon;
       subTotal = subTotal;
-      countTax(subTotal);
       grandTotal = subTotal + taxValues;
     });
   }
@@ -187,7 +336,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         height: MediaQuery.of(context).size.height,
         color: Colors.white,
         child: Stack(children: <Widget>[
-          productList(),
+          isLoading ? CommunFun.loader(context) : productList(),
           Positioned(
             bottom: 0,
             left: 0,
@@ -226,28 +375,52 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 SizedBox(
                   height: 5,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(
-                        top: 0,
-                      ),
-                      child: Text(
-                        "Tax".toUpperCase(),
-                        style: Styles.darkGray(),
-                      ),
-                    ),
-                    SizedBox(width: 70),
-                    Padding(
-                        padding: EdgeInsets.only(
-                          top: 0,
-                        ),
-                        child: Text(
-                          taxValues.toStringAsFixed(2),
-                          style: Styles.blackMediumbold(),
-                        )),
-                  ],
+                Container(
+                  child: taxJson.length != 0
+                      ? Column(
+                          children: taxJson.map((taxitem) {
+                          return Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                Padding(
+                                  padding: EdgeInsets.only(bottom: 5),
+                                  child: Text(
+                                    Strings.tax.toUpperCase() +
+                                        " " +
+                                        taxitem["taxCode"] +
+                                        "(" +
+                                        taxitem["rate"] +
+                                        "%)",
+                                    style: Styles.darkGray(),
+                                  ),
+                                ),
+                                SizedBox(width: 70),
+                                Padding(
+                                  padding: EdgeInsets.all(0),
+                                  child: Text(taxitem["taxAmount"],
+                                      style: Styles.blackMediumbold()),
+                                )
+                              ]);
+                        }).toList())
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                              Padding(
+                                padding: EdgeInsets.all(0),
+                                child: Text(
+                                  Strings.tax.toUpperCase(),
+                                  style: Styles.darkGray(),
+                                ),
+                              ),
+                              SizedBox(width: 70),
+                              Padding(
+                                padding: EdgeInsets.all(0),
+                                child: Text(
+                                  taxValues.toStringAsFixed(2),
+                                  style: Styles.blackMediumBold(),
+                                ),
+                              )
+                            ]),
                 ),
                 SizedBox(
                   height: 5,
@@ -285,17 +458,13 @@ class _SplitBillDialog extends State<SplitBillDialog> {
 
   Widget productList() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10),
+      padding: EdgeInsets.only(bottom: 50),
       //height: MediaQuery.of(context).size.height / 3.5,
       //width: MediaQuery.of(context).size.width / 1.7,
       child: SingleChildScrollView(
         child: Column(
-            children: widget.cartList.map((product) {
-          var index = widget.cartList.indexOf(product);
-          var item = widget.cartList[index];
-          //  var producrdata = json.decode(item.product_detail);
-          // var image_Arr =
-          //     producrdata["base64"].replaceAll("data:image/jpg;base64,", '');
+            children: cartList.map((product) {
+          var productdata = json.decode(product.cart_detail);
           return InkWell(
               onTap: () {},
               child: Container(
@@ -307,37 +476,28 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                         tag: product.productId,
                         child: GestureDetector(
                           // This does not give the tap position ...
-                          onLongPress: () {},
+                          /*onLongPress: () {CommunFun.showToast(
+                              context, "Longpressssss");
+                          },*/
                           onTap: () {
-                            var contain = tempCart
-                                .where((element) => element.id == product.id);
-
-                            if (contain.isNotEmpty) {
-                              setState(() {
-                                tempCart.remove(product);
-                              });
-                            } else if (contain.isEmpty) {
-                              setState(() {
-                                tempCart.add(product);
-                              });
-                            }
-                            setTotalSubTotal();
+                            /*CommunFun.showToast(
+                                context, "Tabbbbbbbbbbbbbbbb");*/
+                            _setSelectUnselect(product);
                           },
-                          child: new Stack(
+                          child: Stack(
                             children: [
                               Container(
                                 height: SizeConfig.safeBlockVertical * 8,
                                 width: SizeConfig.safeBlockVertical * 9,
-                                child:
-                                    /* producrdata["base64"] != ""
-                                ? CommonUtils.imageFromBase64String(
-                                producrdata["base64"])
-                                : */
-                                    new Image.asset(
-                                  Strings.no_imageAsset,
-                                  fit: BoxFit.cover,
-                                  gaplessPlayback: true,
-                                ),
+                                child: productdata["base64"] != "" &&
+                                        productdata["base64"] != null
+                                    ? CommonUtils.imageFromBase64String(
+                                        productdata["base64"])
+                                    : new Image.asset(
+                                        Strings.no_imageAsset,
+                                        fit: BoxFit.cover,
+                                        gaplessPlayback: true,
+                                      ),
                               ),
                               tempCart
                                       .where(
@@ -346,7 +506,18 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                                   ? Container(
                                       height: SizeConfig.safeBlockVertical * 8,
                                       width: SizeConfig.safeBlockVertical * 9,
-                                      color: Colors.black12)
+                                      color: Colors.black54,
+                                      child: IconButton(
+                                        onPressed: () {
+                                          _setSelectUnselect(product);
+                                        },
+                                        icon: Icon(
+                                          Icons.check_rounded,
+                                          color: Colors.white,
+                                          size: 40,
+                                        ),
+                                      ),
+                                    )
                                   : SizedBox()
                             ],
                           ),
@@ -384,5 +555,377 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         }).toList()),
       ),
     );
+  }
+
+  _setSelectUnselect(MSTCartdetails product) {
+    var contain = tempCart.where((element) => element.id == product.id);
+
+    if (contain.isNotEmpty) {
+      setState(() {
+        tempCart.remove(product);
+      });
+    } else if (contain.isEmpty) {
+      setState(() {
+        tempCart.add(product);
+      });
+    }
+    setTotalSubTotal();
+  }
+
+  sendPaymentByCash(payment) async {
+    var cartData = await getcartData();
+    var branchdata = await getbranch();
+    /*if (isWebOrder) {
+      payment.paymentId = cartData.cart_payment_id;
+    }*/
+    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+    Orders order = new Orders();
+    Table_order tables = await getTableData();
+    User userdata = await CommunFun.getuserDetails();
+    List<MSTCartdetails> cartList = await getcartDetails();
+    var terminalId = await CommunFun.getTeminalKey();
+    var branchid = await CommunFun.getbranchId();
+    var uuid = await CommunFun.getLocalID();
+    //var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
+    List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
+
+    int length = branchdata.invoiceStart.length;
+    var invoiceNo;
+    if (lastappid.length > 0) {
+      order.app_id = lastappid[0].app_id + 1;
+      invoiceNo =
+          branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
+    } else {
+      order.app_id = int.parse(terminalId);
+      invoiceNo =
+          branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
+    }
+
+    order.uuid = uuid;
+    order.branch_id = int.parse(branchid);
+    order.terminal_id = int.parse(terminalId);
+    order.table_id = tables.table_id;
+    //order.table_no = tables.table_id;
+    order.invoice_no = invoiceNo;
+    order.customer_id = cartData.user_id;
+    order.sub_total = subTotal;
+    order.sub_total_after_discount = subTotal;
+    order.grand_total = grandTotal;
+    order.order_item_count = 1; //cartData.total_qty.toInt();
+    order.tax_amount = taxValues;
+    order.tax_json = json.encode(taxJson);
+    order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
+    order.order_status = 1;
+    order.server_id = 0;
+    order.order_source = 2; //cartData.source;
+    order.order_by = userdata.id;
+    //order.voucher_id = cartData.voucher_id;
+    // order.voucher_amount = cartData.discount;
+    order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    order.updated_by = userdata.id;
+    var orderid = await localAPI.placeOrder(order);
+    print(orderid);
+    /*if (cartData.voucher_id != 0 && cartData.voucher_id != null) {
+      VoucherHistory history = new VoucherHistory();
+      history.voucher_id = cartData.voucher_id;
+      history.amount = cartData.discount;
+      history.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+      history.order_id = orderid;
+      history.uuid = uuid;
+      var hisID = await localAPI.saveVoucherHistory(history);
+      print(hisID);
+    }*/
+
+    var orderDetailid;
+    if (orderid > 0) {
+      if (tempCart.length > 0) {
+        var orderId = orderid;
+        for (var i = 0; i < tempCart.length; i++) {
+          OrderDetail orderDetail = new OrderDetail();
+          var cartItem = tempCart[i];
+          var productdata = await localAPI.productdData(cartItem.productId);
+          ProductDetails pdata;
+          if (productdata.length > 0) {
+            productdata[0].qty = cartItem.productQty;
+            productdata[0].price = cartItem.productPrice;
+            pdata = productdata[0];
+          }
+          List<OrderDetail> lappid =
+              await localAPI.getLastOrdeDetailAppid(terminalId);
+          if (lappid.length > 0) {
+            orderDetail.app_id = lappid[0].app_id + 1;
+          } else {
+            orderDetail.app_id = int.parse(terminalId);
+          }
+          orderDetail.uuid = uuid;
+          orderDetail.order_id = orderId;
+          orderDetail.branch_id = int.parse(branchid);
+          orderDetail.terminal_id = int.parse(terminalId);
+          orderDetail.product_id = cartItem.productId;
+          orderDetail.product_price = cartItem.productPrice;
+          orderDetail.product_old_price = cartItem.productNetPrice;
+          orderDetail.detail_qty = cartItem.productQty;
+          orderDetail.product_discount = cartItem.discount;
+          orderDetail.product_detail = json.encode(pdata);
+          orderDetail.updated_at =
+              await CommunFun.getCurrentDateTime(DateTime.now());
+          orderDetail.detail_amount =
+              (cartItem.productPrice * cartItem.productQty);
+          orderDetail.detail_datetime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
+          orderDetail.updated_by = userdata.id;
+          orderDetail.detail_status = 1;
+          orderDetail.detail_by = userdata.id;
+          orderDetailid = await localAPI.sendOrderDetails(orderDetail);
+          print(orderDetailid);
+
+          if (productdata[0].hasInventory == 1) {
+            //update invnotory
+            // List<ProductStoreInventory> inventory =
+            //     await localAPI.removeFromInventory(orderDetail);
+            List<ProductStoreInventory> inventory =
+                await localAPI.getStoreInventoryData(orderDetail.product_id);
+            if (inventory.length > 0) {
+              ProductStoreInventory invData = new ProductStoreInventory();
+              invData = inventory[0];
+              var prev = inventory[0];
+              var qty = (invData.qty - orderDetail.detail_qty);
+              invData.qty = qty;
+              invData.updatedAt =
+                  await CommunFun.getCurrentDateTime(DateTime.now());
+              invData.updatedBy = userdata.id;
+              var ulog = await localAPI.updateInvetory(invData);
+              print(ulog);
+
+              //Inventory log update
+              ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+              log.uuid = uuid;
+              log.inventory_id = prev.inventoryId;
+              log.branch_id = int.parse(branchid);
+              log.product_id = cartItem.productId;
+              log.employe_id = userdata.id;
+              log.qty = prev.qty;
+              log.qty_before_change = prev.qty;
+              log.qty_after_change = qty;
+              log.updated_at =
+                  await CommunFun.getCurrentDateTime(DateTime.now());
+              log.updated_by = userdata.id;
+              var inventoryLog =
+                  await localAPI.updateStoreInvetoryLogTable(log);
+              print(inventoryLog);
+            }
+          }
+        }
+      }
+    }
+    List<MSTSubCartdetails> modifireList = await getmodifireList();
+    if (modifireList.length > 0) {
+      var orderId = orderid;
+
+      for (var i = 0; i < modifireList.length; i++) {
+        OrderModifire modifireData = new OrderModifire();
+        var modifire = modifireList[i];
+
+        var contain =
+            tempCart.where((mainCart) => mainCart.id == modifire.cartdetailsId);
+
+        if (contain.isNotEmpty) {
+          if (modifire.caId == null) {
+            List<OrderModifire> lapMpid =
+                await localAPI.getLastOrderModifireAppid(terminalId);
+            if (lapMpid.length > 0) {
+              modifireData.app_id = lapMpid[0].app_id + 1;
+            } else {
+              modifireData.app_id = int.parse(terminalId);
+            }
+            modifireData.uuid = uuid;
+            modifireData.order_id = orderId;
+            modifireData.detail_id = orderDetailid;
+            modifireData.terminal_id = int.parse(terminalId);
+            modifireData.product_id = modifire.productId;
+            modifireData.modifier_id = modifire.modifierId;
+            modifireData.om_amount = modifire.modifirePrice;
+            modifireData.om_by = userdata.id;
+            modifireData.om_datetime =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            modifireData.om_status = 1;
+            modifireData.updated_at =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            modifireData.updated_by = userdata.id;
+            var ordermodifreid = await localAPI.sendModifireData(modifireData);
+            print(ordermodifreid);
+          } else {
+            OrderAttributes attributes = new OrderAttributes();
+            List<OrderAttributes> lapApid =
+                await localAPI.getLastOrderAttrAppid(terminalId);
+            if (lapApid.length > 0) {
+              attributes.app_id = lapApid[0].app_id + 1;
+            } else {
+              attributes.app_id = int.parse(terminalId);
+            }
+            attributes.uuid = uuid;
+            attributes.order_id = orderId;
+            attributes.detail_id = orderDetailid;
+            attributes.terminal_id = int.parse(terminalId);
+            attributes.product_id = modifire.productId;
+            attributes.attribute_id = modifire.attributeId;
+            attributes.attr_price = modifire.attrPrice;
+            attributes.ca_id = modifire.caId;
+            attributes.oa_datetime =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            attributes.oa_by = userdata.id;
+            attributes.oa_status = 1;
+            attributes.updated_at =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            attributes.updated_by = userdata.id;
+            var orderAttri = await localAPI.sendAttrData(attributes);
+            print(orderAttri);
+          }
+        }
+      }
+    }
+
+    OrderPayment orderpayment = new OrderPayment();
+    List<OrderPayment> lapPpid =
+        await localAPI.getLastOrderPaymentAppid(terminalId);
+    if (lapPpid.length > 0) {
+      orderpayment.app_id = lapPpid[0].app_id + 1;
+    } else {
+      orderpayment.app_id = int.parse(terminalId);
+    }
+    orderpayment.uuid = uuid;
+    orderpayment.order_id = orderid;
+    orderpayment.branch_id = int.parse(branchid);
+    orderpayment.terminal_id = int.parse(terminalId);
+    orderpayment.op_method_id = payment != "" ? payment.paymentId : 0;
+    orderpayment.op_amount =
+        (cartData.grand_total - cartData.discount).toDouble();
+    orderpayment.op_method_response = '';
+    orderpayment.op_status = 1;
+    orderpayment.op_datetime =
+        await CommunFun.getCurrentDateTime(DateTime.now());
+    orderpayment.op_by = userdata.id;
+    orderpayment.updated_at =
+        await CommunFun.getCurrentDateTime(DateTime.now());
+    orderpayment.updated_by = userdata.id;
+    var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
+    print(paymentd);
+
+    // Shifr Invoice Table
+    ShiftInvoice shiftinvoice = new ShiftInvoice();
+    shiftinvoice.shift_id = int.parse(shiftid);
+    shiftinvoice.invoice_id = orderid;
+    shiftinvoice.status = 1;
+    shiftinvoice.created_by = userdata.id;
+    shiftinvoice.created_at =
+        await CommunFun.getCurrentDateTime(DateTime.now());
+    shiftinvoice.serverId = 0;
+    shiftinvoice.localID = await CommunFun.getLocalID();
+    shiftinvoice.terminal_id = int.parse(terminalId);
+    shiftinvoice.shift_terminal_id = int.parse(terminalId);
+    var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
+    print(shift);
+
+    if (this.cartList.length == tempCart.length) {
+      await clearCartAfterSuccess(orderid);
+    } else {
+      tempCart.forEach((element) {
+        var contain = this.cartList.where((mainCart) => mainCart.id == element.id);
+        if (contain.isNotEmpty) {
+          setState(() {
+            this.cartList.remove(element);
+          });
+        }
+        widget.onSelectedRemove(element);
+      });
+      Navigator.of(context).pop();
+    }
+    await Navigator.of(context).pop();
+    // await showDialog(
+    //     // Opning Ammount Popup
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       return InvoiceReceiptDailog(orderid: orderid);
+    //     });*/
+    await printReceipt(orderid, int.parse(terminalId));
+  }
+
+  clearCartAfterSuccess(orderid) async {
+    Table_order tables = await getTableData();
+    var result =
+        await localAPI.removeCartItem(widget.currentCartID, tables.table_id);
+    print(result);
+    await Preferences.removeSinglePref(Constant.TABLE_DATA);
+    await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
+    //   clearCart();
+    Navigator.of(context).pop();
+    widget.onClose("clear");
+    //refreshAfterAction();
+    // Navigator.pushNamed(context, Constant.DashboardScreen);
+    // await showDialog(
+    //     // Opning Ammount Popup
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       return InvoiceReceiptDailog(orderid: orderid);
+    //     });
+  }
+
+  getbranch() async {
+    var branchid = await CommunFun.getbranchId();
+    var branch = await localAPI.getbranchData(branchid);
+    return branch;
+  }
+
+  getcartData() async {
+    var cartDatalist = await localAPI.getCartData(widget.currentCartID);
+    return cartDatalist;
+  }
+
+  Future<Table_order> getTableData() async {
+    Table_order tables = new Table_order();
+    var tabledata = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+    if (tabledata != null) {
+      var table = json.decode(tabledata);
+      tables = Table_order.fromJson(table);
+      return tables;
+    } else {
+      return tables;
+    }
+  }
+
+  Future<List<MSTCartdetails>> getcartDetails() async {
+    List<MSTCartdetails> list =
+        await localAPI.getCartItem(widget.currentCartID);
+    print(list);
+    return list;
+  }
+
+  Future<List<MSTSubCartdetails>> getmodifireList() async {
+    List<MSTSubCartdetails> list =
+        await localAPI.itemmodifireList(widget.currentCartID);
+    print(list);
+    return list;
+  }
+
+  printReceipt(int orderid, int terminalId) async {
+    var branchID = await CommunFun.getbranchId();
+    Branch branchAddress = await localAPI.getBranchData(branchID);
+    OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
+    Payments paument_method =
+        await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
+    User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
+    List<ProductDetails> itemsList = await localAPI.getOrderDetails(terminalId);
+    List<OrderDetail> orderitem =
+        await localAPI.getOrderDetailsList(terminalId);
+    Orders order = await localAPI.getcurrentOrders(terminalId);
+    print(branchAddress);
+    print(orderpaymentdata);
+    print(paument_method);
+    print(orderitem);
+    print(user);
+    print(itemsList);
+    print(order);
+    /* printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
+        branchData, itemsList, orderitem, order, paument_method);*/
   }
 }

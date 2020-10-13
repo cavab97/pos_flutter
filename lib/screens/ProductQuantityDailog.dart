@@ -472,6 +472,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.productQty = productdata.qty;
     cartdetails.productNetPrice = productdata.price;
     cartdetails.createdBy = loginData["id"];
+    cartdetails.cart_detail = jsonEncode(productItem);
     cartdetails.discount = 0;
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;

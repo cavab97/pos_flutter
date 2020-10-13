@@ -175,8 +175,8 @@ class CommunFun {
     Toast.show(
       message,
       context,
-      duration: Toast.LENGTH_LONG,
-      gravity: Toast.BOTTOM,
+      duration: Toast.LENGTH_SHORT,
+      gravity: Toast.CENTER,
       backgroundColor: Colors.black,
       textColor: Colors.white,
     );

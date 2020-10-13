@@ -740,7 +740,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   Padding(
                       padding: EdgeInsets.symmetric(vertical: 5),
                       child: Text(
-                        selectedOrder.voucher_amount.toString() != '0.0'
+                        selectedOrder.voucher_amount != null &&
+                                selectedOrder.voucher_amount.toString() != '0.0'
                             ? selectedOrder.voucher_amount.toStringAsFixed(2)
                             : "00.00",
                         style: TextStyle(

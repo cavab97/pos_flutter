@@ -381,6 +381,54 @@ class LocalAPI {
     return list;
   }
 
+  /*Future<List<MSTCartdetails>> getSplitBillData(cartId) async {
+    var qry =
+        "SELECT mst_cart_detail.*, replace(asset.base64,'data:image/jpg;base64,','') as base64  FROM `mst_cart_detail` LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = mst_cart_detail.product_id  where cart_id =  " +
+            cartId.toString();
+    ;
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<MSTCartdetails> list = res.isNotEmpty
+        ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "product", "get split bill data", "mst_cart_detail", cartId);
+    return list;
+  }*/
+
+  Future<int> deleteCartItemFromSplitBill(
+      cartItem, cartID, mainCart, isLast) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    await db
+        .delete("mst_cart_Detail", where: 'id = ?', whereArgs: [cartItem.id]);
+    await SyncAPICalls.logActivity(
+        "cart",
+        "delete cart item from mst_cart_Detail",
+        "mst_cart_Detail",
+        cartItem.id);
+
+    await db.delete("mst_cart_sub_detail",
+        where: 'cart_details_id = ?', whereArgs: [cartItem.id]);
+    await SyncAPICalls.logActivity(
+        "cart",
+        "delete cart item from mst_cart_sub_detail",
+        "mst_cart_sub_detail",
+        cartItem.id);
+
+    if (isLast) {
+      await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartID]);
+      await SyncAPICalls.logActivity(
+          "cart", "delete cart all item", "mst_Cart", cartItem.id);
+      await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartID]);
+      await SyncAPICalls.logActivity("cart",
+          "delete cart all item from save_order", "save_order", cartItem.id);
+    } else {
+      //Update cart
+      await db.update("mst_cart", mainCart.toJson(),
+          where: 'id = ?', whereArgs: [cartID]);
+    }
+    return cartID;
+  }
+
   Future<int> userCheckInOut(CheckinOut clockinOutData) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var shiftid;
