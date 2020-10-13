@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Voucher.dart';
@@ -13,10 +16,11 @@ import 'package:mcncashier/theme/Sized_Config.dart';
 
 class VoucherPop extends StatefulWidget {
   // Opning ammount popup
-  VoucherPop({Key key, this.cartList, this.subTotal, this.onEnter})
+  VoucherPop({Key key, this.cartList, this.cartData, this.cartId, this.onEnter})
       : super(key: key);
+  final cartId;
   Function onEnter;
-  double subTotal;
+  MST_Cart cartData;
   List<MSTCartdetails> cartList;
 
   @override
@@ -28,12 +32,16 @@ class VoucherPopState extends State<VoucherPop> {
   LocalAPI localAPI = LocalAPI();
   bool isLoading = false;
   var productIDs = '';
+  MST_Cart cartData;
   List<ProductCategory> productcateIDS = [];
   var errorMSG = "";
 
   @override
   void initState() {
     super.initState();
+    setState(() {
+      cartData = widget.cartData;
+    });
     KeyboardVisibilityNotification().addNewListener(
       onHide: () {
         FocusScope.of(context).requestFocus(new FocusNode());
@@ -45,7 +53,7 @@ class VoucherPopState extends State<VoucherPop> {
     // Check in minimum  max value with cart value
     var isReturn;
     if (vaocher.minimumAmount == 0.0 ||
-        vaocher.minimumAmount <= widget.subTotal) {
+        vaocher.minimumAmount <= cartData.sub_total) {
       isReturn = true;
     } else {
       CommunFun.showToast(
@@ -56,7 +64,7 @@ class VoucherPopState extends State<VoucherPop> {
     }
 
     if (vaocher.maximumAmount == 0.0 ||
-        vaocher.maximumAmount >= widget.subTotal) {
+        vaocher.maximumAmount >= cartData.sub_total) {
       isReturn = true;
     } else {
       CommunFun.showToast(
@@ -96,6 +104,8 @@ class VoucherPopState extends State<VoucherPop> {
         var count = await checkitsUsableorNot(vaocher);
         if (vaocher.usesTotal == 0 || count < vaocher.usesTotal) {
           //check product
+          bool isadded = false;
+          double totaldiscount = 0;
           for (int i = 0; i < widget.cartList.length; i++) {
             var cartitem = widget.cartList[i];
             // product
@@ -128,11 +138,24 @@ class VoucherPopState extends State<VoucherPop> {
               });
             }
             if (cartitem.discount != null && cartitem.discount != 0.0) {
-              var result =
-                  await localAPI.updateVoucher(cartitem, vaocher.voucherId);
-              selectedvoucher = vaocher;
+              totaldiscount += cartitem.discount;
+              var result = await localAPI.addVoucherIndetail(
+                cartitem,
+                vaocher.voucherId,
+              );
+            } else {
+              totaldiscount = vaocher.voucherDiscount;
             }
           }
+          cartData.discount = totaldiscount;
+          cartData.discount_type = vaocher.voucherDiscountType;
+          cartData.grand_total = cartData.grand_total - cartData.discount;
+          cartData.voucher_detail = json.encode(vaocher);
+          cartData.voucher_id = vaocher.voucherId;
+          var result1 = await localAPI.addVoucherInOrder(cartData, vaocher);
+          selectedvoucher = vaocher;
+          isadded = true;
+          selectedvoucher = vaocher;
           widget.onEnter(selectedvoucher);
           Navigator.of(context).pop(); // close Pop
         } else {

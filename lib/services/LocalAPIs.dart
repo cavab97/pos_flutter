@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
@@ -38,6 +40,7 @@ import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/TerminalLog.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
+import 'package:sqflite/sqflite.dart';
 
 class LocalAPI {
   Future<int> terminalLog(TerminalLog log) async {
@@ -742,27 +745,22 @@ class LocalAPI {
     return list;
   }
 
-  Future<dynamic> updateVoucher(MSTCartdetails details, voucherId) async {
-    var qry = "Update mst_cart_detail SET discount = " +
-        details.discount.toString() +
-        " , discount_type = " +
-        details.discountType.toString() +
-        " where id = " +
-        details.id.toString();
-    var data = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    var qry1 = "Update mst_cart SET discount = (discount +" +
-        details.discount.toString() +
-        " ), discount_type = " +
-        details.discountType.toString() +
-        " , grand_total = (grand_total- " +
-        details.discount.toString() +
-        ") , voucher_id = " +
-        voucherId.toString() +
-        " where id = " +
-        details.cartId.toString();
-    var data1 = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry1);
+  Future<dynamic> addVoucherIndetail(MSTCartdetails details, voucherId) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var data = await db.update("mst_cart_detail", details.toJson(),
+        where: "id =?", whereArgs: [details.id]);
     await SyncAPICalls.logActivity(
         "voucher", "add voucher in cart", "voucher", voucherId);
+    return data;
+  }
+
+  Future<dynamic> addVoucherInOrder(
+      MST_Cart details, Voucher voucherDetail) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var data1 = await db.update("mst_cart", details.toJson(),
+        where: "id =?", whereArgs: [details.id]);
+    await SyncAPICalls.logActivity(
+        "voucher", "add voucher in cart", "voucher", voucherDetail.voucherId);
     return data1;
   }
 
@@ -801,7 +799,8 @@ class LocalAPI {
         "SELECT count(voucher_id) from voucher_history where voucher_id = " +
             voucherid.toString();
     var count = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    return count;
+    int count1 = Sqflite.firstIntValue(count);
+    return count1;
   }
 
   Future<dynamic> saveVoucherHistory(VoucherHistory voucherHis) async {
@@ -858,8 +857,7 @@ class LocalAPI {
     var qry = "SELECT * from orders where branch_id = " +
         branchid.toString() +
         " AND terminal_id = " +
-        terminalid.toString() +
-        " AND order_source = 2";
+        terminalid.toString();
 
     var ordersList = await db.rawQuery(qry);
     List<Orders> list = ordersList.isNotEmpty

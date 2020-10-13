@@ -534,7 +534,8 @@ class _DashboradPageState extends State<DashboradPage>
         builder: (BuildContext context) {
           return VoucherPop(
             cartList: cartList,
-            subTotal: subtotal,
+            cartData: allcartData,
+            cartId: currentCart,
             onEnter: (voucher) {
               if (voucher != null) {
                 setState(() {
@@ -1089,7 +1090,7 @@ class _DashboradPageState extends State<DashboradPage>
     try {
       MST_Cart cart = new MST_Cart();
       MSTCartdetails cartitemdata = cartitem;
-      var subt = allcartData.sub_total -  cartitemdata.productPrice;
+      var subt = allcartData.sub_total - cartitemdata.productPrice;
       var taxjson = await countTax(subt);
       var disc = allcartData.discount != null
           ? allcartData.discount - cartitemdata.discount
@@ -2279,7 +2280,7 @@ class _DashboradPageState extends State<DashboradPage>
         }),
       ).toList(),
     );
-
+    var vaucher = json.decode(allcartData.voucher_detail);
     final totalPriceTable = Table(
         border: TableBorder(
             top: BorderSide(
@@ -2407,7 +2408,7 @@ class _DashboradPageState extends State<DashboradPage>
                           child: Text("CASH : ", style: Styles.darkBlue()),
                         )
                       : SizedBox(),
-                  selectedvoucher != null
+                  vaucher != null
                       ? Padding(
                           padding: EdgeInsets.only(right: 15),
                           child: Chip(
@@ -2421,7 +2422,7 @@ class _DashboradPageState extends State<DashboradPage>
                               ),
                             ),
                             label: Text(
-                              selectedvoucher.voucherName,
+                              vaucher["voucher_name"],
                               style: Styles.whiteBoldsmall(),
                             ),
                           ),
