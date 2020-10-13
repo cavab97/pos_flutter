@@ -827,7 +827,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     print(shift);
 
     if (this.cartList.length == tempCart.length) {
-      await clearCartAfterSuccess(orderid);
+      await clearCartAfterSuccess(orderid,terminalId);
     } else {
       tempCart.forEach((element) {
         var contain =
@@ -839,9 +839,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         }
         widget.onSelectedRemove(element);
       });
-      Navigator.of(context).pop();
     }
-    await Navigator.of(context).pop();
+
     // await showDialog(
     //     // Opning Ammount Popup
     //     context: context,
@@ -849,9 +848,10 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     //       return InvoiceReceiptDailog(orderid: orderid);
     //     });*/
     await printReceipt(orderid, int.parse(terminalId));
+    Navigator.of(context).pop();
   }
 
-  clearCartAfterSuccess(orderid) async {
+  clearCartAfterSuccess(orderid,terminalId) async {
     Table_order tables = await getTableData();
     var result =
         await localAPI.removeCartItem(widget.currentCartID, tables.table_id);
@@ -859,6 +859,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     //   clearCart();
+    await printReceipt(orderid, int.parse(terminalId));
     Navigator.of(context).pop();
     widget.onClose("clear");
     //refreshAfterAction();
