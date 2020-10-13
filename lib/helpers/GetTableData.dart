@@ -360,13 +360,19 @@ class TableData {
           };
 
           var count = await ifExists(db, data);
-          setMeal
-              .toJson()
-              .removeWhere((String key, dynamic value) => value == null);
+
+          var list = setMeal.toJson();
+          final keys = list.keys.toList(growable: false);
+          for (String key in keys) {
+            if (list[key] == "base64") {
+              list.remove(key);
+            }
+          }
+          print(list);
           if (count == 0) {
-            var result = await db.insert("setmeal", setMeal.toJson());
+            var result = await db.insert("setmeal", list);
           } else {
-            var result = await db.update("setmeal", setMeal.toJson(),
+            var result = await db.update("setmeal", list,
                 where: "setmeal_id", whereArgs: [setMeal.setmealId]);
           }
         }
@@ -382,13 +388,17 @@ class TableData {
               'value': setMealbranch.setmealBranchId,
             };
             var count = await ifExists(db, data);
-
+            var list = setMealbranch.toJson();
+            final keys = list.keys.toList(growable: false);
+            for (String key in keys) {
+              if (list[key] == "base64") {
+                list.remove(key);
+              }
+            }
             if (count == 0) {
-              var result =
-                  await db.insert("setmeal_branch", setMealbranch.toJson());
+              var result = await db.insert("setmeal_branch", list);
             } else {
-              var result = await db.update(
-                  "setmeal_branch", setMealbranch.toJson(),
+              var result = await db.update("setmeal_branch", list,
                   where: "setmeal_branch_id",
                   whereArgs: [setMealbranch.setmealBranchId]);
             }
@@ -405,9 +415,9 @@ class TableData {
             'key': "setmeal_product_id",
             'value': setMealProduct.setmealProductId,
           };
-          setMealProduct
+          await setMealProduct
               .toJson()
-              .removeWhere((String key, dynamic value) => value == null);
+              .removeWhere((String key, dynamic value) => key == "Base64");
           var count = await ifExists(db, data);
           if (count == 0) {
             var result =

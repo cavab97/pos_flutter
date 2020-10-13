@@ -528,8 +528,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     ///insert
     var cartid = await localAPI.insertItemTocart(currentCart.id, cart,
         productItem, orderData, tableData["table_id"], subCartData);
+    productItem.qty = product_qty;
+    productItem.price = double.parse(price.toStringAsFixed(2));
     var data = isSetMeal ? setmeal : productItem;
-
     MSTCartdetails cartdetails = new MSTCartdetails();
     if (isEditing) {
       cartdetails.id = cartitem.id;
@@ -541,7 +542,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.productName = isSetMeal ? setmeal.name : productItem.name;
     cartdetails.productPrice = double.parse(price.toStringAsFixed(2));
     cartdetails.productQty = product_qty.toDouble();
-    cartdetails.productNetPrice = price;
+    cartdetails.productNetPrice =
+        double.parse(productnetprice.toStringAsFixed(2));
     cartdetails.createdBy = loginData["id"];
     cartdetails.cart_detail = json.encode(data);
     cartdetails.discount = 0;
