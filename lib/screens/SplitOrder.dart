@@ -26,6 +26,7 @@ import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
@@ -38,12 +39,14 @@ class SplitBillDialog extends StatefulWidget {
       this.onSelectedRemove,
       this.onClose,
       this.currentCartID,
-      this.customer})
+      this.customer,
+      this.printerIP})
       : super(key: key);
   Function onClose;
   Function onSelectedRemove;
   int currentCartID;
   String customer;
+  String printerIP;
 
   @override
   _SplitBillDialog createState() => _SplitBillDialog();
@@ -56,11 +59,13 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   double subTotal = 00.00;
   double taxValues = 00.00;
   double grandTotal = 00.00;
+  int totalQty = 0;
   List<BranchTax> taxlist = [];
   List taxJson = [];
   List<MSTCartdetails> cartList = new List<MSTCartdetails>();
   bool isLoading = false;
   String selectedID = "";
+  PrintReceipt _printReceipt = PrintReceipt();
 
   @override
   void initState() {
@@ -271,9 +276,10 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   setTotalSubTotal() async {
     subTotal = 00.00;
     grandTotal = 00.00;
-
+    totalQty=0;
     tempCart.forEach((element) {
       subTotal = subTotal + element.productPrice;
+      totalQty = totalQty + element.productQty.toInt();
     });
     var tempTaxJSon = await countTax(subTotal);
     setState(() {
@@ -611,7 +617,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     order.sub_total = subTotal;
     order.sub_total_after_discount = subTotal;
     order.grand_total = grandTotal;
-    order.order_item_count = 1; //cartData.total_qty.toInt();
+    order.order_item_count = totalQty; //cartData.total_qty.toInt();
     order.tax_amount = taxValues;
     order.tax_json = json.encode(taxJson);
     order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
@@ -827,7 +833,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     print(shift);
 
     if (this.cartList.length == tempCart.length) {
-      await clearCartAfterSuccess(orderid,terminalId);
+      await clearCartAfterSuccess(orderid);
     } else {
       tempCart.forEach((element) {
         var contain =
@@ -847,11 +853,13 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     //     builder: (BuildContext context) {
     //       return InvoiceReceiptDailog(orderid: orderid);
     //     });*/
-    await printReceipt(orderid, int.parse(terminalId));
+    await printReceipt(orderid);
     Navigator.of(context).pop();
+    widget.onClose("not");
+
   }
 
-  clearCartAfterSuccess(orderid,terminalId) async {
+  clearCartAfterSuccess(orderid) async {
     Table_order tables = await getTableData();
     var result =
         await localAPI.removeCartItem(widget.currentCartID, tables.table_id);
@@ -859,7 +867,6 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     //   clearCart();
-    await printReceipt(orderid, int.parse(terminalId));
     Navigator.of(context).pop();
     widget.onClose("clear");
     //refreshAfterAction();
@@ -909,17 +916,17 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     return list;
   }
 
-  printReceipt(int orderid, int terminalId) async {
+  printReceipt(int orderid) async {
     var branchID = await CommunFun.getbranchId();
     Branch branchAddress = await localAPI.getBranchData(branchID);
     OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
     Payments paument_method =
         await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
-    List<ProductDetails> itemsList = await localAPI.getOrderDetails(terminalId);
+    List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem =
-        await localAPI.getOrderDetailsList(terminalId);
-    Orders order = await localAPI.getcurrentOrders(terminalId);
+        await localAPI.getOrderDetailsList(orderid);
+    Orders order = await localAPI.getcurrentOrders(orderid);
     print(branchAddress);
     print(orderpaymentdata);
     print(paument_method);
@@ -927,7 +934,17 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     print(user);
     print(itemsList);
     print(order);
-    /* printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
-        branchData, itemsList, orderitem, order, paument_method);*/
+    if(widget.printerIP.isNotEmpty) {
+      _printReceipt.checkReceiptPrint(
+          widget.printerIP,
+          context,
+          branchAddress,
+          itemsList,
+          orderitem,
+          order,
+          paument_method);
+    }else{
+      CommunFun.showToast(context, Strings.printer_not_available);
+    }
   }
 }
