@@ -518,7 +518,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                                           _setSelectUnselect(product);
                                         },
                                         icon: Icon(
-                                          Icons.check_rounded,
+                                          Icons.check_circle,
                                           color: Colors.white,
                                           size: 40,
                                         ),
