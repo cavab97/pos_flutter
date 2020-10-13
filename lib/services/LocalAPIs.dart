@@ -18,6 +18,8 @@ import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Role.dart';
+import 'package:mcncashier/models/SetMeal.dart';
+import 'package:mcncashier/models/SetMealProduct.dart';
 import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
@@ -1215,6 +1217,23 @@ class LocalAPI {
     return list;
   }
 
+  Future<List<SetMeal>> setmealData(mealid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "select setmeal.* , replace(asset.base64,'data:image/jpg;base64,','') as base64  from setmeal " +
+        " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
+        " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id " +
+        " WHERE setmeal.setmeal_id = " +
+        mealid.toString() +
+        " GROUP by setmeal.setmeal_id ";
+    var mealList = await db.rawQuery(qry);
+    List<SetMeal> list = mealList.isNotEmpty
+        ? mealList.map((c) => SetMeal.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Meals List", "get Meals List", "setmeal", mealid);
+    return list;
+  }
+
   Future<List<Role>> getRoldata(roleID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from role WHERE role_id = " + roleID.toString();
@@ -1425,6 +1444,41 @@ class LocalAPI {
         : [];
     await SyncAPICalls.logActivity(
         "Order sync", "get Orders list", "Orders", branchid);
+    return list;
+  }
+
+  Future<List<SetMeal>> getMealsData(branchid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "select setmeal.* , replace(asset.base64,'data:image/jpg;base64,','') as base64  from setmeal " +
+        " LEFT join setmeal_branch on setmeal_branch_id =" +
+        branchid +
+        " AND setmeal_branch.setmeal_id = setmeal.setmeal_id " +
+        " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
+        " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id  GROUP by setmeal.setmeal_id ";
+    var mealList = await db.rawQuery(qry);
+    List<SetMeal> list = mealList.isNotEmpty
+        ? mealList.map((c) => SetMeal.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Meals List", "get Meals List", "setmeal", branchid);
+    return list;
+  }
+
+  Future<List<SetMealProduct>> getMealsProductData(setmealid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT setmeal_product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name  FROM setmeal_product " +
+        " LEFT JOIN product ON product.product_id = setmeal_product.product_id " +
+        " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id " +
+        " WHERE setmeal_product.setmeal_id = " +
+        setmealid.toString() +
+        " GROUP by setmeal_product.setmeal_product_id";
+
+    var mealList = await db.rawQuery(qry);
+    List<SetMealProduct> list = mealList.isNotEmpty
+        ? mealList.map((c) => SetMealProduct.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Meals product List", "get Meals product List", "setmeal", setmealid);
     return list;
   }
 }

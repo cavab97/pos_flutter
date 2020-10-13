@@ -2,11 +2,12 @@ class SetMealProduct {
   int setmealProductId;
   int setmealId;
   int productId;
-  int quantity;
+  double quantity;
   int status;
   String createdAt;
   String updatedAt;
-
+  String base64;
+  String name;
   SetMealProduct(
       {this.setmealProductId,
       this.setmealId,
@@ -14,16 +15,22 @@ class SetMealProduct {
       this.quantity,
       this.status,
       this.createdAt,
-      this.updatedAt});
+      this.updatedAt,
+      this.base64,
+      this.name});
 
   SetMealProduct.fromJson(Map<String, dynamic> json) {
     setmealProductId = json['setmeal_product_id'];
     setmealId = json['setmeal_id'];
     productId = json['product_id'];
-    quantity = json['quantity'];
+    quantity = json['quantity'] is int
+        ? (json['quantity'] as int).toDouble()
+        : json["quantity"];
     status = json['status'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    base64 = json['base64'] != null ? json['base64'] : "";
+    name = json['name'];
   }
 
   Map<String, dynamic> toJson() {

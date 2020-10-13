@@ -126,10 +126,12 @@ class SyncAPICalls {
     var branchid = await CommunFun.getbranchId();
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+    var offset = await Preferences.getStringValuesSF(Constant.OFFSET);
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
       'branchId': branchid, // serverTime,
-      'terminal_id': terminalId
+      'terminal_id': terminalId,
+      'offset': offset != null ? int.parse(offset) : 10
     };
     return await APICalls.apiCall(apiurl, context, stringParams);
   }

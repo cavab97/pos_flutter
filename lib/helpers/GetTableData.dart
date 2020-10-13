@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:mcncashier/models/Asset.dart';
 import 'package:mcncashier/models/Attributes.dart';
 import 'package:mcncashier/models/Branch.dart';
@@ -52,7 +54,6 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable1(Database db, dynamic tablesData) async {
-   
     var branchData = tablesData["branch"];
     var userData = tablesData["user"];
     var roleData = tablesData["role"];
@@ -222,7 +223,6 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable2_1(Database db, dynamic tablesData) async {
-   
     var categoryData = tablesData["category"];
     var attributeData = tablesData["attributes"];
     var productData = tablesData["product"];
@@ -358,7 +358,11 @@ class TableData {
             'key': "setmeal_id",
             'value': setMeal.setmealId,
           };
+
           var count = await ifExists(db, data);
+          setMeal
+              .toJson()
+              .removeWhere((String key, dynamic value) => value == null);
           if (count == 0) {
             var result = await db.insert("setmeal", setMeal.toJson());
           } else {
@@ -378,6 +382,7 @@ class TableData {
               'value': setMealbranch.setmealBranchId,
             };
             var count = await ifExists(db, data);
+
             if (count == 0) {
               var result =
                   await db.insert("setmeal_branch", setMealbranch.toJson());
@@ -400,10 +405,13 @@ class TableData {
             'key': "setmeal_product_id",
             'value': setMealProduct.setmealProductId,
           };
+          setMealProduct
+              .toJson()
+              .removeWhere((String key, dynamic value) => value == null);
           var count = await ifExists(db, data);
           if (count == 0) {
             var result =
-                await db.insert("setmeal_branch", setMealProduct.toJson());
+                await db.insert("setmeal_product", setMealProduct.toJson());
           } else {
             var result = await db.update(
                 "setmeal_product", setMealProduct.toJson(),
@@ -421,8 +429,6 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable2_2(Database db, dynamic tablesData) async {
-    
-   
     var productattributeData = tablesData["product_attribute"];
     var productmodifireData = tablesData["product_modifier"];
     var productcategoryData = tablesData["product_category"];
@@ -568,7 +574,6 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable2_3(Database db, dynamic tablesData) async {
-   
     var pricetypeData = tablesData["price_type"];
     var printerData = tablesData["printer"];
     try {
@@ -616,7 +621,6 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable3(Database db, dynamic tablesData) async {
-   
     var customerData = tablesData["customer"];
     var terminalData = tablesData["terminal"];
     var tableData = tablesData["table"];
@@ -702,7 +706,6 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable4_1(Database db, dynamic tablesData) async {
- 
     var voucherData = tablesData["voucher"];
     var orders = tablesData["order"];
     var orderdetail = tablesData["order_detail"];
@@ -766,7 +769,6 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable4_2(Database db, dynamic tablesData) async {
-   
     var shiftdata = tablesData["shift"];
     try {
       if (shiftdata.length != 0) {
@@ -794,7 +796,6 @@ class TableData {
   }
 
   Future<dynamic> insertProductImage(Database db, dynamic tablesData) async {
-   
     var imageData = tablesData["product_image"];
     try {
       if (imageData.length != 0) {

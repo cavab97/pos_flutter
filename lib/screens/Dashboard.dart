@@ -24,6 +24,7 @@ import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
+import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/TableDetails.dart';
@@ -70,6 +71,7 @@ class _DashboradPageState extends State<DashboradPage>
   List<ProductDetails> productList = new List<ProductDetails>();
   List<ProductDetails> SearchProductList = new List<ProductDetails>();
   List<MSTCartdetails> cartList = new List<MSTCartdetails>();
+  List<SetMeal> mealsList = new List<SetMeal>();
   SlidableController slidableController = SlidableController();
   bool isDrawerOpen = false;
   bool isShiftOpen = true;
@@ -223,6 +225,7 @@ class _DashboradPageState extends State<DashboradPage>
   syncAllTables() async {
     Navigator.of(context).pop();
     await Preferences.removeSinglePref(Constant.LastSync_Table);
+    await Preferences.removeSinglePref(Constant.OFFSET);
     await CommunFun.syncAfterSuccess(context);
   }
 
@@ -388,7 +391,20 @@ class _DashboradPageState extends State<DashboradPage>
     _tabController = TabController(vsync: this, length: tabsList.length);
     _tabController.addListener(_handleTabSelection);
 
-    getProductList(tabsList[0].categoryId);
+    if (tabsList[0].isSetmeal == 1) {
+      getMeals();
+    } else {
+      getProductList(tabsList[0].categoryId);
+    }
+  }
+
+  getMeals() async {
+    var branchid = await CommunFun.getbranchId();
+    List<SetMeal> setmeals = await localAPI.getMealsData(branchid);
+    setState(() {
+      mealsList = setmeals;
+      productList = [];
+    });
   }
 
   getAllPrinter() async {
@@ -405,7 +421,11 @@ class _DashboradPageState extends State<DashboradPage>
       subCatList = [];
     });
     var cat = tabsList[_tabController.index].categoryId;
-    getProductList(cat);
+    if (tabsList[_tabController.index].isSetmeal == 1) {
+      getMeals();
+    } else {
+      getProductList(cat);
+    }
   }
 
   getProductList(categoryId) async {
@@ -415,13 +435,20 @@ class _DashboradPageState extends State<DashboradPage>
     var branchid = await CommunFun.getbranchId();
     List<ProductDetails> product =
         await localAPI.getProduct(categoryId.toString(), branchid);
-
-    setState(() {
-      productList.clear();
-      productList =
-          product.length != 0 && product[0].productId != null ? product : [];
-      isLoading = false;
-    });
+    if (product.length > 0) {
+      setState(() {
+        // productList = [];
+        productList = product;
+        isLoading = false;
+        mealsList = [];
+      });
+    } else {
+      setState(() {
+        productList = [];
+        isLoading = false;
+        mealsList = [];
+      });
+    }
   }
 
   getSearchList(seachText) async {
@@ -456,14 +483,22 @@ class _DashboradPageState extends State<DashboradPage>
       if (subCatList.length > 0) {
         cat = subCatList[_subtabController.index].categoryId;
       }
-      getProductList(cat);
+      if (tabsList[_tabController.index].isSetmeal == 1) {
+        getMeals();
+      } else {
+        getProductList(cat);
+      }
     }
   }
 
   void _handleSubTabSelection() {
     if (_subtabController.indexIsChanging) {
       var cat = subCatList[_subtabController.index].categoryId;
-      getProductList(cat);
+      if (subCatList[_subtabController.index].isSetmeal == 1) {
+        getMeals();
+      } else {
+        getProductList(cat);
+      }
     }
   }
 
@@ -617,7 +652,7 @@ class _DashboradPageState extends State<DashboradPage>
     scaffoldKey.currentState.openDrawer();
   }
 
-  showQuantityDailog(selectedProduct) async {
+  showQuantityDailog(selectedProduct, isSetMeal) async {
     // Increase Decrease Quantity popup
     showDialog(
         context: context,
@@ -625,6 +660,7 @@ class _DashboradPageState extends State<DashboradPage>
         builder: (BuildContext context) {
           return ProductQuantityDailog(
               product: selectedProduct,
+              issetMeal: isSetMeal,
               cartID: currentCart,
               onClose: () {
                 refreshAfterAction();
@@ -789,13 +825,7 @@ class _DashboradPageState extends State<DashboradPage>
         for (var i = 0; i < cartList.length; i++) {
           OrderDetail orderDetail = new OrderDetail();
           var cartItem = cartList[i];
-          var productdata = await localAPI.productdData(cartItem.productId);
-          ProductDetails pdata;
-          if (productdata.length > 0) {
-            productdata[0].qty = cartItem.productQty;
-            productdata[0].price = cartItem.productPrice;
-            pdata = productdata[0];
-          }
+
           List<OrderDetail> lappid =
               await localAPI.getLastOrdeDetailAppid(terminalId);
           if (lappid.length > 0) {
@@ -803,6 +833,7 @@ class _DashboradPageState extends State<DashboradPage>
           } else {
             orderDetail.app_id = int.parse(terminalId);
           }
+          var productdata = json.decode(cartItem.cart_detail);
           orderDetail.uuid = uuid;
           orderDetail.order_id = orderId;
           orderDetail.branch_id = int.parse(branchid);
@@ -812,7 +843,7 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.product_old_price = cartItem.productNetPrice;
           orderDetail.detail_qty = cartItem.productQty;
           orderDetail.product_discount = cartItem.discount;
-          orderDetail.product_detail = json.encode(pdata);
+          orderDetail.product_detail = json.encode(productdata);
           orderDetail.updated_at =
               await CommunFun.getCurrentDateTime(DateTime.now());
           orderDetail.detail_amount =
@@ -824,38 +855,40 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.detail_by = userdata.id;
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
 
-          if (productdata[0].hasInventory == 1) {
-            //update invnotory
-            // List<ProductStoreInventory> inventory =
-            //     await localAPI.removeFromInventory(orderDetail);
-            List<ProductStoreInventory> inventory =
-                await localAPI.getStoreInventoryData(orderDetail.product_id);
-            if (inventory.length > 0) {
-              ProductStoreInventory invData = new ProductStoreInventory();
-              invData = inventory[0];
-              var prev = inventory[0];
-              var qty = (invData.qty - orderDetail.detail_qty);
-              invData.qty = qty;
-              invData.updatedAt =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              invData.updatedBy = userdata.id;
-              var ulog = await localAPI.updateInvetory(invData);
+          if (cartItem.issetMeal == 0) {
+            if (productdata["hasInventory"] == 1) {
+              //update invnotory
+              // List<ProductStoreInventory> inventory =
+              //     await localAPI.removeFromInventory(orderDetail);
+              List<ProductStoreInventory> inventory =
+                  await localAPI.getStoreInventoryData(orderDetail.product_id);
+              if (inventory.length > 0) {
+                ProductStoreInventory invData = new ProductStoreInventory();
+                invData = inventory[0];
+                var prev = inventory[0];
+                var qty = (invData.qty - orderDetail.detail_qty);
+                invData.qty = qty;
+                invData.updatedAt =
+                    await CommunFun.getCurrentDateTime(DateTime.now());
+                invData.updatedBy = userdata.id;
+                var ulog = await localAPI.updateInvetory(invData);
 
-              //Inventory log update
-              ProductStoreInventoryLog log = new ProductStoreInventoryLog();
-              log.uuid = uuid;
-              log.inventory_id = prev.inventoryId;
-              log.branch_id = int.parse(branchid);
-              log.product_id = cartItem.productId;
-              log.employe_id = userdata.id;
-              log.qty = prev.qty;
-              log.qty_before_change = prev.qty;
-              log.qty_after_change = qty;
-              log.updated_at =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              log.updated_by = userdata.id;
-              var inventoryLog =
-                  await localAPI.updateStoreInvetoryLogTable(log);
+                //Inventory log update
+                ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+                log.uuid = uuid;
+                log.inventory_id = prev.inventoryId;
+                log.branch_id = int.parse(branchid);
+                log.product_id = cartItem.productId;
+                log.employe_id = userdata.id;
+                log.qty = prev.qty;
+                log.qty_before_change = prev.qty;
+                log.qty_after_change = qty;
+                log.updated_at =
+                    await CommunFun.getCurrentDateTime(DateTime.now());
+                log.updated_by = userdata.id;
+                var inventoryLog =
+                    await localAPI.updateStoreInvetoryLogTable(log);
+              }
             }
           }
         }
@@ -1053,21 +1086,26 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   editCartItem(cart) async {
-    ProductDetails product;
-    // for (int i = 0; i < productList.length; i++) {
-    //   if (productList[i].productId == cart.productId) {
-    //     product = productList[i];
-    List<ProductDetails> productdt =
-        await localAPI.productdData(cart.productId);
-    if (productdt.length > 0) {
-      product = productdt[0];
+    var prod;
+    if (cart.issetMeal == 0) {
+      List<ProductDetails> productdt =
+          await localAPI.productdData(cart.productId);
+      if (productdt.length > 0) {
+        prod = productdt[0];
+      }
+    } else {
+      List<SetMeal> productdt = await localAPI.setmealData(cart.productId);
+      if (productdt.length > 0) {
+        prod = productdt[0];
+      }
     }
     await showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return ProductQuantityDailog(
-              product: product,
+              product: prod,
+              issetMeal: cart.issetMeal == 1 ? true : false,
               cartID: currentCart,
               cartItem: cart,
               onClose: () {
@@ -1232,39 +1270,53 @@ class _DashboradPageState extends State<DashboradPage>
                                       ],
                                     ),
                                   ),
-
-                            // porductsListLoading() :
-                            isLoading
-                                ? CommunFun.loader(context)
-                                : porductsList(),
+                            SingleChildScrollView(
+                              child: Container(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    mealsList.length > 0
+                                        ? setMealsList()
+                                        : SizedBox(),
+                                    isLoading
+                                        ? CommunFun.loader(context)
+                                        : productList.length > 0
+                                            ? porductsList()
+                                            : SizedBox(),
+                                  ],
+                                ),
+                              ),
+                            )
                           ],
                         ),
                       ),
                     ),
                     TableCell(
-                        child: Stack(
-                      children: <Widget>[
-                        Container(
-                          // color: Colors.white,
-                          child: SizedBox(
-                              height: MediaQuery.of(context).size.height -
-                                  SizeConfig.safeBlockVertical * 10,
-                              width: SizeConfig.safeBlockHorizontal * 50,
-                              child: cartITems()),
-                        ),
-                        Positioned(
-                          bottom: 25,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            height: 80,
-                            color: StaticColor.backgroundColor,
-                            child: paybutton(context),
+                      child: Stack(
+                        children: <Widget>[
+                          Container(
+                            // color: Colors.white,
+                            child: SizedBox(
+                                height: MediaQuery.of(context).size.height -
+                                    SizeConfig.safeBlockVertical * 10,
+                                width: SizeConfig.safeBlockHorizontal * 50,
+                                child: cartITems()),
                           ),
-                        ),
-                        !isShiftOpen ? openShiftButton(context) : SizedBox()
-                      ],
-                    )),
+                          Positioned(
+                            bottom: 25,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              height: 80,
+                              color: StaticColor.backgroundColor,
+                              child: paybutton(context),
+                            ),
+                          ),
+                          !isShiftOpen ? openShiftButton(context) : SizedBox()
+                        ],
+                      ),
+                    ),
                   ]),
                 ],
               ),
@@ -1516,7 +1568,7 @@ class _DashboradPageState extends State<DashboradPage>
               onSuggestionSelected: (suggestion) {
                 if (isShiftOpen) {
                   if (isTableSelected && !isWebOrder) {
-                    showQuantityDailog(suggestion);
+                    showQuantityDailog(suggestion, false);
                   } else {
                     if (!isWebOrder) {
                       selectTable();
@@ -1739,6 +1791,102 @@ class _DashboradPageState extends State<DashboradPage>
             ]);
   }
 
+  Widget setMealsList() {
+    // products List
+    var size = MediaQuery.of(context).size;
+    /*24 is for notification bar on Android*/
+    //final double itemHeight = (size.height - kToolbarHeight - 24) / 1.8;
+    final double itemHeight = size.width / 4.2;
+    final double itemWidth = size.width / 4.2;
+    return Container(
+      padding: EdgeInsets.only(top: 5),
+      child: GridView.count(
+        childAspectRatio: (itemWidth / itemHeight),
+        crossAxisCount: 4,
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        children: mealsList.map((meal) {
+          var price = meal.price.toStringAsFixed(2);
+          return InkWell(
+            onTap: () {
+              if (permissions.contains(Constant.EDIT_ORDER)) {
+                if (isShiftOpen) {
+                  if (isTableSelected && !isWebOrder) {
+                    showQuantityDailog(meal, true);
+                  } else {
+                    if (!isWebOrder) {
+                      selectTable();
+                    }
+                  }
+                } else {
+                  CommunFun.showToast(context, Strings.shift_open_message);
+                }
+              }
+            },
+            child: Container(
+              height: itemHeight,
+              // padding: EdgeInsets.all(5),
+              margin: EdgeInsets.all(5),
+              child: Stack(
+                alignment: AlignmentDirectional.topCenter,
+                children: <Widget>[
+                  Hero(
+                      tag: meal.setmealId != null ? meal.setmealId : 0,
+                      child: Container(
+                        color: Colors.grey,
+                        width: MediaQuery.of(context).size.width,
+                        height: itemHeight / 2.2,
+                        child: meal.base64 != ""
+                            ? CommonUtils.imageFromBase64String(meal.base64)
+                            : new Image.asset(
+                                Strings.no_image,
+                                fit: BoxFit.cover,
+                                gaplessPlayback: true,
+                              ),
+                      )),
+                  Container(
+                    padding: EdgeInsets.all(2),
+                    margin: EdgeInsets.only(top: itemHeight / 2.2),
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[600],
+                    ),
+                    child: Center(
+                      child: Text(
+                        meal.name.toString().toUpperCase(),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Styles.whiteSmall(),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: itemHeight / 2.2 - SizeConfig.safeBlockVertical * 5,
+                    left: 0,
+                    child: Container(
+                      height: SizeConfig.safeBlockVertical * 5,
+                      // width: 50,
+                      padding: EdgeInsets.all(5),
+                      color: Colors.deepOrange,
+                      child: Center(
+                        child: Text(
+                            currency != null
+                                ? currency + ' ' + price.toString()
+                                : price.toString(),
+                            style: Styles.whiteSimpleSmall()),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   Widget porductsList() {
     // products List
     var size = MediaQuery.of(context).size;
@@ -1747,10 +1895,13 @@ class _DashboradPageState extends State<DashboradPage>
     final double itemHeight = size.width / 4.2;
     final double itemWidth = size.width / 4.2;
     return Container(
-      height: MediaQuery.of(context).size.height,
+      // height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.only(top: 5),
       child: GridView.count(
+        addRepaintBoundaries: false,
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
         children: productList.map((product) {
@@ -1760,7 +1911,7 @@ class _DashboradPageState extends State<DashboradPage>
               if (permissions.contains(Constant.EDIT_ORDER)) {
                 if (isShiftOpen) {
                   if (isTableSelected && !isWebOrder) {
-                    showQuantityDailog(product);
+                    showQuantityDailog(product, false);
                   } else {
                     if (!isWebOrder) {
                       selectTable();
@@ -2166,8 +2317,7 @@ class _DashboradPageState extends State<DashboradPage>
                             ),
                             Padding(
                               padding: EdgeInsets.only(right: 15),
-                              child: Text(
-                                  taxitem["taxAmount"],
+                              child: Text(taxitem["taxAmount"],
                                   style: Styles.darkBlue()),
                             )
                           ]);

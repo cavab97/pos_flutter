@@ -21,6 +21,7 @@ class Constant {
   static final String IS_LOGIN = "IsLogin";
   static final String SYNC_TIMER = "syncTimer";
   static final String CURRENCY = "Currency";
+  static final String OFFSET = "image_offset";
   // static final String USER_ROLE = "Roledata";
   static final String USER_PERMISSION = "user_permission";
 

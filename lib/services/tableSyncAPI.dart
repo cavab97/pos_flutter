@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/helpers/config.dart';
 import 'package:http/http.dart' as http;
 

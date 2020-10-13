@@ -259,7 +259,7 @@ class CreateTables {
         "asset_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "asset_type	INTEGER," +
-        "asset_type_id	INTEGER," +
+        "asset_type_id	INTEGER," + //asset_type = 1 For Product ,asset_type = 2 For Setmeal
         "asset_path	TEXT," +
         "status	INTEGER," +
         "updated_at	TEXT," +
@@ -636,6 +636,7 @@ class CreateTables {
         'discount REAL,' + //DOUBLE
         'discount_type  INTEGER,' + //int
         'remark TEXT,' +
+        'issetMeal NUMERIC,' +
         'cart_detail TEXT,' +
         'is_deleted   INTEGER,' +
         'created_by  INTEGER,' +
