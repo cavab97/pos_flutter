@@ -359,14 +359,16 @@ class _DashboradPageState extends State<DashboradPage>
                 onSelectedRemove: (cart) {
                   itememovefromCart(cart);
                 },
-                onClose: (String isFor){
-                  if(isFor=="clear") {
+                onClose: (String isFor) {
+                  if (isFor == "clear") {
                     clearCart();
                   }
                 },
                 currentCartID: currentCart,
                 customer: customer != null ? customer.name : "",
-                printerIP:  printerreceiptList.length >0 ? printerreceiptList[0].printerIp : "",
+                printerIP: printerreceiptList.length > 0
+                    ? printerreceiptList[0].printerIp
+                    : "",
               );
             });
         break;
@@ -384,7 +386,8 @@ class _DashboradPageState extends State<DashboradPage>
                 subtotal,
                 grandTotal,
                 tax,
-                branchData);
+                branchData,
+                customer != null ? customer.name : "Walk-in customer");
           } else {
             CommunFun.showToast(context, Strings.printer_not_available);
           }
@@ -698,11 +701,11 @@ class _DashboradPageState extends State<DashboradPage>
         barrierDismissible: false,
         builder: (BuildContext context) {
           return SearchCustomerPage(
-            onClose: () {
-              //refreshAfterAction();
-              checkCustomerSelected();
-            },isFor: Constant.dashboard
-          );
+              onClose: () {
+                //refreshAfterAction();
+                checkCustomerSelected();
+              },
+              isFor: Constant.dashboard);
         });
   }
 
@@ -1032,12 +1035,18 @@ class _DashboradPageState extends State<DashboradPage>
         await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
     List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
-    List<OrderDetail> orderitem =
-        await localAPI.getOrderDetailsList(orderid);
+    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     Orders order = await localAPI.getcurrentOrders(orderid);
 
-    printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
-        branchData, itemsList, orderitem, order, paument_method);
+    printKOT.checkReceiptPrint(
+        printerreceiptList[0].printerIp,
+        context,
+        branchData,
+        itemsList,
+        orderitem,
+        order,
+        paument_method,
+        customer != null ? customer.name : "Walk-in customer");
   }
 
   clearCartAfterSuccess(orderid) async {
