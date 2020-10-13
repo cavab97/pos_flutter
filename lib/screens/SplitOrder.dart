@@ -512,7 +512,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                                           _setSelectUnselect(product);
                                         },
                                         icon: Icon(
-                                          Icons.check_rounded,
+                                          Icons.check_circle,
                                           color: Colors.white,
                                           size: 40,
                                         ),
@@ -830,7 +830,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       await clearCartAfterSuccess(orderid);
     } else {
       tempCart.forEach((element) {
-        var contain = this.cartList.where((mainCart) => mainCart.id == element.id);
+        var contain =
+            this.cartList.where((mainCart) => mainCart.id == element.id);
         if (contain.isNotEmpty) {
           setState(() {
             this.cartList.remove(element);

@@ -801,7 +801,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                     //             element.productId ==
                                     //             product.productId)
                                     //         .isNotEmpty
-                                    Icons.check_box,
+                                    Icons.check_circle,
                                     // : Icons.check_box_outline_blank,
                                     color: Colors.green,
                                     size: 40,

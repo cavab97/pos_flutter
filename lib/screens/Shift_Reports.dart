@@ -402,7 +402,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               style: Styles.whiteMediumBold(),
             ),
             trailing: Text(
-              shifittem.startAmount.toStringAsFixed(2),
+              shifittem != null ? shifittem.startAmount.toStringAsFixed(2) : "",
               style: Styles.whiteMediumBold(),
             ),
           ),
@@ -447,15 +447,15 @@ class _ShiftReportsState extends State<ShiftReports> {
           ),
         ),
         Container(
-          color: Colors.white,
+          color: Colors.grey,
           child: ListTile(
             title: Text(
               "Cash Rounding",
-              style: Styles.blackMediumBold(),
+              style: Styles.whiteMediumBold(),
             ),
             trailing: Text(
               cashRounding.toStringAsFixed(2),
-              style: Styles.blackMediumBold(),
+              style: Styles.whiteMediumBold(),
             ),
           ),
         ),
@@ -473,15 +473,15 @@ class _ShiftReportsState extends State<ShiftReports> {
           ),
         ),
         Container(
-          color: Colors.white,
+          color: Colors.grey,
           child: ListTile(
             title: Text(
               "Drawer Expected/Actual",
-              style: Styles.blackMediumBold(),
+              style: Styles.whiteMediumBold(),
             ),
             trailing: Text(
               expectedVal.toStringAsFixed(2),
-              style: Styles.blackMediumBold(),
+              style: Styles.whiteMediumBold(),
             ),
           ),
         ),
