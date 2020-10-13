@@ -366,6 +366,7 @@ class _DashboradPageState extends State<DashboradPage>
                 },
                 currentCartID: currentCart,
                 customer: customer != null ? customer.name : "",
+                printerIP:  printerreceiptList.length >0 ? printerreceiptList[0].printerIp : "",
               );
             });
         break;
@@ -1020,20 +1021,20 @@ class _DashboradPageState extends State<DashboradPage>
     //     builder: (BuildContext context) {
     //       return InvoiceReceiptDailog(orderid: orderid);
     //     });*/
-    await printReceipt(orderid, int.parse(terminalId));
+    await printReceipt(orderid);
   }
 
-  printReceipt(int orderid, int terminalId) async {
+  printReceipt(int orderid) async {
     var branchID = await CommunFun.getbranchId();
     Branch branchAddress = await localAPI.getBranchData(branchID);
     OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
     Payments paument_method =
         await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
-    List<ProductDetails> itemsList = await localAPI.getOrderDetails(terminalId);
+    List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem =
-        await localAPI.getOrderDetailsList(terminalId);
-    Orders order = await localAPI.getcurrentOrders(terminalId);
+        await localAPI.getOrderDetailsList(orderid);
+    Orders order = await localAPI.getcurrentOrders(orderid);
 
     printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
         branchData, itemsList, orderitem, order, paument_method);

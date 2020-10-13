@@ -534,6 +534,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (isEditing) {
       cartdetails.id = cartitem.id;
     }
+
     cartdetails.cartId = cartid;
     cartdetails.productId =
         isSetMeal ? setmeal.setmealId : productItem.productId;
