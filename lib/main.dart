@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/routes.dart';
+import 'package:mcncashier/screens/Connectivity.dart';
 import 'package:mcncashier/screens/SplashScreen.dart';
 import 'package:mcncashier/theme/theme.dart';
 
@@ -39,7 +40,7 @@ class MyAppState extends State<MyApp> {
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      home: Home(),
       title: 'cashierApp',
       theme: appTheme(),
       // initialRoute:
