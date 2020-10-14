@@ -65,6 +65,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   int isSelectedAttr = -1;
   bool isSetMeal = false;
   var productnetprice = 0.00;
+  var currency;
   @override
   void initState() {
     super.initState();
@@ -76,7 +77,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     setstate();
   }
 
-  setstate() {
+  setstate() async {
     if (isSetMeal) {
       setState(() {
         setmeal = widget.product;
@@ -105,6 +106,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       getCartData();
       getcartItemsDetails();
     }
+    var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
+    setState(() {
+      currency = curre;
+    });
   }
 
   getMealProducts() async {
@@ -253,15 +258,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           setPrice();
         }
       } else {
-        if (product_qty <= productItem.qty) {
-          var prevproductqty = product_qty;
-          setState(() {
-            product_qty = prevproductqty + 1;
-          });
-          setPrice();
-        } else {
-          CommunFun.showToast(context, Strings.store_Validation_message);
-        }
+        var prevproductqty = product_qty;
+        setState(() {
+          product_qty = prevproductqty + 1;
+        });
+        setPrice();
       }
     }
   }
@@ -528,9 +529,25 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     ///insert
     var cartid = await localAPI.insertItemTocart(currentCart.id, cart,
         productItem, orderData, tableData["table_id"], subCartData);
-    productItem.qty = product_qty;
-    productItem.price = double.parse(price.toStringAsFixed(2));
-    var data = isSetMeal ? setmeal : productItem;
+    ProductDetails cartItemproduct = new ProductDetails();
+
+    if (!isSetMeal) {
+      cartItemproduct = productItem;
+      cartItemproduct.qty = product_qty;
+      cartItemproduct.price = double.parse(price.toStringAsFixed(2));
+    } else {
+      cartItemproduct.qty = product_qty;
+      cartItemproduct.price = double.parse(price.toStringAsFixed(2));
+      cartItemproduct.status = setmeal.status;
+      cartItemproduct.productId = setmeal.setmealId;
+      cartItemproduct.base64 = setmeal.base64;
+      cartItemproduct.name = setmeal.name;
+      cartItemproduct.uuid = setmeal.uuid;
+    }
+    cartItemproduct
+        .toJson()
+        .removeWhere((String key, dynamic value) => value == null);
+    var data = cartItemproduct;
     MSTCartdetails cartdetails = new MSTCartdetails();
     if (isEditing) {
       cartdetails.id = cartitem.id;
@@ -545,13 +562,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.productNetPrice =
         double.parse(productnetprice.toStringAsFixed(2));
     cartdetails.createdBy = loginData["id"];
-    cartdetails.cart_detail = json.encode(data);
+    cartdetails.cart_detail = jsonEncode(data);
     cartdetails.discount = 0;
     cartdetails.issetMeal = isSetMeal ? 1 : 0;
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = DateTime.now().toString();
-    print(json.encode(cartdetails.cart_detail));
+    print(json.decode(cartdetails.cart_detail));
     var detailID = await localAPI.addintoCartDetails(cartdetails);
 
     if (selectedModifier.length > 0) {
@@ -625,9 +642,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               child: Text(
                 isSetMeal
                     ? price.toStringAsFixed(2).toString()
-                    : productItem.priceTypeName +
-                        " " +
-                        price.toStringAsFixed(2).toString(),
+                    : currency + " " + price.toStringAsFixed(2).toString(),
                 style: Styles.orangeMedium(),
               ),
             ),

@@ -359,14 +359,17 @@ class _DashboradPageState extends State<DashboradPage>
                 onSelectedRemove: (cart) {
                   itememovefromCart(cart);
                 },
-                onClose: (String isFor){
-                  if(isFor=="clear") {
+                onClose: (String isFor) {
+                  Navigator.of(context).pop();
+                  if (isFor == "clear") {
                     clearCart();
                   }
                 },
                 currentCartID: currentCart,
                 customer: customer != null ? customer.name : "",
-                printerIP:  printerreceiptList.length >0 ? printerreceiptList[0].printerIp : "",
+                printerIP: printerreceiptList.length > 0
+                    ? printerreceiptList[0].printerIp
+                    : "",
               );
             });
         break;
@@ -400,7 +403,6 @@ class _DashboradPageState extends State<DashboradPage>
 
   getCategoryList() async {
     List<Category> categorys = await localAPI.getAllCategory();
-
     List<Category> catList = categorys.where((i) => i.parentId == 0).toList();
     setState(() {
       tabsList = catList;
@@ -698,11 +700,11 @@ class _DashboradPageState extends State<DashboradPage>
         barrierDismissible: false,
         builder: (BuildContext context) {
           return SearchCustomerPage(
-            onClose: () {
-              //refreshAfterAction();
-              checkCustomerSelected();
-            },isFor: Constant.dashboard
-          );
+              onClose: () {
+                //refreshAfterAction();
+                checkCustomerSelected();
+              },
+              isFor: Constant.dashboard);
         });
   }
 
@@ -790,7 +792,6 @@ class _DashboradPageState extends State<DashboradPage>
     var uuid = await CommunFun.getLocalID();
     //var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
     List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
-
     int length = branchdata.invoiceStart.length;
     var invoiceNo;
     if (lastappid.length > 0) {
@@ -1032,8 +1033,7 @@ class _DashboradPageState extends State<DashboradPage>
         await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
     List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
-    List<OrderDetail> orderitem =
-        await localAPI.getOrderDetailsList(orderid);
+    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     Orders order = await localAPI.getcurrentOrders(orderid);
 
     printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
@@ -1953,7 +1953,6 @@ class _DashboradPageState extends State<DashboradPage>
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.only(top: 5, bottom: 20),
       child: GridView.count(
-        addRepaintBoundaries: true,
         shrinkWrap: true,
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
@@ -2215,6 +2214,7 @@ class _DashboradPageState extends State<DashboradPage>
 
     final cartTable = ListView(
       shrinkWrap: true,
+      itemExtent: 50.0,
       padding: EdgeInsets.only(bottom: 50),
       children: ListTile.divideTiles(
         context: context,

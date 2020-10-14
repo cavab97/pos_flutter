@@ -308,7 +308,6 @@ class CommunFun {
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
-
     getAssetsData(context);
   }
 
@@ -333,10 +332,10 @@ class CommunFun {
           Navigator.pushNamed(context, Constant.DashboardScreen);
         }
       } else {
-        if (aceets["data"]["next_offset"] != 0) {
-          getAssetsData(context);
-        } else {
+        if (aceets["data"]["next_offset"] == 0) {
           await CommunFun.setServerTime(aceets, "4");
+        } else {
+          getAssetsData(context);
         }
       }
     } else {

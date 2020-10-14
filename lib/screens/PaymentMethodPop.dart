@@ -159,7 +159,9 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
               return ListTile(
                   contentPadding: EdgeInsets.all(5),
                   leading: Icon(
-                    Icons.credit_card,
+                    payment.name.contains("Wallet")
+                        ? Icons.account_balance_wallet
+                        : Icons.credit_card,
                     color: Colors.black,
                     size: SizeConfig.safeBlockVertical * 7,
                   ),

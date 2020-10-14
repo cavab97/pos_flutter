@@ -276,7 +276,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   setTotalSubTotal() async {
     subTotal = 00.00;
     grandTotal = 00.00;
-    totalQty=0;
+    totalQty = 0;
     tempCart.forEach((element) {
       subTotal = subTotal + element.productPrice;
       totalQty = totalQty + element.productQty.toInt();
@@ -472,8 +472,15 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             children: cartList.map((product) {
           var productdata = json.decode(product.cart_detail);
           return InkWell(
-              onTap: () {},
+              onTap: () {
+                _setSelectUnselect(product);
+              },
               child: Container(
+                color: tempCart
+                        .where((element) => element.id == product.id)
+                        .isNotEmpty
+                    ? Colors.grey[100]
+                    : Colors.white,
                 padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -481,14 +488,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                     Hero(
                         tag: product.productId,
                         child: GestureDetector(
-                          // This does not give the tap position ...
-                          /*onLongPress: () {CommunFun.showToast(
-                              context, "Longpressssss");
-                          },*/
                           onTap: () {
-                            /*CommunFun.showToast(
-                                context, "Tabbbbbbbbbbbbbbbb");*/
-                            _setSelectUnselect(product);
+                            // _setSelectUnselect(product);
                           },
                           child: Stack(
                             children: [
@@ -565,7 +566,6 @@ class _SplitBillDialog extends State<SplitBillDialog> {
 
   _setSelectUnselect(MSTCartdetails product) {
     var contain = tempCart.where((element) => element.id == product.id);
-
     if (contain.isNotEmpty) {
       setState(() {
         tempCart.remove(product);
@@ -684,41 +684,42 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           orderDetail.detail_by = userdata.id;
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
           print(orderDetailid);
+          if (cartItem.issetMeal == 0) {
+            if (productdata[0].hasInventory == 1) {
+              //update invnotory
+              // List<ProductStoreInventory> inventory =
+              //     await localAPI.removeFromInventory(orderDetail);
+              List<ProductStoreInventory> inventory =
+                  await localAPI.getStoreInventoryData(orderDetail.product_id);
+              if (inventory.length > 0) {
+                ProductStoreInventory invData = new ProductStoreInventory();
+                invData = inventory[0];
+                var prev = inventory[0];
+                var qty = (invData.qty - orderDetail.detail_qty);
+                invData.qty = qty;
+                invData.updatedAt =
+                    await CommunFun.getCurrentDateTime(DateTime.now());
+                invData.updatedBy = userdata.id;
+                var ulog = await localAPI.updateInvetory(invData);
+                print(ulog);
 
-          if (productdata[0].hasInventory == 1) {
-            //update invnotory
-            // List<ProductStoreInventory> inventory =
-            //     await localAPI.removeFromInventory(orderDetail);
-            List<ProductStoreInventory> inventory =
-                await localAPI.getStoreInventoryData(orderDetail.product_id);
-            if (inventory.length > 0) {
-              ProductStoreInventory invData = new ProductStoreInventory();
-              invData = inventory[0];
-              var prev = inventory[0];
-              var qty = (invData.qty - orderDetail.detail_qty);
-              invData.qty = qty;
-              invData.updatedAt =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              invData.updatedBy = userdata.id;
-              var ulog = await localAPI.updateInvetory(invData);
-              print(ulog);
-
-              //Inventory log update
-              ProductStoreInventoryLog log = new ProductStoreInventoryLog();
-              log.uuid = uuid;
-              log.inventory_id = prev.inventoryId;
-              log.branch_id = int.parse(branchid);
-              log.product_id = cartItem.productId;
-              log.employe_id = userdata.id;
-              log.qty = prev.qty;
-              log.qty_before_change = prev.qty;
-              log.qty_after_change = qty;
-              log.updated_at =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              log.updated_by = userdata.id;
-              var inventoryLog =
-                  await localAPI.updateStoreInvetoryLogTable(log);
-              print(inventoryLog);
+                //Inventory log update
+                ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+                log.uuid = uuid;
+                log.inventory_id = prev.inventoryId;
+                log.branch_id = int.parse(branchid);
+                log.product_id = cartItem.productId;
+                log.employe_id = userdata.id;
+                log.qty = prev.qty;
+                log.qty_before_change = prev.qty;
+                log.qty_after_change = qty;
+                log.updated_at =
+                    await CommunFun.getCurrentDateTime(DateTime.now());
+                log.updated_by = userdata.id;
+                var inventoryLog =
+                    await localAPI.updateStoreInvetoryLogTable(log);
+                print(inventoryLog);
+              }
             }
           }
         }
@@ -846,7 +847,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         widget.onSelectedRemove(element);
       });
     }
-
+    clearSelected();
     // await showDialog(
     //     // Opning Ammount Popup
     //     context: context,
@@ -855,8 +856,15 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     //     });*/
     await printReceipt(orderid);
     Navigator.of(context).pop();
-    widget.onClose("not");
+    widget.onClose("yes");
+  }
 
+  clearSelected() {
+    setState(() {
+      subTotal = 00.00;
+      taxValues = 00.00;
+      grandTotal = 00.00;
+    });
   }
 
   clearCartAfterSuccess(orderid) async {
@@ -924,8 +932,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
     List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
-    List<OrderDetail> orderitem =
-        await localAPI.getOrderDetailsList(orderid);
+    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     Orders order = await localAPI.getcurrentOrders(orderid);
     print(branchAddress);
     print(orderpaymentdata);
@@ -934,16 +941,10 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     print(user);
     print(itemsList);
     print(order);
-    if(widget.printerIP.isNotEmpty) {
-      _printReceipt.checkReceiptPrint(
-          widget.printerIP,
-          context,
-          branchAddress,
-          itemsList,
-          orderitem,
-          order,
-          paument_method);
-    }else{
+    if (widget.printerIP.isNotEmpty) {
+      _printReceipt.checkReceiptPrint(widget.printerIP, context, branchAddress,
+          itemsList, orderitem, order, paument_method);
+    } else {
       CommunFun.showToast(context, Strings.printer_not_available);
     }
   }
