@@ -360,10 +360,7 @@ class _DashboradPageState extends State<DashboradPage>
                   itememovefromCart(cart);
                 },
                 onClose: (String isFor) {
-<<<<<<< HEAD
                   Navigator.of(context).pop();
-=======
->>>>>>> 2013507ff6c73710681fe640016525df8ffc6d45
                   if (isFor == "clear") {
                     clearCart();
                   }
