@@ -848,12 +848,6 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       });
     }
     clearSelected();
-    // await showDialog(
-    //     // Opning Ammount Popup
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //       return InvoiceReceiptDailog(orderid: orderid);
-    //     });*/
     await printReceipt(orderid);
     Navigator.of(context).pop();
     widget.onClose("yes");
@@ -874,17 +868,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     print(result);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
-    //   clearCart();
     Navigator.of(context).pop();
     widget.onClose("clear");
-    //refreshAfterAction();
-    // Navigator.pushNamed(context, Constant.DashboardScreen);
-    // await showDialog(
-    //     // Opning Ammount Popup
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //       return InvoiceReceiptDailog(orderid: orderid);
-    //     });
   }
 
   getbranch() async {
@@ -942,8 +927,15 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     print(itemsList);
     print(order);
     if (widget.printerIP.isNotEmpty) {
-      _printReceipt.checkReceiptPrint(widget.printerIP, context, branchAddress,
-          itemsList, orderitem, order, paument_method);
+      _printReceipt.checkReceiptPrint(
+          widget.printerIP,
+          context,
+          branchAddress,
+          itemsList,
+          orderitem,
+          order,
+          paument_method,
+          widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
     } else {
       CommunFun.showToast(context, Strings.printer_not_available);
     }

@@ -360,7 +360,10 @@ class _DashboradPageState extends State<DashboradPage>
                   itememovefromCart(cart);
                 },
                 onClose: (String isFor) {
+<<<<<<< HEAD
                   Navigator.of(context).pop();
+=======
+>>>>>>> 2013507ff6c73710681fe640016525df8ffc6d45
                   if (isFor == "clear") {
                     clearCart();
                   }
@@ -387,7 +390,8 @@ class _DashboradPageState extends State<DashboradPage>
                 subtotal,
                 grandTotal,
                 tax,
-                branchData);
+                branchData,
+                customer != null ? customer.name : "Walk-in customer");
           } else {
             CommunFun.showToast(context, Strings.printer_not_available);
           }
@@ -1036,8 +1040,15 @@ class _DashboradPageState extends State<DashboradPage>
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     Orders order = await localAPI.getcurrentOrders(orderid);
 
-    printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
-        branchData, itemsList, orderitem, order, paument_method);
+    printKOT.checkReceiptPrint(
+        printerreceiptList[0].printerIp,
+        context,
+        branchData,
+        itemsList,
+        orderitem,
+        order,
+        paument_method,
+        customer != null ? customer.name : "Walk-in customer");
   }
 
   clearCartAfterSuccess(orderid) async {
