@@ -1230,14 +1230,16 @@ class _DashboradPageState extends State<DashboradPage>
         unselectedLabelColor: Colors.white,
         labelColor: Colors.white,
         isScrollable: true,
+        labelPadding: EdgeInsets.all(2),
+        indicatorPadding: EdgeInsets.all(2),
         indicator: BoxDecoration(
             borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
         tabs: List<Widget>.generate(tabsList.length, (int index) {
           return new Tab(
             child: Container(
                 padding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.safeBlockVertical * 2,
-                    vertical: SizeConfig.safeBlockVertical * 1),
+                  horizontal: SizeConfig.safeBlockHorizontal * 3,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                 ),
@@ -1252,6 +1254,8 @@ class _DashboradPageState extends State<DashboradPage>
       indicatorSize: TabBarIndicatorSize.label,
       unselectedLabelColor: Colors.white,
       labelColor: Colors.white,
+      labelPadding: EdgeInsets.all(1),
+      indicatorPadding: EdgeInsets.all(0),
       isScrollable: true,
       indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(30), color: Colors.deepOrange),
@@ -1259,7 +1263,7 @@ class _DashboradPageState extends State<DashboradPage>
         return new Tab(
           child: Container(
             padding: EdgeInsets.symmetric(
-              horizontal: SizeConfig.safeBlockVertical * 2,
+              horizontal: SizeConfig.safeBlockVertical * 3,
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(50),
@@ -1301,17 +1305,17 @@ class _DashboradPageState extends State<DashboradPage>
                     TableCell(
                       child: Container(
                         padding:
-                            EdgeInsets.all(SizeConfig.safeBlockVertical * 2),
+                            EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
                         child: Column(
                           children: <Widget>[
                             subCatList.length == 0
                                 ? Container(
                                     //margin: EdgeInsets.only(left: 5, right: 5),
                                     width: MediaQuery.of(context).size.width,
-                                    height: SizeConfig.safeBlockVertical * 9,
+                                    height: SizeConfig.safeBlockVertical * 8,
                                     color: Colors.black26,
                                     padding: EdgeInsets.all(
-                                        SizeConfig.safeBlockVertical * 2),
+                                        SizeConfig.safeBlockVertical * 1.2),
                                     child: DefaultTabController(
                                         initialIndex: 0,
                                         length: tabsList.length,
@@ -1320,10 +1324,10 @@ class _DashboradPageState extends State<DashboradPage>
                                 : Container(
                                     //  margin: EdgeInsets.only(left: 5, right: 5),
                                     width: MediaQuery.of(context).size.width,
-                                    height: SizeConfig.safeBlockVertical * 10,
+                                    height: SizeConfig.safeBlockVertical * 8,
                                     color: Colors.black26,
                                     padding: EdgeInsets.all(
-                                        SizeConfig.safeBlockVertical * 2),
+                                        SizeConfig.safeBlockVertical * 1.2),
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
@@ -1971,13 +1975,16 @@ class _DashboradPageState extends State<DashboradPage>
     final double itemHeight = size.width / 4.2;
     final double itemWidth = size.width / 4.2;
     return Container(
+      //color: Colors.lightBlue,
       height: MediaQuery.of(context).size.height / 1.3,
       width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.only(top: 5, bottom: 20),
+      padding: EdgeInsets.only(top: 10, bottom: 20, left: 0, right: 0),
       child: GridView.count(
         shrinkWrap: true,
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
+        crossAxisSpacing: 9.0,
+        mainAxisSpacing: 9.0,
         children: productList.map((product) {
           var price = product.price.toStringAsFixed(2);
           return InkWell(
@@ -1999,7 +2006,7 @@ class _DashboradPageState extends State<DashboradPage>
             child: Container(
               height: itemHeight,
               // padding: EdgeInsets.all(5),
-              margin: EdgeInsets.all(5),
+              margin: EdgeInsets.all(0),
               child: Stack(
                 alignment: AlignmentDirectional.topCenter,
                 children: <Widget>[
@@ -2262,6 +2269,8 @@ class _DashboradPageState extends State<DashboradPage>
                         padding: EdgeInsets.all(0),
                         width: MediaQuery.of(context).size.width / 5.5,
                         child: Text(cart.productName.toUpperCase(),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: Styles.greysmall()),
                       ),
                       Container(
@@ -2528,7 +2537,7 @@ class _DashboradPageState extends State<DashboradPage>
                     )
                   : SizedBox(),
               Container(
-                  height: MediaQuery.of(context).size.height / 3.5,
+                  height: MediaQuery.of(context).size.height / 2.2,
                   margin: EdgeInsets.only(top: customer != null ? 85 : 35),
                   child: cartTable),
               cartList.length != 0

@@ -7,6 +7,8 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/Drawer.dart';
+import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -25,6 +27,7 @@ class _ShiftReportsState extends State<ShiftReports> {
   var screenArea = 1.6;
   int _current = 0;
   List<Orders> orders = [];
+  List<Drawerdata> drawerData = [];
   double grossSale = 0.00;
   double netSale = 0.00;
   double totalTender = 0.00;
@@ -38,6 +41,8 @@ class _ShiftReportsState extends State<ShiftReports> {
   double payinOut = 0.00;
   double expectedVal = 0.00;
   double overShort = 0.00;
+  double payInOutAmount = 0.00;
+  bool isInAmmount = false;
   final List<String> imgList = [
     'Summary',
     'Cash Drawer Summary',
@@ -106,6 +111,7 @@ class _ShiftReportsState extends State<ShiftReports> {
         expectedVal = 0.00;
         overShort = 0.00;
       });
+      getpayInOutAmmount();
     }
   }
 
@@ -119,9 +125,65 @@ class _ShiftReportsState extends State<ShiftReports> {
             ammount: amount,
             onClose: (amount, reson) {
               Navigator.of(context).pop();
+              insertPayinOUT(amount, reson);
             },
           );
         });
+  }
+
+  insertPayinOUT(amount, reson) async {
+    User user = await CommunFun.getuserDetails();
+    var terminalid = await CommunFun.getTeminalKey();
+    Drawerdata drawer = new Drawerdata();
+    drawer.shiftId = shifittem.shiftId;
+    drawer.amount = amount;
+    drawer.isAmountIn = isInAmmount == true ? 1 : 2;
+    drawer.reason = reson;
+    drawer.status = 1;
+    drawer.createdBy = user.id;
+    drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    drawer.localID = await CommunFun.getLocalID();
+    drawer.terminalid = int.parse(terminalid);
+    var result = await localAPI.saveInOutDrawerData(drawer);
+    print(result);
+    getpayInOutAmmount();
+  }
+
+  getpayInOutAmmount() async {
+    if (shifittem.shiftId != null) {
+      List<Drawerdata> result =
+          await localAPI.getPayinOutammount(shifittem.shiftId);
+      print(result);
+      if (result.length > 0) {
+        setState(() {
+          drawerData = result;
+        });
+        var drawerAmm = 0.00;
+        for (var i = 0; i < drawerData.length; i++) {
+          Drawerdata drawer = drawerData[i];
+          if (drawer.amount != null) {
+            drawerAmm += drawer.amount;
+          }
+        }
+        setState(() {
+          payInOutAmount = drawerAmm;
+          expectedVal = drawerAmm;
+        });
+        countTotalDrawer();
+      }
+    }
+  }
+
+  countTotalDrawer() {
+    var newval = shifittem.startAmount +
+        cashSale +
+        cashDeposit +
+        cashRefund +
+        cashRounding +
+        payInOutAmount;
+    setState(() {
+      overShort = newval;
+    });
   }
 
   @override
@@ -476,7 +538,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                   style: Styles.blackMediumBold(),
                 ),
                 trailing: Text(
-                  payinOut.toStringAsFixed(2),
+                  payInOutAmount.toStringAsFixed(2),
                   style: Styles.blackMediumBold(),
                 ),
               ),
@@ -545,8 +607,10 @@ class _ShiftReportsState extends State<ShiftReports> {
                   child: RaisedButton(
                     padding: EdgeInsets.all(20),
                     onPressed: () {
+                      setState(() {
+                        isInAmmount = true;
+                      });
                       openpayInOUTPop("Pay In Amount", "5.00");
-                      CommunFun.showToast(context, "Comming Soon");
                     },
                     child: Text(
                       "Pay In",
@@ -569,8 +633,10 @@ class _ShiftReportsState extends State<ShiftReports> {
                   child: RaisedButton(
                     padding: EdgeInsets.all(20),
                     onPressed: () {
+                      setState(() {
+                        isInAmmount = false;
+                      });
                       openpayInOUTPop("Pay Out Amount", "5.00");
-                      CommunFun.showToast(context, "Comming Soon");
                     },
                     child: Text(
                       "Pay Out",

@@ -821,6 +821,25 @@ class CreateTables {
         "created_at TEXT," +
         "updated_at INTEGERT" +
         ")");
+
+    // Drawer table
+
+    datatables = db.execute("CREATE TABLE drawer ( " +
+        "id INTEGERT PRIMARYKEY AUTOINCREAMENT," +
+        "shift_id INTEGERT," +
+        "Amount REAL," +
+        "is_amount_in NUMERIC," +
+        "reason TEXT," +
+        "status NUMERIC," +
+        "created_by INTEGERT," +
+        "updated_by INTEGERT," +
+        "created_at TEXT," +
+        "updated_at TEXT," +
+        "serverId INTEGERT," +
+        "localID TEXT," +
+        "terminalid INTEGERT" +
+        ")");
+
     return datatables;
   }
 }

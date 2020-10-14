@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
@@ -34,6 +32,8 @@ import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
+
+import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
@@ -1526,5 +1526,32 @@ class LocalAPI {
     await SyncAPICalls.logActivity(
         "Meals product List", "get Meals product List", "setmeal", setmealid);
     return list;
+  }
+
+  Future<List<Drawerdata>> getPayinOutammount(shiftid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from drawer where shift_id = " + shiftid.toString();
+    var mealList = await db.rawQuery(qry);
+    List<Drawerdata> list = mealList.isNotEmpty
+        ? mealList.map((c) => Drawerdata.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Meals product List", "Meals product List", "drawer", shiftid);
+    return list;
+  }
+
+  Future<int> saveInOutDrawerData(Drawerdata drawerData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    // var checkisExitqry = "SELECT *  FROM drawer where id =" +
+    //     drawerData.id.toString();
+    // var checkisExit = await db.rawQuery(checkisExitqry);
+    // var inveID;
+    // if (checkisExit.length > 0) {
+    //   inveID = await db.update("order_cancel", orderData.toJson(),
+    //       where: "order_id =?", whereArgs: [orderData.orderId]);
+    // } else {
+    var inveID = await db.insert("drawer", drawerData.toJson());
+    //}
+    return inveID;
   }
 }

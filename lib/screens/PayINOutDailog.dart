@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class PayInOutDailog extends StatefulWidget {
@@ -16,10 +17,41 @@ class PayInOutDailog extends StatefulWidget {
 class PayInOutDailogstate extends State<PayInOutDailog> {
   DatabaseHelper databaseHelper = DatabaseHelper();
   LocalAPI localAPI = LocalAPI();
-
+  double ammount = 0.00;
+  var selectedreason;
+  List<String> reasonList = [
+    "Add Change",
+    "Routine diposit",
+    "Other",
+  ];
   @override
   void initState() {
     super.initState();
+    // setState(() {
+    //   ammount = widget.ammount;
+    // });
+  }
+
+  openAmmountPop() {
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return OpeningAmmountPage(
+              ammountext: "Pay In Amount",
+              onEnter: (ammountext) {
+                print(ammountext);
+                setamount(ammountext);
+              });
+        });
+  }
+
+  setamount(ammountext) {
+    if (ammountext is String) {
+      setState(() {
+        ammount = double.parse(ammountext);
+      });
+    }
   }
 
   @override
@@ -45,7 +77,9 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
             left: 0,
             top: 10,
             child: FlatButton(
-              onPressed: () {},
+              onPressed: () {
+                widget.onClose(ammount, selectedreason);
+              },
               child: Text(
                 "Confirm",
                 style: Styles.whiteSimpleSmall(),
@@ -98,19 +132,55 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Text(widget.title, style: Styles.drawerText()),
-          Text(widget.ammount, style: Styles.blackBoldLarge()),
+          GestureDetector(
+              onTap: () {
+                openAmmountPop();
+              },
+              child: Text(ammount.toStringAsFixed(2),
+                  style: Styles.blackBoldLarge())),
           Text('reason', style: Styles.drawerText()),
           Container(
-            width: MediaQuery.of(context).size.width / 5,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Text("Add change", style: Styles.drawerText()),
-                Icon(Icons.keyboard_arrow_down)
-              ],
-            ),
-          )
+              width: MediaQuery.of(context).size.width / 5,
+              padding: EdgeInsets.all(15),
+              margin: EdgeInsets.only(top: 5),
+              height: 50,
+              color: Colors.grey[400],
+              child: Center(
+                child: DropdownButton<String>(
+                  underline: Container(
+                    color: Colors.transparent,
+                  ),
+                  elevation: 5,
+                  icon: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 10,
+                  ),
+                  value: selectedreason,
+                  isExpanded: true,
+                  onChanged: (String string) {
+                    setState(() {
+                      selectedreason = string;
+                    });
+                  },
+                  selectedItemBuilder: (BuildContext context) {
+                    return reasonList.map<Widget>((item) {
+                      return Text(
+                        item,
+                        style: Theme.of(context).textTheme.title,
+                      );
+                    }).toList();
+                  },
+                  items: reasonList.map((item) {
+                    return DropdownMenuItem<String>(
+                      child: Text(
+                        item,
+                        style: Theme.of(context).textTheme.title,
+                      ),
+                      value: item,
+                    );
+                  }).toList(),
+                ),
+              )),
         ],
       ),
     );
