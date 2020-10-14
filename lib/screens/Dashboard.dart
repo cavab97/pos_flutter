@@ -591,10 +591,10 @@ class _DashboradPageState extends State<DashboradPage>
     for (int i = 0; i < printerList.length; i++) {
       List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
       tempCart.clear();
-      for (int j = 0; j < cartList.length; j++) {
+      for (int j = 0; j < cartLists.length; j++) {
         MSTCartdetails temp = MSTCartdetails();
-        if (printerList[i].printerId == cartList[j].printer_id) {
-          temp = cartList[j];
+        if (printerList[i].printerId == cartLists[j].printer_id) {
+          temp = cartLists[j];
           tempCart.add(temp);
         }
       }
@@ -603,16 +603,30 @@ class _DashboradPageState extends State<DashboradPage>
             printerList[i].printerIp.toString(), tableName, context, tempCart);
       }
     }
-    /*showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return PrinterListDailog(
-              cartList: cartLists,
-              onPress: () {
-                // TOTO : pring reicipt code
-              });
-        });*/
+  }
+
+  sendTokitched(itemList) async {
+    String ids = "";
+    var list = [];
+    for (var i = 0; i < itemList.length; i++) {
+      if (itemList[i].isSendKichen == null || itemList[i].isSendKichen == 0) {
+        if (ids == "") {
+          ids = itemList[i].id.toString();
+        } else {
+          ids = ids + "," + itemList[i].id.toString();
+        }
+        list.add(itemList[i]);
+      }
+      if (i == itemList.length - 1) {
+        if (list.length > 0) {
+          dynamic send = await localAPI.sendToKitched(ids);
+          openPrinterPop(list);
+          print(send);
+          getCartItem(currentCart);
+        }
+        return false;
+      }
+    }
   }
 
   sendPayment() {
@@ -2061,7 +2075,7 @@ class _DashboradPageState extends State<DashboradPage>
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () {
-                      openPrinterPop(cartList);
+                      sendTokitched(cartList);
                     },
                     child: Text(
                       Strings.send,

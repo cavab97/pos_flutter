@@ -334,11 +334,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
               TableRow(children: [
                 TableCell(
                   // Part 1 white
-                  child: Container(
-                    //    padding: EdgeInsets.only(top: 20, left: 20, right: 20),
-                    height: MediaQuery.of(context).size.height,
-                    color: Colors.white,
-                    child: SingleChildScrollView(
+                  child: SingleChildScrollView(
+                    physics: NeverScrollableScrollPhysics(),
+                    child: Container(
+                      //    padding: EdgeInsets.only(top: 20, left: 20, right: 20),
+                      height: MediaQuery.of(context).size.height,
+                      color: Colors.white,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -984,8 +985,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Widget searchTransationList() {
     if (isFiltering) {
       return Container(
+        height: MediaQuery.of(context).size.height / 1.3,
         child: ListView(
           shrinkWrap: true,
+          physics: AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 5),
           children: filterList.map((item) {
             return Container(
@@ -1044,6 +1047,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       );
     } else {
       return Container(
+        height: MediaQuery.of(context).size.height / 1.3,
         child: ListView(
           itemExtent: 65,
           padding: EdgeInsets.symmetric(horizontal: 5),

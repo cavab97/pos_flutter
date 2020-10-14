@@ -43,18 +43,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
     discover(context);
   }
 
-  sendTokitched() async {
-    List<String> ids = [];
-    for (var i = 0; i < itemList.length; i++) {
-      if (itemList[i].isSendKichen == null || itemList[i].isSendKichen == 0) {
-        ids.add(itemList[i].id.toString());
-      }
-      if (i == itemList.length - 1) {
-        dynamic send = await localAPI.sendToKitched(ids);
-        print(send);
-      }
-    }
-  }
+
 
   void discover(BuildContext ctx) async {
     setState(() {
@@ -112,7 +101,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
   }
 
   void testPrint(String printerIp, BuildContext ctx) async {
-    sendTokitched();
+    //sendTokitched();
   //  printKOT.checkKOTPrint(printerIp, ctx, itemList);
 
   }
