@@ -682,6 +682,10 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           orderDetail.updated_by = userdata.id;
           orderDetail.detail_status = 1;
           orderDetail.detail_by = userdata.id;
+          if (cartItem.issetMeal == 1) {
+            orderDetail.setmeal_product_detail =
+                cartItem.setmeal_product_detail;
+          }
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
           print(orderDetailid);
           if (cartItem.issetMeal == 0) {

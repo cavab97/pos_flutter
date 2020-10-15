@@ -204,6 +204,8 @@ class SyncAPICalls {
               "category_id": details.category_id,
               "detail_amount": details.detail_amount,
               "detail_qty": details.detail_qty,
+              "issetMeal": details.issetMeal,
+              "setmeal_product_detail": details.setmeal_product_detail,
               "detail_status": details.detail_status,
               "detail_by": details.detail_by,
               "updated_at": details.updated_at,
@@ -282,7 +284,6 @@ class SyncAPICalls {
           order.branch_id = orderdata["branch_id"];
           order.terminal_id = orderdata["terminal_id"];
           order.app_id = orderdata["app_id"];
-          //order.table_no = orderdata["table_no"];
           order.table_id = orderdata["table_id"];
           order.invoice_no = orderdata["invoice_no"];
           order.customer_id = orderdata["customer_id"];
@@ -328,6 +329,9 @@ class SyncAPICalls {
               o_details.terminal_id = detail["terminal_id"];
               o_details.app_id = detail["app_id"];
               o_details.product_id = detail["product_id"];
+              o_details.issetMeal = detail["issetMeal"];
+              o_details.setmeal_product_detail =
+                  detail["setmeal_product_detail"];
               o_details.product_price = detail["product_price"] is int
                   ? (detail["product_price"] as int).toDouble()
                   : detail["product_price"];

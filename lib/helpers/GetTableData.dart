@@ -345,7 +345,7 @@ class TableData {
             var result = await db.insert("modifier", modifier.toJson());
           } else {
             var result = await db.update("modifier", modifier.toJson(),
-                where: "modifier_id", whereArgs: [modifier.modifierId]);
+                where: "modifier_id =?", whereArgs: [modifier.modifierId]);
           }
         }
       }
@@ -362,18 +362,18 @@ class TableData {
           var count = await ifExists(db, data);
 
           var list = setMeal.toJson();
-          final keys = list.keys.toList(growable: false);
-          for (String key in keys) {
-            if (list[key] == "base64") {
-              list.remove(key);
-            }
-          }
-          print(list);
+          // final keys = list.keys.toList(growable: false);
+          // for (String key in keys) {
+          //   if (list[key] == "base64") {
+          //     await list.remove(key);
+          //   }
+          // }
+          // print(list);
           if (count == 0) {
             var result = await db.insert("setmeal", list);
           } else {
             var result = await db.update("setmeal", list,
-                where: "setmeal_id", whereArgs: [setMeal.setmealId]);
+                where: "setmeal_id =?", whereArgs: [setMeal.setmealId]);
           }
         }
 
@@ -389,17 +389,17 @@ class TableData {
             };
             var count = await ifExists(db, data);
             var list = setMealbranch.toJson();
-            final keys = list.keys.toList(growable: false);
-            for (String key in keys) {
-              if (list[key] == "base64") {
-                list.remove(key);
-              }
-            }
+            // final keys = list.keys.toList(growable: false);
+            // for (String key in keys) {
+            //   if (list[key] == "base64") {
+            //     list.remove(key);
+            //   }
+            // }
             if (count == 0) {
               var result = await db.insert("setmeal_branch", list);
             } else {
               var result = await db.update("setmeal_branch", list,
-                  where: "setmeal_branch_id",
+                  where: "setmeal_branch_id =?",
                   whereArgs: [setMealbranch.setmealBranchId]);
             }
           }
@@ -415,17 +415,17 @@ class TableData {
             'key': "setmeal_product_id",
             'value': setMealProduct.setmealProductId,
           };
-          await setMealProduct
-              .toJson()
-              .removeWhere((String key, dynamic value) => key == "Base64");
+          // await setMealProduct
+          //     .toJson()
+          //     .removeWhere((String key, dynamic value) => key == "Base64");
           var count = await ifExists(db, data);
+          var setMealP = setMealProduct.toJson();
+          await setMealP.remove("base64");
           if (count == 0) {
-            var result =
-                await db.insert("setmeal_product", setMealProduct.toJson());
+            var result = await db.insert("setmeal_product", setMealP);
           } else {
-            var result = await db.update(
-                "setmeal_product", setMealProduct.toJson(),
-                where: "setmeal_product_id",
+            var result = await db.update("setmeal_product", setMealP,
+                where: "setmeal_product_id =?",
                 whereArgs: [setMealProduct.setmealProductId]);
           }
         }

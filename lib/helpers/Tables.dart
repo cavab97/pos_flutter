@@ -451,6 +451,8 @@ class CreateTables {
         "product_old_price INTEGER," +
         "product_discount REAL," +
         "product_detail TEXT," +
+        "issetMeal NUMERIC," +
+        "setmeal_product_detail TEXT," +
         "category_id INTEGER," +
         "detail_amount REAL," +
         "detail_qty REAL," +
@@ -637,6 +639,7 @@ class CreateTables {
         'discount_type  INTEGER,' + //int
         'remark TEXT,' +
         'issetMeal NUMERIC,' +
+        'setmeal_product_detail TEXT,' +
         'cart_detail TEXT,' +
         'is_deleted   INTEGER,' +
         'created_by  INTEGER,' +

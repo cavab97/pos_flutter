@@ -119,6 +119,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       setState(() {
         mealProducts = mealProductList;
       });
+      tempCart.addAll(mealProducts);
     }
   }
 
@@ -438,6 +439,20 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return grandTotal;
   }
 
+  _setSelectUnselect(SetMealProduct product) {
+    var contain = tempCart.where(
+        (element) => element.setmealProductId == product.setmealProductId);
+    if (contain.isNotEmpty) {
+      setState(() {
+        tempCart.remove(product);
+      });
+    } else if (contain.isEmpty) {
+      setState(() {
+        tempCart.add(product);
+      });
+    }
+  }
+
   countTax(subT) async {
     var totalTax = [];
     double taxvalue = taxvalues;
@@ -568,7 +583,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = DateTime.now().toString();
-    print(json.decode(cartdetails.cart_detail));
+    if (isSetMeal) {
+      cartdetails.setmeal_product_detail = json.encode(tempCart);
+    }
     var detailID = await localAPI.addintoCartDetails(cartdetails);
 
     if (selectedModifier.length > 0) {
@@ -749,8 +766,17 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                   children: mealProducts.map((product) {
                 var index = mealProducts.indexOf(product);
                 return InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      _setSelectUnselect(product);
+                    },
                     child: Container(
+                      color: tempCart
+                              .where((element) =>
+                                  element.setmealProductId ==
+                                  product.setmealProductId)
+                              .isNotEmpty
+                          ? Colors.grey[100]
+                          : Colors.white,
                       padding:
                           EdgeInsets.symmetric(horizontal: 0, vertical: 10),
                       child: Row(
@@ -801,26 +827,27 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                 SizedBox(width: 90),
                                 IconButton(
                                   onPressed: () {
-                                    // var contain = tempCart.where((element) =>
-                                    //     element.productId == product.productId);
-                                    // if (contain.isNotEmpty) {
-                                    //   setState(() {
-                                    //     tempCart.remove(product);
-                                    //   });
-                                    // } else if (contain.isEmpty) {
-                                    //   setState(() {
-                                    //     tempCart.add(product);
-                                    //   });
-                                    // }
+                                    var contain = tempCart.where((element) =>
+                                        element.setmealProductId ==
+                                        product.setmealProductId);
+                                    if (contain.isNotEmpty) {
+                                      setState(() {
+                                        tempCart.remove(product);
+                                      });
+                                    } else if (contain.isEmpty) {
+                                      setState(() {
+                                        tempCart.add(product);
+                                      });
+                                    }
                                   },
                                   icon: Icon(
-                                    // tempCart
-                                    //         .where((element) =>
-                                    //             element.productId ==
-                                    //             product.productId)
-                                    //         .isNotEmpty
-                                    Icons.check_circle,
-                                    // : Icons.check_box_outline_blank,
+                                    tempCart
+                                            .where((element) =>
+                                                element.setmealProductId ==
+                                                product.setmealProductId)
+                                            .isNotEmpty
+                                        ? Icons.check_circle
+                                        : Icons.check_circle_outline,
                                     color: Colors.green,
                                     size: 40,
                                   ),

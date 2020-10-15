@@ -48,6 +48,7 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 class DashboradPage extends StatefulWidget {
   // main Product list page
@@ -869,7 +870,9 @@ class _DashboradPageState extends State<DashboradPage>
           } else {
             orderDetail.app_id = int.parse(terminalId);
           }
-          var productdata = json.decode(cartItem.cart_detail);
+          var productdata = cartItem.cart_detail != null
+              ? json.decode(cartItem.cart_detail)
+              : "";
           orderDetail.uuid = uuid;
           orderDetail.order_id = orderId;
           orderDetail.branch_id = int.parse(branchid);
@@ -880,6 +883,7 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.detail_qty = cartItem.productQty;
           orderDetail.product_discount = cartItem.discount;
           orderDetail.product_detail = json.encode(productdata);
+
           orderDetail.updated_at =
               await CommunFun.getCurrentDateTime(DateTime.now());
           orderDetail.detail_amount =
@@ -889,13 +893,14 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.updated_by = userdata.id;
           orderDetail.detail_status = 1;
           orderDetail.detail_by = userdata.id;
+          orderDetail.issetMeal = cartItem.issetMeal;
+          if (cartItem.issetMeal == 1) {
+            orderDetail.setmeal_product_detail =
+                cartItem.setmeal_product_detail;
+          }
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
-
           if (cartItem.issetMeal == 0) {
             if (productdata["hasInventory"] == 1) {
-              //update invnotory
-              // List<ProductStoreInventory> inventory =
-              //     await localAPI.removeFromInventory(orderDetail);
               List<ProductStoreInventory> inventory =
                   await localAPI.getStoreInventoryData(orderDetail.product_id);
               if (inventory.length > 0) {
@@ -1028,7 +1033,6 @@ class _DashboradPageState extends State<DashboradPage>
     shiftinvoice.terminal_id = int.parse(terminalId);
     shiftinvoice.shift_terminal_id = int.parse(terminalId);
     var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
-
     await clearCartAfterSuccess(orderid);
     await Navigator.of(context).pop();
     // await showDialog(
@@ -1403,6 +1407,15 @@ class _DashboradPageState extends State<DashboradPage>
             ),
           ),
         ),
+        //   isLoading: isLoading,
+        //   opacity: 0.9,
+        //   color: Colors.black87,
+        //   progressIndicator: CircularProgressIndicator(
+        //     backgroundColor: Colors.white,
+        //     valueColor:
+        //         AlwaysStoppedAnimation<Color>(Theme.of(context).accentColor),
+        //   ),
+        // ),
       ),
       onWillPop: _willPopCallback,
     );
@@ -2404,7 +2417,7 @@ class _DashboradPageState extends State<DashboradPage>
                             ),
                             Padding(
                               padding: EdgeInsets.only(right: 15),
-                              child: Text(taxitem["taxAmount"],
+                              child: Text(taxitem["taxAmount"].toString(),
                                   style: Styles.darkBlue()),
                             )
                           ]);
