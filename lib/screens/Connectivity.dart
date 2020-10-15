@@ -1,5 +1,5 @@
+import 'package:mcncashier/components/commanutils.dart';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
@@ -22,7 +22,7 @@ class _HomeState extends State<Home> {
     } on PlatformException {
       print('Failed to get broadcast IP.');
     }
-    var server = await HttpServer.bind(InternetAddress.loopbackIPv4, 8080);
+    var server = await HttpServer.bind(info.ip, 8080);
     print("Server running on IP : " +
         server.address.toString() +
         " On Port : " +
@@ -56,6 +56,11 @@ class _HomeState extends State<Home> {
 
   void handlePOST(HttpRequest request) {
     print(request);
+    CommonUtils.showAlertDialog(context, () {
+      Navigator.of(context).pop();
+    }, () {
+      Navigator.of(context).pop();
+    }, "Warning", request.method, "Yes", "No", true);
   }
 
   void handleGet(HttpRequest request) {
@@ -75,7 +80,7 @@ class _HomeState extends State<Home> {
       'ship': 'Millennium Falcon',
       'weakness': 'smuggling debts'
     };
-    HttpClientRequest request = await HttpClient().post(_host, 8080, path) /*1*/
+    HttpClientRequest request = await HttpClient().post("192.168.1.115", 8080, path) /*1*/
       ..headers.contentType = ContentType.json /*2*/
       ..write(jsonEncode(jsonData)); /*3*/
     HttpClientResponse response = await request.close(); /*4*/

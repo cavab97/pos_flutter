@@ -31,7 +31,7 @@ class CommonUtils {
       String negativeButton,
       bool isShowNegative) {
     // flutter defined function
-     showDialog(
+    showDialog(
       context: context,
       builder: (BuildContext context) {
         // return object of type Dialog
@@ -64,4 +64,7 @@ class CommonUtils {
       },
     );
   }
+
+  // flutter defined function
+
 }

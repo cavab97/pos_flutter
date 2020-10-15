@@ -49,7 +49,7 @@ class Strings {
   static String customer_Search_Hint =
       "Search Customer Name,Email,Phone or Memeber id";
   static String select_table = "Select Table";
-    static String merge_table = "Merge Table";
+  static String merge_table = "Merge Table";
   static String new_order = "New Order";
   static String view_order = "View Order";
   static String merge_order = "Merge Order";
@@ -112,11 +112,12 @@ class Strings {
   static String procesing = "Processing";
   static String send = "SEND";
   static String open = "OPEN";
+  static String shift_close_msg = "Please close your shift and Sync data.";
   static String internet_connection_lost = "Internet Connection Lost";
   static String shift_opne_alert_msg =
       "Currently shift was closed,Please opne shift after you can see shift report.";
   static String shift_opne_alert_msg_transaction =
       "Currently shift was closed,Please opne shift after you  can see Transactions.";
-      static String shift_opne_alert_msg_webOrder=
+  static String shift_opne_alert_msg_webOrder =
       "Currently shift was closed,Please opne shift after you  can see web Orders.";
 }

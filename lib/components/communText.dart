@@ -23,6 +23,7 @@ import 'package:mcncashier/services/tableSyncAPI.dart' as repo;
 import 'package:toast/toast.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:intl/intl.dart';
+import 'package:wifi_ip/wifi_ip.dart';
 
 DatabaseHelper databaseHelper = DatabaseHelper();
 
@@ -661,5 +662,16 @@ class CommunFun {
     } else {
       return "";
     }
+  }
+
+  static wifiDetails() async {
+    WifiIpInfo info;
+    try {
+      info = await WifiIp.getWifiIp;
+    } on PlatformException {
+      print('Failed to get broadcast IP.');
+      info = null;
+    }
+    return info;
   }
 }
