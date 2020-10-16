@@ -16,4 +16,11 @@ class Configrations {
   static String web_orders = "web-order-table-data";
   static String cancle_order = "create-cancel-order-data";
   static String update_inventory_table = "update-product-inventory-data";
+
+  static String products = "Products";
+  static String categories = "Categories";
+  static String search_product = "Search_product";
+  static String customers = "Customers";
+  static String add_customer = "Add_Customer";
+    static String tables = "Tables";
 }

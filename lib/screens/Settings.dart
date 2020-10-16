@@ -2,8 +2,6 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:mcncashier/components/QRCodeScanPop.dart';
 import 'package:mcncashier/components/QrScanAndGenrate.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/colors.dart';
@@ -11,8 +9,10 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/APIcalls/CategoriesReq.dart';
 import 'package:mcncashier/helpers/CustomeIcons.dart';
-import 'package:mcncashier/helpers/LocalAPI/Server.dart';
+import 'package:mcncashier/helpers/LocalAPI/CategoriesList.dart';
+import 'package:mcncashier/helpers/Server.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/screens/PrinteTypeDailog.dart';
 import 'package:mcncashier/screens/SelectPrinterDailog.dart';
@@ -132,20 +132,23 @@ class _SettingsPageState extends State<SettingsPage> {
       setState(() {
         isJoinLoaclServer = value;
       });
-      scanQrCodePop();
+      if (value == true) {
+        scanQrCodePop();
+      } else {
+        remvoveLocalServer();
+      }
     }
+  }
+
+  remvoveLocalServer() async {
+    await Preferences.removeSinglePref(Constant.IS_JOIN_SERVER);
+    await Preferences.removeSinglePref(Constant.SERVER_IP);
   }
 
   opneqrcodePop() async {
     var wifiData = await CommunFun.wifiDetails();
     if (wifiData.ip != null) {
-      // await Server.createSetver(wifiData.ip, context);
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return QRCodesImagePop(ip: wifiData.ip);
-          });
+      await Server.createSetver(wifiData.ip, context);
     } else {
       CommunFun.showToast(context, "Error when getting device ip address");
     }
@@ -167,10 +170,16 @@ class _SettingsPageState extends State<SettingsPage> {
           //   useAutoFocus: _useAutoFocus,
           // ),
           );
-      var result = await BarcodeScanner.scan(options: options);
-      setState(() => scanResult = result);
-      print(scanResult);
+      // var result = await BarcodeScanner.scan(options: options);
+      // print(result);
+      // setState(() => scanResult = result);
+      // print(result.type);
+      // print(result.rawContent);
+      // print(result.format);
+      // print(result.formatNote);
+      checkIPisvalid();
     } on PlatformException catch (e) {
+      print(e);
       var result = ScanResult(
         type: ResultType.Error,
         format: BarcodeFormat.unknown,
@@ -186,6 +195,15 @@ class _SettingsPageState extends State<SettingsPage> {
         scanResult = result;
       });
     }
+  }
+
+  checkIPisvalid() async {
+    CategoriesList catCall = new CategoriesList();
+    await Preferences.setStringToSF(Constant.IS_JOIN_SERVER, "true");
+    await Preferences.setStringToSF(Constant.SERVER_IP, "192.168.1.115");
+    var branchid = await CommunFun.getbranchId();
+    var result = await catCall.getCategories(null, branchid);
+    print(result);
   }
 
   @override

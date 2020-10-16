@@ -326,11 +326,14 @@ class CommunFun {
           getAssetsData(context);
         }
         Navigator.of(context).pop();
-        var serverTime =
-            await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
-        if (serverTime == null) {
-          Navigator.pushNamed(context, Constant.PINScreen);
+        var fisrttime =
+            await Preferences.getStringValuesSF(Constant.IS_FIRST_TIME_SYNC);
+        if (fisrttime == null) {
+          await Navigator.pushNamed(context, Constant.PINScreen);
+          await Preferences.setStringToSF(Constant.IS_FIRST_TIME_SYNC, "true");
         } else {
+          User userdata = await CommunFun.getuserDetails();
+          await CommunFun.checkUserPermission(userdata.id);
           Navigator.pushNamed(context, Constant.DashboardScreen);
         }
       } else {
@@ -673,5 +676,14 @@ class CommunFun {
       info = null;
     }
     return info;
+  }
+
+  static checkIsJoinServer() async {
+    var isjoin = await Preferences.getStringValuesSF(Constant.IS_JOIN_SERVER);
+    if (isjoin != null) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
