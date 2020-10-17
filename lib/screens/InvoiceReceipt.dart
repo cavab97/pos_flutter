@@ -4,6 +4,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Order.dart';
@@ -29,7 +30,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
   DatabaseHelper databaseHelper = DatabaseHelper();
   LocalAPI localAPI = LocalAPI();
   PrintReceipt printReceipt = PrintReceipt();
-
+  OrdersList orderApi = new OrdersList();
   int orderid;
 
   /*For printer */
@@ -68,7 +69,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
     List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
-    Orders order = await localAPI.getcurrentOrders(orderid);
+    Orders order = await orderApi.getcurrentOrders(orderid);
     setState(() {
       branchData = branchAddress;
       paymentdata = orderpaymentdata;

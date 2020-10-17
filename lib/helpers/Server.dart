@@ -1,10 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/QrScanAndGenrate.dart';
+import 'package:mcncashier/helpers/APIcalls/CartReq.dart';
 import 'package:mcncashier/helpers/APIcalls/CategoriesReq.dart';
+import 'package:mcncashier/helpers/APIcalls/CheckinOutReq.dart';
 import 'package:mcncashier/helpers/APIcalls/CustomerReq.dart';
+import 'package:mcncashier/helpers/APIcalls/OrdersReq.dart';
+import 'package:mcncashier/helpers/APIcalls/PaymentReq.dart';
 import 'package:mcncashier/helpers/APIcalls/ProductsReq.dart';
+import 'package:mcncashier/helpers/APIcalls/ShiftReq.dart';
 import 'package:mcncashier/helpers/APIcalls/TablesReq.dart';
+import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
 
 class Server {
   static createSetver(ip, context) async {
@@ -62,6 +68,58 @@ class Server {
         break;
       case "/Tables":
         TablesReq.getTableCall(request);
+        break;
+      case "/Add_Table_Order":
+        TablesReq.addTableOrder(request);
+        break;
+
+      case "/Add_Shift":
+        ShiftReq.addShift(request);
+        break;
+      case "/Shift_datails":
+        ShiftReq.getShiftList(request);
+        break;
+      case "/Product_attributes":
+        ProductsReq.getProductAttributes(request);
+        break;
+      case "/Product_modifires":
+        ProductsReq.getProductModifires(request);
+        break;
+      case "/Add_cart":
+        CartReq.addCart(request);
+        break;
+      case "/Add_SaveOrder":
+        CartReq.addSaveOrder(request);
+        break;
+      case "/Cart_Details":
+        CartReq.addCartDetails(request);
+        break;
+      case "/Cart_Sub_Details":
+        CartReq.addSubCartDetails(request);
+        break;
+      case "/Cart_Items":
+        CartReq.cartItemList(request);
+        break;
+      case "/checkIn_Out":
+        CheckInOutReq.userCheckInOut(request);
+        break;
+      case "/table_Details":
+        TablesReq.gettableDetails(request);
+        break;
+      case "/get_Cart_id":
+        CartReq.getSaveOrder(request);
+        break;
+      case "/cart_data":
+        CartReq.getCartTotals(request);
+        break;
+      case "/payment_Methods":
+        PaymenntReq.getPaymentMethods(request);
+        break;
+      case "/get_order":
+        OrdersReq.getcurrentOrders(request);
+        break;
+      case "/getLastOrderids":
+        OrdersReq.getLastOrderIds(request);
         break;
       default:
     }

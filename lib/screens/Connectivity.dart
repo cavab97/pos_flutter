@@ -80,7 +80,7 @@ class _HomeState extends State<Home> {
       'ship': 'Millennium Falcon',
       'weakness': 'smuggling debts'
     };
-    HttpClientRequest request = await HttpClient().post("192.168.1.115", 8080, path) /*1*/
+    HttpClientRequest request = await HttpClient().post("192.168.0.113", 8080, path) /*1*/
       ..headers.contentType = ContentType.json /*2*/
       ..write(jsonEncode(jsonData)); /*3*/
     HttpClientResponse response = await request.close(); /*4*/

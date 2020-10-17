@@ -5,6 +5,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/LocalAPI/ShiftList.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/screens/PayINOutDailog.dart';
@@ -21,6 +22,7 @@ class ShiftReports extends StatefulWidget {
 
 class _ShiftReportsState extends State<ShiftReports> {
   LocalAPI localAPI = LocalAPI();
+  ShiftList shiftList = new ShiftList();
   Shift shifittem = new Shift();
   var screenArea = 1.6;
   int _current = 0;
@@ -95,7 +97,7 @@ class _ShiftReportsState extends State<ShiftReports> {
   getShiftData() async {
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     if (shiftid != null) {
-      List<Shift> shift = await localAPI.getShiftData(shiftid);
+      List<Shift> shift = await shiftList.getShiftData(context, shiftid);
       setState(() {
         shifittem = shift[0];
         cashSale = 0.00;

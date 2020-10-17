@@ -6,6 +6,9 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
+import 'package:mcncashier/helpers/LocalAPI/ProductList.dart';
+import 'package:mcncashier/helpers/LocalAPI/TablesList.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
@@ -16,6 +19,7 @@ import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
+import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
@@ -45,6 +49,8 @@ class ProductQuantityDailog extends StatefulWidget {
 class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   TextEditingController productController = new TextEditingController();
   LocalAPI localAPI = LocalAPI();
+  ProductsList prodList = new ProductsList();
+  Cartlist cartlistApi = new Cartlist();
   List<Attribute_Data> attributeList = [];
   ProductDetails productItem;
   SetMeal setmeal;
@@ -186,14 +192,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   getAttributes() async {
     List<Attribute_Data> productAttr =
-        await localAPI.getProductDetails(productItem);
+        await prodList.getProductAttributes(context, productItem.productId);
     if (productAttr.length > 0) {
       setState(() {
         attributeList = productAttr;
       });
     }
     List<ModifireData> productModifeir =
-        await localAPI.getProductModifeir(productItem);
+        await prodList.getProductModifiers(context, productItem.productId);
     if (productModifeir.length > 0) {
       setState(() {
         modifireList = productModifeir;
@@ -205,7 +211,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   getCartData() async {
-    List<MST_Cart> cartval = await localAPI.getCurrentCart(widget.cartID);
+    List<MST_Cart> cartval = await cartlistApi.getCurrCartTotals(widget.cartID);
     if (cartval.length != 0) {
       setState(() {
         currentCart = cartval[0];
@@ -215,7 +221,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   getcartItemsDetails() async {
     List<MSTCartdetails> cartItemslist =
-        await localAPI.getCurrentCartItems(widget.cartID);
+        await CommunFun.getcartDetails(widget.cartID);
     if (cartItemslist.length != 0) {
       setState(() {
         cartItems = cartItemslist;
@@ -475,10 +481,30 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         : 0.00;
   }
 
+  insertTableData(tableData) async {
+    SaveOrder orderData = new SaveOrder();
+    Table_order tableorder = new Table_order();
+    Cartlist cartlist = new Cartlist();
+    TablesList tableList = new TablesList();
+    if (!isEditing) {
+      orderData.numberofPax =
+          tableData != null ? tableData["number_of_pax"] : 0;
+      orderData.isTableOrder = tableData != null ? 1 : 0;
+      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+      var saveOid = await cartlist.addSaveOrder(
+          context, orderData, tableData["table_id"]);
+
+      tableorder = Table_order.fromJson(tableData);
+      tableorder.save_order_id = saveOid;
+      var tableid = await tableList.insertTableOrder(context, tableorder);
+    }
+  }
+
   produtAddTocart() async {
     MST_Cart cart = new MST_Cart();
-    SaveOrder orderData = new SaveOrder();
     MSTSubCartdetails subCartData = new MSTSubCartdetails();
+    Cartlist cartlist = new Cartlist();
+
     var branchid = await CommunFun.getbranchId();
     var table = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
@@ -508,26 +534,17 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cart.tax_json = json.encode(totalTax);
     cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
     cart.customer_terminal = customer != null ? customer["terminal_id"] : 0;
+    cart.created_by = loginData["id"];
+    cart.localID = await CommunFun.getLocalID();
     if (!isEditing) {
       cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
     }
-    cart.created_by = loginData["id"];
-    cart.localID = await CommunFun.getLocalID();
-    orderData.orderName = tableData != null ? "" : "test";
-    if (!isEditing) {
-      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-    }
-    orderData.numberofPax = tableData != null ? tableData["number_of_pax"] : 0;
-    orderData.isTableOrder = tableData != null ? 1 : 0;
-    if (!isEditing) {
-      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-    }
+    var cartid = await cartlist.addcart(context, cart); // Insert Cart
+    await insertTableData(tableData);
 
-    // MST Sub Cart details
+    // var cartid = await localAPI.insertItemTocart(currentCart.id, cart,
+    //     productItem, orderData, tableData["table_id"], subCartData);
 
-    ///insert
-    var cartid = await localAPI.insertItemTocart(currentCart.id, cart,
-        productItem, orderData, tableData["table_id"], subCartData);
     productItem.qty = product_qty;
     productItem.price = double.parse(price.toStringAsFixed(2));
     var data = isSetMeal ? setmeal : productItem;
@@ -535,7 +552,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (isEditing) {
       cartdetails.id = cartitem.id;
     }
-
     cartdetails.cartId = cartid;
     cartdetails.productId =
         isSetMeal ? setmeal.setmealId : productItem.productId;
@@ -550,10 +566,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.issetMeal = isSetMeal ? 1 : 0;
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
-    cartdetails.createdAt = DateTime.now().toString();
-    print(json.encode(cartdetails.cart_detail));
-    var detailID = await localAPI.addintoCartDetails(cartdetails);
-
+    cartdetails.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    var detailID = await cartlist.addintoCartDetails(context, cartdetails);
+    List<MSTSubCartdetails> cartModiData = [];
     if (selectedModifier.length > 0) {
       for (var i = 0; i < selectedModifier.length; i++) {
         var modifire = selectedModifier[i];
@@ -562,21 +577,21 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         subCartData.productId = productItem.productId;
         subCartData.modifierId = modifire.modifierId;
         subCartData.modifirePrice = modifire.price;
-        var res = await localAPI.addsubCartData(subCartData);
+        cartModiData.add(subCartData);
       }
     }
-    if (selectedAttr.length > 0) {
-      for (var i = 0; i < selectedAttr.length; i++) {
-        var attr = selectedAttr[i];
-        subCartData.cartdetailsId = detailID;
-        subCartData.localID = cart.localID;
-        subCartData.productId = productItem.productId;
-        subCartData.caId = attr["ca_id"];
-        subCartData.attributeId = int.parse(attr["attrType_ID"]);
-        subCartData.attrPrice = int.parse(attr["attr_price"]).toDouble();
-        var res = await localAPI.addsubCartData(subCartData);
-      }
+    for (var i = 0; i < selectedAttr.length; i++) {
+      var attr = selectedAttr[i];
+      subCartData.cartdetailsId = detailID;
+      subCartData.localID = cart.localID;
+      subCartData.productId = productItem.productId;
+      subCartData.caId = attr["ca_id"];
+      subCartData.attributeId = int.parse(attr["attrType_ID"]);
+      subCartData.attrPrice = int.parse(attr["attr_price"]).toDouble();
+      cartModiData.add(subCartData);
     }
+    var res = await cartlist.addsubCartData(cartModiData);
+    print(res);
     if (isEditing && cartitem.isSendKichen == 1) {
       var items = [];
       items.add(cartitem);

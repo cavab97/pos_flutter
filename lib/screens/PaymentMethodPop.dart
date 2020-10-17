@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/Payment.dart';
@@ -23,6 +24,7 @@ class PaymentMethodPop extends StatefulWidget {
 class PaymentMethodPopState extends State<PaymentMethodPop> {
   List<Payments> paymenttyppeList = [];
   LocalAPI localAPI = LocalAPI();
+  PaymentList paymentAPI = new PaymentList();
   bool isLoading = false;
   var newAmmount;
   Branch branchdata;
@@ -41,7 +43,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   }
 
   getPaymentMethods() async {
-    var result = await localAPI.getPaymentMethods();
+    var result = await paymentAPI.getPaymentMethods();
     if (result.length != 0) {
       setState(() {
         paymenttyppeList = result;

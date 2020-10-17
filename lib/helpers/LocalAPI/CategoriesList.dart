@@ -9,18 +9,15 @@ import 'package:mcncashier/services/allTablesSync.dart';
 class CategoriesList {
   var db = DatabaseHelper.dbHelper.getDatabse();
   Future<List<Category>> getCategories(context, branchID) async {
-   
     List<Category> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      
-      var apiurl = "http://192.168.1.115/" + Configrations.categories;
+      var apiurl = "http://192.168.0.113:8080/" + Configrations.categories;
       var stringParams = {"branch_id": branchID};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
         list = result["data"];
       }
-
     } else {
       var query = "select * from category left join category_branch on " +
           " category_branch.category_id = category.category_id AND category_branch.status = 1 where " +

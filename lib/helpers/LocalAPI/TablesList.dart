@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/helpers/ComunAPIcall.dart';
@@ -14,7 +16,7 @@ class TablesList {
     List<TablesDetails> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = "http://192.168.1.115/" + Configrations.tables;
+      var apiurl = "http://192.168.0.113:8080/" + Configrations.tables;
       var stringParams = {"branch_id": branchid};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -29,7 +31,7 @@ class TablesList {
           // " AND tables.table_id NOT IN (select table_order.merged_table_id from table_order) " +
           " GROUP by tables.table_id";
 
-      var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+      var res = await db.rawQuery(query);
       list = res.isNotEmpty
           ? res.map((c) => TablesDetails.fromJson(c)).toList()
           : [];
@@ -39,21 +41,27 @@ class TablesList {
     return list;
   }
 
-  Future<int> insertTableOrder(Table_order tableOrder) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
+  Future<int> insertTableOrder(context, Table_order tableOrder) async {
     var isjoin = await CommunFun.checkIsJoinServer();
+    var result;
     if (isjoin == true) {
+      var apiurl = "http://192.168.0.113:8080/" + Configrations.add_table_order;
+      var stringParams = {"table_order": jsonEncode(tableOrder)};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        result = 1;
+      }
     } else {
       var qry = "SELECT * from table_order where table_id =" +
           tableOrder.table_id.toString();
-      var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-      List<Table_order> list = res.isNotEmpty
+      var res = await db.rawQuery(qry);
+      List<Table_order> list = res.length > 0
           ? res.map((c) => Table_order.fromJson(c)).toList()
           : [];
-      var result;
+
       if (list.length > 0) {
         result = await db.update("table_order", tableOrder.toJson(),
-            where: 'table_id = ?', whereArgs: [tableOrder.table_id]);
+            where: 'table_id =?', whereArgs: [tableOrder.table_id]);
       } else {
         result = await db.insert("table_order", tableOrder.toJson());
       }
@@ -63,5 +71,35 @@ class TablesList {
           "table_order",
           tableOrder.table_id);
     }
+    return result;
+  }
+
+  Future<List<TablesDetails>> getTableDetails(branchid, tableID) async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    List<TablesDetails> list = [];
+    if (isjoin == true) {
+      var apiurl = "http://192.168.0.113:8080/" + Configrations.table_Details;
+      var stringParams = {"branch_id": branchid, "table_id": tableID};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        list = result["data"];
+      }
+    } else {
+      var query =
+          "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax from tables " +
+              " LEFT JOIN table_order on table_order.table_id = " +
+              tableID.toString() +
+              " WHERE tables.table_id= " +
+              tableID.toString() +
+              " AND tables.status = 1 AND branch_id = " +
+              branchid;
+      var res = await db.rawQuery(query);
+      list = res.length > 0
+          ? res.map((c) => TablesDetails.fromJson(c)).toList()
+          : [];
+      await SyncAPICalls.logActivity(
+          "tables", "get table details", "tables", tableID);
+    }
+    return list;
   }
 }

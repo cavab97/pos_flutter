@@ -1,7 +1,5 @@
 import 'dart:convert';
-
 import 'dart:io';
-
 import 'package:mcncashier/helpers/LocalAPI/CategoriesList.dart';
 
 class CategoriesReq {
@@ -24,7 +22,9 @@ class CategoriesReq {
     } catch (e) {
       request.response
         ..statusCode = HttpStatus.internalServerError
-        ..write('Exception during get categoryList: $e.');
+        ..write(
+            jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..close();
     }
   }
 }

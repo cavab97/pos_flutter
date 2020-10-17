@@ -7,6 +7,8 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
+import 'package:mcncashier/helpers/LocalAPI/TablesList.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -26,6 +28,8 @@ class _SelectTablePageState extends State<SelectTablePage> {
   TextEditingController paxController = new TextEditingController();
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
+  TablesList tabList = new TablesList();
+  Cartlist cartlist = new Cartlist();
   List<TablesDetails> tableList = new List<TablesDetails>();
   var selectedTable;
   var number_of_pax;
@@ -52,7 +56,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
       isLoading = true;
     });
     var branchid = await CommunFun.getbranchId();
-    List<TablesDetails> tables = await localAPI.getTables(branchid);
+    List<TablesDetails> tables = await tabList.getTables(context, branchid);
     setState(() {
       tableList = tables;
       isLoading = false;
@@ -90,7 +94,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
     table_order.is_merge_table = "1";
     table_order.merged_table_id = table.tableId;
     table_order.number_of_pax = pax;
-    var result = await localAPI.insertTableOrder(table_order);
+    var result = await tabList.insertTableOrder(context, table_order);
     setState(() {
       isMergeing = false;
       mergeInTable = null;
@@ -114,8 +118,8 @@ class _SelectTablePageState extends State<SelectTablePage> {
       table_order.table_id = selectedTable.tableId;
       table_order.number_of_pax = int.parse(paxController.text);
       table_order.save_order_id = selectedTable.saveorderid;
-      var result = await localAPI.insertTableOrder(table_order);
-    
+      var result = await tabList.insertTableOrder(context, table_order);
+
       await Preferences.setStringToSF(
           Constant.TABLE_DATA, json.encode(table_order));
       Navigator.of(context).pop();
@@ -132,13 +136,13 @@ class _SelectTablePageState extends State<SelectTablePage> {
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
       orderData.numberofPax = int.parse(paxController.text);
       orderData.cartId = orderid;
-
       Table_order tableorder = new Table_order();
       tableorder.table_id = selectedTable.tableId;
       tableorder.number_of_pax = int.parse(paxController.text);
-      await localAPI.insertTableOrder(tableorder);
-      await localAPI.insertSaveOrders(orderData, selectedTable.tableId);
-      await localAPI.updateTableidintocart(orderid, selectedTable.tableId);
+      var saveorderid = await cartlist.addSaveOrder(
+          context, orderData, selectedTable.tableId);
+      tableorder.save_order_id = saveorderid;
+      var tab = await tabList.insertTableOrder(context, tableorder);
       Navigator.of(context).pop();
       Navigator.pushNamed(context, Constant.WebOrderPages);
     } else {
@@ -169,7 +173,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
   @override
   Widget build(BuildContext context) {
     final Map arguments = ModalRoute.of(context).settings.arguments as Map;
-  
+
     setState(() {
       isAssigning = arguments['isAssign'];
       orderid = arguments['orderID'];
@@ -354,10 +358,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
         contentPadding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
         fillColor: Colors.white,
       ),
-      style: TextStyle(color: Colors.black, fontSize: SizeConfig.safeBlockVertical * 4),
-      onChanged: (e) {
-       
-      },
+      style: TextStyle(
+          color: Colors.black, fontSize: SizeConfig.safeBlockVertical * 4),
+      onChanged: (e) {},
     );
   }
 
@@ -367,7 +370,8 @@ class _SelectTablePageState extends State<SelectTablePage> {
       onPressed: _onPress,
       child: Text(
         Strings.enterPax,
-        style: TextStyle(color: Colors.white, fontSize: SizeConfig.safeBlockVertical * 4),
+        style: TextStyle(
+            color: Colors.white, fontSize: SizeConfig.safeBlockVertical * 4),
       ),
       color: Colors.deepOrange,
       textColor: Colors.white,

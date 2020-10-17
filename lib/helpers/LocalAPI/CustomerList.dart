@@ -15,7 +15,7 @@ class CustomersList {
     List<Customer> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = "http://192.168.1.115/" + Configrations.customers;
+      var apiurl = "http://192.168.0.113:8080/" + Configrations.customers;
       var stringParams = {"terminal_id": teminalid};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -39,7 +39,7 @@ class CustomersList {
     var isjoin = await CommunFun.checkIsJoinServer();
     var result;
     if (isjoin == true) {
-      var apiurl = "http://192.168.1.115/" + Configrations.add_customer;
+      var apiurl = "http://192.168.0.113:8080/" + Configrations.add_customer;
       var stringParams = {"customer": jsonEncode(customer)};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {

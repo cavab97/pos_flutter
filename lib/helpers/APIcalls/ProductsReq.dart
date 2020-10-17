@@ -26,7 +26,8 @@ class ProductsReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write('Exception during get saerch products: $e.');
+        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..close();
     }
   }
 
@@ -49,7 +50,66 @@ class ProductsReq {
     } catch (e) {
       request.response
         ..statusCode = HttpStatus.internalServerError
-        ..write('Exception during get products: $e.');
+        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..close();
+    }
+  }
+
+  static getProductAttributes(request) async {
+    ProductsList product = new ProductsList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var result = await product.getProductAttributes(
+        null,
+        data["product_id"],
+      );
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({
+          "status": 200,
+          "message": result.length > 0 ? "success" : "No data Found",
+          "data": result
+        }))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..close();
+    }
+  }
+
+  static getProductModifires(request) async {
+    ProductsList product = new ProductsList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var result = await product.getProductModifiers(
+        null,
+        data["product_id"],
+      );
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({
+          "status": 200,
+          "message": result.length > 0 ? "success" : "No data Found",
+          "data": result
+        }))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..close();
     }
   }
 }

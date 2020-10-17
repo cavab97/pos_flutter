@@ -7,6 +7,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Customer.dart';
@@ -55,6 +56,7 @@ class SplitBillDialog extends StatefulWidget {
 class _SplitBillDialog extends State<SplitBillDialog> {
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
+  OrdersList orderApi = new OrdersList();
   List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
   double subTotal = 00.00;
   double taxValues = 00.00;
@@ -88,7 +90,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       isLoading = true;
     });
     List<MSTCartdetails> cartItem =
-        await localAPI.getCartItem(widget.currentCartID);
+        await CommunFun.getcartDetails(widget.currentCartID);
     if (cartItem.length > 0) {
       setState(() {
         cartList = cartItem;
@@ -276,7 +278,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   setTotalSubTotal() async {
     subTotal = 00.00;
     grandTotal = 00.00;
-    totalQty=0;
+    totalQty = 0;
     tempCart.forEach((element) {
       subTotal = subTotal + element.productPrice;
       totalQty = totalQty + element.productQty.toInt();
@@ -856,7 +858,6 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     await printReceipt(orderid);
     Navigator.of(context).pop();
     widget.onClose("not");
-
   }
 
   clearCartAfterSuccess(orderid) async {
@@ -904,7 +905,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
 
   Future<List<MSTCartdetails>> getcartDetails() async {
     List<MSTCartdetails> list =
-        await localAPI.getCartItem(widget.currentCartID);
+        await CommunFun.getcartDetails(widget.currentCartID);
     print(list);
     return list;
   }
@@ -924,9 +925,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
     List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
-    List<OrderDetail> orderitem =
-        await localAPI.getOrderDetailsList(orderid);
-    Orders order = await localAPI.getcurrentOrders(orderid);
+    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
+    Orders order = await orderApi.getcurrentOrders(orderid);
     print(branchAddress);
     print(orderpaymentdata);
     print(paument_method);
@@ -934,16 +934,10 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     print(user);
     print(itemsList);
     print(order);
-    if(widget.printerIP.isNotEmpty) {
-      _printReceipt.checkReceiptPrint(
-          widget.printerIP,
-          context,
-          branchAddress,
-          itemsList,
-          orderitem,
-          order,
-          paument_method);
-    }else{
+    if (widget.printerIP.isNotEmpty) {
+      _printReceipt.checkReceiptPrint(widget.printerIP, context, branchAddress,
+          itemsList, orderitem, order, paument_method);
+    } else {
       CommunFun.showToast(context, Strings.printer_not_available);
     }
   }

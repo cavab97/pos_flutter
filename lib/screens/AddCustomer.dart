@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/LocalAPI/CustomerList.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
@@ -24,6 +25,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   TextEditingController addressLine1_controller = new TextEditingController();
   TextEditingController postcode_controller = new TextEditingController();
   LocalAPI localAPI = LocalAPI();
+  CustomersList custList = new CustomersList();
   String _selectedCountry = "India";
   List<String> countries = ['A', 'B', 'C', 'D'];
 
@@ -53,7 +55,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
       customer.cityId = 0;
       customer.stateId = 0;
       customer.countryId = 0;
-      var result = await localAPI.addCustomer(customer);
+      var result = await custList.addCustomer(context, customer);
       Navigator.of(context).pop();
     }
   }

@@ -13,6 +13,7 @@ import 'package:mcncashier/helpers/APIcalls/CategoriesReq.dart';
 import 'package:mcncashier/helpers/CustomeIcons.dart';
 import 'package:mcncashier/helpers/LocalAPI/CategoriesList.dart';
 import 'package:mcncashier/helpers/Server.dart';
+import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/screens/PrinteTypeDailog.dart';
 import 'package:mcncashier/screens/SelectPrinterDailog.dart';
@@ -81,7 +82,6 @@ class _SettingsPageState extends State<SettingsPage> {
   /*Get all Printer from DB*/
   getAllPrinter() async {
     List<Printer> printer = await localAPI.getAllPrinter();
-
     setState(() {
       printerList = printer;
     });
@@ -198,12 +198,12 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   checkIPisvalid() async {
-    CategoriesList catCall = new CategoriesList();
-    await Preferences.setStringToSF(Constant.IS_JOIN_SERVER, "true");
-    await Preferences.setStringToSF(Constant.SERVER_IP, "192.168.1.115");
     var branchid = await CommunFun.getbranchId();
-    var result = await catCall.getCategories(null, branchid);
-    print(result);
+    CategoriesList category = new CategoriesList();
+    await Preferences.setStringToSF(Constant.IS_JOIN_SERVER, "true");
+    List<Category> categorys = await category.getCategories(context, branchid);
+    print(categorys);
+    await Preferences.setStringToSF(Constant.SERVER_IP, "192.168.0.113");
   }
 
   @override
@@ -380,41 +380,43 @@ class _SettingsPageState extends State<SettingsPage> {
           decoration:
               new BoxDecoration(border: new Border.all(color: Colors.white)),
           child: ListTile(
-              title: Text("This is Local Server",
-                  style: Styles.whiteSimpleSmall()),
-              trailing: Container(
-                  width: 150,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: <Widget>[
-                      isLocalServer
-                          ? IconButton(
-                              icon: Icon(
-                                CustomeIcons.qrcode,
-                                color: Colors.white,
-                                size: 30,
-                              ),
-                              onPressed: () {
-                                opneqrcodePop();
-                              })
-                          : SizedBox(),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      Transform.scale(
-                        scale: 1.2,
-                        child: CupertinoSwitch(
-                          activeColor: Colors.deepOrange,
-                          value: isLocalServer,
-                          onChanged: (bool value) {
-                            setState(() {
-                              isLocalServer = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ))),
+            title:
+                Text("This is Local Server", style: Styles.whiteSimpleSmall()),
+            trailing: Container(
+              width: 150,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  isLocalServer
+                      ? IconButton(
+                          icon: Icon(
+                            CustomeIcons.qrcode,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                          onPressed: () {
+                            opneqrcodePop();
+                          })
+                      : SizedBox(),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Transform.scale(
+                    scale: 1.2,
+                    child: CupertinoSwitch(
+                      activeColor: Colors.deepOrange,
+                      value: isLocalServer,
+                      onChanged: (bool value) {
+                        setState(() {
+                          isLocalServer = value;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
         SizedBox(
           height: 10,
@@ -424,25 +426,27 @@ class _SettingsPageState extends State<SettingsPage> {
                 decoration: new BoxDecoration(
                     border: new Border.all(color: Colors.white)),
                 child: ListTile(
-                    title: Text("Join Local server",
-                        style: Styles.whiteSimpleSmall()),
-                    trailing: Container(
-                        width: 150,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            Transform.scale(
-                              scale: 1.2,
-                              child: CupertinoSwitch(
-                                activeColor: Colors.deepOrange,
-                                value: isJoinLoaclServer,
-                                onChanged: (bool value) {
-                                  joinLocalServer(value);
-                                },
-                              ),
-                            ),
-                          ],
-                        ))),
+                  title: Text("Join Local server",
+                      style: Styles.whiteSimpleSmall()),
+                  trailing: Container(
+                    width: 150,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        Transform.scale(
+                          scale: 1.2,
+                          child: CupertinoSwitch(
+                            activeColor: Colors.deepOrange,
+                            value: isJoinLoaclServer,
+                            onChanged: (bool value) {
+                              joinLocalServer(value);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               )
             : SizedBox(),
         SizedBox(

@@ -22,5 +22,23 @@ class Configrations {
   static String search_product = "Search_product";
   static String customers = "Customers";
   static String add_customer = "Add_Customer";
-    static String tables = "Tables";
+  static String add_saveOrder = "Add_SaveOrder";
+  static String add_cart = "Add_cart";
+  static String tables = "Tables";
+  static String add_table_order = "Add_Table_Order";
+  static String add_shift = "Add_shift";
+  static String shift_datails = "Shift_datails";
+  static String product_attributes = "Product_attributes";
+  static String product_Modifeirs = "Product_modifires";
+  static String cart_Details = "Cart_Details";
+  static String cart_Sub_Details = "Cart_Sub_Details";
+  static String cart_items = "Cart_Items";
+  static String checkIn_Out = "checkIn_Out";
+  static String get_Cart_id = "get_Cart_id";
+  static String table_Details = "table_Details";
+  static String cart_data = "cart_data";
+  static String payment_Methods = "payment_Methods";
+  static String get_order = "get_order";
+  static String getLastids = "getLastOrderids";
+  static String place_order = "place_order";
 }

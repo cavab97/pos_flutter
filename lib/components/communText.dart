@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/PosPermission.dart';
@@ -26,6 +27,7 @@ import 'package:intl/intl.dart';
 import 'package:wifi_ip/wifi_ip.dart';
 
 DatabaseHelper databaseHelper = DatabaseHelper();
+Cartlist cartapi = new Cartlist();
 
 class CommunFun {
   static loginText() {
@@ -685,5 +687,10 @@ class CommunFun {
     } else {
       return false;
     }
+  }
+
+  static getcartDetails(cartid) async {
+    List<MSTCartdetails> list = await cartapi.getCartItem(cartid);
+    return list;
   }
 }
