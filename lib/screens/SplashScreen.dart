@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/services/Config.dart' as repo;
+
 class SplashScreen extends StatefulWidget {
 // PIN Enter PAGE
   SplashScreen({Key key}) : super(key: key);
@@ -22,7 +25,7 @@ class SplashScreenstate extends State<SplashScreen> {
   }
 
   getconfigdata() async {
-    var res = await  repo.getCongigData();
+    var res = await repo.getCongigData();
     if (res["status"] == Constant.STATUS200) {
       await Preferences.setStringToSF(
           Constant.SYNC_TIMER, res["data"]["sync_timer"]);
@@ -34,7 +37,8 @@ class SplashScreenstate extends State<SplashScreen> {
   }
 
   navigatePage() {
-    Future.delayed(const Duration(seconds: 4), () async {
+    int sec = Platform.isIOS ? 0 : 4;
+    Future.delayed(Duration(seconds: sec), () async {
       final bool isLogged = await CommunFun.isLogged();
       if (isLogged) {
         await Navigator.of(context).pushNamed(Constant.DashboardScreen);

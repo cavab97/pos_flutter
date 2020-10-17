@@ -479,7 +479,7 @@ class SyncAPICalls {
         }
       } else {
         Navigator.of(context).pop();
-        CommunFun.showToast(context, "all cancel tables up to dates.");
+       // CommunFun.showToast(context, "all cancel tables up to dates.");
       }
     } catch (e) {
       print(e);
