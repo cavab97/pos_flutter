@@ -23,6 +23,7 @@ import 'package:mcncashier/services/tableSyncAPI.dart' as repo;
 import 'package:toast/toast.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:intl/intl.dart';
+import 'package:wifi_ip/wifi_ip.dart';
 
 DatabaseHelper databaseHelper = DatabaseHelper();
 
@@ -324,11 +325,14 @@ class CommunFun {
           getAssetsData(context);
         }
         Navigator.of(context).pop();
-        var serverTime =
-            await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
-        if (serverTime == null) {
-          Navigator.pushNamed(context, Constant.PINScreen);
+        var fisrttime =
+            await Preferences.getStringValuesSF(Constant.IS_FIRST_TIME_SYNC);
+        if (fisrttime == null) {
+          await Navigator.pushNamed(context, Constant.PINScreen);
+          await Preferences.setStringToSF(Constant.IS_FIRST_TIME_SYNC, "true");
         } else {
+          User userdata = await CommunFun.getuserDetails();
+          await CommunFun.checkUserPermission(userdata.id);
           Navigator.pushNamed(context, Constant.DashboardScreen);
         }
       } else {
@@ -661,6 +665,26 @@ class CommunFun {
       return permission;
     } else {
       return "";
+    }
+  }
+
+  static wifiDetails() async {
+    WifiIpInfo info;
+    try {
+      info = await WifiIp.getWifiIp;
+    } on PlatformException {
+      print('Failed to get broadcast IP.');
+      info = null;
+    }
+    return info;
+  }
+
+  static checkIsJoinServer() async {
+    var isjoin = await Preferences.getStringValuesSF(Constant.IS_JOIN_SERVER);
+    if (isjoin != null) {
+      return true;
+    } else {
+      return false;
     }
   }
 }

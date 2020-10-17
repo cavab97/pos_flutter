@@ -1,7 +1,18 @@
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:mcncashier/components/QrScanAndGenrate.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/APIcalls/CategoriesReq.dart';
+import 'package:mcncashier/helpers/CustomeIcons.dart';
+import 'package:mcncashier/helpers/LocalAPI/CategoriesList.dart';
+import 'package:mcncashier/helpers/Server.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/screens/PrinteTypeDailog.dart';
 import 'package:mcncashier/screens/SelectPrinterDailog.dart';
@@ -21,15 +32,15 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   LocalAPI localAPI = LocalAPI();
   PrintReceipt testPrint = PrintReceipt();
-
   List<Printer> printerList = new List<Printer>();
-
   bool isPrinterSettings = false;
-  bool isGeneralSettings = false;
+  bool isGeneralSettings = true;
   bool isChangeTheme = false;
   bool isChangeLanguage = false;
   bool alwaysPrint = false;
-
+  bool isLocalServer = false;
+  var scanResult;
+  bool isJoinLoaclServer = false;
   @override
   void initState() {
     super.initState();
@@ -70,7 +81,7 @@ class _SettingsPageState extends State<SettingsPage> {
   /*Get all Printer from DB*/
   getAllPrinter() async {
     List<Printer> printer = await localAPI.getAllPrinter();
-   
+
     setState(() {
       printerList = printer;
     });
@@ -86,12 +97,11 @@ class _SettingsPageState extends State<SettingsPage> {
               onClose: (selected) async {
                 Navigator.of(context).pop();
                 //TODO: Save Printer
-               
+
                 Printer table_printe = new Printer();
                 table_printe.printerIp = ip;
                 table_printe.printerIsCashier = selected;
                 var result = await localAPI.insertTablePrinter(table_printe);
-               
               });
         });
   }
@@ -108,6 +118,92 @@ class _SettingsPageState extends State<SettingsPage> {
             },
           );
         });
+  }
+
+  scanQrCodePop() {
+    scanQRCode();
+  }
+
+  joinLocalServer(value) async {
+    var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
+    if (isOpen != null && isOpen == "true") {
+      CommunFun.showToast(context, Strings.shift_close_msg);
+    } else {
+      setState(() {
+        isJoinLoaclServer = value;
+      });
+      if (value == true) {
+        scanQrCodePop();
+      } else {
+        remvoveLocalServer();
+      }
+    }
+  }
+
+  remvoveLocalServer() async {
+    await Preferences.removeSinglePref(Constant.IS_JOIN_SERVER);
+    await Preferences.removeSinglePref(Constant.SERVER_IP);
+  }
+
+  opneqrcodePop() async {
+    var wifiData = await CommunFun.wifiDetails();
+    if (wifiData.ip != null) {
+      await Server.createSetver(wifiData.ip, context);
+    } else {
+      CommunFun.showToast(context, "Error when getting device ip address");
+    }
+  }
+
+  Future scanQRCode() async {
+    try {
+      var options = ScanOptions(
+          // strings: {
+          //   "cancel": _cancelController.text,
+          //   "flash_on": _flashOnController.text,
+          //   "flash_off": _flashOffController.text,
+          // },
+          // restrictFormat: selectedFormats,
+          // useCamera: -1,
+          // autoEnableFlash: _autoEnableFlash,
+          // android: AndroidOptions(
+          //   aspectTolerance: _aspectTolerance,
+          //   useAutoFocus: _useAutoFocus,
+          // ),
+          );
+      // var result = await BarcodeScanner.scan(options: options);
+      // print(result);
+      // setState(() => scanResult = result);
+      // print(result.type);
+      // print(result.rawContent);
+      // print(result.format);
+      // print(result.formatNote);
+      checkIPisvalid();
+    } on PlatformException catch (e) {
+      print(e);
+      var result = ScanResult(
+        type: ResultType.Error,
+        format: BarcodeFormat.unknown,
+      );
+      if (e.code == BarcodeScanner.cameraAccessDenied) {
+        setState(() {
+          result.rawContent = 'The user did not grant the camera permission!';
+        });
+      } else {
+        result.rawContent = 'Unknown error: $e';
+      }
+      setState(() {
+        scanResult = result;
+      });
+    }
+  }
+
+  checkIPisvalid() async {
+    CategoriesList catCall = new CategoriesList();
+    await Preferences.setStringToSF(Constant.IS_JOIN_SERVER, "true");
+    await Preferences.setStringToSF(Constant.SERVER_IP, "192.168.1.115");
+    var branchid = await CommunFun.getbranchId();
+    var result = await catCall.getCategories(null, branchid);
+    print(result);
   }
 
   @override
@@ -132,10 +228,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       color: Colors.white,
                       child: ListView(
                         shrinkWrap: true,
-                        padding: EdgeInsets.only(left: 20, right: 20),
                         children: <Widget>[
                           ListTile(
-                            contentPadding: EdgeInsets.only(left: 0, top: 20),
+                            contentPadding:
+                                EdgeInsets.only(left: 10, right: 10, top: 20),
                             leading: IconButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
@@ -151,45 +247,73 @@ class _SettingsPageState extends State<SettingsPage> {
                               style: Styles.blackBoldsmall(),
                             ),
                           ),
-                          ListTile(
-                            contentPadding: EdgeInsets.only(left: 0, top: 10),
-                            selected: isGeneralSettings,
-                            onTap: () {
-                              openSideData("General");
-                            },
-                            title: Text(
-                              "General",
-                              style: Styles.blackBoldsmall(),
+                          new Container(
+                            decoration: new BoxDecoration(
+                                color: isGeneralSettings
+                                    ? Colors.grey[200]
+                                    : Colors.white),
+                            child: ListTile(
+                              contentPadding:
+                                  EdgeInsets.only(left: 10, top: 10),
+                              selected: isGeneralSettings,
+                              onTap: () {
+                                openSideData("General");
+                              },
+                              title: Text(
+                                "General",
+                                style: Styles.drawerText(),
+                              ),
                             ),
                           ),
-                          ListTile(
-                            contentPadding: EdgeInsets.only(left: 0, top: 10),
-                            selected: isPrinterSettings,
-                            onTap: () {
-                              openSideData("Printer");
-                              getAllPrinter();
-                            },
-                            title: Text(
-                              "Printer",
-                              style: Styles.blackBoldsmall(),
+                          new Container(
+                            decoration: new BoxDecoration(
+                                color: isPrinterSettings
+                                    ? Colors.grey[200]
+                                    : Colors.white),
+                            child: ListTile(
+                              contentPadding:
+                                  EdgeInsets.only(left: 10, top: 10),
+                              selected: isPrinterSettings,
+                              onTap: () {
+                                openSideData("Printer");
+                                getAllPrinter();
+                              },
+                              title: Text(
+                                "Printer",
+                                style: Styles.drawerText(),
+                              ),
                             ),
                           ),
-                          ListTile(
-                            contentPadding: EdgeInsets.only(left: 0, top: 10),
-                            selected: isChangeLanguage,
-                            onTap: () {},
-                            title: Text(
-                              "Change Language",
-                              style: Styles.blackBoldsmall(),
+                          new Container(
+                            decoration: new BoxDecoration(
+                                color: isChangeLanguage
+                                    ? Colors.grey[200]
+                                    : Colors.white),
+                            child: ListTile(
+                              contentPadding:
+                                  EdgeInsets.only(left: 10, top: 10),
+                              selected: isChangeLanguage,
+                              onTap: () {},
+                              title: Text(
+                                "Change Language",
+                                style: Styles.drawerText(),
+                              ),
                             ),
                           ),
-                          ListTile(
-                            contentPadding: EdgeInsets.only(left: 0, top: 10),
-                            selected: isChangeTheme,
-                            onTap: () {},
-                            title: Text(
-                              "Change Theme",
-                              style: Styles.blackBoldsmall(),
+                          new Container(
+                            decoration: new BoxDecoration(
+                                color: isChangeTheme
+                                    ? Colors.grey[200]
+                                    : Colors.white),
+                            child: ListTile(
+                              contentPadding:
+                                  EdgeInsets.only(left: 10, top: 10),
+                              selected: isChangeTheme,
+                              onTap: () {},
+                              title: Text(
+                                "Change Theme",
+                                style: Styles.drawerText(),
+                              ),
                             ),
                           )
                         ],
@@ -233,18 +357,139 @@ class _SettingsPageState extends State<SettingsPage> {
           decoration:
               new BoxDecoration(border: new Border.all(color: Colors.white)),
           child: ListTile(
-              title: Text("Auto sync", style: Styles.whiteSimpleSmall()),
-              trailing: Transform.scale(
-                scale: 1,
-                child: CupertinoSwitch(
-                  value: false,
-                  onChanged: (bool value) {
-                    // setState(() {
-                    //   _switchValue = value;
-                    // });
-                  },
-                ),
-              )),
+            title: Text("Auto Sync After Open Shift",
+                style: Styles.whiteSimpleSmall()),
+            trailing: Transform.scale(
+              scale: 1.2,
+              child: CupertinoSwitch(
+                activeColor: Colors.deepOrange,
+                value: false,
+                onChanged: (bool value) {
+                  // setState(() {
+                  //   _switchValue = value;
+                  // });
+                },
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          decoration:
+              new BoxDecoration(border: new Border.all(color: Colors.white)),
+          child: ListTile(
+              title: Text("This is Local Server",
+                  style: Styles.whiteSimpleSmall()),
+              trailing: Container(
+                  width: 150,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      isLocalServer
+                          ? IconButton(
+                              icon: Icon(
+                                CustomeIcons.qrcode,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                              onPressed: () {
+                                opneqrcodePop();
+                              })
+                          : SizedBox(),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Transform.scale(
+                        scale: 1.2,
+                        child: CupertinoSwitch(
+                          activeColor: Colors.deepOrange,
+                          value: isLocalServer,
+                          onChanged: (bool value) {
+                            setState(() {
+                              isLocalServer = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ))),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        !isLocalServer
+            ? Container(
+                decoration: new BoxDecoration(
+                    border: new Border.all(color: Colors.white)),
+                child: ListTile(
+                    title: Text("Join Local server",
+                        style: Styles.whiteSimpleSmall()),
+                    trailing: Container(
+                        width: 150,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            Transform.scale(
+                              scale: 1.2,
+                              child: CupertinoSwitch(
+                                activeColor: Colors.deepOrange,
+                                value: isJoinLoaclServer,
+                                onChanged: (bool value) {
+                                  joinLocalServer(value);
+                                },
+                              ),
+                            ),
+                          ],
+                        ))),
+              )
+            : SizedBox(),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          decoration:
+              new BoxDecoration(border: new Border.all(color: Colors.white)),
+          child: ListTile(
+            title:
+                Text("Show logo in recipt", style: Styles.whiteSimpleSmall()),
+            trailing: Transform.scale(
+              scale: 1.2,
+              child: CupertinoSwitch(
+                activeColor: Colors.deepOrange,
+                value: false,
+                onChanged: (bool value) {
+                  // setState(() {
+                  //   _switchValue = value;
+                  // });
+                },
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          decoration:
+              new BoxDecoration(border: new Border.all(color: Colors.white)),
+          child: ListTile(
+            title: Text("Show QR code in reciept",
+                style: Styles.whiteSimpleSmall()),
+            trailing: Transform.scale(
+              scale: 1.2,
+              child: CupertinoSwitch(
+                activeColor: Colors.deepOrange,
+                value: false,
+                onChanged: (bool value) {
+                  // setState(() {
+                  //   _switchValue = value;
+                  // });
+                },
+              ),
+            ),
+          ),
         )
       ],
     );

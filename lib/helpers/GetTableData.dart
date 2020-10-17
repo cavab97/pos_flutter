@@ -214,7 +214,6 @@ class TableData {
           }
         }
       }
-
       return 1;
     } catch (e) {
       print(e);
