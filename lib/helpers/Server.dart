@@ -10,7 +10,6 @@ import 'package:mcncashier/helpers/APIcalls/PaymentReq.dart';
 import 'package:mcncashier/helpers/APIcalls/ProductsReq.dart';
 import 'package:mcncashier/helpers/APIcalls/ShiftReq.dart';
 import 'package:mcncashier/helpers/APIcalls/TablesReq.dart';
-import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
 
 class Server {
   static createSetver(ip, context) async {
@@ -72,7 +71,6 @@ class Server {
       case "/Add_Table_Order":
         TablesReq.addTableOrder(request);
         break;
-
       case "/Add_Shift":
         ShiftReq.addShift(request);
         break;

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:html';
 
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -91,17 +92,72 @@ class OrdersList {
       await SyncAPICalls.logActivity(
           "orders", "place order", "orders", orderid);
       await OrdersList.orderDetails(
-          orderDetails, orderid, orderAttributes, orderModifire);
+          orderid, orderDetails, orderModifire, orderAttributes);
       await OrdersList.payment(orderPayment, orderid);
-      await OrdersList.voucherHistory(history);
-      await OrdersList.shiftInvoice(shiftInvoice);
+      await OrdersList.voucherHistory(history, orderid);
+      await OrdersList.shiftInvoice(shiftInvoice, orderid);
     }
     return orderData.app_id;
   }
 
-  static orderDetails(orderDetails, orderid, orderAttributes, orderModifire) {}
-  static payment(orderDetails, orderid) {}
-  static shiftInvoice(history) {}
-  static voucherHistory(shiftInvoice) {}
+  static orderDetails(
+    orderid,
+    List<OrderDetail> orderDetails,
+    List<OrderModifire> orderModifire,
+    List<OrderAttributes> orderAttributes,
+  ) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    for (var i = 0; i < orderDetails.length; i++) {
+      OrderDetail orderdata = orderDetails[i];
+      orderdata.order_id = orderid;
+      var orderdetailid = await db.insert("order_detail", orderdata.toJson());
+      await SyncAPICalls.logActivity(
+          "orders", "insert order details", "order_detail", orderid);
+      // Modifire
+      for (var m = 0; m < orderModifire.length; m++) {
+        OrderModifire modifire = orderModifire[m];
+        modifire.detail_id = orderdetailid;
+        modifire.order_id = orderid;
+        await db.insert("order_modifier", modifire.toJson());
+        await SyncAPICalls.logActivity(
+            "orders", "insert order modifier", "order_modifier", orderid);
+        return modifire.app_id;
+      }
+      for (var a = 0; a < orderAttributes.length; a++) {
+        OrderAttributes attribute = orderAttributes[a];
+        attribute.detail_id = orderdetailid;
+        attribute.order_id = orderid;
+        await db.insert("order_attributes", attribute.toJson());
+        await SyncAPICalls.logActivity(
+            "orders", "insert order attributes", "order_attributes", orderid);
+        return attribute.app_id;
+      }
+    }
+  }
 
+  static payment(OrderPayment orderPayment, orderid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    orderPayment.order_id = orderid;
+    await db.insert("order_payment", orderPayment.toJson());
+    await SyncAPICalls.logActivity(
+        "orders", "insert order payment", "order_payment", orderid);
+  }
+
+  static voucherHistory(VoucherHistory voucherHis, orderid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    voucherHis.order_id = orderid;
+    await db.insert("voucher_history", voucherHis.toJson());
+    await SyncAPICalls.logActivity(
+        "order", "add voucher history in cart", "voucher_history", orderid);
+    return orderid;
+  }
+
+  static shiftInvoice(ShiftInvoice shiftInvoice, orderid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    shiftInvoice.invoice_id = orderid;
+    await db.insert("shift_invoice", shiftInvoice.toJson());
+    await SyncAPICalls.logActivity(
+        "orders", "insert shift invoice", "shift_invoice", orderid);
+    return shiftInvoice.invoice_id;
+  }
 }
