@@ -140,8 +140,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   getTaxs() async {
-    var branchid = await CommunFun.getbranchId();
-    List<BranchTax> taxlists = await localAPI.getTaxList(branchid);
+    List<BranchTax> taxlists = await CommunFun.getbranchTax();
     if (taxlists.length > 0) {
       setState(() {
         taxlist = taxlists;
@@ -152,7 +151,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   setEditingData() async {
     if (!isSetMeal) {
       List<MSTSubCartdetails> details =
-          await localAPI.getItemModifire(cartitem.id);
+          await cartapi.getItemModifire(cartitem.id);
       if (details.length > 0) {
         for (var i = 0; i < details.length; i++) {
           var item = details[i];
@@ -217,12 +216,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   getCartData() async {
-    List<MST_Cart> cartval = await cartlistApi.getCurrCartTotals(widget.cartID);
-    if (cartval.length != 0) {
-      setState(() {
-        currentCart = cartval[0];
-      });
-    }
+    MST_Cart cartval = await CommunFun.getCartData(widget.cartID);
+    setState(() {
+      currentCart = cartval;
+    });
   }
 
   getcartItemsDetails() async {
@@ -465,7 +462,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
-        List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
+        // List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
         var taxval = taxlistitem.rate != null
             ? subT * double.parse(taxlistitem.rate) / 100
             : 0.0;
@@ -483,7 +480,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           "updated_at": taxlistitem.updatedAt,
           "updated_by": taxlistitem.updatedBy,
           "taxAmount": taxval.toString(),
-          "taxCode": tax.length > 0 ? tax[0].code : "" //tax.code
+          "taxCode": taxlistitem.code
         };
         totalTax.add(taxmap);
       }
@@ -557,8 +554,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     var cartid = await cartlist.addcart(context, cart); // Insert Cart
     await insertTableData(tableData);
-
-    
 
     ProductDetails cartItemproduct = new ProductDetails();
 

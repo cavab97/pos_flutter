@@ -127,10 +127,12 @@ class TableData {
             'value': branchTax.id,
           };
           var count = await ifExists(db, data);
+          var branchtax = branchTax.toJson();
+          await branchtax.remove("code");
           if (count == 0) {
-            var result = await db.insert("branch_tax", branchTax.toJson());
+            var result = await db.insert("branch_tax", branchtax);
           } else {
-            var result = await db.update("branch_tax", branchTax.toJson(),
+            var result = await db.update("branch_tax", branchtax,
                 where: "id =?", whereArgs: [branchTax.id]);
           }
         }

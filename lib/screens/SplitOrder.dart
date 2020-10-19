@@ -8,6 +8,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
+import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Customer.dart';
@@ -57,6 +58,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
   OrdersList orderApi = new OrdersList();
+  PaymentList paymentAPI = new PaymentList();
   List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
   double subTotal = 00.00;
   double taxValues = 00.00;
@@ -208,7 +210,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   }
 
   paymentWithMethod(mehtod) async {
-    sendPaymentByCash(mehtod);
+    //sendPaymentByCash(mehtod);
   }
 
   openShowAddCustomerDailog() {
@@ -292,8 +294,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   }
 
   getTaxs() async {
-    var branchid = await CommunFun.getbranchId();
-    List<BranchTax> taxlists = await localAPI.getTaxList(branchid);
+    List<BranchTax> taxlists = await CommunFun.getbranchTax();
     if (taxlists.length > 0) {
       setState(() {
         taxlist = taxlists;
@@ -308,7 +309,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
-        List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
+        //List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
         var taxval = taxlistitem.rate != null
             ? subT * double.parse(taxlistitem.rate) / 100
             : 0.0;
@@ -326,7 +327,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           "updated_at": taxlistitem.updatedAt,
           "updated_by": taxlistitem.updatedBy,
           "taxAmount": taxval.toString(),
-          "taxCode": tax.length > 0 ? tax[0].code : "" //tax.code
+          "taxCode": taxlistitem.code //tax.code
         };
         totalTax.add(taxmap);
       }
@@ -580,312 +581,305 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     setTotalSubTotal();
   }
 
-  sendPaymentByCash(payment) async {
-    var cartData = await getcartData();
-    var branchdata = await getbranch();
-    /*if (isWebOrder) {
-      payment.paymentId = cartData.cart_payment_id;
-    }*/
-    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
-    Orders order = new Orders();
-    Table_order tables = await getTableData();
-    User userdata = await CommunFun.getuserDetails();
-    List<MSTCartdetails> cartList = await getcartDetails();
-    var terminalId = await CommunFun.getTeminalKey();
-    var branchid = await CommunFun.getbranchId();
-    var uuid = await CommunFun.getLocalID();
-    //var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
-    List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
+  // sendPaymentByCash(payment) async {
+  //   var cartData = await getcartData();
+  //   var branchdata = await getbranch();
+  //   /*if (isWebOrder) {
+  //     payment.paymentId = cartData.cart_payment_id;
+  //   }*/
+  //   var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+  //   Orders order = new Orders();
+  //   Table_order tables = await getTableData();
+  //   User userdata = await CommunFun.getuserDetails();
+  //   List<MSTCartdetails> cartList = await getcartDetails();
+  //   var terminalId = await CommunFun.getTeminalKey();
+  //   var branchid = await CommunFun.getbranchId();
+  //   var uuid = await CommunFun.getLocalID();
+  //   //var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
+  //   List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
 
-    int length = branchdata.invoiceStart.length;
-    var invoiceNo;
-    if (lastappid.length > 0) {
-      order.app_id = lastappid[0].app_id + 1;
-      invoiceNo =
-          branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
-    } else {
-      order.app_id = int.parse(terminalId);
-      invoiceNo =
-          branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
-    }
+  //   int length = branchdata.invoiceStart.length;
+  //   var invoiceNo;
+  //   if (lastappid.length > 0) {
+  //     order.app_id = lastappid[0].app_id + 1;
+  //     invoiceNo =
+  //         branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
+  //   } else {
+  //     order.app_id = int.parse(terminalId);
+  //     invoiceNo =
+  //         branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
+  //   }
 
-    order.uuid = uuid;
-    order.branch_id = int.parse(branchid);
-    order.terminal_id = int.parse(terminalId);
-    order.table_id = tables.table_id;
-    //order.table_no = tables.table_id;
-    order.invoice_no = invoiceNo;
-    order.customer_id = cartData.user_id;
-    order.sub_total = subTotal;
-    order.sub_total_after_discount = subTotal;
-    order.grand_total = grandTotal;
-    order.order_item_count = totalQty; //cartData.total_qty.toInt();
-    order.tax_amount = taxValues;
-    order.tax_json = json.encode(taxJson);
-    order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
-    order.order_status = 1;
-    order.server_id = 0;
-    order.order_source = 2; //cartData.source;
-    order.order_by = userdata.id;
-    //order.voucher_id = cartData.voucher_id;
-    // order.voucher_amount = cartData.discount;
-    order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
-    order.updated_by = userdata.id;
-    var orderid = await localAPI.placeOrder(order);
-    print(orderid);
-    /*if (cartData.voucher_id != 0 && cartData.voucher_id != null) {
-      VoucherHistory history = new VoucherHistory();
-      history.voucher_id = cartData.voucher_id;
-      history.amount = cartData.discount;
-      history.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
-      history.order_id = orderid;
-      history.uuid = uuid;
-      var hisID = await localAPI.saveVoucherHistory(history);
-      print(hisID);
-    }*/
+  //   order.uuid = uuid;
+  //   order.branch_id = int.parse(branchid);
+  //   order.terminal_id = int.parse(terminalId);
+  //   order.table_id = tables.table_id;
+  //   //order.table_no = tables.table_id;
+  //   order.invoice_no = invoiceNo;
+  //   order.customer_id = cartData.user_id;
+  //   order.sub_total = subTotal;
+  //   order.sub_total_after_discount = subTotal;
+  //   order.grand_total = grandTotal;
+  //   order.order_item_count = totalQty; //cartData.total_qty.toInt();
+  //   order.tax_amount = taxValues;
+  //   order.tax_json = json.encode(taxJson);
+  //   order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
+  //   order.order_status = 1;
+  //   order.server_id = 0;
+  //   order.order_source = 2; //cartData.source;
+  //   order.order_by = userdata.id;
+  //   //order.voucher_id = cartData.voucher_id;
+  //   // order.voucher_amount = cartData.discount;
+  //   order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
+  //   order.updated_by = userdata.id;
+  //   var orderid = await localAPI.placeOrder(order);
+  //   print(orderid);
+  //   /*if (cartData.voucher_id != 0 && cartData.voucher_id != null) {
+  //     VoucherHistory history = new VoucherHistory();
+  //     history.voucher_id = cartData.voucher_id;
+  //     history.amount = cartData.discount;
+  //     history.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+  //     history.order_id = orderid;
+  //     history.uuid = uuid;
+  //     var hisID = await localAPI.saveVoucherHistory(history);
+  //     print(hisID);
+  //   }*/
 
-    var orderDetailid;
-    if (orderid > 0) {
-      if (tempCart.length > 0) {
-        var orderId = orderid;
-        for (var i = 0; i < tempCart.length; i++) {
-          OrderDetail orderDetail = new OrderDetail();
-          var cartItem = tempCart[i];
-          var productdata = await localAPI.productdData(cartItem.productId);
-          ProductDetails pdata;
-          if (productdata.length > 0) {
-            productdata[0].qty = cartItem.productQty;
-            productdata[0].price = cartItem.productPrice;
-            pdata = productdata[0];
-          }
-          List<OrderDetail> lappid =
-              await localAPI.getLastOrdeDetailAppid(terminalId);
-          if (lappid.length > 0) {
-            orderDetail.app_id = lappid[0].app_id + 1;
-          } else {
-            orderDetail.app_id = int.parse(terminalId);
-          }
-          orderDetail.uuid = uuid;
-          orderDetail.order_id = orderId;
-          orderDetail.branch_id = int.parse(branchid);
-          orderDetail.terminal_id = int.parse(terminalId);
-          orderDetail.product_id = cartItem.productId;
-          orderDetail.product_price = cartItem.productPrice;
-          orderDetail.product_old_price = cartItem.productNetPrice;
-          orderDetail.detail_qty = cartItem.productQty;
-          orderDetail.product_discount = cartItem.discount;
-          orderDetail.product_detail = json.encode(pdata);
-          orderDetail.updated_at =
-              await CommunFun.getCurrentDateTime(DateTime.now());
-          orderDetail.detail_amount =
-              (cartItem.productPrice * cartItem.productQty);
-          orderDetail.detail_datetime =
-              await CommunFun.getCurrentDateTime(DateTime.now());
-          orderDetail.updated_by = userdata.id;
-          orderDetail.detail_status = 1;
-          orderDetail.detail_by = userdata.id;
-          if (cartItem.issetMeal == 1) {
-            orderDetail.setmeal_product_detail =
-                cartItem.setmeal_product_detail;
-          }
-          orderDetailid = await localAPI.sendOrderDetails(orderDetail);
-          print(orderDetailid);
-          if (cartItem.issetMeal == 0) {
-            if (productdata[0].hasInventory == 1) {
-              //update invnotory
-              // List<ProductStoreInventory> inventory =
-              //     await localAPI.removeFromInventory(orderDetail);
-              List<ProductStoreInventory> inventory =
-                  await localAPI.getStoreInventoryData(orderDetail.product_id);
-              if (inventory.length > 0) {
-                ProductStoreInventory invData = new ProductStoreInventory();
-                invData = inventory[0];
-                var prev = inventory[0];
-                var qty = (invData.qty - orderDetail.detail_qty);
-                invData.qty = qty;
-                invData.updatedAt =
-                    await CommunFun.getCurrentDateTime(DateTime.now());
-                invData.updatedBy = userdata.id;
-                var ulog = await localAPI.updateInvetory(invData);
-                print(ulog);
+  //   var orderDetailid;
+  //   if (orderid > 0) {
+  //     if (tempCart.length > 0) {
+  //       var orderId = orderid;
+  //       for (var i = 0; i < tempCart.length; i++) {
+  //         OrderDetail orderDetail = new OrderDetail();
+  //         var cartItem = tempCart[i];
+  //         var productdata = await localAPI.productdData(cartItem.productId);
+  //         ProductDetails pdata;
+  //         if (productdata.length > 0) {
+  //           productdata[0].qty = cartItem.productQty;
+  //           productdata[0].price = cartItem.productPrice;
+  //           pdata = productdata[0];
+  //         }
+  //         List<OrderDetail> lappid =
+  //             await localAPI.getLastOrdeDetailAppid(terminalId);
+  //         if (lappid.length > 0) {
+  //           orderDetail.app_id = lappid[0].app_id + 1;
+  //         } else {
+  //           orderDetail.app_id = int.parse(terminalId);
+  //         }
+  //         orderDetail.uuid = uuid;
+  //         orderDetail.order_id = orderId;
+  //         orderDetail.branch_id = int.parse(branchid);
+  //         orderDetail.terminal_id = int.parse(terminalId);
+  //         orderDetail.product_id = cartItem.productId;
+  //         orderDetail.product_price = cartItem.productPrice;
+  //         orderDetail.product_old_price = cartItem.productNetPrice;
+  //         orderDetail.detail_qty = cartItem.productQty;
+  //         orderDetail.product_discount = cartItem.discount;
+  //         orderDetail.product_detail = json.encode(pdata);
+  //         orderDetail.updated_at =
+  //             await CommunFun.getCurrentDateTime(DateTime.now());
+  //         orderDetail.detail_amount =
+  //             (cartItem.productPrice * cartItem.productQty);
+  //         orderDetail.detail_datetime =
+  //             await CommunFun.getCurrentDateTime(DateTime.now());
+  //         orderDetail.updated_by = userdata.id;
+  //         orderDetail.detail_status = 1;
+  //         orderDetail.detail_by = userdata.id;
+  //         if (cartItem.issetMeal == 1) {
+  //           orderDetail.setmeal_product_detail =
+  //               cartItem.setmeal_product_detail;
+  //         }
+  //         orderDetailid = await localAPI.sendOrderDetails(orderDetail);
+  //         print(orderDetailid);
+  //         if (cartItem.issetMeal == 0) {
+  //           if (productdata[0].hasInventory == 1) {
+  //             //update invnotory
+  //             // List<ProductStoreInventory> inventory =
+  //             //     await localAPI.removeFromInventory(orderDetail);
+  //             List<ProductStoreInventory> inventory =
+  //                 await localAPI.getStoreInventoryData(orderDetail.product_id);
+  //             if (inventory.length > 0) {
+  //               ProductStoreInventory invData = new ProductStoreInventory();
+  //               invData = inventory[0];
+  //               var prev = inventory[0];
+  //               var qty = (invData.qty - orderDetail.detail_qty);
+  //               invData.qty = qty;
+  //               invData.updatedAt =
+  //                   await CommunFun.getCurrentDateTime(DateTime.now());
+  //               invData.updatedBy = userdata.id;
+  //               var ulog = await localAPI.updateInvetory(invData);
+  //               print(ulog);
 
-                //Inventory log update
-                ProductStoreInventoryLog log = new ProductStoreInventoryLog();
-                log.uuid = uuid;
-                log.inventory_id = prev.inventoryId;
-                log.branch_id = int.parse(branchid);
-                log.product_id = cartItem.productId;
-                log.employe_id = userdata.id;
-                log.qty = prev.qty;
-                log.qty_before_change = prev.qty;
-                log.qty_after_change = qty;
-                log.updated_at =
-                    await CommunFun.getCurrentDateTime(DateTime.now());
-                log.updated_by = userdata.id;
-                var inventoryLog =
-                    await localAPI.updateStoreInvetoryLogTable(log);
-                print(inventoryLog);
-              }
-            }
-          }
-        }
-      }
-    }
-    List<MSTSubCartdetails> modifireList = await getmodifireList();
-    if (modifireList.length > 0) {
-      var orderId = orderid;
+  //               //Inventory log update
+  //               ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+  //               log.uuid = uuid;
+  //               log.inventory_id = prev.inventoryId;
+  //               log.branch_id = int.parse(branchid);
+  //               log.product_id = cartItem.productId;
+  //               log.employe_id = userdata.id;
+  //               log.qty = prev.qty;
+  //               log.qty_before_change = prev.qty;
+  //               log.qty_after_change = qty;
+  //               log.updated_at =
+  //                   await CommunFun.getCurrentDateTime(DateTime.now());
+  //               log.updated_by = userdata.id;
+  //               var inventoryLog =
+  //                   await localAPI.updateStoreInvetoryLogTable(log);
+  //               print(inventoryLog);
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  //   List<MSTSubCartdetails> modifireList = await getmodifireList();
+  //   if (modifireList.length > 0) {
+  //     var orderId = orderid;
 
-      for (var i = 0; i < modifireList.length; i++) {
-        OrderModifire modifireData = new OrderModifire();
-        var modifire = modifireList[i];
+  //     for (var i = 0; i < modifireList.length; i++) {
+  //       OrderModifire modifireData = new OrderModifire();
+  //       var modifire = modifireList[i];
 
-        var contain =
-            tempCart.where((mainCart) => mainCart.id == modifire.cartdetailsId);
+  //       var contain =
+  //           tempCart.where((mainCart) => mainCart.id == modifire.cartdetailsId);
 
-        if (contain.isNotEmpty) {
-          if (modifire.caId == null) {
-            List<OrderModifire> lapMpid =
-                await localAPI.getLastOrderModifireAppid(terminalId);
-            if (lapMpid.length > 0) {
-              modifireData.app_id = lapMpid[0].app_id + 1;
-            } else {
-              modifireData.app_id = int.parse(terminalId);
-            }
-            modifireData.uuid = uuid;
-            modifireData.order_id = orderId;
-            modifireData.detail_id = orderDetailid;
-            modifireData.terminal_id = int.parse(terminalId);
-            modifireData.product_id = modifire.productId;
-            modifireData.modifier_id = modifire.modifierId;
-            modifireData.om_amount = modifire.modifirePrice;
-            modifireData.om_by = userdata.id;
-            modifireData.om_datetime =
-                await CommunFun.getCurrentDateTime(DateTime.now());
-            modifireData.om_status = 1;
-            modifireData.updated_at =
-                await CommunFun.getCurrentDateTime(DateTime.now());
-            modifireData.updated_by = userdata.id;
-            var ordermodifreid = await localAPI.sendModifireData(modifireData);
-            print(ordermodifreid);
-          } else {
-            OrderAttributes attributes = new OrderAttributes();
-            List<OrderAttributes> lapApid =
-                await localAPI.getLastOrderAttrAppid(terminalId);
-            if (lapApid.length > 0) {
-              attributes.app_id = lapApid[0].app_id + 1;
-            } else {
-              attributes.app_id = int.parse(terminalId);
-            }
-            attributes.uuid = uuid;
-            attributes.order_id = orderId;
-            attributes.detail_id = orderDetailid;
-            attributes.terminal_id = int.parse(terminalId);
-            attributes.product_id = modifire.productId;
-            attributes.attribute_id = modifire.attributeId;
-            attributes.attr_price = modifire.attrPrice;
-            attributes.ca_id = modifire.caId;
-            attributes.oa_datetime =
-                await CommunFun.getCurrentDateTime(DateTime.now());
-            attributes.oa_by = userdata.id;
-            attributes.oa_status = 1;
-            attributes.updated_at =
-                await CommunFun.getCurrentDateTime(DateTime.now());
-            attributes.updated_by = userdata.id;
-            var orderAttri = await localAPI.sendAttrData(attributes);
-            print(orderAttri);
-          }
-        }
-      }
-    }
+  //       if (contain.isNotEmpty) {
+  //         if (modifire.caId == null) {
+  //           List<OrderModifire> lapMpid =
+  //               await localAPI.getLastOrderModifireAppid(terminalId);
+  //           if (lapMpid.length > 0) {
+  //             modifireData.app_id = lapMpid[0].app_id + 1;
+  //           } else {
+  //             modifireData.app_id = int.parse(terminalId);
+  //           }
+  //           modifireData.uuid = uuid;
+  //           modifireData.order_id = orderId;
+  //           modifireData.detail_id = orderDetailid;
+  //           modifireData.terminal_id = int.parse(terminalId);
+  //           modifireData.product_id = modifire.productId;
+  //           modifireData.modifier_id = modifire.modifierId;
+  //           modifireData.om_amount = modifire.modifirePrice;
+  //           modifireData.om_by = userdata.id;
+  //           modifireData.om_datetime =
+  //               await CommunFun.getCurrentDateTime(DateTime.now());
+  //           modifireData.om_status = 1;
+  //           modifireData.updated_at =
+  //               await CommunFun.getCurrentDateTime(DateTime.now());
+  //           modifireData.updated_by = userdata.id;
+  //           var ordermodifreid = await localAPI.sendModifireData(modifireData);
+  //           print(ordermodifreid);
+  //         } else {
+  //           OrderAttributes attributes = new OrderAttributes();
+  //           List<OrderAttributes> lapApid =
+  //               await localAPI.getLastOrderAttrAppid(terminalId);
+  //           if (lapApid.length > 0) {
+  //             attributes.app_id = lapApid[0].app_id + 1;
+  //           } else {
+  //             attributes.app_id = int.parse(terminalId);
+  //           }
+  //           attributes.uuid = uuid;
+  //           attributes.order_id = orderId;
+  //           attributes.detail_id = orderDetailid;
+  //           attributes.terminal_id = int.parse(terminalId);
+  //           attributes.product_id = modifire.productId;
+  //           attributes.attribute_id = modifire.attributeId;
+  //           attributes.attr_price = modifire.attrPrice;
+  //           attributes.ca_id = modifire.caId;
+  //           attributes.oa_datetime =
+  //               await CommunFun.getCurrentDateTime(DateTime.now());
+  //           attributes.oa_by = userdata.id;
+  //           attributes.oa_status = 1;
+  //           attributes.updated_at =
+  //               await CommunFun.getCurrentDateTime(DateTime.now());
+  //           attributes.updated_by = userdata.id;
+  //           var orderAttri = await localAPI.sendAttrData(attributes);
+  //           print(orderAttri);
+  //         }
+  //       }
+  //     }
+  //   }
 
-    OrderPayment orderpayment = new OrderPayment();
-    List<OrderPayment> lapPpid =
-        await localAPI.getLastOrderPaymentAppid(terminalId);
-    if (lapPpid.length > 0) {
-      orderpayment.app_id = lapPpid[0].app_id + 1;
-    } else {
-      orderpayment.app_id = int.parse(terminalId);
-    }
-    orderpayment.uuid = uuid;
-    orderpayment.order_id = orderid;
-    orderpayment.branch_id = int.parse(branchid);
-    orderpayment.terminal_id = int.parse(terminalId);
-    orderpayment.op_method_id = payment != "" ? payment.paymentId : 0;
-    orderpayment.op_amount =
-        (cartData.grand_total - cartData.discount).toDouble();
-    orderpayment.op_method_response = '';
-    orderpayment.op_status = 1;
-    orderpayment.op_datetime =
-        await CommunFun.getCurrentDateTime(DateTime.now());
-    orderpayment.op_by = userdata.id;
-    orderpayment.updated_at =
-        await CommunFun.getCurrentDateTime(DateTime.now());
-    orderpayment.updated_by = userdata.id;
-    var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
-    print(paymentd);
+  //   OrderPayment orderpayment = new OrderPayment();
+  //   List<OrderPayment> lapPpid =
+  //       await localAPI.getLastOrderPaymentAppid(terminalId);
+  //   if (lapPpid.length > 0) {
+  //     orderpayment.app_id = lapPpid[0].app_id + 1;
+  //   } else {
+  //     orderpayment.app_id = int.parse(terminalId);
+  //   }
+  //   orderpayment.uuid = uuid;
+  //   orderpayment.order_id = orderid;
+  //   orderpayment.branch_id = int.parse(branchid);
+  //   orderpayment.terminal_id = int.parse(terminalId);
+  //   orderpayment.op_method_id = payment != "" ? payment.paymentId : 0;
+  //   orderpayment.op_amount =
+  //       (cartData.grand_total - cartData.discount).toDouble();
+  //   orderpayment.op_method_response = '';
+  //   orderpayment.op_status = 1;
+  //   orderpayment.op_datetime =
+  //       await CommunFun.getCurrentDateTime(DateTime.now());
+  //   orderpayment.op_by = userdata.id;
+  //   orderpayment.updated_at =
+  //       await CommunFun.getCurrentDateTime(DateTime.now());
+  //   orderpayment.updated_by = userdata.id;
+  //   var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
+  //   print(paymentd);
 
-    // Shifr Invoice Table
-    ShiftInvoice shiftinvoice = new ShiftInvoice();
-    shiftinvoice.shift_id = int.parse(shiftid);
-    shiftinvoice.invoice_id = orderid;
-    shiftinvoice.status = 1;
-    shiftinvoice.created_by = userdata.id;
-    shiftinvoice.created_at =
-        await CommunFun.getCurrentDateTime(DateTime.now());
-    shiftinvoice.serverId = 0;
-    shiftinvoice.localID = await CommunFun.getLocalID();
-    shiftinvoice.terminal_id = int.parse(terminalId);
-    shiftinvoice.shift_terminal_id = int.parse(terminalId);
-    var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
-    print(shift);
+  //   // Shifr Invoice Table
+  //   ShiftInvoice shiftinvoice = new ShiftInvoice();
+  //   shiftinvoice.shift_id = int.parse(shiftid);
+  //   shiftinvoice.invoice_id = orderid;
+  //   shiftinvoice.status = 1;
+  //   shiftinvoice.created_by = userdata.id;
+  //   shiftinvoice.created_at =
+  //       await CommunFun.getCurrentDateTime(DateTime.now());
+  //   shiftinvoice.serverId = 0;
+  //   shiftinvoice.localID = await CommunFun.getLocalID();
+  //   shiftinvoice.terminal_id = int.parse(terminalId);
+  //   shiftinvoice.shift_terminal_id = int.parse(terminalId);
+  //   var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
+  //   print(shift);
 
-    if (this.cartList.length == tempCart.length) {
-      await clearCartAfterSuccess(orderid);
-    } else {
-      tempCart.forEach((element) {
-        var contain =
-            this.cartList.where((mainCart) => mainCart.id == element.id);
-        if (contain.isNotEmpty) {
-          setState(() {
-            this.cartList.remove(element);
-          });
-        }
-        widget.onSelectedRemove(element);
-      });
-    }
-    clearSelected();
-    await printReceipt(orderid);
-    Navigator.of(context).pop();
-    widget.onClose("yes");
-  }
+  //   if (this.cartList.length == tempCart.length) {
+  //     await clearCartAfterSuccess(orderid);
+  //   } else {
+  //     tempCart.forEach((element) {
+  //       var contain =
+  //           this.cartList.where((mainCart) => mainCart.id == element.id);
+  //       if (contain.isNotEmpty) {
+  //         setState(() {
+  //           this.cartList.remove(element);
+  //         });
+  //       }
+  //       widget.onSelectedRemove(element);
+  //     });
+  //   }
+  //   clearSelected();
+  //   await printReceipt(orderid);
+  //   Navigator.of(context).pop();
+  //   widget.onClose("yes");
+  // }
 
-  clearSelected() {
-    setState(() {
-      subTotal = 00.00;
-      taxValues = 00.00;
-      grandTotal = 00.00;
-    });
-  }
+  // clearSelected() {
+  //   setState(() {
+  //     subTotal = 00.00;
+  //     taxValues = 00.00;
+  //     grandTotal = 00.00;
+  //   });
+  // }
 
   clearCartAfterSuccess(orderid) async {
     Table_order tables = await getTableData();
-    var result =
-        await localAPI.removeCartItem(widget.currentCartID, tables.table_id);
-    print(result);
+    // var result =
+    //     await localAPI.removeCartItem(widget.currentCartID, tables.table_id);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     Navigator.of(context).pop();
     widget.onClose("clear");
   }
 
-  getbranch() async {
-    var branchid = await CommunFun.getbranchId();
-    var branch = await localAPI.getbranchData(branchid);
-    return branch;
-  }
-
   getcartData() async {
-    var cartDatalist = await localAPI.getCartData(widget.currentCartID);
+    var cartDatalist = await CommunFun.getCartData(widget.currentCartID);
     return cartDatalist;
   }
 
@@ -916,28 +910,25 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   }
 
   printReceipt(int orderid) async {
-    var branchID = await CommunFun.getbranchId();
-    Branch branchAddress = await localAPI.getBranchData(branchID);
-    OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
+    Branch branchAddress = await CommunFun.getbranch();
+    OrderPayment orderpaymentdata = await orderApi.getOrderpaymentData(orderid);
     Payments paument_method =
-        await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
+        await CommunFun.getOrderPaymentMethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
-    List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
-    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
+
+    List<OrderDetail> orderitem = await orderApi.getOrderDetailsList(orderid);
     Orders order = await orderApi.getcurrentOrders(orderid);
     print(branchAddress);
     print(orderpaymentdata);
     print(paument_method);
     print(orderitem);
     print(user);
-    print(itemsList);
     print(order);
     if (widget.printerIP.isNotEmpty) {
       _printReceipt.checkReceiptPrint(
           widget.printerIP,
           context,
           branchAddress,
-          itemsList,
           orderitem,
           order,
           paument_method,

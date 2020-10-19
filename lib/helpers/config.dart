@@ -1,5 +1,6 @@
 class Configrations {
   static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
+  static String ipAddress = "http://192.168.1.140:8080/";
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String config = "configs";
@@ -41,4 +42,15 @@ class Configrations {
   static String get_order = "get_order";
   static String getLastids = "getLastOrderids";
   static String place_order = "place_order";
+  static String delete_cart_item = "delete_cart_item";
+  static String clearCart = "clear_cart";
+  static String product_modifire = "product_modifire";
+  static String order_details = "order_details";
+  static String order_payment_details = "order_payment_details";
+  static String update_cart = "update_cart";
+  static String update_cart_items = "update_cart_items";
+  static String branch_detail = "branch_detail";
+  static String order_payment_method = "order_payment_method";
+  static String orders_list = "order_List";
+  static String send_to_kitchen = "send_to_kitchen";
 }

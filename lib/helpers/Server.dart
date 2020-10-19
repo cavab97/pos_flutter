@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/QrScanAndGenrate.dart';
+import 'package:mcncashier/helpers/APIcalls/BranchReq.dart';
 import 'package:mcncashier/helpers/APIcalls/CartReq.dart';
 import 'package:mcncashier/helpers/APIcalls/CategoriesReq.dart';
 import 'package:mcncashier/helpers/APIcalls/CheckinOutReq.dart';
@@ -118,6 +119,42 @@ class Server {
         break;
       case "/getLastOrderids":
         OrdersReq.getLastOrderIds(request);
+        break;
+      case "/delete_cart_item":
+        CartReq.deletecartItem(request);
+        break;
+      case "/clear_cart":
+        CartReq.cleatCart(request);
+        break;
+      case "/product_modifire":
+        CartReq.cleatCart(request);
+        break;
+      case "/order":
+        CartReq.cleatCart(request);
+        break;
+      case "/order_details":
+        OrdersReq.orderDetails(request);
+        break;
+      case "/order_payment_details":
+        OrdersReq.orderPaymentdata(request);
+        break;
+      case "/orders_list":
+        OrdersReq.getOrdersList(request);
+        break;
+      case "/order_payment_method":
+        PaymenntReq.getOrderPaymentMethods(request);
+        break;
+      case "/update_cart":
+        CartReq.updateCartData(request);
+        break;
+      case "/update_cart_items":
+        CartReq.updateCartList(request);
+        break;
+      case "/branch_detail":
+        BranchReq.branchdata(request);
+        break;
+      case "/tax_list":
+        BranchReq.branchdata(request);
         break;
       default:
     }

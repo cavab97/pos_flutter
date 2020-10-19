@@ -76,4 +76,5 @@ class Constant {
                                   Error messages
   =================================================================================*/
   static final String VALID_TERMINAL_KEY = "Please enter terminal key";
+  
 }

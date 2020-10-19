@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'package:mcncashier/helpers/LocalAPI/Branch.dart';
 import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
+import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
+import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -28,6 +32,8 @@ import 'package:wifi_ip/wifi_ip.dart';
 
 DatabaseHelper databaseHelper = DatabaseHelper();
 Cartlist cartapi = new Cartlist();
+BranchList branchapi = new BranchList();
+PaymentList paymentAPI = new PaymentList();
 
 class CommunFun {
   static loginText() {
@@ -693,5 +699,34 @@ class CommunFun {
   static getcartDetails(cartid) async {
     List<MSTCartdetails> list = await cartapi.getCartItem(cartid);
     return list;
+  }
+
+  static getCartData(cartid) async {
+    List<MST_Cart> cartval = await cartapi.getCurrCartTotals(cartid);
+    MST_Cart cart = new MST_Cart();
+    if (cartval.length != 0) {
+      cart = cartval[0];
+      return cart;
+    } else {
+      return cart;
+    }
+  }
+
+  static getbranch() async {
+    var branchid = await CommunFun.getbranchId();
+    var branch = await branchapi.getbranchData(branchid);
+    return branch;
+  }
+
+  static getbranchTax() async {
+    var branchid = await CommunFun.getbranchId();
+    List<BranchTax> taxlists = await branchapi.getTaxList(branchid);
+    return taxlists;
+  }
+
+  static getOrderPaymentMethod(opmethodId) async {
+    Payments paument_method =
+        await paymentAPI.getOrderpaymentmethod(opmethodId);
+    return paument_method;
   }
 }

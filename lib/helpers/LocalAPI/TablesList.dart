@@ -16,11 +16,14 @@ class TablesList {
     List<TablesDetails> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = "http://192.168.0.113:8080/" + Configrations.tables;
+      var apiurl = Configrations.ipAddress + Configrations.tables;
       var stringParams = {"branch_id": branchid};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        list = result["data"];
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => TablesDetails.fromJson(c)).toList()
+            : [];
       }
     } else {
       var query = "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax ,table_order.is_merge_table as is_merge_table, table_order.merged_table_id as merged_table_id, " +
@@ -45,7 +48,7 @@ class TablesList {
     var isjoin = await CommunFun.checkIsJoinServer();
     var result;
     if (isjoin == true) {
-      var apiurl = "http://192.168.0.113:8080/" + Configrations.add_table_order;
+      var apiurl = Configrations.ipAddress + Configrations.add_table_order;
       var stringParams = {"table_order": jsonEncode(tableOrder)};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -78,11 +81,14 @@ class TablesList {
     var isjoin = await CommunFun.checkIsJoinServer();
     List<TablesDetails> list = [];
     if (isjoin == true) {
-      var apiurl = "http://192.168.0.113:8080/" + Configrations.table_Details;
+      var apiurl = Configrations.ipAddress + Configrations.table_Details;
       var stringParams = {"branch_id": branchid, "table_id": tableID};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        list = result["data"];
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => TablesDetails.fromJson(c)).toList()
+            : [];
       }
     } else {
       var query =

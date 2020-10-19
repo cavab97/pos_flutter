@@ -69,9 +69,83 @@ class OrdersReq {
       OrderPayment orderPayment = data["order_payment"];
       VoucherHistory history = data["order_history"];
       ShiftInvoice shiftInvoice = data["shift_invoice"];
-      
-      var res = await order.placeOrder(orderdata, orderDetails, orderModifire,
-          orderAttributes, orderPayment, history, shiftInvoice);
+
+      var res = await order.placeOrder(
+          orderdata,
+          orderDetails,
+          orderModifire,
+          orderAttributes,
+          orderPayment,
+          history,
+          shiftInvoice,
+          data["cart_id"]);
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 200, "message": "success.", "data": res}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static orderDetails(request) async {
+    OrdersList order = new OrdersList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var res = await order.getOrderDetailsList(data["order_id"]);
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 200, "message": "success.", "data": res}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..close();
+    }
+  }
+
+  static orderPaymentdata(request) async {
+    OrdersList order = new OrdersList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var res = await order.getOrderpaymentData(data["order_id"]);
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 200, "message": "success.", "data": res}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static getOrdersList(request) async {
+    OrdersList order = new OrdersList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var res =
+          await order.getOrdersList(data["branch_id"], data["terminal_id"]);
       request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =

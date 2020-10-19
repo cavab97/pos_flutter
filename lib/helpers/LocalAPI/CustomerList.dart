@@ -15,11 +15,14 @@ class CustomersList {
     List<Customer> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = "http://192.168.0.113:8080/" + Configrations.customers;
+      var apiurl = Configrations.ipAddress + Configrations.customers;
       var stringParams = {"terminal_id": teminalid};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        list = result["data"];
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => Customer.fromJson(c)).toList()
+            : [];
       }
     } else {
       var query = "SELECT * from customer WHERE " +
@@ -39,7 +42,7 @@ class CustomersList {
     var isjoin = await CommunFun.checkIsJoinServer();
     var result;
     if (isjoin == true) {
-      var apiurl = "http://192.168.0.113:8080/" + Configrations.add_customer;
+      var apiurl = Configrations.ipAddress + Configrations.add_customer;
       var stringParams = {"customer": jsonEncode(customer)};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {

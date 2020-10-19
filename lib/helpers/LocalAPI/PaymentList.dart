@@ -12,11 +12,14 @@ class PaymentList {
     List<Payments> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = "http://192.168.0.113:8080/" + Configrations.payment_Methods;
+      var apiurl = Configrations.ipAddress + Configrations.payment_Methods;
       var stringParams;
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        list = result["data"];
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => Payments.fromJson(c)).toList()
+            : [];
       }
     } else {
       var query = "SELECT * from payment where status = 1";
@@ -27,5 +30,27 @@ class PaymentList {
           "payment", "get payment list", "payment", 1);
     }
     return list;
+  }
+
+  Future<Payments> getOrderpaymentmethod(methodID) async {
+    Payments payment = new Payments();
+    var isjoin = await CommunFun.checkIsJoinServer();
+    if (isjoin == true) {
+      var apiurl = Configrations.ipAddress + Configrations.payment_Methods;
+      var stringParams = {"payment_id": methodID};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        dynamic data = result["data"];
+        payment = Payments.fromJson(data);
+      }
+    } else {
+      var paymentMeth = await db.query('payment',
+          where: 'payment_id = ?', whereArgs: [methodID.toString()]);
+      List<Payments> list = paymentMeth.isNotEmpty
+          ? paymentMeth.map((c) => Payments.fromJson(c)).toList()
+          : [];
+      payment = list[0];
+    }
+    return payment;
   }
 }

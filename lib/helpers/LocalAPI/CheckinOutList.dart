@@ -16,7 +16,7 @@ class CheckinOutList {
     var shiftid;
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = "http://192.168.0.113:8080/" + Configrations.checkIn_Out;
+      var apiurl = Configrations.ipAddress + Configrations.checkIn_Out;
       var stringParams = {"checkinout_data": jsonEncode(clockinOutData)};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {

@@ -8,6 +8,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -106,6 +107,7 @@ class VoucherPopState extends State<VoucherPop> {
           //check product
           bool isadded = false;
           double totaldiscount = 0;
+          List<MSTCartdetails> cartListUpdate = [];
           for (int i = 0; i < widget.cartList.length; i++) {
             var cartitem = widget.cartList[i];
             // product
@@ -139,10 +141,11 @@ class VoucherPopState extends State<VoucherPop> {
             }
             if (cartitem.discount != null && cartitem.discount != 0.0) {
               totaldiscount += cartitem.discount;
-              var result = await localAPI.addVoucherIndetail(
-                cartitem,
-                vaocher.voucherId,
-              );
+              // var result = await localAPI.addVoucherIndetail(
+              //   cartitem,
+              //   vaocher.voucherId,
+              // );
+              cartListUpdate.add(cartitem);
             } else {
               totaldiscount = vaocher.voucherDiscount;
             }
@@ -152,7 +155,8 @@ class VoucherPopState extends State<VoucherPop> {
           cartData.grand_total = cartData.grand_total - cartData.discount;
           cartData.voucher_detail = json.encode(vaocher);
           cartData.voucher_id = vaocher.voucherId;
-          var result1 = await localAPI.addVoucherInOrder(cartData, vaocher);
+          await cartapi.updateCartdetails(cartData);
+          await cartapi.updateCartList(cartListUpdate);
           selectedvoucher = vaocher;
           isadded = true;
           selectedvoucher = vaocher;

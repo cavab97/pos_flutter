@@ -4,6 +4,7 @@ import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
@@ -34,6 +35,7 @@ class TransactionsPage extends StatefulWidget {
 
 class _TransactionsPageState extends State<TransactionsPage> {
   LocalAPI localAPI = LocalAPI();
+  OrdersList orderApi = new OrdersList();
   List<Orders> orderLists = [];
   List<Orders> filterList = [];
   Orders selectedOrder = new Orders();
@@ -71,7 +73,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   getTansactionList() async {
     var terminalid = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
-    List<Orders> orderList = await localAPI.getOrdersList(branchid, terminalid);
+    List<Orders> orderList = await orderApi.getOrdersList(branchid, terminalid);
     if (orderList.length > 0) {
       setState(() {
         orderLists = orderList;
@@ -88,24 +90,20 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
 
     List<OrderDetail> orderItem =
-        await localAPI.getOrderDetailsList(order.app_id);
-    List<ProductDetails> details = await localAPI.getOrderDetails(order.app_id);
-    if (details.length > 0) {
-      setState(() {
-        detailsList = details;
-        orderItemList = orderItem;
-      });
-    }
-    //  if (order.order_source == 2) {
+        await orderApi.getOrderDetailsList(order.app_id);
+    setState(() {
+      orderItemList = orderItem;
+    });
+
     OrderPayment orderpaymentdata =
-        await localAPI.getOrderpaymentData(order.app_id);
+        await orderApi.getOrderpaymentData(order.app_id);
     setState(() {
       orderpayment = orderpaymentdata;
     });
-    Payments paument_method =
-        await localAPI.getOrderpaymentmethod(orderpayment.op_method_id);
+    Payments paumentmethod =
+        await CommunFun.getOrderPaymentMethod(orderpayment.op_method_id);
     setState(() {
-      paumentMethod = paument_method;
+      paumentMethod = paumentmethod;
     });
     User user = await localAPI.getPaymentUser(orderpayment.op_by);
     if (user != null) {

@@ -93,13 +93,8 @@ class PrintReceipt {
   ===========================Print Receipt==================================
   ========================================================================*/
 
-  Future<Ticket> Receipt(
-      Branch branchData,
-      List<ProductDetails> orderdItem,
-      List<OrderDetail> orderdetail,
-      Orders orderData,
-      Payments paymentdata,
-      String customerName) async {
+  Future<Ticket> Receipt(Branch branchData, List<OrderDetail> orderdetail,
+      Orders orderData, Payments paymentdata, String customerName) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
@@ -243,7 +238,6 @@ class PrintReceipt {
       String printerIp,
       BuildContext ctx,
       Branch branchData,
-      List<ProductDetails> orderdItem,
       List<OrderDetail> orderdetail,
       Orders orderData,
       Payments paymentdata,
@@ -252,12 +246,7 @@ class PrintReceipt {
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(await Receipt(
-        branchData,
-        orderdItem,
-        orderdetail,
-        orderData,
-        paymentdata,
-        customerName));
+        branchData, orderdetail, orderData, paymentdata, customerName));
 
     CommunFun.showToast(ctx, res.msg);
 
