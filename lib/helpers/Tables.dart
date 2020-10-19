@@ -451,6 +451,8 @@ class CreateTables {
         "product_old_price INTEGER," +
         "product_discount REAL," +
         "product_detail TEXT," +
+        "issetMeal NUMERIC," +
+        "setmeal_product_detail TEXT," +
         "category_id INTEGER," +
         "detail_amount REAL," +
         "detail_qty REAL," +
@@ -637,6 +639,7 @@ class CreateTables {
         'discount_type  INTEGER,' + //int
         'remark TEXT,' +
         'issetMeal NUMERIC,' +
+        'setmeal_product_detail TEXT,' +
         'cart_detail TEXT,' +
         'is_deleted   INTEGER,' +
         'created_by  INTEGER,' +
@@ -821,6 +824,25 @@ class CreateTables {
         "created_at TEXT," +
         "updated_at INTEGERT" +
         ")");
+
+    // Drawer table
+
+    datatables = db.execute("CREATE TABLE drawer ( " +
+        "id INTEGERT PRIMARYKEY AUTOINCREAMENT," +
+        "shift_id INTEGERT," +
+        "Amount REAL," +
+        "is_amount_in NUMERIC," +
+        "reason TEXT," +
+        "status NUMERIC," +
+        "created_by INTEGERT," +
+        "updated_by INTEGERT," +
+        "created_at TEXT," +
+        "updated_at TEXT," +
+        "serverId INTEGERT," +
+        "localID TEXT," +
+        "terminalid INTEGERT" +
+        ")");
+
     return datatables;
   }
 }

@@ -311,7 +311,6 @@ class CommunFun {
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
-
     getAssetsData(context);
   }
 
@@ -339,10 +338,10 @@ class CommunFun {
           Navigator.pushNamed(context, Constant.DashboardScreen);
         }
       } else {
-        if (aceets["data"]["next_offset"] != 0) {
-          getAssetsData(context);
-        } else {
+        if (aceets["data"]["next_offset"] == 0) {
           await CommunFun.setServerTime(aceets, "4");
+        } else {
+          getAssetsData(context);
         }
       }
     } else {
@@ -617,7 +616,9 @@ class CommunFun {
           "remark": detailitem["remark"],
           "is_deleted": detailitem["is_deleted"],
           "is_send_kichen": detailitem["is_send_kichen"],
-          "cart_detail": detailitem["cart_detail"],
+          "cart_detail": detailitem["product_detail"],
+          "issetMeal": detailitem["issetMeal"],
+          "setmeal_product_detail": cart["setmeal_product_detail"],
           "has_composite_inventory": detailitem["has_composite_inventory"],
           "item_unit": detailitem["item_unit"],
           "created_by": detailitem["created_by"],

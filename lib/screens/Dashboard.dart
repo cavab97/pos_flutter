@@ -54,6 +54,7 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 class DashboradPage extends StatefulWidget {
   // main Product list page
@@ -369,6 +370,7 @@ class _DashboradPageState extends State<DashboradPage>
                   itememovefromCart(cart);
                 },
                 onClose: (String isFor) {
+                  Navigator.of(context).pop();
                   if (isFor == "clear") {
                     clearCart();
                   }
@@ -395,7 +397,8 @@ class _DashboradPageState extends State<DashboradPage>
                 subtotal,
                 grandTotal,
                 tax,
-                branchData);
+                branchData,
+                customer != null ? customer.name : "Walk-in customer");
           } else {
             CommunFun.showToast(context, Strings.printer_not_available);
           }
@@ -600,10 +603,10 @@ class _DashboradPageState extends State<DashboradPage>
     for (int i = 0; i < printerList.length; i++) {
       List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
       tempCart.clear();
-      for (int j = 0; j < cartList.length; j++) {
+      for (int j = 0; j < cartLists.length; j++) {
         MSTCartdetails temp = MSTCartdetails();
-        if (printerList[i].printerId == cartList[j].printer_id) {
-          temp = cartList[j];
+        if (printerList[i].printerId == cartLists[j].printer_id) {
+          temp = cartLists[j];
           tempCart.add(temp);
         }
       }
@@ -612,16 +615,30 @@ class _DashboradPageState extends State<DashboradPage>
             printerList[i].printerIp.toString(), tableName, context, tempCart);
       }
     }
-    /*showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return PrinterListDailog(
-              cartList: cartLists,
-              onPress: () {
-                // TOTO : pring reicipt code
-              });
-        });*/
+  }
+
+  sendTokitched(itemList) async {
+    String ids = "";
+    var list = [];
+    for (var i = 0; i < itemList.length; i++) {
+      if (itemList[i].isSendKichen == null || itemList[i].isSendKichen == 0) {
+        if (ids == "") {
+          ids = itemList[i].id.toString();
+        } else {
+          ids = ids + "," + itemList[i].id.toString();
+        }
+        list.add(itemList[i]);
+      }
+      if (i == itemList.length - 1) {
+        if (list.length > 0) {
+          dynamic send = await localAPI.sendToKitched(ids);
+          openPrinterPop(list);
+          print(send);
+          getCartItem(currentCart);
+        }
+        return false;
+      }
+    }
   }
 
   sendPayment() {
@@ -808,7 +825,6 @@ class _DashboradPageState extends State<DashboradPage>
     var uuid = await CommunFun.getLocalID();
     //var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
     List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
-
     int length = branchdata.invoiceStart.length;
     var invoiceNo;
     if (lastappid.length > 0) {
@@ -856,70 +872,79 @@ class _DashboradPageState extends State<DashboradPage>
 
     var orderDetailid;
     if (orderid > 0) {
-      orderid;
-      for (var i = 0; i < cartList.length; i++) {
-        OrderDetail orderDetail = new OrderDetail();
-        var cartItem = cartList[i];
-        List<OrderDetail> lappid =
-            await localAPI.getLastOrdeDetailAppid(terminalId);
-        if (lappid.length > 0) {
-          orderDetail.app_id = lappid[0].app_id + 1;
-        } else {
-          orderDetail.app_id = int.parse(terminalId);
-        }
-        var productdata = json.decode(cartItem.cart_detail);
-        orderDetail.uuid = uuid;
-        orderDetail.order_id = orderid;
-        orderDetail.branch_id = int.parse(branchid);
-        orderDetail.terminal_id = int.parse(terminalId);
-        orderDetail.product_id = cartItem.productId;
-        orderDetail.product_price = cartItem.productPrice;
-        orderDetail.product_old_price = cartItem.productNetPrice;
-        orderDetail.detail_qty = cartItem.productQty;
-        orderDetail.product_discount = cartItem.discount;
-        orderDetail.product_detail = json.encode(productdata);
-        orderDetail.updated_at =
-            await CommunFun.getCurrentDateTime(DateTime.now());
-        orderDetail.detail_amount =
-            (cartItem.productPrice * cartItem.productQty);
-        orderDetail.detail_datetime =
-            await CommunFun.getCurrentDateTime(DateTime.now());
-        orderDetail.updated_by = userdata.id;
-        orderDetail.detail_status = 1;
-        orderDetail.detail_by = userdata.id;
-        // orderDetailid = await localAPI.sendOrderDetails(orderDetail);
-        orderDetailsList.add(orderDetail);
+      if (cartList.length > 0) {
+        var orderId = orderid;
+        for (var i = 0; i < cartList.length; i++) {
+          OrderDetail orderDetail = new OrderDetail();
+          var cartItem = cartList[i];
 
-        if (cartItem.issetMeal == 0) {
-          if (productdata["hasInventory"] == 1) {
-            List<ProductStoreInventory> inventory =
-                await localAPI.getStoreInventoryData(orderDetail.product_id);
-            if (inventory.length > 0) {
-              ProductStoreInventory invData = new ProductStoreInventory();
-              invData = inventory[0];
-              var prev = inventory[0];
-              var qty = (invData.qty - orderDetail.detail_qty);
-              invData.qty = qty;
-              invData.updatedAt =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              invData.updatedBy = userdata.id;
-              var ulog = await localAPI.updateInvetory(invData);
+          List<OrderDetail> lappid =
+              await localAPI.getLastOrdeDetailAppid(terminalId);
+          if (lappid.length > 0) {
+            orderDetail.app_id = lappid[0].app_id + 1;
+          } else {
+            orderDetail.app_id = int.parse(terminalId);
+          }
+          var productdata = cartItem.cart_detail != null
+              ? json.decode(cartItem.cart_detail)
+              : "";
+          orderDetail.uuid = uuid;
+          orderDetail.order_id = orderId;
+          orderDetail.branch_id = int.parse(branchid);
+          orderDetail.terminal_id = int.parse(terminalId);
+          orderDetail.product_id = cartItem.productId;
+          orderDetail.product_price = cartItem.productPrice;
+          orderDetail.product_old_price = cartItem.productNetPrice;
+          orderDetail.detail_qty = cartItem.productQty;
+          orderDetail.product_discount = cartItem.discount;
+          orderDetail.product_detail = json.encode(productdata);
 
-              //Inventory log update
-              ProductStoreInventoryLog log = new ProductStoreInventoryLog();
-              log.uuid = uuid;
-              log.inventory_id = prev.inventoryId;
-              log.branch_id = int.parse(branchid);
-              log.product_id = cartItem.productId;
-              log.employe_id = userdata.id;
-              log.qty = prev.qty;
-              log.qty_before_change = prev.qty;
-              log.qty_after_change = qty;
-              log.updated_at =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              log.updated_by = userdata.id;
-              var inventoryLog =
-                  await localAPI.updateStoreInvetoryLogTable(log);
+          orderDetail.updated_at =
+              await CommunFun.getCurrentDateTime(DateTime.now());
+          orderDetail.detail_amount =
+              (cartItem.productPrice * cartItem.productQty);
+          orderDetail.detail_datetime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
+          orderDetail.updated_by = userdata.id;
+          orderDetail.detail_status = 1;
+          orderDetail.detail_by = userdata.id;
+          orderDetail.issetMeal = cartItem.issetMeal;
+          if (cartItem.issetMeal == 1) {
+            orderDetail.setmeal_product_detail =
+                cartItem.setmeal_product_detail;
+          }
+          orderDetailid = await localAPI.sendOrderDetails(orderDetail);
+          if (cartItem.issetMeal == 0) {
+            if (productdata["hasInventory"] == 1) {
+              List<ProductStoreInventory> inventory =
+                  await localAPI.getStoreInventoryData(orderDetail.product_id);
+              if (inventory.length > 0) {
+                ProductStoreInventory invData = new ProductStoreInventory();
+                invData = inventory[0];
+                var prev = inventory[0];
+                var qty = (invData.qty - orderDetail.detail_qty);
+                invData.qty = qty;
+                invData.updatedAt =
+                    await CommunFun.getCurrentDateTime(DateTime.now());
+                invData.updatedBy = userdata.id;
+                var ulog = await localAPI.updateInvetory(invData);
+
+                //Inventory log update
+                ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+                log.uuid = uuid;
+                log.inventory_id = prev.inventoryId;
+                log.branch_id = int.parse(branchid);
+                log.product_id = cartItem.productId;
+                log.employe_id = userdata.id;
+                log.qty = prev.qty;
+                log.qty_before_change = prev.qty;
+                log.qty_after_change = qty;
+                log.updated_at =
+                    await CommunFun.getCurrentDateTime(DateTime.now());
+                log.updated_by = userdata.id;
+                var inventoryLog =
+                    await localAPI.updateStoreInvetoryLogTable(log);
+              }
             }
           }
         }
@@ -1039,8 +1064,15 @@ class _DashboradPageState extends State<DashboradPage>
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     Orders order = await orderApi.getcurrentOrders(orderid);
 
-    printKOT.checkReceiptPrint(printerreceiptList[0].printerIp, context,
-        branchData, itemsList, orderitem, order, paument_method);
+    printKOT.checkReceiptPrint(
+        printerreceiptList[0].printerIp,
+        context,
+        branchData,
+        itemsList,
+        orderitem,
+        order,
+        paument_method,
+        customer != null ? customer.name : "Walk-in customer");
   }
 
   clearCartAfterSuccess(orderid) async {
@@ -1211,14 +1243,16 @@ class _DashboradPageState extends State<DashboradPage>
         unselectedLabelColor: Colors.white,
         labelColor: Colors.white,
         isScrollable: true,
+        labelPadding: EdgeInsets.all(2),
+        indicatorPadding: EdgeInsets.all(2),
         indicator: BoxDecoration(
             borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
         tabs: List<Widget>.generate(tabsList.length, (int index) {
           return new Tab(
             child: Container(
                 padding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.safeBlockVertical * 2,
-                    vertical: SizeConfig.safeBlockVertical * 1),
+                  horizontal: SizeConfig.safeBlockHorizontal * 3,
+                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                 ),
@@ -1233,6 +1267,8 @@ class _DashboradPageState extends State<DashboradPage>
       indicatorSize: TabBarIndicatorSize.label,
       unselectedLabelColor: Colors.white,
       labelColor: Colors.white,
+      labelPadding: EdgeInsets.all(1),
+      indicatorPadding: EdgeInsets.all(0),
       isScrollable: true,
       indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(30), color: Colors.deepOrange),
@@ -1240,7 +1276,7 @@ class _DashboradPageState extends State<DashboradPage>
         return new Tab(
           child: Container(
             padding: EdgeInsets.symmetric(
-              horizontal: SizeConfig.safeBlockVertical * 2,
+              horizontal: SizeConfig.safeBlockVertical * 3,
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(50),
@@ -1282,17 +1318,17 @@ class _DashboradPageState extends State<DashboradPage>
                     TableCell(
                       child: Container(
                         padding:
-                            EdgeInsets.all(SizeConfig.safeBlockVertical * 2),
+                            EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
                         child: Column(
                           children: <Widget>[
                             subCatList.length == 0
                                 ? Container(
                                     //margin: EdgeInsets.only(left: 5, right: 5),
                                     width: MediaQuery.of(context).size.width,
-                                    height: SizeConfig.safeBlockVertical * 9,
+                                    height: SizeConfig.safeBlockVertical * 8,
                                     color: Colors.black26,
                                     padding: EdgeInsets.all(
-                                        SizeConfig.safeBlockVertical * 2),
+                                        SizeConfig.safeBlockVertical * 1.2),
                                     child: DefaultTabController(
                                         initialIndex: 0,
                                         length: tabsList.length,
@@ -1301,10 +1337,10 @@ class _DashboradPageState extends State<DashboradPage>
                                 : Container(
                                     //  margin: EdgeInsets.only(left: 5, right: 5),
                                     width: MediaQuery.of(context).size.width,
-                                    height: SizeConfig.safeBlockVertical * 10,
+                                    height: SizeConfig.safeBlockVertical * 8,
                                     color: Colors.black26,
                                     padding: EdgeInsets.all(
-                                        SizeConfig.safeBlockVertical * 2),
+                                        SizeConfig.safeBlockVertical * 1.2),
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
@@ -1380,6 +1416,15 @@ class _DashboradPageState extends State<DashboradPage>
             ),
           ),
         ),
+        //   isLoading: isLoading,
+        //   opacity: 0.9,
+        //   color: Colors.black87,
+        //   progressIndicator: CircularProgressIndicator(
+        //     backgroundColor: Colors.white,
+        //     valueColor:
+        //         AlwaysStoppedAnimation<Color>(Theme.of(context).accentColor),
+        //   ),
+        // ),
       ),
       onWillPop: _willPopCallback,
     );
@@ -1952,14 +1997,16 @@ class _DashboradPageState extends State<DashboradPage>
     final double itemHeight = size.width / 4.2;
     final double itemWidth = size.width / 4.2;
     return Container(
+      //color: Colors.lightBlue,
       height: MediaQuery.of(context).size.height / 1.3,
       width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.only(top: 5, bottom: 20),
+      padding: EdgeInsets.only(top: 10, bottom: 20, left: 0, right: 0),
       child: GridView.count(
-        addRepaintBoundaries: true,
         shrinkWrap: true,
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
+        crossAxisSpacing: 9.0,
+        mainAxisSpacing: 9.0,
         children: productList.map((product) {
           var price = product.price.toStringAsFixed(2);
           return InkWell(
@@ -1981,7 +2028,7 @@ class _DashboradPageState extends State<DashboradPage>
             child: Container(
               height: itemHeight,
               // padding: EdgeInsets.all(5),
-              margin: EdgeInsets.all(5),
+              margin: EdgeInsets.all(0),
               child: Stack(
                 alignment: AlignmentDirectional.topCenter,
                 children: <Widget>[
@@ -2057,7 +2104,7 @@ class _DashboradPageState extends State<DashboradPage>
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () {
-                      openPrinterPop(cartList);
+                      sendTokitched(cartList);
                     },
                     child: Text(
                       Strings.send,
@@ -2218,6 +2265,7 @@ class _DashboradPageState extends State<DashboradPage>
 
     final cartTable = ListView(
       shrinkWrap: true,
+      itemExtent: 50.0,
       padding: EdgeInsets.only(bottom: 50),
       children: ListTile.divideTiles(
         context: context,
@@ -2243,6 +2291,8 @@ class _DashboradPageState extends State<DashboradPage>
                         padding: EdgeInsets.all(0),
                         width: MediaQuery.of(context).size.width / 5.5,
                         child: Text(cart.productName.toUpperCase(),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: Styles.greysmall()),
                       ),
                       Container(
@@ -2376,7 +2426,7 @@ class _DashboradPageState extends State<DashboradPage>
                             ),
                             Padding(
                               padding: EdgeInsets.only(right: 15),
-                              child: Text(taxitem["taxAmount"],
+                              child: Text(taxitem["taxAmount"].toString(),
                                   style: Styles.darkBlue()),
                             )
                           ]);
@@ -2509,7 +2559,7 @@ class _DashboradPageState extends State<DashboradPage>
                     )
                   : SizedBox(),
               Container(
-                  height: MediaQuery.of(context).size.height / 3.5,
+                  height: MediaQuery.of(context).size.height / 2.2,
                   margin: EdgeInsets.only(top: customer != null ? 85 : 35),
                   child: cartTable),
               cartList.length != 0

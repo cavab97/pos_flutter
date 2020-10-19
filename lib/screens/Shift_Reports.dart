@@ -8,6 +8,8 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/LocalAPI/ShiftList.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/Drawer.dart';
+import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -27,6 +29,7 @@ class _ShiftReportsState extends State<ShiftReports> {
   var screenArea = 1.6;
   int _current = 0;
   List<Orders> orders = [];
+  List<Drawerdata> drawerData = [];
   double grossSale = 0.00;
   double netSale = 0.00;
   double totalTender = 0.00;
@@ -40,6 +43,8 @@ class _ShiftReportsState extends State<ShiftReports> {
   double payinOut = 0.00;
   double expectedVal = 0.00;
   double overShort = 0.00;
+  double payInOutAmount = 0.00;
+  bool isInAmmount = false;
   final List<String> imgList = [
     'Summary',
     'Cash Drawer Summary',
@@ -80,7 +85,7 @@ class _ShiftReportsState extends State<ShiftReports> {
         refundval += 0;
         netsale = grosssale - refundval;
         taxval += order.tax_amount;
-        discountval += order.voucher_amount;
+        discountval += order.voucher_amount != null ? order.voucher_amount : 0;
         totaltend += (netsale + tax) - discountval;
       }
       setState(() {
@@ -108,6 +113,7 @@ class _ShiftReportsState extends State<ShiftReports> {
         expectedVal = 0.00;
         overShort = 0.00;
       });
+      getpayInOutAmmount();
     }
   }
 
@@ -121,9 +127,65 @@ class _ShiftReportsState extends State<ShiftReports> {
             ammount: amount,
             onClose: (amount, reson) {
               Navigator.of(context).pop();
+              insertPayinOUT(amount, reson);
             },
           );
         });
+  }
+
+  insertPayinOUT(amount, reson) async {
+    User user = await CommunFun.getuserDetails();
+    var terminalid = await CommunFun.getTeminalKey();
+    Drawerdata drawer = new Drawerdata();
+    drawer.shiftId = shifittem.shiftId;
+    drawer.amount = amount;
+    drawer.isAmountIn = isInAmmount == true ? 1 : 2;
+    drawer.reason = reson;
+    drawer.status = 1;
+    drawer.createdBy = user.id;
+    drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    drawer.localID = await CommunFun.getLocalID();
+    drawer.terminalid = int.parse(terminalid);
+    var result = await localAPI.saveInOutDrawerData(drawer);
+    print(result);
+    getpayInOutAmmount();
+  }
+
+  getpayInOutAmmount() async {
+    if (shifittem.shiftId != null) {
+      List<Drawerdata> result =
+          await localAPI.getPayinOutammount(shifittem.shiftId);
+      print(result);
+      if (result.length > 0) {
+        setState(() {
+          drawerData = result;
+        });
+        var drawerAmm = 0.00;
+        for (var i = 0; i < drawerData.length; i++) {
+          Drawerdata drawer = drawerData[i];
+          if (drawer.amount != null) {
+            drawerAmm += drawer.amount;
+          }
+        }
+        setState(() {
+          payInOutAmount = drawerAmm;
+          expectedVal = drawerAmm;
+        });
+        countTotalDrawer();
+      }
+    }
+  }
+
+  countTotalDrawer() {
+    var newval = shifittem.startAmount +
+        cashSale +
+        cashDeposit +
+        cashRefund +
+        cashRounding +
+        payInOutAmount;
+    setState(() {
+      overShort = newval;
+    });
   }
 
   @override
@@ -219,23 +281,26 @@ class _ShiftReportsState extends State<ShiftReports> {
               });
             }),
         items: imgList
-            .map((item) => Container(
-                  // color: Colors.blueGrey,
+            .map(
+              (item) => SingleChildScrollView(
+                child: Container(
                   width: MediaQuery.of(context).size.width / screenArea,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      SizedBox(height: 20),
+                      SizedBox(height: 10),
                       Text(
                         item,
                         style: Styles.whiteBold(),
                       ),
                       SizedBox(height: 10),
-                      Container(child: getReportList(item)),
+                      getReportList(item),
                     ],
                   ),
-                ))
+                ),
+              ),
+            )
             .toList(),
       ),
     );
@@ -307,222 +372,230 @@ class _ShiftReportsState extends State<ShiftReports> {
   }
 
   Widget summeryView() {
-    return ListView(
-      shrinkWrap: true,
-      children: <Widget>[
-        Container(
-          color: Colors.grey,
-          child: ListTile(
-            title: Text(
-              "Gross Sales",
-              style: Styles.whiteMediumBold(),
+    return Container(
+        height: MediaQuery.of(context).size.height / 1.8,
+        child: ListView(
+          shrinkWrap: true,
+          children: <Widget>[
+            Container(
+              color: Colors.grey,
+              child: ListTile(
+                title: Text(
+                  "Gross Sales",
+                  style: Styles.whiteMediumBold(),
+                ),
+                trailing: Text(
+                  grossSale.toStringAsFixed(2),
+                  style: Styles.whiteMediumBold(),
+                ),
+              ),
             ),
-            trailing: Text(
-              grossSale.toStringAsFixed(2),
-              style: Styles.whiteMediumBold(),
+            Container(
+              color: Colors.white,
+              child: ListTile(
+                title: Text(
+                  "Refunds",
+                  style: Styles.blackMediumBold(),
+                ),
+                trailing: Text(
+                  refund.toStringAsFixed(2),
+                  style: Styles.blackMediumBold(),
+                ),
+              ),
             ),
-          ),
-        ),
-        Container(
-          color: Colors.white,
-          child: ListTile(
-            title: Text(
-              "Refunds",
-              style: Styles.blackMediumBold(),
+            Container(
+              color: Colors.grey,
+              child: ListTile(
+                title: Text(
+                  "Discount",
+                  style: Styles.whiteMediumBold(),
+                ),
+                trailing: Text(
+                  discount.toStringAsFixed(2),
+                  style: Styles.whiteMediumBold(),
+                ),
+              ),
             ),
-            trailing: Text(
-              refund.toStringAsFixed(2),
-              style: Styles.blackMediumBold(),
+            Container(
+              color: Colors.white,
+              child: ListTile(
+                title: Text(
+                  "Net Sales",
+                  style: Styles.blackMediumBold(),
+                ),
+                trailing: Text(
+                  netSale.toStringAsFixed(2),
+                  style: Styles.blackMediumBold(),
+                ),
+              ),
             ),
-          ),
-        ),
-        Container(
-          color: Colors.grey,
-          child: ListTile(
-            title: Text(
-              "Discount",
-              style: Styles.whiteMediumBold(),
+            Container(
+              color: Colors.white,
+              child: ListTile(
+                title: Text(
+                  "Tax/Service Charge",
+                  style: Styles.blackMediumBold(),
+                ),
+                trailing: Text(
+                  tax.toStringAsFixed(2),
+                  style: Styles.blackMediumBold(),
+                ),
+              ),
             ),
-            trailing: Text(
-              discount.toStringAsFixed(2),
-              style: Styles.whiteMediumBold(),
+            Container(
+              color: Colors.white,
+              child: ListTile(
+                title: Text(
+                  "Total Tenders :",
+                  style: Styles.blackMediumBold(),
+                ),
+                trailing: Text(
+                  totalTender.toStringAsFixed(2),
+                  style: Styles.blackMediumBold(),
+                ),
+              ),
             ),
-          ),
-        ),
-        Container(
-          color: Colors.white,
-          child: ListTile(
-            title: Text(
-              "Net Sales",
-              style: Styles.blackMediumBold(),
-            ),
-            trailing: Text(
-              netSale.toStringAsFixed(2),
-              style: Styles.blackMediumBold(),
-            ),
-          ),
-        ),
-        Container(
-          color: Colors.white,
-          child: ListTile(
-            title: Text(
-              "Tax/Service Charge",
-              style: Styles.blackMediumBold(),
-            ),
-            trailing: Text(
-              tax.toStringAsFixed(2),
-              style: Styles.blackMediumBold(),
-            ),
-          ),
-        ),
-        Container(
-          color: Colors.white,
-          child: ListTile(
-            title: Text(
-              "Total Tenders :",
-              style: Styles.blackMediumBold(),
-            ),
-            trailing: Text(
-              totalTender.toStringAsFixed(2),
-              style: Styles.blackMediumBold(),
-            ),
-          ),
-        ),
-      ],
-    );
+          ],
+        ));
   }
 
   Widget drawersummeryView() {
-    return ListView(
-      shrinkWrap: true,
-      children: <Widget>[
-        Container(
-          color: Colors.grey,
-          child: ListTile(
-            title: Text(
-              "Opnening Amount",
-              style: Styles.whiteMediumBold(),
+    return Container(
+        height: MediaQuery.of(context).size.height / 1.8,
+        child: new ListView(
+          shrinkWrap: true,
+          children: <Widget>[
+            Container(
+              color: Colors.grey,
+              child: ListTile(
+                title: Text(
+                  "Opnening Amount",
+                  style: Styles.whiteMediumBold(),
+                ),
+                trailing: Text(
+                  shifittem.startAmount != null
+                      ? shifittem.startAmount.toStringAsFixed(2)
+                      : "",
+                  style: Styles.whiteMediumBold(),
+                ),
+              ),
             ),
-            trailing: Text(
-              shifittem != null ? shifittem.startAmount.toStringAsFixed(2) : "",
-              style: Styles.whiteMediumBold(),
+            Container(
+              color: Colors.white,
+              child: ListTile(
+                title: Text(
+                  "Cash Sales",
+                  style: Styles.blackMediumBold(),
+                ),
+                trailing: Text(
+                  cashSale.toStringAsFixed(2),
+                  style: Styles.blackMediumBold(),
+                ),
+              ),
             ),
-          ),
-        ),
-        Container(
-          color: Colors.white,
-          child: ListTile(
-            title: Text(
-              "Cash Sales",
-              style: Styles.blackMediumBold(),
+            Container(
+              color: Colors.grey,
+              child: ListTile(
+                title: Text(
+                  "Case Deposit",
+                  style: Styles.whiteMediumBold(),
+                ),
+                trailing: Text(
+                  cashDeposit.toStringAsFixed(2),
+                  style: Styles.whiteMediumBold(),
+                ),
+              ),
             ),
-            trailing: Text(
-              cashSale.toStringAsFixed(2),
-              style: Styles.blackMediumBold(),
+            Container(
+              color: Colors.white,
+              child: ListTile(
+                title: Text(
+                  "Cash Refunds",
+                  style: Styles.blackMediumBold(),
+                ),
+                trailing: Text(
+                  cashRefund.toStringAsFixed(2),
+                  style: Styles.blackMediumBold(),
+                ),
+              ),
             ),
-          ),
-        ),
-        Container(
-          color: Colors.grey,
-          child: ListTile(
-            title: Text(
-              "Case Deposit",
-              style: Styles.whiteMediumBold(),
+            Container(
+              color: Colors.grey,
+              child: ListTile(
+                title: Text(
+                  "Cash Rounding",
+                  style: Styles.whiteMediumBold(),
+                ),
+                trailing: Text(
+                  cashRounding.toStringAsFixed(2),
+                  style: Styles.whiteMediumBold(),
+                ),
+              ),
             ),
-            trailing: Text(
-              cashDeposit.toStringAsFixed(2),
-              style: Styles.whiteMediumBold(),
+            Container(
+              color: Colors.white,
+              child: ListTile(
+                title: Text(
+                  "Pay In/Out",
+                  style: Styles.blackMediumBold(),
+                ),
+                trailing: Text(
+                  payInOutAmount.toStringAsFixed(2),
+                  style: Styles.blackMediumBold(),
+                ),
+              ),
             ),
-          ),
-        ),
-        Container(
-          color: Colors.white,
-          child: ListTile(
-            title: Text(
-              "Cash Refunds",
-              style: Styles.blackMediumBold(),
+            Container(
+              color: Colors.grey,
+              child: ListTile(
+                title: Text(
+                  "Drawer Expected/Actual",
+                  style: Styles.whiteMediumBold(),
+                ),
+                trailing: Text(
+                  expectedVal.toStringAsFixed(2),
+                  style: Styles.whiteMediumBold(),
+                ),
+              ),
             ),
-            trailing: Text(
-              cashRefund.toStringAsFixed(2),
-              style: Styles.blackMediumBold(),
+            Container(
+              color: Colors.white,
+              child: ListTile(
+                title: Text(
+                  "Over/Short",
+                  style: Styles.blackMediumBold(),
+                ),
+                trailing: Text(
+                  overShort.toStringAsFixed(2),
+                  style: Styles.blackMediumBold(),
+                ),
+              ),
             ),
-          ),
-        ),
-        Container(
-          color: Colors.grey,
-          child: ListTile(
-            title: Text(
-              "Cash Rounding",
-              style: Styles.whiteMediumBold(),
-            ),
-            trailing: Text(
-              cashRounding.toStringAsFixed(2),
-              style: Styles.whiteMediumBold(),
-            ),
-          ),
-        ),
-        Container(
-          color: Colors.white,
-          child: ListTile(
-            title: Text(
-              "Pay In/Out",
-              style: Styles.blackMediumBold(),
-            ),
-            trailing: Text(
-              payinOut.toStringAsFixed(2),
-              style: Styles.blackMediumBold(),
-            ),
-          ),
-        ),
-        Container(
-          color: Colors.grey,
-          child: ListTile(
-            title: Text(
-              "Drawer Expected/Actual",
-              style: Styles.whiteMediumBold(),
-            ),
-            trailing: Text(
-              expectedVal.toStringAsFixed(2),
-              style: Styles.whiteMediumBold(),
-            ),
-          ),
-        ),
-        Container(
-          color: Colors.white,
-          child: ListTile(
-            title: Text(
-              "Over/Short",
-              style: Styles.blackMediumBold(),
-            ),
-            trailing: Text(
-              overShort.toStringAsFixed(2),
-              style: Styles.blackMediumBold(),
-            ),
-          ),
-        ),
-      ],
-    );
+          ],
+        ));
   }
 
   Widget paymentsummeryView() {
-    return ListView(
-      shrinkWrap: true,
-      children: <Widget>[
-        Container(
-          color: Colors.grey,
-          child: ListTile(
-            title: Text(
-              "Total",
-              style: Styles.whiteMediumBold(),
+    return Container(
+        height: MediaQuery.of(context).size.height / 1.8,
+        child: ListView(
+          shrinkWrap: true,
+          children: <Widget>[
+            Container(
+              color: Colors.grey,
+              child: ListTile(
+                title: Text(
+                  "Total",
+                  style: Styles.whiteMediumBold(),
+                ),
+                trailing: Text(
+                  grossSale.toStringAsFixed(2),
+                  style: Styles.whiteMediumBold(),
+                ),
+              ),
             ),
-            trailing: Text(
-              grossSale.toStringAsFixed(2),
-              style: Styles.whiteMediumBold(),
-            ),
-          ),
-        ),
-      ],
-    );
+          ],
+        ));
   }
 
   Widget squareActionButton() {
@@ -536,8 +609,10 @@ class _ShiftReportsState extends State<ShiftReports> {
                   child: RaisedButton(
                     padding: EdgeInsets.all(20),
                     onPressed: () {
+                      setState(() {
+                        isInAmmount = true;
+                      });
                       openpayInOUTPop("Pay In Amount", "5.00");
-                      CommunFun.showToast(context, "Comming Soon");
                     },
                     child: Text(
                       "Pay In",
@@ -560,8 +635,10 @@ class _ShiftReportsState extends State<ShiftReports> {
                   child: RaisedButton(
                     padding: EdgeInsets.all(20),
                     onPressed: () {
+                      setState(() {
+                        isInAmmount = false;
+                      });
                       openpayInOUTPop("Pay Out Amount", "5.00");
-                      CommunFun.showToast(context, "Comming Soon");
                     },
                     child: Text(
                       "Pay Out",
@@ -629,7 +706,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               "Total Net Sales",
               style: Styles.whiteSimpleSmall(),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 5),
             Text(
               "0.00",
               style: Styles.orangeLarge(),
@@ -643,7 +720,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               "Transactions",
               style: Styles.whiteSimpleSmall(),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 5),
             Text(
               "0.00",
               style: Styles.orangeLarge(),
@@ -657,7 +734,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               "Average Order Value",
               style: Styles.whiteSimpleSmall(),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 5),
             Text(
               "0.00",
               style: Styles.orangeLarge(),

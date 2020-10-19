@@ -71,6 +71,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   int isSelectedAttr = -1;
   bool isSetMeal = false;
   var productnetprice = 0.00;
+  var currency;
   @override
   void initState() {
     super.initState();
@@ -82,7 +83,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     setstate();
   }
 
-  setstate() {
+  setstate() async {
     if (isSetMeal) {
       setState(() {
         setmeal = widget.product;
@@ -111,6 +112,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       getCartData();
       getcartItemsDetails();
     }
+    var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
+    setState(() {
+      currency = curre;
+    });
   }
 
   getMealProducts() async {
@@ -120,6 +125,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       setState(() {
         mealProducts = mealProductList;
       });
+      tempCart.addAll(mealProducts);
     }
   }
 
@@ -259,15 +265,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           setPrice();
         }
       } else {
-        if (product_qty <= productItem.qty) {
-          var prevproductqty = product_qty;
-          setState(() {
-            product_qty = prevproductqty + 1;
-          });
-          setPrice();
-        } else {
-          CommunFun.showToast(context, Strings.store_Validation_message);
-        }
+        var prevproductqty = product_qty;
+        setState(() {
+          product_qty = prevproductqty + 1;
+        });
+        setPrice();
       }
     }
   }
@@ -443,6 +445,20 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return grandTotal;
   }
 
+  _setSelectUnselect(SetMealProduct product) {
+    var contain = tempCart.where(
+        (element) => element.setmealProductId == product.setmealProductId);
+    if (contain.isNotEmpty) {
+      setState(() {
+        tempCart.remove(product);
+      });
+    } else if (contain.isEmpty) {
+      setState(() {
+        tempCart.add(product);
+      });
+    }
+  }
+
   countTax(subT) async {
     var totalTax = [];
     double taxvalue = taxvalues;
@@ -542,12 +558,27 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var cartid = await cartlist.addcart(context, cart); // Insert Cart
     await insertTableData(tableData);
 
-    // var cartid = await localAPI.insertItemTocart(currentCart.id, cart,
-    //     productItem, orderData, tableData["table_id"], subCartData);
+    
 
-    productItem.qty = product_qty;
-    productItem.price = double.parse(price.toStringAsFixed(2));
-    var data = isSetMeal ? setmeal : productItem;
+    ProductDetails cartItemproduct = new ProductDetails();
+
+    if (!isSetMeal) {
+      cartItemproduct = productItem;
+      cartItemproduct.qty = product_qty;
+      cartItemproduct.price = double.parse(price.toStringAsFixed(2));
+    } else {
+      cartItemproduct.qty = product_qty;
+      cartItemproduct.price = double.parse(price.toStringAsFixed(2));
+      cartItemproduct.status = setmeal.status;
+      cartItemproduct.productId = setmeal.setmealId;
+      cartItemproduct.base64 = setmeal.base64;
+      cartItemproduct.name = setmeal.name;
+      cartItemproduct.uuid = setmeal.uuid;
+    }
+    cartItemproduct
+        .toJson()
+        .removeWhere((String key, dynamic value) => value == null);
+    var data = cartItemproduct;
     MSTCartdetails cartdetails = new MSTCartdetails();
     if (isEditing) {
       cartdetails.id = cartitem.id;
@@ -561,12 +592,15 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.productNetPrice =
         double.parse(productnetprice.toStringAsFixed(2));
     cartdetails.createdBy = loginData["id"];
-    cartdetails.cart_detail = json.encode(data);
+    cartdetails.cart_detail = jsonEncode(data);
     cartdetails.discount = 0;
     cartdetails.issetMeal = isSetMeal ? 1 : 0;
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    if (isSetMeal) {
+      cartdetails.setmeal_product_detail = json.encode(tempCart);
+    }
     var detailID = await cartlist.addintoCartDetails(context, cartdetails);
     List<MSTSubCartdetails> cartModiData = [];
     if (selectedModifier.length > 0) {
@@ -640,9 +674,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               child: Text(
                 isSetMeal
                     ? price.toStringAsFixed(2).toString()
-                    : productItem.priceTypeName +
-                        " " +
-                        price.toStringAsFixed(2).toString(),
+                    : currency + " " + price.toStringAsFixed(2).toString(),
                 style: Styles.orangeMedium(),
               ),
             ),
@@ -749,8 +781,17 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                   children: mealProducts.map((product) {
                 var index = mealProducts.indexOf(product);
                 return InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      _setSelectUnselect(product);
+                    },
                     child: Container(
+                      color: tempCart
+                              .where((element) =>
+                                  element.setmealProductId ==
+                                  product.setmealProductId)
+                              .isNotEmpty
+                          ? Colors.grey[100]
+                          : Colors.white,
                       padding:
                           EdgeInsets.symmetric(horizontal: 0, vertical: 10),
                       child: Row(
@@ -801,26 +842,27 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                 SizedBox(width: 90),
                                 IconButton(
                                   onPressed: () {
-                                    // var contain = tempCart.where((element) =>
-                                    //     element.productId == product.productId);
-                                    // if (contain.isNotEmpty) {
-                                    //   setState(() {
-                                    //     tempCart.remove(product);
-                                    //   });
-                                    // } else if (contain.isEmpty) {
-                                    //   setState(() {
-                                    //     tempCart.add(product);
-                                    //   });
-                                    // }
+                                    var contain = tempCart.where((element) =>
+                                        element.setmealProductId ==
+                                        product.setmealProductId);
+                                    if (contain.isNotEmpty) {
+                                      setState(() {
+                                        tempCart.remove(product);
+                                      });
+                                    } else if (contain.isEmpty) {
+                                      setState(() {
+                                        tempCart.add(product);
+                                      });
+                                    }
                                   },
                                   icon: Icon(
-                                    // tempCart
-                                    //         .where((element) =>
-                                    //             element.productId ==
-                                    //             product.productId)
-                                    //         .isNotEmpty
-                                    Icons.check_circle,
-                                    // : Icons.check_box_outline_blank,
+                                    tempCart
+                                            .where((element) =>
+                                                element.setmealProductId ==
+                                                product.setmealProductId)
+                                            .isNotEmpty
+                                        ? Icons.check_circle
+                                        : Icons.check_circle_outline,
                                     color: Colors.green,
                                     size: 40,
                                   ),
