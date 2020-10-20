@@ -73,7 +73,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   int isSelectedAttr = -1;
   bool isSetMeal = false;
   var productnetprice = 0.00;
-  var currency;
+  var currency = "MYR";
 
   @override
   void initState() {
@@ -128,7 +128,16 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       setState(() {
         mealProducts = mealProductList;
       });
-      tempCart.addAll(mealProducts);
+      if (cartitem != null) {
+        List<dynamic> selectedTemp =
+            jsonDecode(cartitem.setmeal_product_detail);
+        List<SetMealProduct> list = selectedTemp.isNotEmpty
+            ? selectedTemp.map((c) => SetMealProduct.fromJson(c)).toList()
+            : [];
+        tempCart.addAll(list);
+      } else {
+        tempCart.addAll(mealProducts);
+      }
     }
   }
 
@@ -498,7 +507,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         : 0.00;
   }
 
-  insertTableData(tableData) async {
+  insertTableData(tableData, cartid) async {
     SaveOrder orderData = new SaveOrder();
     Table_order tableorder = new Table_order();
     Cartlist cartlist = new Cartlist();
@@ -508,9 +517,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           tableData != null ? tableData["number_of_pax"] : 0;
       orderData.isTableOrder = tableData != null ? 1 : 0;
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+      orderData.cartId = cartid;
       var saveOid = await cartlist.addSaveOrder(
           context, orderData, tableData["table_id"]);
-
       tableorder = Table_order.fromJson(tableData);
       tableorder.save_order_id = saveOid;
       var tableid = await tableList.insertTableOrder(context, tableorder);
@@ -539,6 +548,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var grandTotal = await countGrandtotal(subtotal, taxvalues, disc);
 
     //cart data
+    if (widget.cartID != null) {
+      cart.id = currentCart.id;
+    }
     cart.user_id = customerid;
     cart.branch_id = int.parse(branchid);
     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
@@ -557,10 +569,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
     }
     var cartid = await cartlist.addcart(context, cart); // Insert Cart
-    await insertTableData(tableData);
-
+    if (!isEditing) {
+      await insertTableData(tableData, cartid);
+    }
     ProductDetails cartItemproduct = new ProductDetails();
-
     if (!isSetMeal) {
       cartItemproduct = productItem;
       cartItemproduct.qty = product_qty;
@@ -650,7 +662,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(isSetMeal ? setmeal.name : productItem.name,
+                Text(
+                    isSetMeal
+                        ? setmeal.name.toUpperCase()
+                        : productItem.name.toUpperCase(),
                     style: TextStyle(
                         fontSize: SizeConfig.safeBlockVertical * 3,
                         color: Colors.white)),
@@ -673,7 +688,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               child: Text(
                 isSetMeal
                     ? price.toStringAsFixed(2).toString()
-                    : currency + " " + price.toStringAsFixed(2).toString(),
+                    : currency != null
+                        ? currency + " " + price.toStringAsFixed(2)
+                        : price.toStringAsFixed(2),
                 style: Styles.orangeMedium(),
               ),
             ),

@@ -62,17 +62,14 @@ class OrdersReq {
     try {
       String content = await utf8.decoder.bind(request).join();
       var data = await jsonDecode(content);
-      Orders orderdata = Orders.fromJson(data["order"]); 
-      
-      var res = "";//await order.placeOrder(orderdata);
-      Orders orderdata = data["order"];
+      Orders orderdata = Orders.fromJson(data["order"]);
+
       List<OrderDetail> orderDetails = data["order_details"];
       List<OrderModifire> orderModifire = data["order_modifire"];
       List<OrderAttributes> orderAttributes = data["order_attributes"];
       OrderPayment orderPayment = data["order_payment"];
       VoucherHistory history = data["order_history"];
       ShiftInvoice shiftInvoice = data["shift_invoice"];
-
       var res = await order.placeOrder(
           orderdata,
           orderDetails,
@@ -94,7 +91,6 @@ class OrdersReq {
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
         ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
-      
         ..close();
     }
   }

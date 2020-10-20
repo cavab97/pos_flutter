@@ -121,14 +121,13 @@ class Server {
       case "/getLastOrderids":
         OrdersReq.getLastOrderIds(request);
         break;
- case "/delete_cart_item":
+      case "/delete_cart_item":
         CartReq.deletecartItem(request);
         break;
       case "/clear_cart":
         CartReq.cleatCart(request);
         break;
-     
-     
+
       case "/product_modifire":
         CartReq.cleatCart(request);
         break;
@@ -165,37 +164,6 @@ class Server {
       case "/getPrinterForCart":
         PrinterReq.getCartQTYPrinters(request);
         break;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> .theirs
       default:
     }
   }

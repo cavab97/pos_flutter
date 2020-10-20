@@ -1,6 +1,6 @@
 class Configrations {
   static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
-  static String ipAddress = "http://192.168.1.140:8080/";
+  static String ipAddress = "http://192.168.0.113:8080/";
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String config = "configs";

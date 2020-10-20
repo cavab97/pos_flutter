@@ -23,9 +23,9 @@ class PaymentList {
       }
     } else {
       var query = "SELECT * from payment where status = 1";
-      var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
-      List<Payments> list =
-          res.isNotEmpty ? res.map((c) => Payments.fromJson(c)).toList() : [];
+      var res = await db.rawQuery(query);
+      list =
+          res.length > 0 ? res.map((c) => Payments.fromJson(c)).toList() : [];
       await SyncAPICalls.logActivity(
           "payment", "get payment list", "payment", 1);
     }

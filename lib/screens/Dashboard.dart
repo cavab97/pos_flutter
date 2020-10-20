@@ -29,6 +29,7 @@ import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Payment.dart';
+import 'package:mcncashier/models/Lastids.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/SetMeal.dart';
@@ -445,8 +446,9 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getAllPrinter() async {
-    List<Printer> printer = await printerAPI.getAllPrinterList(context,"0");
-    List<Printer> printerDraft = await  printerAPI.getAllPrinterList(context,"1");
+    List<Printer> printer = await printerAPI.getAllPrinterList(context, "0");
+    List<Printer> printerDraft =
+        await printerAPI.getAllPrinterList(context, "1");
     setState(() {
       printerList = printer;
       printerreceiptList = printerDraft;
@@ -815,12 +817,13 @@ class _DashboradPageState extends State<DashboradPage>
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
-    var lastappid = await orderApi.getLastids(terminalId);
-    var allAppids = lastappid[0];
+    LastAppids lastappid = await orderApi.getLastids(terminalId);
+
     int length = branchdata.invoiceStart.length;
     var invoiceNo;
-    if (allAppids["app_id"] != null) {
-      order.app_id = int.parse(allAppids["app_id"]) + 1;
+
+    if (lastappid.app_id != null) {
+      order.app_id = lastappid.app_id + 1;
       invoiceNo =
           branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     } else {
@@ -857,8 +860,9 @@ class _DashboradPageState extends State<DashboradPage>
     for (var i = 0; i < cartList.length; i++) {
       OrderDetail orderDetail = new OrderDetail();
       var cartItem = cartList[i];
-      if (allAppids["order_detail_id"] != null) {
-        orderDetail.app_id = allAppids["order_detail_id"] + 1;
+      if (lastappid.order_detail_id != null) {
+        orderDetail.app_id = lastappid.order_detail_id + 1;
+        lastappid.order_detail_id = orderDetail.app_id;
       } else {
         orderDetail.app_id = int.parse(terminalId);
       }
@@ -894,8 +898,9 @@ class _DashboradPageState extends State<DashboradPage>
       OrderModifire modifireData = new OrderModifire();
       var modifire = modifireList[i];
       if (modifire.caId == null) {
-        if (allAppids["order_modifier_id"] != null) {
-          modifireData.app_id = allAppids["order_modifier_id"] + 1;
+        if (lastappid.order_modifier_id != null) {
+          modifireData.app_id = lastappid.order_modifier_id + 1;
+          lastappid.order_modifier_id = modifireData.app_id;
         } else {
           modifireData.app_id = int.parse(terminalId);
         }
@@ -916,8 +921,9 @@ class _DashboradPageState extends State<DashboradPage>
         orderModifires.add(modifireData);
       } else {
         OrderAttributes attributes = new OrderAttributes();
-        if (allAppids["order_attr_id"]) {
-          attributes.app_id = allAppids["order_attr_id"] + 1;
+        if (lastappid.order_attr_id != null) {
+          attributes.app_id = lastappid.order_attr_id + 1;
+          lastappid.order_attr_id = attributes.app_id;
         } else {
           attributes.app_id = int.parse(terminalId);
         }
@@ -940,8 +946,8 @@ class _DashboradPageState extends State<DashboradPage>
       }
     }
 
-    if (allAppids["order_payment_id"].length > 0) {
-      orderPayment.app_id = allAppids["order_payment_id"] + 1;
+    if (lastappid.order_payment_id != null) {
+      orderPayment.app_id = lastappid.order_payment_id + 1;
     } else {
       orderPayment.app_id = int.parse(terminalId);
     }
@@ -2207,6 +2213,7 @@ class _DashboradPageState extends State<DashboradPage>
     final cartTable = ListView(
       shrinkWrap: true,
       itemExtent: 50.0,
+      physics: NeverScrollableScrollPhysics(),
       padding: EdgeInsets.only(bottom: 50),
       children: ListTile.divideTiles(
         context: context,
@@ -2500,9 +2507,10 @@ class _DashboradPageState extends State<DashboradPage>
                     )
                   : SizedBox(),
               Container(
-                  height: MediaQuery.of(context).size.height / 2.2,
+                  //  color: Colors.amber,
+                  height: MediaQuery.of(context).size.height / 3,
                   margin: EdgeInsets.only(top: customer != null ? 85 : 35),
-                  child: cartTable),
+                  child: SingleChildScrollView(child: cartTable)),
               cartList.length != 0
                   ? Positioned(
                       bottom: 100,

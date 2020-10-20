@@ -97,93 +97,95 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
 
   Widget mainContent() {
     return Container(
-      height: MediaQuery.of(context).size.height / 3,
+     // height: MediaQuery.of(context).size.height / 3,
       width: MediaQuery.of(context).size.width / 3,
-      child: Column(
-        children: <Widget>[
-          // Row(
-          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //     children: <Widget>[
-          //       Row(
-          //         children: <Widget>[
-          //           SizedBox(width: 10),
-          //           // Container(
-          //           //     height: 70,
-          //           //     width: 70,
-          //           //     child: Image.asset("assets/bg.jpg")),
-          //           Icon(
-          //             Icons.credit_card,
-          //             color: Colors.black,
-          //             size: 50,
-          //           ),
-          //           SizedBox(width: 15),
-          //           Text(
-          //             Strings.cash,
-          //             style: Styles.blackBoldLarge(),
-          //           ),
-          //         ],
-          //       ),
-          //       Row(
-          //         children: <Widget>[
-          //           GestureDetector(
-          //               onTap: () {
-          //                 openAmountPop();
-          //               },
-          //               child: Text(newAmmount.toString(),
-          //                   style:
-          //                       TextStyle(color: Colors.grey, fontSize: 20))),
-          //           SizedBox(width: 10),
-          //           GestureDetector(
-          //             onTap: () {
-          //               // sendPaymentByCash("");
-          //             },
-          //             child: Container(
-          //               height: 50,
-          //               width: 100,
-          //               decoration: BoxDecoration(
-          //                   color: Colors.deepOrange,
-          //                   borderRadius: BorderRadius.circular(10.0)),
-          //               child: Center(
-          //                 child: Text(
-          //                   Strings.btn_exect,
-          //                   style: Styles.whiteBold(),
-          //                 ),
-          //               ),
-          //             ),
-          //           )
-          //         ],
-          //       ),
-          //     ]),
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            // Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     children: <Widget>[
+            //       Row(
+            //         children: <Widget>[
+            //           SizedBox(width: 10),
+            //           // Container(
+            //           //     height: 70,
+            //           //     width: 70,
+            //           //     child: Image.asset("assets/bg.jpg")),
+            //           Icon(
+            //             Icons.credit_card,
+            //             color: Colors.black,
+            //             size: 50,
+            //           ),
+            //           SizedBox(width: 15),
+            //           Text(
+            //             Strings.cash,
+            //             style: Styles.blackBoldLarge(),
+            //           ),
+            //         ],
+            //       ),
+            //       Row(
+            //         children: <Widget>[
+            //           GestureDetector(
+            //               onTap: () {
+            //                 openAmountPop();
+            //               },
+            //               child: Text(newAmmount.toString(),
+            //                   style:
+            //                       TextStyle(color: Colors.grey, fontSize: 20))),
+            //           SizedBox(width: 10),
+            //           GestureDetector(
+            //             onTap: () {
+            //               // sendPaymentByCash("");
+            //             },
+            //             child: Container(
+            //               height: 50,
+            //               width: 100,
+            //               decoration: BoxDecoration(
+            //                   color: Colors.deepOrange,
+            //                   borderRadius: BorderRadius.circular(10.0)),
+            //               child: Center(
+            //                 child: Text(
+            //                   Strings.btn_exect,
+            //                   style: Styles.whiteBold(),
+            //                 ),
+            //               ),
+            //             ),
+            //           )
+            //         ],
+            //       ),
+            //     ]),
 
-          ListView(
-            shrinkWrap: true,
-            children: paymenttyppeList.map((payment) {
-              return ListTile(
-                  contentPadding: EdgeInsets.all(5),
-                  leading: Icon(
-                    payment.name.contains("Wallet")
-                        ? Icons.account_balance_wallet
-                        : Icons.credit_card,
-                    color: Colors.black,
-                    size: SizeConfig.safeBlockVertical * 7,
-                  ),
-                  // Container(
-                  //     height: 70,
-                  //     width: 70,
-                  //     child: Image.asset("assets/bg.jpg")),
-                  onTap: () {
-                    /// sendPaymentByCash(payment);
-                    widget.onClose(payment);
-                  },
-                  title: Text(payment.name, style: Styles.blackMediumBold()),
-                  trailing: Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.black,
-                    size: SizeConfig.safeBlockVertical * 4,
-                  ));
-            }).toList(),
-          )
-        ],
+            ListView(
+              shrinkWrap: true,
+              children: paymenttyppeList.map((payment) {
+                return ListTile(
+                    contentPadding: EdgeInsets.all(5),
+                    leading: Icon(
+                      payment.name.contains("Wallet")
+                          ? Icons.account_balance_wallet
+                          : Icons.credit_card,
+                      color: Colors.black,
+                      size: SizeConfig.safeBlockVertical * 7,
+                    ),
+                    // Container(
+                    //     height: 70,
+                    //     width: 70,
+                    //     child: Image.asset("assets/bg.jpg")),
+                    onTap: () {
+                      /// sendPaymentByCash(payment);
+                      widget.onClose(payment);
+                    },
+                    title: Text(payment.name, style: Styles.blackMediumBold()),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.black,
+                      size: SizeConfig.safeBlockVertical * 4,
+                    ));
+              }).toList(),
+            )
+          ],
+        ),
       ),
     );
   }

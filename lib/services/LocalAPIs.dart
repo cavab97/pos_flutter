@@ -3,25 +3,18 @@ import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
-import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/PosPermission.dart';
-import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
-import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Role.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
-import 'package:mcncashier/models/ShiftInvoice.dart';
-import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
-import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Table_order.dart';
-import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
@@ -894,7 +887,7 @@ class LocalAPI {
 
   Future<List<ProductStoreInventory>> checkItemAvailableinStore(
       productId) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var inventoryProd = await db.query("product_store_inventory",
         where: 'product_id = ?', whereArgs: [productId]);
     List<ProductStoreInventory> list = inventoryProd.length > 0
@@ -1136,16 +1129,16 @@ class LocalAPI {
   }
 
   Future<int> updateInvoice(Orders order) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var result;
-    if (order.order_item_count > 0) {
-      result = await db
-          .delete("orders", where: "app_id =?", whereArgs: [order.app_id]);
-    } else {
-      result = await db.update("orders", order.toJson(),
-          where: "app_id =?", whereArgs: [order.app_id]);
-    }
-    return result;
+    // var db = DatabaseHelper.dbHelper.getDatabse();
+    // var result;
+    // if (order.order_item_count > 0) {
+    //   result = await db
+    //       .delete("orders", where: "app_id =?", whereArgs: [order.app_id]);
+    // } else {
+    //   result = await db.update("orders", order.toJson(),
+    //       where: "app_id =?", whereArgs: [order.app_id]);
+    // }
+    // return result;
   }
 
   Future<List<ProductDetails>> productdData(productid) async {

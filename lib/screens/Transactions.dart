@@ -97,20 +97,23 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
     OrderPayment orderpaymentdata =
         await orderApi.getOrderpaymentData(order.app_id);
-    setState(() {
-      orderpayment = orderpaymentdata;
-    });
-    Payments paumentmethod =
-        await CommunFun.getOrderPaymentMethod(orderpayment.op_method_id);
-    setState(() {
-      paumentMethod = paumentmethod;
-    });
-    User user = await localAPI.getPaymentUser(orderpayment.op_by);
-    if (user != null) {
+    if (orderpaymentdata != null) {
       setState(() {
-        paymemtUser = user;
+        orderpayment = orderpaymentdata;
       });
+      Payments paumentmethod =
+          await CommunFun.getOrderPaymentMethod(orderpayment.op_method_id);
+      setState(() {
+        paumentMethod = paumentmethod;
+      });
+      User user = await localAPI.getPaymentUser(orderpayment.op_by);
+      if (user != null) {
+        setState(() {
+          paymemtUser = user;
+        });
+      }
     }
+
     //}
   }
 
@@ -877,7 +880,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget productList() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.only(top: 0, left: 20, right: 20, bottom: 100),
       height: MediaQuery.of(context).size.height / 3.5,
       //width: MediaQuery.of(context).size.width / 1.7,
       child: SingleChildScrollView(
@@ -947,28 +950,28 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               style: TextStyle(
                                   fontSize: SizeConfig.safeBlockVertical * 2.8,
                                   color: Theme.of(context).primaryColor)),
-                          isRefunding
-                              ? IconButton(
-                                  icon: Icon(
-                                    Icons.remove_circle_outline,
-                                    color: Colors.red,
-                                    size: SizeConfig.safeBlockVertical * 5,
-                                  ),
-                                  onPressed: () {
-                                    CommonUtils.showAlertDialog(context, () {
-                                      Navigator.of(context).pop();
-                                    }, () {
-                                      Navigator.of(context).pop();
-                                      deleteItemFormList(product);
-                                    },
-                                        "Alert",
-                                        "Are you sure you want to delete this item?",
-                                        "Yes",
-                                        "No",
-                                        true);
-                                    //deleteItemFormList(product);
-                                  })
-                              : SizedBox(),
+                          // isRefunding
+                          //     ? IconButton(
+                          //         icon: Icon(
+                          //           Icons.remove_circle_outline,
+                          //           color: Colors.red,
+                          //           size: SizeConfig.safeBlockVertical * 5,
+                          //         ),
+                          //         onPressed: () {
+                          //           // CommonUtils.showAlertDialog(context, () {
+                          //           //   Navigator.of(context).pop();
+                          //           // }, () {
+                          //           //   Navigator.of(context).pop();
+                          //           //   deleteItemFormList(product);
+                          //           // },
+                          //           //     "Alert",
+                          //           //     "Are you sure you want to delete this item?",
+                          //           //     "Yes",
+                          //           //     "No",
+                          //           //     true);
+                          //           // //deleteItemFormList(product);
+                          //         })
+                          //     : SizedBox(),
                         ],
                       ),
                     )
@@ -983,7 +986,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Widget searchTransationList() {
     if (isFiltering) {
       return Container(
-        height: MediaQuery.of(context).size.height / 1.3,
+        // color: Colors.red,
+        height: MediaQuery.of(context).size.height / 1.4,
         child: ListView(
           shrinkWrap: true,
           physics: AlwaysScrollableScrollPhysics(),
@@ -1045,7 +1049,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
       );
     } else {
       return Container(
-        height: MediaQuery.of(context).size.height / 1.3,
+        // color: Colors.blue,
+        height: MediaQuery.of(context).size.height / 1.4,
         child: ListView(
           itemExtent: 65,
           padding: EdgeInsets.symmetric(horizontal: 5),

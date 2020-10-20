@@ -11,6 +11,8 @@ import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
+
+import 'package:mcncashier/models/Lastids.dart';
 import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/ShiftInvoice.dart';
@@ -42,9 +44,9 @@ class OrdersList {
     return list[0];
   }
 
-  Future<List> getLastids(terminalid) async {
+  Future<LastAppids> getLastids(terminalid) async {
     var isjoin = await CommunFun.checkIsJoinServer();
-    List<Map> result;
+    LastAppids result = new LastAppids();
     if (isjoin == true) {
       var apiurl = Configrations.ipAddress + Configrations.getLastids;
       var stringParams = {"terminal_id": terminalid};
@@ -60,9 +62,15 @@ class OrdersList {
           " Left JOIN order_attributes on order_attributes.order_id = orders.app_id" +
           " Left JOIN order_modifier on order_modifier.order_id = orders.app_id" +
           " Left JOIN order_payment on order_payment.order_id = orders.app_id" +
-          " where orders.terminal_id = 1 ORDER BY order_date DESC LIMIT 1";
-      result = await db.rawQuery(qry);
-      print(result);
+          " where orders.terminal_id = " +
+          terminalid +
+          " ORDER BY order_date DESC LIMIT 1";
+      var res = await db.rawQuery(qry);
+      List<LastAppids> list =
+          res.length > 0 ? res.map((c) => LastAppids.fromJson(c)).toList() : [];
+      if (list.length > 0) {
+        result = list[0];
+      }
     }
     return result;
   }
@@ -128,7 +136,6 @@ class OrdersList {
         await db.insert("order_modifier", modifire.toJson());
         await SyncAPICalls.logActivity(
             "orders", "insert order modifier", "order_modifier", orderid);
-        return modifire.app_id;
       }
       // sttributes update
       for (var a = 0; a < orderAttributes.length; a++) {
@@ -138,7 +145,6 @@ class OrdersList {
         await db.insert("order_attributes", attribute.toJson());
         await SyncAPICalls.logActivity(
             "orders", "insert order attributes", "order_attributes", orderid);
-        return attribute.app_id;
       }
 
       // product store inve
@@ -234,8 +240,8 @@ class OrdersList {
 
   static removeCartItem(cartid, tableID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var cart = // cart table
-        await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
+
+    await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
 
     await SyncAPICalls.logActivity("orders", "clear cart", "mst_cart", 1);
 
@@ -257,7 +263,7 @@ class OrdersList {
         : [];
     if (list.length > 0) {
       for (var i = 0; i < list.length; i++) {
-        var cartsubdatad = await db.delete("mst_cart_sub_detail",
+        await db.delete("mst_cart_sub_detail",
             where: 'cart_details_id = ?', whereArgs: [list[i].id]);
       }
     }
@@ -299,26 +305,27 @@ class OrdersList {
 
   Future<OrderPayment> getOrderpaymentData(orderid) async {
     var isjoin = await CommunFun.checkIsJoinServer();
-    List<OrderPayment> list = [];
+    OrderPayment list;
     if (isjoin == true) {
       var apiurl = Configrations.ipAddress + Configrations.order_details;
       var stringParams = {"order_id": orderid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        List<dynamic> data = result["data"];
-        list = data.length > 0
-            ? data.map((c) => OrderPayment.fromJson(c)).toList()
-            : [];
+        var data = result["data"];
+        list = OrderPayment.fromJson(data);
       }
     } else {
       var qry =
           "SELECT * from order_payment where order_id = " + orderid.toString();
       var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-      list = ordersList.isNotEmpty
+      List<OrderPayment> res = ordersList.length > 0
           ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
           : [];
+      if (res.length > 0) {
+        list = res[0];
+      }
     }
-    return list[0];
+    return list;
   }
 
   Future<List<Orders>> getOrdersList(branchid, terminalid) async {

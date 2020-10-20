@@ -254,8 +254,8 @@ class _SelectTablePageState extends State<SelectTablePage> {
         content: Builder(
           builder: (context) {
             return Container(
-              height: 200,
-              width: 250,
+              height: MediaQuery.of(context).size.height / 4,
+              width: MediaQuery.of(context).size.width / 4,
               child: Center(
                 child: Stack(
                   children: <Widget>[
