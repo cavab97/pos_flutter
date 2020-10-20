@@ -1146,7 +1146,7 @@ class _DashboradPageState extends State<DashboradPage>
       if (cartitem.isSendKichen == 1) {
         var deletedlist = [];
         deletedlist.add(cartitem);
-        openPrinterPop(deletedlist);
+        //openPrinterPop(deletedlist);
       }
       if (cartList.length > 1) {
         await getCartItem(currentCart);

@@ -1,5 +1,4 @@
 import 'package:esc_pos_printer/esc_pos_printer.dart';
-import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/components/styles.dart';
@@ -7,8 +6,6 @@ import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
-import 'package:ping_discover_network/ping_discover_network.dart';
-import 'package:wifi/wifi.dart';
 
 class PrinterListDailog extends StatefulWidget {
   PrinterListDailog({Key key, this.onPress, this.cartList}) : super(key: key);
@@ -31,7 +28,6 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
   int found = -1;
 
   // int portController = 1900;
-  PaperSize paper = PaperSize.mm80;
   List<MSTCartdetails> itemList = [];
 
   @override
@@ -40,65 +36,8 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
     setState(() {
       itemList = widget.cartList;
     });
-    discover(context);
   }
 
-
-
-  void discover(BuildContext ctx) async {
-    setState(() {
-      isDiscovering = true;
-      devices.clear();
-      found = -1;
-    });
-
-    String ip;
-    try {
-      ip = await Wifi.ip;
-      print('local ip:\t$ip');
-    } catch (e) {
-      final snackBar = SnackBar(
-          content:
-              Text('WiFi is not connected $e', textAlign: TextAlign.center));
-      Scaffold.of(ctx).showSnackBar(snackBar);
-      return;
-    }
-    setState(() {
-      localIp = ip;
-    });
-
-    final String subnet = ip.substring(0, ip.lastIndexOf('.'));
-    int port = 9100;
-    /* try {
-      port = int.parse(portController.text);
-    } catch (e) {
-      portController.text = port.toString();
-    }*/
-    print('subnet:\t$subnet, port:\t$port');
-
-    final stream = NetworkAnalyzer.discover2(subnet, port);
-
-    stream.listen((NetworkAddress addr) {
-      if (addr.exists) {
-        print('Found device: ${addr.ip}');
-        setState(() {
-          devices.add(addr.ip);
-          found = devices.length;
-        });
-      }
-    })
-      ..onDone(() {
-        setState(() {
-          isDiscovering = false;
-          found = devices.length;
-        });
-      })
-      ..onError((dynamic e) {
-        final snackBar = SnackBar(
-            content: Text('Unexpected exception', textAlign: TextAlign.center));
-        Scaffold.of(ctx).showSnackBar(snackBar);
-      });
-  }
 
   void testPrint(String printerIp, BuildContext ctx) async {
     //sendTokitched();
@@ -142,8 +81,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
                     Icons.sync,
                     color: Colors.white,
                     size: 40,
-                  ),
-                  onPressed: isDiscovering ? null : () => discover(context))),
+                  ))),
           closeButton(context),
         ],
       ),

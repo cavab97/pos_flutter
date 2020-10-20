@@ -66,6 +66,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   bool isSetMeal = false;
   var productnetprice = 0.00;
   var currency;
+
   @override
   void initState() {
     super.initState();
@@ -77,8 +78,29 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     setstate();
   }
 
+  setSetMealData() {
+    if (cartitem != null) {
+      List<dynamic> cartData = jsonDecode(cartitem.setmeal_product_detail);
+
+      List<SetMealProduct> tCartData = cartData.isNotEmpty
+          ? cartData.map((c) => SetMealProduct.fromJson(c)).toList()
+          : [];
+
+      setState(() {
+        tempCart = tCartData;
+      });
+      print("===============================");
+
+      tempCart.forEach((element) {
+        print(element.setmealProductId);
+        print(element.setmealId);
+      });
+    }
+  }
+
   setstate() async {
     if (isSetMeal) {
+      setSetMealData();
       setState(() {
         setmeal = widget.product;
         price = setmeal.price;

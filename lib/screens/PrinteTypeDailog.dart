@@ -1,4 +1,3 @@
-import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/styles.dart';
