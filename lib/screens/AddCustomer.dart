@@ -28,7 +28,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   CustomersList custList = new CustomersList();
   String _selectedCountry = "India";
   List<String> countries = ['A', 'B', 'C', 'D'];
-
+  final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     super.initState();
@@ -41,17 +41,19 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
 
   addCustomer() async {
     var isvalid = validateFields();
-    if (isvalid) {
+    if (_formKey.currentState.validate()) {
       var terminalkey = await CommunFun.getTeminalKey();
       Customer customer = new Customer();
       customer.terminalId = int.parse(terminalkey);
-      customer.firstName = firstname_controller.text;
-      customer.lastName = lastname_controller.text;
+      customer.name = firstname_controller.text;
+      customer.username = lastname_controller.text;
       customer.email = email_controller.text;
       customer.mobile = phone_controller.text;
       customer.password = password_controller.text;
       customer.address = addressLine1_controller.text;
       customer.email = email_controller.text;
+      customer.status = 1;
+      customer.uuid = await CommunFun.getLocalID();
       customer.cityId = 0;
       customer.stateId = 0;
       customer.countryId = 0;
@@ -84,8 +86,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             ),
           ),
           Positioned(
-            left: 40,
-            top: 20,
+            left: 30,
+            top: 25,
             child: GestureDetector(
               onTap: () {
                 addCustomer();
@@ -239,12 +241,18 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   Widget inputfield(lable, type, isCompal, isPassword, Function _onchnage) {
     return Padding(
       padding: EdgeInsets.all(10),
-      child: TextField(
+      child: TextFormField(
         //controller: lable,
+        validator: (value) {
+          if (value.isEmpty) {
+            return 'Please enter ' + lable + '.';
+          }
+          return null;
+        },
         keyboardType: type,
         obscureText: isPassword,
         decoration: InputDecoration(
-          contentPadding: EdgeInsets.only(left: 10, right: 10),
+          //contentPadding: EdgeInsets.only(left: 5, right: 5),
           border: OutlineInputBorder(),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
@@ -270,67 +278,72 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   Widget mainContent() {
     return Container(
       width: MediaQuery.of(context).size.width / 1.8,
-      height: MediaQuery.of(context).size.height / 1.8,
-      child: SingleChildScrollView(
-        child: Table(
-          columnWidths: {
-            0: FractionColumnWidth(.5),
-            1: FractionColumnWidth(.5),
-          },
-          children: [
-            TableRow(children: [
-              TableCell(
-                  child: inputfield(
-                      Strings.fisrtname, TextInputType.text, true, false, (e) {
-                firstname_controller.text = e;
-              })),
-              TableCell(
-                  child: inputfield(
-                      Strings.lastname, TextInputType.text, true, false, (e) {
-                lastname_controller.text = e;
-              })),
-            ]),
-            TableRow(children: [
-              TableCell(
-                  child: inputfield(
-                      Strings.email, TextInputType.text, true, false, (e) {
-                email_controller.text = e;
-              })),
-              TableCell(
-                  child: inputfield(
-                      Strings.phone, TextInputType.number, true, false, (e) {
-                phone_controller.text = e;
-              })),
-            ]),
-            TableRow(children: [
-              TableCell(
-                  child: inputfield(
-                      Strings.password, TextInputType.text, true, true, (e) {
-                password_controller.text = e;
-              })),
-              TableCell(
-                  child: inputfield(
-                      Strings.addressline1, TextInputType.text, false, false,
-                      (e) {
-                addressLine1_controller.text = e;
-              })),
-            ]),
-            TableRow(children: [
-              TableCell(child: cityselect()),
-              TableCell(child: stateSelect()),
-            ]),
-            TableRow(children: [
-              TableCell(child: countryselect()),
-              TableCell(
-                  child: inputfield(
-                      Strings.postcode, TextInputType.number, false, false,
-                      (e) {
-                postcode_controller.text = e;
-              })),
-            ]),
-          ],
-        ),
-      ),
+      //height: MediaQuery.of(context).size.height / 1.8,
+      child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Table(
+              columnWidths: {
+                0: FractionColumnWidth(.5),
+                1: FractionColumnWidth(.5),
+              },
+              children: [
+                TableRow(children: [
+                  TableCell(
+                      child: inputfield(
+                          Strings.fisrtname, TextInputType.text, true, false,
+                          (e) {
+                    firstname_controller.text = e;
+                  })),
+                  TableCell(
+                      child: inputfield(
+                          Strings.lastname, TextInputType.text, true, false,
+                          (e) {
+                    lastname_controller.text = e;
+                  })),
+                ]),
+                TableRow(children: [
+                  TableCell(
+                      child: inputfield(
+                          Strings.email, TextInputType.text, true, false, (e) {
+                    email_controller.text = e;
+                  })),
+                  TableCell(
+                      child: inputfield(
+                          Strings.phone, TextInputType.number, true, false,
+                          (e) {
+                    phone_controller.text = e;
+                  })),
+                ]),
+                TableRow(children: [
+                  TableCell(
+                      child: inputfield(
+                          Strings.password, TextInputType.text, true, true,
+                          (e) {
+                    password_controller.text = e;
+                  })),
+                  TableCell(
+                      child: inputfield(Strings.addressline1,
+                          TextInputType.text, false, false, (e) {
+                    addressLine1_controller.text = e;
+                  })),
+                ]),
+                // TableRow(children: [
+                //   TableCell(child: cityselect()),
+                //   TableCell(child: stateSelect()),
+                // ]),
+                // TableRow(children: [
+                //   TableCell(child: countryselect()),
+                //   TableCell(
+                //       child: inputfield(
+                //           Strings.postcode, TextInputType.number, false, false,
+                //           (e) {
+                //     postcode_controller.text = e;
+                //   })),
+                // ]),
+              ],
+            ),
+          )),
     );
   }
 }

@@ -60,7 +60,7 @@ class Cartlist {
             tableid.toString() +
             " WHERE id = " +
             saveorder.cartId.toString();
-        var res = await db.rawQuery(rawQuery);
+        await db.rawQuery(rawQuery);
         await SyncAPICalls.logActivity(
             "weborder", "update table_id", "mst_cart", tableid.toString());
       }

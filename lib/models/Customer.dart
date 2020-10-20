@@ -29,8 +29,7 @@ class Customer {
   int deletedBy;
 
   Customer(
-      {
-      this.customerId,
+      {this.customerId,
       this.uuid,
       this.appId,
       this.terminalId,

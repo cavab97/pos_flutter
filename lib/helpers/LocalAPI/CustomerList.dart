@@ -25,9 +25,7 @@ class CustomersList {
             : [];
       }
     } else {
-      var query = "SELECT * from customer WHERE " +
-          " customer.status = 1 AND terminal_id = " +
-          teminalid.toString();
+      var query = "SELECT * from customer WHERE customer.status = 1";
       var res = await db.rawQuery(query);
       list =
           res.isNotEmpty ? res.map((c) => Customer.fromJson(c)).toList() : [];
@@ -49,7 +47,7 @@ class CustomersList {
         result = 1;
       }
     } else {
-      var result = await db.insert("customer", customer.toJson());
+       result = await db.insert("customer", customer.toJson());
       await SyncAPICalls.logActivity(
           "Customer", "Adding customer", "customer", result);
     }

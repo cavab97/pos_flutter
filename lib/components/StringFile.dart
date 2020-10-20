@@ -33,10 +33,10 @@ class Strings {
   static String update = "Update";
   static String add_new = "Add New";
   static String pay = "Pay";
-  static String fisrtname = "Fisrt Name";
-  static String lastname = "Last Name";
+  static String fisrtname = "Name";
+  static String lastname = "User Name";
   static String email = "Email";
-  static String phone = "Phone";
+  static String phone = "Mobile";
   static String password = "Password";
   static String birthdate = "Birth Date";
   static String addressline1 = "Address";

@@ -569,7 +569,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
     }
     var cartid = await cartlist.addcart(context, cart); // Insert Cart
-    if (!isEditing) {
+    if (widget.cartID == null) {
       await insertTableData(tableData, cartid);
     }
     ProductDetails cartItemproduct = new ProductDetails();

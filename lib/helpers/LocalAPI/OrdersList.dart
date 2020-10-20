@@ -110,7 +110,7 @@ class OrdersList {
       await OrdersList.payment(orderPayment, orderid);
       await OrdersList.voucherHistory(history, orderid);
       await OrdersList.shiftInvoice(shiftInvoice, orderid);
-      await OrdersList.removeCartItem(orderData.table_id, cartID);
+      await OrdersList.removeCartItem(cartID, orderData.table_id);
     }
     return orderData.app_id;
   }
@@ -241,22 +241,22 @@ class OrdersList {
   static removeCartItem(cartid, tableID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
 
-    await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
+    await db.delete("mst_cart", where: 'id =?', whereArgs: [cartid]);
 
     await SyncAPICalls.logActivity("orders", "clear cart", "mst_cart", 1);
 
-    await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartid]);
+    await db.delete("save_order", where: 'cart_id =?', whereArgs: [cartid]);
 
     await SyncAPICalls.logActivity(
         "orders", "clear save_order", "save_order", cartid);
 
-    await db.delete("table_order", where: 'table_id = ?', whereArgs: [tableID]);
+    await db.delete("table_order", where: 'table_id =?', whereArgs: [tableID]);
 
     await SyncAPICalls.logActivity(
         "orders", "clear table_order", "table_order", cartid);
 
     var cartDetail = await db
-        .query("mst_cart_detail", where: 'cart_id = ?', whereArgs: [cartid]);
+        .query("mst_cart_detail", where: 'cart_id =?', whereArgs: [cartid]);
 
     List<MSTCartdetails> list = cartDetail.isNotEmpty
         ? cartDetail.map((c) => MSTCartdetails.fromJson(c)).toList()

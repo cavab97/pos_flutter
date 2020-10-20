@@ -534,7 +534,7 @@ class CreateTables {
     //Table customer
 
     datatables = db.execute("CREATE TABLE customer (" +
-        "customer_id	INTEGER," +
+        "customer_id	INTEGER PRIMARY KEY AUTOINCREMENT," +
         "uuid	char TEXT," +
         "app_id	INTEGER," +
         "terminal_id	INTEGER," +

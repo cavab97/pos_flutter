@@ -881,7 +881,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Widget productList() {
     return Container(
       padding: EdgeInsets.only(top: 0, left: 20, right: 20, bottom: 100),
-      height: MediaQuery.of(context).size.height / 3.5,
+      height: MediaQuery.of(context).size.height / 2.5,
       //width: MediaQuery.of(context).size.width / 1.7,
       child: SingleChildScrollView(
         child: Column(
