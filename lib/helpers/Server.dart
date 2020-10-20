@@ -127,7 +127,6 @@ class Server {
       case "/clear_cart":
         CartReq.cleatCart(request);
         break;
-
       case "/product_modifire":
         CartReq.cleatCart(request);
         break;
@@ -155,14 +154,20 @@ class Server {
       case "/branch_detail":
         BranchReq.branchdata(request);
         break;
-      case "/tax_list":
-        BranchReq.branchdata(request);
+      case "/branch_tax":
+        BranchReq.branchtax(request);
         break;
       case "/getPrinter":
         PrinterReq.getAllPrinters(request);
         break;
       case "/getPrinterForCart":
         PrinterReq.getCartQTYPrinters(request);
+        break;
+      case "/set_meals":
+        ProductsReq.getSetMeals(request);
+        break;
+      case "/set_meals_products":
+        ProductsReq.getSetmealProducts(request);
         break;
       default:
     }

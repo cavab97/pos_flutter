@@ -16,7 +16,7 @@ class TablesList {
     List<TablesDetails> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.tables;
+      var apiurl = await Configrations.ipAddress() + Configrations.tables;
       var stringParams = {"branch_id": branchid};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -48,11 +48,14 @@ class TablesList {
     var isjoin = await CommunFun.checkIsJoinServer();
     var result;
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.add_table_order;
-      var stringParams = {"table_order": jsonEncode(tableOrder)};
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.add_table_order;
+      var stringParams = {"table_order": tableOrder};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
         result = 1;
+      } else {
+        CommunFun.showToast(context, result["message"]);
       }
     } else {
       var qry = "SELECT * from table_order where table_id =" +
@@ -81,7 +84,8 @@ class TablesList {
     var isjoin = await CommunFun.checkIsJoinServer();
     List<TablesDetails> list = [];
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.table_Details;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.table_Details;
       var stringParams = {"branch_id": branchid, "table_id": tableID};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {

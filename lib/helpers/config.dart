@@ -1,6 +1,10 @@
+import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
+
 class Configrations {
   static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
-  static String ipAddress = "http://192.168.1.143:8080/";
+
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String config = "configs";
@@ -55,4 +59,11 @@ class Configrations {
   static String order_payment_method = "order_payment_method";
   static String orders_list = "order_List";
   static String send_to_kitchen = "send_to_kitchen";
+  static String set_meals = "set_meals";
+    static String branch_tax = "branch_tax";
+  static String set_meals_products = "set_meals_products";
+
+  static ipAddress() async {
+    return await Preferences.getStringValuesSF(Constant.SERVER_IP);
+  }
 }

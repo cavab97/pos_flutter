@@ -15,7 +15,7 @@ class ShiftList {
     var isjoin = await CommunFun.checkIsJoinServer();
     List<Shift> list = [];
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.shift_datails;
+      var apiurl = await Configrations.ipAddress() + Configrations.shift_datails;
       var stringParams = {"shift_id": shiftId};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -38,7 +38,7 @@ class ShiftList {
     var isjoin = await CommunFun.checkIsJoinServer();
     var result;
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.add_shift;
+      var apiurl = await Configrations.ipAddress() + Configrations.add_shift;
       var stringParams = {"shift_data": jsonEncode(shift)};
       result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {

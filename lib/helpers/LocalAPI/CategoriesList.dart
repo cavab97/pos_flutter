@@ -12,10 +12,10 @@ class CategoriesList {
     List<Category> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.categories;
+      var apiurl = await Configrations.ipAddress() + Configrations.categories;
       var stringParams = {"branch_id": branchID};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
-      if (result["status"] == Constant.STATUS200) {
+      if (result != null && result["status"] == Constant.STATUS200) {
         List<dynamic> data = result["data"];
         list = data.length > 0
             ? data.map((c) => Category.fromJson(c)).toList()

@@ -6,6 +6,8 @@ import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
 import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/SetMeal.dart';
+import 'package:mcncashier/models/SetMealProduct.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 
 class ProductsList {
@@ -14,7 +16,7 @@ class ProductsList {
     List<ProductDetails> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.products;
+      var apiurl = await Configrations.ipAddress() + Configrations.products;
       var stringParams = {"branch_id": branchID, "category_id": catid};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -50,7 +52,8 @@ class ProductsList {
     List<ProductDetails> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.search_product;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.search_product;
       var stringParams = {"search_text": searchText};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -81,7 +84,8 @@ class ProductsList {
     var isjoin = await CommunFun.checkIsJoinServer();
     List<Attribute_Data> list = [];
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.product_attributes;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.product_attributes;
       var stringParams = {"product_id": productid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -117,7 +121,8 @@ class ProductsList {
     var isjoin = await CommunFun.checkIsJoinServer();
     List<ModifireData> list = [];
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.product_Modifeirs;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.product_Modifeirs;
       var stringParams = {"product_id": productid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -140,6 +145,68 @@ class ProductsList {
           : [];
       await SyncAPICalls.logActivity(
           "Product", "Getting Product modifire", "modifier", productid);
+    }
+    return list;
+  }
+
+  Future<List<SetMeal>> getMealsData(branchid) async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    List<SetMeal> list = [];
+    if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.set_meals;
+      var stringParams = {"branch_id": branchid};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => SetMeal.fromJson(c)).toList()
+            : [];
+      }
+    } else {
+      var qry = "select setmeal.* , replace(asset.base64,'data:image/jpg;base64,','') as base64  from setmeal " +
+          " LEFT join setmeal_branch on setmeal_branch_id =" +
+          branchid +
+          " AND setmeal_branch.setmeal_id = setmeal.setmeal_id " +
+          " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
+          " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id  GROUP by setmeal.setmeal_id ";
+      var mealList = await db.rawQuery(qry);
+      list = mealList.isNotEmpty
+          ? mealList.map((c) => SetMeal.fromJson(c)).toList()
+          : [];
+      await SyncAPICalls.logActivity(
+          "Meals List", "get Meals List", "setmeal", branchid);
+    }
+    return list;
+  }
+
+  Future<List<SetMealProduct>> getMealsProductData(setmealid) async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    List<SetMealProduct> list = [];
+    if (isjoin == true) {
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.set_meals_products;
+      var stringParams = {"setmeal_id": setmealid};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => SetMealProduct.fromJson(c)).toList()
+            : [];
+      }
+    } else {
+      var qry = "SELECT setmeal_product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name  FROM setmeal_product " +
+          " LEFT JOIN product ON product.product_id = setmeal_product.product_id " +
+          " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id " +
+          " WHERE setmeal_product.setmeal_id = " +
+          setmealid.toString() +
+          " GROUP by setmeal_product.setmeal_product_id";
+
+      var mealList = await db.rawQuery(qry);
+      list = mealList.isNotEmpty
+          ? mealList.map((c) => SetMealProduct.fromJson(c)).toList()
+          : [];
+      await SyncAPICalls.logActivity(
+          "Meals product List", "get Meals product List", "setmeal", setmealid);
     }
     return list;
   }

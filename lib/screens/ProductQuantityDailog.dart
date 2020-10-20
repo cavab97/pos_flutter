@@ -21,7 +21,6 @@ import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
 import 'package:mcncashier/models/Table_order.dart';
-import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -123,7 +122,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   getMealProducts() async {
     List<SetMealProduct> mealProductList =
-        await localAPI.getMealsProductData(setmeal.setmealId);
+        await prodList.getMealsProductData(setmeal.setmealId);
     if (mealProductList.length > 0) {
       setState(() {
         mealProducts = mealProductList;
@@ -518,8 +517,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       orderData.isTableOrder = tableData != null ? 1 : 0;
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
       orderData.cartId = cartid;
-      var saveOid = await cartlist.addSaveOrder(
-          context, orderData, tableData["table_id"]);
+      var saveOid =
+          await cartlist.addSaveOrder(orderData, tableData["table_id"]);
       tableorder = Table_order.fromJson(tableData);
       tableorder.save_order_id = saveOid;
       var tableid = await tableList.insertTableOrder(context, tableorder);
@@ -635,8 +634,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       subCartData.attrPrice = int.parse(attr["attr_price"]).toDouble();
       cartModiData.add(subCartData);
     }
-    var res = await cartlist.addsubCartData(cartModiData);
-    print(res);
+    if (cartModiData.length > 0) {
+      var res = await cartlist.addsubCartData(context, cartModiData);
+      print(res);
+    }
+
     if (isEditing && cartitem.isSendKichen == 1) {
       var items = [];
       items.add(cartitem);

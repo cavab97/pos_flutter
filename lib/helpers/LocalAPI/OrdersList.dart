@@ -26,7 +26,7 @@ class OrdersList {
     List<Orders> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.get_order;
+      var apiurl = await Configrations.ipAddress() + Configrations.get_order;
       var stringParams = {"order_id": orderid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -48,7 +48,7 @@ class OrdersList {
     var isjoin = await CommunFun.checkIsJoinServer();
     LastAppids result = new LastAppids();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.getLastids;
+      var apiurl = await Configrations.ipAddress() + Configrations.getLastids;
       var stringParams = {"terminal_id": terminalid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -86,7 +86,7 @@ class OrdersList {
       cartID) async {
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.place_order;
+      var apiurl = await Configrations.ipAddress() + Configrations.place_order;
       var stringParams = {
         "order": orderData,
         "order_details": jsonEncode(orderDetails),
@@ -282,7 +282,7 @@ class OrdersList {
     List<OrderDetail> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.order_details;
+      var apiurl = await Configrations.ipAddress() + Configrations.order_details;
       var stringParams = {"order_id": orderid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -307,7 +307,7 @@ class OrdersList {
     var isjoin = await CommunFun.checkIsJoinServer();
     OrderPayment list;
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.order_details;
+      var apiurl = await Configrations.ipAddress() + Configrations.order_details;
       var stringParams = {"order_id": orderid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -332,7 +332,7 @@ class OrdersList {
     List<Orders> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.orders_list;
+      var apiurl = await Configrations.ipAddress() + Configrations.orders_list;
       var stringParams = {"branch_id": branchid, "terminal_id": terminalid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {

@@ -9,6 +9,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/helpers/LocalAPI/Branch.dart';
 import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
 import 'package:mcncashier/helpers/LocalAPI/CategoriesList.dart';
 import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
@@ -76,7 +77,7 @@ class _DashboradPageState extends State<DashboradPage>
   OrdersList orderApi = new OrdersList();
   TablesList tableListAPI = new TablesList();
   PaymentList paymentAPI = new PaymentList();
-
+  BranchList branchAPI = new BranchList();
   ProductsList prodList = new ProductsList();
   PrintReceipt printKOT = PrintReceipt();
   List<Category> allCaterories = new List<Category>();
@@ -142,17 +143,18 @@ class _DashboradPageState extends State<DashboradPage>
     var isInit = await CommunFun.checkDatabaseExit();
     if (isInit == true) {
       await getCategoryList();
+      await checkidTableSelected();
       await getAllPrinter();
     } else {
       await databaseHelper.initializeDatabase();
       await getCategoryList();
+      await checkidTableSelected();
     }
     var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
     setState(() {
       currency = curre;
     });
     await checkshift();
-    await checkidTableSelected();
     await getUserData();
     await setPermissons();
     await getTaxs();
@@ -190,27 +192,29 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   checkidTableSelected() async {
-    var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
-    var branchid = await CommunFun.getbranchId();
-    Branch branchAddress = await localAPI.getBranchData(branchid);
-    if (tableid != null) {
-      var tableddata = json.decode(tableid);
-      Table_order table = Table_order.fromJson(tableddata);
-      List<TablesDetails> tabledata =
-          await tableListAPI.getTableDetails(branchid, table.table_id);
-      table.save_order_id = tabledata[0].saveorderid;
-      setState(() {
-        branchData = branchAddress;
-        isTableSelected = true;
-        selectedTable = table;
-        tableName = tabledata[0].tableName;
-      });
-      if (selectedTable.save_order_id != null &&
-          selectedTable.save_order_id != 0) {
-        getCurrentCart();
+    try {
+      var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+      var branchid = await CommunFun.getbranchId();
+      if (tableid != null) {
+        var tableddata = json.decode(tableid);
+        Table_order table = Table_order.fromJson(tableddata);
+        List<TablesDetails> tabledata =
+            await tableListAPI.getTableDetails(branchid, table.table_id);
+        table.save_order_id = tabledata[0].saveorderid;
+        setState(() {
+          isTableSelected = true;
+          selectedTable = table;
+          tableName = tabledata[0].tableName;
+        });
+        if (selectedTable.save_order_id != null &&
+            selectedTable.save_order_id != 0) {
+          getCurrentCart();
+        }
+      } else {
+        clearCart();
       }
-    } else {
-      clearCart();
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -353,7 +357,7 @@ class _DashboradPageState extends State<DashboradPage>
     await refreshAfterAction();
   }
 
-  void selectOption(choice) {
+  void selectOption(choice) async {
     // Causes the app to rebuild with the new _selectedChoice.
 
     switch (choice) {
@@ -394,6 +398,8 @@ class _DashboradPageState extends State<DashboradPage>
       case 4:
         if (cartList.length > 0) {
           if (printerreceiptList.length > 0) {
+            var branchid = await CommunFun.getbranchId();
+            Branch branchAddress = await branchapi.getbranchData(branchid);
             printKOT.checkDraftPrint(
                 printerreceiptList[0].printerIp.toString(),
                 context,
@@ -402,7 +408,7 @@ class _DashboradPageState extends State<DashboradPage>
                 subtotal,
                 grandTotal,
                 tax,
-                branchData,
+                branchAddress,
                 customer != null ? customer.name : "Walk-in customer");
           } else {
             CommunFun.showToast(context, Strings.printer_not_available);
@@ -438,7 +444,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   getMeals() async {
     var branchid = await CommunFun.getbranchId();
-    List<SetMeal> setmeals = await localAPI.getMealsData(branchid);
+    List<SetMeal> setmeals = await prodList.getMealsData(branchid);
     setState(() {
       mealsList = setmeals;
       productList = [];
@@ -1005,7 +1011,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   printReceipt(int orderid) async {
     var branchID = await CommunFun.getbranchId();
-    Branch branchAddress = await localAPI.getBranchData(branchID);
+    Branch branchAddress = await branchapi.getbranchData(branchID);
     OrderPayment orderpaymentdata = await orderApi.getOrderpaymentData(orderid);
     Payments paument_method =
         await CommunFun.getOrderPaymentMethod(orderpaymentdata.op_method_id);
@@ -1016,7 +1022,7 @@ class _DashboradPageState extends State<DashboradPage>
     printKOT.checkReceiptPrint(
         printerreceiptList[0].printerIp,
         context,
-        branchData,
+        branchAddress,
         orderitem,
         order,
         paument_method,
@@ -1056,7 +1062,6 @@ class _DashboradPageState extends State<DashboradPage>
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
-        //List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
         var taxval = taxlistitem.rate != null
             ? subT * double.parse(taxlistitem.rate) / 100
             : 0.0;
@@ -2214,7 +2219,7 @@ class _DashboradPageState extends State<DashboradPage>
       shrinkWrap: true,
       itemExtent: 50.0,
       physics: NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.only(bottom: 50),
+      padding: EdgeInsets.only(bottom: 150),
       children: ListTile.divideTiles(
         context: context,
         tiles: cartList.map((cart) {

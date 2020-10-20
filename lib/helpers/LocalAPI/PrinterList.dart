@@ -6,6 +6,7 @@ import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/helpers/ComunAPIcall.dart';
+
 class PrinterList {
   var db = DatabaseHelper.dbHelper.getDatabse();
 
@@ -17,7 +18,7 @@ class PrinterList {
     List<Printer> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = "http://192.168.0.113:8080/" + Configrations.printers;
+      var apiurl = await Configrations.ipAddress() + Configrations.printers;
       var stringParams = {"printer_is_cashier": printer_is_cashier};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -50,7 +51,8 @@ class PrinterList {
     List<Printer> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = "http://192.168.0.113:8080/" + Configrations.printersForCart;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.printersForCart;
       var stringParams = {"product_id": productID};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {

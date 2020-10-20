@@ -20,7 +20,7 @@ class PaymenntReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
@@ -42,7 +42,7 @@ class PaymenntReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }

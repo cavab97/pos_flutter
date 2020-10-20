@@ -29,7 +29,7 @@ class CartReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
@@ -39,8 +39,9 @@ class CartReq {
     try {
       String content = await utf8.decoder.bind(request).join();
       var data = await jsonDecode(content);
-      SaveOrder order = SaveOrder.fromJson(jsonDecode(data["save_order"]));
-      var res = await cartlist.addSaveOrder(null, order, data["table_id"]);
+      var orderdata = data["save_order"];
+      SaveOrder order = SaveOrder.fromJson(orderdata);
+      var res = await cartlist.addSaveOrder(order, data["table_id"]);
       request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =
@@ -56,7 +57,7 @@ class CartReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
@@ -83,7 +84,7 @@ class CartReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
@@ -93,8 +94,8 @@ class CartReq {
     try {
       String content = await utf8.decoder.bind(request).join();
       var data = await jsonDecode(content);
-      List<MSTSubCartdetails> details = jsonDecode(data["cart_details"]);
-      var res = await cartlist.addsubCartData(details);
+      List<MSTSubCartdetails> details = data["cart_details"];
+      var res = await cartlist.addsubCartData(null, details);
       request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =
@@ -109,7 +110,7 @@ class CartReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
@@ -131,7 +132,7 @@ class CartReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
@@ -153,7 +154,7 @@ class CartReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
@@ -175,7 +176,7 @@ class CartReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
@@ -203,7 +204,7 @@ class CartReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
@@ -252,7 +253,7 @@ class CartReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
@@ -275,7 +276,7 @@ class CartReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
@@ -298,9 +299,8 @@ class CartReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
- 
 }

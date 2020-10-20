@@ -166,11 +166,11 @@ class PrintReceipt {
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
         PosColumn(
-            text: name["old_price"].toStringAsFixed(2),
+            text: item.product_old_price.toStringAsFixed(2),
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
         PosColumn(
-            text: name["price"].toStringAsFixed(2),
+            text: item.product_price.toStringAsFixed(2),
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
       ]);
@@ -219,7 +219,7 @@ class PrintReceipt {
     ]);
 
     ticket.setStyles(PosStyles(align: PosAlign.center));
-   /* ticket.emptyLines(1);
+    /* ticket.emptyLines(1);
     ticket.qrcode('www.example.com',
         size: QRSize.Size5, align: PosAlign.center);
     ticket.emptyLines(1);*/
@@ -379,7 +379,7 @@ class PrintReceipt {
     ]);
 
     ticket.setStyles(PosStyles(align: PosAlign.center));
-   /* ticket.emptyLines(1);
+    /* ticket.emptyLines(1);
     ticket.qrcode('www.example.com',
         size: QRSize.Size5, align: PosAlign.center);*/
     ticket.emptyLines(1);

@@ -262,7 +262,7 @@ class CommunFun {
       databaseHelper.insertData1(data1["data"]);
       CommunFun.setServerTime(null, "1");
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
 
     var data2_1 =
@@ -271,7 +271,7 @@ class CommunFun {
       databaseHelper.insertData2_1(data2_1["data"]);
       CommunFun.setServerTime(null, "1");
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
 
     var data2_2 =
@@ -280,7 +280,7 @@ class CommunFun {
       databaseHelper.insertData2_2(data2_2["data"]);
       CommunFun.setServerTime(null, "1");
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
     var data2_3 =
         await SyncAPICalls.getDataServerBulk2_3(context); //api call 2_3
@@ -288,7 +288,7 @@ class CommunFun {
       databaseHelper.insertData2_3(data2_3["data"]);
       CommunFun.setServerTime(null, "2");
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
 
     var data3 = await SyncAPICalls.getDataServerBulk3(context); // call 3
@@ -296,14 +296,14 @@ class CommunFun {
       databaseHelper.insertData3(data3["data"]);
       CommunFun.setServerTime(null, "3");
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
     var data4_1 = await SyncAPICalls.getDataServerBulk4_1(context);
     if (data4_1 != null) {
       databaseHelper.insertData4_1(data4_1["data"]);
       CommunFun.setServerTime(null, "3");
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
     var data4_2 = await SyncAPICalls.getDataServerBulk4_2(context);
     if (data4_2 != null) {
@@ -315,7 +315,7 @@ class CommunFun {
         print("Error when getting data4_3");
       }
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
     getAssetsData(context);
   }

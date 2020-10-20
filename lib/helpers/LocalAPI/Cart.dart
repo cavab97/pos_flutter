@@ -17,11 +17,13 @@ class Cartlist {
     var cartid;
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.add_cart;
-      var stringParams = {"cart_data": jsonEncode(cartData)};
+      var apiurl = await Configrations.ipAddress() + Configrations.add_cart;
+      var stringParams = {"cart_data": cartData};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
         cartid = result["cart_id"];
+      } else {
+        CommunFun.showToast(context, result["message"]);
       }
     } else {
       if (cartData.id == null) {
@@ -39,15 +41,13 @@ class Cartlist {
     return cartid;
   }
 
-  Future<int> addSaveOrder(context, SaveOrder saveorder, tableid) async {
+  Future<int> addSaveOrder(SaveOrder saveorder, tableid) async {
     var saveOrderid;
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.add_saveOrder;
-      var stringParams = {
-        "save_order": jsonEncode(saveorder),
-        "table_id": tableid
-      };
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.add_saveOrder;
+      var stringParams = {"save_order": saveorder, "table_id": tableid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
         saveOrderid = result["save_order_id"];
@@ -74,7 +74,7 @@ class Cartlist {
     var isjoin = await CommunFun.checkIsJoinServer();
     List<SaveOrder> list = [];
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.get_Cart_id;
+      var apiurl = await Configrations.ipAddress() + Configrations.get_Cart_id;
       var stringParams = {"save_order_id": saveorderid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -99,8 +99,8 @@ class Cartlist {
 
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.cart_Details;
-      var stringParams = {"cart_details": jsonEncode(cartdetails)};
+      var apiurl = await Configrations.ipAddress() + Configrations.cart_Details;
+      var stringParams = {"cart_details": cartdetails};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
         cartdetailid = result["detail_id"];
@@ -119,15 +119,19 @@ class Cartlist {
     return cartdetailid;
   }
 
-  Future<int> addsubCartData(List<MSTSubCartdetails> data) async {
+  Future<int> addsubCartData(context, List<MSTSubCartdetails> data) async {
     var result;
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.cart_Sub_Details;
-      var stringParams = {"cart_sub_details": jsonEncode(data)};
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.cart_Sub_Details;
+      var stringParams = {"cart_sub_details": data};
+      print(data);
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
         result = result;
+      } else {
+        CommunFun.showToast(context, result["message"]);
       }
     } else {
       for (var i = 0; i < data.length; i++) {
@@ -143,8 +147,8 @@ class Cartlist {
     var isjoin = await CommunFun.checkIsJoinServer();
     List<MSTCartdetails> list = [];
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.cart_items;
-      var stringParams = {"cart_id": jsonEncode(cartId)};
+      var apiurl = await Configrations.ipAddress() + Configrations.cart_items;
+      var stringParams = {"cart_id": cartId};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
         result = result;
@@ -166,7 +170,7 @@ class Cartlist {
     List<MST_Cart> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.cart_data;
+      var apiurl = await Configrations.ipAddress() + Configrations.cart_data;
       var stringParams = {"cart_id": cartID};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -191,7 +195,8 @@ class Cartlist {
     List<MSTCartdetails> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.delete_cart_item;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.delete_cart_item;
       var stringParams = {
         "cart_item": cartItem,
         "cart_id": cartID,
@@ -240,7 +245,8 @@ class Cartlist {
   Future clearCartItem(cartid, tableID) async {
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.delete_cart_item;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.delete_cart_item;
       var stringParams = {
         "cart_id": cartid,
         "table_id": tableID,
@@ -272,7 +278,8 @@ class Cartlist {
     var isjoin = await CommunFun.checkIsJoinServer();
     List<MSTSubCartdetails> list = [];
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.product_modifire;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.product_modifire;
       var stringParams = {
         "cart_details_id": id,
       };
@@ -295,7 +302,7 @@ class Cartlist {
   Future updateCartdetails(MST_Cart details) async {
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.update_cart;
+      var apiurl = await Configrations.ipAddress() + Configrations.update_cart;
       var stringParams = {
         "cart_details": details,
       };
@@ -311,9 +318,10 @@ class Cartlist {
   Future<int> updateCartList(List<MSTCartdetails> details) async {
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.update_cart_items;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.update_cart_items;
       var stringParams = {
-        "cart_list": jsonEncode(details),
+        "cart_list": details,
       };
       await APICall.localapiCall(null, apiurl, stringParams);
     } else {
@@ -329,7 +337,8 @@ class Cartlist {
   Future<dynamic> sendToKitched(ids) async {
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.update_cart_items;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.update_cart_items;
       var stringParams = {
         "ids": ids,
       };

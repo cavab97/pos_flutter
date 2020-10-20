@@ -23,7 +23,7 @@ class CustomerReq {
     } catch (e) {
       request.response
         ..statusCode = HttpStatus.internalServerError
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))..close();
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))..close();
     }
   }
 
@@ -50,7 +50,7 @@ class CustomerReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))..close();
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))..close();
     }
   }
 }

@@ -28,7 +28,7 @@ class CheckInOutReq {
     } catch (e) {
       request.response
         ..statusCode = HttpStatus.internalServerError
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }

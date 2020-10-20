@@ -23,7 +23,7 @@ class CategoriesReq {
       request.response
         ..statusCode = HttpStatus.internalServerError
         ..write(
-            jsonEncode({"status": 500, "message": "Something want wrong"}))
+            jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }

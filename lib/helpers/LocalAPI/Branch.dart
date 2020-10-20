@@ -12,7 +12,8 @@ class BranchList {
     Branch list = new Branch();
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.branch_detail;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.branch_detail;
       var stringParams = {"branch_id": branchID};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -35,19 +36,19 @@ class BranchList {
     var isjoin = await CommunFun.checkIsJoinServer();
     List<BranchTax> list = [];
     if (isjoin == true) {
-      var apiurl = Configrations.ipAddress + Configrations.branch_detail;
+      var apiurl = await Configrations.ipAddress() + Configrations.branch_tax;
       var stringParams = {"branch_id": branchid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        dynamic list1 = result["data"];
-        list = list1.isNotEmpty
+        List<dynamic> list1 = result["data"];
+        list = list1.length > 0
             ? list1.map((c) => BranchTax.fromJson(c)).toList()
             : [];
       }
     } else {
       var tax = await db.rawQuery(
           "SELECT branch_tax.*,tax.code From branch_tax " +
-              " Left join   tax on tax.tax_id = branch_tax.tax_id " +
+              " Left join  tax on tax.tax_id = branch_tax.tax_id " +
               " WHERE branch_id =" +
               branchid.toString());
       list =

@@ -1,11 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
-import 'package:mcncashier/models/MST_Cart.dart';
-import 'package:mcncashier/models/MST_Cart_Details.dart';
-import 'package:mcncashier/models/Printer.dart';
-import 'package:mcncashier/models/mst_sub_cart_details.dart';
-import 'package:mcncashier/models/saveOrder.dart';
 
 class PrinterReq {
   static getAllPrinters(request) async {
@@ -43,7 +38,6 @@ class PrinterReq {
       var data = await jsonDecode(content);
       var res =
           await printerList.getPrinterForAddCartProduct(null, data["product_id"]);
-
       request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =

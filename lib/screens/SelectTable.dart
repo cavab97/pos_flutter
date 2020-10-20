@@ -118,8 +118,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
       table_order.table_id = selectedTable.tableId;
       table_order.number_of_pax = int.parse(paxController.text);
       table_order.save_order_id = selectedTable.saveorderid;
-      var result = await tabList.insertTableOrder(context, table_order);
-
+      await tabList.insertTableOrder(context, table_order);
       await Preferences.setStringToSF(
           Constant.TABLE_DATA, json.encode(table_order));
       Navigator.of(context).pop();
@@ -139,8 +138,8 @@ class _SelectTablePageState extends State<SelectTablePage> {
       Table_order tableorder = new Table_order();
       tableorder.table_id = selectedTable.tableId;
       tableorder.number_of_pax = int.parse(paxController.text);
-      var saveorderid = await cartlist.addSaveOrder(
-          context, orderData, selectedTable.tableId);
+      var saveorderid =
+          await cartlist.addSaveOrder(orderData, selectedTable.tableId);
       tableorder.save_order_id = saveorderid;
       var tab = await tabList.insertTableOrder(context, tableorder);
       Navigator.of(context).pop();
