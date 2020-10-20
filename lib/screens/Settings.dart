@@ -12,6 +12,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/APIcalls/CategoriesReq.dart';
 import 'package:mcncashier/helpers/CustomeIcons.dart';
 import 'package:mcncashier/helpers/LocalAPI/CategoriesList.dart';
+import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
 import 'package:mcncashier/helpers/Server.dart';
 import 'package:mcncashier/helpers/config.dart';
 import 'package:mcncashier/models/Category.dart';
@@ -33,6 +34,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   LocalAPI localAPI = LocalAPI();
+  PrinterList printerAPI = new PrinterList();
   PrintReceipt testPrint = PrintReceipt();
   List<Printer> printerList = new List<Printer>();
   bool isPrinterSettings = false;
@@ -43,6 +45,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool isLocalServer = false;
   var scanResult;
   bool isJoinLoaclServer = false;
+
   @override
   void initState() {
     super.initState();
@@ -82,7 +85,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   /*Get all Printer from DB*/
   getAllPrinter() async {
-    List<Printer> printer = await localAPI.getAllPrinter();
+    List<Printer> printer = await printerAPI.getAllPrinterList(context, "0");
     setState(() {
       printerList = printer;
     });
@@ -102,7 +105,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 Printer table_printe = new Printer();
                 table_printe.printerIp = ip;
                 table_printe.printerIsCashier = selected;
-                var result = await localAPI.insertTablePrinter(table_printe);
+                //var result = await localAPI.insertTablePrinter(table_printe);
               });
         });
   }

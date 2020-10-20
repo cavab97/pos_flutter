@@ -7,6 +7,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
+import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
 import 'package:mcncashier/helpers/LocalAPI/ProductList.dart';
 import 'package:mcncashier/helpers/LocalAPI/TablesList.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
@@ -49,6 +50,7 @@ class ProductQuantityDailog extends StatefulWidget {
 class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   TextEditingController productController = new TextEditingController();
   LocalAPI localAPI = LocalAPI();
+  PrinterList printerAPI = new PrinterList();
   ProductsList prodList = new ProductsList();
   Cartlist cartlistApi = new Cartlist();
   List<Attribute_Data> attributeList = [];
@@ -72,6 +74,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   bool isSetMeal = false;
   var productnetprice = 0.00;
   var currency;
+
   @override
   void initState() {
     super.initState();
@@ -130,11 +133,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   getPrinter() async {
-    List<Printer> printerlist = await localAPI.getPrinter(
+    List<Printer> printerList = await printerAPI.getPrinterForAddCartProduct(
+        context,
         !isSetMeal ? productItem.productId.toString() : setmeal.setmealId);
-    if (printerlist.length > 0) {
+    if (printerList.length > 0) {
       setState(() {
-        printer = printerlist[0];
+        printer = printerList[0];
       });
     }
   }

@@ -30,7 +30,7 @@ class OrdersReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
@@ -52,7 +52,7 @@ class OrdersReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something want wrong"}))
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
         ..close();
     }
   }
@@ -62,6 +62,9 @@ class OrdersReq {
     try {
       String content = await utf8.decoder.bind(request).join();
       var data = await jsonDecode(content);
+      Orders orderdata = Orders.fromJson(data["order"]); 
+      
+      var res = "";//await order.placeOrder(orderdata);
       Orders orderdata = data["order"];
       List<OrderDetail> orderDetails = data["order_details"];
       List<OrderModifire> orderModifire = data["order_modifire"];
@@ -91,6 +94,7 @@ class OrdersReq {
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
         ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+      
         ..close();
     }
   }

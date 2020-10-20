@@ -8,6 +8,7 @@ import 'package:mcncashier/helpers/APIcalls/CheckinOutReq.dart';
 import 'package:mcncashier/helpers/APIcalls/CustomerReq.dart';
 import 'package:mcncashier/helpers/APIcalls/OrdersReq.dart';
 import 'package:mcncashier/helpers/APIcalls/PaymentReq.dart';
+import 'package:mcncashier/helpers/APIcalls/PrinterReq.dart';
 import 'package:mcncashier/helpers/APIcalls/ProductsReq.dart';
 import 'package:mcncashier/helpers/APIcalls/ShiftReq.dart';
 import 'package:mcncashier/helpers/APIcalls/TablesReq.dart';
@@ -120,12 +121,14 @@ class Server {
       case "/getLastOrderids":
         OrdersReq.getLastOrderIds(request);
         break;
-      case "/delete_cart_item":
+ case "/delete_cart_item":
         CartReq.deletecartItem(request);
         break;
       case "/clear_cart":
         CartReq.cleatCart(request);
         break;
+     
+     
       case "/product_modifire":
         CartReq.cleatCart(request);
         break;
@@ -156,6 +159,43 @@ class Server {
       case "/tax_list":
         BranchReq.branchdata(request);
         break;
+      case "/getPrinter":
+        PrinterReq.getAllPrinters(request);
+        break;
+      case "/getPrinterForCart":
+        PrinterReq.getCartQTYPrinters(request);
+        break;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
       default:
     }
   }

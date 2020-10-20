@@ -481,8 +481,7 @@ class LocalAPI {
   //   var db = DatabaseHelper.dbHelper.getDatabse();
   //   var orderid = await db.insert("orders", orderData.toJson());
   //   await SyncAPICalls.logActivity("orders", "place order", "orders", orderid);
-  //   return orderData.app_id;
-  // }
+  //   return orderData.app_id;  // }
 
   // Future<int> sendOrderDetails(OrderDetail orderDetailData) async {
   //   var db = DatabaseHelper.dbHelper.getDatabse();
@@ -1040,7 +1039,7 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<Printer>> getPrinter(productID) async {
+  /*Future<List<Printer>> getPrinter(productID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry =
         "SELECT * from printer where printer.printer_id = (Select printer_id from product_branch WHERE product_branch.product_id = $productID)";
@@ -1080,7 +1079,7 @@ class LocalAPI {
         ? result.map((c) => Printer.fromJson(c)).toList()
         : [];
     return list;
-  }
+  }*/
 
   Future updateWebCart(MST_Cart cart) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
@@ -1431,7 +1430,7 @@ class LocalAPI {
     return list;
   }
 
-  Future<int> insertTablePrinter(Printer table_printer) async {
+  /*Future<int> insertTablePrinter(Printer table_printer) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from printer where printer_ip = 1"; //+
     // table_printer.printerIp.toString();
@@ -1465,7 +1464,7 @@ class LocalAPI {
     await SyncAPICalls.logActivity("Printer",
         list.length > 0 ? "Print KOT" : "Print KOT", "printerId", "1");
     return list;
-  }
+  }*/
 
   Future<List<MSTSubCartdetails>> itemmodifireList(cartID) async {
     var qry = "SELECT  mst_cart_sub_detail.*  from mst_cart_sub_detail" +

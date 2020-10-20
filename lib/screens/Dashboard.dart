@@ -13,6 +13,7 @@ import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
 import 'package:mcncashier/helpers/LocalAPI/CategoriesList.dart';
 import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
 import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
+import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
 import 'package:mcncashier/helpers/LocalAPI/ProductList.dart';
 import 'package:mcncashier/helpers/LocalAPI/ShiftList.dart';
 import 'package:mcncashier/helpers/LocalAPI/TablesList.dart';
@@ -70,6 +71,7 @@ class _DashboradPageState extends State<DashboradPage>
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
   Cartlist cartlistAPI = new Cartlist();
+  PrinterList printerAPI = new PrinterList();
   OrdersList orderApi = new OrdersList();
   TablesList tableListAPI = new TablesList();
   PaymentList paymentAPI = new PaymentList();
@@ -443,8 +445,8 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getAllPrinter() async {
-    List<Printer> printer = await localAPI.getAllPrinterForKOT();
-    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    List<Printer> printer = await printerAPI.getAllPrinterList(context,"0");
+    List<Printer> printerDraft = await  printerAPI.getAllPrinterList(context,"1");
     setState(() {
       printerList = printer;
       printerreceiptList = printerDraft;

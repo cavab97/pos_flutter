@@ -166,11 +166,11 @@ class PrintReceipt {
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
         PosColumn(
-            text: item.product_old_price.toString(),
+            text: name["old_price"].toStringAsFixed(2),
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
         PosColumn(
-            text: item.product_price.toString(),
+            text: name["price"].toStringAsFixed(2),
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
       ]);
@@ -219,10 +219,10 @@ class PrintReceipt {
     ]);
 
     ticket.setStyles(PosStyles(align: PosAlign.center));
-    ticket.emptyLines(1);
+   /* ticket.emptyLines(1);
     ticket.qrcode('www.example.com',
         size: QRSize.Size5, align: PosAlign.center);
-    ticket.emptyLines(1);
+    ticket.emptyLines(1);*/
 
     ticket.text('Thank you!',
         styles: PosStyles(bold: true, align: PosAlign.center));
@@ -231,6 +231,8 @@ class PrintReceipt {
 
     ticket.feed(1);
     ticket.cut();
+    ticket.drawer();
+
     return ticket;
   }
 
@@ -333,11 +335,11 @@ class PrintReceipt {
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
         PosColumn(
-            text: cartList[i].productPrice.toString(),
+            text: cartList[i].productPrice.toStringAsFixed(2),
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
         PosColumn(
-            text: total.toString(),
+            text: total.toStringAsFixed(2),
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
       ]);
@@ -350,7 +352,7 @@ class PrintReceipt {
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
-          text: subTotal.toString(),
+          text: subTotal.toStringAsFixed(2),
           width: 4,
           styles: PosStyles(align: PosAlign.right)),
     ]);
@@ -360,7 +362,7 @@ class PrintReceipt {
       PosColumn(
           text: "TAX(MYR)", width: 8, styles: PosStyles(align: PosAlign.right)),
       PosColumn(
-          text: tax.toString(),
+          text: tax.toStringAsFixed(2),
           width: 4,
           styles: PosStyles(align: PosAlign.right)),
     ]);
@@ -371,15 +373,15 @@ class PrintReceipt {
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(
-          text: grandTotal.toString(),
+          text: grandTotal.toStringAsFixed(2),
           width: 4,
           styles: PosStyles(align: PosAlign.right)),
     ]);
 
     ticket.setStyles(PosStyles(align: PosAlign.center));
-    ticket.emptyLines(1);
+   /* ticket.emptyLines(1);
     ticket.qrcode('www.example.com',
-        size: QRSize.Size5, align: PosAlign.center);
+        size: QRSize.Size5, align: PosAlign.center);*/
     ticket.emptyLines(1);
 
     ticket.text('Thank you!',

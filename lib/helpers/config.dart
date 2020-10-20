@@ -20,6 +20,8 @@ class Configrations {
 
   static String products = "Products";
   static String categories = "Categories";
+  static String printers = "printer";
+  static String printersForCart = "printer_cart";
   static String search_product = "Search_product";
   static String customers = "Customers";
   static String add_customer = "Add_Customer";
