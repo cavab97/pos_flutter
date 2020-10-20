@@ -13,6 +13,7 @@ import 'package:mcncashier/helpers/APIcalls/CategoriesReq.dart';
 import 'package:mcncashier/helpers/CustomeIcons.dart';
 import 'package:mcncashier/helpers/LocalAPI/CategoriesList.dart';
 import 'package:mcncashier/helpers/Server.dart';
+import 'package:mcncashier/helpers/config.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/screens/PrinteTypeDailog.dart';
@@ -126,9 +127,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   joinLocalServer(value) async {
     var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
-    if (isOpen != null && isOpen == "true") {
-      CommunFun.showToast(context, Strings.shift_close_msg);
-    } else {
+  //  if (isOpen != null && isOpen == "true") {
+    //  CommunFun.showToast(context, Strings.shift_close_msg);
+   // } else {
       setState(() {
         isJoinLoaclServer = value;
       });
@@ -137,7 +138,7 @@ class _SettingsPageState extends State<SettingsPage> {
       } else {
         remvoveLocalServer();
       }
-    }
+   // }
   }
 
   remvoveLocalServer() async {
@@ -201,9 +202,19 @@ class _SettingsPageState extends State<SettingsPage> {
     var branchid = await CommunFun.getbranchId();
     CategoriesList category = new CategoriesList();
     await Preferences.setStringToSF(Constant.IS_JOIN_SERVER, "true");
-    List<Category> categorys = await category.getCategories(context, branchid);
-    print(categorys);
-    await Preferences.setStringToSF(Constant.SERVER_IP, "192.168.0.113");
+    try {
+      List<Category> categorys =
+          await category.getCategories(context, branchid);
+      print(categorys);
+      if (categorys != null) {
+        await Preferences.setStringToSF(
+            Constant.SERVER_IP, Configrations.ipAddress);
+      }
+    } catch (e) {
+      print(e);
+      CommunFun.showToast(context, "server not found");
+      await Preferences.removeSinglePref(Constant.IS_JOIN_SERVER);
+    }
   }
 
   @override

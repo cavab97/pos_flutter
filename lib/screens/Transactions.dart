@@ -4,6 +4,7 @@ import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
@@ -34,6 +35,7 @@ class TransactionsPage extends StatefulWidget {
 
 class _TransactionsPageState extends State<TransactionsPage> {
   LocalAPI localAPI = LocalAPI();
+  OrdersList orderApi = new OrdersList();
   List<Orders> orderLists = [];
   List<Orders> filterList = [];
   Orders selectedOrder = new Orders();
@@ -71,7 +73,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   getTansactionList() async {
     var terminalid = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
-    List<Orders> orderList = await localAPI.getOrdersList(branchid, terminalid);
+    List<Orders> orderList = await orderApi.getOrdersList(branchid, terminalid);
     if (orderList.length > 0) {
       setState(() {
         orderLists = orderList;
@@ -88,24 +90,20 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
 
     List<OrderDetail> orderItem =
-        await localAPI.getOrderDetailsList(order.app_id);
-    List<ProductDetails> details = await localAPI.getOrderDetails(order.app_id);
-    if (details.length > 0) {
-      setState(() {
-        detailsList = details;
-        orderItemList = orderItem;
-      });
-    }
-    //  if (order.order_source == 2) {
+        await orderApi.getOrderDetailsList(order.app_id);
+    setState(() {
+      orderItemList = orderItem;
+    });
+
     OrderPayment orderpaymentdata =
-        await localAPI.getOrderpaymentData(order.app_id);
+        await orderApi.getOrderpaymentData(order.app_id);
     setState(() {
       orderpayment = orderpaymentdata;
     });
-    Payments paument_method =
-        await localAPI.getOrderpaymentmethod(orderpayment.op_method_id);
+    Payments paumentmethod =
+        await CommunFun.getOrderPaymentMethod(orderpayment.op_method_id);
     setState(() {
-      paumentMethod = paument_method;
+      paumentMethod = paumentmethod;
     });
     User user = await localAPI.getPaymentUser(orderpayment.op_by);
     if (user != null) {
@@ -334,11 +332,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
               TableRow(children: [
                 TableCell(
                   // Part 1 white
-                  child: Container(
-                    //    padding: EdgeInsets.only(top: 20, left: 20, right: 20),
-                    height: MediaQuery.of(context).size.height,
-                    color: Colors.white,
-                    child: SingleChildScrollView(
+                  child: SingleChildScrollView(
+                    physics: NeverScrollableScrollPhysics(),
+                    child: Container(
+                      //    padding: EdgeInsets.only(top: 20, left: 20, right: 20),
+                      height: MediaQuery.of(context).size.height,
+                      color: Colors.white,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -415,7 +414,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                       height: 10,
                                     ),
                                     Text(
-                                      orderpayment.op_amount.toString(),
+                                      orderpayment.op_amount != null
+                                          ? orderpayment.op_amount
+                                              .toStringAsFixed(2)
+                                          : "",
                                       style: TextStyle(
                                           fontSize:
                                               SizeConfig.safeBlockVertical * 4,
@@ -488,11 +490,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                                     top: 0,
                                                   ),
                                                   child: Text(
-                                                    selectedOrder.grand_total !=
+                                                    orderpayment.op_amount !=
                                                             null
-                                                        ? selectedOrder
-                                                            .grand_total
-                                                            .toString()
+                                                        ? orderpayment.op_amount
+                                                            .toStringAsFixed(2)
                                                         : "00:00",
                                                     style: Styles.darkGray(),
                                                   )),
@@ -859,6 +860,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         onPressed: _onPress,
         child: Text(
           Strings.cancel_tansaction,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
               color:
                   orderpayment.op_status == 1 ? Colors.white : Colors.white38,
@@ -981,13 +983,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Widget searchTransationList() {
     if (isFiltering) {
       return Container(
-        height: MediaQuery.of(context).size.height,
+        height: MediaQuery.of(context).size.height / 1.3,
         child: ListView(
           shrinkWrap: true,
-
-          // physics: AlwaysScrollableScrollPhysics(),
+          physics: AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: 5),
           children: filterList.map((item) {
             return Container(
+              padding: EdgeInsets.symmetric(horizontal: 5),
               decoration: new BoxDecoration(
                   color: selectedOrder.app_id == item.app_id
                       ? Colors.grey[200]
@@ -1042,13 +1045,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
       );
     } else {
       return Container(
-        // /height: MediaQuery.of(context).size.height,
+        height: MediaQuery.of(context).size.height / 1.3,
         child: ListView(
+          itemExtent: 65,
           padding: EdgeInsets.symmetric(horizontal: 5),
           shrinkWrap: true,
           physics: AlwaysScrollableScrollPhysics(),
           children: orderLists.map((item) {
             return Container(
+                height: 100.0,
+                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
                 decoration: new BoxDecoration(
                     color: selectedOrder.app_id == item.app_id
                         ? Colors.grey[200]
@@ -1093,7 +1099,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   subtitle: Text(Strings.invoice + item.invoice_no.toString(),
                       style: Styles.greysmall()),
                   isThreeLine: true,
-                  trailing: Text(item.grand_total.toString(),
+                  trailing: Text(item.grand_total.toStringAsFixed(2),
                       style: Styles.greysmall()),
                 ));
           }).toList(),

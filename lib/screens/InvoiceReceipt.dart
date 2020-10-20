@@ -5,6 +5,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
+import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Order.dart';
@@ -31,6 +32,7 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
   LocalAPI localAPI = LocalAPI();
   PrintReceipt printReceipt = PrintReceipt();
   OrdersList orderApi = new OrdersList();
+  PaymentList paymentAPI = new PaymentList();
   int orderid;
 
   /*For printer */
@@ -63,19 +65,17 @@ class _InvoiceReceiptDailogState extends State<InvoiceReceiptDailog> {
   getOederData() async {
     var branchID = await CommunFun.getbranchId();
     Branch branchAddress = await localAPI.getBranchData(branchID);
-    OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
+    OrderPayment orderpaymentdata = await orderApi.getOrderpaymentData(orderid);
     Payments paument_method =
-        await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
+        await CommunFun.getOrderPaymentMethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
-    List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
-    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
+    List<OrderDetail> orderitem = await orderApi.getOrderDetailsList(orderid);
     Orders order = await orderApi.getcurrentOrders(orderid);
     setState(() {
       branchData = branchAddress;
       paymentdata = orderpaymentdata;
       paymentMethod = paument_method;
       userdata = user;
-      orderdItem = itemsList;
       orderData = order;
       orderdetail = orderitem;
     });

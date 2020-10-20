@@ -7,7 +7,6 @@ Future<dynamic> syncTable(dynamic data) async {
   var reqdata = data;
   try {
     Uri url = Uri.parse(Configrations.base_URL + Configrations.synch_table);
-
     final client = new http.Client();
     Map<String, dynamic> params = {
       'serverdatetime': reqdata["serverdatetime"],

@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'package:mcncashier/helpers/LocalAPI/Branch.dart';
 import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
+import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
+import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -28,6 +32,8 @@ import 'package:wifi_ip/wifi_ip.dart';
 
 DatabaseHelper databaseHelper = DatabaseHelper();
 Cartlist cartapi = new Cartlist();
+BranchList branchapi = new BranchList();
+PaymentList paymentAPI = new PaymentList();
 
 class CommunFun {
   static loginText() {
@@ -311,7 +317,6 @@ class CommunFun {
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
-
     getAssetsData(context);
   }
 
@@ -339,10 +344,10 @@ class CommunFun {
           Navigator.pushNamed(context, Constant.DashboardScreen);
         }
       } else {
-        if (aceets["data"]["next_offset"] != 0) {
-          getAssetsData(context);
-        } else {
+        if (aceets["data"]["next_offset"] == 0) {
           await CommunFun.setServerTime(aceets, "4");
+        } else {
+          getAssetsData(context);
         }
       }
     } else {
@@ -617,7 +622,9 @@ class CommunFun {
           "remark": detailitem["remark"],
           "is_deleted": detailitem["is_deleted"],
           "is_send_kichen": detailitem["is_send_kichen"],
-          "cart_detail": detailitem["cart_detail"],
+          "cart_detail": detailitem["product_detail"],
+          "issetMeal": detailitem["issetMeal"],
+          "setmeal_product_detail": cart["setmeal_product_detail"],
           "has_composite_inventory": detailitem["has_composite_inventory"],
           "item_unit": detailitem["item_unit"],
           "created_by": detailitem["created_by"],
@@ -692,5 +699,34 @@ class CommunFun {
   static getcartDetails(cartid) async {
     List<MSTCartdetails> list = await cartapi.getCartItem(cartid);
     return list;
+  }
+
+  static getCartData(cartid) async {
+    List<MST_Cart> cartval = await cartapi.getCurrCartTotals(cartid);
+    MST_Cart cart = new MST_Cart();
+    if (cartval.length != 0) {
+      cart = cartval[0];
+      return cart;
+    } else {
+      return cart;
+    }
+  }
+
+  static getbranch() async {
+    var branchid = await CommunFun.getbranchId();
+    var branch = await branchapi.getbranchData(branchid);
+    return branch;
+  }
+
+  static getbranchTax() async {
+    var branchid = await CommunFun.getbranchId();
+    List<BranchTax> taxlists = await branchapi.getTaxList(branchid);
+    return taxlists;
+  }
+
+  static getOrderPaymentMethod(opmethodId) async {
+    Payments paument_method =
+        await paymentAPI.getOrderpaymentmethod(opmethodId);
+    return paument_method;
   }
 }

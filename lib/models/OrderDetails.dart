@@ -14,6 +14,8 @@ class OrderDetail {
   double detail_qty;
   int detail_status;
   String product_detail;
+  int issetMeal;
+  String setmeal_product_detail;
   int detail_by;
   int updated_by;
   String updated_at;
@@ -34,9 +36,11 @@ class OrderDetail {
     this.detail_amount,
     this.detail_qty,
     this.product_detail,
+    this.setmeal_product_detail,
     this.detail_status,
     this.detail_by,
     this.updated_by,
+    this.issetMeal,
     this.updated_at,
     this.detail_datetime,
   });
@@ -64,10 +68,12 @@ class OrderDetail {
         : json['detail_qty'];
     detail_status = json["detail_status"];
     detail_by = json["detail_by"];
+    issetMeal = json["issetMeal"];
     product_discount = json["product_discount"] is int
         ? (json['product_discount'] as int).toDouble()
         : json['product_discount'];
     product_detail = json["product_detail"];
+    setmeal_product_detail = json["setmeal_product_detail"];
     updated_by = json["updated_by"];
     updated_at = json["updated_at"];
     detail_datetime = json["detail_datetime"];
@@ -88,10 +94,12 @@ class OrderDetail {
     data["category_id"] = this.category_id;
     data["detail_amount"] = this.detail_amount;
     data["detail_qty"] = this.detail_qty;
+    data["issetMeal"] = this.issetMeal;
     data["detail_status"] = this.detail_status;
     data["detail_by"] = this.detail_by;
     data["product_discount"] = this.product_discount;
     data["product_detail"] = this.product_detail;
+    data["setmeal_product_detail"] = this.setmeal_product_detail;
     data["updated_by"] = this.updated_by;
     data["updated_at"] = this.updated_at;
     data["detail_datetime"] = this.detail_datetime;

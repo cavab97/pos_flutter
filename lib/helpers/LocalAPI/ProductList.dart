@@ -14,11 +14,14 @@ class ProductsList {
     List<ProductDetails> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = "http://192.168.0.113/" + Configrations.products;
+      var apiurl = Configrations.ipAddress + Configrations.products;
       var stringParams = {"branch_id": branchID, "category_id": catid};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        list = result["data"];
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => ProductDetails.fromJson(c)).toList()
+            : [];
       }
     } else {
       var query = "SELECT product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64, price_type.name as price_type_Name FROM `product` " +
@@ -47,11 +50,14 @@ class ProductsList {
     List<ProductDetails> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = "http://192.168.0.113:8080/" + Configrations.search_product;
+      var apiurl = Configrations.ipAddress + Configrations.search_product;
       var stringParams = {"search_text": searchText};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        list = result["data"];
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => ProductDetails.fromJson(c)).toList()
+            : [];
       }
     } else {
       var query = "SELECT product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64 , price_type.name as price_type_Name FROM `product` " +
@@ -75,12 +81,14 @@ class ProductsList {
     var isjoin = await CommunFun.checkIsJoinServer();
     List<Attribute_Data> list = [];
     if (isjoin == true) {
-      var apiurl =
-          "http://192.168.0.113:8080/" + Configrations.product_attributes;
+      var apiurl = Configrations.ipAddress + Configrations.product_attributes;
       var stringParams = {"product_id": productid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        list = result["data"];
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => Attribute_Data.fromJson(c)).toList()
+            : [];
       }
     } else {
       var qry = "SELECT product.product_id, category_attribute.name as attr_name,attributes.ca_id, " +
@@ -109,12 +117,14 @@ class ProductsList {
     var isjoin = await CommunFun.checkIsJoinServer();
     List<ModifireData> list = [];
     if (isjoin == true) {
-      var apiurl =
-          "http://192.168.0.113:8080/" + Configrations.product_Modifeirs;
+      var apiurl = Configrations.ipAddress + Configrations.product_Modifeirs;
       var stringParams = {"product_id": productid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        list = result["data"];
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => ModifireData.fromJson(c)).toList()
+            : [];
       }
     } else {
       var qry =

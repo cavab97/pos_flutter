@@ -274,7 +274,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
                           SizedBox(height: 30),
                           Text(
                             "Open Customer",
-                            style: Styles.blackBoldsmall(),
+                            style: Styles.blackMediumBold(),
                           ),
                         ]),
                   ),
@@ -311,6 +311,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
                     : Container(
                         margin: EdgeInsets.only(top: itemHeight / 2.1),
                         width: MediaQuery.of(context).size.width,
+                        padding: EdgeInsets.all(2),
                         decoration: BoxDecoration(
                             color: Colors.grey,
                             borderRadius: BorderRadius.only(
@@ -320,7 +321,9 @@ class _WebOrderPagesState extends State<WebOrderPages>
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Text("Grand Total : " + cart.grand_total.toStringAsFixed(2),
+                            Text(
+                                "Grand Total : " +
+                                    cart.grand_total.toStringAsFixed(2),
                                 style: Styles.whiteSimpleSmall())
                           ],
                         ),
