@@ -38,7 +38,6 @@ import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
-import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
@@ -144,7 +143,7 @@ class _DashboradPageState extends State<DashboradPage>
     if (isInit == true) {
       await getCategoryList();
       await checkidTableSelected();
-      await getAllPrinter();
+      //await getAllPrinter();
     } else {
       await databaseHelper.initializeDatabase();
       await getCategoryList();
@@ -157,7 +156,7 @@ class _DashboradPageState extends State<DashboradPage>
     await checkshift();
     await getUserData();
     await setPermissons();
-    await getTaxs();
+    //await getTaxs();
     _textController.addListener(() {
       getSearchList(_textController.text.toString());
     });
@@ -285,7 +284,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getCartItem(cartId) async {
-    List<MSTCartdetails> cartItem = await getcartDetails(cartId);
+    List<MSTCartdetails> cartItem = await  CommunFun.getcartDetails(cartId);
     if (cartItem.length > 0) {
       setState(() {
         cartList = cartItem;
@@ -438,6 +437,7 @@ class _DashboradPageState extends State<DashboradPage>
     if (tabsList[0].isSetmeal == 1) {
       getMeals();
     } else {
+      print("!!!!!!!!!!1");
       getProductList(tabsList[0].categoryId);
     }
   }
@@ -469,6 +469,7 @@ class _DashboradPageState extends State<DashboradPage>
     if (tabsList[_tabController.index].isSetmeal == 1) {
       getMeals();
     } else {
+       print("!!!!!!!!!!2");
       getProductList(cat);
     }
   }
@@ -478,7 +479,6 @@ class _DashboradPageState extends State<DashboradPage>
       isLoading = true;
     });
     var branchid = await CommunFun.getbranchId();
-
     List<ProductDetails> product =
         await prodList.getProduct(context, categoryId, branchid);
     if (product.length > 0) {
@@ -531,6 +531,7 @@ class _DashboradPageState extends State<DashboradPage>
       if (tabsList[_tabController.index].isSetmeal == 1) {
         getMeals();
       } else {
+         print("!!!!!!!!!!3");
         getProductList(cat);
       }
     }
@@ -542,6 +543,7 @@ class _DashboradPageState extends State<DashboradPage>
       if (subCatList[_subtabController.index].isSetmeal == 1) {
         getMeals();
       } else {
+         print("!!!!!!!!!!4");
         getProductList(cat);
       }
     }
@@ -611,7 +613,8 @@ class _DashboradPageState extends State<DashboradPage>
   // }
 
   /*This method used for print KOT receipt print*/
-  openPrinterPop(cartLists) {
+  openPrinterPop(cartLists) async {
+    await getAllPrinter();
     for (int i = 0; i < printerList.length; i++) {
       List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
       tempCart.clear();
@@ -1048,18 +1051,22 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getTaxs() async {
+    List<BranchTax> taxlist = [];
     List<BranchTax> taxlists = await CommunFun.getbranchTax();
     if (taxlists.length > 0) {
       setState(() {
         taxlist = taxlists;
       });
+      taxlist = taxlists;
     }
+    return taxlist;
   }
 
   countTax(subT) async {
+    var res = await getTaxs();
     var totalTax = [];
     double taxvalue = taxvalues;
-    if (taxlist.length > 0) {
+    if (res.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
         var taxval = taxlistitem.rate != null

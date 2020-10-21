@@ -13,12 +13,15 @@ class APICall {
         Uri url = Uri.parse(apiurl);
         final client = new http.Client();
         final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
+        print(apiurl);
+        print(stringParams);
         final response = await client.post(
           url,
           headers: headers,
           body: jsonEncode(stringParams),
         );
         var data = json.decode(response.body);
+        print(data);
         return data;
       } else {
         CommunFun.showToast(context, Strings.internet_connection_lost);

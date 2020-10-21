@@ -15,7 +15,8 @@ class ShiftList {
     var isjoin = await CommunFun.checkIsJoinServer();
     List<Shift> list = [];
     if (isjoin == true) {
-      var apiurl = await Configrations.ipAddress() + Configrations.shift_datails;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.shift_datails;
       var stringParams = {"shift_id": shiftId};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -39,12 +40,13 @@ class ShiftList {
     var result;
     if (isjoin == true) {
       var apiurl = await Configrations.ipAddress() + Configrations.add_shift;
-      var stringParams = {"shift_data": jsonEncode(shift)};
+      var stringParams = shift.toJson();
       result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        result = 1;
+        result = result["shift_id"];
       }
     } else {
+      print(shift.shiftId);
       if (shift.shiftId != null) {
         result = await db.update("shift", shift.toJson(),
             where: 'shift_id = ?', whereArgs: [shift.shiftId]);
@@ -54,6 +56,7 @@ class ShiftList {
       var dis = shift.shiftId != null ? "Update shift" : "Insert shift";
       await SyncAPICalls.logActivity("Product", dis, "shift", result);
     }
+    print(result);
     return result;
   }
 }

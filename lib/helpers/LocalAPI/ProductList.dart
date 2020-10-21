@@ -19,7 +19,7 @@ class ProductsList {
       var apiurl = await Configrations.ipAddress() + Configrations.products;
       var stringParams = {"branch_id": branchID, "category_id": catid};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
-      if (result["status"] == Constant.STATUS200) {
+      if (result != null && result["status"] == Constant.STATUS200) {
         List<dynamic> data = result["data"];
         list = data.length > 0
             ? data.map((c) => ProductDetails.fromJson(c)).toList()

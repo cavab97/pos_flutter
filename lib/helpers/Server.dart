@@ -49,8 +49,9 @@ class Server {
   }
 
   static handlePOST(request) async {
-    print(request);
+   
     var path = request.uri.path;
+     print(path);
     switch (path) {
       case "/Categories":
         CategoriesReq.getcategoryCall(request);
@@ -73,7 +74,7 @@ class Server {
       case "/Add_Table_Order":
         TablesReq.addTableOrder(request);
         break;
-      case "/Add_Shift":
+      case "/Add_shift":
         ShiftReq.addShift(request);
         break;
       case "/Shift_datails":
@@ -128,10 +129,10 @@ class Server {
         CartReq.cleatCart(request);
         break;
       case "/product_modifire":
-        CartReq.cleatCart(request);
+        CartReq.productModifierdata(request);
         break;
       case "/order":
-        CartReq.cleatCart(request);
+        OrdersReq.placeOrder(request);
         break;
       case "/order_details":
         OrdersReq.orderDetails(request);

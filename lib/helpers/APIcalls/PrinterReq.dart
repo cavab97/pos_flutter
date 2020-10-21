@@ -22,6 +22,7 @@ class PrinterReq {
         }))
         ..close();
     } catch (e) {
+      print(e);
       request.response
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
@@ -36,8 +37,8 @@ class PrinterReq {
     try {
       String content = await utf8.decoder.bind(request).join();
       var data = await jsonDecode(content);
-      var res =
-          await printerList.getPrinterForAddCartProduct(null, data["product_id"]);
+      var res = await printerList.getPrinterForAddCartProduct(
+          null, data["product_id"]);
       request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =
@@ -49,6 +50,7 @@ class PrinterReq {
         }))
         ..close();
     } catch (e) {
+      print(e);
       request.response
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =

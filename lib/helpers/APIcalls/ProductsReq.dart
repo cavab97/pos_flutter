@@ -22,6 +22,7 @@ class ProductsReq {
         }))
         ..close();
     } catch (e) {
+      print(e);
       request.response
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =

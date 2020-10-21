@@ -47,6 +47,7 @@ class TablesReq {
         }))
         ..close();
     } catch (e) {
+      print(e);
       request.response
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
@@ -70,11 +71,13 @@ class TablesReq {
         ..write(jsonEncode({"status": 200, "message": "success.", "data": res}))
         ..close();
     } catch (e) {
+      print(e);
       request.response
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..write(jsonEncode(
+            {"status": 500, "message": "Something went wrong" + e.toString()}))
         ..close();
     }
   }

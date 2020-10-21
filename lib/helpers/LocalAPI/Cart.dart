@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/helpers/ComunAPIcall.dart';
@@ -151,7 +149,10 @@ class Cartlist {
       var stringParams = {"cart_id": cartId};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        result = result;
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => MSTCartdetails.fromJson(c)).toList()
+            : [];
       }
     } else {
       var qry =
@@ -285,7 +286,10 @@ class Cartlist {
       };
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        list = result;
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => MSTSubCartdetails.fromJson(c)).toList()
+            : [];
       }
     } else {
       var cartDetail = await db.query("mst_cart_sub_detail",

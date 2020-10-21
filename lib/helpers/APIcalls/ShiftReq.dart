@@ -32,10 +32,11 @@ class ShiftReq {
     ShiftList shift = new ShiftList();
     try {
       String content = await utf8.decoder.bind(request).join();
+      print(content);
       var data = await jsonDecode(content);
       Shift shifts = new Shift();
-      var tabledata = data["shift_data"];
-      shifts = Shift.fromJson(tabledata);
+      shifts = Shift.fromJson(data);
+      print(shifts);
       var res = await shift.insertShift(null, shifts);
       request.response
         ..statusCode = HttpStatus.ok
@@ -44,9 +45,11 @@ class ShiftReq {
         ..write(jsonEncode({
           "status": 200,
           "message": "successfuly inserted shift",
+          "shift_id": res
         }))
         ..close();
     } catch (e) {
+      print(e);
       request.response
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
