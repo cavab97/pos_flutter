@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:mcncashier/components/QrScanAndGenrate.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -38,6 +39,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
   bool isLoading = false;
   bool isMergeing = false;
   bool isAssigning = false;
+  String qrCodeString = "";
 
   @override
   void initState() {
@@ -305,7 +307,18 @@ class _SelectTablePageState extends State<SelectTablePage> {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).pop();
-        opnPaxDailog();
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return QRCodesImagePop(
+                ip: qrCodeString,
+                onClose: () {
+                  opnPaxDailog();
+                },
+              );
+            });
+        // opnPaxDailog();
       },
       child: Text(Strings.new_order,
           textAlign: TextAlign.center, style: Styles.bluesmall()),
@@ -478,6 +491,9 @@ class _SelectTablePageState extends State<SelectTablePage> {
                     context, "Table already merged with other table");
               }
             } else {
+              setState(() {
+                qrCodeString = table.tableQr;
+              });
               ontableTap(table);
             }
           },
