@@ -44,6 +44,7 @@ class ProductQuantityDailog extends StatefulWidget {
 
 class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   TextEditingController productController = new TextEditingController();
+  TextEditingController extraNotes = new TextEditingController();
   LocalAPI localAPI = LocalAPI();
   List<Attribute_Data> attributeList = [];
   ProductDetails productItem;
@@ -89,7 +90,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       setState(() {
         tempCart = tCartData;
       });
-      print("===============================");
 
       tempCart.forEach((element) {
         print(element.setmealProductId);
@@ -204,6 +204,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       }
     }
 
+    if (cartitem.remark != null && cartitem.remark.isNotEmpty) {
+      extraNotes.text = cartitem.remark;
+    }
+
     setState(() {
       product_qty = cartitem.productQty is int
           ? cartitem.productQty.toDouble()
@@ -247,6 +251,19 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (cartItemslist.length != 0) {
       setState(() {
         cartItems = cartItemslist;
+      });
+    }
+    var contain = cartItems
+        .where((element) => element.productId == productItem.productId);
+
+    if (contain.isNotEmpty) {
+      var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
+      List<MSTCartdetails> myModels = (json.decode(jsonString) as List)
+          .map((i) => MSTCartdetails.fromJson(i))
+          .toList();
+      setState(() {
+        isEditing = true;
+        cartitem = myModels[0];
       });
     }
   }
@@ -561,8 +578,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
 
-    // MST Sub Cart details
-
     ///insert
     var cartid = await localAPI.insertItemTocart(currentCart.id, cart,
         productItem, orderData, tableData["table_id"], subCartData);
@@ -601,6 +616,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.createdBy = loginData["id"];
     cartdetails.cart_detail = jsonEncode(data);
     cartdetails.discount = 0;
+    cartdetails.remark =
+        extraNotes.text.trim().isNotEmpty ? extraNotes.text.trim() : "";
     cartdetails.issetMeal = isSetMeal ? 1 : 0;
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
@@ -1039,6 +1056,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       child: Container(
         padding: EdgeInsets.all(20),
         child: TextField(
+          controller: extraNotes,
           keyboardType: TextInputType.multiline,
           textAlignVertical: TextAlignVertical.center,
           style: TextStyle(
