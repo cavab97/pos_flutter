@@ -35,8 +35,8 @@ class Styles {
     return TextStyle(
         // White text
         color: Color(0xFF000000),
-        fontSize: 20,
-        fontWeight: FontWeight.w800,
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
         fontFamily: Strings.fontFamily);
   }
 
@@ -44,7 +44,7 @@ class Styles {
     return TextStyle(
         // White text
         color: Color(0xFF000000),
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: FontWeight.w500,
         fontFamily: Strings.fontFamily);
   }
@@ -189,7 +189,7 @@ class Styles {
   }
 
   static communGrey() {
-    return TextStyle(color: Colors.grey, fontSize: 20.0);
+    return TextStyle(color: Colors.grey, fontSize: 16.0);
   }
 
   static greysmall() {
@@ -207,6 +207,7 @@ class Styles {
       color: Colors.grey[700],
     );
   }
+
   static smallBlack() {
     return TextStyle(
       fontSize: SizeConfig.safeBlockVertical * 2.5,
