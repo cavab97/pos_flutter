@@ -403,6 +403,25 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
+/*this function used for remove promocode from cart*/
+  removePromoCode(voucherdata) async {
+    List<MSTCartdetails> cartListUpdate = [];
+    for (int i = 0; i < cartList.length; i++) {
+      var cartitem = cartList[i];
+      cartitem.discount = 0.0;
+      cartitem.discountType = 0;
+    }
+    allcartData.discount = 0.0;
+    allcartData.discount_type = 0;
+    allcartData.grand_total = allcartData.grand_total + allcartData.discount;
+    allcartData.voucher_detail = "";
+    allcartData.voucher_id = null;
+    Voucher voucher = Voucher.fromJson(voucherdata);
+    await localAPI.addVoucherInOrder(allcartData, voucher);
+    // await localAPI.updateCartList(cartListUpdate);
+    await countTotals(currentCart);
+  }
+
   getCategoryList() async {
     List<Category> categorys = await localAPI.getAllCategory();
     List<Category> catList = categorys.where((i) => i.parentId == 0).toList();
@@ -2338,9 +2357,10 @@ class _DashboradPageState extends State<DashboradPage>
         }),
       ).toList(),
     );
-    var vaucher = allcartData.voucher_detail != null
-        ? json.decode(allcartData.voucher_detail)
-        : null;
+    var vaucher =
+        allcartData.voucher_detail != null && allcartData.voucher_detail != ""
+            ? json.decode(allcartData.voucher_detail)
+            : null;
 
     final totalPriceTable = Table(
         border: TableBorder(
@@ -2472,21 +2492,38 @@ class _DashboradPageState extends State<DashboradPage>
                   vaucher != null
                       ? Padding(
                           padding: EdgeInsets.only(right: 15),
-                          child: Chip(
-                            backgroundColor: Colors.grey,
-                            avatar: CircleAvatar(
-                              backgroundColor: Colors.grey.shade800,
-                              child: Icon(
-                                Icons.close,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                            label: Text(
-                              vaucher["voucher_name"],
-                              style: Styles.whiteBoldsmall(),
-                            ),
-                          ),
+                          child: InkWell(
+                              onTap: () {
+                                CommonUtils.showAlertDialog(context, () {
+                                  Navigator.of(context).pop();
+                                }, () {
+                                  Navigator.of(context).pop();
+                                  removePromoCode(vaucher);
+                                  // setState(() {
+                                  //   vaucher = null;
+                                  // });
+                                },
+                                    "Alert",
+                                    "Are you sure you want to remove this promocode?",
+                                    "Yes",
+                                    "No",
+                                    true);
+                              },
+                              child: Chip(
+                                backgroundColor: Colors.grey,
+                                avatar: CircleAvatar(
+                                  backgroundColor: Colors.grey.shade800,
+                                  child: Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                                label: Text(
+                                  vaucher["voucher_name"],
+                                  style: Styles.whiteBoldsmall(),
+                                ),
+                              )),
                         )
                       : SizedBox(),
                   !isWebOrder
