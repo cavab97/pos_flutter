@@ -98,7 +98,7 @@ class _DashboradPageState extends State<DashboradPage>
   bool isLoading = false;
   User checkInUser;
   var permissions = "";
-  var currency;
+  var currency = "RM";
 
   @override
   void initState() {

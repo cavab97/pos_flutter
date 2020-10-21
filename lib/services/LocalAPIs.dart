@@ -83,7 +83,7 @@ class LocalAPI {
         " AND product_branch.branch_id = " +
         branchID +
         " AND product.status = 1 GROUP By product.product_id";
-    List<Map> res = await db.rawQuery(query);
+   var res = await db.rawQuery(query);
     List<ProductDetails> list = res.isNotEmpty
         ? res.map((c) => ProductDetails.fromJson(c)).toList()
         : [];
