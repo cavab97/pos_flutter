@@ -33,6 +33,7 @@ import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Lastids.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/ShiftInvoice.dart';
@@ -588,27 +589,22 @@ class _DashboradPageState extends State<DashboradPage>
         });
   }
 
-  // opneVoucherPop() async {
-  //   // var customerData =
-  //   //     await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
-  //   // if (customerData != null) {
-  //   showDialog(
-  //       // Opning Ammount Popup
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return VoucherApplyconfirmPop(
-  //           onEnter: () {
-  //             openVoucherPopFinal();
-  //           },
-  //           onCancel: () {
-  //             sendPayment();
-  //           },
-  //         );
-  //       });
-  //   // } else {
-  //   //   sendPayment();
-  //   // }
-  // }
+  /*this function used for remove promocode from cart*/
+  removePromoCode(voucher) async {
+    List<MSTCartdetails> cartListUpdate = [];
+    for (int i = 0; i < cartList.length; i++) {
+      var cartitem = cartList[i];
+      cartitem.discount = 0.0;
+      cartitem.discountType = 0;
+    }
+    allcartData.discount = 0.0;
+    allcartData.discount_type = 0;
+    allcartData.grand_total = allcartData.grand_total + allcartData.discount;
+    allcartData.voucher_detail = "";
+    allcartData.voucher_id = null;
+    await cartapi.updateCartdetails(allcartData);
+    await cartapi.updateCartList(cartListUpdate);
+  }
 
   /*This method used for print KOT receipt print*/
   openPrinterPop(cartLists) {
@@ -2434,21 +2430,38 @@ class _DashboradPageState extends State<DashboradPage>
                   vaucher != null
                       ? Padding(
                           padding: EdgeInsets.only(right: 15),
-                          child: Chip(
-                            backgroundColor: Colors.grey,
-                            avatar: CircleAvatar(
-                              backgroundColor: Colors.grey.shade800,
-                              child: Icon(
-                                Icons.close,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                            label: Text(
-                              vaucher["voucher_name"],
-                              style: Styles.whiteBoldsmall(),
-                            ),
-                          ),
+                          child: InkWell(
+                              onTap: () {
+                                CommonUtils.showAlertDialog(context, () {
+                                  Navigator.of(context).pop();
+                                }, () {
+                                  Navigator.of(context).pop();
+                                  //removePromoCode(vaucher["voucher_name"]);
+                                  /*setState(() {
+                                    vaucher = null;
+                                  });*/
+                                },
+                                    "Alert",
+                                    "Are you sure you want to remove this promocode?",
+                                    "Yes",
+                                    "No",
+                                    true);
+                              },
+                              child: Chip(
+                                backgroundColor: Colors.grey,
+                                avatar: CircleAvatar(
+                                  backgroundColor: Colors.grey.shade800,
+                                  child: Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                                label: Text(
+                                  vaucher["voucher_name"],
+                                  style: Styles.whiteBoldsmall(),
+                                ),
+                              )),
                         )
                       : SizedBox(),
                   !isWebOrder
