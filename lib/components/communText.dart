@@ -182,7 +182,7 @@ class CommunFun {
     );
   }
 
-  static syncDailog(context) {
+  static syncDailog(context,title) {
     return AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(30.0))),
@@ -200,7 +200,7 @@ class CommunFun {
                   SizedBox(
                     height: 30,
                   ),
-                  Text(Strings.syncText, style: Styles.normalBlack())
+                  Text(title, style: Styles.normalBlack())
                 ],
               )),
             );
@@ -213,7 +213,7 @@ class CommunFun {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return syncDailog(context);
+        return syncDailog(context,Strings.syncText);
       },
     );
   }

@@ -107,8 +107,10 @@ class _DashboradPageState extends State<DashboradPage>
     checkISlogin();
   }
 
-  refreshAfterAction() {
-    clearCart();
+  refreshAfterAction(bool isClearCart) {
+    if (isClearCart) {
+      clearCart();
+    }
     checkidTableSelected();
     checkCustomerSelected();
   }
@@ -336,7 +338,7 @@ class _DashboradPageState extends State<DashboradPage>
     Table_order tables = await getTableData();
     var result = await localAPI.clearCartItem(currentCart, tables.table_id);
 
-    await refreshAfterAction();
+    await refreshAfterAction(true);
   }
 
   void selectOption(choice) {
@@ -700,7 +702,7 @@ class _DashboradPageState extends State<DashboradPage>
               issetMeal: isSetMeal,
               cartID: currentCart,
               onClose: () {
-                refreshAfterAction();
+                refreshAfterAction(false);
               });
         });
   }
@@ -1074,7 +1076,7 @@ class _DashboradPageState extends State<DashboradPage>
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     clearCart();
     Navigator.of(context).pop();
-    refreshAfterAction();
+    refreshAfterAction(true);
     // Navigator.pushNamed(context, Constant.DashboardScreen);
     // await showDialog(
     //     // Opning Ammount Popup
@@ -1189,7 +1191,7 @@ class _DashboradPageState extends State<DashboradPage>
               cartID: currentCart,
               cartItem: cart,
               onClose: () {
-                refreshAfterAction();
+                refreshAfterAction(false);
               });
         });
     //     return false;

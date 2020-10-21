@@ -65,6 +65,7 @@ class Strings {
   static String opened_at = "Open at";
   static String closed = "CLOSED";
   static String syncText = "Syncing...";
+  static String please_wait = "Please wait...";
   static String shift_open_message = "Shift is not Opened";
   static String modifier = "Modifier";
   static String notesAndQty = "Notes";

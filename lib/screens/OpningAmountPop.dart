@@ -129,7 +129,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
         child: number != Strings.enter
             ? Text(number,
                 textAlign: TextAlign.center, style: Styles.blackMediumBold())
-            : Icon(Icons.subdirectory_arrow_left_rounded, size: 30),
+            : Icon(Icons.subdirectory_arrow_left_rounded, size: 35),
         textColor: Colors.black,
         color: Colors.grey[100],
         onPressed: f,
