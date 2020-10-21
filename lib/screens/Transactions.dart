@@ -361,7 +361,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               ),
                               SizedBox(width: 10),
                               Text(Strings.transaction,
-                                  style: Styles.blackBoldsmall()),
+                                  style: Styles.drawerText()),
                             ],
                           ),
                           SizedBox(height: 10),
@@ -984,12 +984,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget searchTransationList() {
     if (isFiltering) {
-      return Container(
-        height: MediaQuery.of(context).size.height / 1.3,
+      return Expanded(
         child: ListView(
           shrinkWrap: true,
           physics: AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 5),
+          padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
           children: filterList.map((item) {
             return Container(
               padding: EdgeInsets.symmetric(horizontal: 5),
@@ -1046,11 +1045,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
         ),
       );
     } else {
-      return Container(
-        height: MediaQuery.of(context).size.height / 1.3,
+      return Expanded(
         child: ListView(
           itemExtent: 65,
-          padding: EdgeInsets.symmetric(horizontal: 5),
+          padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
           shrinkWrap: true,
           physics: AlwaysScrollableScrollPhysics(),
           children: orderLists.map((item) {

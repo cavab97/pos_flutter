@@ -392,7 +392,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   setModifire(mod) {
     var isSelected = selectedModifier.any((item) => item.pmId == mod.pmId);
     if (isSelected) {
-      selectedModifier.removeWhere((item) => item.pmId == mod);
+      selectedModifier.removeWhere((item) => item.pmId == mod.pmId);
       setState(() {
         selectedModifier = selectedModifier;
       });
@@ -515,7 +515,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           "status": taxlistitem.status,
           "updated_at": taxlistitem.updatedAt,
           "updated_by": taxlistitem.updatedBy,
-          "taxAmount": taxval.toString(),
+          "taxAmount": taxval.toStringAsFixed(2),
           "taxCode": tax.length > 0 ? tax[0].code : "" //tax.code
         };
         totalTax.add(taxmap);
@@ -697,7 +697,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               right: 30,
               child: Text(
                 isSetMeal
-                    ? price.toStringAsFixed(2).toString()
+                    ? currency != null
+                        ? currency + " " + price.toStringAsFixed(2).toString()
+                        : price.toStringAsFixed(2).toString()
                     : currency != null
                         ? currency + " " + price.toStringAsFixed(2).toString()
                         : price.toStringAsFixed(2).toString(),

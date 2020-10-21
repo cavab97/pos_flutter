@@ -83,7 +83,7 @@ class LocalAPI {
         " AND product_branch.branch_id = " +
         branchID +
         " AND product.status = 1 GROUP By product.product_id";
-    List<Map> res = await db.rawQuery(query);
+    var res = await db.rawQuery(query);
     List<ProductDetails> list = res.isNotEmpty
         ? res.map((c) => ProductDetails.fromJson(c)).toList()
         : [];
@@ -1114,7 +1114,9 @@ class LocalAPI {
 
   Future<List<User>> checkUserExit(userpin) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from users where user_pin =" + userpin.toString();
+    var qry = "SELECT * from users where user_pin =" +
+        userpin.toString() +
+        " AND status = 1";
     var user = await db.rawQuery(qry);
     List<User> list =
         user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
