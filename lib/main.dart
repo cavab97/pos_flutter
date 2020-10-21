@@ -6,8 +6,6 @@ import 'package:mcncashier/routes.dart';
 import 'package:mcncashier/screens/SplashScreen.dart';
 import 'package:mcncashier/theme/theme.dart';
 
-import 'components/constant.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final bool isLogged = await CommunFun.isLogged();
@@ -23,12 +21,10 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  // This widget is the root of your application.
   var intitialRoute;
   DatabaseHelper databaseHelper = DatabaseHelper();
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     databaseHelper.initializeDatabase();
   }

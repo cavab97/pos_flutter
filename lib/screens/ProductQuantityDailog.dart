@@ -698,7 +698,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               child: Text(
                 isSetMeal
                     ? price.toStringAsFixed(2).toString()
-                    : currency + " " + price.toStringAsFixed(2).toString(),
+                    : currency != null
+                        ? currency + " " + price.toStringAsFixed(2).toString()
+                        : price.toStringAsFixed(2).toString(),
                 style: Styles.orangeMedium(),
               ),
             ),
@@ -1082,7 +1084,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         child: Text(
             product_qty.toString() +
                 " " +
-                (!isSetMeal ? productItem.priceTypeName : ""),
+                (!isSetMeal
+                    ? productItem.priceTypeName != null
+                        ? productItem.priceTypeName
+                        : ""
+                    : ""),
             style: TextStyle(color: Colors.grey, fontSize: 20)),
       ),
     );

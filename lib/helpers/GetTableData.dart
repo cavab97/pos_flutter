@@ -748,9 +748,9 @@ class TableData {
           };
           var count = await ifExists(db, data);
           if (count == 0) {
-            var result = await db.insert("orders", order.toJson());
+            await db.insert("orders", order.toJson());
           } else {
-            var result = await db.update("orders", order.toJson());
+            await db.update("orders", order.toJson());
           }
         }
       }
@@ -765,9 +765,9 @@ class TableData {
           };
           var count = await ifExists(db, data);
           if (count == 0) {
-            var result = await db.insert("order_detail", orderdeta.toJson());
+            await db.insert("order_detail", orderdeta.toJson());
           } else {
-            var result = await db.update("order_detail", orderdeta.toJson());
+            await db.update("order_detail", orderdeta.toJson());
           }
         }
       }
@@ -792,9 +792,9 @@ class TableData {
           };
           var count = await ifExists(db, data);
           if (count == 0) {
-            var result = await db.insert("shift", shift.toJson());
+            await db.insert("shift", shift.toJson());
           } else {
-            var result = await db.update("shift", shift.toJson());
+            await db.update("shift", shift.toJson());
           }
         }
       }
@@ -819,9 +819,9 @@ class TableData {
           };
           var count = await ifExists(db, data);
           if (count == 0) {
-            var result = await db.insert("asset", accet.toJson());
+            await db.insert("asset", accet.toJson());
           } else {
-            var result = await db.update("asset", accet.toJson());
+            await db.update("asset", accet.toJson());
           }
         }
       }

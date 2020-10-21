@@ -403,7 +403,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                                 SizedBox(width: 70),
                                 Padding(
                                   padding: EdgeInsets.all(0),
-                                  child: Text(taxitem["taxAmount"],
+                                  child: Text(taxitem["taxAmount"].toStringAsFixed(2),
                                       style: Styles.blackMediumbold()),
                                 )
                               ]);
