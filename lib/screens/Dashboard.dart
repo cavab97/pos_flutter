@@ -33,7 +33,6 @@ import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Lastids.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Printer.dart';
-import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/ShiftInvoice.dart';
@@ -146,7 +145,7 @@ class _DashboradPageState extends State<DashboradPage>
     if (isInit == true) {
       await getCategoryList();
       await checkidTableSelected();
-      //await getAllPrinter();
+      await getAllPrinter();
     } else {
       await databaseHelper.initializeDatabase();
       await getCategoryList();
@@ -425,8 +424,6 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
-
-
   getCategoryList() async {
     var branchid = await CommunFun.getbranchId();
     CategoriesList category = new CategoriesList();
@@ -615,7 +612,8 @@ class _DashboradPageState extends State<DashboradPage>
 
   /*This method used for print KOT receipt print*/
   openPrinterPop(cartLists) async {
-    await getAllPrinter();
+    var res = await getAllPrinter();
+
     for (int i = 0; i < printerList.length; i++) {
       List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
       tempCart.clear();
@@ -2227,7 +2225,7 @@ class _DashboradPageState extends State<DashboradPage>
     final cartTable = ListView(
       shrinkWrap: true,
       itemExtent: 50.0,
-      // physics: NeverScrollableScrollPhysics(),
+      physics: NeverScrollableScrollPhysics(),
       padding: EdgeInsets.only(bottom: 150),
       children: ListTile.divideTiles(
         context: context,

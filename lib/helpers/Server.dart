@@ -49,9 +49,8 @@ class Server {
   }
 
   static handlePOST(request) async {
-   
     var path = request.uri.path;
-     print(path);
+    print(path);
     switch (path) {
       case "/Categories":
         CategoriesReq.getcategoryCall(request);
@@ -140,7 +139,7 @@ class Server {
       case "/order_payment_details":
         OrdersReq.orderPaymentdata(request);
         break;
-      case "/orders_list":
+      case "/order_List":
         OrdersReq.getOrdersList(request);
         break;
       case "/order_payment_method":
