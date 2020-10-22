@@ -127,6 +127,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 ),
                 widget.customer.isEmpty
                     ? IconButton(
+                        padding: EdgeInsets.all(0),
                         onPressed: () {
                           openShowAddCustomerDailog();
                         },
@@ -136,6 +137,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                           size: 30,
                         ))
                     : IconButton(
+                        padding: EdgeInsets.all(0),
                         onPressed: () {
                           CommonUtils.showAlertDialog(context, () {
                             Navigator.of(context).pop();
@@ -468,10 +470,9 @@ class _SplitBillDialog extends State<SplitBillDialog> {
 
   Widget productList() {
     return Container(
-      padding: EdgeInsets.only(bottom: 50),
-      //height: MediaQuery.of(context).size.height / 3.5,
-      //width: MediaQuery.of(context).size.width / 1.7,
+      color: Colors.white,
       child: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: 200),
         child: Column(
             children: cartList.map((product) {
           var productdata = json.decode(product.cart_detail);
@@ -518,14 +519,16 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                                       height: SizeConfig.safeBlockVertical * 8,
                                       width: SizeConfig.safeBlockVertical * 9,
                                       color: Colors.black54,
-                                      child: IconButton(
-                                        onPressed: () {
-                                          _setSelectUnselect(product);
-                                        },
-                                        icon: Icon(
-                                          Icons.check_circle,
-                                          color: Colors.white,
-                                          size: 40,
+                                      child: Center(
+                                        child: IconButton(
+                                          onPressed: () {
+                                            _setSelectUnselect(product);
+                                          },
+                                          icon: Icon(
+                                            Icons.check_circle,
+                                            color: Colors.white,
+                                            size: 30,
+                                          ),
                                         ),
                                       ),
                                     )

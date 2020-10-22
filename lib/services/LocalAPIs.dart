@@ -353,7 +353,7 @@ class LocalAPI {
   }
 
   Future<int> addintoCartDetails(cartdetails) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db =  DatabaseHelper.dbHelper.getDatabse();
     var cartdetailid;
     if (cartdetails.id != null) {
       cartdetailid = db.update("mst_cart_detail", cartdetails.toJson(),

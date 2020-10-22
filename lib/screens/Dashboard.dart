@@ -933,7 +933,6 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.detail_qty = cartItem.productQty;
           orderDetail.product_discount = cartItem.discount;
           orderDetail.product_detail = json.encode(productdata);
-
           orderDetail.updated_at =
               await CommunFun.getCurrentDateTime(DateTime.now());
           orderDetail.detail_amount =
