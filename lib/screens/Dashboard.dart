@@ -2042,6 +2042,7 @@ class _DashboradPageState extends State<DashboradPage>
       height: MediaQuery.of(context).size.height / 1.3,
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.only(top: 10, bottom: 20, left: 0, right: 0),
+
       child: GridView.count(
         shrinkWrap: true,
         childAspectRatio: (itemWidth / itemHeight),
@@ -2307,7 +2308,7 @@ class _DashboradPageState extends State<DashboradPage>
     final cartTable = ListView(
       shrinkWrap: true,
       itemExtent: 50.0,
-      padding: EdgeInsets.only(bottom: 50),
+      padding: EdgeInsets.only(bottom: 150),
       children: ListTile.divideTiles(
         context: context,
         tiles: cartList.map((cart) {
@@ -2618,7 +2619,8 @@ class _DashboradPageState extends State<DashboradPage>
                     )
                   : SizedBox(),
               Container(
-                  height: MediaQuery.of(context).size.height / 2.2,
+                  //color: Colors.red,
+                  height: MediaQuery.of(context).size.height / 3,
                   margin: EdgeInsets.only(top: customer != null ? 85 : 35),
                   child: cartTable),
               cartList.length != 0

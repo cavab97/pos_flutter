@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:mcncashier/models/CheckInout.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/PosPermission.dart';
@@ -25,6 +26,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:intl/intl.dart';
 
 DatabaseHelper databaseHelper = DatabaseHelper();
+LocalAPI localAPI = LocalAPI();
 
 class CommunFun {
   static loginText() {
@@ -182,7 +184,7 @@ class CommunFun {
     );
   }
 
-  static syncDailog(context,title) {
+  static syncDailog(context, title) {
     return AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(30.0))),
@@ -213,7 +215,7 @@ class CommunFun {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return syncDailog(context,Strings.syncText);
+        return syncDailog(context, Strings.syncText);
       },
     );
   }
@@ -329,6 +331,7 @@ class CommunFun {
         if (serverTime == null) {
           Navigator.pushNamed(context, Constant.PINScreen);
         } else {
+          await checkUserDeleted(context);
           Navigator.pushNamed(context, Constant.DashboardScreen);
         }
       } else {
@@ -342,6 +345,43 @@ class CommunFun {
       // handle Exaption
       print("Error when getting product image data");
     }
+  }
+
+  static checkUserDeleted(context) async {
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var user = json.decode(loginUser);
+    var pin = user["user_pin"];
+    List<User> checkUserExit = await localAPI.checkUserExit(pin);
+    if (checkUserExit.length == 0) {
+      checkoutMenualy(context, user["id"]);
+    }
+  }
+
+  static checkoutMenualy(context, id) async {
+    CheckinOut checkIn = new CheckinOut();
+    var shiftid = await Preferences.getStringValuesSF(Constant.SHIFT_ID);
+    var terminalId = await CommunFun.getTeminalKey();
+    var branchid = await CommunFun.getbranchId();
+    var date = DateTime.now();
+    checkIn.id = int.parse(shiftid);
+    checkIn.localID = await CommunFun.getLocalID();
+    checkIn.terminalId = int.parse(terminalId);
+    checkIn.userId = id;
+    checkIn.branchId = int.parse(branchid);
+    checkIn.status = "OUT";
+    checkIn.timeInOut = date.toString();
+    checkIn.sync = 0;
+    var result = await localAPI.userCheckInOut(checkIn);
+    clearAfterCheckout(context);
+    CommunFun.showToast(context, "User deleted from database.");
+  }
+
+  static clearAfterCheckout(context) async {
+    await Preferences.removeSinglePref(Constant.IS_CHECKIN);
+    await Preferences.removeSinglePref(Constant.SHIFT_ID);
+    await Preferences.removeSinglePref(Constant.LOIGN_USER);
+    await Preferences.removeSinglePref(Constant.USER_PERMISSION);
+    await Navigator.pushNamed(context, Constant.PINScreen);
   }
 
   static getDataTables2(context) async {
