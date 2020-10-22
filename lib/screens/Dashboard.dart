@@ -499,14 +499,28 @@ class _DashboradPageState extends State<DashboradPage>
       var branchid = await CommunFun.getbranchId();
       List<ProductDetails> product =
           await localAPI.getSeachProduct(seachText.toString(), branchid);
+
+      List<SetMeal> setMeal =
+          await localAPI.getSearchSetMealsData(seachText.toString(), branchid);
+
+      setMeal.forEach((element) {
+        ProductDetails cartItemproduct = new ProductDetails();
+        cartItemproduct.price = double.parse(element.price.toStringAsFixed(2));
+        cartItemproduct.status = element.status;
+        cartItemproduct.productId = element.setmealId;
+        cartItemproduct.base64 = element.base64;
+        cartItemproduct.name = element.name;
+        cartItemproduct.uuid = element.uuid;
+        cartItemproduct.isSetMeal = true;
+        product.add(cartItemproduct);
+      });
+
       setState(() {
-        SearchProductList.clear();
-        SearchProductList =
-            product.length != 0 && product[0].productId != null ? product : [];
+        SearchProductList = product.length > 0 ? product : [];
       });
     } else {
       setState(() {
-        SearchProductList.clear();
+        // SearchProductList.clear();
         SearchProductList = [];
       });
     }
@@ -586,29 +600,29 @@ class _DashboradPageState extends State<DashboradPage>
         });
   }
 
-  // opneVoucherPop() async {
-  //   // var customerData =
-  //   //     await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
-  //   // if (customerData != null) {
-  //   showDialog(
-  //       // Opning Ammount Popup
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return VoucherApplyconfirmPop(
-  //           onEnter: () {
-  //             openVoucherPopFinal();
-  //           },
-  //           onCancel: () {
-  //             sendPayment();
-  //           },
-  //         );
-  //       });
-  //   // } else {
-  //   //   sendPayment();
-  //   // }
-  // }
+// opneVoucherPop() async {
+//   // var customerData =
+//   //     await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
+//   // if (customerData != null) {
+//   showDialog(
+//       // Opning Ammount Popup
+//       context: context,
+//       builder: (BuildContext context) {
+//         return VoucherApplyconfirmPop(
+//           onEnter: () {
+//             openVoucherPopFinal();
+//           },
+//           onCancel: () {
+//             sendPayment();
+//           },
+//         );
+//       });
+//   // } else {
+//   //   sendPayment();
+//   // }
+// }
 
-  /*This method used for print KOT receipt print*/
+/*This method used for print KOT receipt print*/
   openPrinterPop(cartLists) {
     for (int i = 0; i < printerList.length; i++) {
       List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
@@ -712,6 +726,21 @@ class _DashboradPageState extends State<DashboradPage>
 
   showQuantityDailog(selectedProduct, isSetMeal) async {
     // Increase Decrease Quantity popup
+    if (!isSetMeal) {
+      if (selectedProduct.isSetMeal != null) {
+        isSetMeal = true;
+        SetMeal cartItemproduct = new SetMeal();
+        cartItemproduct.price =
+            double.parse(selectedProduct.price.toStringAsFixed(2));
+        cartItemproduct.status = selectedProduct.status;
+        cartItemproduct.setmealId = selectedProduct.productId;
+        cartItemproduct.base64 = selectedProduct.base64;
+        cartItemproduct.name = selectedProduct.name;
+        cartItemproduct.uuid = selectedProduct.uuid;
+        selectedProduct = cartItemproduct;
+      }
+    }
+
     showDialog(
         context: context,
         barrierDismissible: false,

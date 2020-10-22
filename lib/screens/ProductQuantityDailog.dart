@@ -253,18 +253,22 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         cartItems = cartItemslist;
       });
     }
-    var contain = cartItems
-        .where((element) => element.productId == productItem.productId);
+    if (!isSetMeal) {
+      var contain = cartItems
+          .where((element) => element.productId == productItem.productId);
 
-    if (contain.isNotEmpty) {
-      var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
-      List<MSTCartdetails> myModels = (json.decode(jsonString) as List)
-          .map((i) => MSTCartdetails.fromJson(i))
-          .toList();
-      setState(() {
-        isEditing = true;
-        cartitem = myModels[0];
-      });
+      if (contain.isNotEmpty) {
+        var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
+        List<MSTCartdetails> myModels = (json.decode(jsonString) as List)
+            .map((i) => MSTCartdetails.fromJson(i))
+            .toList();
+        setState(() {
+          isEditing = true;
+          cartitem = myModels[0];
+        });
+      }
+    } else {
+      //Put logic here for set Meal update
     }
   }
 
