@@ -102,16 +102,18 @@ class _TransactionsPageState extends State<TransactionsPage> {
     setState(() {
       orderpayment = orderpaymentdata;
     });
-    Payments paument_method =
-        await localAPI.getOrderpaymentmethod(orderpayment.op_method_id);
-    setState(() {
-      paumentMethod = paument_method;
-    });
-    User user = await localAPI.getPaymentUser(orderpayment.op_by);
-    if (user != null) {
+    if (orderpayment.op_method_id != null) {
+      Payments paument_method =
+          await localAPI.getOrderpaymentmethod(orderpayment.op_method_id);
       setState(() {
-        paymemtUser = user;
+        paumentMethod = paument_method;
       });
+      User user = await localAPI.getPaymentUser(orderpayment.op_by);
+      if (user != null) {
+        setState(() {
+          paymemtUser = user;
+        });
+      }
     }
     //}
   }
@@ -879,7 +881,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget productList() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.only(left: 20, right: 20, bottom: 50),
       height: MediaQuery.of(context).size.height / 3.5,
       //width: MediaQuery.of(context).size.width / 1.7,
       child: SingleChildScrollView(

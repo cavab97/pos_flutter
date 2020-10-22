@@ -82,7 +82,6 @@ class PrintReceipt {
       List<MSTCartdetails> cartList) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
-
     final PosPrintResult res = await printerManager
         .printTicket(await KOTReceipt(paper, tableName, cartList));
 
