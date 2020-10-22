@@ -34,7 +34,7 @@ class SetMeal {
     createdBy = json['created_by'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
-    base64 = json['base64'];
+    base64 = json['base64'] != null ? json['base64'] : "";
   }
 
   Map<String, dynamic> toJson() {
@@ -48,6 +48,8 @@ class SetMeal {
     data['created_by'] = this.createdBy;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;
+    data['base64'] = this.base64;
+
     return data;
   }
 }

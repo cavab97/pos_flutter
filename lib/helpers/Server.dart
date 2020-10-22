@@ -61,6 +61,9 @@ class Server {
       case "/Search_product":
         ProductsReq.getProductSearchCall(request);
         break;
+      case "/Search_setmeal":
+        ProductsReq.getsetmealSearchCall(request);
+        break;
       case "/Customers":
         CustomerReq.getCustomerCall(request);
         break;

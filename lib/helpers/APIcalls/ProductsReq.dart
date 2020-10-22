@@ -56,6 +56,31 @@ class ProductsReq {
     }
   }
 
+  static getsetmealSearchCall(request) async {
+    ProductsList product = new ProductsList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var res = await product.getSearchSetMealsData(
+          data["search_text"], data["branch_id"]);
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({
+          "status": 200,
+          "message": res.length > 0 ? "success" : "No data Found",
+          "data": res
+        }))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
   static getProductAttributes(request) async {
     ProductsList product = new ProductsList();
     try {

@@ -83,51 +83,26 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       isEditing = widget.cartItem != null;
       cartitem = widget.cartItem;
     });
-    setstate();
+    setInitstate();
   }
 
-  setSetMealData() {
-    if (cartitem != null) {
-      List<dynamic> cartData = jsonDecode(cartitem.setmeal_product_detail);
-
-      List<SetMealProduct> tCartData = cartData.isNotEmpty
-          ? cartData.map((c) => SetMealProduct.fromJson(c)).toList()
-          : [];
-
-      setState(() {
-        tempCart = tCartData;
-      });
-
-      tempCart.forEach((element) {
-        print(element.setmealProductId);
-        print(element.setmealId);
-      });
-    }
-  }
-
-  setstate() async {
+  setInitstate() async {
     if (isSetMeal) {
-      setSetMealData();
       setState(() {
         setmeal = widget.product;
         price = setmeal.price;
         productnetprice = setmeal.price;
       });
+      getMealProducts();
     } else {
       setState(() {
         productItem = widget.product;
         price = productItem.price;
         productnetprice = productItem.price;
       });
-    }
-    if (isSetMeal) {
-      getMealProducts();
-      if (isEditing) {
-        setEditingData();
-      }
-    } else {
       getAttributes();
     }
+
     getTaxs();
     getPrinter();
 
@@ -141,6 +116,20 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     });
   }
 
+  setSetMealData() {
+    if (cartitem != null) {
+      List<dynamic> cartData = jsonDecode(cartitem.setmeal_product_detail);
+      List<SetMealProduct> tCartData = cartData.isNotEmpty
+          ? cartData.map((c) => SetMealProduct.fromJson(c)).toList()
+          : [];
+      setState(() {
+        tempCart = tCartData;
+      });
+    } else {
+      tempCart.addAll(mealProducts);
+    }
+  }
+
   getMealProducts() async {
     List<SetMealProduct> mealProductList =
         await prodList.getMealsProductData(setmeal.setmealId);
@@ -148,16 +137,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       setState(() {
         mealProducts = mealProductList;
       });
-      if (cartitem != null) {
-        List<dynamic> selectedTemp =
-            jsonDecode(cartitem.setmeal_product_detail);
-        List<SetMealProduct> list = selectedTemp.isNotEmpty
-            ? selectedTemp.map((c) => SetMealProduct.fromJson(c)).toList()
-            : [];
-        tempCart.addAll(list);
-      } else {
-        tempCart.addAll(mealProducts);
-      }
+      await setSetMealData();
     }
   }
 
@@ -181,7 +161,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
-  setEditingData() async {
+  setProductEditingData() async {
     if (!isSetMeal) {
       List<MSTSubCartdetails> details =
           await cartapi.getItemModifire(cartitem.id);
@@ -218,18 +198,16 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           }
         }
       }
+      if (cartitem.remark != null && cartitem.remark.isNotEmpty) {
+        extraNotes.text = cartitem.remark;
+      }
+      setState(() {
+        product_qty = cartitem.productQty is int
+            ? cartitem.productQty.toDouble()
+            : cartitem.productQty;
+        price = cartitem.productPrice;
+      });
     }
-
-    if (cartitem.remark != null && cartitem.remark.isNotEmpty) {
-      extraNotes.text = cartitem.remark;
-    }
-
-    setState(() {
-      product_qty = cartitem.productQty is int
-          ? cartitem.productQty.toDouble()
-          : cartitem.productQty;
-      price = cartitem.productPrice;
-    });
   }
 
   getAttributes() async {
@@ -248,7 +226,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       });
     }
     if (isEditing) {
-      setEditingData();
+      setProductEditingData();
     }
   }
 
@@ -267,7 +245,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         cartItems = cartItemslist;
       });
     }
-    if (isSetMeal) {
+    if (!isSetMeal) {
       var contain = cartItems
           .where((element) => element.productId == productItem.productId);
       if (contain.isNotEmpty) {
@@ -278,6 +256,35 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         setState(() {
           isEditing = true;
           cartitem = myModels[0];
+        });
+      }
+    } else {
+      //Put logic here for set Meal update
+      print(cartItems);
+      var contain =
+          cartItems.where((element) => element.productId == setmeal.setmealId);
+      print(contain);
+      if (contain.isNotEmpty) {
+        var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
+        List<MSTCartdetails> prodData = (json.decode(jsonString) as List)
+            .map((i) => MSTCartdetails.fromJson(i))
+            .toList();
+        setmeal.price = prodData[0].productPrice;
+        List<SetMealProduct> tCartData = [];
+        if (prodData[0] != null) {
+          List<dynamic> cartData =
+              jsonDecode(prodData[0].setmeal_product_detail);
+          tCartData = cartData.isNotEmpty
+              ? cartData.map((c) => SetMealProduct.fromJson(c)).toList()
+              : [];
+        }
+        setState(() {
+          isEditing = true;
+          setmeal = setmeal;
+          price = setmeal.price;
+          product_qty = prodData[0].productQty;
+          tempCart = tCartData;
+          cartitem = prodData[0];
         });
       }
     }
@@ -458,7 +465,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         selectedITemTotal += item.productPrice;
       }
       if (isEditing) {
-        selectedITemTotal = selectedITemTotal - cartitem.productPrice;
+        if (!isSetMeal) {
+          selectedITemTotal = selectedITemTotal - cartitem.productPrice;
+        } else {
+          selectedITemTotal = selectedITemTotal - setmeal.price;
+        }
       }
       subT = selectedITemTotal + price;
     } else {
@@ -494,15 +505,18 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   _setSelectUnselect(SetMealProduct product) {
-    var contain = tempCart.where(
-        (element) => element.setmealProductId == product.setmealProductId);
-    if (contain.isNotEmpty) {
+    var isSelected = tempCart
+        .any((item) => item.setmealProductId == product.setmealProductId);
+    if (isSelected) {
+      tempCart.removeWhere(
+          (item) => item.setmealProductId == product.setmealProductId);
       setState(() {
-        tempCart.remove(product);
+        tempCart = tempCart;
       });
-    } else if (contain.isEmpty) {
+    } else {
+      tempCart.add(product);
       setState(() {
-        tempCart.add(product);
+        tempCart = tempCart;
       });
     }
   }
@@ -683,10 +697,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       print(res);
     }
 
-    if (isEditing && cartitem.isSendKichen == 1) {
-      var items = [];
-      items.add(cartitem);
-      //  senditemtoKitchen(items);
+    if (isEditing) {
+      if (!isSetMeal) {
+        if (cartitem.isSendKichen == 1) {
+          var items = [];
+          items.add(cartitem);
+          //  senditemtoKitchen(items);
+        }
+      }
     }
     widget.onClose();
     Navigator.of(context).pop();
@@ -904,32 +922,16 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                 Text(product.quantity.toString(),
                                     style: Styles.smallBlack()),
                                 SizedBox(width: 90),
-                                IconButton(
-                                  onPressed: () {
-                                    var contain = tempCart.where((element) =>
-                                        element.setmealProductId ==
-                                        product.setmealProductId);
-                                    if (contain.isNotEmpty) {
-                                      setState(() {
-                                        tempCart.remove(product);
-                                      });
-                                    } else if (contain.isEmpty) {
-                                      setState(() {
-                                        tempCart.add(product);
-                                      });
-                                    }
-                                  },
-                                  icon: Icon(
-                                    tempCart
-                                            .where((element) =>
-                                                element.setmealProductId ==
-                                                product.setmealProductId)
-                                            .isNotEmpty
-                                        ? Icons.check_circle
-                                        : Icons.check_circle_outline,
-                                    color: Colors.green,
-                                    size: 40,
-                                  ),
+                                Icon(
+                                  tempCart
+                                          .where((element) =>
+                                              element.setmealProductId ==
+                                              product.setmealProductId)
+                                          .isNotEmpty
+                                      ? Icons.check_circle
+                                      : Icons.check_circle_outline,
+                                  color: Colors.green,
+                                  size: 40,
                                 ),
                               ],
                             ),
@@ -1152,9 +1154,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   Widget addbutton(context) {
-    // Add button header rounded
     return RaisedButton(
-      padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
       onPressed: () {
         if (isEditing) {
           updateCartItem();
@@ -1168,14 +1168,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               ? Icon(
                   Icons.add_circle_outline,
                   color: Colors.white,
-                  size: SizeConfig.safeBlockVertical * 4,
+                  size: SizeConfig.safeBlockVertical * 3.5,
                 )
               : Icon(
                   Icons.edit,
                   color: Colors.white,
-                  size: SizeConfig.safeBlockVertical * 4,
+                  size: SizeConfig.safeBlockVertical * 3.5,
                 ),
-          SizedBox(width: 10),
+          SizedBox(width: 5),
           Text(isEditing ? Strings.update : Strings.add,
               style: TextStyle(
                 color: Colors.white,

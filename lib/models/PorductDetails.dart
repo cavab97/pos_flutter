@@ -1,5 +1,6 @@
 class ProductDetails {
   int productId;
+  bool isSetMeal;
   String uuid;
   String name;
   String description;
@@ -41,6 +42,7 @@ class ProductDetails {
 
   ProductDetails.fromJson(Map<String, dynamic> json) {
     productId = json['product_id'];
+    isSetMeal = json['isSetMeal'];
     uuid = json['uuid'];
     name = json['name'];
     description = json['description'];
@@ -70,6 +72,7 @@ class ProductDetails {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['product_id'] = this.productId;
+    data['isSetMeal'] = this.isSetMeal;
     data['uuid'] = this.uuid;
     data['name'] = this.name;
     data['description'] = this.description;

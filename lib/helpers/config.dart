@@ -3,8 +3,8 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 
 class Configrations {
-  static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
-
+  //static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
+  static String base_URL = "https://mcnpos.com.my/api/v1/en/";
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String config = "configs";
@@ -27,6 +27,7 @@ class Configrations {
   static String printers = "printer";
   static String printersForCart = "printer_cart";
   static String search_product = "Search_product";
+  static String search_setmeal = "Search_setmeal";
   static String customers = "Customers";
   static String add_customer = "Add_Customer";
   static String add_saveOrder = "Add_SaveOrder";
@@ -60,7 +61,7 @@ class Configrations {
   static String orders_list = "order_List";
   static String send_to_kitchen = "send_to_kitchen";
   static String set_meals = "set_meals";
-    static String branch_tax = "branch_tax";
+  static String branch_tax = "branch_tax";
   static String set_meals_products = "set_meals_products";
 
   static ipAddress() async {

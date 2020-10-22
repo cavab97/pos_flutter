@@ -80,6 +80,41 @@ class ProductsList {
     return list;
   }
 
+  Future<List<SetMeal>> getSearchSetMealsData(
+      String searchText, String branchid) async {
+    List<SetMeal> list = [];
+    var isjoin = await CommunFun.checkIsJoinServer();
+    if (isjoin == true) {
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.search_setmeal;
+      var stringParams = {"search_text": searchText, "branch_id": branchid};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => SetMeal.fromJson(c)).toList()
+            : [];
+      }
+    } else {
+      var qry = "select setmeal.* , replace(asset.base64,'data:image/jpg;base64,','') as base64  from setmeal " +
+          " LEFT join setmeal_branch on setmeal_branch_id =" +
+          branchid +
+          " AND setmeal_branch.setmeal_id = setmeal.setmeal_id " +
+          " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
+          " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id  " +
+          " where setmeal.name LIKE '%$searchText%'" +
+          "GROUP by setmeal.setmeal_id ";
+
+      var mealList = await db.rawQuery(qry);
+      list = mealList.isNotEmpty
+          ? mealList.map((c) => SetMeal.fromJson(c)).toList()
+          : [];
+      await SyncAPICalls.logActivity(
+          "Meals List", "get Meals List", "setmeal", branchid);
+    }
+    return list;
+  }
+
   Future<List<Attribute_Data>> getProductAttributes(context, productid) async {
     var isjoin = await CommunFun.checkIsJoinServer();
     List<Attribute_Data> list = [];

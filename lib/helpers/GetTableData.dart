@@ -359,21 +359,13 @@ class TableData {
             'key': "setmeal_id",
             'value': setMeal.setmealId,
           };
-
           var count = await ifExists(db, data);
-
-          var list = setMeal.toJson();
-          // final keys = list.keys.toList(growable: false);
-          // for (String key in keys) {
-          //   if (list[key] == "base64") {
-          //     await list.remove(key);
-          //   }
-          // }
-          // print(list);
+          var setMealP = setMeal.toJson();
+          await setMealP.remove("base64");
           if (count == 0) {
-            var result = await db.insert("setmeal", list);
+            var result = await db.insert("setmeal", setMealP);
           } else {
-            var result = await db.update("setmeal", list,
+            var result = await db.update("setmeal", setMealP,
                 where: "setmeal_id =?", whereArgs: [setMeal.setmealId]);
           }
         }
@@ -390,12 +382,7 @@ class TableData {
             };
             var count = await ifExists(db, data);
             var list = setMealbranch.toJson();
-            // final keys = list.keys.toList(growable: false);
-            // for (String key in keys) {
-            //   if (list[key] == "base64") {
-            //     list.remove(key);
-            //   }
-            // }
+
             if (count == 0) {
               var result = await db.insert("setmeal_branch", list);
             } else {

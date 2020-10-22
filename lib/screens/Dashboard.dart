@@ -501,16 +501,29 @@ class _DashboradPageState extends State<DashboradPage>
 
   getSearchList(seachText) async {
     if (seachText != "") {
+      var branchid = await CommunFun.getbranchId();
       List<ProductDetails> product =
           await prodList.getSeachProduct(context, seachText);
+      List<SetMeal> setMeal =
+          await prodList.getSearchSetMealsData(seachText.toString(), branchid);
+
+      setMeal.forEach((element) {
+        ProductDetails cartItemproduct = new ProductDetails();
+        cartItemproduct.price = double.parse(element.price.toStringAsFixed(2));
+        cartItemproduct.status = element.status;
+        cartItemproduct.productId = element.setmealId;
+        cartItemproduct.base64 = element.base64;
+        cartItemproduct.name = element.name;
+        cartItemproduct.uuid = element.uuid;
+        cartItemproduct.isSetMeal = true;
+        product.add(cartItemproduct);
+      });
+
       setState(() {
-        SearchProductList.clear();
-        SearchProductList =
-            product.length != 0 && product[0].productId != null ? product : [];
+        SearchProductList = product.length > 0 ? product : [];
       });
     } else {
       setState(() {
-        SearchProductList.clear();
         SearchProductList = [];
       });
     }
@@ -613,7 +626,6 @@ class _DashboradPageState extends State<DashboradPage>
   /*This method used for print KOT receipt print*/
   openPrinterPop(cartLists) async {
     var res = await getAllPrinter();
-
     for (int i = 0; i < printerList.length; i++) {
       List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
       tempCart.clear();
@@ -717,6 +729,21 @@ class _DashboradPageState extends State<DashboradPage>
 
   showQuantityDailog(selectedProduct, isSetMeal) async {
     // Increase Decrease Quantity popup
+    if (!isSetMeal) {
+      if (selectedProduct.isSetMeal != null) {
+        isSetMeal = true;
+        SetMeal cartItemproduct = new SetMeal();
+        cartItemproduct.price =
+            double.parse(selectedProduct.price.toStringAsFixed(2));
+        cartItemproduct.status = selectedProduct.status;
+        cartItemproduct.setmealId = selectedProduct.productId;
+        cartItemproduct.base64 = selectedProduct.base64;
+        cartItemproduct.name = selectedProduct.name;
+        cartItemproduct.uuid = selectedProduct.uuid;
+        selectedProduct = cartItemproduct;
+      }
+    }
+
     showDialog(
         context: context,
         barrierDismissible: false,
