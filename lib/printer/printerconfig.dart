@@ -82,14 +82,13 @@ class PrintReceipt {
       List<MSTCartdetails> cartList) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
-
     final PosPrintResult res = await printerManager
         .printTicket(await KOTReceipt(paper, tableName, cartList));
 
     CommunFun.showToast(ctx, res.msg);
   }
 
-  /*========================================================================
+/*========================================================================
   ===========================Print Receipt==================================
   ========================================================================*/
 
@@ -221,6 +220,8 @@ class PrintReceipt {
     ticket.setStyles(PosStyles(align: PosAlign.center));
     /* ticket.emptyLines(1);
     ticket.qrcode('www.example.com',
+    ticket.emptyLines(1);
+    ticket.qrcode('www.MCN.com',
         size: QRSize.Size5, align: PosAlign.center);
     ticket.emptyLines(1);*/
 
@@ -232,7 +233,6 @@ class PrintReceipt {
     ticket.feed(1);
     ticket.cut();
     ticket.drawer();
-
     return ticket;
   }
 
@@ -252,12 +252,12 @@ class PrintReceipt {
 
     CommunFun.showToast(ctx, res.msg);
 
-    /*final snackBar =
+/*final snackBar =
         SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
     Scaffold.of(ctx).showSnackBar(snackBar);*/
   }
 
-  /*========================================================================
+/*========================================================================
   ===========================Print Draft print==================================
   ========================================================================*/
 
@@ -383,6 +383,9 @@ class PrintReceipt {
     ticket.qrcode('www.example.com',
         size: QRSize.Size5, align: PosAlign.center);*/
     ticket.emptyLines(1);
+    ticket.qrcode('www.MCN.com',
+        size: QRSize.Size5, align: PosAlign.center);
+    ticket.emptyLines(1);
 
     ticket.text('Thank you!',
         styles: PosStyles(bold: true, align: PosAlign.center));
@@ -413,12 +416,12 @@ class PrintReceipt {
 
     CommunFun.showToast(ctx, res.msg);
 
-    /*final snackBar =
+/*final snackBar =
         SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
     Scaffold.of(ctx).showSnackBar(snackBar);*/
   }
 
-  /*========================================================================
+/*========================================================================
   ===========================Test print=====================================
   ========================================================================*/
 
@@ -432,7 +435,7 @@ class PrintReceipt {
 
     CommunFun.showToast(ctx, res.msg);
 
-    /* final snackBar = SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
+/* final snackBar = SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
     Scaffold.of(ctx).showSnackBar(snackBar);*/
   }
 
@@ -460,6 +463,7 @@ class PrintReceipt {
 
     ticket.feed(2);
     ticket.cut();
+    ticket.drawer();
     return ticket;
   }
 }

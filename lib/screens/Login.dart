@@ -20,8 +20,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController emailAddress = new TextEditingController(text: "jack");
-  TextEditingController userPin = new TextEditingController(text: "672907");
+  TextEditingController emailAddress = new TextEditingController(text: "");
+  TextEditingController userPin = new TextEditingController(text: "");
   GlobalKey<ScaffoldState> scaffoldKey;
 
   // DatabaseHelper databaseHelper = DatabaseHelper();
@@ -91,7 +91,6 @@ class _LoginPageState extends State<LoginPage> {
             await Preferences.setStringToSF(Constant.IS_LOGIN, "true");
             user = User.fromJson(value["data"]);
             await CommunFun.syncAfterSuccess(context);
-
             setState(() {
               isLoading = false;
             });

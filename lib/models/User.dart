@@ -24,7 +24,7 @@ class User {
   int createdBy;
   int updatedBy;
   String deviceType;
-  String deletedBy;
+  int deletedBy;
   String terminalId;
 
   User(
@@ -85,7 +85,7 @@ class User {
     deletedAt = json['deleted_at'];
     createdBy = json['created_by'];
     updatedBy = json['updated_by'];
-    deletedBy = json['deleted_by'];
+    deletedBy = json['deleted_by'] != "" ? json['deleted_by'] : 0;
   }
 
   Map<String, dynamic> toJson() {

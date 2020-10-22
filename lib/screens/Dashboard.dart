@@ -112,7 +112,7 @@ class _DashboradPageState extends State<DashboradPage>
   bool isLoading = false;
   User checkInUser;
   var permissions = "";
-  var currency;
+  var currency = "RM";
 
   @override
   void initState() {
@@ -121,8 +121,10 @@ class _DashboradPageState extends State<DashboradPage>
     checkISlogin();
   }
 
-  refreshAfterAction() {
-    clearCart();
+  refreshAfterAction(bool isClearCart) {
+    if (isClearCart) {
+      clearCart();
+    }
     checkidTableSelected();
     checkCustomerSelected();
   }
@@ -285,7 +287,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getCartItem(cartId) async {
-    List<MSTCartdetails> cartItem = await  CommunFun.getcartDetails(cartId);
+    List<MSTCartdetails> cartItem = await CommunFun.getcartDetails(cartId);
     if (cartItem.length > 0) {
       setState(() {
         cartList = cartItem;
@@ -354,7 +356,7 @@ class _DashboradPageState extends State<DashboradPage>
     Table_order tables = await getTableData();
     await cartapi.clearCartItem(currentCart, tables.table_id);
 
-    await refreshAfterAction();
+    await refreshAfterAction(true);
   }
 
   void selectOption(choice) async {
@@ -423,6 +425,8 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
+
+
   getCategoryList() async {
     var branchid = await CommunFun.getbranchId();
     CategoriesList category = new CategoriesList();
@@ -470,7 +474,7 @@ class _DashboradPageState extends State<DashboradPage>
     if (tabsList[_tabController.index].isSetmeal == 1) {
       getMeals();
     } else {
-       print("!!!!!!!!!!2");
+      print("!!!!!!!!!!2");
       getProductList(cat);
     }
   }
@@ -532,7 +536,7 @@ class _DashboradPageState extends State<DashboradPage>
       if (tabsList[_tabController.index].isSetmeal == 1) {
         getMeals();
       } else {
-         print("!!!!!!!!!!3");
+        print("!!!!!!!!!!3");
         getProductList(cat);
       }
     }
@@ -544,7 +548,7 @@ class _DashboradPageState extends State<DashboradPage>
       if (subCatList[_subtabController.index].isSetmeal == 1) {
         getMeals();
       } else {
-         print("!!!!!!!!!!4");
+        print("!!!!!!!!!!4");
         getProductList(cat);
       }
     }
@@ -606,6 +610,7 @@ class _DashboradPageState extends State<DashboradPage>
     allcartData.voucher_id = null;
     await cartapi.updateCartdetails(allcartData);
     await cartapi.updateCartList(cartListUpdate);
+    await countTotals(currentCart);
   }
 
   /*This method used for print KOT receipt print*/
@@ -723,7 +728,7 @@ class _DashboradPageState extends State<DashboradPage>
               issetMeal: isSetMeal,
               cartID: currentCart,
               onClose: () {
-                refreshAfterAction();
+                refreshAfterAction(false);
               });
         });
   }
@@ -1036,7 +1041,7 @@ class _DashboradPageState extends State<DashboradPage>
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     clearCart();
     Navigator.of(context).pop();
-    refreshAfterAction();
+    refreshAfterAction(true);
     // Navigator.pushNamed(context, Constant.DashboardScreen);
     // await showDialog(
     //     // Opning Ammount Popup
@@ -1110,7 +1115,7 @@ class _DashboradPageState extends State<DashboradPage>
       if (cartitem.isSendKichen == 1) {
         var deletedlist = [];
         deletedlist.add(cartitem);
-        openPrinterPop(deletedlist);
+        //openPrinterPop(deletedlist);
       }
       if (cartList.length > 1) {
         await getCartItem(currentCart);
@@ -1153,7 +1158,7 @@ class _DashboradPageState extends State<DashboradPage>
               cartID: currentCart,
               cartItem: cart,
               onClose: () {
-                refreshAfterAction();
+                refreshAfterAction(false);
               });
         });
     //     return false;
@@ -1956,6 +1961,7 @@ class _DashboradPageState extends State<DashboradPage>
       height: MediaQuery.of(context).size.height / 1.3,
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.only(top: 10, bottom: 20, left: 0, right: 0),
+
       child: GridView.count(
         shrinkWrap: true,
         childAspectRatio: (itemWidth / itemHeight),
@@ -2221,7 +2227,7 @@ class _DashboradPageState extends State<DashboradPage>
     final cartTable = ListView(
       shrinkWrap: true,
       itemExtent: 50.0,
-      physics: NeverScrollableScrollPhysics(),
+      // physics: NeverScrollableScrollPhysics(),
       padding: EdgeInsets.only(bottom: 150),
       children: ListTile.divideTiles(
         context: context,
@@ -2303,9 +2309,10 @@ class _DashboradPageState extends State<DashboradPage>
         }),
       ).toList(),
     );
-    var vaucher = allcartData.voucher_detail != null
-        ? json.decode(allcartData.voucher_detail)
-        : null;
+    var vaucher =
+        allcartData.voucher_detail != null && allcartData.voucher_detail != ""
+            ? json.decode(allcartData.voucher_detail)
+            : null;
 
     final totalPriceTable = Table(
         border: TableBorder(
@@ -2447,6 +2454,10 @@ class _DashboradPageState extends State<DashboradPage>
                                   /*setState(() {
                                     vaucher = null;
                                   });*/
+                                  removePromoCode(vaucher);
+                                  // setState(() {
+                                  //   vaucher = null;
+                                  // });
                                 },
                                     "Alert",
                                     "Are you sure you want to remove this promocode?",
@@ -2533,6 +2544,7 @@ class _DashboradPageState extends State<DashboradPage>
                   : SizedBox(),
               Container(
                   //  color: Colors.amber,
+                  //color: Colors.red,
                   height: MediaQuery.of(context).size.height / 3,
                   margin: EdgeInsets.only(top: customer != null ? 85 : 35),
                   child: SingleChildScrollView(child: cartTable)),

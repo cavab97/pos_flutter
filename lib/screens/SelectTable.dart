@@ -25,7 +25,8 @@ class SelectTablePage extends StatefulWidget {
   _SelectTablePageState createState() => _SelectTablePageState();
 }
 
-class _SelectTablePageState extends State<SelectTablePage> {
+class _SelectTablePageState extends State<SelectTablePage>
+    with SingleTickerProviderStateMixin {
   TextEditingController paxController = new TextEditingController();
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
@@ -40,7 +41,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
   bool isMergeing = false;
   bool isAssigning = false;
   String qrCodeString = "";
-
+  TabController _tabController;
   @override
   void initState() {
     super.initState();
@@ -51,6 +52,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
+    _tabController = new TabController(length: 2, vsync: this);
   }
 
   getTables() async {
@@ -180,44 +182,87 @@ class _SelectTablePageState extends State<SelectTablePage> {
       orderid = arguments['orderID'];
     });
     return Scaffold(
-        key: scaffoldKey,
-        appBar: AppBar(
-            leading: new IconButton(
-              icon: new Icon(
-                Icons.arrow_back,
-                size: 30.0,
+      key: scaffoldKey,
+      appBar: AppBar(
+        leading: new IconButton(
+          icon: new Icon(
+            Icons.arrow_back,
+            size: 30.0,
+          ),
+          onPressed: () {
+            if (isMergeing) {
+              setState(() {
+                isMergeing = false;
+                mergeInTable = null;
+              });
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
+        ),
+        centerTitle: true,
+        iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        title: Text(isMergeing ? Strings.merge_table : Strings.select_table,
+            style: Styles.whiteMediumBold()),
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorSize: TabBarIndicatorSize.tab,
+          unselectedLabelColor: Colors.white,
+          unselectedLabelStyle: Styles.whiteBoldsmall(),
+          indicator: BoxDecoration(color: Colors.deepOrange),
+          labelColor: Colors.white,
+          labelStyle: Styles.whiteBoldsmall(),
+          tabs: [
+            Tab(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  "Dine In",
+                ),
               ),
-              onPressed: () {
-                if (isMergeing) {
-                  setState(() {
-                    isMergeing = false;
-                    mergeInTable = null;
-                  });
-                } else {
-                  Navigator.of(context).pop();
-                }
-              },
             ),
-            centerTitle: true,
-            iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            title: Text(isMergeing ? Strings.merge_table : Strings.select_table,
-                style: Styles.whiteMediumBold())),
-        body: new GestureDetector(
+            Tab(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  "Take Away",
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: new GestureDetector(
           onTap: () {
             FocusScope.of(context).requestFocus(new FocusNode());
           },
-          child: SingleChildScrollView(
-            child: Container(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                children: <Widget>[
-                  !isLoading ? tablesListwidget() : CommunFun.loader(context)
-                ],
-              ),
+          child: SafeArea(
+            
+            child: TabBarView(
+              controller: _tabController,
+              physics: AlwaysScrollableScrollPhysics(),
+              children: [
+                Container(
+                  padding: EdgeInsets.all(10),
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    child: tablesListwidget(1)),
+                Container(
+                  padding: EdgeInsets.all(10),
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    child: tablesListwidget(2)),
+              ],
             ),
-          ),
-        ));
+          )),
+    );
   }
 
   Widget closeButton(context) {
@@ -462,7 +507,7 @@ class _SelectTablePageState extends State<SelectTablePage> {
         ));
   }
 
-  Widget tablesListwidget() {
+  Widget tablesListwidget(type) {
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2.4;
     final double itemWidth = size.width / 4.2;
@@ -474,12 +519,21 @@ class _SelectTablePageState extends State<SelectTablePage> {
         tableList = list;
       });
     }
-
+    List<TablesDetails> newtableList = new List<TablesDetails>();
+    if (type == 1) {
+      //TakeAway
+      var dainIn = tableList.where((x) => x.tableType == 1).toList();
+      newtableList = dainIn;
+    } else {
+      // DineIn
+      var takeAway = tableList.where((x) => x.tableType == 2).toList();
+      newtableList = takeAway;
+    }
     return GridView.count(
       shrinkWrap: true,
       childAspectRatio: (itemWidth / itemHeight),
       crossAxisCount: 6,
-      children: tableList.map((table) {
+      children: newtableList.map((table) {
         return InkWell(
           borderRadius: BorderRadius.all(Radius.circular(30.0)),
           onTap: () {

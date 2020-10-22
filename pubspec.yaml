@@ -41,6 +41,10 @@ dependencies:
   loading_overlay: ^0.2.1
 
   # For POS Printer
+ # esc_pos_printer:
+  #  git:
+    #  url: git://github.com/nhancv/esc_pos_printer.git
+
   esc_pos_printer: ^3.2.9
   wifi: ^0.1.5
   ping_discover_network: ^0.2.0+1

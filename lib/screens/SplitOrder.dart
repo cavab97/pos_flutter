@@ -70,7 +70,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   bool isLoading = false;
   String selectedID = "";
   PrintReceipt _printReceipt = PrintReceipt();
-
+  var currency = "RM";
   @override
   void initState() {
     super.initState();
@@ -99,6 +99,10 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         isLoading = false;
       });
     }
+    var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
+    setState(() {
+      currency = curre;
+    });
   }
 
   @override
@@ -326,7 +330,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           "status": taxlistitem.status,
           "updated_at": taxlistitem.updatedAt,
           "updated_by": taxlistitem.updatedBy,
-          "taxAmount": taxval.toString(),
+          "taxAmount": taxval.toStringAsFixed(2),
           "taxCode": taxlistitem.code //tax.code
         };
         totalTax.add(taxmap);
@@ -406,7 +410,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                                 SizedBox(width: 70),
                                 Padding(
                                   padding: EdgeInsets.all(0),
-                                  child: Text(taxitem["taxAmount"],
+                                  child: Text(taxitem["taxAmount"].toString(),
                                       style: Styles.blackMediumbold()),
                                 )
                               ]);

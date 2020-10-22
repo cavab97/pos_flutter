@@ -362,7 +362,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               ),
                               SizedBox(width: 10),
                               Text(Strings.transaction,
-                                  style: Styles.blackBoldsmall()),
+                                  style: Styles.drawerText()),
                             ],
                           ),
                           SizedBox(height: 10),
@@ -880,8 +880,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget productList() {
     return Container(
-      padding: EdgeInsets.only(top: 0, left: 20, right: 20, bottom: 100),
-      height: MediaQuery.of(context).size.height / 2.5,
+      padding: EdgeInsets.only(left: 20, right: 20, bottom: 50),
+      height: MediaQuery.of(context).size.height / 3.5,
       //width: MediaQuery.of(context).size.width / 1.7,
       child: SingleChildScrollView(
         child: Column(
@@ -985,13 +985,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget searchTransationList() {
     if (isFiltering) {
-      return Container(
-        // color: Colors.red,
-        height: MediaQuery.of(context).size.height / 1.4,
+      return Expanded(
         child: ListView(
           shrinkWrap: true,
           physics: AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 5),
+          padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
           children: filterList.map((item) {
             return Container(
               padding: EdgeInsets.symmetric(horizontal: 5),
@@ -1048,12 +1046,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
         ),
       );
     } else {
-      return Container(
-        // color: Colors.blue,
-        height: MediaQuery.of(context).size.height / 1.4,
+      return Expanded(
         child: ListView(
           itemExtent: 65,
-          padding: EdgeInsets.symmetric(horizontal: 5),
+          padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
           shrinkWrap: true,
           physics: AlwaysScrollableScrollPhysics(),
           children: orderLists.map((item) {
