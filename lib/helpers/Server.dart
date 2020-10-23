@@ -109,6 +109,9 @@ class Server {
       case "/table_Details":
         TablesReq.gettableDetails(request);
         break;
+      case "/table_orders":
+        TablesReq.gettableOrder(request);
+        break;
       case "/get_Cart_id":
         CartReq.getSaveOrder(request);
         break;
@@ -133,7 +136,7 @@ class Server {
       case "/product_modifire":
         CartReq.productModifierdata(request);
         break;
-      case "/order":
+      case "/place_order":
         OrdersReq.placeOrder(request);
         break;
       case "/order_details":

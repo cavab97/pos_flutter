@@ -1,10 +1,9 @@
-import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 
 class Configrations {
-  //static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
-  static String base_URL = "https://mcnpos.com.my/api/v1/en/";
+  static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
+  //static String base_URL = "https://mcnpos.com.my/api/v1/en/";
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String config = "configs";
@@ -21,7 +20,6 @@ class Configrations {
   static String web_orders = "web-order-table-data";
   static String cancle_order = "create-cancel-order-data";
   static String update_inventory_table = "update-product-inventory-data";
-
   static String products = "Products";
   static String categories = "Categories";
   static String printers = "printer";
@@ -44,6 +42,7 @@ class Configrations {
   static String checkIn_Out = "checkIn_Out";
   static String get_Cart_id = "get_Cart_id";
   static String table_Details = "table_Details";
+  static String table_orders = "table_orders";
   static String cart_data = "cart_data";
   static String payment_Methods = "payment_Methods";
   static String get_order = "get_order";

@@ -141,6 +141,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   checkisInit() async {
+    await setPermissons();
     var isInit = await CommunFun.checkDatabaseExit();
     if (isInit == true) {
       await getCategoryList();
@@ -157,7 +158,7 @@ class _DashboradPageState extends State<DashboradPage>
     });
     await checkshift();
     await getUserData();
-    await setPermissons();
+
     //await getTaxs();
     _textController.addListener(() {
       getSearchList(_textController.text.toString());
@@ -1261,7 +1262,7 @@ class _DashboradPageState extends State<DashboradPage>
         return new Tab(
           child: Container(
             padding: EdgeInsets.symmetric(
-              horizontal: SizeConfig.safeBlockVertical * 3,
+              horizontal: SizeConfig.safeBlockVertical * 2,
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(50),
@@ -2252,8 +2253,8 @@ class _DashboradPageState extends State<DashboradPage>
     final cartTable = ListView(
       shrinkWrap: true,
       itemExtent: 50.0,
-      physics: NeverScrollableScrollPhysics(),
       padding: EdgeInsets.only(bottom: 150),
+      physics: AlwaysScrollableScrollPhysics(),
       children: ListTile.divideTiles(
         context: context,
         tiles: cartList.map((cart) {
@@ -2570,9 +2571,10 @@ class _DashboradPageState extends State<DashboradPage>
               Container(
                   //  color: Colors.amber,
                   //color: Colors.red,
+                  // padding: EdgeInsets.only(bottom: 50),
                   height: MediaQuery.of(context).size.height / 3,
                   margin: EdgeInsets.only(top: customer != null ? 85 : 35),
-                  child: SingleChildScrollView(child: cartTable)),
+                  child: cartTable),
               cartList.length != 0
                   ? Positioned(
                       bottom: 100,

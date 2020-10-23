@@ -187,7 +187,8 @@ class OrdersList {
   static payment(OrderPayment orderPayment, orderid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     orderPayment.order_id = orderid;
-    await db.insert("order_payment", orderPayment.toJson());
+    var res = await db.insert("order_payment", orderPayment.toJson());
+    print(res);
     await SyncAPICalls.logActivity(
         "orders", "insert order payment", "order_payment", orderid);
   }
@@ -195,7 +196,8 @@ class OrdersList {
   static voucherHistory(VoucherHistory voucherHis, orderid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     voucherHis.order_id = orderid;
-    await db.insert("voucher_history", voucherHis.toJson());
+    var res = await db.insert("voucher_history", voucherHis.toJson());
+    print(res);
     await SyncAPICalls.logActivity(
         "order", "add voucher history in cart", "voucher_history", orderid);
     return orderid;
@@ -204,7 +206,8 @@ class OrdersList {
   static shiftInvoice(ShiftInvoice shiftInvoice, orderid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     shiftInvoice.invoice_id = orderid;
-    await db.insert("shift_invoice", shiftInvoice.toJson());
+    var res = await db.insert("shift_invoice", shiftInvoice.toJson());
+    print(res);
     await SyncAPICalls.logActivity(
         "orders", "insert shift invoice", "shift_invoice", orderid);
     return shiftInvoice.invoice_id;
@@ -282,7 +285,8 @@ class OrdersList {
     List<OrderDetail> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = await Configrations.ipAddress() + Configrations.order_details;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.order_details;
       var stringParams = {"order_id": orderid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -307,7 +311,8 @@ class OrdersList {
     var isjoin = await CommunFun.checkIsJoinServer();
     OrderPayment list;
     if (isjoin == true) {
-      var apiurl = await Configrations.ipAddress() + Configrations.order_details;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.order_details;
       var stringParams = {"order_id": orderid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {

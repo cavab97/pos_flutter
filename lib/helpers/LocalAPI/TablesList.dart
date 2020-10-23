@@ -26,13 +26,13 @@ class TablesList {
             : [];
       }
     } else {
-      var query = "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax ,table_order.is_merge_table as is_merge_table, table_order.merged_table_id as merged_table_id, " +
-          " (select tables.table_name from tables where table_order.merged_table_id = tables.table_id) as merge_table_name from tables " +
-          " LEFT JOIN table_order on table_order.table_id = tables.table_id " +
-          " WHERE tables.status = 1 AND branch_id = " +
-          branchid.toString() +
-          // " AND tables.table_id NOT IN (select table_order.merged_table_id from table_order) " +
-          " GROUP by tables.table_id";
+      var query =
+          "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax ,table_order.is_merge_table as is_merge_table, table_order.merged_table_id as merged_table_id, " +
+              " (select tables.table_name from tables where table_order.merged_table_id = tables.table_id) as merge_table_name from tables " +
+              " LEFT JOIN table_order on table_order.table_id = tables.table_id " +
+              " WHERE tables.status = 1 AND branch_id = " +
+              branchid.toString() +
+              " GROUP by tables.table_id";
 
       var res = await db.rawQuery(query);
       list = res.isNotEmpty
@@ -109,6 +109,30 @@ class TablesList {
           : [];
       await SyncAPICalls.logActivity(
           "tables", "get table details", "tables", tableID);
+    }
+    return list;
+  }
+
+  Future<List<Table_order>> getTableOrders(tableid) async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    List<Table_order> list = [];
+    if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.table_orders;
+      var stringParams = {"table_id": tableid};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => Table_order.fromJson(c)).toList()
+            : [];
+      }
+    } else {
+      var qry =
+          "SELECT * from table_order where table_id = " + tableid.toString();
+      var tableList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+      list = tableList.isNotEmpty
+          ? tableList.map((c) => Table_order.fromJson(c)).toList()
+          : [];
     }
     return list;
   }

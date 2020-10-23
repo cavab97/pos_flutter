@@ -69,7 +69,7 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   viewOrder() async {
     var tableid = selectedTable.tableId;
-    List<Table_order> order = await localAPI.getTableOrders(tableid);
+    List<Table_order> order = await tabList.getTableOrders(tableid);
     await Preferences.setStringToSF(Constant.TABLE_DATA, json.encode(order[0]));
     Navigator.of(context).pop();
     Navigator.pushNamed(context, Constant.DashboardScreen);

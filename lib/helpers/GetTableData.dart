@@ -403,12 +403,11 @@ class TableData {
             'key': "setmeal_product_id",
             'value': setMealProduct.setmealProductId,
           };
-          // await setMealProduct
-          //     .toJson()
-          //     .removeWhere((String key, dynamic value) => key == "Base64");
+
           var count = await ifExists(db, data);
           var setMealP = setMealProduct.toJson();
           await setMealP.remove("base64");
+          await setMealP.remove("name");
           if (count == 0) {
             var result = await db.insert("setmeal_product", setMealP);
           } else {

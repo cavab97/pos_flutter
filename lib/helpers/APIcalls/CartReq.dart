@@ -94,8 +94,11 @@ class CartReq {
     try {
       String content = await utf8.decoder.bind(request).join();
       var data = await jsonDecode(content);
-      List<MSTSubCartdetails> details = data["cart_details"];
-      var res = await cartlist.addsubCartData(null, details);
+      List<dynamic> dt = data["cart_sub_details"];
+      List<MSTSubCartdetails> details = dt.length > 0
+          ? dt.map((c) => MSTSubCartdetails.fromJson(c)).toList()
+          : [];
+      await cartlist.addsubCartData(null, details);
       request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =

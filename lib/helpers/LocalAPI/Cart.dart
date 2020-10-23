@@ -321,6 +321,7 @@ class Cartlist {
 
   Future<int> updateCartList(List<MSTCartdetails> details) async {
     var isjoin = await CommunFun.checkIsJoinServer();
+    var result;
     if (isjoin == true) {
       var apiurl =
           await Configrations.ipAddress() + Configrations.update_cart_items;
@@ -336,6 +337,7 @@ class Cartlist {
             "voucher", "add voucher in cart", "voucher", details[i].id);
       }
     }
+    return result;
   }
 
   Future<dynamic> sendToKitched(ids) async {

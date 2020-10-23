@@ -22,10 +22,12 @@ class PrinterList {
       var stringParams = {"printer_is_cashier": printer_is_cashier};
       var result = await APICall.localapiCall(context, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        list = result["data"];
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => Printer.fromJson(c)).toList()
+            : [];
       }
     } else {
-      var db = DatabaseHelper.dbHelper.getDatabse();
       var qry = "";
       if (printer_is_cashier == "0") {
         qry = "SELECT * from printer where status = 1 ";
@@ -37,7 +39,6 @@ class PrinterList {
       list = result.isNotEmpty
           ? result.map((c) => Printer.fromJson(c)).toList()
           : [];
-
       await SyncAPICalls.logActivity(
           "Product", "get all printers", "Printer", "1");
     }

@@ -81,4 +81,29 @@ class TablesReq {
         ..close();
     }
   }
+
+  static gettableOrder(request) async {
+    TablesList tablesList = new TablesList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var res =
+          await tablesList.getTableOrders(data["table_id"]);
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 200, "message": "success.", "data": res}))
+        ..close();
+    } catch (e) {
+      print(e);
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode(
+            {"status": 500, "message": "Something went wrong" + e.toString()}))
+        ..close();
+    }
+  }
 }

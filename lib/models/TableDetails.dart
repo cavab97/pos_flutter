@@ -79,7 +79,7 @@ class TablesDetails {
     data['updated_by'] = this.updatedBy;
     data['deleted_at'] = this.deletedAt;
     data['deleted_by'] = this.deletedBy;
-    // data['number_of_pax'] = this.numberofpax;
+    data['number_of_pax'] = this.numberofpax;
     data['save_order_id'] = this.saveorderid;
     return data;
   }
