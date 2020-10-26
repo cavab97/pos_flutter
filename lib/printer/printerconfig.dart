@@ -135,11 +135,7 @@ class PrintReceipt {
                     fontType: PosFontType.fontA,
                   ))
             ]);
-          } else {
-            print("=-==============");
           }
-        } else {
-          print(item.productSecondName);
         }
       }
     }
@@ -209,7 +205,7 @@ class PrintReceipt {
     ticket.text('Terminal Name : MCN002',
         styles: PosStyles(align: PosAlign.left));
     ticket.text('Name : ' + customerName,
-        styles: PosStyles(align: PosAlign.left));
+        styles: PosStyles(align: PosAlign.left), linesAfter: 1);
 
     ticket.text("Order # : " + orderData.invoice_no,
         styles: PosStyles(
@@ -226,30 +222,38 @@ class PrintReceipt {
     ticket.setStyles(PosStyles(align: null));
     ticket.row([
       PosColumn(
-          text: 'ITEM', width: 6, styles: PosStyles(align: PosAlign.left)),
+          text: 'Item',
+          width: 8,
+          styles: PosStyles(
+              align: PosAlign.left, fontType: PosFontType.fontA, bold: true)),
       PosColumn(
-          text: 'QTY', width: 2, styles: PosStyles(align: PosAlign.right)),
+          text: 'QTY',
+          width: 2,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
       PosColumn(
-          text: 'PRICE', width: 2, styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: 'AMT', width: 2, styles: PosStyles(align: PosAlign.right)),
+          text: 'AMT',
+          width: 2,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
     ]);
     ticket.hr();
     for (var i = 0; i < orderdetail.length; i++) {
       var item = orderdetail[i];
       var name = jsonDecode(item.product_detail);
-      print(name);
       ticket.row([
         PosColumn(
             text: name["name"],
-            width: 6,
+            width: 8,
             styles: PosStyles(align: PosAlign.left)),
         PosColumn(
             text: item.detail_qty.toString(),
-            width: 2,
-            styles: PosStyles(align: PosAlign.right)),
-        PosColumn(
-            text: item.product_old_price.toStringAsFixed(2),
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
         PosColumn(
@@ -257,6 +261,20 @@ class PrintReceipt {
             width: 2,
             styles: PosStyles(align: PosAlign.right)),
       ]);
+      if (name["name_2"] != null) {
+        if (name["name_2"].isNotEmpty) {
+          ticket.row([
+            PosColumn(
+                text: name["name_2"].toString(),
+                width: 12,
+                containsChinese: true,
+                styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontA,
+                ))
+          ]);
+        }
+      }
     }
     ticket.hr();
     ticket.setStyles(PosStyles(align: PosAlign.right));
