@@ -1,32 +1,29 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mcncashier/components/StringFile.dart';
-import 'package:mcncashier/components/commanutils.dart';
-import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
-import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 
-class PaymentMethodPop extends StatefulWidget {
+class SubPaymentMethodPop extends StatefulWidget {
   // Opning ammount popup
-  PaymentMethodPop({Key key, this.subTotal, this.grandTotal, this.onClose})
+  SubPaymentMethodPop(
+      {Key key, this.subList, this.subTotal, this.grandTotal, this.onClose})
       : super(key: key);
   final double grandTotal;
+  List<Payments> subList = [];
   final double subTotal;
   Function onClose;
 
   @override
-  PaymentMethodPopState createState() => PaymentMethodPopState();
+  _SubPaymentMethodPop createState() => _SubPaymentMethodPop();
 }
 
-class PaymentMethodPopState extends State<PaymentMethodPop> {
+class _SubPaymentMethodPop extends State<SubPaymentMethodPop> {
   List<Payments> paymenttyppeList = [];
-  List<Payments> allPaymentTypes = [];
   LocalAPI localAPI = LocalAPI();
   bool isLoading = false;
   var newAmmount;
@@ -39,21 +36,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     super.initState();
     setState(() {
       newAmmount = widget.grandTotal;
+      paymenttyppeList = widget.subList;
     });
-    getPaymentMethods();
-  }
-
-  getPaymentMethods() async {
-    var result = await localAPI.getPaymentMethods();
-    List<Payments> mainPaymentList =
-        result.where((i) => i.isParent == 0).toList();
-
-    if (result.length != 0) {
-      setState(() {
-        paymenttyppeList = mainPaymentList;
-        allPaymentTypes = result;
-      });
-    }
   }
 
   openAmountPop() {
@@ -101,11 +85,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   }
 
   Widget mainContent() {
-    var size = MediaQuery.of(context).size;
-    /*24 is for notification bar on Android*/
-    //final double itemHeight = (size.height - kToolbarHeight - 24) / 1.8;
-    final double itemHeight = size.width / 4.2;
-    final double itemWidth = size.width / 4.2;
     return SingleChildScrollView(
       physics: BouncingScrollPhysics(),
       child: Container(
@@ -119,41 +98,20 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
               children: paymenttyppeList.map((payment) {
                 return ListTile(
                     contentPadding: EdgeInsets.all(5),
-                    leading:  Hero(
-                        tag: payment.paymentId != null ? payment.paymentId : 0,
-                        child: Container(
-                          color: Colors.grey,
-                          width: MediaQuery.of(context).size.width,
-                          height: itemHeight / 2.2,
-                          child: payment.base64 != ""
-                              ? CommonUtils.imageFromBase64String(payment.base64)
-                              : new Image.asset(
-                            Strings.no_image,
-                            fit: BoxFit.cover,
-                            gaplessPlayback: true,
-                          ),
-                        )),/*Icon(
+                    leading: Icon(
                       payment.name.contains("Wallet")
                           ? Icons.account_balance_wallet
                           : Icons.credit_card,
                       color: Colors.black,
                       size: SizeConfig.safeBlockVertical * 7,
-                    ),*/
+                    ),
                     // Container(
                     //     height: 70,
                     //     width: 70,
                     //     child: Image.asset("assets/bg.jpg")),
                     onTap: () {
                       /// sendPaymentByCash(payment);
-                      ///
-                      List<Payments> subList = allPaymentTypes
-                          .where((i) => i.isParent == payment.paymentId)
-                          .toList();
-                      if (subList.length > 0) {
-                        openSubPaymentDialog(subList);
-                      } else {
-                        widget.onClose(payment);
-                      }
+                      widget.onClose(payment);
                     },
                     title: Text(payment.name, style: Styles.blackMediumBold()),
                     trailing: Icon(
@@ -167,23 +125,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         ),
       ),
     );
-  }
-
-  openSubPaymentDialog(List<Payments> subList) {
-    showDialog(
-        // Opning Ammount Popup
-        context: context,
-        builder: (BuildContext context) {
-          return SubPaymentMethodPop(
-            subList: subList,
-            subTotal: widget.subTotal,
-            grandTotal: widget.grandTotal,
-            onClose: (mehtod){
-              Navigator.of(context).pop();
-              widget.onClose(mehtod);
-            },
-          );
-        });
   }
 
   Widget closeButton(context) {

@@ -1,5 +1,6 @@
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/models/Asset.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Category.dart';
@@ -118,8 +119,8 @@ class LocalAPI {
         branchid +
         " AND setmeal_branch.setmeal_id = setmeal.setmeal_id " +
         " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
-        " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id  "+
-            " where setmeal.name LIKE '%$searchText%'" +
+        " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id  " +
+        " where setmeal.name LIKE '%$searchText%'" +
         "GROUP by setmeal.setmeal_id ";
     var mealList = await db.rawQuery(qry);
     List<SetMeal> list = mealList.isNotEmpty
@@ -353,7 +354,7 @@ class LocalAPI {
   }
 
   Future<int> addintoCartDetails(cartdetails) async {
-    var db =  DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var cartdetailid;
     if (cartdetails.id != null) {
       cartdetailid = db.update("mst_cart_detail", cartdetails.toJson(),
@@ -517,8 +518,13 @@ class LocalAPI {
   }
 
   Future<List<Payments>> getPaymentMethods() async {
-    var query = "SELECT * from payment where status = 1 AND is_parent = 0";
+    /*  var query =
+        "SELECT payment.* , replace(asset.base64,'data:image/jpg;base64,','') as base64  from payment " +
+            " LEFT join asset on asset.asset_type = 3 AND asset.asset_type_id = payment.payment_id " +
+            " WHERE payment.status = 1";  */
+    var query = "SELECT *  from payment WHERE status = 1";
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+    print(res);
     List<Payments> list =
         res.isNotEmpty ? res.map((c) => Payments.fromJson(c)).toList() : [];
     await SyncAPICalls.logActivity("payment", "get payment list", "payment", 1);

@@ -7,6 +7,7 @@ class Payments {
   int isParent;
   String updatedAt;
   int updatedBy;
+  String base64;
 
   Payments(
       {this.paymentId,
@@ -16,7 +17,8 @@ class Payments {
       this.status,
       this.isParent,
       this.updatedAt,
-      this.updatedBy});
+      this.updatedBy,
+      this.base64});
 
   Payments.fromJson(Map<String, dynamic> json) {
     paymentId = json['payment_id'];
@@ -27,6 +29,8 @@ class Payments {
     isParent = json['is_parent'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
+    base64 = json['base64'] != null ? json['base64'] : "";
+
   }
 
   Map<String, dynamic> toJson() {
@@ -39,6 +43,8 @@ class Payments {
     data['is_parent'] = this.isParent;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;
+    data['base64'] = this.base64;
+
     return data;
   }
 }
