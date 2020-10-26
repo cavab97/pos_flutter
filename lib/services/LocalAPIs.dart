@@ -265,39 +265,39 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<Attribute_Data>> getProductDetails(ProductDetails product) async {
+  Future<List<Attribute_Data>> getProductDetails(productId) async {
     var qry = " SELECT product.product_id, category_attribute.name as attr_name,attributes.ca_id, " +
         " group_concat(product_attribute.price) as attr_types_price,group_concat(attributes.name) as attr_types ,group_concat(attributes.attribute_id) as attributeId" +
         " FROM product LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1" +
         " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1" +
         " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1 " +
         " WHERE product.product_id = " +
-        product.productId.toString() +
+        productId.toString() +
         " AND product_attribute.product_id = " +
-        product.productId.toString() +
+        productId.toString() +
         " GROUP by category_attribute.ca_id";
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<Attribute_Data> list = res.length > 0
         ? res.map((c) => Attribute_Data.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
-        "Product", "Getting Product details", "product", product.productId);
+        "Product", "Getting Product details", "product", productId);
     return list;
   }
 
-  Future<List<ModifireData>> getProductModifeir(ProductDetails product) async {
+  Future<List<ModifireData>> getProductModifeir(productId) async {
     var qry =
         "SELECT modifier.name,modifier.modifier_id,modifier.is_default,product_modifier.pm_id,product_modifier.price FROM  product_modifier " +
             " LEFT JOIN modifier on modifier.modifier_id = product_modifier.modifier_id " +
             " WHERE product_modifier.product_id = " +
-            product.productId.toString() +
+            productId.toString() +
             " AND product_modifier.status = 1" +
             " GROUP by product_modifier.pm_id";
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<ModifireData> list =
         res.isNotEmpty ? res.map((c) => ModifireData.fromJson(c)).toList() : [];
     await SyncAPICalls.logActivity(
-        "Product", "Getting Product modifire", "modifier", product.productId);
+        "Product", "Getting Product modifire", "modifier", productId);
     return list;
   }
 
@@ -527,12 +527,11 @@ class LocalAPI {
     List<Payments> list =
         res.isNotEmpty ? res.map((c) => Payments.fromJson(c)).toList() : [];
     await SyncAPICalls.logActivity("payment", "get payment list", "payment", 1);
-
     return list;
   }
 
   Future<Orders> getcurrentOrders(orderid) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var result =
         await db.query('orders', where: "app_id = ?", whereArgs: [orderid]);
     List<Orders> list =

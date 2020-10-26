@@ -48,7 +48,6 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
-import 'package:loading_overlay/loading_overlay.dart';
 
 class DashboradPage extends StatefulWidget {
   // main Product list page
@@ -200,6 +199,8 @@ class _DashboradPageState extends State<DashboradPage>
       }
     } else {
       clearCart();
+      Navigator.pushNamed(context, Constant.SelectTableScreen,
+          arguments: {"isAssign": false});
     }
   }
 

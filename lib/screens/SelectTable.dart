@@ -47,6 +47,14 @@ class _SelectTablePageState extends State<SelectTablePage>
       },
     );
     _tabController = new TabController(length: 2, vsync: this);
+    checkSelectedTable();
+  }
+
+  checkSelectedTable() async {
+    var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+    if (tableid != null) {
+       
+    }
   }
 
   getTables() async {
@@ -168,6 +176,10 @@ class _SelectTablePageState extends State<SelectTablePage>
     );
   }
 
+  changePax() {
+    opnPaxDailog();
+  }
+
   @override
   Widget build(BuildContext context) {
     final Map arguments = ModalRoute.of(context).settings.arguments as Map;
@@ -239,18 +251,17 @@ class _SelectTablePageState extends State<SelectTablePage>
             FocusScope.of(context).requestFocus(new FocusNode());
           },
           child: SafeArea(
-            
             child: TabBarView(
               controller: _tabController,
               physics: AlwaysScrollableScrollPhysics(),
               children: [
                 Container(
-                  padding: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(10),
                     height: MediaQuery.of(context).size.height,
                     width: MediaQuery.of(context).size.width,
                     child: tablesListwidget(1)),
                 Container(
-                  padding: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(10),
                     height: MediaQuery.of(context).size.height,
                     width: MediaQuery.of(context).size.width,
                     child: tablesListwidget(2)),
@@ -318,6 +329,16 @@ class _SelectTablePageState extends State<SelectTablePage>
                             ? Column(
                                 children: <Widget>[
                                   ListTile(
+                                    title: changePaxbtn(context),
+                                  ),
+                                  Divider(),
+                                ],
+                              )
+                            : SizedBox(),
+                        selectedTable.numberofpax != null
+                            ? Column(
+                                children: <Widget>[
+                                  ListTile(
                                     title: viewOrderBtn(context),
                                   ),
                                   Divider(),
@@ -351,6 +372,16 @@ class _SelectTablePageState extends State<SelectTablePage>
         opnPaxDailog();
       },
       child: Text(Strings.new_order,
+          textAlign: TextAlign.center, style: Styles.bluesmall()),
+    );
+  }
+
+  Widget changePaxbtn(context) {
+    return GestureDetector(
+      onTap: () {
+        changePax();
+      },
+      child: Text(Strings.change_pax,
           textAlign: TextAlign.center, style: Styles.bluesmall()),
     );
   }

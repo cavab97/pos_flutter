@@ -322,7 +322,7 @@ class PrintReceipt {
     ]);
     ticket.row([
       PosColumn(
-          text: "CASH(MYR)",
+          text: "PAYMENT TYPE",
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(

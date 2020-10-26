@@ -1,8 +1,7 @@
 class Strings {
-
   /*Print horizontal 64 lines*/
-  static String print64line = "----------------------------------------------------------------";
-
+  static String print64line =
+      "----------------------------------------------------------------";
 
   static String fontFamily = "Roboto";
   static String something_wrong = "Something went wrong!";
@@ -54,9 +53,10 @@ class Strings {
   static String customer_Search_Hint =
       "Search Customer Name,Email,Phone or Memeber id";
   static String select_table = "Select Table";
-    static String merge_table = "Merge Table";
+  static String merge_table = "Merge Table";
   static String new_order = "New Order";
   static String view_order = "View Order";
+  static String change_pax = "Change Pax";
   static String merge_order = "Merge Order";
   static String enterPax = "Enter Pax";
   static String open_shift = "Open Shift";
@@ -123,6 +123,6 @@ class Strings {
       "Currently shift was closed,Please opne shift after you can see shift report.";
   static String shift_opne_alert_msg_transaction =
       "Currently shift was closed,Please opne shift after you  can see Transactions.";
-      static String shift_opne_alert_msg_webOrder=
+  static String shift_opne_alert_msg_webOrder =
       "Currently shift was closed,Please opne shift after you  can see web Orders.";
 }
