@@ -95,6 +95,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
 
   Widget mainContent() {
     return SingleChildScrollView(
+      physics: BouncingScrollPhysics(),
       child: Container(
         // height: MediaQuery.of(context).size.height / 3,
         width: MediaQuery.of(context).size.width / 3,
@@ -155,6 +156,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
             //     ]),
 
             ListView(
+              physics: BouncingScrollPhysics(),
               shrinkWrap: true,
               children: paymenttyppeList.map((payment) {
                 return ListTile(

@@ -242,6 +242,7 @@ class _ShiftReportsState extends State<ShiftReports> {
         ),
       ),
       body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         child: Container(
           padding: EdgeInsets.all(20),
           child: Column(
@@ -281,6 +282,7 @@ class _ShiftReportsState extends State<ShiftReports> {
         items: imgList
             .map(
               (item) => SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
                 child: Container(
                   width: MediaQuery.of(context).size.width / screenArea,
                   child: Column(
@@ -373,6 +375,7 @@ class _ShiftReportsState extends State<ShiftReports> {
     return Container(
         height: MediaQuery.of(context).size.height / 1.8,
         child: ListView(
+          physics: BouncingScrollPhysics(),
           shrinkWrap: true,
           children: <Widget>[
             Container(
@@ -461,6 +464,7 @@ class _ShiftReportsState extends State<ShiftReports> {
     return Container(
         height: MediaQuery.of(context).size.height / 1.8,
         child: new ListView(
+          physics: BouncingScrollPhysics(),
           shrinkWrap: true,
           children: <Widget>[
             Container(
@@ -577,6 +581,7 @@ class _ShiftReportsState extends State<ShiftReports> {
     return Container(
         height: MediaQuery.of(context).size.height / 1.8,
         child: ListView(
+          physics: BouncingScrollPhysics(),
           shrinkWrap: true,
           children: <Widget>[
             Container(

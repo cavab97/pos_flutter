@@ -133,6 +133,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
           Container(
             // height: MediaQuery.of(context).size.height / 2.2,
             child: ListView.builder(
+              physics: BouncingScrollPhysics(),
               shrinkWrap: true,
               itemCount: devices.length,
               itemBuilder: (BuildContext context, int index) {

@@ -211,6 +211,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         attributeList = productAttr;
       });
     }
+
     List<ModifireData> productModifeir =
         await localAPI.getProductModifeir(productItem);
     if (productModifeir.length > 0) {
@@ -632,6 +633,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.productId =
         isSetMeal ? setmeal.setmealId : productItem.productId;
     cartdetails.productName = isSetMeal ? setmeal.name : productItem.name;
+    cartdetails.productSecondName = isSetMeal ? "" : productItem.name_2;
     cartdetails.productPrice = double.parse(price.toStringAsFixed(2));
     cartdetails.productQty = product_qty.toDouble();
     cartdetails.productNetPrice =
@@ -801,21 +803,26 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       width: MediaQuery.of(context).size.width / 1.8,
       height: MediaQuery.of(context).size.height / 1.8,
       child: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            getAttributeList(),
+            isSetMeal ? SizedBox() : getAttributeList(),
             getMealsProductList(),
-            modifireList.length != 0
-                ? Text(
-                    Strings.modifier,
-                    style:
-                        TextStyle(fontSize: SizeConfig.safeBlockVertical * 3),
-                  )
-                : SizedBox(),
+            isSetMeal
+                ? SizedBox()
+                : modifireList.length != 0
+                    ? Text(
+                        Strings.modifier,
+                        style: TextStyle(
+                            fontSize: SizeConfig.safeBlockVertical * 3),
+                      )
+                    : SizedBox(),
             SizedBox(height: 5),
-            modifireList.length != 0 ? modifireItmeList() : SizedBox(),
+            isSetMeal
+                ? SizedBox()
+                : modifireList.length != 0 ? modifireItmeList() : SizedBox(),
             SizedBox(height: 10),
             _extraNotesTitle(),
             SizedBox(height: 5),
@@ -829,9 +836,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   Widget getMealsProductList() {
     return isSetMeal
         ? Container(
-            //color: Colors.green,
+            // color: Colors.green,
             height: MediaQuery.of(context).size.height / 2.1,
             child: SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
               child: Column(
                   children: mealProducts.map((product) {
                 var index = mealProducts.indexOf(product);
@@ -840,75 +848,84 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                       _setSelectUnselect(product);
                     },
                     child: Container(
-                      color: tempCart
+                      margin: EdgeInsets.only(top: 8),
+                      decoration: new BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8.0)),
+                      /* color: tempCart
                               .where((element) =>
                                   element.setmealProductId ==
                                   product.setmealProductId)
                               .isNotEmpty
                           ? Colors.grey[100]
-                          : Colors.white,
+                          : Colors.white,*/
                       padding:
-                          EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Hero(
-                            tag: product.productId,
-                            child: new Stack(
-                              children: [
-                                Container(
-                                  height: SizeConfig.safeBlockVertical * 8,
-                                  width: SizeConfig.safeBlockVertical * 9,
-                                  child: product.base64 != "" &&
-                                          product.base64 != null
-                                      ? CommonUtils.imageFromBase64String(
-                                          product.base64)
-                                      : new Image.asset(
-                                          Strings.no_imageAsset,
-                                          fit: BoxFit.cover,
-                                          gaplessPlayback: true,
-                                        ),
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              Hero(
+                                tag: product.productId,
+                                child: new Stack(
+                                  children: [
+                                    Container(
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      width: SizeConfig.safeBlockVertical * 9,
+                                      child: product.base64 != "" &&
+                                              product.base64 != null
+                                          ? CommonUtils.imageFromBase64String(
+                                              product.base64)
+                                          : new Image.asset(
+                                              Strings.no_imageAsset,
+                                              fit: BoxFit.cover,
+                                              gaplessPlayback: true,
+                                            ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                              SizedBox(width: 15),
+                              Flexible(
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Text(product.name.toUpperCase(),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 2,
+                                              style: Styles.smallBlack())
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 8,
+                                    ),
+                                    Text(product.quantity.toString(),
+                                        style: Styles.smallBlack()),
+                                    SizedBox(width: 90),
+                                    Icon(
+                                      tempCart
+                                              .where((element) =>
+                                                  element.setmealProductId ==
+                                                  product.setmealProductId)
+                                              .isNotEmpty
+                                          ? Icons.check_circle
+                                          : Icons.check_circle_outline,
+                                      color: Colors.green,
+                                      size: 40,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(width: 15),
-                          Flexible(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(product.name.toUpperCase(),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 2,
-                                          style: Styles.smallBlack())
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 8,
-                                ),
-                                Text(product.quantity.toString(),
-                                    style: Styles.smallBlack()),
-                                SizedBox(width: 90),
-                                Icon(
-                                  tempCart
-                                          .where((element) =>
-                                              element.setmealProductId ==
-                                              product.setmealProductId)
-                                          .isNotEmpty
-                                      ? Icons.check_circle
-                                      : Icons.check_circle_outline,
-                                  color: Colors.green,
-                                  size: 40,
-                                ),
-                              ],
-                            ),
-                          )
+                          getAttributeList(),
                         ],
                       ),
                     ));
@@ -920,12 +937,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   Widget getAttributeList() {
     return Container(
-      margin: EdgeInsets.only(bottom: 10, top: 0),
+      //color: Colors.white,
+      margin: EdgeInsets.only(bottom: isSetMeal ? 0 : 10, top: 0),
       // MediaQuery.of(context).size.height /8,
       child: ListView(
         shrinkWrap: true,
         scrollDirection: Axis.vertical,
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: BouncingScrollPhysics(),
         children: attributeList.map((attribute) {
           var attributType = attribute.attr_types.split(',');
           var attrIDs = attribute.attributeId.split(',').asMap();
@@ -934,15 +952,19 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              SizedBox(height: 10),
-              Text(
-                attribute.attr_name,
-                style: TextStyle(fontSize: SizeConfig.safeBlockVertical * 3),
-              ),
+              isSetMeal ? SizedBox() : SizedBox(height: 10),
+              isSetMeal
+                  ? SizedBox()
+                  : Text(
+                      attribute.attr_name,
+                      style:
+                          TextStyle(fontSize: SizeConfig.safeBlockVertical * 3),
+                    ),
               Container(
                   margin: EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
                   height: SizeConfig.safeBlockVertical * 9,
                   child: ListView(
+                      physics: BouncingScrollPhysics(),
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
                       children: attributType
@@ -987,7 +1009,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         height: SizeConfig.safeBlockVertical * 9,
         child: ListView(
             shrinkWrap: true,
-            physics: AlwaysScrollableScrollPhysics(),
+            physics: BouncingScrollPhysics(),
             scrollDirection: Axis.horizontal,
             children: modifireList.map((modifier) {
               if (modifier.isDefault == 1) {

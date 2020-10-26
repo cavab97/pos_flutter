@@ -337,7 +337,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 TableCell(
                   // Part 1 white
                   child: SingleChildScrollView(
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: BouncingScrollPhysics(),
                     child: Container(
                       //    padding: EdgeInsets.only(top: 20, left: 20, right: 20),
                       height: MediaQuery.of(context).size.height,
@@ -384,6 +384,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   child: Center(
                       child: orderLists.length > 0
                           ? SingleChildScrollView(
+                          physics: BouncingScrollPhysics(),
                               child: Stack(children: <Widget>[
                               // Padding(
                               //     padding: EdgeInsets.only(right: 10, top: 10),
@@ -885,6 +886,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       height: MediaQuery.of(context).size.height / 3.5,
       //width: MediaQuery.of(context).size.width / 1.7,
       child: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         child: Column(
             children: orderItemList.map((product) {
           var index = orderItemList.indexOf(product);
@@ -989,7 +991,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       return Expanded(
         child: ListView(
           shrinkWrap: true,
-          physics: AlwaysScrollableScrollPhysics(),
+          physics: BouncingScrollPhysics(),
           padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
           children: filterList.map((item) {
             return Container(
@@ -1052,7 +1054,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           itemExtent: 65,
           padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
           shrinkWrap: true,
-          physics: AlwaysScrollableScrollPhysics(),
+          physics: BouncingScrollPhysics(),
           children: orderLists.map((item) {
             return Container(
                 height: 100.0,
@@ -1145,6 +1147,7 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
       content: Container(
         width: MediaQuery.of(context).size.width / 2.4,
         child: ListView(
+          physics: BouncingScrollPhysics(),
           shrinkWrap: true,
           children: <Widget>[
             ListTile(
@@ -1257,6 +1260,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
         height: MediaQuery.of(context).size.height / 4,
         width: MediaQuery.of(context).size.width / 3.4,
         child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
             child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,

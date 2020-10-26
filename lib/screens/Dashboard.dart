@@ -383,6 +383,7 @@ class _DashboradPageState extends State<DashboradPage>
         if (cartList.length > 0) {
           if (printerreceiptList.length > 0) {
             printKOT.checkDraftPrint(
+                taxJson,
                 printerreceiptList[0].printerIp.toString(),
                 context,
                 cartList,
@@ -478,6 +479,7 @@ class _DashboradPageState extends State<DashboradPage>
     var branchid = await CommunFun.getbranchId();
     List<ProductDetails> product =
         await localAPI.getProduct(categoryId.toString(), branchid);
+
     if (product.length > 0) {
       setState(() {
         // productList = [];
@@ -629,14 +631,17 @@ class _DashboradPageState extends State<DashboradPage>
       tempCart.clear();
       for (int j = 0; j < cartLists.length; j++) {
         MSTCartdetails temp = MSTCartdetails();
+        print(printerList[i].printerId.toString() +
+            "==" +
+            cartLists[j].printer_id.toString());
         if (printerList[i].printerId == cartLists[j].printer_id) {
           temp = cartLists[j];
           tempCart.add(temp);
         }
       }
       if (tempCart.length > 0) {
-        printKOT.checkKOTPrint(
-            printerList[i].printerIp.toString(), tableName, context, tempCart);
+        printKOT.checkKOTPrint(printerList[i].printerIp.toString(), tableName,
+            context, tempCart, selectedTable.number_of_pax.toString());
       }
     }
   }
@@ -1094,13 +1099,13 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   printReceipt(int orderid) async {
-    var branchID = await CommunFun.getbranchId();
-    Branch branchAddress = await localAPI.getBranchData(branchID);
+    // var branchID = await CommunFun.getbranchId();
+    // Branch branchAddress = await localAPI.getBranchData(branchID);
     OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
     Payments paument_method =
         await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
-    User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
-    List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
+    //User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
+    // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     Orders order = await localAPI.getcurrentOrders(orderid);
 
@@ -1108,7 +1113,7 @@ class _DashboradPageState extends State<DashboradPage>
         printerreceiptList[0].printerIp,
         context,
         branchData,
-        itemsList,
+        taxJson,
         orderitem,
         order,
         paument_method,
@@ -1404,6 +1409,7 @@ class _DashboradPageState extends State<DashboradPage>
                                     ),
                                   ),
                             SingleChildScrollView(
+                              physics: BouncingScrollPhysics(),
                               child: Container(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -1512,6 +1518,7 @@ class _DashboradPageState extends State<DashboradPage>
           padding: EdgeInsets.only(top: 10, left: 10, right: 10),
           color: Colors.white,
           child: ListView(
+            physics: BouncingScrollPhysics(),
             children: <Widget>[
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1946,7 +1953,7 @@ class _DashboradPageState extends State<DashboradPage>
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
         shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
+        physics: BouncingScrollPhysics(),
         children: mealsList.map((meal) {
           var price = meal.price.toStringAsFixed(2);
           return InkWell(
@@ -2043,6 +2050,7 @@ class _DashboradPageState extends State<DashboradPage>
       padding: EdgeInsets.only(top: 10, bottom: 20, left: 0, right: 0),
 
       child: GridView.count(
+        physics: BouncingScrollPhysics(),
         shrinkWrap: true,
         childAspectRatio: (itemWidth / itemHeight),
         crossAxisCount: 4,
@@ -2305,6 +2313,7 @@ class _DashboradPageState extends State<DashboradPage>
         ]);
 
     final cartTable = ListView(
+      physics: BouncingScrollPhysics(),
       shrinkWrap: true,
       itemExtent: 50.0,
       padding: EdgeInsets.only(bottom: 150),

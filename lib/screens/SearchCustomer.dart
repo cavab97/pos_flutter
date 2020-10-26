@@ -206,6 +206,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
   Widget customerLists() {
     if (isFiltring) {
       return ListView(
+          physics: BouncingScrollPhysics(),
           shrinkWrap: true,
           children: filterList.map((customer) {
             return ListTile(
@@ -221,6 +222,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           }).toList());
     } else {
       return ListView(
+        physics: BouncingScrollPhysics(),
         shrinkWrap: true,
         children: customerList.map((customer) {
           return ListTile(

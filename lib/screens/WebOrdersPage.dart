@@ -157,6 +157,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2.4;
     final double itemWidth = size.width / 4.2;
     return GridView.count(
+      physics: BouncingScrollPhysics(),
       padding: EdgeInsets.all(20),
       shrinkWrap: true,
       childAspectRatio: (itemWidth / itemHeight),
@@ -233,6 +234,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2.4;
     final double itemWidth = size.width / 4.2;
     return GridView.count(
+      physics: BouncingScrollPhysics(),
       padding: EdgeInsets.all(20),
       shrinkWrap: true,
       childAspectRatio: (itemWidth / itemHeight),

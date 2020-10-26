@@ -270,6 +270,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
       width: MediaQuery.of(context).size.width / 1.8,
       height: MediaQuery.of(context).size.height / 1.8,
       child: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         child: Table(
           columnWidths: {
             0: FractionColumnWidth(.5),

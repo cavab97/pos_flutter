@@ -125,6 +125,7 @@ class _LoginPageState extends State<LoginPage> {
               width: MediaQuery.of(context).size.width / 1.8,
               padding: EdgeInsets.only(left: 30, right: 30),
               child: new SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,

@@ -254,6 +254,7 @@ class _PINPageState extends State<PINPage> {
             bottomRight: Radius.circular(30), topRight: Radius.circular(30)),
       ),
       child: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

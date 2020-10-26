@@ -3,6 +3,7 @@ class ProductDetails {
   bool isSetMeal;
   String uuid;
   String name;
+  String name_2;
   String description;
   String sku;
   int priceTypeId;
@@ -13,6 +14,7 @@ class ProductDetails {
   double qty;
   int hasInventory;
   int status;
+  int hasSetmeal;
   String updatedAt;
   String deletedAt;
   int updatedBy;
@@ -23,6 +25,7 @@ class ProductDetails {
     this.productId,
     this.uuid,
     this.name,
+    this.name_2,
     this.description,
     this.sku,
     this.priceTypeId,
@@ -33,6 +36,7 @@ class ProductDetails {
     this.hasInventory,
     this.qty,
     this.status,
+    this.hasSetmeal,
     this.updatedAt,
     this.deletedAt,
     this.updatedBy,
@@ -45,6 +49,7 @@ class ProductDetails {
     isSetMeal = json['isSetMeal'];
     uuid = json['uuid'];
     name = json['name'];
+    name_2 = json['name_2'];
     description = json['description'];
     sku = json['sku'];
     priceTypeName = json['price_type_Name'];
@@ -59,6 +64,7 @@ class ProductDetails {
         : json['old_price'];
     hasInventory = json['has_inventory'];
     status = json['status'];
+    hasSetmeal = json['has_setmeal'];
     qty = json['qty'] != null ? double.parse(json['qty']) : 0.0;
     updatedAt = json['updated_at'];
     deletedAt = json['deleted_at'];
@@ -73,6 +79,7 @@ class ProductDetails {
     data['isSetMeal'] = this.isSetMeal;
     data['uuid'] = this.uuid;
     data['name'] = this.name;
+    data['name_2'] = this.name_2;
     data['description'] = this.description;
     data['sku'] = this.sku;
     data['price_type_id'] = this.priceTypeId;
@@ -83,6 +90,7 @@ class ProductDetails {
     data['qty'] = this.qty;
     data['has_inventory'] = this.hasInventory;
     data['status'] = this.status;
+    data['has_setmeal'] = this.hasSetmeal;
     data['updated_at'] = this.updatedAt;
     data['deleted_at'] = this.deletedAt;
     data['updated_by'] = this.updatedBy;

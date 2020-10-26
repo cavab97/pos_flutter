@@ -301,6 +301,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                 child: Stack(
                   children: <Widget>[
                     ListView(
+                      physics: BouncingScrollPhysics(),
                       shrinkWrap: true,
                       children: <Widget>[
                         selectedTable.numberofpax == null
@@ -467,6 +468,7 @@ class _SelectTablePageState extends State<SelectTablePage>
               width: MediaQuery.of(context).size.width / 3,
               child: Center(
                 child: SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
                   child: Column(
                     children: <Widget>[
                       paxTextInput(),
@@ -514,6 +516,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       newtableList = takeAway;
     }
     return GridView.count(
+      physics: BouncingScrollPhysics(),
       shrinkWrap: true,
       childAspectRatio: (itemWidth / itemHeight),
       crossAxisCount: 6,

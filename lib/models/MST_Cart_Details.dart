@@ -5,6 +5,7 @@ class MSTCartdetails {
   int productId;
   int printer_id;
   String productName;
+  String productSecondName;
   double productPrice;
   double productQty;
   double productNetPrice;
@@ -32,6 +33,7 @@ class MSTCartdetails {
       this.productId,
       this.printer_id,
       this.productName,
+      this.productSecondName,
       this.productPrice,
       this.productQty,
       this.productNetPrice,
@@ -57,6 +59,7 @@ class MSTCartdetails {
     productId = json["product_id"];
     printer_id = json["printer_id"];
     productName = json["product_name"];
+    productSecondName = json["name_2"];
     productPrice = json["product_price"] is int
         ? (json['product_price'] as int).toDouble()
         : json["product_price"];
@@ -94,6 +97,7 @@ class MSTCartdetails {
     data["product_id"] = this.productId;
     data["printer_id"] = this.printer_id;
     data["product_name"] = this.productName;
+    data["name_2"] = this.productSecondName;
     data["product_price"] = this.productPrice;
     data["product_qty"] = this.productQty;
     data["product_net_price"] = this.productNetPrice;

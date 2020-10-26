@@ -82,7 +82,7 @@ class LocalAPI {
         id +
         " AND product_branch.branch_id = " +
         branchID +
-        " AND product.status = 1 GROUP By product.product_id";
+        " AND product.status = 1 AND product.has_setmeal = 0 GROUP By product.product_id";
     var res = await db.rawQuery(query);
     List<ProductDetails> list = res.isNotEmpty
         ? res.map((c) => ProductDetails.fromJson(c)).toList()
@@ -98,7 +98,7 @@ class LocalAPI {
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
         " where product.name LIKE '%$searchText%' OR product.sku LIKE '%$searchText%'" +
-        " AND product.status = 1" +
+        " AND product.status = 1 AND product.has_setmeal = 0" +
         " GROUP By product.product_id";
 
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);

@@ -131,6 +131,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       height: MediaQuery.of(context).size.height,
                       color: Colors.white,
                       child: ListView(
+                        physics: BouncingScrollPhysics(),
                         shrinkWrap: true,
                         padding: EdgeInsets.only(left: 20, right: 20),
                         children: <Widget>[
@@ -200,6 +201,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     // Part 2 transactions list
                     child: Center(
                       child: SingleChildScrollView(
+                          physics: BouncingScrollPhysics(),
                           child: isGeneralSettings
                               ? generalSettings()
                               : printingSetitngs()),
@@ -214,6 +216,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget generalSettings() {
     return ListView(
+      physics: BouncingScrollPhysics(),
       padding: EdgeInsets.all(20),
       shrinkWrap: true,
       children: <Widget>[
@@ -256,6 +259,7 @@ class _SettingsPageState extends State<SettingsPage> {
         Container(
           height: MediaQuery.of(context).size.height,
           child: ListView(
+            physics: BouncingScrollPhysics(),
             padding: EdgeInsets.all(20),
             shrinkWrap: true,
             children: <Widget>[
@@ -294,6 +298,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 margin: EdgeInsets.only(top: 10),
                 // height: MediaQuery.of(context).size.height / 2.2,
                 child: ListView.builder(
+                  physics: BouncingScrollPhysics(),
                   shrinkWrap: true,
                   itemCount: printerList.length,
                   itemBuilder: (BuildContext context, int index) {

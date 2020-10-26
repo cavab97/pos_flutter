@@ -94,6 +94,7 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
         children: <Widget>[
           Container(
               child: ListView(
+                physics: BouncingScrollPhysics(),
             padding: EdgeInsets.all(0),
             shrinkWrap: true,
             children: <Widget>[

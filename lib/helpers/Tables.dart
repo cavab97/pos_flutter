@@ -188,6 +188,7 @@ class CreateTables {
     datatables = db.execute("CREATE TABLE product(" +
         "product_id INTEGER PRIMARY KEY," +
         "name TEXT," +
+        "name_2 TEXT," +
         "uuid TEXT," +
         "description TEXT," +
         "sku TEXT," +
@@ -197,6 +198,7 @@ class CreateTables {
         "old_price REAL," +
         "has_inventory INTEGER," +
         "status INTEGER," +
+        "has_setmeal INTEGER," +
         "updated_at TEXT," +
         "updated_by INTEGER," +
         "deleted_at TEXT," +
@@ -630,6 +632,7 @@ class CreateTables {
         'product_id INTEGER,' +
         'printer_id INTEGER,' +
         'product_name TEXT,' +
+        'name_2 TEXT,' +
         'product_price REAL,' +
         'product_net_price REAL,' +
         'product_qty REAL,' +
@@ -794,15 +797,15 @@ class CreateTables {
 
     //set Meal Tables \
     datatables = db.execute("CREATE TABLE setmeal ( " +
-        "setmeal_id INTIGER PRIMARYKEY," +
+        "setmeal_id INTEGER PRIMARYKEY," +
         "uuid TEXT," +
         "name TEXT," +
         "price REAL," +
         "status NUMERIC," +
         "created_at TEXT," +
-        "created_by INTIGER," +
+        "created_by INTEGER," +
         "updated_at TEXT," +
-        "updated_by INTIGER" +
+        "updated_by INTEGER" +
         ")");
 
     datatables = db.execute("CREATE TABLE setmeal_branch ( " +

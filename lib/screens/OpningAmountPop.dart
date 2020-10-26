@@ -107,6 +107,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
 
   Widget mainContent() {
     return SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         child: Column(
       children: [
         getAmount(), // dynamic enter ammount

@@ -263,6 +263,7 @@ class VoucherPopState extends State<VoucherPop> {
 
   Widget mainContent() {
     return SingleChildScrollView(
+      physics: BouncingScrollPhysics(),
       child: Container(
         width: MediaQuery.of(context).size.width / 3,
         child: Column(

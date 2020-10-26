@@ -94,6 +94,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
           child: Container(
             width: MediaQuery.of(context).size.width / 1.7,
             child: new SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,

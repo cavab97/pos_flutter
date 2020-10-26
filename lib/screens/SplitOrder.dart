@@ -67,6 +67,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   String selectedID = "";
   PrintReceipt _printReceipt = PrintReceipt();
   var currency = "RM";
+
   @override
   void initState() {
     super.initState();
@@ -472,6 +473,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     return Container(
       color: Colors.white,
       child: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         padding: EdgeInsets.only(bottom: 200),
         child: Column(
             children: cartList.map((product) {
@@ -927,7 +929,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     Payments paument_method =
         await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
-    List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
+    // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     Orders order = await localAPI.getcurrentOrders(orderid);
     print(branchAddress);
@@ -935,14 +937,13 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     print(paument_method);
     print(orderitem);
     print(user);
-    print(itemsList);
     print(order);
     if (widget.printerIP.isNotEmpty) {
       _printReceipt.checkReceiptPrint(
           widget.printerIP,
           context,
           branchAddress,
-          itemsList,
+          taxJson,
           orderitem,
           order,
           paument_method,
