@@ -105,20 +105,20 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       height: MediaQuery.of(context).size.height / 3,
       width: MediaQuery.of(context).size.width / 3,
       child: ListView(
-        physics: BouncingScrollPhysics(),
+        //physics: BouncingScrollPhysics(),
         shrinkWrap: true,
         children: paymenttyppeList.map((payment) {
+          print(payment);
           return ListTile(
               contentPadding: EdgeInsets.all(5),
               leading: Hero(
                   tag: payment.paymentId != null ? payment.paymentId : 0,
                   child: Container(
-                    color: Colors.grey,
-                    width: MediaQuery.of(context).size.width,
-                    height: 20.0,
+                    //color: Colors.grey,
+                    width: 40,
+                    height: 40,
                     child: payment.base64 != ""
-                        ? CommonUtils.imageFromBase64String(
-                            payment.base64)
+                        ? CommonUtils.imageFromBase64String(payment.base64)
                         : new Image.asset(
                             Strings.no_image,
                             fit: BoxFit.cover,

@@ -199,8 +199,10 @@ class _DashboradPageState extends State<DashboradPage>
       }
     } else {
       clearCart();
-      Navigator.pushNamed(context, Constant.SelectTableScreen,
-          arguments: {"isAssign": false});
+      if (isShiftOpen) {
+        Navigator.pushNamed(context, Constant.SelectTableScreen,
+            arguments: {"isAssign": false});
+      }
     }
   }
 
