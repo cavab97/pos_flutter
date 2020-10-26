@@ -4,6 +4,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/services/Config.dart' as repo;
+
 class SplashScreen extends StatefulWidget {
 // PIN Enter PAGE
   SplashScreen({Key key}) : super(key: key);
@@ -22,7 +23,7 @@ class SplashScreenstate extends State<SplashScreen> {
   }
 
   getconfigdata() async {
-    var res = await  repo.getCongigData();
+    var res = await repo.getCongigData();
     if (res["status"] == Constant.STATUS200) {
       await Preferences.setStringToSF(
           Constant.SYNC_TIMER, res["data"]["sync_timer"]);

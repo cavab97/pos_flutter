@@ -109,11 +109,19 @@ class PrintReceipt {
           PosColumn(
               text: item.productName,
               width: 11,
-              styles: PosStyles(align: PosAlign.left,fontType: PosFontType.fontA,bold: true,)),
+              styles: PosStyles(
+                align: PosAlign.left,
+                fontType: PosFontType.fontA,
+                bold: true,
+              )),
           PosColumn(
               text: item.productQty.toString(),
               width: 1,
-              styles: PosStyles(align: PosAlign.left,fontType: PosFontType.fontA,bold: true,)),
+              styles: PosStyles(
+                align: PosAlign.left,
+                fontType: PosFontType.fontA,
+                bold: true,
+              )),
         ]);
         if (item.productSecondName != null) {
           if (item.productSecondName.isNotEmpty) {
@@ -122,7 +130,10 @@ class PrintReceipt {
                   text: item.productSecondName.toString(),
                   width: 12,
                   containsChinese: true,
-                  styles: PosStyles(align: PosAlign.left,fontType: PosFontType.fontA,))
+                  styles: PosStyles(
+                    align: PosAlign.left,
+                    fontType: PosFontType.fontA,
+                  ))
             ]);
           } else {
             print("=-==============");
@@ -284,7 +295,7 @@ class PrintReceipt {
     ]);
     ticket.row([
       PosColumn(
-          text: "CASH(MYR)",
+          text: "PAYMENT TYPE",
           width: 8,
           styles: PosStyles(align: PosAlign.right)),
       PosColumn(

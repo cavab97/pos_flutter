@@ -1,6 +1,4 @@
-import 'package:esc_pos_printer/esc_pos_printer.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';

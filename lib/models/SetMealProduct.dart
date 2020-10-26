@@ -1,3 +1,5 @@
+import 'package:mcncashier/models/Attribute_data.dart';
+
 class SetMealProduct {
   int setmealProductId;
   int setmealId;
@@ -8,6 +10,7 @@ class SetMealProduct {
   String updatedAt;
   String base64;
   String name;
+  //List<Attribute_Data> attributes;
   SetMealProduct(
       {this.setmealProductId,
       this.setmealId,
@@ -17,7 +20,9 @@ class SetMealProduct {
       this.createdAt,
       this.updatedAt,
       this.base64,
-      this.name});
+      this.name,
+      // this.attributes
+      });
 
   SetMealProduct.fromJson(Map<String, dynamic> json) {
     setmealProductId = json['setmeal_product_id'];
@@ -31,6 +36,7 @@ class SetMealProduct {
     updatedAt = json['updated_at'];
     base64 = json['base64'] != null ? json['base64'] : "";
     name = json['name'];
+    //attributes = json['attributes'];
   }
 
   Map<String, dynamic> toJson() {
@@ -43,6 +49,7 @@ class SetMealProduct {
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['base64'] = this.base64;
+  //  data["attributes"] = this.attributes;
     return data;
   }
 }

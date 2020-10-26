@@ -6,7 +6,7 @@ import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
-import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
+//import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 
@@ -42,9 +42,19 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
 
   getPaymentMethods() async {
     var result = await localAPI.getPaymentMethods();
+    // if (result.length != 0) {
+    //   setState(() {
+    //     paymenttyppeList = result;
+    //   });
+    // }
+
+    List<Payments> mainPaymentList =
+        result.where((i) => i.isParent == 0).toList();
+
     if (result.length != 0) {
       setState(() {
-        paymenttyppeList = result;
+        paymenttyppeList = mainPaymentList;
+        //   allPaymentTypes = result;
       });
     }
   }

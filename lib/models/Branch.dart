@@ -17,8 +17,8 @@ class Branch {
   String invoiceStart;
   String updatedAt;
   int updatedBy;
-  Null deletedAt;
-  Null deletedBy;
+  String deletedAt;
+  int deletedBy;
   String base64;
 
   Branch(
