@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
+import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 
@@ -36,8 +38,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       newAmmount = widget.grandTotal;
     });
     getPaymentMethods();
-    // getcartData();
-    // getbranch();
   }
 
   getPaymentMethods() async {
@@ -174,7 +174,14 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                     //     child: Image.asset("assets/bg.jpg")),
                     onTap: () {
                       /// sendPaymentByCash(payment);
+                      /* List<Payments> subList = paymenttyppeList
+                          .where((i) => i.paymentId == payment.isParent)
+                          .toList();
+                      if (subList.length > 0) {
+                        openSubPaymentDialog(subList);
+                      } else {*/
                       widget.onClose(payment);
+                      // }
                     },
                     title: Text(payment.name, style: Styles.blackMediumBold()),
                     trailing: Icon(
@@ -190,6 +197,19 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     );
   }
 
+  /*openSubPaymentDialog(List<Payments> subList) {
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return SubPaymentMethodPop(
+            subList: subList,
+            subTotal: widget.subTotal,
+            grandTotal: widget.grandTotal,
+          );
+        });
+  }
+*/
   Widget closeButton(context) {
     return Positioned(
       top: -30,

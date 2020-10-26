@@ -517,7 +517,7 @@ class LocalAPI {
   }
 
   Future<List<Payments>> getPaymentMethods() async {
-    var query = "SELECT * from payment where status = 1";
+    var query = "SELECT * from payment where status = 1 AND is_parent = 0";
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Payments> list =
         res.isNotEmpty ? res.map((c) => Payments.fromJson(c)).toList() : [];

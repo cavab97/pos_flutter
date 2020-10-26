@@ -332,7 +332,9 @@ class CreateTables {
         "payment_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "name	TEXT," +
+        "slug	TEXT," +
         "status	INTEGER," +
+        "is_parent	INTEGER," +
         "updated_at	INTEGER," +
         "updated_by	INTEGER" +
         ")");
