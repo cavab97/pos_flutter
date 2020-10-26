@@ -101,70 +101,60 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   }
 
   Widget mainContent() {
-    var size = MediaQuery.of(context).size;
-    /*24 is for notification bar on Android*/
-    //final double itemHeight = (size.height - kToolbarHeight - 24) / 1.8;
-    final double itemHeight = size.width / 4.2;
-    final double itemWidth = size.width / 4.2;
-    return SingleChildScrollView(
-      physics: BouncingScrollPhysics(),
-      child: Container(
-        // height: MediaQuery.of(context).size.height / 3,
-        width: MediaQuery.of(context).size.width / 3,
-        child: Column(
-          children: <Widget>[
-            ListView(
-              physics: BouncingScrollPhysics(),
-              shrinkWrap: true,
-              children: paymenttyppeList.map((payment) {
-                return ListTile(
-                    contentPadding: EdgeInsets.all(5),
-                    leading:  Hero(
-                        tag: payment.paymentId != null ? payment.paymentId : 0,
-                        child: Container(
-                          color: Colors.grey,
-                          width: MediaQuery.of(context).size.width,
-                          height: itemHeight / 2.2,
-                          child: payment.base64 != ""
-                              ? CommonUtils.imageFromBase64String(payment.base64)
-                              : new Image.asset(
+    return Container(
+      height: MediaQuery.of(context).size.height / 3,
+      width: MediaQuery.of(context).size.width / 3,
+      child: ListView(
+        physics: BouncingScrollPhysics(),
+        shrinkWrap: true,
+        children: paymenttyppeList.map((payment) {
+          return ListTile(
+              contentPadding: EdgeInsets.all(5),
+              leading: Hero(
+                  tag: payment.paymentId != null ? payment.paymentId : 0,
+                  child: Container(
+                    color: Colors.grey,
+                    width: MediaQuery.of(context).size.width,
+                    height: 20.0,
+                    child: payment.base64 != ""
+                        ? CommonUtils.imageFromBase64String(
+                            payment.base64)
+                        : new Image.asset(
                             Strings.no_image,
                             fit: BoxFit.cover,
                             gaplessPlayback: true,
                           ),
-                        )),/*Icon(
-                      payment.name.contains("Wallet")
-                          ? Icons.account_balance_wallet
-                          : Icons.credit_card,
-                      color: Colors.black,
-                      size: SizeConfig.safeBlockVertical * 7,
-                    ),*/
-                    // Container(
-                    //     height: 70,
-                    //     width: 70,
-                    //     child: Image.asset("assets/bg.jpg")),
-                    onTap: () {
-                      /// sendPaymentByCash(payment);
-                      ///
-                      List<Payments> subList = allPaymentTypes
-                          .where((i) => i.isParent == payment.paymentId)
-                          .toList();
-                      if (subList.length > 0) {
-                        openSubPaymentDialog(subList);
-                      } else {
-                        widget.onClose(payment);
-                      }
-                    },
-                    title: Text(payment.name, style: Styles.blackMediumBold()),
-                    trailing: Icon(
-                      Icons.arrow_forward_ios,
-                      color: Colors.black,
-                      size: SizeConfig.safeBlockVertical * 4,
-                    ));
-              }).toList(),
-            )
-          ],
-        ),
+                  )),
+              /*Icon(
+                payment.name.contains("Wallet")
+                    ? Icons.account_balance_wallet
+                    : Icons.credit_card,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 7,
+              ),*/
+              // Container(
+              //     height: 70,
+              //     width: 70,
+              //     child: Image.asset("assets/bg.jpg")),
+              onTap: () {
+                /// sendPaymentByCash(payment);
+                ///
+                List<Payments> subList = allPaymentTypes
+                    .where((i) => i.isParent == payment.paymentId)
+                    .toList();
+                if (subList.length > 0) {
+                  openSubPaymentDialog(subList);
+                } else {
+                  widget.onClose(payment);
+                }
+              },
+              title: Text(payment.name, style: Styles.blackMediumBold()),
+              trailing: Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 4,
+              ));
+        }).toList(),
       ),
     );
   }
@@ -178,7 +168,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
             subList: subList,
             subTotal: widget.subTotal,
             grandTotal: widget.grandTotal,
-            onClose: (mehtod){
+            onClose: (mehtod) {
               Navigator.of(context).pop();
               widget.onClose(mehtod);
             },
