@@ -4,10 +4,15 @@ import 'package:mcncashier/helpers/ComunAPIcall.dart';
 import 'package:mcncashier/helpers/config.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
+import 'package:mcncashier/models/BranchTax.dart';
+import 'package:mcncashier/models/MST_Cart.dart';
+import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
+import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 
 class ProductsList {
@@ -115,21 +120,9 @@ class ProductsList {
     return list;
   }
 
-  Future<List<Attribute_Data>> getProductAttributes(context, productid) async {
-    var isjoin = await CommunFun.checkIsJoinServer();
+  Future<List<Attribute_Data>> getProductAttributes(productid) async {
     List<Attribute_Data> list = [];
-    if (isjoin == true) {
-      var apiurl =
-          await Configrations.ipAddress() + Configrations.product_attributes;
-      var stringParams = {"product_id": productid};
-      var result = await APICall.localapiCall(null, apiurl, stringParams);
-      if (result["status"] == Constant.STATUS200) {
-        List<dynamic> data = result["data"];
-        list = data.length > 0
-            ? data.map((c) => Attribute_Data.fromJson(c)).toList()
-            : [];
-      }
-    } else {
+    if (productid != null) {
       var qry = "SELECT product.product_id, category_attribute.name as attr_name,attributes.ca_id, " +
           " group_concat(product_attribute.price) as attr_types_price,group_concat(attributes.name) as attr_types ,group_concat(attributes.attribute_id) as attributeId" +
           " FROM product LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1" +
@@ -140,33 +133,19 @@ class ProductsList {
           " AND product_attribute.product_id = " +
           productid.toString() +
           " GROUP by category_attribute.ca_id";
-
       List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
       list = res.length > 0
           ? res.map((c) => Attribute_Data.fromJson(c)).toList()
           : [];
-
       await SyncAPICalls.logActivity(
           "Product", "Getting Product details", "product", productid);
     }
     return list;
   }
 
-  Future<List<ModifireData>> getProductModifiers(context, productid) async {
-    var isjoin = await CommunFun.checkIsJoinServer();
+  Future<List<ModifireData>> getProductModifiers(productid) async {
     List<ModifireData> list = [];
-    if (isjoin == true) {
-      var apiurl =
-          await Configrations.ipAddress() + Configrations.product_Modifeirs;
-      var stringParams = {"product_id": productid};
-      var result = await APICall.localapiCall(null, apiurl, stringParams);
-      if (result["status"] == Constant.STATUS200) {
-        List<dynamic> data = result["data"];
-        list = data.length > 0
-            ? data.map((c) => ModifireData.fromJson(c)).toList()
-            : [];
-      }
-    } else {
+    if (productid != null) {
       var qry =
           "SELECT modifier.name,modifier.modifier_id,modifier.is_default,product_modifier.pm_id,product_modifier.price FROM  product_modifier " +
               " LEFT JOIN modifier on modifier.modifier_id = product_modifier.modifier_id " +
@@ -215,27 +194,14 @@ class ProductsList {
   }
 
   Future<List<SetMealProduct>> getMealsProductData(setmealid) async {
-    var isjoin = await CommunFun.checkIsJoinServer();
     List<SetMealProduct> list = [];
-    if (isjoin == true) {
-      var apiurl =
-          await Configrations.ipAddress() + Configrations.set_meals_products;
-      var stringParams = {"setmeal_id": setmealid};
-      var result = await APICall.localapiCall(null, apiurl, stringParams);
-      if (result["status"] == Constant.STATUS200) {
-        List<dynamic> data = result["data"];
-        list = data.length > 0
-            ? data.map((c) => SetMealProduct.fromJson(c)).toList()
-            : [];
-      }
-    } else {
+    if (setmealid != null) {
       var qry = "SELECT setmeal_product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name  FROM setmeal_product " +
           " LEFT JOIN product ON product.product_id = setmeal_product.product_id " +
           " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id " +
           " WHERE setmeal_product.setmeal_id = " +
           setmealid.toString() +
           " GROUP by setmeal_product.setmeal_product_id";
-
       var mealList = await db.rawQuery(qry);
       list = mealList.isNotEmpty
           ? mealList.map((c) => SetMealProduct.fromJson(c)).toList()
@@ -244,5 +210,118 @@ class ProductsList {
           "Meals product List", "get Meals product List", "setmeal", setmealid);
     }
     return list;
+  }
+
+  Future<List<BranchTax>> getTaxList(branchid) async {
+    List<BranchTax> list = [];
+    var tax = await db.rawQuery(
+        "SELECT branch_tax.*,tax.code From branch_tax " +
+            " Left join  tax on tax.tax_id = branch_tax.tax_id " +
+            " WHERE branch_id =" +
+            branchid.toString());
+    list = tax.isNotEmpty ? tax.map((c) => BranchTax.fromJson(c)).toList() : [];
+    return list;
+  }
+
+  Future<List<Printer>> getPrinterList(productID) async {
+    List<Printer> list = [];
+    if (productID != null) {
+      var qry =
+          "SELECT * from printer where printer.printer_id = (Select printer_id from product_branch WHERE product_branch.product_id = $productID)";
+      var result = await db.rawQuery(qry);
+      list = result.isNotEmpty
+          ? result.map((c) => Printer.fromJson(c)).toList()
+          : [];
+      await SyncAPICalls.logActivity("Product",
+          "get printer for add in cart product", "Printer", productID);
+    }
+    return list;
+  }
+
+  Future<List<MSTSubCartdetails>> getCartItemSubDetails(cartDetailsId) async {
+    List<MSTSubCartdetails> list = [];
+    if (cartDetailsId != null) {
+      var cartDetail = await db.query("mst_cart_sub_detail",
+          where: 'cart_details_id = ?', whereArgs: [cartDetailsId]);
+      list = cartDetail.isNotEmpty
+          ? cartDetail.map((c) => MSTSubCartdetails.fromJson(c)).toList()
+          : [];
+      await SyncAPICalls.logActivity(
+          "edit cart item",
+          "get modifire list mst_cart_sub_detail",
+          "mst_cart_sub_detail",
+          cartDetailsId);
+    }
+    return list;
+  }
+
+  Future<List<MST_Cart>> getCurrCartTotals(cartID) async {
+    List<MST_Cart> list = [];
+    if (cartID != null) {
+      var query = "SELECT * from mst_cart where id = " + cartID.toString();
+      var res = await db.rawQuery(query);
+      list =
+          res.length > 0 ? res.map((c) => MST_Cart.fromJson(c)).toList() : [];
+      await SyncAPICalls.logActivity("product", "get cart data", "mst_cart", 1);
+    }
+    return list;
+  }
+
+  Future<List<MSTCartdetails>> getCartItems(cartId) async {
+    List<MSTCartdetails> list = [];
+    if (cartId != null) {
+      var qry =
+          "SELECT * from mst_cart_detail where cart_id = " + cartId.toString();
+      var res = await db.rawQuery(qry);
+      list = res.isNotEmpty
+          ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
+          : [];
+      await SyncAPICalls.logActivity(
+          "product", "get cart list", "mst_cart_detail", cartId);
+    }
+    return list;
+  }
+
+  Future<dynamic> getProductDetails(
+      branchid, productid, setmealid, cartdetailid, cartID) async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    if (isjoin == true) {
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.product_Modifeirs;
+      var stringParams = {
+        "product_id": productid,
+        "setmeal_id": setmealid,
+        "branch_id": branchid,
+        "cart_details_id": cartdetailid,
+        "cartID": cartID
+      };
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      return result;
+    } else {
+      // product attributes
+
+      List<Attribute_Data> productAttr = await getProductAttributes(productid);
+      List<ModifireData> productModifire = await getProductModifiers(productid);
+      List<SetMealProduct> setmealProducts =
+          await getMealsProductData(setmealid);
+      List<BranchTax> branchtaxList = await getTaxList(branchid);
+      List<Printer> printerList = await getPrinterList(productid);
+      List<MST_Cart> currentCart = await getCurrCartTotals(cartID);
+      List<MSTCartdetails> cartItemsList = await getCartItems(cartID);
+      List<MSTSubCartdetails> cartItemSub =
+          await getCartItemSubDetails(cartdetailid);
+
+      dynamic productDetais = {
+        "Attributes": productAttr,
+        "Modifire": productModifire,
+        "SetMealsProduct": setmealProducts,
+        "BranchTax": branchtaxList,
+        "PrinterList": printerList,
+        "CartTotals": currentCart,
+        "CartItems": cartItemsList,
+        "CartSubItems": cartItemSub
+      };
+      return productDetais;
+    }
   }
 }

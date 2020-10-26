@@ -175,6 +175,10 @@ class Server {
       case "/set_meals_products":
         ProductsReq.getSetmealProducts(request);
         break;
+      case "/product_details":
+        ProductsReq.getSetmealProducts(request);
+        break;
+
       default:
     }
   }

@@ -93,27 +93,126 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         price = setmeal.price;
         productnetprice = setmeal.price;
       });
-      getMealProducts();
+      //  getMealProducts();
     } else {
       setState(() {
         productItem = widget.product;
         price = productItem.price;
         productnetprice = productItem.price;
       });
-      getAttributes();
+      //getAttributes();
     }
+    getProductDetails();
+    // getTaxs();
+    // getPrinter();
 
-    getTaxs();
-    getPrinter();
-
-    if (widget.cartID != null) {
-      getCartData();
-      getcartItemsDetails();
-    }
+    // if (widget.cartID != null) {
+    //   getCartData();
+    //   getcartItemsDetails();
+    // }
     var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
     setState(() {
       currency = curre;
     });
+  }
+
+  getProductDetails() async {
+    var branchid = await CommunFun.getbranchId();
+    var setmealid;
+    var cartdetailid;
+    var productid;
+    if (setmeal != null) {
+      setmealid = setmeal.setmealId;
+    }
+    if (cartitem != null) {
+      cartdetailid = cartitem.id;
+    }
+    if (!isSetMeal) {
+      productid = productItem.productId;
+    }
+    dynamic productData = await prodList.getProductDetails(
+        branchid, productid, setmealid, cartdetailid, widget.cartID);
+    print(productData);
+    setAttrData(productData);
+    setModifireData(productData);
+    setMealProduct(productData);
+    setTaxs(productData);
+    setPrinter(productData);
+    setCartData(productData);
+    getcartItemsDetails(productData);
+  }
+
+  setAttrData(productData) {
+    List<dynamic> data = productData["Attributes"];
+    List<Attribute_Data> productAttr = data.length > 0
+        ? data.map((c) => Attribute_Data.fromJson(c)).toList()
+        : [];
+    if (productAttr.length > 0) {
+      setState(() {
+        attributeList = productAttr;
+      });
+    }
+  }
+
+  setModifireData(productData) {
+    List<dynamic> data = productData["Modifire"];
+    List<ModifireData> productModifeir = data.length > 0
+        ? data.map((c) => ModifireData.fromJson(c)).toList()
+        : [];
+    if (productModifeir.length > 0) {
+      setState(() {
+        modifireList = productModifeir;
+      });
+    }
+    if (isEditing) {
+      setProductEditingData(productData);
+    }
+  }
+
+  setMealProduct(productData) async {
+    List<dynamic> data = productData["SetMealsProduct"];
+    List<SetMealProduct> mealProductList = data.length > 0
+        ? data.map((c) => SetMealProduct.fromJson(c)).toList()
+        : [];
+    if (mealProductList.length > 0) {
+      setState(() {
+        mealProducts = mealProductList;
+      });
+      await setSetMealData();
+    }
+  }
+
+  setTaxs(productData) async {
+    List<dynamic> data = productData["BranchTax"];
+    List<BranchTax> taxlists =
+        data.length > 0 ? data.map((c) => BranchTax.fromJson(c)).toList() : [];
+    if (taxlists.length > 0) {
+      setState(() {
+        taxlist = taxlists;
+      });
+    }
+  }
+
+  setPrinter(productData) async {
+    List<dynamic> data = productData["PrinterList"];
+    List<Printer> printerList =
+        data.isNotEmpty ? data.map((c) => Printer.fromJson(c)).toList() : [];
+    if (printerList.length > 0) {
+      setState(() {
+        printer = printerList[0];
+      });
+    }
+  }
+
+  setCartData(productData) async {
+    List<dynamic> data = productData["CartTotals"];
+    List<MST_Cart> cartval =
+        data.length > 0 ? data.map((c) => MST_Cart.fromJson(c)).toList() : [];
+    if (cartval.length > 0) {
+      setState(() {
+        currentCart = cartval[0];
+      });
+    }
   }
 
   setSetMealData() {
@@ -130,41 +229,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
-  getMealProducts() async {
-    List<SetMealProduct> mealProductList =
-        await prodList.getMealsProductData(setmeal.setmealId);
-    if (mealProductList.length > 0) {
-      setState(() {
-        mealProducts = mealProductList;
-      });
-      await setSetMealData();
-    }
-  }
-
-  getPrinter() async {
-    List<Printer> printerList = await printerAPI.getPrinterForAddCartProduct(
-        context,
-        !isSetMeal ? productItem.productId.toString() : setmeal.setmealId);
-    if (printerList.length > 0) {
-      setState(() {
-        printer = printerList[0];
-      });
-    }
-  }
-
-  getTaxs() async {
-    List<BranchTax> taxlists = await CommunFun.getbranchTax();
-    if (taxlists.length > 0) {
-      setState(() {
-        taxlist = taxlists;
-      });
-    }
-  }
-
-  setProductEditingData() async {
+  setProductEditingData(productData) async {
     if (!isSetMeal) {
-      List<MSTSubCartdetails> details =
-          await cartapi.getItemModifire(cartitem.id);
+      List<dynamic> data = productData["CartSubItems"];
+      List<MSTSubCartdetails> details = data.length > 0
+          ? data.map((c) => MSTSubCartdetails.fromJson(c)).toList()
+          : [];
       if (details.length > 0) {
         for (var i = 0; i < details.length; i++) {
           var item = details[i];
@@ -210,36 +280,32 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
-  getAttributes() async {
-    List<Attribute_Data> productAttr =
-        await prodList.getProductAttributes(context, productItem.productId);
-    if (productAttr.length > 0) {
-      setState(() {
-        attributeList = productAttr;
-      });
-    }
-    List<ModifireData> productModifeir =
-        await prodList.getProductModifiers(context, productItem.productId);
-    if (productModifeir.length > 0) {
-      setState(() {
-        modifireList = productModifeir;
-      });
-    }
-    if (isEditing) {
-      setProductEditingData();
-    }
-  }
+  // getAttributes() async {
+  //   List<Attribute_Data> productAttr =
+  //       await prodList.getProductAttributes(productItem.productId);
+  //   if (productAttr.length > 0) {
+  //     setState(() {
+  //       attributeList = productAttr;
+  //     });
+  //   }
+  //   List<ModifireData> productModifeir =
+  //       await prodList.getProductModifiers(productItem.productId);
+  //   if (productModifeir.length > 0) {
+  //     setState(() {
+  //       modifireList = productModifeir;
+  //     });
+  //   }
+  //   if (isEditing) {
+  //     // setProductEditingData();
+  //   }
+  // }
 
-  getCartData() async {
-    MST_Cart cartval = await CommunFun.getCartData(widget.cartID);
-    setState(() {
-      currentCart = cartval;
-    });
-  }
-
-  getcartItemsDetails() async {
-    List<MSTCartdetails> cartItemslist =
-        await CommunFun.getcartDetails(widget.cartID);
+  getcartItemsDetails(productData) async {
+    List<MSTCartdetails> cartItemslist = productData["CartItems"].length > 0
+        ? productData["CartItems"]
+            .map((c) => MSTCartdetails.fromJson(c))
+            .toList()
+        : [];
     if (cartItemslist.length != 0) {
       setState(() {
         cartItems = cartItemslist;
@@ -359,33 +425,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       selectedAttr = selectedAttr;
     });
     setPrice();
-    /*// var array = [];
-    var prvSeelected = selectedAttr;
-    var isSelected =
-        selectedAttr.any((item) => item['attrType_ID'] == attrTypeIDs);
-    if (isSelected) {
-      selectedAttr.removeWhere((item) => item['attrType_ID'] == attrTypeIDs);
-      */ /* prvSeelected.add({
-        'ca_id': id,
-        'attribute': attribute,
-        'attrType_ID': attrTypeIDs,
-        'attr_price': attrPrice
-      });*/ /*
-      setState(() {
-        selectedAttr = prvSeelected;
-      });
-    } else {
-      prvSeelected.removeWhere((item) => item['attrType_ID'] == attrTypeIDs);
-      prvSeelected.add({
-        'ca_id': id,
-        'attribute': attribute,
-        'attrType_ID': attrTypeIDs,
-        'attr_price': attrPrice
-      });
-      setState(() {
-        selectedAttr = prvSeelected;
-      });
-    }*/
   }
 
   setPrice() {
