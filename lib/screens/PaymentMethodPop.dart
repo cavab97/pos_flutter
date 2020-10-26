@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
-//import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
+import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 
@@ -24,6 +26,7 @@ class PaymentMethodPop extends StatefulWidget {
 
 class PaymentMethodPopState extends State<PaymentMethodPop> {
   List<Payments> paymenttyppeList = [];
+  List<Payments> allPaymentTypes = [];
   LocalAPI localAPI = LocalAPI();
   bool isLoading = false;
   var newAmmount;
@@ -42,19 +45,13 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
 
   getPaymentMethods() async {
     var result = await localAPI.getPaymentMethods();
-    // if (result.length != 0) {
-    //   setState(() {
-    //     paymenttyppeList = result;
-    //   });
-    // }
-
     List<Payments> mainPaymentList =
         result.where((i) => i.isParent == 0).toList();
 
     if (result.length != 0) {
       setState(() {
         paymenttyppeList = mainPaymentList;
-        //   allPaymentTypes = result;
+        allPaymentTypes = result;
       });
     }
   }
@@ -104,110 +101,65 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   }
 
   Widget mainContent() {
-    return SingleChildScrollView(
-      physics: BouncingScrollPhysics(),
-      child: Container(
-        // height: MediaQuery.of(context).size.height / 3,
-        width: MediaQuery.of(context).size.width / 3,
-        child: Column(
-          children: <Widget>[
-            // Row(
-            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //     children: <Widget>[
-            //       Row(
-            //         children: <Widget>[
-            //           SizedBox(width: 10),
-            //           // Container(
-            //           //     height: 70,
-            //           //     width: 70,
-            //           //     child: Image.asset("assets/bg.jpg")),
-            //           Icon(
-            //             Icons.credit_card,
-            //             color: Colors.black,
-            //             size: 50,
-            //           ),
-            //           SizedBox(width: 15),
-            //           Text(
-            //             Strings.cash,
-            //             style: Styles.blackBoldLarge(),
-            //           ),
-            //         ],
-            //       ),
-            //       Row(
-            //         children: <Widget>[
-            //           GestureDetector(
-            //               onTap: () {
-            //                 openAmountPop();
-            //               },
-            //               child: Text(newAmmount.toString(),
-            //                   style:
-            //                       TextStyle(color: Colors.grey, fontSize: 20))),
-            //           SizedBox(width: 10),
-            //           GestureDetector(
-            //             onTap: () {
-            //               // sendPaymentByCash("");
-            //             },
-            //             child: Container(
-            //               height: 50,
-            //               width: 100,
-            //               decoration: BoxDecoration(
-            //                   color: Colors.deepOrange,
-            //                   borderRadius: BorderRadius.circular(10.0)),
-            //               child: Center(
-            //                 child: Text(
-            //                   Strings.btn_exect,
-            //                   style: Styles.whiteBold(),
-            //                 ),
-            //               ),
-            //             ),
-            //           )
-            //         ],
-            //       ),
-            //     ]),
-
-            ListView(
-              physics: BouncingScrollPhysics(),
-              shrinkWrap: true,
-              children: paymenttyppeList.map((payment) {
-                return ListTile(
-                    contentPadding: EdgeInsets.all(5),
-                    leading: Icon(
-                      payment.name.contains("Wallet")
-                          ? Icons.account_balance_wallet
-                          : Icons.credit_card,
-                      color: Colors.black,
-                      size: SizeConfig.safeBlockVertical * 7,
-                    ),
-                    // Container(
-                    //     height: 70,
-                    //     width: 70,
-                    //     child: Image.asset("assets/bg.jpg")),
-                    onTap: () {
-                      /// sendPaymentByCash(payment);
-                      /* List<Payments> subList = paymenttyppeList
-                          .where((i) => i.paymentId == payment.isParent)
-                          .toList();
-                      if (subList.length > 0) {
-                        openSubPaymentDialog(subList);
-                      } else {*/
-                      widget.onClose(payment);
-                      // }
-                    },
-                    title: Text(payment.name, style: Styles.blackMediumBold()),
-                    trailing: Icon(
-                      Icons.arrow_forward_ios,
-                      color: Colors.black,
-                      size: SizeConfig.safeBlockVertical * 4,
-                    ));
-              }).toList(),
-            )
-          ],
-        ),
+    return Container(
+      height: MediaQuery.of(context).size.height / 3,
+      width: MediaQuery.of(context).size.width / 3,
+      child: ListView(
+        physics: BouncingScrollPhysics(),
+        shrinkWrap: true,
+        children: paymenttyppeList.map((payment) {
+          return ListTile(
+              contentPadding: EdgeInsets.all(5),
+              leading: Hero(
+                  tag: payment.paymentId != null ? payment.paymentId : 0,
+                  child: Container(
+                    color: Colors.grey,
+                    width: MediaQuery.of(context).size.width,
+                    height: 20.0,
+                    child: payment.base64 != ""
+                        ? CommonUtils.imageFromBase64String(
+                            payment.base64)
+                        : new Image.asset(
+                            Strings.no_image,
+                            fit: BoxFit.cover,
+                            gaplessPlayback: true,
+                          ),
+                  )),
+              /*Icon(
+                payment.name.contains("Wallet")
+                    ? Icons.account_balance_wallet
+                    : Icons.credit_card,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 7,
+              ),*/
+              // Container(
+              //     height: 70,
+              //     width: 70,
+              //     child: Image.asset("assets/bg.jpg")),
+              onTap: () {
+                /// sendPaymentByCash(payment);
+                ///
+                List<Payments> subList = allPaymentTypes
+                    .where((i) => i.isParent == payment.paymentId)
+                    .toList();
+                if (subList.length > 0) {
+                  openSubPaymentDialog(subList);
+                } else {
+                  widget.onClose(payment);
+                }
+              },
+              title: Text(payment.name, style: Styles.blackMediumBold()),
+              trailing: Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 4,
+              ));
+        }).toList(),
       ),
     );
   }
 
-  /*openSubPaymentDialog(List<Payments> subList) {
+  openSubPaymentDialog(List<Payments> subList) {
     showDialog(
         // Opning Ammount Popup
         context: context,
@@ -216,10 +168,14 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
             subList: subList,
             subTotal: widget.subTotal,
             grandTotal: widget.grandTotal,
+            onClose: (mehtod) {
+              Navigator.of(context).pop();
+              widget.onClose(mehtod);
+            },
           );
         });
   }
-*/
+
   Widget closeButton(context) {
     return Positioned(
       top: -30,

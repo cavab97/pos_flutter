@@ -206,12 +206,21 @@ class PrintReceipt {
         styles: PosStyles(align: PosAlign.left));
     ticket.text("Invoice Date : " + timestamp,
         styles: PosStyles(align: PosAlign.left));
-    ticket.text("Invoice No : " + orderData.invoice_no,
-        styles: PosStyles(align: PosAlign.left));
     ticket.text('Terminal Name : MCN002',
         styles: PosStyles(align: PosAlign.left));
     ticket.text('Name : ' + customerName,
         styles: PosStyles(align: PosAlign.left));
+
+    ticket.text("Order # : " + orderData.invoice_no,
+        styles: PosStyles(
+          fontType: PosFontType.fontA,
+          bold: true,
+          underline: true,
+          align: PosAlign.right,
+          height: PosTextSize.size1,
+          width: PosTextSize.size1,
+        ),
+        linesAfter: 1);
 
     ticket.hr();
     ticket.setStyles(PosStyles(align: null));

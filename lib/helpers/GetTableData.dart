@@ -687,10 +687,12 @@ class TableData {
             'value': payments.paymentId,
           };
           var count = await ifExists(db, data);
+          var payment = payments.toJson();
+          await payment.remove("base64");
           if (count == 0) {
-            var result = await db.insert("payment", payments.toJson());
+            var result = await db.insert("payment", payment);
           } else {
-            var result = await db.update("payment", payments.toJson(),
+            var result = await db.update("payment", payment,
                 where: "payment_id =?", whereArgs: [payments.paymentId]);
           }
         }

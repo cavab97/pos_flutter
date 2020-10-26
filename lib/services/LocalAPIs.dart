@@ -1,5 +1,6 @@
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/models/Asset.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Category.dart';
@@ -517,7 +518,11 @@ class LocalAPI {
   }
 
   Future<List<Payments>> getPaymentMethods() async {
-    var query = "SELECT * from payment where status = 1";
+      var query =
+        "SELECT payment.* , replace(replace(asset.base64,'data:image/png;base64,',''),'data:image/jpg;base64,','') as base64  from payment " +
+            " LEFT join asset on asset.asset_type = 3 AND asset.asset_type_id = payment.payment_id " +
+            " WHERE payment.status = 1";
+    //var query = "SELECT *  from payment WHERE status = 1";
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Payments> list =
         res.isNotEmpty ? res.map((c) => Payments.fromJson(c)).toList() : [];
