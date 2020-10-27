@@ -549,6 +549,7 @@ class SyncAPICalls {
           inventory.qty = storeitem['qty'] is int
               ? (storeitem['qty'] as int).toDouble()
               : storeitem['qty'];
+          inventory.serverid = storeitem["server_id"];
           inventory.warningStockLevel = storeitem['warningStockLevel'];
           inventory.status = storeitem['status'];
           inventory.updatedAt = storeitem['updated_at'];
@@ -569,6 +570,7 @@ class SyncAPICalls {
               log.qty = storLoditem["qty"] is int
                   ? (storLoditem['qty'] as int).toDouble()
                   : storLoditem['qty'];
+              log.serverid = storLoditem["server_id"];
               log.qty_before_change = storLoditem["qty_before_change"] is int
                   ? (storLoditem['qty_before_change'] as int).toDouble()
                   : storLoditem['qty_before_change'];

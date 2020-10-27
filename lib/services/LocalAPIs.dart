@@ -1430,8 +1430,9 @@ class LocalAPI {
   Future<List<ProductStoreInventory>> getProductStoreInventoryTable(
       branchid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from product_store_inventory where branch_id = " +
-        branchid.toString();
+    var qry =
+        "SELECT * from product_store_inventory where server_id IS NULL AND  branch_id = " +
+            branchid.toString();
     var ordersList = await db.rawQuery(qry);
     List<ProductStoreInventory> list = ordersList.length > 0
         ? ordersList.map((c) => ProductStoreInventory.fromJson(c)).toList()

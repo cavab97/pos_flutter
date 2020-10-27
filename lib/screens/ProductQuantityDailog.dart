@@ -954,13 +954,16 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
+                SizedBox(
+                  height: 5,
+                ),
                 Text(
                   categorys[index],
-                  style: TextStyle(fontSize: SizeConfig.safeBlockVertical * 3),
+                  style: TextStyle(fontSize: SizeConfig.safeBlockVertical * 2),
                 ),
                 Container(
-                    margin: EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
-                    height: SizeConfig.safeBlockVertical * 9,
+                    margin: EdgeInsets.symmetric(horizontal: 0, vertical: 4.0),
+                    height: SizeConfig.safeBlockVertical * 8,
                     child: ListView.builder(
                         physics: BouncingScrollPhysics(),
                         shrinkWrap: true,

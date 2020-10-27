@@ -277,6 +277,7 @@ class CreateTables {
         "branch_id	INTEGER," +
         "qty	REAL," +
         "rac_id INTEGER," +
+        "server_id INTEGER," +
         "box_id INTEGER," +
         "warningStockLevel	INTEGER," +
         "status	INTEGER," +
@@ -293,6 +294,7 @@ class CreateTables {
         "product_id	INTEGER," +
         "employe_id	INTEGER," +
         "il_type	INTEGER," +
+        "server_id INTEGER," +
         "qty	REAL," +
         "qty_before_change	REAL," +
         "qty_after_change	REAL," +
