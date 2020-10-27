@@ -39,6 +39,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Orders selectedOrder = new Orders();
   List taxJson = [];
   List<OrderPayment> orderpayment = [];
+  List<Payments> paymentMethods = [];
   User paymemtUser = new User();
   List<ProductDetails> detailsList = [];
   List<OrderDetail> orderItemList = [];
@@ -47,7 +48,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   bool isWeborder = true;
   var permissions = "";
   Customer customer = new Customer();
-  Payments paumentMethod = new Payments();
+  //Payments paumentMethod = new Payments();
 
   @override
   void initState() {
@@ -103,10 +104,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
       orderpayment = orderpaymentdata;
     });
 
-    Payments paument_method =
+    List<Payments> paumentM =
         await localAPI.getOrderpaymentmethod(orderpayment[0].op_method_id);
     setState(() {
-      paumentMethod = paument_method;
+      paymentMethods = paumentM;
     });
     User user = await localAPI.getPaymentUser(orderpayment[0].op_by);
     if (user != null) {
@@ -483,41 +484,40 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                       Divider(),
                                       Column(
                                           children: orderpayment.map((payment) {
-                                        return paumentMethod != null
-                                            ? Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: <Widget>[
-                                                  Padding(
-                                                    padding: EdgeInsets.only(
-                                                      top: 0,
-                                                    ),
-                                                    child: Text(
-                                                      paumentMethod.name != null
-                                                          ? paumentMethod.name
-                                                              .toUpperCase()
-                                                          : "",
-                                                      style: Styles.darkGray(),
-                                                    ),
-                                                  ),
-                                                  SizedBox(width: 70),
-                                                  Padding(
-                                                      padding: EdgeInsets.only(
-                                                        top: 0,
-                                                      ),
-                                                      child: Text(
-                                                        payment.op_amount !=
-                                                                null
-                                                            ? payment.op_amount
-                                                                .toStringAsFixed(
-                                                                    2)
-                                                            : "00:00",
-                                                        style:
-                                                            Styles.darkGray(),
-                                                      )),
-                                                ],
-                                              )
-                                            : SizedBox();
+                                        int index =
+                                            orderpayment.indexOf(payment);
+                                        return Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: <Widget>[
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                top: 0,
+                                              ),
+                                              child: Text(
+                                                paymentMethods[index].name !=
+                                                        null
+                                                    ? paymentMethods[index]
+                                                        .name
+                                                        .toUpperCase()
+                                                    : "",
+                                                style: Styles.darkGray(),
+                                              ),
+                                            ),
+                                            SizedBox(width: 70),
+                                            Padding(
+                                                padding: EdgeInsets.only(
+                                                  top: 0,
+                                                ),
+                                                child: Text(
+                                                  payment.op_amount != null
+                                                      ? payment.op_amount
+                                                          .toStringAsFixed(2)
+                                                      : "00:00",
+                                                  style: Styles.darkGray(),
+                                                )),
+                                          ],
+                                        );
                                       }).toList()),
                                       isRefunding
                                           ? refundButtons(context)

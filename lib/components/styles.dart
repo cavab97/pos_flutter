@@ -184,6 +184,14 @@ class Styles {
         fontFamily: Strings.fontFamily);
   }
 
+  static orangesimpleSmall() {
+    return TextStyle(
+        fontSize: 10,
+        fontWeight: FontWeight.w400,
+        color: Color(0xffff531a),
+        fontFamily: Strings.fontFamily);
+  }
+
   static normalBlack() {
     return TextStyle(color: Colors.black, fontSize: 25.0);
   }

@@ -927,7 +927,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     Branch branchAddress = await localAPI.getBranchData(branchID);
     List<OrderPayment> orderpaymentdata =
         await localAPI.getOrderpaymentData(orderid);
-    Payments paumentMethod =
+    List<Payments> paumentMethod =
         await localAPI.getOrderpaymentmethod(orderpaymentdata[0].op_method_id);
     User user = await localAPI.getPaymentUser(orderpaymentdata[0].op_by);
     // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
@@ -947,7 +947,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           taxJson,
           orderitem,
           order,
-          paumentMethod,
+          paumentMethod[0],
           widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
     } else {
       CommunFun.showToast(context, Strings.printer_not_available);

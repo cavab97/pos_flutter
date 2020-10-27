@@ -604,33 +604,32 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
           ),
           titlePadding: EdgeInsets.all(20),
           title: Center(child: Text("Wallet Payment")),
-          content: SingleChildScrollView(
-            child: Container(
-                width: MediaQuery.of(context).size.width / 3.4,
-                height: MediaQuery.of(context).size.height / 3.4,
+          content: Container(
+            width: MediaQuery.of(context).size.width / 2.4,
+            height: MediaQuery.of(context).size.height / 2.4,
+            child: SingleChildScrollView(
                 child: Form(
-                  key: _formKey1,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text("Enter Ref Number : ",
-                          style: Styles.blackMediumBold()),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      refInput(),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Text("Remark: ", style: Styles.blackMediumBold()),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      remarkInput()
-                    ],
+              key: _formKey1,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text("Enter Ref Number : ", style: Styles.blackMediumBold()),
+                  SizedBox(
+                    height: 20,
                   ),
-                )),
+                  refInput(),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Text("Remark: ", style: Styles.blackMediumBold()),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  remarkInput()
+                ],
+              ),
+            )),
           ),
           actions: <Widget>[
             FlatButton(

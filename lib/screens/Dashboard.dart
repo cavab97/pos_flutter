@@ -1125,7 +1125,7 @@ class _DashboradPageState extends State<DashboradPage>
     // Branch branchAddress = await localAPI.getBranchData(branchID);
     List<OrderPayment> orderpaymentdata =
         await localAPI.getOrderpaymentData(orderid);
-    Payments paument_method =
+    List<Payments> paument_method =
         await localAPI.getOrderpaymentmethod(orderpaymentdata[0].op_method_id);
     //User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
     // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
@@ -1139,7 +1139,7 @@ class _DashboradPageState extends State<DashboradPage>
         taxJson,
         orderitem,
         order,
-        paument_method,
+        paument_method[0],
         customer != null ? customer.name : "Walk-in customer");
   }
 
@@ -1728,8 +1728,8 @@ class _DashboradPageState extends State<DashboradPage>
                 return ListTile(
                     leading: Container(
                       color: Colors.grey,
-                      width: 50,
-                      height: 50,
+                      width: 40,
+                      height: 40,
                       child: SearchProductList.base64 != ""
                           ? CommonUtils.imageFromBase64String(
                               SearchProductList.base64)
@@ -1739,12 +1739,16 @@ class _DashboradPageState extends State<DashboradPage>
                               fit: BoxFit.cover,
                             ),
                     ),
-                    title: Text(SearchProductList.name),
+                    title: Text(
+                      SearchProductList.name,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     subtitle: Text(SearchProductList.price.toString()),
                     trailing: SearchProductList.qty != null &&
                             SearchProductList.hasInventory == 1 &&
                             SearchProductList.qty <= 0
-                        ? Text("OUT OF STOCK", style: Styles.orangeSmall())
+                        ? Text("OUT OF STOCK",
+                            style: Styles.orangesimpleSmall())
                         : SizedBox());
               },
               onSuggestionSelected: (suggestion) {
@@ -2201,7 +2205,7 @@ class _DashboradPageState extends State<DashboradPage>
                           child: Container(
                             height: SizeConfig.safeBlockVertical * 4,
                             // width: 50,
-                            padding: EdgeInsets.all(5),
+                            padding: EdgeInsets.all(2),
                             color: Colors.deepOrange,
                             child: Center(
                               child: Text("OUT OF STOCK",
