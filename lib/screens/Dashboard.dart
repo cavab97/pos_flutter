@@ -385,6 +385,23 @@ class _DashboradPageState extends State<DashboradPage>
       case 4:
         if (cartList.length > 0) {
           if (printerreceiptList.length > 0) {
+            printKOT.checkListReceiptPrint(
+                printerreceiptList[0].printerIp.toString(),
+                context,
+                cartList,
+                tableName,
+                branchData,
+                customer != null ? customer.name : "Walk-in customer");
+          } else {
+            CommunFun.showToast(context, Strings.printer_not_available);
+          }
+        } else {
+          CommunFun.showToast(context, Strings.cart_empty);
+        }
+        break;
+      case 5:
+        if (cartList.length > 0) {
+          if (printerreceiptList.length > 0) {
             printKOT.checkDraftPrint(
                 taxJson,
                 printerreceiptList[0].printerIp.toString(),
@@ -403,7 +420,7 @@ class _DashboradPageState extends State<DashboradPage>
           CommunFun.showToast(context, Strings.cart_empty);
         }
         break;
-      case 5:
+      case 6:
         deleteCurrentCart();
         break;
     }
@@ -1915,6 +1932,25 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       SizedBox(width: 15),
                       Text(Strings.close_shift,
+                          style: Styles.communBlacksmall()),
+                    ],
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                enabled: cartList.length > 0 ? true : false,
+                value: 4,
+                child: Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.local_printshop,
+                        color: Colors.black,
+                        size: SizeConfig.safeBlockVertical * 5,
+                      ),
+                      SizedBox(width: 15),
+                      Text(Strings.check_list,
                           style: Styles.communBlacksmall()),
                     ],
                   ),
