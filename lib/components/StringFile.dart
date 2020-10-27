@@ -81,6 +81,7 @@ class Strings {
   static String split_order = "Split Order";
   static String close_shift = "Close Shift";
   static String draft_report = "Draft Report";
+  static String check_list = "Check list";
   static String no_image = "assets/no_image.png";
   static String delete_order = "Delete Order";
   static String out_of_stoke = "OUT OF STOCK";

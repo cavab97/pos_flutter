@@ -158,7 +158,8 @@ class PrintReceipt {
   ===========================Print Receipt==================================
   ========================================================================*/
 
-  Future<Ticket> Receipt(Branch branchData,
+  Future<Ticket> Receipt(
+      Branch branchData,
       List taxJson,
       List<OrderDetail> orderdetail,
       Orders orderData,
@@ -172,7 +173,7 @@ class PrintReceipt {
         PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
 
     final ByteData data =
-    await rootBundle.load('assets/headerlogo_receipt.png');
+        await rootBundle.load('assets/headerlogo_receipt.png');
     final Uint8List bytes = data.buffer.asUint8List();
     final image = decodeImage(bytes);
     ticket.image(image);
@@ -381,8 +382,8 @@ class PrintReceipt {
           styles: PosStyles(
               align: PosAlign.right, fontType: PosFontType.fontA, bold: false))
     ]);
-    double total = double.parse(
-        checkRoundData(orderData.grand_total.toStringAsFixed(2)));
+    double total =
+        double.parse(checkRoundData(orderData.grand_total.toStringAsFixed(2)));
     ticket.row([
       PosColumn(
           text: "Rounding",
@@ -513,7 +514,8 @@ class PrintReceipt {
     }
   }
 
-  void checkReceiptPrint(String printerIp,
+  void checkReceiptPrint(
+      String printerIp,
       BuildContext ctx,
       Branch branchData,
       List taxJson,
@@ -543,7 +545,8 @@ class PrintReceipt {
   ===========================Print Draft print==================================
   ========================================================================*/
 
-  Future<Ticket> DraftReceipt(List taxJson,
+  Future<Ticket> DraftReceipt(
+      List taxJson,
       List<MSTCartdetails> cartList,
       String tableName,
       double subTotal,
@@ -559,7 +562,7 @@ class PrintReceipt {
         PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
 
     final ByteData data =
-    await rootBundle.load('assets/headerlogo_receipt.png');
+        await rootBundle.load('assets/headerlogo_receipt.png');
     final Uint8List bytes = data.buffer.asUint8List();
     final image = decodeImage(bytes);
     ticket.image(image);
@@ -591,6 +594,9 @@ class PrintReceipt {
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
     ticket.text('Terminal Name : MCN002',
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
+    ticket.text('Table : '+tableName,
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
     ticket.text('Name : ' + custName,
@@ -634,7 +640,9 @@ class PrintReceipt {
             text: cartList[i].productName,
             width: 7,
             styles: PosStyles(
-                align: PosAlign.left, fontType: PosFontType.fontA, bold: false)),
+                align: PosAlign.left,
+                fontType: PosFontType.fontA,
+                bold: false)),
         PosColumn(
             text: cartList[i].productQty.toString(),
             width: 2,
@@ -734,8 +742,7 @@ class PrintReceipt {
       });
     }
 
-    double total = double.parse(
-        checkRoundData(grandTotal.toStringAsFixed(2)));
+    double total = double.parse(checkRoundData(grandTotal.toStringAsFixed(2)));
     ticket.row([
       PosColumn(
           text: "Rounding",
@@ -814,7 +821,8 @@ class PrintReceipt {
     return ticket;
   }
 
-  void checkDraftPrint(List taxJson,
+  void checkDraftPrint(
+      List taxJson,
       String printerIp,
       BuildContext ctx,
       List<MSTCartdetails> cartList,
@@ -828,15 +836,180 @@ class PrintReceipt {
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
-        await DraftReceipt(
-            taxJson,
-            cartList,
-            tableName,
-            subTotal,
-            grandTotal,
-            tax,
-            branchData,
-            custName));
+        await DraftReceipt(taxJson, cartList, tableName, subTotal, grandTotal,
+            tax, branchData, custName));
+
+    CommunFun.showToast(ctx, res.msg);
+
+/*final snackBar =
+        SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
+    Scaffold.of(ctx).showSnackBar(snackBar);*/
+  }
+
+/*========================================================================
+  ===========================Print Order check list print=======================
+  ========================================================================*/
+
+  Future<Ticket> CheckListReceipt(List<MSTCartdetails> cartList,
+      String tableName, Branch branchData, String custName) async {
+    final profile = await CapabilityProfile.load();
+    final Ticket ticket = Ticket(paper, profile);
+
+    // Print image
+    ticket.setStyles(
+        PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
+
+    ticket.text("Customer Order",
+        styles: PosStyles(
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size2,
+            align: PosAlign.center));
+    ticket.text("Check List",
+        styles: PosStyles(
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size2,
+            align: PosAlign.center));
+
+    ticket.emptyLines(1);
+
+    ticket.setStyles(PosStyles(
+        align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
+    final now = DateTime.now();
+    final formatter = DateFormat('MM/dd/yyyy H:m');
+    final String timestamp = formatter.format(now);
+
+    ticket.text('Processed by  : ' + branchData.contactPerson,
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
+    ticket.text("Order Date : " + timestamp,
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
+    ticket.text('Terminal Name : MCN002',
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
+    ticket.text('Table : '+tableName,
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
+    ticket.text('Name : ' + custName,
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: true),
+        linesAfter: 1);
+
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+
+    ticket.hr();
+    ticket.row([
+      PosColumn(
+          text: 'Item',
+          width: 7,
+          styles: PosStyles(
+              align: PosAlign.left, fontType: PosFontType.fontA, bold: true)),
+      PosColumn(
+          text: 'Qty',
+          width: 2,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+      PosColumn(
+          text: 'Check',
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+    ]);
+    ticket.hr();
+
+    double totalQTY = 0.0;
+
+    for (var i = 0; i < cartList.length; i++) {
+      totalQTY = totalQTY + cartList[i].productQty;
+      ticket.row([
+        PosColumn(
+            text: cartList[i].productName,
+            width: 7,
+            styles: PosStyles(
+                align: PosAlign.left,
+                fontType: PosFontType.fontA,
+                bold: false)),
+        PosColumn(
+            text: cartList[i].productQty.toString(),
+            width: 2,
+            styles: PosStyles(
+              align: PosAlign.right,
+              fontType: PosFontType.fontA,
+              bold: false,
+            )),
+        PosColumn(
+            text: "[  ]",
+            width: 3,
+            styles: PosStyles(
+              align: PosAlign.right,
+              fontType: PosFontType.fontA,
+              bold: false,
+            )),
+      ]);
+      ticket.setStyles(PosStyles(align: PosAlign.left));
+
+      if (cartList[i].productSecondName != null) {
+        if (cartList[i].productSecondName.isNotEmpty) {
+          ticket.row([
+            PosColumn(
+                text: cartList[i].productSecondName.toString(),
+                width: 12,
+                containsChinese: true,
+                styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontA,
+                ))
+          ]);
+        }
+      }
+    }
+    ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.right));
+    ticket.row([
+      PosColumn(
+          text: "Total QTY:",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+      PosColumn(
+          text: totalQTY.toStringAsFixed(1),
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+    ]);
+    ticket.hr();
+
+    ticket.feed(1);
+    ticket.cut();
+    return ticket;
+  }
+
+  void checkListReceiptPrint(
+      String printerIp,
+      BuildContext ctx,
+      List<MSTCartdetails> cartList,
+      String tableName,
+      Branch branchData,
+      String custName) async {
+    final PrinterNetworkManager printerManager = PrinterNetworkManager();
+    printerManager.selectPrinter(printerIp, port: 9100);
+
+    final PosPrintResult res = await printerManager.printTicket(
+        await CheckListReceipt(cartList, tableName, branchData, custName));
 
     CommunFun.showToast(ctx, res.msg);
 
@@ -849,8 +1022,8 @@ class PrintReceipt {
   ===========================Test print=====================================
   ========================================================================*/
 
-  void testReceiptPrint(String printerIp, BuildContext ctx,
-      String printerName) async {
+  void testReceiptPrint(
+      String printerIp, BuildContext ctx, String printerName) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
@@ -863,8 +1036,8 @@ class PrintReceipt {
     Scaffold.of(ctx).showSnackBar(snackBar);*/
   }
 
-  Future<Ticket> testPrintReceipt(PaperSize paper, String printerName,
-      String printerIp) async {
+  Future<Ticket> testPrintReceipt(
+      PaperSize paper, String printerName, String printerIp) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
