@@ -245,6 +245,7 @@ class _DashboradPageState extends State<DashboradPage>
     await CommunFun.opneSyncPop(context);
     await getsetWebOrders();
     await SyncAPICalls.syncOrderstoDatabase(context);
+    await SyncAPICalls.sendInvenotryTable(context);
     await SyncAPICalls.sendCancledOrderTable(context);
   }
 

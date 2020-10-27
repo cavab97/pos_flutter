@@ -39,7 +39,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Orders selectedOrder = new Orders();
   List taxJson = [];
   List<OrderPayment> orderpayment = [];
-  List<Payments> paymentMethods = [];
   User paymemtUser = new User();
   List<ProductDetails> detailsList = [];
   List<OrderDetail> orderItemList = [];
@@ -48,7 +47,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   bool isWeborder = true;
   var permissions = "";
   Customer customer = new Customer();
-  //Payments paumentMethod = new Payments();
+  Payments paumentMethod = new Payments();
 
   @override
   void initState() {
@@ -104,10 +103,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
       orderpayment = orderpaymentdata;
     });
 
-    List<Payments> paumentM =
+    List<Payments> paument_method =
         await localAPI.getOrderpaymentmethod(orderpayment[0].op_method_id);
     setState(() {
-      paymentMethods = paumentM;
+      paumentMethod = paument_method[0];
     });
     User user = await localAPI.getPaymentUser(orderpayment[0].op_by);
     if (user != null) {
@@ -484,8 +483,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                       Divider(),
                                       Column(
                                           children: orderpayment.map((payment) {
-                                        int index =
-                                            orderpayment.indexOf(payment);
                                         return Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.end,
@@ -495,10 +492,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                                 top: 0,
                                               ),
                                               child: Text(
-                                                paymentMethods[index].name !=
-                                                        null
-                                                    ? paymentMethods[index]
-                                                        .name
+                                                paumentMethod.name != null
+                                                    ? paumentMethod.name
                                                         .toUpperCase()
                                                     : "",
                                                 style: Styles.darkGray(),

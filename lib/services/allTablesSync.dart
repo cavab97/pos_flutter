@@ -522,12 +522,9 @@ class SyncAPICalls {
           'store_inventory': json.encode(invData)
         };
         var res = await APICalls.apiCall(apiurl, context, stringParams);
-
         if (res["status"] == Constant.STATUS200) {
           saveInvToTable(context, res);
         }
-        Navigator.of(context).pop();
-        CommunFun.showToast(context, "Sync sucessfully done.");
       } else {
         CommunFun.showToast(context, "all cancel tables up to dates.");
       }
