@@ -74,11 +74,12 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getProduct(String id, String branchID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var query = "SELECT product.*,price_type.name as price_type_Name,replace(asset.base64,'data:image/jpg;base64,','') as base64 FROM `product` " +
+    var query = "SELECT product.*,price_type.name as price_type_Name,replace(asset.base64,'data:image/jpg;base64,','') as base64 ,product_store_inventory.qty FROM `product` " +
         " LEFT join product_category on product_category.product_id = product.product_id " +
         " LEFT join product_branch on product_branch.product_id = product.product_id AND product_branch.status = 1" +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
+        " LEFT join product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
         " where product_category.category_id = " +
         id +
         " AND product_branch.branch_id = " +
@@ -95,9 +96,10 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getSeachProduct(
       String searchText, String branchID) async {
-    var query = "SELECT product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64 , price_type.name as price_type_Name FROM `product` " +
+    var query = "SELECT product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64 ,product_store_inventory.qty, price_type.name as price_type_Name FROM `product` " +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
+        " LEFT join product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
         " where product.name LIKE '%$searchText%' OR product.sku LIKE '%$searchText%'" +
         " AND product.status = 1 AND product.has_setmeal = 0" +
         " GROUP By product.product_id";
@@ -518,7 +520,7 @@ class LocalAPI {
   }
 
   Future<List<Payments>> getPaymentMethods() async {
-      var query =
+    var query =
         "SELECT payment.* , replace(replace(asset.base64,'data:image/png;base64,',''),'data:image/jpg;base64,','') as base64  from payment " +
             " LEFT join asset on asset.asset_type = 3 AND asset.asset_type_id = payment.payment_id " +
             " WHERE payment.status = 1";

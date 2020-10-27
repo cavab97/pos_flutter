@@ -65,7 +65,7 @@ class ProductDetails {
     hasInventory = json['has_inventory'];
     status = json['status'];
     hasSetmeal = json['has_setmeal'];
-    qty = json['qty'] != null ? double.parse(json['qty']) : 0.0;
+    qty = json['qty'] is int ? (json['qty'] as int).toDouble() : json['qty'];
     updatedAt = json['updated_at'];
     deletedAt = json['deleted_at'];
     updatedBy = json['updated_by'];

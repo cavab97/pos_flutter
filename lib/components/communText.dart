@@ -300,7 +300,7 @@ class CommunFun {
     }
     var data4_2 = await SyncAPICalls.getDataServerBulk4_2(context);
     if (data4_2 != null) {
-      var result = databaseHelper.insertData4_2(data4_2["data"]);
+      var result = await databaseHelper.insertData4_2(data4_2["data"]);
       print(result);
       if (result == 1) {
         CommunFun.setServerTime(null, "4");
@@ -332,6 +332,7 @@ class CommunFun {
           Navigator.pushNamed(context, Constant.PINScreen);
         } else {
           await checkUserDeleted(context);
+          await checkpermission();
           Navigator.pushNamed(context, Constant.DashboardScreen);
         }
       } else {
@@ -345,6 +346,13 @@ class CommunFun {
       // handle Exaption
       print("Error when getting product image data");
     }
+  }
+
+  static checkpermission() async {
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var user = json.decode(loginUser);
+    var id = user["id"];
+    checkUserPermission(id);
   }
 
   static checkUserDeleted(context) async {

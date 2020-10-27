@@ -954,7 +954,7 @@ class _DashboradPageState extends State<DashboradPage>
           }
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
           if (cartItem.issetMeal == 0) {
-            if (productdata["hasInventory"] == 1) {
+            if (productdata["has_inventory"] == 1) {
               List<ProductStoreInventory> inventory =
                   await localAPI.getStoreInventoryData(orderDetail.product_id);
               if (inventory.length > 0) {
@@ -1135,6 +1135,7 @@ class _DashboradPageState extends State<DashboradPage>
     clearCart();
     Navigator.of(context).pop();
     refreshAfterAction(true);
+    getCategoryList();
     // Navigator.pushNamed(context, Constant.DashboardScreen);
     // await showDialog(
     //     // Opning Ammount Popup
@@ -1343,8 +1344,7 @@ class _DashboradPageState extends State<DashboradPage>
 
     return WillPopScope(
       child: Scaffold(
-        key: scaffoldKey,
-        drawer: drawerWidget(),
+        key: scaffoldKey, drawer: drawerWidget(),
         body: SafeArea(
           child: new GestureDetector(
             onTap: () {
@@ -1519,120 +1519,125 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   Widget drawerWidget() {
-    return Drawer(
-      child: Container(
-         // width: MediaQuery.of(context).size.width / 3,
+    return Container(
+      width: MediaQuery.of(context).size.width / 3.2,
+      height: MediaQuery.of(context).size.height,
+      padding: EdgeInsets.only(
+        top: 20,
+      ),
+      color: Colors.white,
+      child: Drawer(
+        child: ListView(
           padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-          color: Colors.white,
-          child: ListView(
-            physics: BouncingScrollPhysics(),
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  checkoutbtn(),
-                  SizedBox(width: SizeConfig.safeBlockVertical * 3),
-                  nameBtn()
-                ],
+          physics: BouncingScrollPhysics(),
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                checkoutbtn(),
+                SizedBox(width: SizeConfig.safeBlockVertical * 3),
+                nameBtn()
+              ],
+            ),
+            CommunFun.divider(),
+            ListTile(
+              onTap: () {
+                gotoTansactionPage();
+              },
+              leading: Icon(
+                Icons.art_track,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 5,
               ),
-              CommunFun.divider(),
-              ListTile(
+              title: Text(
+                "Transaction",
+                style: Styles.drawerText(),
+              ),
+            ),
+            permissions.contains(Constant.VIEW_ORDER)
+                ? ListTile(
+                    onTap: () {
+                      gotoWebCart();
+                    },
+                    leading: Icon(
+                      Icons.shopping_cart,
+                      color: Colors.black,
+                      size: SizeConfig.safeBlockVertical * 5,
+                    ),
+                    title: Text(
+                      "Web Orders",
+                      style: Styles.drawerText(),
+                    ),
+                  )
+                : SizedBox(),
+            ListTile(
                 onTap: () {
-                  gotoTansactionPage();
+                  Navigator.of(context).pop();
+                  if (isShiftOpen) {
+                    closeShift();
+                  } else {
+                    openOpningAmmountPop(Strings.title_opening_amount);
+                  }
                 },
                 leading: Icon(
-                  Icons.art_track,
+                  Icons.open_in_new,
                   color: Colors.black,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
-                title: Text(
-                  "Transaction",
-                  style: Styles.drawerText(),
+                title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
+                    style: Styles.drawerText())),
+            permissions.contains(Constant.VIEW_REPORT)
+                ? ListTile(
+                    onTap: () {
+                      gotoShiftReport();
+                    },
+                    leading: Icon(
+                      Icons.filter_tilt_shift,
+                      color: Colors.black,
+                      size: SizeConfig.safeBlockVertical * 5,
+                    ),
+                    title: Text(
+                      "Shift Report",
+                      style: Styles.drawerText(),
+                    ),
+                  )
+                : SizedBox(),
+            ListTile(
+                onTap: () {
+                  Navigator.of(context).pop();
+                  syncOrdersTodatabase();
+                },
+                leading: Icon(
+                  Icons.transform,
+                  color: Colors.black,
+                  size: SizeConfig.safeBlockVertical * 5,
                 ),
-              ),
-              permissions.contains(Constant.VIEW_ORDER)
-                  ? ListTile(
-                      onTap: () {
-                        gotoWebCart();
-                      },
-                      leading: Icon(
-                        Icons.shopping_cart,
-                        color: Colors.black,
-                        size: SizeConfig.safeBlockVertical * 5,
-                      ),
-                      title: Text(
-                        "Web Orders",
-                        style: Styles.drawerText(),
-                      ),
-                    )
-                  : SizedBox(),
-              ListTile(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    if (isShiftOpen) {
-                      closeShift();
-                    } else {
-                      openOpningAmmountPop(Strings.title_opening_amount);
-                    }
-                  },
-                  leading: Icon(
-                    Icons.open_in_new,
-                    color: Colors.black,
-                    size: SizeConfig.safeBlockVertical * 5,
-                  ),
-                  title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
-                      style: Styles.drawerText())),
-              permissions.contains(Constant.VIEW_REPORT)
-                  ? ListTile(
-                      onTap: () {
-                        gotoShiftReport();
-                      },
-                      leading: Icon(
-                        Icons.filter_tilt_shift,
-                        color: Colors.black,
-                        size: SizeConfig.safeBlockVertical * 5,
-                      ),
-                      title: Text(
-                        "Shift Report",
-                        style: Styles.drawerText(),
-                      ),
-                    )
-                  : SizedBox(),
-              ListTile(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    syncOrdersTodatabase();
-                  },
-                  leading: Icon(
-                    Icons.transform,
-                    color: Colors.black,
-                    size: SizeConfig.safeBlockVertical * 5,
-                  ),
-                  title: Text("Sync Orders", style: Styles.drawerText())),
-              ListTile(
-                  onTap: () async {
-                    syncAllTables();
-                  },
-                  leading: Icon(
-                    Icons.sync,
-                    color: Colors.black,
-                    size: SizeConfig.safeBlockVertical * 5,
-                  ),
-                  title: Text("Sync", style: Styles.drawerText())),
-              ListTile(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    Navigator.pushNamed(context, Constant.SettingsScreen);
-                  },
-                  leading: Icon(
-                    Icons.settings,
-                    color: Colors.black,
-                    size: SizeConfig.safeBlockVertical * 5,
-                  ),
-                  title: Text("Settings", style: Styles.drawerText())),
-            ],
-          )),
+                title: Text("Sync Orders", style: Styles.drawerText())),
+            ListTile(
+                onTap: () async {
+                  syncAllTables();
+                },
+                leading: Icon(
+                  Icons.sync,
+                  color: Colors.black,
+                  size: SizeConfig.safeBlockVertical * 5,
+                ),
+                title: Text("Sync", style: Styles.drawerText())),
+            ListTile(
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.pushNamed(context, Constant.SettingsScreen);
+                },
+                leading: Icon(
+                  Icons.settings,
+                  color: Colors.black,
+                  size: SizeConfig.safeBlockVertical * 5,
+                ),
+                title: Text("Settings", style: Styles.drawerText())),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1704,36 +1709,45 @@ class _DashboradPageState extends State<DashboradPage>
                 // var image_Arr = SearchProductList.base64
                 //     .replaceAll("data:image/jpg;base64,", '');
                 return ListTile(
-                  leading: Container(
-                    color: Colors.grey,
-                    width: 50,
-                    height: 50,
-                    child: SearchProductList.base64 != ""
-                        ? CommonUtils.imageFromBase64String(
-                            SearchProductList.base64)
-                        : new Image.asset(
-                            Strings.no_image,
-                            gaplessPlayback: true,
-                            fit: BoxFit.cover,
-                          ),
-                  ),
-                  title: Text(SearchProductList.name),
-                  subtitle: Text(SearchProductList.price.toString()),
-                );
+                    leading: Container(
+                      color: Colors.grey,
+                      width: 50,
+                      height: 50,
+                      child: SearchProductList.base64 != ""
+                          ? CommonUtils.imageFromBase64String(
+                              SearchProductList.base64)
+                          : new Image.asset(
+                              Strings.no_image,
+                              gaplessPlayback: true,
+                              fit: BoxFit.cover,
+                            ),
+                    ),
+                    title: Text(SearchProductList.name),
+                    subtitle: Text(SearchProductList.price.toString()),
+                    trailing: SearchProductList.qty != null &&
+                            SearchProductList.hasInventory == 1 &&
+                            SearchProductList.qty <= 0
+                        ? Text("OUT OF STOCK", style: Styles.orangeSmall())
+                        : SizedBox());
               },
               onSuggestionSelected: (suggestion) {
-                if (isShiftOpen) {
-                  if (isTableSelected && !isWebOrder) {
-                    showQuantityDailog(suggestion, false);
-                  } else {
-                    if (!isWebOrder) {
-                      selectTable();
+                if (suggestion.qty == null ||
+                    suggestion.hasInventory != 1 ||
+                    suggestion.qty > 0.0) {
+                  if (isShiftOpen) {
+                    if (isTableSelected && !isWebOrder) {
+                      showQuantityDailog(suggestion, false);
+                    } else {
+                      if (!isWebOrder) {
+                        selectTable();
+                      }
                     }
+                  } else {
+                    CommunFun.showToast(context, Strings.shift_open_message);
                   }
                 } else {
-                  CommunFun.showToast(context, Strings.shift_open_message);
+                  CommunFun.showToast(context, "Product Out of Stock");
                 }
-
                 // Navigator.of(context).push(MaterialPageRoute(
                 //     //builder: (context) => ProductPage(product: suggestion)
                 //     ));
@@ -2067,18 +2081,24 @@ class _DashboradPageState extends State<DashboradPage>
           var price = product.price.toStringAsFixed(2);
           return InkWell(
             onTap: () {
-              if (permissions.contains(Constant.EDIT_ORDER)) {
-                if (isShiftOpen) {
-                  if (isTableSelected && !isWebOrder) {
-                    showQuantityDailog(product, false);
-                  } else {
-                    if (!isWebOrder) {
-                      selectTable();
+              if (product.qty == null ||
+                  product.hasInventory != 1 ||
+                  product.qty > 0.0) {
+                if (permissions.contains(Constant.EDIT_ORDER)) {
+                  if (isShiftOpen) {
+                    if (isTableSelected && !isWebOrder) {
+                      showQuantityDailog(product, false);
+                    } else {
+                      if (!isWebOrder) {
+                        selectTable();
+                      }
                     }
+                  } else {
+                    CommunFun.showToast(context, Strings.shift_open_message);
                   }
-                } else {
-                  CommunFun.showToast(context, Strings.shift_open_message);
                 }
+              } else {
+                CommunFun.showToast(context, "Product Out of Stock");
               }
             },
             child: Container(
@@ -2135,7 +2155,25 @@ class _DashboradPageState extends State<DashboradPage>
                             style: Styles.whiteSimpleSmall()),
                       ),
                     ),
-                  )
+                  ),
+                  product.qty != null &&
+                          product.hasInventory == 1 &&
+                          product.qty <= 0
+                      ? Positioned(
+                          top: 0,
+                          right: 0,
+                          child: Container(
+                            height: SizeConfig.safeBlockVertical * 4,
+                            // width: 50,
+                            padding: EdgeInsets.all(5),
+                            color: Colors.deepOrange,
+                            child: Center(
+                              child: Text("OUT OF STOCK",
+                                  style: Styles.whiteSimpleSmall()),
+                            ),
+                          ),
+                        )
+                      : SizedBox()
                 ],
               ),
             ),

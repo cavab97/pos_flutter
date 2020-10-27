@@ -861,7 +861,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         child: Text(
           "Refund",
           style: TextStyle(
-              color: orderpayment[0].op_status == 1
+              color: orderpayment.length > 0 && orderpayment[0].op_status == 1
                   ? Colors.white
                   : Colors.white38,
               fontSize: 20),
@@ -884,7 +884,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           Strings.cancel_tansaction,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-              color: orderpayment[0].op_status == 1
+              color: orderpayment.length > 0 && orderpayment[0].op_status == 1
                   ? Colors.white
                   : Colors.white38,
               fontSize: 20),
