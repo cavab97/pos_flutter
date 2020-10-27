@@ -1544,9 +1544,20 @@ class LocalAPI {
 
   Future<List<SetMealProduct>> getMealsProductData(setmealid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT setmeal_product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name  FROM setmeal_product " +
-        " LEFT JOIN product ON product.product_id = setmeal_product.product_id " +
-        " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id " +
+    // var qry = "SELECT setmeal_product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name  FROM setmeal_product " +
+    //     " LEFT JOIN product ON product.product_id = setmeal_product.product_id " +
+    //     " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id " +
+    //     " WHERE setmeal_product.setmeal_id = " +
+    //     setmealid.toString() +
+    //     " GROUP by setmeal_product.setmeal_product_id";
+    var qry = "SELECT setmeal_product.*,group_concat(attributes. name, ',') as attr_name," +
+        " attributes.ca_id, group_concat(product_attribute.price) as attr_types_price," +
+        " category_attribute.name as cateAtt,group_concat(attributes.attribute_id) as attributeId,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name FROM setmeal_product" +
+        " LEFT JOIN product ON product.product_id = setmeal_product.product_id" +
+        " LEFT JOIN product_attribute on product_attribute.product_id = setmeal_product.product_id and product_attribute.status = 1" +
+        " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1" +
+        " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1" +
+        " LEFT JOIN asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id" +
         " WHERE setmeal_product.setmeal_id = " +
         setmealid.toString() +
         " GROUP by setmeal_product.setmeal_product_id";

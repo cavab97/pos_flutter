@@ -52,9 +52,7 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   checkSelectedTable() async {
     var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
-    if (tableid != null) {
-       
-    }
+    if (tableid != null) {}
   }
 
   getTables() async {
@@ -535,6 +533,16 @@ class _SelectTablePageState extends State<SelectTablePage>
       setState(() {
         tableList = list;
       });
+    }
+    if (isMergeing) {
+      var list =
+          tableList.where((x) => x.tableId != selectedTable.tableId).toList();
+      setState(() {
+        tableList = list;
+      });
+      if (tableList.length == 0) {
+        CommunFun.showToast(context, "Table not available for merge.");
+      }
     }
     List<TablesDetails> newtableList = new List<TablesDetails>();
     if (type == 1) {

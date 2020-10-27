@@ -174,7 +174,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                   var aattrid = int.parse(attrIDs[a]);
                   if (item.attributeId == aattrid) {
                     onSelectAttr(a, attribute.ca_id, attributType[a],
-                        attrIDs[a], attrtypesPrice[a]);
+                        attrIDs[a], attrtypesPrice[a], null);
                     break;
                   }
                 }
@@ -336,14 +336,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
-  onSelectAttr(i, id, attribute, attrTypeIDs, attrPrice) {
+  onSelectAttr(i, id, attribute, attrTypeIDs, attrPrice, setmealid) {
     if (!isSetMeal) {
       if (isSelectedAttr == i) {
         isSelectedAttr = -1;
       } else {
         isSelectedAttr = i;
       }
-
       selectedAttr.clear();
       if (isSelectedAttr != -1) {
         selectedAttr.add({
@@ -357,7 +356,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         selectedAttr = selectedAttr;
       });
     } else {
-      
+      //Setmenal attribute
+
     }
     setPrice();
   }
@@ -820,17 +820,18 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               physics: BouncingScrollPhysics(),
               child: ListView(
                   shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
                   children: mealProducts.map((product) {
                     var index = mealProducts.indexOf(product);
                     return InkWell(
                         onTap: () {
                           _setSelectUnselect(product);
-                          getAttributes(product.productId);
+                          //  getAttributes(product.productId);
                         },
                         child: Container(
                           margin: EdgeInsets.only(top: 8),
                           decoration: new BoxDecoration(
-                              color: Colors.grey[200],
+                              color: Colors.grey[100],
                               borderRadius: BorderRadius.circular(8.0)),
                           /* color: tempCart
                               .where((element) =>
@@ -911,7 +912,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                   ),
                                 ],
                               ),
-                              getAttributeList(),
+                              getsetMealAttrList(product),
                             ],
                           ),
                         ));
@@ -919,6 +920,83 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             ),
           )
         : SizedBox();
+  }
+
+  Widget getsetMealAttrList(SetMealProduct product) {
+    List<String> attrs = [];
+    List<String> categorys = [];
+    List<String> attrIDS = [];
+    List<String> attrPrice = [];
+    if (product.attr_name != null) {
+      attrs = product.attr_name.split(',');
+    }
+    if (product.cateAtt != null) {
+      categorys = product.cateAtt.split(',');
+    }
+
+    if (product.attributeId != null) {
+      attrIDS = product.attributeId.split(',');
+    }
+    if (product.attr_types_price != null) {
+      attrPrice = product.attr_types_price.split(',');
+    }
+
+    print(product);
+    return Container(
+      margin: EdgeInsets.only(bottom: isSetMeal ? 0 : 10, top: 0),
+      child: ListView.builder(
+          shrinkWrap: true,
+          scrollDirection: Axis.vertical,
+          physics: BouncingScrollPhysics(),
+          itemCount: categorys.length,
+          itemBuilder: (BuildContext ctxt, int index) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  categorys[index],
+                  style: TextStyle(fontSize: SizeConfig.safeBlockVertical * 3),
+                ),
+                Container(
+                    margin: EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
+                    height: SizeConfig.safeBlockVertical * 9,
+                    child: ListView.builder(
+                        physics: BouncingScrollPhysics(),
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: attrs.length,
+                        itemBuilder: (BuildContext ctxt, int i) {
+                          print(product.selectedid == int.parse(attrIDS[i]));
+                          return Padding(
+                              padding: EdgeInsets.all(5),
+                              child: MaterialButton(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    side: BorderSide(
+                                      color: product.selectedid ==
+                                              int.parse(attrIDS[i])
+                                          ? Colors.green
+                                          : Colors.grey[300],
+                                      width: 4,
+                                    )),
+                                minWidth: 50,
+                                child: Text(attrs[i].toString(),
+                                    style: Styles.blackMediumBold()),
+                                textColor: Colors.black,
+                                color: Colors.grey[300],
+                                onPressed: () {
+                                  product.selectedid = int.parse(attrIDS[i]);
+                                  setState(() {
+                                    mealProducts = mealProducts;
+                                  });
+                                },
+                              ));
+                        }))
+              ],
+            );
+          }),
+    );
   }
 
   Widget getAttributeList() {
@@ -976,8 +1054,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                       textColor: Colors.black,
                                       color: Colors.grey[300],
                                       onPressed: () {
-                                        onSelectAttr(i, attribute.ca_id, attr,
-                                            attrIDs[i], attrtypesPrice[i]);
+                                        onSelectAttr(
+                                            i,
+                                            attribute.ca_id,
+                                            attr,
+                                            attrIDs[i],
+                                            attrtypesPrice[i],
+                                            null);
                                       },
                                     )));
                           })
