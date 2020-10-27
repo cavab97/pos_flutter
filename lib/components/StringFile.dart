@@ -110,6 +110,9 @@ class Strings {
   static String apply = "Apply";
   static String vauchercode = "Voucher code :";
   static String enter_Code = "Enter code";
+  static String enter_remark = "Enter Remark";
+  static String enter_digit = "Enter last 4 digits";
+  static String enterref_number = "Enter Ref Number";
   static String voucher_not_exit = "Voucher not exist.";
   static String voucher_code_msg = "Voucher code must be required.";
   static String voucher_already_used = "Voucher already used 5 times.";

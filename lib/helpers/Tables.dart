@@ -511,6 +511,11 @@ class CreateTables {
         "branch_id  INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
+        "is_split NUMERIC," +
+        "remark TEXT," +
+        "last_digits TEXT," +
+        "approval_code TEXT," +
+        "reference_number TEXT," +
         "op_method_id INTEGER," +
         "op_amount REAL," +
         "op_method_response TEXT," +

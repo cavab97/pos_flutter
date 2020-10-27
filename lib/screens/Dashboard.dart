@@ -684,7 +684,7 @@ class _DashboradPageState extends State<DashboradPage>
   checkoutWebOrder() async {
     if (cartList.length != 0) {
       CommunFun.processingPopup(context);
-      Payments payment = new Payments();
+      List<OrderPayment> payment = [];
       sendPaymentByCash(payment);
       Navigator.of(context).pop();
     } else {
@@ -850,12 +850,9 @@ class _DashboradPageState extends State<DashboradPage>
     sendPaymentByCash(mehtod);
   }
 
-  sendPaymentByCash(payment) async {
+  sendPaymentByCash(List<OrderPayment> payment) async {
     var cartData = await getcartData();
     var branchdata = await getbranch();
-    if (isWebOrder) {
-      payment.paymentId = cartData.cart_payment_id;
-    }
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     Orders order = new Orders();
     Table_order tables = await getTableData();
@@ -1051,31 +1048,36 @@ class _DashboradPageState extends State<DashboradPage>
         }
       }
     }
-
-    OrderPayment orderpayment = new OrderPayment();
-    List<OrderPayment> lapPpid =
-        await localAPI.getLastOrderPaymentAppid(terminalId);
-    if (lapPpid.length > 0) {
-      orderpayment.app_id = lapPpid[0].app_id + 1;
-    } else {
-      orderpayment.app_id = int.parse(terminalId);
+    if (payment.length > 0) {
+      for (var i = 0; i < payment.length; i++) {
+        OrderPayment orderpayment = payment[i];
+        if (isWebOrder) {
+          payment[i].op_method_id = cartData.cart_payment_id;
+        }
+        List<OrderPayment> lapPpid =
+            await localAPI.getLastOrderPaymentAppid(terminalId);
+        if (lapPpid.length > 0) {
+          orderpayment.app_id = lapPpid[0].app_id + 1;
+        } else {
+          orderpayment.app_id = int.parse(terminalId);
+        }
+        orderpayment.uuid = uuid;
+        orderpayment.order_id = orderid;
+        orderpayment.branch_id = int.parse(branchid);
+        orderpayment.terminal_id = int.parse(terminalId);
+        // orderpayment.op_method_id = payment[i].op_method_id;
+        // orderpayment.op_amount = payment[i].op_amount.toDouble();
+        orderpayment.op_method_response = '';
+        orderpayment.op_status = 1;
+        orderpayment.op_datetime =
+            await CommunFun.getCurrentDateTime(DateTime.now());
+        orderpayment.op_by = userdata.id;
+        orderpayment.updated_at =
+            await CommunFun.getCurrentDateTime(DateTime.now());
+        orderpayment.updated_by = userdata.id;
+        var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
+      }
     }
-    orderpayment.uuid = uuid;
-    orderpayment.order_id = orderid;
-    orderpayment.branch_id = int.parse(branchid);
-    orderpayment.terminal_id = int.parse(terminalId);
-    orderpayment.op_method_id = payment != "" ? payment.paymentId : 0;
-    orderpayment.op_amount =
-        (cartData.grand_total - cartData.discount).toDouble();
-    orderpayment.op_method_response = '';
-    orderpayment.op_status = 1;
-    orderpayment.op_datetime =
-        await CommunFun.getCurrentDateTime(DateTime.now());
-    orderpayment.op_by = userdata.id;
-    orderpayment.updated_at =
-        await CommunFun.getCurrentDateTime(DateTime.now());
-    orderpayment.updated_by = userdata.id;
-    var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
 
     // Shifr Invoice Table
     ShiftInvoice shiftinvoice = new ShiftInvoice();
@@ -1104,9 +1106,10 @@ class _DashboradPageState extends State<DashboradPage>
   printReceipt(int orderid) async {
     // var branchID = await CommunFun.getbranchId();
     // Branch branchAddress = await localAPI.getBranchData(branchID);
-    OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
+    List<OrderPayment> orderpaymentdata =
+        await localAPI.getOrderpaymentData(orderid);
     Payments paument_method =
-        await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
+        await localAPI.getOrderpaymentmethod(orderpaymentdata[0].op_method_id);
     //User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
     // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
@@ -1518,6 +1521,7 @@ class _DashboradPageState extends State<DashboradPage>
   Widget drawerWidget() {
     return Drawer(
       child: Container(
+         // width: MediaQuery.of(context).size.width / 3,
           padding: EdgeInsets.only(top: 10, left: 10, right: 10),
           color: Colors.white,
           child: ListView(

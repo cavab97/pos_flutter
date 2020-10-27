@@ -587,7 +587,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     setTotalSubTotal();
   }
 
-  sendPaymentByCash(payment) async {
+  sendPaymentByCash(OrderPayment payment) async {
     var cartData = await getcartData();
     var branchdata = await getbranch();
     /*if (isWebOrder) {
@@ -805,7 +805,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       }
     }
 
-    OrderPayment orderpayment = new OrderPayment();
+    OrderPayment orderpayment = payment;
     List<OrderPayment> lapPpid =
         await localAPI.getLastOrderPaymentAppid(terminalId);
     if (lapPpid.length > 0) {
@@ -817,7 +817,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     orderpayment.order_id = orderid;
     orderpayment.branch_id = int.parse(branchid);
     orderpayment.terminal_id = int.parse(terminalId);
-    orderpayment.op_method_id = payment != "" ? payment.paymentId : 0;
+    orderpayment.op_method_id = payment.op_method_id;
     orderpayment.op_amount =
         (cartData.grand_total - cartData.discount).toDouble();
     orderpayment.op_method_response = '';
@@ -925,16 +925,17 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   printReceipt(int orderid) async {
     var branchID = await CommunFun.getbranchId();
     Branch branchAddress = await localAPI.getBranchData(branchID);
-    OrderPayment orderpaymentdata = await localAPI.getOrderpaymentData(orderid);
-    Payments paument_method =
-        await localAPI.getOrderpaymentmethod(orderpaymentdata.op_method_id);
-    User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
+    List<OrderPayment> orderpaymentdata =
+        await localAPI.getOrderpaymentData(orderid);
+    Payments paumentMethod =
+        await localAPI.getOrderpaymentmethod(orderpaymentdata[0].op_method_id);
+    User user = await localAPI.getPaymentUser(orderpaymentdata[0].op_by);
     // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     Orders order = await localAPI.getcurrentOrders(orderid);
     print(branchAddress);
     print(orderpaymentdata);
-    print(paument_method);
+    print(paumentMethod);
     print(orderitem);
     print(user);
     print(order);
@@ -946,7 +947,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           taxJson,
           orderitem,
           order,
-          paument_method,
+          paumentMethod,
           widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
     } else {
       CommunFun.showToast(context, Strings.printer_not_available);

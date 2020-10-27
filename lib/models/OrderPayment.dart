@@ -13,6 +13,11 @@ class OrderPayment {
   int op_by;
   String updated_at;
   int updated_by;
+  int is_split;
+  String remark;
+  String last_digits;
+  String approval_code;
+  String reference_number;
 
   OrderPayment({
     this.op_id,
@@ -29,6 +34,11 @@ class OrderPayment {
     this.op_by,
     this.updated_at,
     this.updated_by,
+    this.is_split,
+    this.remark,
+    this.last_digits,
+    this.approval_code,
+    this.reference_number,
   });
 
   OrderPayment.fromJson(Map<String, dynamic> json) {
@@ -48,6 +58,11 @@ class OrderPayment {
     op_by = json["op_by"];
     updated_at = json["updated_at"];
     updated_by = json["updated_by"];
+    is_split = json["is_split"];
+    remark = json["remark"];
+    last_digits = json["last_digits"];
+    approval_code = json["approval_code"];
+    reference_number = json["reference_number"];
   }
 
   Map<String, dynamic> toJson() {
@@ -66,7 +81,11 @@ class OrderPayment {
     data["op_by"] = this.op_by;
     data["updated_at"] = this.updated_at;
     data["updated_by"] = this.updated_by;
-
+    data["is_split"] = this.is_split;
+    data["remark"] = this.remark;
+    data["last_digits"] = this.last_digits;
+    data["approval_code"] = this.approval_code;
+    data["reference_number"] = this.reference_number;
     return data;
   }
 }

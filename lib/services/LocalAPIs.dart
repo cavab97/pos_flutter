@@ -788,7 +788,7 @@ class LocalAPI {
     return list;
   }
 
-  Future<OrderPayment> getOrderpaymentData(orderid) async {
+  Future<List<OrderPayment>> getOrderpaymentData(orderid) async {
     OrderPayment data = new OrderPayment();
     var qry =
         "SELECT * from order_payment where order_id = " + orderid.toString();
@@ -796,10 +796,10 @@ class LocalAPI {
     List<OrderPayment> list = ordersList.length > 0
         ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
         : [];
-    if (list.length > 0) {
-      data = list[0];
-    }
-    return data;
+    // if (list.length > 0) {
+    //   data = list[0];
+    // }
+    return list;
   }
 
   Future<List<Voucher>> checkVoucherIsExit(code) async {
