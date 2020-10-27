@@ -142,18 +142,20 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
     return Container(
       width: MediaQuery.of(context).size.width / 1.8,
       height: MediaQuery.of(context).size.height / 1.8,
-      child: Container(
-        padding: EdgeInsets.all(0),
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        color: Colors.white,
-        child: Column(children: <Widget>[
-          customerSearchBox(),
-          SizedBox(
-            height: 10,
-          ),
-          customerLists()
-        ]),
+      child: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(0),
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          color: Colors.white,
+          child: Column(children: <Widget>[
+            customerSearchBox(),
+            SizedBox(
+              height: 10,
+            ),
+            customerLists()
+          ]),
+        ),
       ),
     );
   }
@@ -176,7 +178,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           ),
           hintText: Strings.customer_Search_Hint,
           hintStyle: TextStyle(
-              fontSize: SizeConfig.safeBlockVertical * 2.9,
+              fontSize: SizeConfig.safeBlockVertical * 2.5,
               fontWeight: FontWeight.bold,
               color: Colors.grey[400]),
           border: OutlineInputBorder(
@@ -190,7 +192,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           contentPadding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
           fillColor: Colors.white,
         ),
-        style: TextStyle(color: Colors.black, fontSize: 25.0),
+        style: TextStyle(color: Colors.black, fontSize: 18.0),
         onTap: () {
           setState(() {
             isFiltring = true;

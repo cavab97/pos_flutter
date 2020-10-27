@@ -134,8 +134,7 @@ class LocalAPI {
   }
 
   Future<List<Customer>> getCustomers(teminalID) async {
-    var query = "SELECT * from customer WHERE " + " customer.status = 1 ";
-
+    var query = "SELECT * from customer WHERE customer.status = 1 ";
     teminalID;
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Customer> list =
@@ -147,7 +146,7 @@ class LocalAPI {
   }
 
   Future<int> addCustomer(Customer customer) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var result = await db.insert("customer", customer.toJson());
     await SyncAPICalls.logActivity(
         "Customer", "Adding customer", "customer", result);
