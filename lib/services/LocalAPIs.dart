@@ -57,7 +57,7 @@ class LocalAPI {
   Future<List<Category>> getAllCategory() async {
     var branchID = await CommunFun.getbranchId();
     var query = "select * from category left join category_branch on " +
-        " category_branch.category_id = category.category_id where " +
+        " category_branch.category_id = category.category_id AND category_branch.status=1 where " +
         " category_branch.branch_id =" +
         branchID.toString() +
         " AND category.status = 1";
@@ -535,12 +535,16 @@ class LocalAPI {
     return list;
   }
 
-  Future<Orders> getcurrentOrders(orderid) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
+  Future<Orders> getcurrentOrders(orderid,terminalID) async {
+    var query = "SELECT * from orders WHERE app_id=$orderid AND terminal_id=$terminalID";
+    //var query = "SELECT *  from payment WHERE status = 1";
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+
+   /* var db = DatabaseHelper.dbHelper.getDatabse();
     var result =
-        await db.query('orders', where: "app_id = ?", whereArgs: [orderid]);
+        await db.query('orders', where: "app_id = ?", whereArgs: [orderid]);*/
     List<Orders> list =
-        result.isNotEmpty ? result.map((c) => Orders.fromJson(c)).toList() : [];
+    res.isNotEmpty ? res.map((c) => Orders.fromJson(c)).toList() : [];
     return list[0];
   }
 

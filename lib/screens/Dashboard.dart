@@ -1132,7 +1132,9 @@ class _DashboradPageState extends State<DashboradPage>
     //User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
     // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
-    Orders order = await localAPI.getcurrentOrders(orderid);
+    var branchID = await CommunFun.getbranchId();
+
+    Orders order = await localAPI.getcurrentOrders(orderid, branchID);
 
     printKOT.checkReceiptPrint(
         printerreceiptList[0].printerIp,
@@ -1794,14 +1796,16 @@ class _DashboradPageState extends State<DashboradPage>
         children: <Widget>[
           selectedTable != null
               ? Row(
-                  children: <Widget>[
-                    Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: SizeConfig.safeBlockVertical * 4,
-                    ),
-                    SizedBox(width: 5),
-                    Text(
+                children: <Widget>[
+                  Icon(
+                    Icons.person,
+                    color: Colors.white,
+                    size: SizeConfig.safeBlockVertical * 4,
+                  ),
+                  SizedBox(width: 5),
+                  Container(
+                    width: SizeConfig.safeBlockHorizontal * 12,
+                    child: Text(
                       tableName +
                           " (" +
                           selectedTable.number_of_pax.toString() +
@@ -1810,8 +1814,9 @@ class _DashboradPageState extends State<DashboradPage>
                       softWrap: false,
                       style: Styles.whiteBoldsmall(),
                     ),
-                  ],
-                )
+                  ),
+                ],
+              )
               : SizedBox(),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
