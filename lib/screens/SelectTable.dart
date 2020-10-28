@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
@@ -32,8 +33,10 @@ class _SelectTablePageState extends State<SelectTablePage>
   var number_of_pax;
   var orderid;
   var mergeInTable;
+  var changeInTable;
   bool isLoading = false;
   bool isMergeing = false;
+  bool isChangingTable = false;
   bool isAssigning = false;
   bool isChanging = false;
   TabController _tabController;
@@ -190,6 +193,47 @@ class _SelectTablePageState extends State<SelectTablePage>
     Navigator.of(context).pop();
   }
 
+  changeTablePop() {
+    Navigator.of(context).pop();
+    CommonUtils.showAlertDialog(context, () {
+      Navigator.of(context).pop();
+    }, () {
+      Navigator.of(context).pop();
+      setState(() {
+        isChangingTable = true;
+      });
+    }, "Warning", "Are you want sure to change your table?", "Yes", "No", true);
+  }
+
+  changeTableToOtherTable(table) async {
+    var cartid;
+    if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
+      List<SaveOrder> cartID =
+          await localAPI.gettableCartID(selectedTable.saveorderid);
+      if (cartID.length > 0) {
+        cartid = cartID[0].cartId;
+      }
+    }
+    var tables = await localAPI.changeTable(
+        selectedTable.tableId, table.tableId, cartid);
+    print(tables);
+    setState(() {
+      changeInTable = null;
+      isChangingTable = false;
+    });
+    var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+    if (tableid != null) {
+      var tableddata = json.decode(tableid);
+      Table_order tabledata = Table_order.fromJson(tableddata);
+      if (tabledata.table_id == selectedTable.tableId) {
+        tabledata.table_id = table.tableId;
+        await Preferences.setStringToSF(
+            Constant.TABLE_DATA, jsonEncode(tabledata));
+      }
+    }
+    await getTables();
+  }
+
   changePax() {
     setState(() {
       isChanging = true;
@@ -214,20 +258,25 @@ class _SelectTablePageState extends State<SelectTablePage>
             size: 30.0,
           ),
           onPressed: () {
-            if (isMergeing) {
+            if (isMergeing || isChangingTable) {
               setState(() {
                 isMergeing = false;
                 mergeInTable = null;
+                isChangingTable = false;
+                changeInTable = null;
               });
             } else {
-              Navigator.of(context).pop();
+              Navigator.pushNamed(context, Constant.DashboardScreen);
             }
           },
         ),
         centerTitle: true,
         iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Text(isMergeing ? Strings.merge_table : Strings.select_table,
+        title: Text(
+            isMergeing
+                ? Strings.merge_table
+                : isChangingTable ? Strings.change_table : Strings.select_table,
             style: Styles.whiteMediumBold()),
         bottom: TabBar(
           controller: _tabController,
@@ -324,7 +373,7 @@ class _SelectTablePageState extends State<SelectTablePage>
         builder: (context) {
           return Container(
               //height: MediaQuery.of(context).size.height / 4,
-              width: MediaQuery.of(context).size.width / 4,
+              width: MediaQuery.of(context).size.width / 4.5,
               child: ListView(
                 physics: BouncingScrollPhysics(),
                 shrinkWrap: true,
@@ -348,6 +397,11 @@ class _SelectTablePageState extends State<SelectTablePage>
                         : SizedBox(),
                     selectedTable.numberofpax != null
                         ? ListTile(
+                            title: changeTable(context),
+                          )
+                        : SizedBox(),
+                    selectedTable.numberofpax != null
+                        ? ListTile(
                             title: cancleOrder(context),
                           )
                         : SizedBox(),
@@ -366,6 +420,16 @@ class _SelectTablePageState extends State<SelectTablePage>
               ));
         },
       ),
+    );
+  }
+
+  Widget changeTable(context) {
+    return GestureDetector(
+      onTap: () {
+        changeTablePop();
+      },
+      child: Text(Strings.change_table,
+          textAlign: TextAlign.center, style: Styles.bluesmall()),
     );
   }
 
@@ -553,7 +617,7 @@ class _SelectTablePageState extends State<SelectTablePage>
         tableList = list;
       });
     }
-    if (isMergeing) {
+    if (isMergeing || isChangingTable) {
       var list =
           tableList.where((x) => x.tableId != selectedTable.tableId).toList();
       setState(() {
@@ -588,6 +652,13 @@ class _SelectTablePageState extends State<SelectTablePage>
               } else {
                 CommunFun.showToast(
                     context, "Table already merged with other table");
+              }
+            }
+            if (isChangingTable) {
+              if (table.saveorderid == 0) {
+                changeTableToOtherTable(table);
+              } else {
+                CommunFun.showToast(context, "Table already occupied");
               }
             } else {
               ontableTap(table);

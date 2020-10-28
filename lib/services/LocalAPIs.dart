@@ -155,13 +155,13 @@ class LocalAPI {
   }
 
   Future<List<TablesDetails>> getTables(branchid) async {
-    var query = "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax ,table_order.is_merge_table as is_merge_table, table_order.merged_table_id as merged_table_id, " +
-        " (select tables.table_name from tables where table_order.merged_table_id = tables.table_id) as merge_table_name from tables " +
-        " LEFT JOIN table_order on table_order.table_id = tables.table_id " +
-        " WHERE tables.status = 1 AND branch_id = " +
-        branchid +
-        // " AND tables.table_id NOT IN (select table_order.merged_table_id from table_order) " +
-        " GROUP by tables.table_id";
+    var query =
+        "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax ,table_order.is_merge_table as is_merge_table, table_order.merged_table_id as merged_table_id, " +
+            " (select tables.table_name from tables where table_order.merged_table_id = tables.table_id) as merge_table_name from tables " +
+            " LEFT JOIN table_order on table_order.table_id = tables.table_id " +
+            " WHERE tables.status = 1 AND branch_id = " +
+            branchid +
+            " GROUP by tables.table_id";
 
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<TablesDetails> list = res.isNotEmpty
@@ -174,7 +174,7 @@ class LocalAPI {
   }
 
   Future<int> insertTableOrder(Table_order table_order) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from table_order where table_id =" +
         table_order.table_id.toString();
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
@@ -1613,5 +1613,23 @@ class LocalAPI {
         : [];
     print(list);
     return list;
+  }
+
+  Future changeTable(tableID, totableid, cartid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "UPDATE table_order SET table_id= " +
+        totableid.toString() +
+        " where table_id = " +
+        tableID.toString();
+    var result = await db.rawQuery(qry);
+    print(result);
+    if (cartid != null) {
+      var qry1 = "UPDATE mst_cart SET table_id = " +
+          totableid.toString() +
+          " where  id = " +
+          cartid.toString();
+      var result1 = await db.rawQuery(qry1);
+      print(result1);
+    }
   }
 }

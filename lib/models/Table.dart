@@ -60,5 +60,6 @@ class Tables {
     data['deleted_at'] = this.deletedAt;
     data['deleted_by'] = this.deletedBy;
     return data;
+  
   }
 }

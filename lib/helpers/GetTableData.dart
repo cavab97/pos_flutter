@@ -679,7 +679,7 @@ class TableData {
             var result = await db.insert("tables", table.toJson());
           } else {
             var result = await db.update("tables", table.toJson(),
-                where: "table_id", whereArgs: [table.tableId]);
+                where: "table_id =?", whereArgs: [table.tableId]);
           }
         }
       }
