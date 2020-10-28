@@ -229,9 +229,17 @@ class PrintReceipt {
     ticket.row([
       PosColumn(
           text: 'Item',
-          width: 7,
+          width: 6,
           styles: PosStyles(
               align: PosAlign.left, fontType: PosFontType.fontA, bold: true)),
+      PosColumn(
+          text: 'Price',
+          width: 2,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
       PosColumn(
           text: 'Qty',
           width: 2,
@@ -242,7 +250,7 @@ class PrintReceipt {
           )),
       PosColumn(
           text: 'Total',
-          width: 3,
+          width: 2,
           styles: PosStyles(
             align: PosAlign.right,
             fontType: PosFontType.fontA,
@@ -250,15 +258,25 @@ class PrintReceipt {
           )),
     ]);
     ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+
     for (var i = 0; i < orderdetail.length; i++) {
       var item = orderdetail[i];
       var name = jsonDecode(item.product_detail);
       ticket.row([
         PosColumn(
             text: name["name"].toString().trim(),
-            width: 7,
+            width: 6,
             styles: PosStyles(
               align: PosAlign.left,
+              fontType: PosFontType.fontA,
+              bold: false,
+            )),
+        PosColumn(
+            text: item.product_old_price.toStringAsFixed(2),
+            width: 2,
+            styles: PosStyles(
+              align: PosAlign.right,
               fontType: PosFontType.fontA,
               bold: false,
             )),
@@ -272,7 +290,7 @@ class PrintReceipt {
             )),
         PosColumn(
             text: item.product_price.toStringAsFixed(2),
-            width: 3,
+            width: 2,
             styles: PosStyles(
               align: PosAlign.right,
               fontType: PosFontType.fontA,
@@ -416,8 +434,7 @@ class PrintReceipt {
             align: PosAlign.left,
             fontType: PosFontType.fontA,
             bold: true,
-            height: PosTextSize.size1,
-            width: PosTextSize.size2,
+            width: PosTextSize.size1,
           )),
       PosColumn(
           text: ":",
@@ -609,9 +626,17 @@ class PrintReceipt {
     ticket.row([
       PosColumn(
           text: 'Item',
-          width: 7,
+          width: 6,
           styles: PosStyles(
               align: PosAlign.left, fontType: PosFontType.fontA, bold: true)),
+      PosColumn(
+          text: 'Price',
+          width: 2,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
       PosColumn(
           text: 'Qty',
           width: 2,
@@ -622,7 +647,7 @@ class PrintReceipt {
           )),
       PosColumn(
           text: 'Total',
-          width: 3,
+          width: 2,
           styles: PosStyles(
             align: PosAlign.right,
             fontType: PosFontType.fontA,
@@ -637,11 +662,19 @@ class PrintReceipt {
       ticket.row([
         PosColumn(
             text: cartList[i].productName,
-            width: 7,
+            width: 6,
             styles: PosStyles(
                 align: PosAlign.left,
                 fontType: PosFontType.fontA,
                 bold: false)),
+        PosColumn(
+            text: cartList[i].productPrice.toStringAsFixed(2),
+            width: 2,
+            styles: PosStyles(
+              align: PosAlign.right,
+              fontType: PosFontType.fontA,
+              bold: false,
+            )),
         PosColumn(
             text: cartList[i].productQty.toString(),
             width: 2,
@@ -652,7 +685,7 @@ class PrintReceipt {
             )),
         PosColumn(
             text: total.toStringAsFixed(2),
-            width: 3,
+            width: 2,
             styles: PosStyles(
               align: PosAlign.right,
               fontType: PosFontType.fontA,
@@ -773,8 +806,7 @@ class PrintReceipt {
             align: PosAlign.left,
             fontType: PosFontType.fontA,
             bold: true,
-            height: PosTextSize.size1,
-            width: PosTextSize.size2,
+            width: PosTextSize.size1,
           )),
       PosColumn(
           text: ":",

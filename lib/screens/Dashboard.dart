@@ -1007,6 +1007,7 @@ class _DashboradPageState extends State<DashboradPage>
         }
       }
     }
+
     List<MSTSubCartdetails> modifireList = await getmodifireList();
     if (modifireList.length > 0) {
       var orderId = orderid;
@@ -1950,7 +1951,7 @@ class _DashboradPageState extends State<DashboradPage>
                   child: Row(
                     children: <Widget>[
                       Icon(
-                        Icons.local_printshop,
+                        Icons.print_outlined,
                         color: Colors.black,
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
@@ -1963,7 +1964,7 @@ class _DashboradPageState extends State<DashboradPage>
               ),
               PopupMenuItem(
                 enabled: cartList.length > 0 ? true : false,
-                value: 4,
+                value: 5,
                 child: Padding(
                   padding: EdgeInsets.all(10),
                   child: Row(
@@ -1982,7 +1983,7 @@ class _DashboradPageState extends State<DashboradPage>
               ),
               PopupMenuItem(
                 enabled: cartList.length > 0 ? true : false,
-                value: 5,
+                value: 6,
                 child: Padding(
                   padding: EdgeInsets.all(10),
                   child: Row(
