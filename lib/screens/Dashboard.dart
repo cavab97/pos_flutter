@@ -42,6 +42,7 @@ import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
+import 'package:mcncashier/screens/ChangeQtyDailog.dart';
 import 'package:mcncashier/screens/SplitOrder.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -243,19 +244,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   syncOrdersTodatabase() async {
     await CommunFun.opneSyncPop(context);
-    await getsetWebOrders();
-    await SyncAPICalls.syncOrderstoDatabase(context);
-    await SyncAPICalls.sendInvenotryTable(context);
-    await SyncAPICalls.sendCancledOrderTable(context);
-  }
-
-  getsetWebOrders() async {
-    var res = await SyncAPICalls.getWebOrders(context);
-    var sertvertime = res["data"]["serverdatetime"];
-    await Preferences.setStringToSF(
-        Constant.ORDER_SERVER_DATE_TIME, sertvertime);
-    var cartdata = res["data"]["cart"];
-    await CommunFun.savewebOrdersintoCart(cartdata);
+    await CommunFun.syncOrdersANDStore(context);
   }
 
   gotoShiftReport() {
@@ -1247,6 +1236,38 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
+  applyforFocProduct(cartitem) {
+    CommonUtils.showAlertDialog(context, () {
+      Navigator.of(context).pop();
+    }, () {
+      Navigator.of(context).pop();
+      opneSelectQtyPop(cartitem);
+    }, "Warning", "Are you want sure to add this prodoct as free?", "Yes", "No",
+        true);
+  }
+
+  opneSelectQtyPop(cartitem) async {
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return ChangeQtyDailog(
+              qty: cartitem.productQty,
+              onClose: (qty) {
+                splitproductfromItem(qty, cartitem);
+              });
+        });
+  }
+
+  splitproductfromItem(qty, MSTCartdetails cartitem) async {
+    MSTCartdetails foxProduct = new MSTCartdetails();
+    foxProduct = cartitem;
+    foxProduct.productQty = qty;
+    foxProduct.isFocProduct = 1;
+    cartitem.productQty = cartitem.productQty - qty;
+    var result = await localAPI.makeAsFocProduct();
+  }
+
   editCartItem(cart) async {
     var prod;
     if (cart.issetMeal == 0) {
@@ -1796,27 +1817,27 @@ class _DashboradPageState extends State<DashboradPage>
         children: <Widget>[
           selectedTable != null
               ? Row(
-                children: <Widget>[
-                  Icon(
-                    Icons.person,
-                    color: Colors.white,
-                    size: SizeConfig.safeBlockVertical * 4,
-                  ),
-                  SizedBox(width: 5),
-                  Container(
-                    width: SizeConfig.safeBlockHorizontal * 12,
-                    child: Text(
-                      tableName +
-                          " (" +
-                          selectedTable.number_of_pax.toString() +
-                          ")",
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                      style: Styles.whiteBoldsmall(),
+                  children: <Widget>[
+                    Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: SizeConfig.safeBlockVertical * 4,
                     ),
-                  ),
-                ],
-              )
+                    SizedBox(width: 5),
+                    Container(
+                      width: SizeConfig.safeBlockHorizontal * 12,
+                      child: Text(
+                        tableName +
+                            " (" +
+                            selectedTable.number_of_pax.toString() +
+                            ")",
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                        style: Styles.whiteBoldsmall(),
+                      ),
+                    ),
+                  ],
+                )
               : SizedBox(),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -2462,6 +2483,17 @@ class _DashboradPageState extends State<DashboradPage>
               ),
             ),
             secondaryActions: <Widget>[
+              permissions.contains(Constant.EDIT_ITEM) && cart.issetMeal == 0
+                  ? IconSlideAction(
+                      color: Colors.blueAccent,
+                      icon: Icons.format_clear,
+                      onTap: () {
+                        // if (!isWebOrder) {
+                        applyforFocProduct(cart);
+                        // }
+                      },
+                    )
+                  : SizedBox(),
               permissions.contains(Constant.EDIT_ITEM)
                   ? IconSlideAction(
                       color: Colors.black45,

@@ -1636,4 +1636,8 @@ class LocalAPI {
       print(result1);
     }
   }
+  Future makeAsFocProduct()
+  {
+    
+  }
 }

@@ -220,6 +220,22 @@ class CommunFun {
     );
   }
 
+  static syncOrdersANDStore(context) async {
+    await getsetWebOrders(context);
+    await SyncAPICalls.syncOrderstoDatabase(context);
+    await SyncAPICalls.sendInvenotryTable(context);
+    await SyncAPICalls.sendCancledOrderTable(context);
+  }
+
+  static getsetWebOrders(context) async {
+    var res = await SyncAPICalls.getWebOrders(context);
+    var sertvertime = res["data"]["serverdatetime"];
+    await Preferences.setStringToSF(
+        Constant.ORDER_SERVER_DATE_TIME, sertvertime);
+    var cartdata = res["data"]["cart"];
+    await CommunFun.savewebOrdersintoCart(cartdata);
+  }
+
   static syncAfterSuccess(context) async {
     // sync in 4 part api call
     opneSyncPop(context);
@@ -333,6 +349,8 @@ class CommunFun {
         } else {
           await checkUserDeleted(context);
           await checkpermission();
+          //await CommunFun.opneSyncPop(context);
+          //await CommunFun.syncOrdersANDStore(context);
           Navigator.pushNamed(context, Constant.DashboardScreen);
         }
       } else {

@@ -17,6 +17,7 @@ class MSTCartdetails {
   int isDeleted;
   int sync;
   int isSendKichen;
+  int isFocProduct;
   String itemUnit;
   String cart_detail;
   String setmeal_product_detail;
@@ -45,6 +46,7 @@ class MSTCartdetails {
       this.isDeleted,
       this.issetMeal,
       this.isSendKichen,
+      this.isFocProduct,
       this.itemUnit,
       this.hasCompositeInventory,
       this.cart_detail,
@@ -87,6 +89,7 @@ class MSTCartdetails {
     hasCompositeInventory = json["has_composite_inventory"];
     createdAt = json["created_at"];
     createdBy = json["created_by"];
+    isFocProduct = json["isFoc_Product"];
   }
 
   Map<String, dynamic> toJson() {
@@ -115,6 +118,7 @@ class MSTCartdetails {
     data["issetMeal"] = this.issetMeal;
     data["created_by"] = this.createdBy;
     data["created_at"] = this.createdAt;
+    data["isFoc_Product"] = this.isFocProduct;
     return data;
   }
 }
