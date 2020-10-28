@@ -8,8 +8,14 @@ class CommonUtils {
   /*load image from base64*/
   static Image imageFromBase64String(String base64) {
     if (base64 != null) {
-      return Image.memory(base64Decode(base64),
-          fit: BoxFit.cover, gaplessPlayback: true);
+      if (base64.isNotEmpty) {
+        var strImage = base64;
+        if (base64.contains("base64,")) {
+          strImage = base64.split("base64,")[1];
+        }
+        return Image.memory(base64Decode(strImage),
+            fit: BoxFit.cover, gaplessPlayback: true);
+      }
     }
   }
 
@@ -31,7 +37,7 @@ class CommonUtils {
       String negativeButton,
       bool isShowNegative) {
     // flutter defined function
-     showDialog(
+    showDialog(
       context: context,
       builder: (BuildContext context) {
         // return object of type Dialog

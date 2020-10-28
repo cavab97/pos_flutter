@@ -35,6 +35,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   bool isLoading = false;
   bool isMergeing = false;
   bool isAssigning = false;
+  bool isChanging = false;
   TabController _tabController;
   @override
   void initState() {
@@ -174,7 +175,25 @@ class _SelectTablePageState extends State<SelectTablePage>
     );
   }
 
+  cancleTableOrder() async {
+    if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
+      List<SaveOrder> cartID =
+          await localAPI.gettableCartID(selectedTable.saveorderid);
+      if (cartID.length > 0) {
+        await localAPI.removeCartItem(cartID[0].cartId, selectedTable.tableId);
+      }
+    } else {
+      await localAPI.deleteTableOrder(selectedTable.tableId);
+    }
+    await Preferences.removeSinglePref(Constant.TABLE_DATA);
+    await getTables();
+    Navigator.of(context).pop();
+  }
+
   changePax() {
+    setState(() {
+      isChanging = true;
+    });
     opnPaxDailog();
   }
 
@@ -299,74 +318,64 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   Widget alertDailog(context) {
     return AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0))),
-        content: Builder(
-          builder: (context) {
-            return Container(
-              height: 200,
-              width: 250,
-              child: Center(
-                child: Stack(
-                  children: <Widget>[
-                    ListView(
-                      physics: BouncingScrollPhysics(),
-                      shrinkWrap: true,
-                      children: <Widget>[
-                        selectedTable.numberofpax == null
-                            ? Column(
-                                children: <Widget>[
-                                  ListTile(
-                                    title: neworder_button(context),
-                                  ),
-                                  Divider(),
-                                ],
-                              )
-                            : SizedBox(),
-                        selectedTable.numberofpax != null
-                            ? Column(
-                                children: <Widget>[
-                                  ListTile(
-                                    title: changePaxbtn(context),
-                                  ),
-                                  Divider(),
-                                ],
-                              )
-                            : SizedBox(),
-                        selectedTable.numberofpax != null
-                            ? Column(
-                                children: <Widget>[
-                                  ListTile(
-                                    title: viewOrderBtn(context),
-                                  ),
-                                  Divider(),
-                                ],
-                              )
-                            : SizedBox(),
-                        ListTile(
-                          onTap: () {
-                            mergeTable(selectedTable);
-                          },
-                          title: Text(
-                            Strings.merge_order,
-                            textAlign: TextAlign.center,
-                            style: Styles.bluesmall(),
-                          ),
-                        )
-                      ],
-                    ),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0))),
+      content: Builder(
+        builder: (context) {
+          return Container(
+              //height: MediaQuery.of(context).size.height / 4,
+              width: MediaQuery.of(context).size.width / 4,
+              child: ListView(
+                physics: BouncingScrollPhysics(),
+                shrinkWrap: true,
+                children: ListTile.divideTiles(
+                  context: context,
+                  tiles: [
+                    selectedTable.numberofpax == null
+                        ? ListTile(
+                            title: neworder_button(context),
+                          )
+                        : SizedBox(),
+                    selectedTable.numberofpax != null
+                        ? ListTile(
+                            title: changePaxbtn(context),
+                          )
+                        : SizedBox(),
+                    selectedTable.numberofpax != null
+                        ? ListTile(
+                            title: viewOrderBtn(context),
+                          )
+                        : SizedBox(),
+                    selectedTable.numberofpax != null
+                        ? ListTile(
+                            title: cancleOrder(context),
+                          )
+                        : SizedBox(),
+                    ListTile(
+                      onTap: () {
+                        mergeTable(selectedTable);
+                      },
+                      title: Text(
+                        Strings.merge_order,
+                        textAlign: TextAlign.center,
+                        style: Styles.bluesmall(),
+                      ),
+                    )
                   ],
-                ),
-              ),
-            );
-          },
-        ));
+                ).toList(),
+              ));
+        },
+      ),
+    );
   }
 
   Widget neworder_button(context) {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).pop();
+        setState(() {
+          isChanging = false;
+        });
         opnPaxDailog();
       },
       child: Text(Strings.new_order,
@@ -380,6 +389,16 @@ class _SelectTablePageState extends State<SelectTablePage>
         changePax();
       },
       child: Text(Strings.change_pax,
+          textAlign: TextAlign.center, style: Styles.bluesmall()),
+    );
+  }
+
+  Widget cancleOrder(context) {
+    return GestureDetector(
+      onTap: () {
+        cancleTableOrder();
+      },
+      child: Text(Strings.cancle_order,
           textAlign: TextAlign.center, style: Styles.bluesmall()),
     );
   }
@@ -440,7 +459,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
       onPressed: _onPress,
       child: Text(
-        Strings.enterPax,
+        isChanging ? Strings.change_pax : Strings.enterPax,
         style: TextStyle(
             color: Colors.white, fontSize: SizeConfig.safeBlockVertical * 4),
       ),
@@ -475,7 +494,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(Strings.enterPax,
+                  Text(isChanging ? Strings.change_pax : Strings.enterPax,
                       style: TextStyle(
                           fontSize: SizeConfig.safeBlockVertical * 3,
                           color: Colors.white)),

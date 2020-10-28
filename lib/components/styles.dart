@@ -139,8 +139,8 @@ class Styles {
   static bluesmall() {
     return TextStyle(
         color: Color(0xFF0388fc),
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
         fontFamily: Strings.fontFamily);
   }
 

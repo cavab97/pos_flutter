@@ -262,7 +262,9 @@ class PrintReceipt {
 
     for (var i = 0; i < orderdetail.length; i++) {
       var item = orderdetail[i];
+      print(item.product_detail);
       var name = jsonDecode(item.product_detail);
+      print(name["base64"]);
       ticket.row([
         PosColumn(
             text: name["name"].toString().trim(),
@@ -594,15 +596,12 @@ class PrintReceipt {
     ticket.text("Contact No : " + branchData.contactNo,
         styles: PosStyles(
             fontType: PosFontType.fontA, align: PosAlign.center, bold: true));
-
     ticket.emptyLines(1);
-
     ticket.setStyles(PosStyles(
         align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
     final now = DateTime.now();
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
-
     ticket.text('Processed by  : ' + branchData.contactPerson,
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: true));

@@ -1,4 +1,3 @@
-import 'package:mcncashier/components/StringFile.dart';
 
 class TablesDetails {
   int tableId;

@@ -131,7 +131,7 @@ class SyncAPICalls {
       'datetime': serverTime != null ? serverTime : '',
       'branchId': branchid, // serverTime,
       'terminal_id': terminalId,
-      'offset': offset != null ? int.parse(offset) : 10
+      'offset': offset != null ? int.parse(offset) : 0
     };
     return await APICalls.apiCall(apiurl, context, stringParams);
   }

@@ -57,8 +57,10 @@ class Strings {
   static String new_order = "New Order";
   static String view_order = "View Order";
   static String change_pax = "Change Pax";
+  static String cancle_order = "Cancle Order";
   static String merge_order = "Merge Order";
   static String enterPax = "Enter Pax";
+
   static String open_shift = "Open Shift";
   static String shiftTextLable = "Sorry,we're";
   static String shiftTextLableOpen = "Yes,we're\nOpen";
