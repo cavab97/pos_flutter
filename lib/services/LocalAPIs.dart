@@ -74,11 +74,11 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getProduct(String id, String branchID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var query = "SELECT product.*,price_type.name as price_type_Name,replace(asset.base64,'data:image/jpg;base64,','') as base64 ,product_store_inventory.qty FROM `product` " +
+    var query = "SELECT product.*,price_type.name as price_type_Name,base64 ,product_store_inventory.qty FROM `product` " +
         " LEFT join product_category on product_category.product_id = product.product_id " +
         " LEFT join product_branch on product_branch.product_id = product.product_id AND product_branch.status = 1" +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
-        " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
+        " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id AND asset.status = 1" +
         " LEFT join product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
         " where product_category.category_id = " +
         id +
@@ -86,7 +86,7 @@ class LocalAPI {
         branchID +
         " AND product.status = 1 AND product.has_setmeal = 0 GROUP By product.product_id";
     var res = await db.rawQuery(query);
-    List<ProductDetails> list = res.isNotEmpty
+    List<ProductDetails> list = res.length > 0
         ? res.map((c) => ProductDetails.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
@@ -96,7 +96,7 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getSeachProduct(
       String searchText, String branchID) async {
-    var query = "SELECT product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64 ,product_store_inventory.qty, price_type.name as price_type_Name FROM `product` " +
+    var query = "SELECT product.*,base64 ,product_store_inventory.qty, price_type.name as price_type_Name FROM `product` " +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
         " LEFT join product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
@@ -116,7 +116,7 @@ class LocalAPI {
   Future<List<SetMeal>> getSearchSetMealsData(
       String searchText, String branchid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "select setmeal.* , replace(asset.base64,'data:image/jpg;base64,','') as base64  from setmeal " +
+    var qry = "select setmeal.* ,base64  from setmeal " +
         " LEFT join setmeal_branch on setmeal_branch_id =" +
         branchid +
         " AND setmeal_branch.setmeal_id = setmeal.setmeal_id " +
@@ -194,6 +194,11 @@ class LocalAPI {
         table_order.table_id);
 
     return result;
+  }
+
+  Future deleteTableOrder(tableID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    await db.delete("table_order", where: 'table_id = ?', whereArgs: [tableID]);
   }
 
   Future updateTableIdInOrder(orderid, tableid) async {
@@ -519,10 +524,9 @@ class LocalAPI {
   }
 
   Future<List<Payments>> getPaymentMethods() async {
-    var query =
-        "SELECT payment.* , replace(replace(asset.base64,'data:image/png;base64,',''),'data:image/jpg;base64,','') as base64  from payment " +
-            " LEFT join asset on asset.asset_type = 3 AND asset.asset_type_id = payment.payment_id " +
-            " WHERE payment.status = 1";
+    var query = "SELECT payment.* , base64  from payment " +
+        " LEFT join asset on asset.asset_type = 3 AND asset.asset_type_id = payment.payment_id " +
+        " WHERE payment.status = 1";
     //var query = "SELECT *  from payment WHERE status = 1";
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Payments> list =
@@ -759,13 +763,12 @@ class LocalAPI {
   }
 
   Future<List<ProductDetails>> getOrderDetails(orderid) async {
-    var qry =
-        "SELECT P.product_id,P.name,P.price,replace(asset.base64,'data:image/jpg;base64,','') as base64" +
-            " FROM order_detail O " +
-            " LEFT JOIN product P ON O.product_id = P.product_id" +
-            " LEFT join asset on asset.asset_type_id = P.product_id " +
-            " WHERE  O.order_id = " +
-            orderid.toString();
+    var qry = "SELECT P.product_id,P.name,P.price, base64" +
+        " FROM order_detail O " +
+        " LEFT JOIN product P ON O.product_id = P.product_id" +
+        " LEFT join asset on asset.asset_type_id = P.product_id " +
+        " WHERE  O.order_id = " +
+        orderid.toString();
 
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<ProductDetails> list = ordersList.isNotEmpty
@@ -777,8 +780,7 @@ class LocalAPI {
   }
 
   Future<List<OrderDetail>> getOrderDetailsList(orderid) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
-
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var ordersList = await db
         .query("order_detail", where: "order_id =?", whereArgs: [orderid]);
     List<OrderDetail> list = ordersList.isNotEmpty
@@ -1281,7 +1283,7 @@ class LocalAPI {
   Future<List<ProductDetails>> productdData(productid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry =
-        " SELECT product.*, price_type.name as price_type_Name ,replace(asset.base64,'data:image/jpg;base64,','')  as base64   from product " +
+        " SELECT product.*, price_type.name as price_type_Name , base64   from product " +
             " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
             " LEFT join asset on asset.asset_type_id = product.product_id " +
             " where product_id = " +
@@ -1297,7 +1299,7 @@ class LocalAPI {
 
   Future<List<SetMeal>> setmealData(mealid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "select setmeal.* , replace(asset.base64,'data:image/jpg;base64,','') as base64  from setmeal " +
+    var qry = "select setmeal.* ,  base64  from setmeal " +
         " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
         " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id " +
         " WHERE setmeal.setmeal_id = " +
@@ -1528,7 +1530,7 @@ class LocalAPI {
 
   Future<List<SetMeal>> getMealsData(branchid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "select setmeal.* , replace(asset.base64,'data:image/jpg;base64,','') as base64  from setmeal " +
+    var qry = "select setmeal.* ,  base64  from setmeal " +
         " LEFT join setmeal_branch on setmeal_branch_id =" +
         branchid +
         " AND setmeal_branch.setmeal_id = setmeal.setmeal_id " +
@@ -1553,7 +1555,7 @@ class LocalAPI {
     //     " GROUP by setmeal_product.setmeal_product_id";
     var qry = "SELECT setmeal_product.*,group_concat(attributes. name, ',') as attr_name," +
         " attributes.ca_id, group_concat(product_attribute.price) as attr_types_price," +
-        " category_attribute.name as cateAtt,group_concat(attributes.attribute_id) as attributeId,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name FROM setmeal_product" +
+        " category_attribute.name as cateAtt,group_concat(attributes.attribute_id) as attributeId, base64,product.name FROM setmeal_product" +
         " LEFT JOIN product ON product.product_id = setmeal_product.product_id" +
         " LEFT JOIN product_attribute on product_attribute.product_id = setmeal_product.product_id and product_attribute.status = 1" +
         " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1" +
@@ -1597,5 +1599,19 @@ class LocalAPI {
     var inveID = await db.insert("drawer", drawerData.toJson());
     //}
     return inveID;
+  }
+
+  Future<List<SaveOrder>> gettableCartID(saveorderid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "select save_order.cart_id from table_order " +
+        " LEFT join save_order on save_order.id = table_order.save_order_id " +
+        " WHERE table_order.save_order_id = " +
+        saveorderid.toString();
+    var result = await db.rawQuery(qry);
+    List<SaveOrder> list = result.length > 0
+        ? result.map((c) => SaveOrder.fromJson(c)).toList()
+        : [];
+    print(list);
+    return list;
   }
 }

@@ -102,17 +102,18 @@ class _TransactionsPageState extends State<TransactionsPage> {
     setState(() {
       orderpayment = orderpaymentdata;
     });
-
-    List<Payments> paument_method =
-        await localAPI.getOrderpaymentmethod(orderpayment[0].op_method_id);
-    setState(() {
-      paumentMethod = paument_method[0];
-    });
-    User user = await localAPI.getPaymentUser(orderpayment[0].op_by);
-    if (user != null) {
+    if (orderpayment.length > 0) {
+      List<Payments> paument_method =
+          await localAPI.getOrderpaymentmethod(orderpayment[0].op_method_id);
       setState(() {
-        paymemtUser = user;
+        paumentMethod = paument_method[0];
       });
+      User user = await localAPI.getPaymentUser(orderpayment[0].op_by);
+      if (user != null) {
+        setState(() {
+          paymemtUser = user;
+        });
+      }
     }
 
     //}
@@ -904,9 +905,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
             children: orderItemList.map((product) {
           var index = orderItemList.indexOf(product);
           var item = orderItemList[index];
+          print(item.product_detail);
           var producrdata = json.decode(item.product_detail);
-          // var image_Arr =
-          //     producrdata["base64"].replaceAll("data:image/jpg;base64,", '');
+          print(producrdata);
           return InkWell(
               onTap: () {},
               child: Container(

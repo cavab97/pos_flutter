@@ -817,7 +817,8 @@ class TableData {
           if (count == 0) {
             await db.insert("asset", accet.toJson());
           } else {
-            await db.update("asset", accet.toJson());
+            await db.update("asset", accet.toJson(),
+                where: "asset_id =?", whereArgs: [accet.assetId]);
           }
         }
       }

@@ -16,7 +16,7 @@ class TerminalKeyPage extends StatefulWidget {
 }
 
 class _TerminalKeyPageState extends State<TerminalKeyPage> {
-  TextEditingController terminalKey = new TextEditingController(text: "");
+  TextEditingController terminalKey = new TextEditingController(text: "0AkA");
   GlobalKey<ScaffoldState> scaffoldKey;
   var errormessage = "";
   bool isValidatekey = true;
