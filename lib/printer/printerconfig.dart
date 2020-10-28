@@ -432,17 +432,16 @@ class PrintReceipt {
           //orderData.grand_total.toStringAsFixed(2),
           width: 5,
           styles: PosStyles(
-              align: PosAlign.right,
-              fontType: PosFontType.fontA,
-              bold: true,
-              height: PosTextSize.size1,
-              width: PosTextSize.size2,
-              reverse: true))
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size1,
+          ))
     ]);
 
     ticket.setStyles(PosStyles(align: PosAlign.center));
-    ticket.emptyLines(1);
-    ticket.qrcode('www.MCN.com', size: QRSize.Size5, align: PosAlign.center);
+    /* ticket.emptyLines(1);
+    ticket.qrcode('www.MCN.com', size: QRSize.Size5, align: PosAlign.center);*/
     ticket.emptyLines(1);
 
     ticket.text('Thank you!',
@@ -596,7 +595,7 @@ class PrintReceipt {
     ticket.text('Terminal Name : MCN002',
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
-    ticket.text('Table : '+tableName,
+    ticket.text('Table : ' + tableName,
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
     ticket.text('Name : ' + custName,
@@ -790,17 +789,16 @@ class PrintReceipt {
           //orderData.grand_total.toStringAsFixed(2),
           width: 5,
           styles: PosStyles(
-              align: PosAlign.right,
-              fontType: PosFontType.fontA,
-              bold: true,
-              height: PosTextSize.size1,
-              width: PosTextSize.size2,
-              reverse: true))
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size1,
+          ))
     ]);
 
     ticket.setStyles(PosStyles(align: PosAlign.center));
-    ticket.emptyLines(1);
-    ticket.qrcode('www.MCN.com', size: QRSize.Size5, align: PosAlign.center);
+    /* ticket.emptyLines(1);
+    ticket.qrcode('www.MCN.com', size: QRSize.Size5, align: PosAlign.center);*/
     ticket.emptyLines(1);
 
     ticket.text('Thank you!',
@@ -889,7 +887,7 @@ class PrintReceipt {
     ticket.text('Terminal Name : MCN002',
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
-    ticket.text('Table : '+tableName,
+    ticket.text('Table : ' + tableName,
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
     ticket.text('Name : ' + custName,
