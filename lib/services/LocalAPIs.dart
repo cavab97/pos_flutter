@@ -535,16 +535,17 @@ class LocalAPI {
     return list;
   }
 
-  Future<Orders> getcurrentOrders(orderid,terminalID) async {
-    var query = "SELECT * from orders WHERE app_id=$orderid AND terminal_id=$terminalID";
+  Future<Orders> getcurrentOrders(orderid, terminalID) async {
+    var query =
+        "SELECT * from orders WHERE app_id=$orderid AND terminal_id=$terminalID";
     //var query = "SELECT *  from payment WHERE status = 1";
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
 
-   /* var db = DatabaseHelper.dbHelper.getDatabse();
+    /* var db = DatabaseHelper.dbHelper.getDatabse();
     var result =
         await db.query('orders', where: "app_id = ?", whereArgs: [orderid]);*/
     List<Orders> list =
-    res.isNotEmpty ? res.map((c) => Orders.fromJson(c)).toList() : [];
+        res.isNotEmpty ? res.map((c) => Orders.fromJson(c)).toList() : [];
     return list[0];
   }
 
@@ -1636,8 +1637,24 @@ class LocalAPI {
       print(result1);
     }
   }
-  Future makeAsFocProduct()
-  {
-    
+
+  Future makeAsFocProduct(MSTCartdetails focProduct, isUpdate, MST_Cart cart,
+      MSTCartdetails cartitem) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    if (isUpdate) {
+      var data = await db.update("mst_cart_detail", focProduct.toJson(),
+          where: "id =?", whereArgs: [focProduct.id]);
+    } else {
+      var data = await db.insert(
+        "mst_cart_detail",
+        focProduct.toJson(),
+      );
+      var res = await db.update("mst_cart_detail", cartitem.toJson(),
+          where: "id =?", whereArgs: [cartitem.id]);
+    }
+    var res = await db.update("mst_cart", cart.toJson(),
+        where: "id =?", whereArgs: [cart.id]);
+    await SyncAPICalls.logActivity(
+        "mst_cart_detail", "Added Foc Product", "mst_cart_detail", cart.id);
   }
 }

@@ -13,6 +13,7 @@ class ChangeQtyDailog extends StatefulWidget {
 
 class ChangeQtyDailogState extends State<ChangeQtyDailog> {
   double productQty = 0;
+  TextEditingController remarkText = new TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -43,57 +44,144 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.0),
+      contentPadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.all(0),
+      title: Stack(
+        overflow: Overflow.visible,
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
+            height: SizeConfig.safeBlockVertical * 9,
+            color: Colors.black,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text("Enter Qty",
+                    style: TextStyle(
+                        fontSize: SizeConfig.safeBlockVertical * 3,
+                        color: Colors.white)),
+                addbutton(context)
+              ],
+            ),
+          ),
+          closeButton(context), // close button
+        ],
       ),
-      titlePadding: EdgeInsets.all(20),
-      title: Center(child: Text("Enter Qty")),
       content: Container(
-        width: MediaQuery.of(context).size.width / 3,
-        height: MediaQuery.of(context).size.height / 5,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              "Select qty for free product :",
-              style: Styles.greysmall(),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  _button("-", () {
-                    decreaseQty();
-                  }),
-                  _quantityTextInput(),
-                  _button("+", () {
-                    increaseQty();
-                  }),
-                ],
+        width: MediaQuery.of(context).size.width / 2,
+        height: MediaQuery.of(context).size.height / 4,
+        padding: EdgeInsets.all(15),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                "Remark :",
+                style: Styles.greysmall(),
               ),
-            )
-          ],
+              remarkfield(),
+              SizedBox(
+                height: 5,
+              ),
+            ],
+          ),
         ),
       ),
       actions: <Widget>[
-        FlatButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Text("Cancel", style: Styles.orangeSmall()),
-        ),
-        FlatButton(
-          onPressed: () {
-            widget.onClose(productQty);
-          },
-          child: Text("Done", style: Styles.orangeSmall()),
+        Container(
+          width: MediaQuery.of(context).size.width / 2,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              _button("-", () {
+                decreaseQty();
+              }),
+              _quantityTextInput(),
+              _button("+", () {
+                increaseQty();
+              }),
+            ],
+          ),
         )
       ],
+    );
+  }
+
+  Widget remarkfield() {
+    return Card(
+        color: Colors.grey[200],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(10),
+          child: TextField(
+            controller: remarkText,
+            keyboardType: TextInputType.multiline,
+            textAlignVertical: TextAlignVertical.center,
+            style: TextStyle(
+                fontSize: SizeConfig.safeBlockVertical * 3, height: 1.4),
+            maxLines: 2,
+            decoration: new InputDecoration(
+              border: InputBorder.none,
+              // hintText: product_qty.toDouble().toString(),
+            ),
+            onChanged: (val) {},
+          ),
+        ));
+  }
+
+  Widget closeButton(context) {
+    return Positioned(
+      top: -30,
+      right: -20,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          width: 50.0,
+          height: 50.0,
+          decoration: BoxDecoration(
+              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+          child: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: Icon(
+              Icons.clear,
+              color: Colors.white,
+              size: 30,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget addbutton(context) {
+    return RaisedButton(
+      onPressed: () {
+        widget.onClose(productQty, remarkText.text);
+      },
+      child: Row(
+        children: <Widget>[
+          Text(
+            "Done",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: SizeConfig.safeBlockVertical * 3,
+            ),
+          ),
+        ],
+      ),
+      color: Colors.deepOrange,
+      textColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50.0),
+      ),
     );
   }
 

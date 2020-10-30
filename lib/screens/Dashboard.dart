@@ -935,6 +935,7 @@ class _DashboradPageState extends State<DashboradPage>
           var productdata = cartItem.cart_detail != null
               ? json.decode(cartItem.cart_detail)
               : "";
+          print(productdata);
           orderDetail.uuid = uuid;
           orderDetail.order_id = orderId;
           orderDetail.branch_id = int.parse(branchid);
@@ -1167,7 +1168,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   countTax(subT) async {
     var totalTax = [];
-    double taxvalue = taxvalues;
+    double taxvalue = 0.00;
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
@@ -1253,19 +1254,57 @@ class _DashboradPageState extends State<DashboradPage>
         builder: (BuildContext context) {
           return ChangeQtyDailog(
               qty: cartitem.productQty,
-              onClose: (qty) {
-                splitproductfromItem(qty, cartitem);
+              onClose: (qty, remark) {
+                splitproductfromItem(qty, cartitem, remark);
               });
         });
   }
 
-  splitproductfromItem(qty, MSTCartdetails cartitem) async {
-    MSTCartdetails foxProduct = new MSTCartdetails();
-    foxProduct = cartitem;
-    foxProduct.productQty = qty;
-    foxProduct.isFocProduct = 1;
+  splitproductfromItem(qty, MSTCartdetails cartitem, remark) async {
+    MSTCartdetails focProduct = new MSTCartdetails();
+    User userdata = await CommunFun.getuserDetails();
+    bool isupdate = false;
+    if (cartitem.productQty == 1) {
+      isupdate = true;
+      focProduct.id = cartitem.id;
+    }
+    focProduct.isFocProduct = 1;
+    focProduct.cartId = cartitem.cartId;
+    focProduct.productId = cartitem.productId;
+    focProduct.productName = cartitem.productName;
+    focProduct.productSecondName = cartitem.productSecondName;
+    focProduct.productPrice = 0.0;
+    focProduct.productQty = qty;
+    focProduct.productNetPrice = cartitem.productNetPrice;
+    focProduct.createdBy = userdata.id;
+    focProduct.cart_detail = cartitem.cart_detail;
+    focProduct.discount = 0.0;
+    focProduct.remark = remark;
+    focProduct.issetMeal = cartitem.issetMeal;
+    focProduct.taxValue = 0.0;
+    focProduct.printer_id = cartitem.printer_id;
+    focProduct.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    focProduct.setmeal_product_detail = cartitem.setmeal_product_detail;
+    var realprice = (cartitem.productPrice / cartitem.productQty);
+    var dis = (cartitem.discount / cartitem.productQty);
     cartitem.productQty = cartitem.productQty - qty;
-    var result = await localAPI.makeAsFocProduct();
+    cartitem.productPrice = (realprice * cartitem.productQty);
+    cartitem.discount = (realprice * dis);
+    MST_Cart cart = new MST_Cart();
+    cart = allcartData;
+    var subt = allcartData.sub_total - (realprice * qty);
+    var taxjson = await countTax(subt);
+    var disc =
+        allcartData.discount != null ? allcartData.discount - (dis * qty) : 0;
+    cart.sub_total = subt;
+    cart.discount = disc;
+    cart.total_qty = allcartData.total_qty - qty;
+    cart.grand_total = (cart.sub_total - disc) + taxvalues;
+    cart.tax_json = json.encode(taxjson);
+    var result =
+        await localAPI.makeAsFocProduct(focProduct, isupdate, cart, cartitem);
+    Navigator.of(context).pop();
+    getCartItem(currentCart);
   }
 
   editCartItem(cart) async {
@@ -2499,8 +2538,13 @@ class _DashboradPageState extends State<DashboradPage>
                       color: Colors.black45,
                       icon: Icons.edit,
                       onTap: () {
-                        if (!isWebOrder) {
+                        if (!isWebOrder && cart.isFocProduct != 1) {
                           editCartItem(cart);
+                        } else {
+                          if (cart.isFocProduct == 1) {
+                            CommunFun.showToast(
+                                context, "FOC Product is not editable.");
+                          }
                         }
                       },
                     )
