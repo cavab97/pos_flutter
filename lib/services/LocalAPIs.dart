@@ -100,8 +100,8 @@ class LocalAPI {
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
         " LEFT join product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
-        " where product.name LIKE '%$searchText%' OR product.sku LIKE '%$searchText%'" +
-        " AND product.status = 1 AND product.has_setmeal = 0" +
+        " where product.status = 1 AND product.has_setmeal = 0 AND " +
+        " (product.name LIKE '%$searchText%' OR product.sku LIKE '%$searchText%')" +
         " GROUP By product.product_id";
 
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
@@ -535,16 +535,17 @@ class LocalAPI {
     return list;
   }
 
-  Future<Orders> getcurrentOrders(orderid,terminalID) async {
-    var query = "SELECT * from orders WHERE app_id=$orderid AND terminal_id=$terminalID";
+  Future<Orders> getcurrentOrders(orderid, terminalID) async {
+    var query =
+        "SELECT * from orders WHERE app_id=$orderid AND terminal_id=$terminalID";
     //var query = "SELECT *  from payment WHERE status = 1";
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
 
-   /* var db = DatabaseHelper.dbHelper.getDatabse();
+    /* var db = DatabaseHelper.dbHelper.getDatabse();
     var result =
         await db.query('orders', where: "app_id = ?", whereArgs: [orderid]);*/
     List<Orders> list =
-    res.isNotEmpty ? res.map((c) => Orders.fromJson(c)).toList() : [];
+        res.isNotEmpty ? res.map((c) => Orders.fromJson(c)).toList() : [];
     return list[0];
   }
 
