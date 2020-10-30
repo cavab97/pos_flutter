@@ -20,29 +20,32 @@ class ProductDetails {
   int updatedBy;
   String deletedBy;
   String base64;
+  String attrCat;
+  String modifireName;
 
-  ProductDetails({
-    this.productId,
-    this.uuid,
-    this.name,
-    this.name_2,
-    this.description,
-    this.sku,
-    this.priceTypeId,
-    this.priceTypeValue,
-    this.price,
-    this.oldPrice,
-    this.priceTypeName,
-    this.hasInventory,
-    this.qty,
-    this.status,
-    this.hasSetmeal,
-    this.updatedAt,
-    this.deletedAt,
-    this.updatedBy,
-    this.deletedBy,
-    this.base64,
-  });
+  ProductDetails(
+      {this.productId,
+      this.uuid,
+      this.name,
+      this.name_2,
+      this.description,
+      this.sku,
+      this.priceTypeId,
+      this.priceTypeValue,
+      this.price,
+      this.oldPrice,
+      this.priceTypeName,
+      this.hasInventory,
+      this.qty,
+      this.status,
+      this.hasSetmeal,
+      this.updatedAt,
+      this.deletedAt,
+      this.updatedBy,
+      this.deletedBy,
+      this.base64,
+      this.attrCat,
+      this.modifireName});
 
   ProductDetails.fromJson(Map<String, dynamic> json) {
     productId = json['product_id'];
@@ -71,6 +74,8 @@ class ProductDetails {
     updatedBy = json['updated_by'];
     deletedBy = json['deleted_by'];
     base64 = json['base64'] != null ? json['base64'] : "";
+    attrCat = json["attr_cat"];
+    modifireName = json["modifire_Name"];
   }
 
   Map<String, dynamic> toJson() {
@@ -96,6 +101,8 @@ class ProductDetails {
     data['updated_by'] = this.updatedBy;
     data['deleted_by'] = this.deletedBy;
     data['base64'] = this.base64;
+    data['attr_cat'] = this.attrCat;
+    data["modifire_Name"] = this.modifireName; 
     return data;
   }
 }
