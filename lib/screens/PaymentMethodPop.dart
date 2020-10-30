@@ -520,12 +520,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   Widget remarkInput() {
     return TextFormField(
       controller: remarkInputController,
-      validator: (value) {
-        if (value.isEmpty) {
-          return 'Please enter remark.';
-        }
-        return null;
-      },
       keyboardType: TextInputType.text,
       decoration: InputDecoration(
         errorStyle: TextStyle(

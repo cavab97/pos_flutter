@@ -1637,4 +1637,24 @@ class LocalAPI {
       print(result1);
     }
   }
+
+  Future makeAsFocProduct(MSTCartdetails focProduct, isUpdate, MST_Cart cart,
+      MSTCartdetails cartitem) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    if (isUpdate) {
+      var data = await db.update("mst_cart_detail", focProduct.toJson(),
+          where: "id =?", whereArgs: [focProduct.id]);
+    } else {
+      var data = await db.insert(
+        "mst_cart_detail",
+        focProduct.toJson(),
+      );
+      var res = await db.update("mst_cart_detail", cartitem.toJson(),
+          where: "id =?", whereArgs: [cartitem.id]);
+    }
+    var res = await db.update("mst_cart", cart.toJson(),
+        where: "id =?", whereArgs: [cart.id]);
+    await SyncAPICalls.logActivity(
+        "mst_cart_detail", "Added Foc Product", "mst_cart_detail", cart.id);
+  }
 }

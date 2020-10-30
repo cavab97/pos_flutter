@@ -1163,7 +1163,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   Widget notesInput() {
     return Center(
       child: Container(
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.all(10),
         child: TextField(
           controller: extraNotes,
           keyboardType: TextInputType.multiline,

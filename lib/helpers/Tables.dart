@@ -651,6 +651,7 @@ class CreateTables {
         'discount_type  INTEGER,' + //int
         'remark TEXT,' +
         'issetMeal NUMERIC,' +
+        'isFoc_Product NUMERIC,' +
         'setmeal_product_detail TEXT,' +
         'cart_detail TEXT,' +
         'is_deleted   INTEGER,' +

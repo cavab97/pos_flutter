@@ -222,6 +222,16 @@ class CommunFun {
     );
   }
 
+  static syncOrdersANDStore(context) async {
+     await CommunFun.getsetWebOrders(context);
+    await SyncAPICalls.syncOrderstoDatabase(context);
+    await SyncAPICalls.sendInvenotryTable(context);
+    await SyncAPICalls.sendCancledOrderTable(context);
+    await Navigator.of(context).pop();
+  }
+
+ 
+
   static syncAfterSuccess(context, isOpen) async {
     if (isOpen) {
       opneSyncPop(context);
