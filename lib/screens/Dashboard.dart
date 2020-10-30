@@ -767,7 +767,6 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   showQuantityDailog(selectedProduct, isSetMeal) async {
-    // Increase Decrease Quantity popup
     if (!isSetMeal) {
       if (selectedProduct.isSetMeal != null) {
         isSetMeal = true;
@@ -782,19 +781,25 @@ class _DashboradPageState extends State<DashboradPage>
         selectedProduct = cartItemproduct;
       }
     }
-
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return ProductQuantityDailog(
-              product: selectedProduct,
-              issetMeal: isSetMeal,
-              cartID: currentCart,
-              onClose: () {
-                refreshAfterAction(false);
-              });
-        });
+    if (isSetMeal ||
+        selectedProduct.attrCat != null ||
+        selectedProduct.modifireName != null) {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return ProductQuantityDailog(
+                product: selectedProduct,
+                issetMeal: isSetMeal,
+                cartID: currentCart,
+                onClose: () {
+                  refreshAfterAction(false);
+                });
+          });
+    } else {
+      CommunFun.addItemToCart(
+          selectedProduct, cartList, allcartData, isSetMeal);
+    }
   }
 
   openSendReceiptPop(orderID) {
