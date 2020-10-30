@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -98,7 +99,7 @@ class _DashboradPageState extends State<DashboradPage>
   User checkInUser;
   var permissions = "";
   var currency = "RM";
-
+  Timer timer;
   @override
   void initState() {
     super.initState();
@@ -131,9 +132,11 @@ class _DashboradPageState extends State<DashboradPage>
     if (isInit == true) {
       await getCategoryList();
       await getAllPrinter();
+      //await checkisAutoSync();
     } else {
       await databaseHelper.initializeDatabase();
       await getCategoryList();
+      //await checkisAutoSync();
     }
     var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
     setState(() {
@@ -158,6 +161,27 @@ class _DashboradPageState extends State<DashboradPage>
       onSlideIsOpenChanged: handleSlideIsOpenChanged,
     );
   }
+
+  // checkisAutoSync() async {
+  //   var isSync = await Preferences.getStringValuesSF(Constant.IS_AUTO_SYNC);
+  //   if (isSync != null) {
+  //     print(isSync);
+  //     if (isSync == "true") {
+  //       startAutosync();
+  //     }
+  //   }
+  // }
+
+  // startAutosync() async {
+  //   int timertime = 3;
+  //   var isSynctimer = await Preferences.getStringValuesSF(Constant.SYNC_TIMER);
+  //   if (isSynctimer != null) {
+  //     timertime = int.parse(isSynctimer);
+  //   }
+  //   timer = new Timer.periodic(new Duration(minutes: 1), (timer) async {
+  //     await CommunFun.autosyncAllTables(context);
+  //   });
+  // }
 
   void handleSlideAnimationChanged(Animation<double> slideAnimation) {}
 
@@ -238,24 +262,16 @@ class _DashboradPageState extends State<DashboradPage>
     Navigator.of(context).pop();
     await Preferences.removeSinglePref(Constant.LastSync_Table);
     await Preferences.removeSinglePref(Constant.OFFSET);
-    await CommunFun.syncAfterSuccess(context);
+    await CommunFun.syncAfterSuccess(context, true);
   }
 
   syncOrdersTodatabase() async {
     await CommunFun.opneSyncPop(context);
-    await getsetWebOrders();
+    await CommunFun.getsetWebOrders(context);
     await SyncAPICalls.syncOrderstoDatabase(context);
     await SyncAPICalls.sendInvenotryTable(context);
     await SyncAPICalls.sendCancledOrderTable(context);
-  }
-
-  getsetWebOrders() async {
-    var res = await SyncAPICalls.getWebOrders(context);
-    var sertvertime = res["data"]["serverdatetime"];
-    await Preferences.setStringToSF(
-        Constant.ORDER_SERVER_DATE_TIME, sertvertime);
-    var cartdata = res["data"]["cart"];
-    await CommunFun.savewebOrdersintoCart(cartdata);
+    await Navigator.of(context).pop();
   }
 
   gotoShiftReport() {
@@ -1796,27 +1812,27 @@ class _DashboradPageState extends State<DashboradPage>
         children: <Widget>[
           selectedTable != null
               ? Row(
-                children: <Widget>[
-                  Icon(
-                    Icons.person,
-                    color: Colors.white,
-                    size: SizeConfig.safeBlockVertical * 4,
-                  ),
-                  SizedBox(width: 5),
-                  Container(
-                    width: SizeConfig.safeBlockHorizontal * 12,
-                    child: Text(
-                      tableName +
-                          " (" +
-                          selectedTable.number_of_pax.toString() +
-                          ")",
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                      style: Styles.whiteBoldsmall(),
+                  children: <Widget>[
+                    Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: SizeConfig.safeBlockVertical * 4,
                     ),
-                  ),
-                ],
-              )
+                    SizedBox(width: 5),
+                    Container(
+                      width: SizeConfig.safeBlockHorizontal * 12,
+                      child: Text(
+                        tableName +
+                            " (" +
+                            selectedTable.number_of_pax.toString() +
+                            ")",
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                        style: Styles.whiteBoldsmall(),
+                      ),
+                    ),
+                  ],
+                )
               : SizedBox(),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,

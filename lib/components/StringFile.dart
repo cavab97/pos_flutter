@@ -132,4 +132,6 @@ class Strings {
       "Currently shift was closed,Please opne shift after you  can see Transactions.";
   static String shift_opne_alert_msg_webOrder =
       "Currently shift was closed,Please opne shift after you  can see web Orders.";
+
+   static String auto_sync = "Auto sync";   
 }

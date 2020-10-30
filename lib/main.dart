@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/routes.dart';
 import 'package:mcncashier/screens/SplashScreen.dart';
@@ -20,13 +24,37 @@ class MyApp extends StatefulWidget {
   MyAppState createState() => MyAppState();
 }
 
-class MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   var intitialRoute;
+
   DatabaseHelper databaseHelper = DatabaseHelper();
   @override
   void initState() {
     super.initState();
     databaseHelper.initializeDatabase();
+   
+  }
+
+ 
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.paused:
+        print("ppaused");
+        break;
+      case AppLifecycleState.resumed:
+        print("rresumed");
+        break;
+      case AppLifecycleState.inactive:
+        print("Iinactive");
+        timer?.cancel();
+        break;
+      case AppLifecycleState.detached:
+        print("Ddetached");
+        break;
+    }
   }
 
   @override

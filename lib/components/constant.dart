@@ -25,6 +25,7 @@ class Constant {
   static final String OFFSET = "image_offset";
   // static final String USER_ROLE = "Roledata";
   static final String USER_PERMISSION = "user_permission";
+  static final String IS_AUTO_SYNC = "is_Ayto_Sync";
 
   /*==============================================================================
                               Manage Permission  status

@@ -34,10 +34,15 @@ class SplashScreenstate extends State<SplashScreen> {
     }
   }
 
+  setTimer() async {
+    await CommunFun.checkisAutoSync(context);
+  }
+
   navigatePage() {
     Future.delayed(const Duration(seconds: 4), () async {
       final bool isLogged = await CommunFun.isLogged();
       if (isLogged) {
+        setTimer();
         await Navigator.of(context).pushNamed(Constant.DashboardScreen);
       } else {
         await Navigator.of(context).pushNamed(Constant.TerminalScreen);

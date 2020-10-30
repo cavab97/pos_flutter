@@ -36,7 +36,9 @@ class _PINPageState extends State<PINPage> {
   checkAlreadyclockin() async {
     var isClockin = await Preferences.getStringValuesSF(Constant.IS_CHECKIN);
     if (isClockin != null) {
-      isCheckIn = isClockin == "true" ? true : false;
+      setState(() {
+        isCheckIn = isClockin == "true" ? true : false;
+      });
     }
   }
 

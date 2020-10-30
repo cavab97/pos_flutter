@@ -91,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
           if (value != null && value["status"] == Constant.STATUS200) {
             await Preferences.setStringToSF(Constant.IS_LOGIN, "true");
             user = User.fromJson(value["data"]);
-            await CommunFun.syncAfterSuccess(context);
+            await CommunFun.syncAfterSuccess(context, true);
             setState(() {
               isLoading = false;
             });

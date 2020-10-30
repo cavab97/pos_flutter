@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/screens/PrinteTypeDailog.dart';
@@ -23,9 +27,9 @@ class _SettingsPageState extends State<SettingsPage> {
   PrintReceipt testPrint = PrintReceipt();
 
   List<Printer> printerList = new List<Printer>();
-
+  bool isAutoSync = false;
   bool isPrinterSettings = false;
-  bool isGeneralSettings = false;
+  bool isGeneralSettings = true;
   bool isChangeTheme = false;
   bool isChangeLanguage = false;
   bool alwaysPrint = false;
@@ -38,6 +42,29 @@ class _SettingsPageState extends State<SettingsPage> {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
+    checkisAutoSync();
+  }
+
+  checkisAutoSync() async {
+    var isSync = await Preferences.getStringValuesSF(Constant.IS_AUTO_SYNC);
+    if (isSync != null) {
+      setState(() {
+        isAutoSync = isSync == "true" ? true : false;
+      });
+    }
+  }
+
+  setAutosync(issync) async {
+    setState(() {
+      isAutoSync = issync;
+    });
+    if (issync) {
+      await Preferences.setStringToSF(Constant.IS_AUTO_SYNC, issync.toString());
+      await CommunFun.checkisAutoSync(context);
+    } else {
+      await Preferences.removeSinglePref(Constant.IS_AUTO_SYNC);
+      CommunFun.stopAutoSync();
+    }
   }
 
   openSideData(side) {
@@ -70,7 +97,7 @@ class _SettingsPageState extends State<SettingsPage> {
   /*Get all Printer from DB*/
   getAllPrinter() async {
     List<Printer> printer = await localAPI.getAllPrinter();
-   
+
     setState(() {
       printerList = printer;
     });
@@ -86,12 +113,11 @@ class _SettingsPageState extends State<SettingsPage> {
               onClose: (selected) async {
                 Navigator.of(context).pop();
                 //TODO: Save Printer
-               
+
                 Printer table_printe = new Printer();
                 table_printe.printerIp = ip;
                 table_printe.printerIsCashier = selected;
                 var result = await localAPI.insertTablePrinter(table_printe);
-               
               });
         });
   }
@@ -236,15 +262,14 @@ class _SettingsPageState extends State<SettingsPage> {
           decoration:
               new BoxDecoration(border: new Border.all(color: Colors.white)),
           child: ListTile(
-              title: Text("Auto sync", style: Styles.whiteSimpleSmall()),
+              title: Text(Strings.auto_sync, style: Styles.whiteSimpleSmall()),
               trailing: Transform.scale(
                 scale: 1,
                 child: CupertinoSwitch(
-                  value: false,
+                  activeColor: Colors.deepOrange,
+                  value: isAutoSync,
                   onChanged: (bool value) {
-                    // setState(() {
-                    //   _switchValue = value;
-                    // });
+                    setAutosync(value);
                   },
                 ),
               )),

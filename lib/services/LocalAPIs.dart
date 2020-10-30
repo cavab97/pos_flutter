@@ -74,7 +74,7 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getProduct(String id, String branchID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var query = "SELECT product.*,price_type.name as price_type_Name,base64 ,product_store_inventory.qty FROM `product` " +
+    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64  FROM `product` " +
         " LEFT join product_category on product_category.product_id = product.product_id " +
         " LEFT join product_branch on product_branch.product_id = product.product_id AND product_branch.status = 1" +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +

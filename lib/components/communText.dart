@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:mcncashier/models/CheckInout.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
@@ -27,6 +28,7 @@ import 'package:intl/intl.dart';
 
 DatabaseHelper databaseHelper = DatabaseHelper();
 LocalAPI localAPI = LocalAPI();
+Timer timer;
 
 class CommunFun {
   static loginText() {
@@ -220,12 +222,13 @@ class CommunFun {
     );
   }
 
-  static syncAfterSuccess(context) async {
-    // sync in 4 part api call
-    opneSyncPop(context);
+  static syncAfterSuccess(context, isOpen) async {
+    if (isOpen) {
+      opneSyncPop(context);
+    }
     var lastSync = await Preferences.getStringValuesSF(Constant.LastSync_Table);
     if (lastSync == null) {
-      CommunFun.getDataTables1(context);
+      CommunFun.getDataTables1(context, isOpen);
     } else if (lastSync == "1") {
       CommunFun.getDataTables2(context);
     } else if (lastSync == "2") {
@@ -248,7 +251,7 @@ class CommunFun {
     await Preferences.setStringToSF(Constant.LastSync_Table, lastSync);
   }
 
-  static getDataTables1(context) async {
+  static getDataTables1(context, isOpen) async {
     // start with 1 tables
     var data1 = await SyncAPICalls.getDataServerBulk1(context); //api call 1
     if (data1 != null) {
@@ -310,10 +313,10 @@ class CommunFun {
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
-    getAssetsData(context);
+    getAssetsData(context, isOpen);
   }
 
-  static getAssetsData(context) async {
+  static getAssetsData(context, isOpen) async {
     var offset = await CommunFun.getOffset();
     var aceets = await SyncAPICalls.getAssets(context);
     if (aceets != null) {
@@ -323,9 +326,11 @@ class CommunFun {
       print(aceets["data"]["product_image"]);
       if (offset == null) {
         if (aceets["data"]["next_offset"] != 0) {
-          getAssetsData(context);
+          getAssetsData(context, isOpen);
         }
-        Navigator.of(context).pop();
+        if (isOpen) {
+          Navigator.of(context).pop();
+        }
         var serverTime =
             await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
         if (serverTime == null) {
@@ -333,13 +338,13 @@ class CommunFun {
         } else {
           await checkUserDeleted(context);
           await checkpermission();
-          Navigator.pushNamed(context, Constant.DashboardScreen);
+          if (isOpen) Navigator.pushNamed(context, Constant.DashboardScreen);
         }
       } else {
         if (aceets["data"]["next_offset"] == 0) {
           await CommunFun.setServerTime(aceets, "4");
         } else {
-          getAssetsData(context);
+          getAssetsData(context, isOpen);
         }
       }
     } else {
@@ -710,5 +715,51 @@ class CommunFun {
     } else {
       return "";
     }
+  }
+
+  static autosyncAllTables(context) async {
+    await getsetWebOrders(context);
+    await SyncAPICalls.syncOrderstoDatabase(context);
+    await SyncAPICalls.sendInvenotryTable(context);
+    await SyncAPICalls.sendCancledOrderTable(context);
+    await Preferences.removeSinglePref(Constant.LastSync_Table);
+    await Preferences.removeSinglePref(Constant.OFFSET);
+    await CommunFun.syncAfterSuccess(context, false);
+  }
+
+  static getsetWebOrders(context) async {
+    var res = await SyncAPICalls.getWebOrders(context);
+    var sertvertime = res["data"]["serverdatetime"];
+    await Preferences.setStringToSF(
+        Constant.ORDER_SERVER_DATE_TIME, sertvertime);
+    var cartdata = res["data"]["cart"];
+    await CommunFun.savewebOrdersintoCart(cartdata);
+  }
+
+  static checkisAutoSync(context) async {
+    var isSync = await Preferences.getStringValuesSF(Constant.IS_AUTO_SYNC);
+    if (isSync != null) {
+      print(isSync);
+      if (isSync == "true") {
+        startAutosync(context);
+      }
+    }
+  }
+
+  static startAutosync(context) async {
+    int timertime = 1;
+    var isSynctimer = await Preferences.getStringValuesSF(Constant.SYNC_TIMER);
+    if (isSynctimer != null && isSynctimer != "") {
+      timertime = int.parse(isSynctimer);
+    }
+    print("++++++++++++++++++++++++++++++++++++");
+    print(timertime);
+    var _inactivityTimeout = Duration(minutes: timertime);
+    timer =
+        Timer(_inactivityTimeout, () => CommunFun.autosyncAllTables(context));
+  }
+
+  static stopAutoSync() {
+    timer?.cancel();
   }
 }
