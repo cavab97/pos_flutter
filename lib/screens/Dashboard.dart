@@ -2525,7 +2525,7 @@ class _DashboradPageState extends State<DashboradPage>
               permissions.contains(Constant.EDIT_ITEM) && cart.issetMeal == 0
                   ? IconSlideAction(
                       color: Colors.blueAccent,
-                      icon: Icons.format_clear,
+                      icon: Icons.free_breakfast,
                       onTap: () {
                         // if (!isWebOrder) {
                         applyforFocProduct(cart);
