@@ -1,10 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/CheckInout.dart';
+import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/PosPermission.dart';
+import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/models/SetMeal.dart';
+import 'package:mcncashier/models/Table.dart';
+import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
+import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -29,6 +38,7 @@ import 'package:intl/intl.dart';
 DatabaseHelper databaseHelper = DatabaseHelper();
 LocalAPI localAPI = LocalAPI();
 Timer timer;
+double taxvalues = 0;
 
 class CommunFun {
   static loginText() {
@@ -223,14 +233,12 @@ class CommunFun {
   }
 
   static syncOrdersANDStore(context) async {
-     await CommunFun.getsetWebOrders(context);
+    await CommunFun.getsetWebOrders(context);
     await SyncAPICalls.syncOrderstoDatabase(context);
     await SyncAPICalls.sendInvenotryTable(context);
     await SyncAPICalls.sendCancledOrderTable(context);
     await Navigator.of(context).pop();
   }
-
- 
 
   static syncAfterSuccess(context, isOpen) async {
     if (isOpen) {
@@ -543,6 +551,28 @@ class CommunFun {
     return branchid;
   }
 
+  static getCustomerData() async {
+    Customer customer = new Customer();
+    var localdata = await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
+    if (localdata != null) {
+      var custData = json.decode(localdata);
+      return customer = Customer.fromJson(custData);
+    } else {
+      return customer;
+    }
+  }
+
+  static getTableData() async {
+    Table_order table = new Table_order();
+    var localdata = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+    if (localdata != null) {
+      var tableData = json.decode(localdata);
+      return table = Table_order.fromJson(tableData);
+    } else {
+      return table;
+    }
+  }
+
   static getOffset() async {
     var offset = await Preferences.getStringValuesSF(Constant.OFFSET);
     return offset;
@@ -771,5 +801,166 @@ class CommunFun {
 
   static stopAutoSync() {
     timer?.cancel();
+  }
+
+  static countTotalQty(
+      List<MSTCartdetails> cartItems, productItem, productQty) {
+    double qty = 0;
+    if (cartItems.length > 0) {
+      for (var i = 0; i < cartItems.length; i++) {
+        var item = cartItems[i];
+
+        if (item.productId == productItem.productId) {
+          item.productQty = productQty;
+        }
+
+        qty += item.productQty;
+      }
+    } else {
+      qty += productQty;
+    }
+    return qty;
+  }
+
+  static countSubtotal(List<MSTCartdetails> cartItems, price) {
+    double subT = 0;
+    if (cartItems.length > 0) {
+      double selectedITemTotal = 0;
+      for (var i = 0; i < cartItems.length; i++) {
+        var item = cartItems[i];
+        selectedITemTotal += item.productPrice;
+      }
+
+      subT = selectedITemTotal + price;
+    } else {
+      subT += price;
+    }
+    return subT;
+  }
+
+  static countGrandtotal(subt, tax, dis) {
+    double grandTotal = 0;
+    grandTotal = ((subt - dis) + tax);
+    return grandTotal;
+  }
+
+  static getTaxs() async {
+    var branchid = await CommunFun.getbranchId();
+    List<BranchTax> taxlists = await localAPI.getTaxList(branchid);
+    return taxlists;
+  }
+
+  static countTax(subT) async {
+    var taxlist = await CommunFun.getTaxs();
+    var totalTax = [];
+    double taxvalue = taxvalues;
+    if (taxlist.length > 0) {
+      for (var i = 0; i < taxlist.length; i++) {
+        var taxlistitem = taxlist[i];
+        List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
+        var taxval = taxlistitem.rate != null
+            ? subT * double.parse(taxlistitem.rate) / 100
+            : 0.0;
+        taxval = double.parse(taxval.toStringAsFixed(2));
+        taxvalue += taxval;
+        taxvalues = taxvalue;
+        var taxmap = {
+          "id": taxlistitem.id,
+          "tax_id": taxlistitem.taxId,
+          "branch_id": taxlistitem.branchId,
+          "rate": taxlistitem.rate,
+          "status": taxlistitem.status,
+          "updated_at": taxlistitem.updatedAt,
+          "updated_by": taxlistitem.updatedBy,
+          "taxAmount": taxval.toStringAsFixed(2),
+          "taxCode": tax.length > 0 ? tax[0].code : "" //tax.code
+        };
+        totalTax.add(taxmap);
+      }
+    }
+    return totalTax;
+  }
+
+  static countDiscount(MST_Cart currentCart) {
+    return currentCart.discount != null
+        ? double.parse(currentCart.discount.toStringAsFixed(2))
+        : 0.00;
+  }
+
+  static getPrinter(productItem) async {
+    Printer printer = new Printer();
+    List<Printer> printerlist =
+        await localAPI.getPrinter(productItem.productId.toString());
+    if (printerlist.length > 0) {
+      printer = printerlist[0];
+    }
+    return printer;
+  }
+
+  static addItemToCart(productItem, List<MSTCartdetails> cartItems,
+      MST_Cart allcartData, callback) async {
+    MST_Cart cart = new MST_Cart();
+    SaveOrder orderData = new SaveOrder();
+    var branchid = await CommunFun.getbranchId();
+    Table_order table = await CommunFun.getTableData();
+    User loginUser = await CommunFun.getuserDetails();
+    Customer customerData = await CommunFun.getCustomerData();
+    Printer printer = await CommunFun.getPrinter(productItem);
+    var qty = await CommunFun.countTotalQty(cartItems, productItem, 1.0);
+    var disc = await CommunFun.countDiscount(allcartData);
+    var subtotal = await CommunFun.countSubtotal(cartItems, productItem.price);
+    var totalTax = await CommunFun.countTax(subtotal);
+    var grandTotal = await CommunFun.countGrandtotal(subtotal, taxvalues, disc);
+    cart.user_id = customerData.customerId;
+    cart.branch_id = int.parse(branchid);
+    cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
+    cart.discount = disc;
+    cart.table_id = table.table_id;
+    cart.discount_type = allcartData.discount_type;
+    cart.total_qty = qty;
+    cart.tax = double.parse(taxvalues.toStringAsFixed(2));
+    cart.source = 2;
+    cart.tax_json = json.encode(totalTax);
+    cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
+    cart.customer_terminal = customerData != null ? customerData.terminalId : 0;
+    cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    cart.created_by = loginUser.id;
+    cart.localID = await CommunFun.getLocalID();
+    orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    orderData.numberofPax = table != null ? table.number_of_pax : 0;
+    orderData.isTableOrder = table != null ? 1 : 0;
+
+    var cartid = await localAPI.insertItemTocart(
+        allcartData.id, cart, productItem, orderData, table.table_id);
+    ProductDetails cartItemproduct = new ProductDetails();
+    cartItemproduct = productItem;
+    cartItemproduct.qty = 1;
+    cartItemproduct.price = double.parse(productItem.price.toStringAsFixed(2));
+    cartItemproduct
+        .toJson()
+        .removeWhere((String key, dynamic value) => value == null);
+    var data = cartItemproduct;
+    MSTCartdetails cartdetails = new MSTCartdetails();
+
+    cartdetails.cartId = cartid;
+    cartdetails.productId = productItem.productId;
+    cartdetails.productName = productItem.name;
+    cartdetails.productSecondName = productItem.name_2;
+    cartdetails.productPrice =
+        double.parse(productItem.price.toStringAsFixed(2));
+    cartdetails.productQty = 1.0;
+    cartdetails.productNetPrice =
+        double.parse(productItem.price.toStringAsFixed(2));
+    cartdetails.createdBy = loginUser.id;
+    cartdetails.cart_detail = jsonEncode(data);
+    cartdetails.discount = 0;
+    cartdetails.remark = "";
+    cartdetails.issetMeal = 0;
+    cartdetails.taxValue = taxvalues;
+    cartdetails.printer_id = printer != null ? printer.printerId : 0;
+    cartdetails.createdAt = await CommunFun.getLocalID();
+    var detailID = await localAPI.addintoCartDetails(cartdetails);
+    print(detailID);
+    callback();
   }
 }

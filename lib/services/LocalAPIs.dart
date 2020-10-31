@@ -74,11 +74,16 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getProduct(String id, String branchID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64  FROM `product` " +
+    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,category_attribute.name as attr_cat ,modifier.name as modifire_Name FROM `product` " +
         " LEFT join product_category on product_category.product_id = product.product_id " +
         " LEFT join product_branch on product_branch.product_id = product.product_id AND product_branch.status = 1" +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id AND asset.status = 1" +
+        " LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1" +
+        " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1" +
+        " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1" +
+        " LEFT JOIN product_modifier on  product_modifier.product_id = product.product_id AND product_modifier.status = 1 " +
+        " LEFT JOIN modifier on modifier.modifier_id = product_modifier.modifier_id AND modifier.status = 1 " +
         " LEFT join product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
         " where product_category.category_id = " +
         id +
@@ -308,7 +313,7 @@ class LocalAPI {
   }
 
   Future<int> insertItemTocart(cartidd, MST_Cart cartData,
-      ProductDetails product, SaveOrder orderData, tableiD, subCartData) async {
+      ProductDetails product, SaveOrder orderData, tableiD) async {
     var db = await DatabaseHelper.dbHelper.getDatabse();
     var cartid;
     if (cartidd == null) {

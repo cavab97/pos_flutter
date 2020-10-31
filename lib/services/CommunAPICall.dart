@@ -10,6 +10,7 @@ class APICalls {
     try {
       var connected = await CommunFun.checkConnectivity();
       if (connected) {
+        print(apiurl);
         Uri url = Uri.parse(Configrations.base_URL + apiurl);
         final client = new http.Client();
         final headers = {HttpHeaders.contentTypeHeader: 'application/json'};

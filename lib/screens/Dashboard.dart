@@ -47,9 +47,9 @@ import 'package:mcncashier/screens/ChangeQtyDailog.dart';
 import 'package:mcncashier/screens/SplitOrder.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
-import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 class DashboradPage extends StatefulWidget {
   // main Product list page
@@ -100,10 +100,14 @@ class _DashboradPageState extends State<DashboradPage>
   User checkInUser;
   var permissions = "";
   var currency = "RM";
+  bool isScreenLoad = false;
   Timer timer;
   @override
   void initState() {
     super.initState();
+    setState(() {
+      isScreenLoad = true;
+    });
     checkisInit();
     checkISlogin();
   }
@@ -150,6 +154,9 @@ class _DashboradPageState extends State<DashboradPage>
     await getTaxs();
     _textController.addListener(() {
       getSearchList(_textController.text.toString());
+    });
+    setState(() {
+      isScreenLoad = false;
     });
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
     KeyboardVisibilityNotification().addNewListener(
@@ -764,7 +771,6 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   showQuantityDailog(selectedProduct, isSetMeal) async {
-    // Increase Decrease Quantity popup
     if (!isSetMeal) {
       if (selectedProduct.isSetMeal != null) {
         isSetMeal = true;
@@ -779,19 +785,32 @@ class _DashboradPageState extends State<DashboradPage>
         selectedProduct = cartItemproduct;
       }
     }
-
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return ProductQuantityDailog(
-              product: selectedProduct,
-              issetMeal: isSetMeal,
-              cartID: currentCart,
-              onClose: () {
-                refreshAfterAction(false);
-              });
+    if (isSetMeal ||
+        selectedProduct.attrCat != null ||
+        selectedProduct.modifireName != null) {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return ProductQuantityDailog(
+                product: selectedProduct,
+                issetMeal: isSetMeal,
+                cartID: currentCart,
+                onClose: () {
+                  refreshAfterAction(false);
+                });
+          });
+    } else {
+      setState(() {
+        isScreenLoad = true;
+      });
+      await CommunFun.addItemToCart(selectedProduct, cartList, allcartData, () {
+        checkidTableSelected();
+        setState(() {
+          isScreenLoad = false;
         });
+      });
+    }
   }
 
   openSendReceiptPop(orderID) {
@@ -1449,139 +1468,148 @@ class _DashboradPageState extends State<DashboradPage>
 
     return WillPopScope(
       child: Scaffold(
-        key: scaffoldKey, drawer: drawerWidget(),
-        body: SafeArea(
-          child: new GestureDetector(
-            onTap: () {
-              FocusScope.of(context).requestFocus(new FocusNode());
-              slidableController.activeState?.close();
-            },
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Table(
-                border: TableBorder.all(color: Colors.white, width: 0.6),
-                columnWidths: {
-                  0: FractionColumnWidth(.6),
-                  1: FractionColumnWidth(.3),
-                },
-                children: [
-                  TableRow(children: [
-                    TableCell(child: tableHeader1()),
-                    TableCell(child: tableHeader2()),
-                  ]),
-                  TableRow(children: [
-                    TableCell(
-                      child: Container(
-                        padding:
-                            EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
-                        child: Column(
-                          children: <Widget>[
-                            subCatList.length == 0
-                                ? Container(
-                                    //margin: EdgeInsets.only(left: 5, right: 5),
-                                    width: MediaQuery.of(context).size.width,
-                                    height: SizeConfig.safeBlockVertical * 8,
-                                    color: Colors.black26,
-                                    padding: EdgeInsets.all(
-                                        SizeConfig.safeBlockVertical * 1.2),
-                                    child: DefaultTabController(
-                                        initialIndex: 0,
-                                        length: tabsList.length,
-                                        child: _tabs),
-                                  )
-                                : Container(
-                                    //  margin: EdgeInsets.only(left: 5, right: 5),
-                                    width: MediaQuery.of(context).size.width,
-                                    height: SizeConfig.safeBlockVertical * 8,
-                                    color: Colors.black26,
-                                    padding: EdgeInsets.all(
-                                        SizeConfig.safeBlockVertical * 1.2),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: <Widget>[
-                                        IconButton(
-                                            onPressed: _backtoMainCat,
-                                            icon: Icon(
-                                              Icons.arrow_back,
-                                              color: Colors.white,
-                                              size:
-                                                  SizeConfig.safeBlockVertical *
-                                                      4,
-                                            )),
-                                        DefaultTabController(
-                                            initialIndex: 0,
-                                            length: subCatList.length,
-                                            child: _subtabs),
-                                      ],
+        key: scaffoldKey,
+        drawer: drawerWidget(),
+        body: LoadingOverlay(
+          child: SafeArea(
+            child: new GestureDetector(
+              onTap: () {
+                FocusScope.of(context).requestFocus(new FocusNode());
+                slidableController.activeState?.close();
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Table(
+                  border: TableBorder.all(color: Colors.white, width: 0.6),
+                  columnWidths: {
+                    0: FractionColumnWidth(.6),
+                    1: FractionColumnWidth(.3),
+                  },
+                  children: [
+                    TableRow(children: [
+                      TableCell(child: tableHeader1()),
+                      TableCell(child: tableHeader2()),
+                    ]),
+                    TableRow(children: [
+                      TableCell(
+                        child: Container(
+                          padding:
+                              EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
+                          child: Column(
+                            children: <Widget>[
+                              subCatList.length == 0
+                                  ? Container(
+                                      //margin: EdgeInsets.only(left: 5, right: 5),
+                                      width: MediaQuery.of(context).size.width,
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      color: Colors.black26,
+                                      padding: EdgeInsets.all(
+                                          SizeConfig.safeBlockVertical * 1.2),
+                                      child: DefaultTabController(
+                                          initialIndex: 0,
+                                          length: tabsList.length,
+                                          child: _tabs),
+                                    )
+                                  : Container(
+                                      //  margin: EdgeInsets.only(left: 5, right: 5),
+                                      width: MediaQuery.of(context).size.width,
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      color: Colors.black26,
+                                      padding: EdgeInsets.all(
+                                          SizeConfig.safeBlockVertical * 1.2),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          IconButton(
+                                              onPressed: _backtoMainCat,
+                                              icon: Icon(
+                                                Icons.arrow_back,
+                                                color: Colors.white,
+                                                size: SizeConfig
+                                                        .safeBlockVertical *
+                                                    4,
+                                              )),
+                                          DefaultTabController(
+                                              initialIndex: 0,
+                                              length: subCatList.length,
+                                              child: _subtabs),
+                                        ],
+                                      ),
                                     ),
+                              SingleChildScrollView(
+                                physics: BouncingScrollPhysics(),
+                                child: Container(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      mealsList.length > 0
+                                          ? setMealsList()
+                                          : SizedBox(),
+                                      isLoading
+                                          ? CommunFun.loader(context)
+                                          : productList.length > 0
+                                              ? porductsList()
+                                              : SizedBox(),
+                                    ],
                                   ),
-                            SingleChildScrollView(
-                              physics: BouncingScrollPhysics(),
-                              child: Container(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    mealsList.length > 0
-                                        ? setMealsList()
-                                        : SizedBox(),
-                                    isLoading
-                                        ? CommunFun.loader(context)
-                                        : productList.length > 0
-                                            ? porductsList()
-                                            : SizedBox(),
-                                  ],
                                 ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      TableCell(
+                        child: Stack(
+                          children: <Widget>[
+                            Container(
+                              // color: Colors.white,
+                              child: SizedBox(
+                                  height: MediaQuery.of(context).size.height -
+                                      SizeConfig.safeBlockVertical * 10,
+                                  width: SizeConfig.safeBlockHorizontal * 50,
+                                  child: cartITems()),
+                            ),
+                            Positioned(
+                              bottom: 25,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                height: 80,
+                                color: StaticColor.backgroundColor,
+                                child: paybutton(context),
                               ),
-                            )
+                            ),
+                            !isShiftOpen ? openShiftButton(context) : SizedBox()
                           ],
                         ),
                       ),
-                    ),
-                    TableCell(
-                      child: Stack(
-                        children: <Widget>[
-                          Container(
-                            // color: Colors.white,
-                            child: SizedBox(
-                                height: MediaQuery.of(context).size.height -
-                                    SizeConfig.safeBlockVertical * 10,
-                                width: SizeConfig.safeBlockHorizontal * 50,
-                                child: cartITems()),
-                          ),
-                          Positioned(
-                            bottom: 25,
-                            left: 0,
-                            right: 0,
-                            child: Container(
-                              height: 80,
-                              color: StaticColor.backgroundColor,
-                              child: paybutton(context),
-                            ),
-                          ),
-                          !isShiftOpen ? openShiftButton(context) : SizedBox()
-                        ],
-                      ),
-                    ),
-                  ]),
-                ],
+                    ]),
+                  ],
+                ),
               ),
             ),
           ),
+          isLoading: isScreenLoad,
+          //opacity: 0.5,
+          color: Colors.black87,
+          progressIndicator: Container(
+            padding: EdgeInsets.all(20),
+            height: 110,
+            width: 110,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100), color: Colors.white),
+            child: CircularProgressIndicator(
+              strokeWidth: 5,
+              backgroundColor: Colors.grey[200],
+            ),
+          ),
         ),
-        //   isLoading: isLoading,
-        //   opacity: 0.9,
-        //   color: Colors.black87,
-        //   progressIndicator: CircularProgressIndicator(
-        //     backgroundColor: Colors.white,
-        //     valueColor:
-        //         AlwaysStoppedAnimation<Color>(Theme.of(context).accentColor),
-        //   ),
-        // ),
       ),
       onWillPop: _willPopCallback,
     );
@@ -2200,7 +2228,6 @@ class _DashboradPageState extends State<DashboradPage>
       height: MediaQuery.of(context).size.height / 1.3,
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.only(top: 10, bottom: 20, left: 0, right: 0),
-
       child: GridView.count(
         physics: BouncingScrollPhysics(),
         shrinkWrap: true,
@@ -2442,14 +2469,15 @@ class _DashboradPageState extends State<DashboradPage>
     // selected item list and total price calculations
     final customerdatawidget = Row(
       crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Icon(
           Icons.account_circle,
           color: Colors.grey,
-          size: SizeConfig.safeBlockVertical * 6,
+          size: SizeConfig.safeBlockVertical * 4,
         ),
         Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             SizedBox(
               height: 5,
@@ -2805,6 +2833,7 @@ class _DashboradPageState extends State<DashboradPage>
             children: <Widget>[
               customer != null
                   ? Container(
+                      padding: EdgeInsets.only(left: 20, right: 20),
                       height: 50,
                       width: MediaQuery.of(context).size.width / 1.2,
                       child: customerdatawidget)
@@ -2820,7 +2849,7 @@ class _DashboradPageState extends State<DashboradPage>
                   : SizedBox(),
               Container(
                   //color: Colors.red,
-                  height: MediaQuery.of(context).size.height / 3,
+                  height: MediaQuery.of(context).size.height / 2,
                   margin: EdgeInsets.only(top: customer != null ? 85 : 35),
                   child: cartTable),
               cartList.length != 0

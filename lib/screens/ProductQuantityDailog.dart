@@ -582,8 +582,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
 
     ///insert
-    var cartid = await localAPI.insertItemTocart(currentCart.id, cart,
-        productItem, orderData, tableData["table_id"], subCartData);
+    var cartid = await localAPI.insertItemTocart(
+        currentCart.id, cart, productItem, orderData, tableData["table_id"]);
     ProductDetails cartItemproduct = new ProductDetails();
 
     if (!isSetMeal) {
