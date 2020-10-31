@@ -1596,16 +1596,15 @@ class _DashboradPageState extends State<DashboradPage>
             ),
           ),
           isLoading: isScreenLoad,
-          //opacity: 0.5,
           color: Colors.black87,
           progressIndicator: Container(
-            padding: EdgeInsets.all(20),
-            height: 110,
-            width: 110,
+            padding: EdgeInsets.all(10),
+            height: 70,
+            width: 70,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(100), color: Colors.white),
             child: CircularProgressIndicator(
-              strokeWidth: 5,
+              strokeWidth: 4,
               backgroundColor: Colors.grey[200],
             ),
           ),

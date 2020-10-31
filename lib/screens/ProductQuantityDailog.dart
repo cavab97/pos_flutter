@@ -102,7 +102,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
     if (widget.cartID != null) {
       getCartData();
-      getcartItemsDetails();
+      // getcartItemsDetails();
     }
     var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
     setState(() {
@@ -234,6 +234,41 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
+//  if (attributeList.length > 0) {
+//                   for (var i = 0; i < attributeList.length; i++) {
+//                     var attribute = attributeList[i];
+//                     var attributType = attribute.attr_types.split(',');
+//                     var attrIDs = attribute.attributeId.split(',');
+//                     var attrtypesPrice = attribute.attr_types_price.split(',');
+//                     for (var a = 0; a < attributType.length; a++) {
+//                       var aattrid = int.parse(attrIDs[a]);
+//                       if (item.attributeId == aattrid) {
+//                         setState(() {
+//                           isEditing = true;
+//                         });
+//                       } else {
+//                         setState(() {
+//                           isEditing = false;
+//                           cartitem = null;
+//                         });
+//                       }
+//                     }
+//                   }
+//                 }
+//  if (modifireList.length > 0) {
+//                   for (var j = 0; j < modifireList.length; j++) {
+//                     if (modifireList[j].modifierId == item.modifierId) {
+//                       setState(() {
+//                         isEditing = true;
+//                       });
+//                     } else {
+//                       setState(() {
+//                         isEditing = false;
+//                         cartitem = null;
+//                       });
+//                     }
+//                   }
+//                 }
   getcartItemsDetails() async {
     List<MSTCartdetails> cartItemslist =
         await localAPI.getCurrentCartItems(widget.cartID);
@@ -242,6 +277,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         cartItems = cartItemslist;
       });
     }
+
     if (!isSetMeal) {
       var contain = cartItems
           .where((element) => element.productId == productItem.productId);
@@ -250,10 +286,58 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         List<MSTCartdetails> myModels = (json.decode(jsonString) as List)
             .map((i) => MSTCartdetails.fromJson(i))
             .toList();
-        setState(() {
-          isEditing = true;
-          cartitem = myModels[0];
-        });
+        var sameAttributes = [];
+        MSTCartdetails itemset = new MSTCartdetails();
+        for (var m = 0; m < myModels.length; m++) {
+          List<MSTSubCartdetails> details =
+              await localAPI.getItemModifire(myModels[m].id);
+          if (details.length > 0) {
+            for (var p = 0; p < details.length; p++) {
+              var item = details[p];
+              if (item.caId != null) {
+                if (selectedAttr.length > 0) {
+                  for (var i = 0; i < selectedAttr.length; i++) {
+                    var attr = selectedAttr[i];
+                    if (item.attributeId == int.parse(attr["attrType_ID"])) {
+                      sameAttributes.add(item);
+                    }
+                  }
+                }
+              } else {
+                if (selectedModifier.length > 0) {
+                  for (var i = 0; i < selectedModifier.length; i++) {
+                    var modifire = selectedModifier[i];
+                    if (item.modifierId == modifire.modifierId) {
+                      sameAttributes.add(item);
+                    }
+                  }
+                }
+              }
+            }
+          }
+          if (selectedAttr.length != 0 || selectedModifier.length != 0) {
+            if (details.length > 0 && sameAttributes.length == details.length) {
+              setState(() {
+                isEditing = true;
+                cartitem = myModels[m];
+              });
+            }
+          } else {
+            if (details.length == 0) {
+              setState(() {
+                isEditing = true;
+                cartitem = myModels[m];
+              });
+            }
+          }
+        }
+        if (isEditing && cartitem != null) {
+          setState(() {
+            product_qty =
+                isEditing ? product_qty + cartitem.productQty : product_qty;
+            price = isEditing ? price + cartitem.productPrice : price;
+          });
+        }
       }
     } else {
       //Put logic here for set Meal update
@@ -533,6 +617,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         : 0.00;
   }
 
+  checkIsAvailble() async {}
   produtAddTocart() async {
     MST_Cart cart = new MST_Cart();
     SaveOrder orderData = new SaveOrder();
@@ -604,6 +689,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         .removeWhere((String key, dynamic value) => value == null);
     var data = cartItemproduct;
     MSTCartdetails cartdetails = new MSTCartdetails();
+    if (!isEditing) {
+      await getcartItemsDetails();
+    }
+
     if (isEditing) {
       cartdetails.id = cartitem.id;
     }

@@ -963,4 +963,26 @@ class CommunFun {
     print(detailID);
     callback();
   }
+
+  // sendTokitched(itemList) async {
+  //   String ids = "";
+  //   var list = [];
+  //   for (var i = 0; i < itemList.length; i++) {
+  //     if (itemList[i].isSendKichen == null || itemList[i].isSendKichen == 0) {
+  //       if (ids == "") {
+  //         ids = itemList[i].id.toString();
+  //       } else {
+  //         ids = ids + "," + itemList[i].id.toString();
+  //       }
+  //       list.add(itemList[i]);
+  //     }
+  //     if (i == itemList.length - 1) {
+  //       if (list.length > 0) {
+  //         dynamic send = await localAPI.sendToKitched(ids);
+  //         openPrinterPop(list);
+  //       }
+  //     }
+  //   }
+  // }
+
 }
