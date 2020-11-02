@@ -11,6 +11,8 @@ import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/SetMeal.dart';
+import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
@@ -809,11 +811,9 @@ class CommunFun {
     if (cartItems.length > 0) {
       for (var i = 0; i < cartItems.length; i++) {
         var item = cartItems[i];
-
         if (item.productId == productItem.productId) {
           item.productQty = productQty;
         }
-
         qty += item.productQty;
       }
     } else {
