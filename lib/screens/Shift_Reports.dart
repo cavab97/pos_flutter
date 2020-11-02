@@ -124,8 +124,27 @@ class _ShiftReportsState extends State<ShiftReports> {
             title: title,
             ammount: amount,
             onClose: (amount, reson) {
+              if (reson == "Other") {
+                Navigator.of(context).pop();
+                otherReasonPop(amount);
+              } else {
+                Navigator.of(context).pop();
+                insertPayinOUT(amount, reson);
+              }
+            },
+          );
+        });
+  }
+
+  otherReasonPop(amount) {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AddOtherReason(
+            onClose: (otherText) {
               Navigator.of(context).pop();
-              insertPayinOUT(amount, reson);
+              insertPayinOUT(amount, otherText);
             },
           );
         });
@@ -499,7 +518,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               color: Colors.grey,
               child: ListTile(
                 title: Text(
-                  "Case Deposit",
+                  "Cash Deposit",
                   style: Styles.whiteMediumBold(),
                 ),
                 trailing: Text(
@@ -745,6 +764,80 @@ class _ShiftReportsState extends State<ShiftReports> {
           ],
         )
       ],
+    );
+  }
+}
+
+class AddOtherReason extends StatefulWidget {
+  AddOtherReason({Key key, this.onClose}) : super(key: key);
+  Function onClose;
+
+  @override
+  AddOtherReasonState createState() => AddOtherReasonState();
+}
+
+class AddOtherReasonState extends State<AddOtherReason> {
+  TextEditingController reasonController = new TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      titlePadding: EdgeInsets.all(0),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(15.0))),
+      content: Container(
+        height: MediaQuery.of(context).size.height / 4,
+        width: MediaQuery.of(context).size.width / 3.4,
+        child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "Reason",
+                  style: Styles.communBlack(),
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: reasonController,
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(width: 1, color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(width: 1, color: Colors.grey),
+                    ),
+                  ),
+                ),
+              ],
+            )),
+      ),
+      actions: <Widget>[canclebutton(context), confirmBtn(context)],
+    );
+  }
+
+  Widget confirmBtn(context) {
+    // Add button header rounded
+    return FlatButton(
+      onPressed: () {
+        widget.onClose(reasonController.text);
+      },
+      child: Text("Confirm", style: Styles.orangeSmall()),
+      textColor: Colors.white,
+    );
+  }
+
+  Widget canclebutton(context) {
+    return FlatButton(
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+      child: Text("Cancel", style: Styles.orangeSmall()),
+      textColor: Colors.white,
     );
   }
 }

@@ -69,6 +69,20 @@ class CommunFun {
     }
   }
 
+  static overLayLoader() {
+    return Container(
+      padding: EdgeInsets.all(10),
+      height: 70,
+      width: 70,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(100), color: Colors.white),
+      child: CircularProgressIndicator(
+        strokeWidth: 4,
+        backgroundColor: Colors.grey[200],
+      ),
+    );
+  }
+
   static divider() {
     // Simple divider
     return Padding(
@@ -234,12 +248,14 @@ class CommunFun {
     );
   }
 
-  static syncOrdersANDStore(context) async {
+  static syncOrdersANDStore(context, isClose) async {
     await CommunFun.getsetWebOrders(context);
     await SyncAPICalls.syncOrderstoDatabase(context);
     await SyncAPICalls.sendInvenotryTable(context);
     await SyncAPICalls.sendCancledOrderTable(context);
-    await Navigator.of(context).pop();
+    if (isClose) {
+      Navigator.of(context).pop();
+    }
   }
 
   static syncAfterSuccess(context, isOpen) async {
@@ -358,7 +374,7 @@ class CommunFun {
         } else {
           await checkUserDeleted(context);
           await checkpermission();
-          if (isOpen) Navigator.pushNamed(context, Constant.DashboardScreen);
+          Navigator.pushNamed(context, Constant.DashboardScreen);
         }
       } else {
         if (aceets["data"]["next_offset"] == 0) {
@@ -830,7 +846,6 @@ class CommunFun {
         var item = cartItems[i];
         selectedITemTotal += item.productPrice;
       }
-
       subT = selectedITemTotal + price;
     } else {
       subT += price;
@@ -906,6 +921,18 @@ class CommunFun {
     User loginUser = await CommunFun.getuserDetails();
     Customer customerData = await CommunFun.getCustomerData();
     Printer printer = await CommunFun.getPrinter(productItem);
+    bool isEditing = false;
+    MSTCartdetails sameitem;
+    var contain = cartItems
+        .where((element) => element.productId == productItem.productId);
+    if (contain.isNotEmpty) {
+      isEditing = true;
+      var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
+      List<MSTCartdetails> myModels = (json.decode(jsonString) as List)
+          .map((i) => MSTCartdetails.fromJson(i))
+          .toList();
+      sameitem = myModels[0];
+    }
     var qty = await CommunFun.countTotalQty(cartItems, productItem, 1.0);
     var disc = await CommunFun.countDiscount(allcartData);
     var subtotal = await CommunFun.countSubtotal(cartItems, productItem.price);
@@ -923,38 +950,50 @@ class CommunFun {
     cart.tax_json = json.encode(totalTax);
     cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
     cart.customer_terminal = customerData != null ? customerData.terminalId : 0;
-    cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    if (!isEditing) {
+      cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    }
     cart.created_by = loginUser.id;
     cart.localID = await CommunFun.getLocalID();
-    orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    if (!isEditing) {
+      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    }
     orderData.numberofPax = table != null ? table.number_of_pax : 0;
     orderData.isTableOrder = table != null ? 1 : 0;
-
     var cartid = await localAPI.insertItemTocart(
         allcartData.id, cart, productItem, orderData, table.table_id);
     ProductDetails cartItemproduct = new ProductDetails();
     cartItemproduct = productItem;
-    cartItemproduct.qty = 1;
-    cartItemproduct.price = double.parse(productItem.price.toStringAsFixed(2));
+    cartItemproduct.qty = isEditing ? sameitem.productQty + 1.0 : 1.0;
+    cartItemproduct.price = isEditing
+        ? double.parse(productItem.price.toStringAsFixed(2)) +
+            sameitem.productPrice
+        : double.parse(productItem.price.toStringAsFixed(2));
     cartItemproduct
         .toJson()
         .removeWhere((String key, dynamic value) => value == null);
     var data = cartItemproduct;
     MSTCartdetails cartdetails = new MSTCartdetails();
-
+    if (isEditing) {
+      cartdetails.id = sameitem.id;
+    }
     cartdetails.cartId = cartid;
     cartdetails.productId = productItem.productId;
     cartdetails.productName = productItem.name;
     cartdetails.productSecondName = productItem.name_2;
-    cartdetails.productPrice =
-        double.parse(productItem.price.toStringAsFixed(2));
-    cartdetails.productQty = 1.0;
-    cartdetails.productNetPrice =
-        double.parse(productItem.price.toStringAsFixed(2));
+    cartdetails.productPrice = cartdetails.productPrice = isEditing
+        ? double.parse(productItem.price.toStringAsFixed(2)) +
+            sameitem.productPrice
+        : double.parse(productItem.price.toStringAsFixed(2));
+    cartdetails.productQty = isEditing ? sameitem.productQty + 1.0 : 1.0;
+    cartdetails.productNetPrice = isEditing
+        ? sameitem.productNetPrice +
+            double.parse(productItem.price.toStringAsFixed(2))
+        : double.parse(productItem.price.toStringAsFixed(2));
     cartdetails.createdBy = loginUser.id;
     cartdetails.cart_detail = jsonEncode(data);
-    cartdetails.discount = 0;
-    cartdetails.remark = "";
+    cartdetails.discount = isEditing ? sameitem.discount : 0;
+    cartdetails.remark = isEditing ? sameitem.remark : "";
     cartdetails.issetMeal = 0;
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;

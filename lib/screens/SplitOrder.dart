@@ -698,12 +698,16 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
           print(orderDetailid);
           if (cartItem.issetMeal == 0) {
+            List<ProductStoreInventory> updatedInt = [];
+            List<ProductStoreInventoryLog> updatedIntLog = [];
+
             if (productdata[0].hasInventory == 1) {
               //update invnotory
               // List<ProductStoreInventory> inventory =
               //     await localAPI.removeFromInventory(orderDetail);
               List<ProductStoreInventory> inventory =
                   await localAPI.getStoreInventoryData(orderDetail.product_id);
+
               if (inventory.length > 0) {
                 ProductStoreInventory invData = new ProductStoreInventory();
                 invData = inventory[0];
@@ -713,7 +717,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 invData.updatedAt =
                     await CommunFun.getCurrentDateTime(DateTime.now());
                 invData.updatedBy = userdata.id;
-                var ulog = await localAPI.updateInvetory(invData);
+                updatedInt.add(invData);
+                var ulog = await localAPI.updateInvetory(updatedInt);
                 print(ulog);
 
                 //Inventory log update
@@ -729,8 +734,9 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 log.updated_at =
                     await CommunFun.getCurrentDateTime(DateTime.now());
                 log.updated_by = userdata.id;
+                updatedIntLog.add(log);
                 var inventoryLog =
-                    await localAPI.updateStoreInvetoryLogTable(log);
+                    await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
                 print(inventoryLog);
               }
             }
@@ -933,7 +939,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     User user = await localAPI.getPaymentUser(orderpaymentdata[0].op_by);
     // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
-    Orders order = await localAPI.getcurrentOrders(orderid,treminalID);
+    Orders order = await localAPI.getcurrentOrders(orderid, treminalID);
     print(branchAddress);
     print(orderpaymentdata);
     print(paumentMethod);

@@ -37,7 +37,7 @@ class Strings {
   static String update = "Update";
   static String add_new = "Add New";
   static String pay = "Pay";
-  static String fisrtname = "Fisrt Name";
+  static String fisrtname = "First Name";
   static String lastname = "Last Name";
   static String email = "Email";
   static String phone = "Phone";
@@ -51,14 +51,14 @@ class Strings {
   static String countrys = "Countrys";
   static String search_customer = "Search Customer";
   static String customer_Search_Hint =
-      "Search Customer Name,Email,Phone or Memeber id";
+      "Search Customer Name,Email,Phone or member ID";
   static String select_table = "Select Table";
   static String merge_table = "Merge Table";
   static String new_order = "New Order";
   static String view_order = "View Order";
   static String change_pax = "Change Pax";
   static String change_table = "Change Table";
-  static String cancle_order = "Cancle Order";
+  static String cancle_order = "Cancel Order";
   static String merge_order = "Merge Order";
   static String enterPax = "Enter Pax";
 

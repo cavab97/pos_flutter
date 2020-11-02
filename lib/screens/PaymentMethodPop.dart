@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/styles.dart';
@@ -451,6 +452,9 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         }
         return null;
       },
+      inputFormatters: <TextInputFormatter>[
+        WhitelistingTextInputFormatter.digitsOnly
+      ],
       keyboardType: TextInputType.number,
       maxLength: 4,
       decoration: InputDecoration(

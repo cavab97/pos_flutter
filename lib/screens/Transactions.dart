@@ -222,6 +222,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
         OrderDetail productDetail = orderItem[i];
         var productData = productDetail.product_detail;
         var jsonProduct = json.decode(productData);
+        List<ProductStoreInventory> updatedInt = [];
+        List<ProductStoreInventoryLog> updatedIntLog = [];
         if (jsonProduct["has_inventory"] == 1) {
           List<ProductStoreInventory> inventory =
               await localAPI.getStoreInventoryData(productDetail.product_id);
@@ -232,7 +234,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
             invData.updatedAt =
                 await CommunFun.getCurrentDateTime(DateTime.now());
             invData.updatedBy = userdata.id;
-            var ulog = await localAPI.updateInvetory(invData);
+            updatedInt.add(invData);
+            var ulog = await localAPI.updateInvetory(updatedInt);
             ProductStoreInventoryLog log = new ProductStoreInventoryLog();
             if (inventory.length > 0) {
               log.uuid = uuid;
@@ -247,7 +250,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
               log.updated_at =
                   await CommunFun.getCurrentDateTime(DateTime.now());
               log.updated_by = userdata.id;
-              var ulog = await localAPI.updateStoreInvetoryLogTable(log);
+              updatedIntLog.add(log);
+              var ulog =
+                  await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
             }
           }
         }

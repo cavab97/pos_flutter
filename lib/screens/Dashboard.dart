@@ -270,12 +270,16 @@ class _DashboradPageState extends State<DashboradPage>
     Navigator.of(context).pop();
     await Preferences.removeSinglePref(Constant.LastSync_Table);
     await Preferences.removeSinglePref(Constant.OFFSET);
-    await CommunFun.syncAfterSuccess(context, true);
+    await CommunFun.opneSyncPop(context);
+    await CommunFun.syncOrdersANDStore(context, false);
+    await CommunFun.syncAfterSuccess(context, false);
+    //  Navigator.of(context).pop();
+    await checkisInit();
   }
 
   syncOrdersTodatabase() async {
     await CommunFun.opneSyncPop(context);
-    await CommunFun.syncOrdersANDStore(context);
+    await CommunFun.syncOrdersANDStore(context, true);
   }
 
   gotoShiftReport() {
@@ -949,7 +953,6 @@ class _DashboradPageState extends State<DashboradPage>
     order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
     order.updated_by = userdata.id;
     var orderid = await localAPI.placeOrder(order);
-
     if (cartData.voucher_id != 0 && cartData.voucher_id != null) {
       VoucherHistory history = new VoucherHistory();
       history.voucher_id = cartData.voucher_id;
@@ -959,15 +962,32 @@ class _DashboradPageState extends State<DashboradPage>
       history.uuid = uuid;
       var hisID = await localAPI.saveVoucherHistory(history);
     }
-
     var orderDetailid;
     if (orderid > 0) {
       if (cartList.length > 0) {
         var orderId = orderid;
+        List<ProductStoreInventory> updatedInt = [];
+        List<ProductStoreInventoryLog> updatedLog = [];
         for (var i = 0; i < cartList.length; i++) {
           OrderDetail orderDetail = new OrderDetail();
           var cartItem = cartList[i];
-
+          var productdata = cartItem.cart_detail != null
+              ? json.decode(cartItem.cart_detail)
+              : "";
+          List<ProductStoreInventory> cartval =
+              await localAPI.checkItemAvailableinStore(cartItem.productId);
+          if (productdata["has_inventory"] == 1 && cartval.length > 0) {
+            double storeqty = cartval[0].qty;
+            if (storeqty < cartItem.productQty) {
+              CommunFun.showToast(
+                  context,
+                  productdata["name"] +
+                      "Product is out of stock.Please check store.");
+              await localAPI.deleteOrderid(orderId);
+              Navigator.of(context).pop();
+              return false;
+            }
+          }
           List<OrderDetail> lappid =
               await localAPI.getLastOrdeDetailAppid(terminalId);
           if (lappid.length > 0) {
@@ -975,9 +995,6 @@ class _DashboradPageState extends State<DashboradPage>
           } else {
             orderDetail.app_id = int.parse(terminalId);
           }
-          var productdata = cartItem.cart_detail != null
-              ? json.decode(cartItem.cart_detail)
-              : "";
           print(productdata);
           orderDetail.uuid = uuid;
           orderDetail.order_id = orderId;
@@ -1017,8 +1034,7 @@ class _DashboradPageState extends State<DashboradPage>
                 invData.updatedAt =
                     await CommunFun.getCurrentDateTime(DateTime.now());
                 invData.updatedBy = userdata.id;
-                var ulog = await localAPI.updateInvetory(invData);
-
+                updatedInt.add(invData);
                 //Inventory log update
                 ProductStoreInventoryLog log = new ProductStoreInventoryLog();
                 log.uuid = uuid;
@@ -1027,148 +1043,140 @@ class _DashboradPageState extends State<DashboradPage>
                 log.product_id = cartItem.productId;
                 log.employe_id = userdata.id;
                 log.qty = prev.qty;
+                log.il_type = 2; //1 for add 2 for deduct
                 log.qty_before_change = prev.qty;
                 log.qty_after_change = qty;
                 log.updated_at =
                     await CommunFun.getCurrentDateTime(DateTime.now());
                 log.updated_by = userdata.id;
-                var inventoryLog =
-                    await localAPI.updateStoreInvetoryLogTable(log);
+                updatedLog.add(log);
               }
             }
           }
         }
+        var ulog = await localAPI.updateInvetory(updatedInt);
+        var inventoryLog =
+            await localAPI.updateStoreInvetoryLogTable(updatedLog);
       }
     }
+    if (orderDetailid != null) {
+      List<MSTSubCartdetails> modifireList = await getmodifireList();
+      if (modifireList.length > 0) {
+        var orderId = orderid;
 
-    List<MSTSubCartdetails> modifireList = await getmodifireList();
-    if (modifireList.length > 0) {
-      var orderId = orderid;
+        for (var i = 0; i < modifireList.length; i++) {
+          OrderModifire modifireData = new OrderModifire();
+          var modifire = modifireList[i];
 
-      for (var i = 0; i < modifireList.length; i++) {
-        OrderModifire modifireData = new OrderModifire();
-        var modifire = modifireList[i];
-
-        if (modifire.caId == null) {
-          List<OrderModifire> lapMpid =
-              await localAPI.getLastOrderModifireAppid(terminalId);
-          if (lapMpid.length > 0) {
-            modifireData.app_id = lapMpid[0].app_id + 1;
+          if (modifire.caId == null) {
+            List<OrderModifire> lapMpid =
+                await localAPI.getLastOrderModifireAppid(terminalId);
+            if (lapMpid.length > 0) {
+              modifireData.app_id = lapMpid[0].app_id + 1;
+            } else {
+              modifireData.app_id = int.parse(terminalId);
+            }
+            modifireData.uuid = uuid;
+            modifireData.order_id = orderId;
+            modifireData.detail_id = orderDetailid;
+            modifireData.terminal_id = int.parse(terminalId);
+            modifireData.product_id = modifire.productId;
+            modifireData.modifier_id = modifire.modifierId;
+            modifireData.om_amount = modifire.modifirePrice;
+            modifireData.om_by = userdata.id;
+            modifireData.om_datetime =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            modifireData.om_status = 1;
+            modifireData.updated_at =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            modifireData.updated_by = userdata.id;
+            var ordermodifreid = await localAPI.sendModifireData(modifireData);
           } else {
-            modifireData.app_id = int.parse(terminalId);
+            OrderAttributes attributes = new OrderAttributes();
+            List<OrderAttributes> lapApid =
+                await localAPI.getLastOrderAttrAppid(terminalId);
+            if (lapApid.length > 0) {
+              attributes.app_id = lapApid[0].app_id + 1;
+            } else {
+              attributes.app_id = int.parse(terminalId);
+            }
+            attributes.uuid = uuid;
+            attributes.order_id = orderId;
+            attributes.detail_id = orderDetailid;
+            attributes.terminal_id = int.parse(terminalId);
+            attributes.product_id = modifire.productId;
+            attributes.attribute_id = modifire.attributeId;
+            attributes.attr_price = modifire.attrPrice;
+            attributes.ca_id = modifire.caId;
+            attributes.oa_datetime =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            attributes.oa_by = userdata.id;
+            attributes.oa_status = 1;
+            attributes.updated_at =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            attributes.updated_by = userdata.id;
+            var orderAttri = await localAPI.sendAttrData(attributes);
           }
-          modifireData.uuid = uuid;
-          modifireData.order_id = orderId;
-          modifireData.detail_id = orderDetailid;
-          modifireData.terminal_id = int.parse(terminalId);
-          modifireData.product_id = modifire.productId;
-          modifireData.modifier_id = modifire.modifierId;
-          modifireData.om_amount = modifire.modifirePrice;
-          modifireData.om_by = userdata.id;
-          modifireData.om_datetime =
-              await CommunFun.getCurrentDateTime(DateTime.now());
-          modifireData.om_status = 1;
-          modifireData.updated_at =
-              await CommunFun.getCurrentDateTime(DateTime.now());
-          modifireData.updated_by = userdata.id;
-          var ordermodifreid = await localAPI.sendModifireData(modifireData);
-        } else {
-          OrderAttributes attributes = new OrderAttributes();
-          List<OrderAttributes> lapApid =
-              await localAPI.getLastOrderAttrAppid(terminalId);
-          if (lapApid.length > 0) {
-            attributes.app_id = lapApid[0].app_id + 1;
+        }
+      }
+      if (payment.length > 0) {
+        for (var i = 0; i < payment.length; i++) {
+          OrderPayment orderpayment = payment[i];
+          if (isWebOrder) {
+            payment[i].op_method_id = cartData.cart_payment_id;
+          }
+          List<OrderPayment> lapPpid =
+              await localAPI.getLastOrderPaymentAppid(terminalId);
+          if (lapPpid.length > 0) {
+            orderpayment.app_id = lapPpid[0].app_id + 1;
           } else {
-            attributes.app_id = int.parse(terminalId);
+            orderpayment.app_id = int.parse(terminalId);
           }
-          attributes.uuid = uuid;
-          attributes.order_id = orderId;
-          attributes.detail_id = orderDetailid;
-          attributes.terminal_id = int.parse(terminalId);
-          attributes.product_id = modifire.productId;
-          attributes.attribute_id = modifire.attributeId;
-          attributes.attr_price = modifire.attrPrice;
-          attributes.ca_id = modifire.caId;
-          attributes.oa_datetime =
+          orderpayment.uuid = uuid;
+          orderpayment.order_id = orderid;
+          orderpayment.branch_id = int.parse(branchid);
+          orderpayment.terminal_id = int.parse(terminalId);
+          // orderpayment.op_method_id = payment[i].op_method_id;
+          // orderpayment.op_amount = payment[i].op_amount.toDouble();
+          orderpayment.op_method_response = '';
+          orderpayment.op_status = 1;
+          orderpayment.op_datetime =
               await CommunFun.getCurrentDateTime(DateTime.now());
-          attributes.oa_by = userdata.id;
-          attributes.oa_status = 1;
-          attributes.updated_at =
+          orderpayment.op_by = userdata.id;
+          orderpayment.updated_at =
               await CommunFun.getCurrentDateTime(DateTime.now());
-          attributes.updated_by = userdata.id;
-          var orderAttri = await localAPI.sendAttrData(attributes);
+          orderpayment.updated_by = userdata.id;
+          var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
         }
       }
-    }
-    if (payment.length > 0) {
-      for (var i = 0; i < payment.length; i++) {
-        OrderPayment orderpayment = payment[i];
-        if (isWebOrder) {
-          payment[i].op_method_id = cartData.cart_payment_id;
-        }
-        List<OrderPayment> lapPpid =
-            await localAPI.getLastOrderPaymentAppid(terminalId);
-        if (lapPpid.length > 0) {
-          orderpayment.app_id = lapPpid[0].app_id + 1;
-        } else {
-          orderpayment.app_id = int.parse(terminalId);
-        }
-        orderpayment.uuid = uuid;
-        orderpayment.order_id = orderid;
-        orderpayment.branch_id = int.parse(branchid);
-        orderpayment.terminal_id = int.parse(terminalId);
-        // orderpayment.op_method_id = payment[i].op_method_id;
-        // orderpayment.op_amount = payment[i].op_amount.toDouble();
-        orderpayment.op_method_response = '';
-        orderpayment.op_status = 1;
-        orderpayment.op_datetime =
-            await CommunFun.getCurrentDateTime(DateTime.now());
-        orderpayment.op_by = userdata.id;
-        orderpayment.updated_at =
-            await CommunFun.getCurrentDateTime(DateTime.now());
-        orderpayment.updated_by = userdata.id;
-        var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
-      }
-    }
 
-    // Shifr Invoice Table
-    ShiftInvoice shiftinvoice = new ShiftInvoice();
-    shiftinvoice.shift_id = int.parse(shiftid);
-    shiftinvoice.invoice_id = orderid;
-    shiftinvoice.status = 1;
-    shiftinvoice.created_by = userdata.id;
-    shiftinvoice.created_at =
-        await CommunFun.getCurrentDateTime(DateTime.now());
-    shiftinvoice.serverId = 0;
-    shiftinvoice.localID = await CommunFun.getLocalID();
-    shiftinvoice.terminal_id = int.parse(terminalId);
-    shiftinvoice.shift_terminal_id = int.parse(terminalId);
-    var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
-    await clearCartAfterSuccess(orderid);
-    await Navigator.of(context).pop();
-    // await showDialog(
-    //     // Opning Ammount Popup
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //       return InvoiceReceiptDailog(orderid: orderid);
-    //     });*/
-    await printReceipt(orderid);
+      // Shifr Invoice Table
+      ShiftInvoice shiftinvoice = new ShiftInvoice();
+      shiftinvoice.shift_id = int.parse(shiftid);
+      shiftinvoice.invoice_id = orderid;
+      shiftinvoice.status = 1;
+      shiftinvoice.created_by = userdata.id;
+      shiftinvoice.created_at =
+          await CommunFun.getCurrentDateTime(DateTime.now());
+      shiftinvoice.serverId = 0;
+      shiftinvoice.localID = await CommunFun.getLocalID();
+      shiftinvoice.terminal_id = int.parse(terminalId);
+      shiftinvoice.shift_terminal_id = int.parse(terminalId);
+      var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
+      await clearCartAfterSuccess(orderid);
+      await printReceipt(orderid);
+    }
+    Navigator.of(context).pop();
   }
 
   printReceipt(int orderid) async {
-    // var branchID = await CommunFun.getbranchId();
-    // Branch branchAddress = await localAPI.getBranchData(branchID);
     List<OrderPayment> orderpaymentdata =
         await localAPI.getOrderpaymentData(orderid);
     List<Payments> paument_method =
         await localAPI.getOrderpaymentmethod(orderpaymentdata[0].op_method_id);
-    //User user = await localAPI.getPaymentUser(orderpaymentdata.op_by);
-    // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     var branchID = await CommunFun.getbranchId();
-
     Orders order = await localAPI.getcurrentOrders(orderid, branchID);
-
     printKOT.checkReceiptPrint(
         printerreceiptList[0].printerIp,
         context,
@@ -1471,144 +1479,140 @@ class _DashboradPageState extends State<DashboradPage>
         key: scaffoldKey,
         drawer: drawerWidget(),
         body: LoadingOverlay(
-          child: SafeArea(
-            child: new GestureDetector(
-              onTap: () {
-                FocusScope.of(context).requestFocus(new FocusNode());
-                slidableController.activeState?.close();
-              },
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                child: Table(
-                  border: TableBorder.all(color: Colors.white, width: 0.6),
-                  columnWidths: {
-                    0: FractionColumnWidth(.6),
-                    1: FractionColumnWidth(.3),
-                  },
-                  children: [
-                    TableRow(children: [
-                      TableCell(child: tableHeader1()),
-                      TableCell(child: tableHeader2()),
-                    ]),
-                    TableRow(children: [
-                      TableCell(
-                        child: Container(
-                          padding:
-                              EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
-                          child: Column(
-                            children: <Widget>[
-                              subCatList.length == 0
-                                  ? Container(
-                                      //margin: EdgeInsets.only(left: 5, right: 5),
-                                      width: MediaQuery.of(context).size.width,
-                                      height: SizeConfig.safeBlockVertical * 8,
-                                      color: Colors.black26,
-                                      padding: EdgeInsets.all(
-                                          SizeConfig.safeBlockVertical * 1.2),
-                                      child: DefaultTabController(
-                                          initialIndex: 0,
-                                          length: tabsList.length,
-                                          child: _tabs),
-                                    )
-                                  : Container(
-                                      //  margin: EdgeInsets.only(left: 5, right: 5),
-                                      width: MediaQuery.of(context).size.width,
-                                      height: SizeConfig.safeBlockVertical * 8,
-                                      color: Colors.black26,
-                                      padding: EdgeInsets.all(
-                                          SizeConfig.safeBlockVertical * 1.2),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: <Widget>[
-                                          IconButton(
-                                              onPressed: _backtoMainCat,
-                                              icon: Icon(
-                                                Icons.arrow_back,
-                                                color: Colors.white,
-                                                size: SizeConfig
-                                                        .safeBlockVertical *
-                                                    4,
-                                              )),
-                                          DefaultTabController(
-                                              initialIndex: 0,
-                                              length: subCatList.length,
-                                              child: _subtabs),
-                                        ],
+            child: SafeArea(
+              child: new GestureDetector(
+                onTap: () {
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                  slidableController.activeState?.close();
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                  child: Table(
+                    border: TableBorder.all(color: Colors.white, width: 0.6),
+                    columnWidths: {
+                      0: FractionColumnWidth(.6),
+                      1: FractionColumnWidth(.3),
+                    },
+                    children: [
+                      TableRow(children: [
+                        TableCell(child: tableHeader1()),
+                        TableCell(child: tableHeader2()),
+                      ]),
+                      TableRow(children: [
+                        TableCell(
+                          child: Container(
+                            padding: EdgeInsets.all(
+                                SizeConfig.safeBlockVertical * 1),
+                            child: Column(
+                              children: <Widget>[
+                                subCatList.length == 0
+                                    ? Container(
+                                        //margin: EdgeInsets.only(left: 5, right: 5),
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        height:
+                                            SizeConfig.safeBlockVertical * 8,
+                                        color: Colors.black26,
+                                        padding: EdgeInsets.all(
+                                            SizeConfig.safeBlockVertical * 1.2),
+                                        child: DefaultTabController(
+                                            initialIndex: 0,
+                                            length: tabsList.length,
+                                            child: _tabs),
+                                      )
+                                    : Container(
+                                        //  margin: EdgeInsets.only(left: 5, right: 5),
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        height:
+                                            SizeConfig.safeBlockVertical * 8,
+                                        color: Colors.black26,
+                                        padding: EdgeInsets.all(
+                                            SizeConfig.safeBlockVertical * 1.2),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: <Widget>[
+                                            IconButton(
+                                                onPressed: _backtoMainCat,
+                                                icon: Icon(
+                                                  Icons.arrow_back,
+                                                  color: Colors.white,
+                                                  size: SizeConfig
+                                                          .safeBlockVertical *
+                                                      4,
+                                                )),
+                                            DefaultTabController(
+                                                initialIndex: 0,
+                                                length: subCatList.length,
+                                                child: _subtabs),
+                                          ],
+                                        ),
                                       ),
+                                SingleChildScrollView(
+                                  physics: BouncingScrollPhysics(),
+                                  child: Container(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        mealsList.length > 0
+                                            ? setMealsList()
+                                            : SizedBox(),
+                                        isLoading
+                                            ? CommunFun.loader(context)
+                                            : productList.length > 0
+                                                ? porductsList()
+                                                : SizedBox(),
+                                      ],
                                     ),
-                              SingleChildScrollView(
-                                physics: BouncingScrollPhysics(),
-                                child: Container(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      mealsList.length > 0
-                                          ? setMealsList()
-                                          : SizedBox(),
-                                      isLoading
-                                          ? CommunFun.loader(context)
-                                          : productList.length > 0
-                                              ? porductsList()
-                                              : SizedBox(),
-                                    ],
                                   ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                        TableCell(
+                          child: Stack(
+                            children: <Widget>[
+                              Container(
+                                // color: Colors.white,
+                                child: SizedBox(
+                                    height: MediaQuery.of(context).size.height -
+                                        SizeConfig.safeBlockVertical * 10,
+                                    width: SizeConfig.safeBlockHorizontal * 50,
+                                    child: cartITems()),
+                              ),
+                              Positioned(
+                                bottom: 25,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  height: 80,
+                                  color: StaticColor.backgroundColor,
+                                  child: paybutton(context),
                                 ),
-                              )
+                              ),
+                              !isShiftOpen
+                                  ? openShiftButton(context)
+                                  : SizedBox()
                             ],
                           ),
                         ),
-                      ),
-                      TableCell(
-                        child: Stack(
-                          children: <Widget>[
-                            Container(
-                              // color: Colors.white,
-                              child: SizedBox(
-                                  height: MediaQuery.of(context).size.height -
-                                      SizeConfig.safeBlockVertical * 10,
-                                  width: SizeConfig.safeBlockHorizontal * 50,
-                                  child: cartITems()),
-                            ),
-                            Positioned(
-                              bottom: 25,
-                              left: 0,
-                              right: 0,
-                              child: Container(
-                                height: 80,
-                                color: StaticColor.backgroundColor,
-                                child: paybutton(context),
-                              ),
-                            ),
-                            !isShiftOpen ? openShiftButton(context) : SizedBox()
-                          ],
-                        ),
-                      ),
-                    ]),
-                  ],
+                      ]),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          isLoading: isScreenLoad,
-          color: Colors.black87,
-          progressIndicator: Container(
-            padding: EdgeInsets.all(10),
-            height: 70,
-            width: 70,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(100), color: Colors.white),
-            child: CircularProgressIndicator(
-              strokeWidth: 4,
-              backgroundColor: Colors.grey[200],
-            ),
-          ),
-        ),
+            isLoading: isScreenLoad,
+            color: Colors.black87,
+            progressIndicator: CommunFun.overLayLoader()),
       ),
       onWillPop: _willPopCallback,
     );

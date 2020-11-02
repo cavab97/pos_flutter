@@ -60,7 +60,7 @@ class LocalAPI {
         " category_branch.category_id = category.category_id AND category_branch.status=1 where " +
         " category_branch.branch_id =" +
         branchID.toString() +
-        " AND category.status = 1";
+        " AND category.status = 1 order by category_branch.display_order ASC";
 
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Category> list =
@@ -68,13 +68,12 @@ class LocalAPI {
 
     await SyncAPICalls.logActivity(
         "Product", "geting category List", "category", branchID);
-
     return list;
   }
 
   Future<List<ProductDetails>> getProduct(String id, String branchID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,category_attribute.name as attr_cat ,modifier.name as modifire_Name FROM `product` " +
+    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,product_store_inventory.qty,category_attribute.name as attr_cat ,modifier.name as modifire_Name FROM `product` " +
         " LEFT join product_category on product_category.product_id = product.product_id " +
         " LEFT join product_branch on product_branch.product_id = product.product_id AND product_branch.status = 1" +
         " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
@@ -1076,22 +1075,32 @@ class LocalAPI {
     return list;
   }
 
-  Future<int> updateInvetory(ProductStoreInventory data) async {
+  Future<int> updateInvetory(List<ProductStoreInventory> data) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var inventory = await db.update("product_store_inventory", data.toJson(),
-        where: "inventory_id =?", whereArgs: [data.inventoryId]);
-    await SyncAPICalls.logActivity("Order", "update InventoryTable",
-        "product_store_inventory", data.productId);
-    return inventory;
+    if (data.length > 0) {
+      for (var i = 0; i < data.length; i++) {
+        var inventory = await db.update(
+            "product_store_inventory", data[i].toJson(),
+            where: "inventory_id =?", whereArgs: [data[i].inventoryId]);
+        await SyncAPICalls.logActivity("Order", "update InventoryTable",
+            "product_store_inventory", data[i].productId);
+      }
+      return 1;
+    }
   }
 
-  Future<int> updateStoreInvetoryLogTable(ProductStoreInventoryLog log) async {
+  Future<int> updateStoreInvetoryLogTable(
+      List<ProductStoreInventoryLog> log) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var inventory =
-        await db.insert("product_store_inventory_log", log.toJson());
-    await SyncAPICalls.logActivity("product_store_inventory_log insert",
-        "insert", "product_store_inventory_log", log.inventory_id);
-    return inventory;
+    if (log.length > 0) {
+      for (var i = 0; i < log.length; i++) {
+        var inventory =
+            await db.insert("product_store_inventory_log", log[i].toJson());
+        await SyncAPICalls.logActivity("product_store_inventory_log insert",
+            "insert", "product_store_inventory_log", log[i].inventory_id);
+      }
+    }
+    return 1;
   }
 
   Future<Branch> getBranchData(branchID) async {
@@ -1661,5 +1670,12 @@ class LocalAPI {
         where: "id =?", whereArgs: [cart.id]);
     await SyncAPICalls.logActivity(
         "mst_cart_detail", "Added Foc Product", "mst_cart_detail", cart.id);
+  }
+
+  Future deleteOrderid(orderid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var res =
+        await db.delete("orders", where: "app_id =?", whereArgs: [orderid]);
+    print(res);
   }
 }

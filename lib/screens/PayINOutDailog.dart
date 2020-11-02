@@ -21,7 +21,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
   var selectedreason;
   List<String> reasonList = [
     "Add Change",
-    "Routine diposit",
+    "Deposit",
     "Other",
   ];
   @override

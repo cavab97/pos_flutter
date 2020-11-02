@@ -46,7 +46,6 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
     Navigator.of(context).pop();
     showDialog(
         // Opning Ammount Popup
-
         barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
@@ -68,8 +67,9 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
 
   filterCustomer(val) {
     var list = customerList
-        .where(
-            (x) => x.name.toString().toLowerCase().contains(val.toLowerCase()))
+        .where((x) =>
+            x.name.toString().toLowerCase().contains(val.toLowerCase()) ||
+            x.email.toString().toLowerCase().contains(val.toLowerCase()))
         .toList();
     setState(() {
       filterList = list;

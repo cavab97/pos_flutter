@@ -144,7 +144,6 @@ class _SelectTablePageState extends State<SelectTablePage>
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
       orderData.numberofPax = int.parse(paxController.text);
       orderData.cartId = orderid;
-
       Table_order tableorder = new Table_order();
       tableorder.table_id = selectedTable.tableId;
       tableorder.number_of_pax = int.parse(paxController.text);

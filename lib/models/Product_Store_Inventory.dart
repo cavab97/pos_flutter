@@ -27,7 +27,9 @@ class ProductStoreInventory {
     uuid = json['uuid'];
     productId = json['product_id'];
     branchId = json['branch_id'];
-    qty = json['qty'] is int ? (json['qty'] as int).toDouble() : json['qty'];
+    qty = json['qty'] != null && json['qty'] is int
+        ? (json['qty'] as int).toDouble()
+        : json['qty'];
     warningStockLevel = json['warningStockLevel'];
     status = json['status'];
     serverid = json["server_id"];
