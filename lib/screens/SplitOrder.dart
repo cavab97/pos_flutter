@@ -949,6 +949,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           orderitem,
           order,
           paumentMethod[0],
+          "",// Add table name here
+          "",// Add Currency here
           widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
     } else {
       CommunFun.showToast(context, Strings.printer_not_available);
