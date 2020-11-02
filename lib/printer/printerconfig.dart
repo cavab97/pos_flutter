@@ -31,15 +31,7 @@ class PrintReceipt {
 
     ticket.setStyles(
         PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
-    /*ticket.text('K.O.T',
-        styles: PosStyles(
-          fontType: PosFontType.fontA,
-          bold: true,
-          align: PosAlign.center,
-          height: PosTextSize.size2,
-          width: PosTextSize.size2,
-        ),
-        linesAfter: 1);*/
+
     ticket.text('Table : ' + tableName,
         styles: PosStyles(
           fontType: PosFontType.fontA,
@@ -55,13 +47,11 @@ class PrintReceipt {
           fontType: PosFontType.fontA,
           bold: true,
           align: PosAlign.center,
-          height: PosTextSize.size1,
-          width: PosTextSize.size1,
+          width: PosTextSize.size2,
         ),
         linesAfter: 1);
 
-    ticket.setStyles(
-        PosStyles(align: PosAlign.left, fontType: PosFontType.fontB));
+    ticket.setStyles(PosStyles(align: PosAlign.left));
     final now = DateTime.now();
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
@@ -69,35 +59,30 @@ class PrintReceipt {
         styles: PosStyles(
           align: PosAlign.left,
           bold: true,
-          fontType: PosFontType.fontA,
-          height: PosTextSize.size1,
-          width: PosTextSize.size1,
+          fontType: PosFontType.fontB,
+          width: PosTextSize.size2,
         ));
-    /* ticket.text('Table No : ' + tableName,
-        styles: PosStyles(align: PosAlign.left));*/
 
     ticket.hr();
     ticket.setStyles(PosStyles(align: PosAlign.left));
     ticket.row([
       PosColumn(
           text: 'Item',
-          width: 11,
+          width: 10,
           styles: PosStyles(
             align: PosAlign.left,
             bold: true,
             fontType: PosFontType.fontA,
-            height: PosTextSize.size1,
-            width: PosTextSize.size1,
+            width: PosTextSize.size2,
           )),
       PosColumn(
           text: 'Qty',
-          width: 1,
+          width: 2,
           styles: PosStyles(
             align: PosAlign.left,
             bold: true,
             fontType: PosFontType.fontA,
-            height: PosTextSize.size1,
-            width: PosTextSize.size1,
+            width: PosTextSize.size2,
           )),
     ]);
     ticket.hr();
@@ -108,19 +93,22 @@ class PrintReceipt {
         ticket.row([
           PosColumn(
               text: item.productName,
-              width: 11,
+              width: 10,
               styles: PosStyles(
                 align: PosAlign.left,
                 fontType: PosFontType.fontA,
-                bold: true,
+                bold: false,
+                width: PosTextSize.size2,
+                height: PosTextSize.size1,
               )),
           PosColumn(
               text: item.productQty.toString(),
-              width: 1,
+              width: 2,
               styles: PosStyles(
                 align: PosAlign.left,
                 fontType: PosFontType.fontA,
-                bold: true,
+                width: PosTextSize.size2,
+                bold: false,
               )),
         ]);
         if (item.productSecondName != null) {
@@ -133,6 +121,8 @@ class PrintReceipt {
                   styles: PosStyles(
                     align: PosAlign.left,
                     fontType: PosFontType.fontA,
+                    width: PosTextSize.size2,
+                    bold: false,
                   ))
             ]);
           }
@@ -164,6 +154,8 @@ class PrintReceipt {
       List<OrderDetail> orderdetail,
       Orders orderData,
       Payments paymentdata,
+      String tableName,
+      var currency,
       String customerName) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
@@ -192,54 +184,112 @@ class PrintReceipt {
 
     ticket.emptyLines(1);
 
-    ticket.setStyles(PosStyles(
-        align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
-    final now = DateTime.now();
-    final formatter = DateFormat('MM/dd/yyyy H:m');
-    final String timestamp = formatter.format(now);
-
-    ticket.text('Processed by  : ' + branchData.contactPerson,
-        styles: PosStyles(
-            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
-    ticket.text("Order Date : " + timestamp,
-        styles: PosStyles(
-            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
-    ticket.text('Terminal Name : MCN002',
-        styles: PosStyles(
-            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
-    ticket.text('Name : ' + customerName,
-        styles: PosStyles(
-            align: PosAlign.left, fontType: PosFontType.fontA, bold: true),
-        linesAfter: 1);
-
-    ticket.setStyles(PosStyles(align: PosAlign.right));
-
-    ticket.text("Order # : " + orderData.invoice_no,
-        styles: PosStyles(
-          fontType: PosFontType.fontA,
-          bold: true,
-          reverse: true,
-          align: PosAlign.right,
-          height: PosTextSize.size2,
-          width: PosTextSize.size2,
-        ));
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+    ticket.hr();
     ticket.setStyles(PosStyles(align: PosAlign.left));
 
-    ticket.hr();
     ticket.row([
       PosColumn(
-          text: 'Item',
-          width: 6,
+          text: "Document No.",
+          width: 4,
           styles: PosStyles(
-              align: PosAlign.left, fontType: PosFontType.fontA, bold: true)),
-      PosColumn(
-          text: 'Price',
-          width: 2,
-          styles: PosStyles(
-            align: PosAlign.right,
+            align: PosAlign.left,
             fontType: PosFontType.fontA,
             bold: true,
           )),
+      PosColumn(
+          text: " : " + orderData.invoice_no,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Table",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+      PosColumn(
+          text: " : " + tableName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+    ]);
+    final now = DateTime.now();
+    final formatter = DateFormat('MM/dd/yyyy H:m');
+    final String timestamp = formatter.format(now);
+    ticket.row([
+      PosColumn(
+          text: "Date",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + timestamp,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Cashier",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + branchData.contactPerson,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Customer",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + customerName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+    ticket.hr();
+    ticket.row([
+      PosColumn(
+          text: 'Description',
+          width: 6,
+          styles: PosStyles(
+              align: PosAlign.left, fontType: PosFontType.fontA, bold: true)),
       PosColumn(
           text: 'Qty',
           width: 2,
@@ -249,7 +299,46 @@ class PrintReceipt {
             bold: true,
           )),
       PosColumn(
-          text: 'Total',
+          text: 'Price',
+          width: 2,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+      PosColumn(
+          text: 'Amount',
+          width: 2,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: '',
+          width: 6,
+          styles: PosStyles(
+              align: PosAlign.left, fontType: PosFontType.fontA, bold: true)),
+      PosColumn(
+          text: '',
+          width: 2,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: currency.toString(),
+          width: 2,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+      PosColumn(
+          text: currency.toString(),
           width: 2,
           styles: PosStyles(
             align: PosAlign.right,
@@ -264,7 +353,6 @@ class PrintReceipt {
       var item = orderdetail[i];
       print(item.product_detail);
       var name = jsonDecode(item.product_detail);
-      print(name["base64"]);
       ticket.row([
         PosColumn(
             text: name["name"].toString().trim(),
@@ -275,7 +363,7 @@ class PrintReceipt {
               bold: false,
             )),
         PosColumn(
-            text: item.product_old_price.toStringAsFixed(2),
+            text: item.detail_qty.toString(),
             width: 2,
             styles: PosStyles(
               align: PosAlign.right,
@@ -283,7 +371,7 @@ class PrintReceipt {
               bold: false,
             )),
         PosColumn(
-            text: item.detail_qty.toString(),
+            text: item.product_old_price.toStringAsFixed(2),
             width: 2,
             styles: PosStyles(
               align: PosAlign.right,
@@ -318,34 +406,43 @@ class PrintReceipt {
       }
     }
     ticket.hr();
-    ticket.setStyles(PosStyles(align: PosAlign.left));
+    ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
-          text: "SUB TOTAL",
-          width: 5,
+          text: "SUB TOTAL : ",
+          width: 8,
           styles: PosStyles(
-            align: PosAlign.left,
+            align: PosAlign.right,
             fontType: PosFontType.fontA,
             bold: false,
           )),
       PosColumn(
-          text: ":",
-          width: 2,
-          styles: PosStyles(
-            align: PosAlign.center,
-            fontType: PosFontType.fontA,
-            bold: true,
-          )),
-      PosColumn(
           text: orderData.sub_total.toStringAsFixed(2),
-          width: 5,
+          width: 4,
           styles: PosStyles(
             align: PosAlign.right,
             fontType: PosFontType.fontA,
             bold: false,
           )),
     ]);
-    ticket.hr();
+    ticket.row([
+      PosColumn(
+          text: "Service Charge@10% : ",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: "50.00",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
 
     if (taxJson.length > 0) {
       taxJson.forEach((element) {
@@ -354,26 +451,18 @@ class PrintReceipt {
               text: Strings.tax.toUpperCase() +
                   " " +
                   element["taxCode"] +
-                  "(" +
+                  "@" +
                   element["rate"] +
-                  "%)",
-              width: 5,
+                  "% : ",
+              width: 8,
               styles: PosStyles(
-                align: PosAlign.left,
+                align: PosAlign.right,
                 fontType: PosFontType.fontA,
                 bold: false,
               )),
           PosColumn(
-              text: ":",
-              width: 2,
-              styles: PosStyles(
-                align: PosAlign.center,
-                fontType: PosFontType.fontA,
-                bold: true,
-              )),
-          PosColumn(
               text: element["taxAmount"].toString(),
-              width: 5,
+              width: 4,
               styles: PosStyles(
                 align: PosAlign.right,
                 fontType: PosFontType.fontA,
@@ -384,21 +473,13 @@ class PrintReceipt {
     }
     ticket.row([
       PosColumn(
-          text: "PAYMENT TYPE",
-          width: 5,
+          text: "PAYMENT TYPE : ",
+          width: 8,
           styles: PosStyles(
-              align: PosAlign.left, fontType: PosFontType.fontA, bold: false)),
-      PosColumn(
-          text: ":",
-          width: 2,
-          styles: PosStyles(
-            align: PosAlign.center,
-            fontType: PosFontType.fontA,
-            bold: true,
-          )),
+              align: PosAlign.right, fontType: PosFontType.fontA, bold: false)),
       PosColumn(
           text: paymentdata.name.toString(),
-          width: 5,
+          width: 4,
           styles: PosStyles(
               align: PosAlign.right, fontType: PosFontType.fontA, bold: false))
     ]);
@@ -406,21 +487,13 @@ class PrintReceipt {
         double.parse(checkRoundData(orderData.grand_total.toStringAsFixed(2)));
     ticket.row([
       PosColumn(
-          text: "Rounding",
-          width: 5,
+          text: "Adjustment : ",
+          width: 8,
           styles: PosStyles(
-              align: PosAlign.left, fontType: PosFontType.fontA, bold: false)),
-      PosColumn(
-          text: ":",
-          width: 2,
-          styles: PosStyles(
-            align: PosAlign.center,
-            fontType: PosFontType.fontA,
-            bold: true,
-          )),
+              align: PosAlign.right, fontType: PosFontType.fontA, bold: false)),
       PosColumn(
           text: calRounded(total, orderData.grand_total).toStringAsFixed(2),
-          width: 5,
+          width: 4,
           styles: PosStyles(
             align: PosAlign.right,
             fontType: PosFontType.fontA,
@@ -428,28 +501,22 @@ class PrintReceipt {
           ))
     ]);
 
+    ticket.hr(len: 15);
+
     ticket.row([
       PosColumn(
-          text: "Net Total",
-          width: 5,
+          text: "Total : ",
+          width: 8,
           styles: PosStyles(
-            align: PosAlign.left,
+            align: PosAlign.right,
             fontType: PosFontType.fontA,
             bold: true,
             width: PosTextSize.size1,
           )),
       PosColumn(
-          text: ":",
-          width: 2,
-          styles: PosStyles(
-            align: PosAlign.center,
-            fontType: PosFontType.fontA,
-            bold: true,
-          )),
-      PosColumn(
           text: total.toStringAsFixed(2),
           //orderData.grand_total.toStringAsFixed(2),
-          width: 5,
+          width: 4,
           styles: PosStyles(
             align: PosAlign.right,
             fontType: PosFontType.fontA,
@@ -457,6 +524,45 @@ class PrintReceipt {
             width: PosTextSize.size1,
           ))
     ]);
+    ticket.hr(len: 15);
+    ticket.hr();
+    ticket.row([
+      PosColumn(
+          text: "Cash Received ",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: "50.00",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          ))
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Change ",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: "25.00",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          ))
+    ]);
+    ticket.hr();
 
     ticket.setStyles(PosStyles(align: PosAlign.center));
     /* ticket.emptyLines(1);
@@ -540,6 +646,8 @@ class PrintReceipt {
       List<OrderDetail> orderdetail,
       Orders orderData,
       Payments paymentdata,
+      String tableName,
+      var currency,
       String customerName) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
@@ -550,6 +658,8 @@ class PrintReceipt {
         orderdetail,
         orderData,
         paymentdata,
+        tableName,
+        currency,
         customerName));
 
     CommunFun.showToast(ctx, res.msg);

@@ -707,7 +707,6 @@ class _DashboradPageState extends State<DashboradPage>
         if (list.length > 0) {
           dynamic send = await localAPI.sendToKitched(ids);
           openPrinterPop(list);
-          print(send);
           getCartItem(currentCart);
         }
         return false;
@@ -1185,6 +1184,8 @@ class _DashboradPageState extends State<DashboradPage>
         orderitem,
         order,
         paument_method[0],
+        tableName,
+        currency,
         customer != null ? customer.name : "Walk-in customer");
   }
 
