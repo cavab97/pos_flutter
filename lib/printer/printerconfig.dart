@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:image/image.dart';
@@ -15,9 +14,10 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
+import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Payment.dart';
-import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:image/image.dart';
 
 class PrintReceipt {
@@ -152,6 +152,8 @@ class PrintReceipt {
       Branch branchData,
       List taxJson,
       List<OrderDetail> orderdetail,
+      List<OrderAttributes> orderAttr,
+      List<OrderModifire> orderModifire,
       Orders orderData,
       Payments paymentdata,
       String tableName,
@@ -351,7 +353,29 @@ class PrintReceipt {
 
     for (var i = 0; i < orderdetail.length; i++) {
       var item = orderdetail[i];
-      print(item.product_detail);
+      if (item.issetMeal == 1) {
+        var setmealproduct = json.decode(item.setmeal_product_detail);
+        print(setmealproduct);
+      }
+      var contain =
+          orderAttr.where((element) => element.detail_id == item.app_id);
+      List<OrderAttributes> attrList = [];
+     
+      if (contain.isNotEmpty) {
+        var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
+        attrList.addAll((json.decode(jsonString) as List)
+            .map((i) => OrderAttributes.fromJson(i))
+            .toList());
+      }
+      var contain1 =
+          orderAttr.where((element) => element.detail_id == item.app_id);
+      List<OrderModifire> modiList = [];
+      if (contain1.isNotEmpty) {
+        var jsonString = jsonEncode(contain1.map((e) => e.toJson()).toList());
+        modiList.addAll((json.decode(jsonString) as List)
+            .map((i) => OrderModifire.fromJson(i))
+            .toList());
+      }
       var name = jsonDecode(item.product_detail);
       ticket.row([
         PosColumn(
@@ -389,7 +413,18 @@ class PrintReceipt {
       ]);
 
       ticket.setStyles(PosStyles(align: PosAlign.left));
-
+      for (var i = 0; i < attrList.length; i++) {
+        ticket.row([
+          PosColumn(
+              text: attrList[i].name,
+              width: 12,
+              containsChinese: true,
+              styles: PosStyles(
+                align: PosAlign.left,
+                fontType: PosFontType.fontA,
+              ))
+        ]);
+      }
       if (name["name_2"] != null) {
         if (name["name_2"].isNotEmpty) {
           ticket.row([
@@ -589,7 +624,7 @@ class PrintReceipt {
     if (paymentdata.name.toString().toLowerCase() == "cash") {
       ticket.drawer();
     }
-    return ticket;
+    //  return ticket;
   }
 
   String checkRoundData(String total) {
@@ -644,6 +679,8 @@ class PrintReceipt {
       Branch branchData,
       List taxJson,
       List<OrderDetail> orderdetail,
+      List<OrderAttributes> orderAttr,
+      List<OrderModifire> orderModifire,
       Orders orderData,
       Payments paymentdata,
       String tableName,
@@ -656,6 +693,8 @@ class PrintReceipt {
         branchData,
         taxJson,
         orderdetail,
+        orderAttr,
+        orderModifire,
         orderData,
         paymentdata,
         tableName,

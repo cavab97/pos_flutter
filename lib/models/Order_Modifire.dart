@@ -13,23 +13,24 @@ class OrderModifire {
   int om_by;
   String updated_at;
   int updated_by;
-
-  OrderModifire({
-    this.om_id,
-    this.uuid,
-    this.order_id,
-    this.detail_id,
-    this.terminal_id,
-    this.app_id,
-    this.product_id,
-    this.modifier_id,
-    this.om_amount,
-    this.om_status,
-    this.om_datetime,
-    this.om_by,
-    this.updated_at,
-    this.updated_by,
-  });
+  String name;
+  
+  OrderModifire(
+      {this.om_id,
+      this.uuid,
+      this.order_id,
+      this.detail_id,
+      this.terminal_id,
+      this.app_id,
+      this.product_id,
+      this.modifier_id,
+      this.om_amount,
+      this.om_status,
+      this.om_datetime,
+      this.om_by,
+      this.updated_at,
+      this.updated_by,
+      this.name});
 
   OrderModifire.fromJson(Map<String, dynamic> json) {
     om_id = json["om_id"];
@@ -49,11 +50,11 @@ class OrderModifire {
     om_by = json["om_by"];
     updated_at = json["updated_at"];
     updated_by = json["updated_by"];
+    name = json["name"];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-
     data["om_id"] = this.om_id;
     data["uuid"] = this.uuid;
     data["order_id"] = this.order_id;
@@ -68,6 +69,7 @@ class OrderModifire {
     data["om_by"] = this.om_by;
     data["updated_at"] = this.updated_at;
     data["updated_by"] = this.updated_by;
+    data["name"] = this.name;
     return data;
   }
 }

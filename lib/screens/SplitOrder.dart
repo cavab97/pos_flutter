@@ -940,6 +940,9 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     Orders order = await localAPI.getcurrentOrders(orderid, treminalID);
+    List<OrderAttributes> attributes =
+        await localAPI.getOrderAttributes(orderid);
+    List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
     print(branchAddress);
     print(orderpaymentdata);
     print(paumentMethod);
@@ -953,10 +956,12 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           branchAddress,
           taxJson,
           orderitem,
+          attributes,
+          modifires,
           order,
           paumentMethod[0],
-          "",// Add table name here
-          "",// Add Currency here
+          "", // Add table name here
+          "", // Add Currency here
           widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
     } else {
       CommunFun.showToast(context, Strings.printer_not_available);

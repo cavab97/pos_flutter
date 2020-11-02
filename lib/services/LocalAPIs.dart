@@ -553,6 +553,29 @@ class LocalAPI {
     return list[0];
   }
 
+  Future<List<OrderAttributes>> getOrderAttributes(orderid) async {
+    var query = "SELECT order_attributes.*,attributes.name from order_attributes " +
+        " LEFT join attributes on attributes.attribute_id =  order_attributes.attribute_id WHERE order_attributes.order_id = " +
+        orderid.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+    List<OrderAttributes> list = res.isNotEmpty
+        ? res.map((c) => OrderAttributes.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<OrderModifire>> getOrderModifire(orderid) async {
+    var query = "SELECT order_modifier.*,modifier.name  from order_modifier " +
+        " LEFT JOIN modifier on modifier.modifier_id = order_modifier.modifier_id" +
+        " WHERE order_modifier.order_id  = " +
+        orderid.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+    List<OrderModifire> list = res.isNotEmpty
+        ? res.map((c) => OrderModifire.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
   Future<List<Orders>> getLastOrderAppid(terminalid) async {
     var qey = "SELECT orders.app_id from orders where terminal_id =" +
         terminalid +
@@ -629,7 +652,9 @@ class LocalAPI {
 
   Future<int> sendModifireData(OrderModifire orderDetailData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var orderid = await db.insert("order_modifier", orderDetailData.toJson());
+    var newObj = orderDetailData.toJson();
+    newObj.remove("name");
+    var orderid = await db.insert("order_modifier", newObj);
     await SyncAPICalls.logActivity(
         "orders", "insert order modifier", "order_modifier", orderid);
     return orderDetailData.app_id;
@@ -637,7 +662,9 @@ class LocalAPI {
 
   Future<int> sendAttrData(OrderAttributes orderDetailData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var orderid = await db.insert("order_attributes", orderDetailData.toJson());
+    var newObj = orderDetailData.toJson();
+    newObj.remove("name");
+    var orderid = await db.insert("order_attributes", newObj);
     await SyncAPICalls.logActivity(
         "orders", "insert order attributes", "order_attributes", orderid);
     return orderDetailData.app_id;
@@ -1393,11 +1420,13 @@ class LocalAPI {
         orderData.app_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var orderid;
+    var newObj = orderData.toJson();
+    newObj.remove("name");
     if (checkisExit.length > 0) {
-      orderid = await db.update("order_modifier", orderData.toJson(),
+      orderid = await db.update("order_modifier", newObj,
           where: "app_id =?", whereArgs: [orderData.app_id]);
     } else {
-      orderid = await db.insert("order_modifier", orderData.toJson());
+      orderid = await db.insert("order_modifier", newObj);
     }
     return orderid;
   }
@@ -1408,11 +1437,13 @@ class LocalAPI {
         orderData.app_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var orderid;
+    var newObj = orderData.toJson();
+    newObj.remove("name");
     if (checkisExit.length > 0) {
-      orderid = await db.update("order_attributes", orderData.toJson(),
+      orderid = await db.update("order_attributes", newObj,
           where: "app_id =?", whereArgs: [orderData.app_id]);
     } else {
-      orderid = await db.insert("order_attributes", orderData.toJson());
+      orderid = await db.insert("order_attributes", newObj);
     }
     return orderid;
   }

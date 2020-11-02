@@ -417,12 +417,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                       Text(
                                           DateFormat(
                                                   'EEE, MMM d yyyy, hh:mm aaa')
-                                              .format(DateTime.parse(
-                                                  selectedOrder.order_date !=
-                                                          null
-                                                      ? selectedOrder.order_date
-                                                      : DateTime.now()
-                                                          .toString())),
+                                              .format(CommunFun
+                                                  .getCurrentDateTime(DateTime
+                                                      .parse(selectedOrder
+                                                                  .order_date !=
+                                                              null
+                                                          ? selectedOrder
+                                                              .order_date
+                                                          : DateTime.now()
+                                                              .toString()))),
                                           style: Styles.whiteMediumBold()),
                                       SizedBox(
                                         height: 10,

@@ -1062,11 +1062,9 @@ class _DashboradPageState extends State<DashboradPage>
       List<MSTSubCartdetails> modifireList = await getmodifireList();
       if (modifireList.length > 0) {
         var orderId = orderid;
-
         for (var i = 0; i < modifireList.length; i++) {
           OrderModifire modifireData = new OrderModifire();
           var modifire = modifireList[i];
-
           if (modifire.caId == null) {
             List<OrderModifire> lapMpid =
                 await localAPI.getLastOrderModifireAppid(terminalId);
@@ -1176,12 +1174,19 @@ class _DashboradPageState extends State<DashboradPage>
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     var branchID = await CommunFun.getbranchId();
     Orders order = await localAPI.getcurrentOrders(orderid, branchID);
+    List<OrderAttributes> attributes =
+        await localAPI.getOrderAttributes(orderid);
+    List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
+    print(attributes);
+    print(modifires);
     printKOT.checkReceiptPrint(
         printerreceiptList[0].printerIp,
         context,
         branchData,
         taxJson,
         orderitem,
+        attributes,
+        modifires,
         order,
         paument_method[0],
         tableName,
