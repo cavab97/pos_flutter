@@ -214,22 +214,30 @@ class LocalAPI {
         if (cartIDs.length > 0) {
           var qry1 = "UPDATE mst_cart SET table_id = " +
               table_order.table_id.toString() +
-              " where id = " +
-              cartIDs[0].id.toString();
+              " where table_id = " +
+              list[0].table_id.toString();
           var result1 = await db.rawQuery(qry1);
           if (table_order.save_order_id == 0 && list[0].save_order_id != 0) {
             list[0].table_id = table_order.table_id;
-            var qry1 = "UPDATE table_order SET table_id = " +
+            var qry2 = "UPDATE table_order SET table_id = " +
                 table_order.table_id.toString() +
                 " where table_id = " +
                 list[0].table_id.toString();
+            var res = await db.rawQuery(qry2);
+            var qrysabve = "UPDATE save_order SET cart_id = " +
+                cartIDs[0].cartId.toString() +
+                " where id = " +
+                list[0].save_order_id.toString();
+            var res1 = await db.rawQuery(qrysabve);
             table_order.save_order_id = list[0].save_order_id;
           } else {
             await deleteTableOrder(list[0].table_id);
+            await deleteSaveOrder(list[0].save_order_id);
           }
         }
       } else {
         await deleteTableOrder(list[0].table_id);
+        await deleteSaveOrder(list[0].save_order_id);
       }
     }
 
@@ -246,6 +254,13 @@ class LocalAPI {
   Future deleteTableOrder(tableID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     await db.delete("table_order", where: 'table_id = ?', whereArgs: [tableID]);
+  }
+
+  Future deleteSaveOrder(id) async {
+    if (id != 0) {
+      var db = DatabaseHelper.dbHelper.getDatabse();
+      await db.delete("save_order", where: 'id  =?', whereArgs: [id]);
+    }
   }
 
   Future updateTableIdInOrder(orderid, tableid) async {
@@ -409,12 +424,14 @@ class LocalAPI {
   Future<int> addintoCartDetails(cartdetails) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var cartdetailid;
+    var newObj = cartdetails.toJson();
+    newObj.remove("attrName");
     if (cartdetails.id != null) {
-      cartdetailid = db.update("mst_cart_detail", cartdetails.toJson(),
+      cartdetailid = db.update("mst_cart_detail", newObj,
           where: 'id = ?', whereArgs: [cartdetails.id]);
       cartdetailid = cartdetails.id;
     } else {
-      cartdetailid = await db.insert("mst_cart_detail", cartdetails.toJson());
+      cartdetailid = await db.insert("mst_cart_detail", newObj);
     }
     await SyncAPICalls.logActivity(
         "product", "insert  cart details", "mst_cart_detail", cartdetailid);
@@ -422,32 +439,33 @@ class LocalAPI {
   }
 
   Future<int> addsubCartData(MSTSubCartdetails data) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var result1 = await db.insert("mst_cart_sub_detail", data.toJson());
-
     await SyncAPICalls.logActivity(
         "product", "insert sub cart details", "mst_cart_sub_detail", result1);
     return result1;
   }
 
-  Future<List<MSTSubCartdetails>> itemmodifireList(cartID) async {
-    var qry = "SELECT  mst_cart_sub_detail.*  from mst_cart_sub_detail" +
-        " LEFT JOIN mst_cart_detail on mst_cart_detail.cart_id = " +
-        cartID.toString() +
-        " WHERE mst_cart_sub_detail.cart_details_id = mst_cart_detail.id";
+  Future<List<MSTSubCartdetails>> itemmodifireList(detailid) async {
+    var qry =
+        "SELECT  *  from   mst_cart_sub_detail WHERE cart_details_id  = " +
+            detailid.toString();
 
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<MSTSubCartdetails> list = res.isNotEmpty
         ? res.map((c) => MSTSubCartdetails.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
-        "product", "get cart modifier list", "mst_cart_sub_detail", cartID);
+        "product", "get cart modifier list", "mst_cart_sub_detail", detailid);
     return list;
   }
 
   Future<List<MSTCartdetails>> getCartItem(cartId) async {
-    var qry =
-        "SELECT * from mst_cart_detail where cart_id = " + cartId.toString();
+    var qry = " SELECT mst_cart_detail.* , attributes.name as attrName from mst_cart_detail " +
+        " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id " +
+        " LEft join attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id " +
+        " where cart_id = " +
+        cartId.toString();
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<MSTCartdetails> list = res.isNotEmpty
         ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
@@ -906,7 +924,9 @@ class LocalAPI {
 
   Future<dynamic> addVoucherIndetail(MSTCartdetails details, voucherId) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var data = await db.update("mst_cart_detail", details.toJson(),
+    var newObj = details.toJson();
+    newObj.remove("attrName");
+    var data = await db.update("mst_cart_detail", newObj,
         where: "id =?", whereArgs: [details.id]);
     await SyncAPICalls.logActivity(
         "voucher", "add voucher in cart", "voucher", voucherId);
@@ -1329,11 +1349,13 @@ class LocalAPI {
         ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
         : [];
     var result;
+    var newObj = details.toJson();
+    newObj.remove("attrName");
     if (list.length > 0) {
-      result = await db.update("mst_cart_detail", details.toJson(),
+      result = await db.update("mst_cart_detail", newObj,
           where: "id =?", whereArgs: [details.id]);
     } else {
-      result = await db.insert("mst_cart_detail", details.toJson());
+      result = await db.insert("mst_cart_detail", newObj);
     }
     return result;
   }
@@ -1728,15 +1750,17 @@ class LocalAPI {
   Future makeAsFocProduct(MSTCartdetails focProduct, isUpdate, MST_Cart cart,
       MSTCartdetails cartitem) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
+    var newObj = focProduct.toJson();
+    newObj.remove("attrName");
     if (isUpdate) {
-      var data = await db.update("mst_cart_detail", focProduct.toJson(),
+      var data = await db.update("mst_cart_detail", newObj,
           where: "id =?", whereArgs: [focProduct.id]);
     } else {
       var data = await db.insert(
         "mst_cart_detail",
         focProduct.toJson(),
       );
-      var res = await db.update("mst_cart_detail", cartitem.toJson(),
+      var res = await db.update("mst_cart_detail", newObj,
           where: "id =?", whereArgs: [cartitem.id]);
     }
     var res = await db.update("mst_cart", cart.toJson(),

@@ -914,8 +914,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
           var index = orderItemList.indexOf(product);
           var item = orderItemList[index];
           print(item.product_detail);
-          // var producrdata = json.decode(item.product_detail);
-          // print(producrdata);
+          var producrdata = json.decode(item.product_detail);
+           print(producrdata);
           return InkWell(
               onTap: () {},
               child: Container(
@@ -931,10 +931,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         decoration: new BoxDecoration(
                           color: Colors.greenAccent,
                         ),
-                        child: //producrdata["base64"] != ""
-                            // ? CommonUtils.imageFromBase64String(
-                            //    producrdata["base64"])
-                            new Image.asset(
+                        child: producrdata["base64"] != ""
+                             ? CommonUtils.imageFromBase64String(
+                                producrdata["base64"])
+                           : new Image.asset(
                           Strings.no_imageAsset,
                           fit: BoxFit.cover,
                           gaplessPlayback: true,
@@ -951,8 +951,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
                                 Text(
-                                    //  producrdata["name"]
-                                    "test".toString().toUpperCase(),
+                                     producrdata["name"],
+                                   // "test".toString().toUpperCase(),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 2,
                                     style: TextStyle(

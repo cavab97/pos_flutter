@@ -27,7 +27,8 @@ class MSTCartdetails {
   int productTotalPoints;
   String createdAt;
   int createdBy;
-
+  String attrName;
+  
   MSTCartdetails(
       {this.cartId,
       this.localID,
@@ -52,7 +53,8 @@ class MSTCartdetails {
       this.cart_detail,
       this.setmeal_product_detail,
       this.createdAt,
-      this.createdBy});
+      this.createdBy,
+      this.attrName});
 
   MSTCartdetails.fromJson(Map<String, dynamic> json) {
     id = json["id"];
@@ -90,6 +92,7 @@ class MSTCartdetails {
     createdAt = json["created_at"];
     createdBy = json["created_by"];
     isFocProduct = json["isFoc_Product"];
+    attrName = json["attrName"];
   }
 
   Map<String, dynamic> toJson() {
@@ -119,6 +122,7 @@ class MSTCartdetails {
     data["created_by"] = this.createdBy;
     data["created_at"] = this.createdAt;
     data["isFoc_Product"] = this.isFocProduct;
+    data["attrName"] = this.attrName;
     return data;
   }
 }

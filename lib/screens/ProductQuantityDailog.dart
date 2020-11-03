@@ -624,7 +624,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     SaveOrder orderData = new SaveOrder();
     MSTSubCartdetails subCartData = new MSTSubCartdetails();
     var branchid = await CommunFun.getbranchId();
-    var table = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
     var customerData =
         await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
@@ -690,10 +689,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         .removeWhere((String key, dynamic value) => value == null);
     var data = cartItemproduct;
     MSTCartdetails cartdetails = new MSTCartdetails();
-    if (!isEditing) {
+    if (!isEditing && !isSetMeal) {
       await getcartItemsDetails();
     }
-
     if (isEditing) {
       cartdetails.id = cartitem.id;
     }
@@ -709,6 +707,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.createdBy = loginData["id"];
     cartdetails.cart_detail = jsonEncode(data);
     cartdetails.discount = 0;
+    cartdetails.localID = await CommunFun.getLocalID();
     cartdetails.remark =
         extraNotes.text.trim().isNotEmpty ? extraNotes.text.trim() : "";
     cartdetails.issetMeal = isSetMeal ? 1 : 0;

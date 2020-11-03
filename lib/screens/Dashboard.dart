@@ -886,8 +886,8 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
-  Future<List<MSTSubCartdetails>> getmodifireList() async {
-    List<MSTSubCartdetails> list = await localAPI.itemmodifireList(currentCart);
+  Future<List<MSTSubCartdetails>> getmodifireList(detailid) async {
+    List<MSTSubCartdetails> list = await localAPI.itemmodifireList(detailid);
 
     return list;
   }
@@ -1031,102 +1031,106 @@ class _DashboradPageState extends State<DashboradPage>
                 cartItem.setmeal_product_detail;
           }
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
-          if (cartItem.issetMeal == 0) {
-            if (productdata["has_inventory"] == 1) {
-              List<ProductStoreInventory> inventory =
-                  await localAPI.getStoreInventoryData(orderDetail.product_id);
-              if (inventory.length > 0) {
-                ProductStoreInventory invData = new ProductStoreInventory();
-                invData = inventory[0];
-                var prev = inventory[0];
-                var qty = (invData.qty - orderDetail.detail_qty);
-                invData.qty = qty;
-                invData.updatedAt =
-                    await CommunFun.getCurrentDateTime(DateTime.now());
-                invData.updatedBy = userdata.id;
-                updatedInt.add(invData);
-                //Inventory log update
-                ProductStoreInventoryLog log = new ProductStoreInventoryLog();
-                log.uuid = uuid;
-                log.inventory_id = prev.inventoryId;
-                log.branch_id = int.parse(branchid);
-                log.product_id = cartItem.productId;
-                log.employe_id = userdata.id;
-                log.qty = prev.qty;
-                log.il_type = 2; //1 for add 2 for deduct
-                log.qty_before_change = prev.qty;
-                log.qty_after_change = qty;
-                log.updated_at =
-                    await CommunFun.getCurrentDateTime(DateTime.now());
-                log.updated_by = userdata.id;
-                updatedLog.add(log);
+
+          if (orderDetailid != null) {
+            List<MSTSubCartdetails> modifireList =
+                await getmodifireList(cartItem.id);
+            if (modifireList.length > 0) {
+              var orderId = orderid;
+              for (var i = 0; i < modifireList.length; i++) {
+                OrderModifire modifireData = new OrderModifire();
+                var modifire = modifireList[i];
+                if (modifire.caId == null) {
+                  List<OrderModifire> lapMpid =
+                      await localAPI.getLastOrderModifireAppid(terminalId);
+                  if (lapMpid.length > 0) {
+                    modifireData.app_id = lapMpid[0].app_id + 1;
+                  } else {
+                    modifireData.app_id = int.parse(terminalId);
+                  }
+                  modifireData.uuid = uuid;
+                  modifireData.order_id = orderId;
+                  modifireData.detail_id = orderDetailid;
+                  modifireData.terminal_id = int.parse(terminalId);
+                  modifireData.product_id = modifire.productId;
+                  modifireData.modifier_id = modifire.modifierId;
+                  modifireData.om_amount = modifire.modifirePrice;
+                  modifireData.om_by = userdata.id;
+                  modifireData.om_datetime =
+                      await CommunFun.getCurrentDateTime(DateTime.now());
+                  modifireData.om_status = 1;
+                  modifireData.updated_at =
+                      await CommunFun.getCurrentDateTime(DateTime.now());
+                  modifireData.updated_by = userdata.id;
+                  var ordermodifreid =
+                      await localAPI.sendModifireData(modifireData);
+                } else {
+                  OrderAttributes attributes = new OrderAttributes();
+                  List<OrderAttributes> lapApid =
+                      await localAPI.getLastOrderAttrAppid(terminalId);
+                  if (lapApid.length > 0) {
+                    attributes.app_id = lapApid[0].app_id + 1;
+                  } else {
+                    attributes.app_id = int.parse(terminalId);
+                  }
+                  attributes.uuid = uuid;
+                  attributes.order_id = orderId;
+                  attributes.detail_id = orderDetailid;
+                  attributes.terminal_id = int.parse(terminalId);
+                  attributes.product_id = modifire.productId;
+                  attributes.attribute_id = modifire.attributeId;
+                  attributes.attr_price = modifire.attrPrice;
+                  attributes.ca_id = modifire.caId;
+                  attributes.oa_datetime =
+                      await CommunFun.getCurrentDateTime(DateTime.now());
+                  attributes.oa_by = userdata.id;
+                  attributes.oa_status = 1;
+                  attributes.updated_at =
+                      await CommunFun.getCurrentDateTime(DateTime.now());
+                  attributes.updated_by = userdata.id;
+                  var orderAttri = await localAPI.sendAttrData(attributes);
+                }
+              }
+            }
+            if (cartItem.issetMeal == 0) {
+              if (productdata["has_inventory"] == 1) {
+                List<ProductStoreInventory> inventory = await localAPI
+                    .getStoreInventoryData(orderDetail.product_id);
+                if (inventory.length > 0) {
+                  ProductStoreInventory invData = new ProductStoreInventory();
+                  invData = inventory[0];
+                  var prev = inventory[0];
+                  var qty = (invData.qty - orderDetail.detail_qty);
+                  invData.qty = qty;
+                  invData.updatedAt =
+                      await CommunFun.getCurrentDateTime(DateTime.now());
+                  invData.updatedBy = userdata.id;
+                  updatedInt.add(invData);
+                  //Inventory log update
+                  ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+                  log.uuid = uuid;
+                  log.inventory_id = prev.inventoryId;
+                  log.branch_id = int.parse(branchid);
+                  log.product_id = cartItem.productId;
+                  log.employe_id = userdata.id;
+                  log.qty = prev.qty;
+                  log.il_type = 2; //1 for add 2 for deduct
+                  log.qty_before_change = prev.qty;
+                  log.qty_after_change = qty;
+                  log.updated_at =
+                      await CommunFun.getCurrentDateTime(DateTime.now());
+                  log.updated_by = userdata.id;
+                  updatedLog.add(log);
+                }
               }
             }
           }
-        }
-        var ulog = await localAPI.updateInvetory(updatedInt);
-        var inventoryLog =
-            await localAPI.updateStoreInvetoryLogTable(updatedLog);
-      }
-    }
-    if (orderDetailid != null) {
-      List<MSTSubCartdetails> modifireList = await getmodifireList();
-      if (modifireList.length > 0) {
-        var orderId = orderid;
-        for (var i = 0; i < modifireList.length; i++) {
-          OrderModifire modifireData = new OrderModifire();
-          var modifire = modifireList[i];
-          if (modifire.caId == null) {
-            List<OrderModifire> lapMpid =
-                await localAPI.getLastOrderModifireAppid(terminalId);
-            if (lapMpid.length > 0) {
-              modifireData.app_id = lapMpid[0].app_id + 1;
-            } else {
-              modifireData.app_id = int.parse(terminalId);
-            }
-            modifireData.uuid = uuid;
-            modifireData.order_id = orderId;
-            modifireData.detail_id = orderDetailid;
-            modifireData.terminal_id = int.parse(terminalId);
-            modifireData.product_id = modifire.productId;
-            modifireData.modifier_id = modifire.modifierId;
-            modifireData.om_amount = modifire.modifirePrice;
-            modifireData.om_by = userdata.id;
-            modifireData.om_datetime =
-                await CommunFun.getCurrentDateTime(DateTime.now());
-            modifireData.om_status = 1;
-            modifireData.updated_at =
-                await CommunFun.getCurrentDateTime(DateTime.now());
-            modifireData.updated_by = userdata.id;
-            var ordermodifreid = await localAPI.sendModifireData(modifireData);
-          } else {
-            OrderAttributes attributes = new OrderAttributes();
-            List<OrderAttributes> lapApid =
-                await localAPI.getLastOrderAttrAppid(terminalId);
-            if (lapApid.length > 0) {
-              attributes.app_id = lapApid[0].app_id + 1;
-            } else {
-              attributes.app_id = int.parse(terminalId);
-            }
-            attributes.uuid = uuid;
-            attributes.order_id = orderId;
-            attributes.detail_id = orderDetailid;
-            attributes.terminal_id = int.parse(terminalId);
-            attributes.product_id = modifire.productId;
-            attributes.attribute_id = modifire.attributeId;
-            attributes.attr_price = modifire.attrPrice;
-            attributes.ca_id = modifire.caId;
-            attributes.oa_datetime =
-                await CommunFun.getCurrentDateTime(DateTime.now());
-            attributes.oa_by = userdata.id;
-            attributes.oa_status = 1;
-            attributes.updated_at =
-                await CommunFun.getCurrentDateTime(DateTime.now());
-            attributes.updated_by = userdata.id;
-            var orderAttri = await localAPI.sendAttrData(attributes);
-          }
+          var ulog = await localAPI.updateInvetory(updatedInt);
+          var inventoryLog =
+              await localAPI.updateStoreInvetoryLogTable(updatedLog);
         }
       }
+
       if (payment.length > 0) {
         for (var i = 0; i < payment.length; i++) {
           OrderPayment orderpayment = payment[i];
