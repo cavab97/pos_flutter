@@ -1027,8 +1027,7 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.detail_by = userdata.id;
           orderDetail.issetMeal = cartItem.issetMeal;
           if (cartItem.issetMeal == 1) {
-            orderDetail.setmeal_product_detail =
-                cartItem.setmeal_product_detail;
+            orderDetail.setmeal_product_detail = cartItem.setmeal_product_detail;
           }
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
           if (cartItem.issetMeal == 0) {

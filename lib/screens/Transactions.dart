@@ -400,19 +400,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           ? SingleChildScrollView(
                               physics: BouncingScrollPhysics(),
                               child: Stack(children: <Widget>[
-                                // Padding(
-                                //     padding: EdgeInsets.only(right: 10, top: 10),
-                                //     child: Row(
-                                //       crossAxisAlignment: CrossAxisAlignment.center,
-                                //       mainAxisAlignment: MainAxisAlignment.end,
-                                //       children: <Widget>[
-                                //         isWeborder
-                                //             ? assingTableButton(() {
-                                //                 assignTable();
-                                //               })
-                                //             : SizedBox()
-                                //       ],
-                                //     )),
                                 Container(
                                   padding: EdgeInsets.symmetric(horizontal: 50),
                                   height: MediaQuery.of(context).size.height,
@@ -914,7 +901,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           var index = orderItemList.indexOf(product);
           var item = orderItemList[index];
           print(item.product_detail);
-          // var producrdata = json.decode(item.product_detail);
+          var producrdata = json.decode(item.product_detail);
           // print(producrdata);
           return InkWell(
               onTap: () {},
@@ -931,14 +918,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         decoration: new BoxDecoration(
                           color: Colors.greenAccent,
                         ),
-                        child: //producrdata["base64"] != ""
-                            // ? CommonUtils.imageFromBase64String(
-                            //    producrdata["base64"])
-                            new Image.asset(
-                          Strings.no_imageAsset,
-                          fit: BoxFit.cover,
-                          gaplessPlayback: true,
-                        ),
+                        child: producrdata["base64"] != ""
+                            ? CommonUtils.imageFromBase64String(
+                                producrdata["base64"])
+                            : new Image.asset(
+                                Strings.no_imageAsset,
+                                fit: BoxFit.cover,
+                                gaplessPlayback: true,
+                              ),
                       ),
                     ),
                     SizedBox(width: 15),
@@ -951,8 +938,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
                                 Text(
-                                    //  producrdata["name"]
-                                    "test".toString().toUpperCase(),
+                                    producrdata["name"]
+                                        .toString()
+                                        .toUpperCase(),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 2,
                                     style: TextStyle(

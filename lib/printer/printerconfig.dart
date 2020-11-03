@@ -354,9 +354,13 @@ class PrintReceipt {
     for (var i = 0; i < orderdetail.length; i++) {
       var item = orderdetail[i];
 
-      /*if (item.issetMeal == 1) {
+      if (item.issetMeal == 1) {
         var setmealproduct = json.decode(item.setmeal_product_detail);
+        print("********************");
         print(setmealproduct);
+      }else{
+        print("=====================");
+
       }
 
       var contain =
@@ -368,10 +372,10 @@ class PrintReceipt {
         attrList.addAll((json.decode(jsonString) as List)
             .map((i) => OrderAttributes.fromJson(i))
             .toList());
-       //  print("=====================");
-        //print(attrList.length);
+        print(attrList.length);
+        print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBB  ");
       } else {
-         print("********************");
+        print("aaaaaaaaaaaaaaaaaaaaaaaaaaa "+item.app_id.toString());
       }
 
       var contain1 =
@@ -382,11 +386,11 @@ class PrintReceipt {
         modiList.addAll((json.decode(jsonString) as List)
             .map((i) => OrderModifire.fromJson(i))
             .toList());
-       // print("22222222222222222222222");
-       // print(modiList.length);
+        print("000000000000000000000000");
+        print(modiList.length);
       } else {
-       // print("22222222222222222222222");
-      }*/
+        print("22222222222222222222222 "+item.app_id.toString());
+      }
 
       var name = jsonDecode(item.product_detail);
       ticket.row([
@@ -425,7 +429,7 @@ class PrintReceipt {
       ]);
 
       ticket.setStyles(PosStyles(align: PosAlign.left));
-    /*  for (var i = 0; i < attrList.length; i++) {
+      for (var i = 0; i < attrList.length; i++) {
         ticket.row([
           PosColumn(
               text: attrList[i].name,
@@ -436,7 +440,7 @@ class PrintReceipt {
                 fontType: PosFontType.fontA,
               ))
         ]);
-      }*/
+      }
       if (name["name_2"] != null) {
         if (name["name_2"].isNotEmpty) {
           ticket.row([
@@ -572,7 +576,7 @@ class PrintReceipt {
           ))
     ]);
     ticket.hr(len: 15);
-   /* ticket.hr();
+    ticket.hr();
     ticket.row([
       PosColumn(
           text: "Cash Received ",
@@ -609,7 +613,7 @@ class PrintReceipt {
             bold: false,
           ))
     ]);
-    ticket.hr();*/
+    ticket.hr();
 
     ticket.setStyles(PosStyles(align: PosAlign.center));
     /* ticket.emptyLines(1);
