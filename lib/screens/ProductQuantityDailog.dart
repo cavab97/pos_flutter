@@ -48,7 +48,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   TextEditingController extraNotes = new TextEditingController();
   LocalAPI localAPI = LocalAPI();
   List<Attribute_Data> attributeList = [];
-  ProductDetails productItem;
+  ProductDetails productItem = new ProductDetails();
+  ProductDetails selectedProdut = new ProductDetails();
   SetMeal setmeal;
   MSTCartdetails cartitem;
   List<SetMealProduct> tempCart = new List<SetMealProduct>();
@@ -93,6 +94,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     } else {
       setState(() {
         productItem = widget.product;
+        selectedProdut = productItem;
         price = productItem.price;
         productnetprice = productItem.price;
       });
@@ -655,7 +657,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     ProductDetails cartItemproduct = new ProductDetails();
 
     if (!isSetMeal) {
-      cartItemproduct = productItem;
+      cartItemproduct = selectedProdut;
       cartItemproduct.qty = product_qty;
       cartItemproduct.price = double.parse(price.toStringAsFixed(2));
     } else {
@@ -1308,7 +1310,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               produtAddTocart();
             }
           } else {
-            CommunFun.showToast(context, "Please select "+attributeTitle);
+            CommunFun.showToast(context, "Please select " + attributeTitle);
           }
         } else {
           if (isEditing) {

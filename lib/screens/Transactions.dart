@@ -463,7 +463,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                   ),
                                 ),
                                 Positioned(
-                                  bottom: 40,
+                                  bottom: 30,
                                   left: 0,
                                   right: 0,
                                   child: Container(
@@ -891,8 +891,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget productList() {
     return Container(
-      padding: EdgeInsets.only(left: 20, right: 20, bottom: 150),
-      height: MediaQuery.of(context).size.height / 5,
+      //color: Colors.white,
+      padding: EdgeInsets.only(left: 20, right: 20, bottom: 0),
+      height: MediaQuery.of(context).size.height / 3,
       child: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Column(

@@ -458,7 +458,7 @@ class _SelectTablePageState extends State<SelectTablePage>
               return QRCodesImagePop(
                 ip: selectedTable.tableQr,
                 onClose: () {
-                  Navigator.of(context).pop();
+                //  Navigator.of(context).pop();
                   setState(() {
                     isChanging = false;
                   });

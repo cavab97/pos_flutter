@@ -1298,7 +1298,6 @@ class _DashboradPageState extends State<DashboradPage>
         await getCartItem(currentCart);
       } else {
         setState(() {
-          currentCart = null;
           cartList = [];
           grandTotal = 0.0;
           discount = 0.0;
