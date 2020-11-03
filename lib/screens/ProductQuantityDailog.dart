@@ -69,6 +69,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   bool isSetMeal = false;
   var productnetprice = 0.00;
   var currency;
+  String attributeTitle = "";
 
   @override
   void initState() {
@@ -619,6 +620,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   checkIsAvailble() async {}
+
   produtAddTocart() async {
     MST_Cart cart = new MST_Cart();
     SaveOrder orderData = new SaveOrder();
@@ -748,7 +750,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         if (cartitem.isSendKichen == 1) {
           var items = [];
           items.add(cartitem);
-             //senditemtoKitchen(items);
+          //senditemtoKitchen(items);
         }
       }
     }
@@ -1105,6 +1107,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           var attributType = attribute.attr_types.split(',');
           var attrIDs = attribute.attributeId.split(',').asMap();
           var attrtypesPrice = attribute.attr_types_price.split(',').asMap();
+
+          /*Set attribute name for selection toast*/
+          attributeTitle = attribute.attr_name;
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -1313,10 +1318,22 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   Widget addbutton(context) {
     return RaisedButton(
       onPressed: () {
-        if (isEditing) {
-          updateCartItem();
+        if (attributeList.length > 0) {
+          if (selectedAttr.length > 0) {
+            if (isEditing) {
+              updateCartItem();
+            } else {
+              produtAddTocart();
+            }
+          } else {
+            CommunFun.showToast(context, "Please select "+attributeTitle);
+          }
         } else {
-          produtAddTocart();
+          if (isEditing) {
+            updateCartItem();
+          } else {
+            produtAddTocart();
+          }
         }
       },
       child: Row(

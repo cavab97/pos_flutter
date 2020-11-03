@@ -41,12 +41,14 @@ dependencies:
  # esc_pos_printer:
   #  git:
     #  url: git://github.com/nhancv/esc_pos_printer.git
-
   esc_pos_printer: ^3.2.9
   wifi: ^0.1.5
   ping_discover_network: ^0.2.0+1
   intl: ^0.16.1
   esc_pos_utils: ^0.4.9
+
+  # QR code
+  qr_flutter: ^3.1.0
 
 dev_dependencies:
   flutter_test:

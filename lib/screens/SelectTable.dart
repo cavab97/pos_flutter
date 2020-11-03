@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:mcncashier/components/QrScanAndGenrate.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
@@ -432,7 +433,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     );
   }
 
-  Widget neworder_button(context) {
+  /*Widget neworder_button(context) {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).pop();
@@ -440,6 +441,32 @@ class _SelectTablePageState extends State<SelectTablePage>
           isChanging = false;
         });
         opnPaxDailog();
+      },
+      child: Text(Strings.new_order,
+          textAlign: TextAlign.center, style: Styles.bluesmall()),
+    );
+  }*/
+
+  Widget neworder_button(context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).pop();
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return QRCodesImagePop(
+                ip: selectedTable.tableQr,
+                onClose: () {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    isChanging = false;
+                  });
+                  opnPaxDailog();
+                },
+              );
+            });
+        // opnPaxDailog();
       },
       child: Text(Strings.new_order,
           textAlign: TextAlign.center, style: Styles.bluesmall()),
