@@ -230,11 +230,11 @@ class _DashboradPageState extends State<DashboradPage>
         getCurrentCart();
       }
     } else {
-      clearCart();
-      if (isShiftOpen) {
-        Navigator.pushNamed(context, Constant.SelectTableScreen,
-            arguments: {"isAssign": false});
-      }
+      // clearCart();
+      // if (isShiftOpen) {
+      //   Navigator.pushNamed(context, Constant.SelectTableScreen,
+      //       arguments: {"isAssign": false});
+      // }
     }
   }
 
@@ -981,8 +981,9 @@ class _DashboradPageState extends State<DashboradPage>
               CommunFun.showToast(
                   context,
                   productdata["name"] +
-                      "Product is out of stock.Please check store.");
+                      " Product is out of stock.Please check store.");
               await localAPI.deleteOrderid(orderId);
+              Navigator.of(context).pop();
               Navigator.of(context).pop();
               return false;
             }
@@ -1164,6 +1165,7 @@ class _DashboradPageState extends State<DashboradPage>
       await printReceipt(orderid);
     }
     Navigator.of(context).pop();
+    Navigator.of(context).pop();
   }
 
   printReceipt(int orderid) async {
@@ -1201,7 +1203,7 @@ class _DashboradPageState extends State<DashboradPage>
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     clearCart();
-    Navigator.of(context).pop();
+
     refreshAfterAction(true);
     getCategoryList();
     // Navigator.pushNamed(context, Constant.DashboardScreen);

@@ -92,17 +92,17 @@ class _SelectTablePageState extends State<SelectTablePage>
     }
   }
 
-  mergeTabledata(table) async {
+  mergeTabledata(TablesDetails table) async {
+    TablesDetails table1 = mergeInTable;
+    TablesDetails table2 = table;
     Table_order table_order = new Table_order();
-    var pax = mergeInTable.numberofpax != null ? mergeInTable.numberofpax : 0;
-    pax += table.numberofpax != null ? table.numberofpax : 0;
-    table_order.table_id = mergeInTable.tableId;
+    table_order.number_of_pax = table1.numberofpax + table2.numberofpax;
+    table_order.table_id = table1.tableId;
     table_order.save_order_id =
-        mergeInTable.saveorderid != 0 ? mergeInTable.saveorderid : null;
+        table1.saveorderid != 0 ? table1.saveorderid : 0;
     table_order.is_merge_table = "1";
-    table_order.merged_table_id = table.tableId;
-    table_order.number_of_pax = pax;
-    var result = await localAPI.insertTableOrder(table_order);
+    table_order.merged_table_id = table2.tableId;
+    var result = await localAPI.mergeTableOrder(table_order);
     setState(() {
       isMergeing = false;
       mergeInTable = null;

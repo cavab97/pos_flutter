@@ -46,6 +46,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   bool isRefunding = false;
   bool isWeborder = true;
   var permissions = "";
+  var orderDate = "";
   Customer customer = new Customer();
   Payments paumentMethod = new Payments();
 
@@ -81,8 +82,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   getOrderDetails(order) async {
+    var date = await CommunFun.getCurrentDateTime(DateTime.parse(
+        order.order_date != null
+            ? order.order_date
+            : DateTime.now().toString()));
+    var orderDateF =
+        DateFormat('EEE, MMM d yyyy, hh:mm aaa').format(DateTime.parse(date));
     setState(() {
       selectedOrder = order;
+      orderDate = orderDateF;
       isWeborder = order.order_source == 1 ? true : false;
       taxJson = json.decode(selectedOrder.tax_json);
     });
@@ -414,18 +422,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: <Widget>[
                                       SizedBox(height: 10),
-                                      Text(
-                                          DateFormat(
-                                                  'EEE, MMM d yyyy, hh:mm aaa')
-                                              .format(CommunFun
-                                                  .getCurrentDateTime(DateTime
-                                                      .parse(selectedOrder
-                                                                  .order_date !=
-                                                              null
-                                                          ? selectedOrder
-                                                              .order_date
-                                                          : DateTime.now()
-                                                              .toString()))),
+                                      Text(orderDate,
                                           style: Styles.whiteMediumBold()),
                                       SizedBox(
                                         height: 10,
@@ -821,7 +818,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           Padding(
                             padding: EdgeInsets.symmetric(vertical: 5),
                             child: Text(
-                                selectedOrder.tax_amount.toStringAsFixed(2),
+                                selectedOrder != null
+                                    ? selectedOrder.tax_amount
+                                        .toStringAsFixed(2)
+                                    : 0.00,
                                 style: Styles.darkGray()),
                           )
                         ]),
@@ -914,8 +914,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
           var index = orderItemList.indexOf(product);
           var item = orderItemList[index];
           print(item.product_detail);
-          var producrdata = json.decode(item.product_detail);
-          print(producrdata);
+          // var producrdata = json.decode(item.product_detail);
+          // print(producrdata);
           return InkWell(
               onTap: () {},
               child: Container(
@@ -931,14 +931,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         decoration: new BoxDecoration(
                           color: Colors.greenAccent,
                         ),
-                        child: producrdata["base64"] != ""
-                            ? CommonUtils.imageFromBase64String(
-                                producrdata["base64"])
-                            : new Image.asset(
-                                Strings.no_imageAsset,
-                                fit: BoxFit.cover,
-                                gaplessPlayback: true,
-                              ),
+                        child: //producrdata["base64"] != ""
+                            // ? CommonUtils.imageFromBase64String(
+                            //    producrdata["base64"])
+                            new Image.asset(
+                          Strings.no_imageAsset,
+                          fit: BoxFit.cover,
+                          gaplessPlayback: true,
+                        ),
                       ),
                     ),
                     SizedBox(width: 15),
@@ -951,9 +951,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
                                 Text(
-                                    producrdata["name"]
-                                        .toString()
-                                        .toUpperCase(),
+                                    //  producrdata["name"]
+                                    "test".toString().toUpperCase(),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 2,
                                     style: TextStyle(

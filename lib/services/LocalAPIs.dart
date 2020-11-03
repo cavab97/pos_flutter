@@ -200,6 +200,49 @@ class LocalAPI {
     return result;
   }
 
+  Future<int> mergeTableOrder(Table_order table_order) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from table_order where table_id =" +
+        table_order.merged_table_id.toString();
+    var res = await db.rawQuery(qry);
+    List<Table_order> list =
+        res.isNotEmpty ? res.map((c) => Table_order.fromJson(c)).toList() : [];
+    if (list.length > 0) {
+      if (list[0].save_order_id != null && list[0].save_order_id != 0) {
+        List<SaveOrder> cartIDs =
+            await localAPI.gettableCartID(list[0].save_order_id);
+        if (cartIDs.length > 0) {
+          var qry1 = "UPDATE mst_cart SET table_id = " +
+              table_order.table_id.toString() +
+              " where id = " +
+              cartIDs[0].id.toString();
+          var result1 = await db.rawQuery(qry1);
+          if (table_order.save_order_id == 0 && list[0].save_order_id != 0) {
+            list[0].table_id = table_order.table_id;
+            var qry1 = "UPDATE table_order SET table_id = " +
+                table_order.table_id.toString() +
+                " where table_id = " +
+                list[0].table_id.toString();
+            table_order.save_order_id = list[0].save_order_id;
+          } else {
+            await deleteTableOrder(list[0].table_id);
+          }
+        }
+      } else {
+        await deleteTableOrder(list[0].table_id);
+      }
+    }
+
+    await insertTableOrder(table_order);
+    await SyncAPICalls.logActivity(
+        "Tables",
+        list.length > 0 ? "Update table Order" : "Insert table Order",
+        "table_order",
+        table_order.table_id);
+
+    return 1;
+  }
+
   Future deleteTableOrder(tableID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     await db.delete("table_order", where: 'table_id = ?', whereArgs: [tableID]);
@@ -1482,9 +1525,8 @@ class LocalAPI {
   Future<List<ProductStoreInventory>> getProductStoreInventoryTable(
       branchid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry =
-        "SELECT * from product_store_inventory where server_id IS NULL AND  branch_id = " +
-            branchid.toString();
+    var qry = "SELECT * from product_store_inventory where  branch_id = " +
+        branchid.toString();
     var ordersList = await db.rawQuery(qry);
     List<ProductStoreInventory> list = ordersList.length > 0
         ? ordersList.map((c) => ProductStoreInventory.fromJson(c)).toList()
@@ -1501,7 +1543,7 @@ class LocalAPI {
       inventoryid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry =
-        "SELECT * from product_store_inventory_log where inventory_id = " +
+        "SELECT * from product_store_inventory_log where IFNULL(server_id,'')='' AND inventory_id = " +
             inventoryid.toString();
     var inList = await db.rawQuery(qry);
     List<ProductStoreInventoryLog> list = inList.length > 0

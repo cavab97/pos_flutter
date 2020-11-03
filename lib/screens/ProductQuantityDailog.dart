@@ -16,6 +16,7 @@ import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
+import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
@@ -630,7 +631,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var customer =
         customerData != null ? json.decode(customerData) : customerData;
     var customerid = customer != null ? customer["customer_id"] : 0;
-    var tableData = await json.decode(table); // table data
+    Table_order tableData = await CommunFun.getTableData(); // table data
     var loginData = await json.decode(loginUser);
     var qty = await countTotalQty();
     var disc = await countDiscount();
@@ -643,7 +644,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cart.branch_id = int.parse(branchid);
     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
     cart.discount = disc;
-    cart.table_id = tableData["table_id"];
+    cart.table_id = tableData.table_id;
     cart.discount_type = currentCart.discount_type;
     cart.total_qty = qty;
     cart.tax = double.parse(taxvalues.toStringAsFixed(2));
@@ -660,7 +661,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (!isEditing) {
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
-    orderData.numberofPax = tableData != null ? tableData["number_of_pax"] : 0;
+    orderData.numberofPax = tableData != null ? tableData.number_of_pax : 0;
     orderData.isTableOrder = tableData != null ? 1 : 0;
     if (!isEditing) {
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
@@ -668,7 +669,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
     ///insert
     var cartid = await localAPI.insertItemTocart(
-        currentCart.id, cart, productItem, orderData, tableData["table_id"]);
+        currentCart.id, cart, productItem, orderData, tableData.number_of_pax);
     ProductDetails cartItemproduct = new ProductDetails();
 
     if (!isSetMeal) {

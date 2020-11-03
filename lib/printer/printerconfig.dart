@@ -360,7 +360,7 @@ class PrintReceipt {
       var contain =
           orderAttr.where((element) => element.detail_id == item.app_id);
       List<OrderAttributes> attrList = [];
-     
+
       if (contain.isNotEmpty) {
         var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
         attrList.addAll((json.decode(jsonString) as List)
@@ -624,7 +624,7 @@ class PrintReceipt {
     if (paymentdata.name.toString().toLowerCase() == "cash") {
       ticket.drawer();
     }
-    //  return ticket;
+    return ticket;
   }
 
   String checkRoundData(String total) {

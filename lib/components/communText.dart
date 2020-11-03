@@ -601,14 +601,16 @@ class CommunFun {
     //converttoserver tiem
     var timeZone =
         await Preferences.getStringValuesSF(Constant.SERVER_TIME_ZONE);
+    print(timeZone);
     if (timeZone != null) {
       final detroitTime =
           new tz.TZDateTime.from(dateTime, tz.getLocation(timeZone));
       print('Local India Time: ' + dateTime.toString());
       print('Detroit Time: ' + detroitTime.toString());
-      DateTime serverDate = DateTime.parse(detroitTime.toString());
+     // DateTime serverDate = DateTime.parse(detroitTime.toString());
       String formattedDate =
-          DateFormat('yyyy-MM-dd HH:mm:ss').format(serverDate);
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(detroitTime);
+      print(formattedDate);
       return formattedDate;
     } else {
       String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
