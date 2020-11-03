@@ -61,7 +61,7 @@ class OrderAttributes {
     data["oa_id"] = this.oa_id;
     data["uuid"] = this.uuid;
     data["order_id"] = this.order_id;
-    data["detail_id"] = this.order_id;
+    data["detail_id"] = this.detail_id;
     data["terminal_id"] = this.terminal_id;
     data["app_id"] = this.app_id;
     data["product_id"] = this.product_id;

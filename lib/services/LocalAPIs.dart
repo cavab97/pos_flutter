@@ -462,10 +462,14 @@ class LocalAPI {
 
   Future<List<MSTCartdetails>> getCartItem(cartId) async {
     var qry = " SELECT mst_cart_detail.* , attributes.name as attrName from mst_cart_detail " +
-        " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id " +
-        " LEft join attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id " +
-        " where cart_id = " +
+        " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  mst_cart_sub_detail.attribute_id != " +
+        " '' " +
+        " LEft join attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != " +
+        " '' " +
+        " where cart_id =" +
         cartId.toString();
+    // var qry =
+    //     " SELECT * from mst_cart_detail where cart_id =  " + cartId.toString();
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<MSTCartdetails> list = res.isNotEmpty
         ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
