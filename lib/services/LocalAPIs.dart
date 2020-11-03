@@ -426,6 +426,7 @@ class LocalAPI {
     var cartdetailid;
     var newObj = cartdetails.toJson();
     newObj.remove("attrName");
+    newObj.remove("modiName");
     if (cartdetails.id != null) {
       cartdetailid = db.update("mst_cart_detail", newObj,
           where: 'id = ?', whereArgs: [cartdetails.id]);
@@ -464,7 +465,7 @@ class LocalAPI {
     var qry = " SELECT mst_cart_detail.* , attributes.name as attrName from mst_cart_detail " +
         " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  mst_cart_sub_detail.attribute_id != " +
         " '' " +
-        " LEft join attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != " +
+        " LEFT JOIN attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != " +
         " '' " +
         " where cart_id =" +
         cartId.toString();
@@ -930,6 +931,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var newObj = details.toJson();
     newObj.remove("attrName");
+    newObj.remove("modiName");
     var data = await db.update("mst_cart_detail", newObj,
         where: "id =?", whereArgs: [details.id]);
     await SyncAPICalls.logActivity(
@@ -1355,6 +1357,7 @@ class LocalAPI {
     var result;
     var newObj = details.toJson();
     newObj.remove("attrName");
+    newObj.remove("modiName");
     if (list.length > 0) {
       result = await db.update("mst_cart_detail", newObj,
           where: "id =?", whereArgs: [details.id]);
@@ -1756,6 +1759,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var newObj = focProduct.toJson();
     newObj.remove("attrName");
+    newObj.remove("modiName");
     if (isUpdate) {
       var data = await db.update("mst_cart_detail", newObj,
           where: "id =?", whereArgs: [focProduct.id]);

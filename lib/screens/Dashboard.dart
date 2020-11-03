@@ -1027,7 +1027,8 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.detail_by = userdata.id;
           orderDetail.issetMeal = cartItem.issetMeal;
           if (cartItem.issetMeal == 1) {
-            orderDetail.setmeal_product_detail = cartItem.setmeal_product_detail;
+            orderDetail.setmeal_product_detail =
+                cartItem.setmeal_product_detail;
           }
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
 
@@ -2568,7 +2569,13 @@ class _DashboradPageState extends State<DashboradPage>
                         margin: EdgeInsets.all(0),
                         padding: EdgeInsets.all(0),
                         width: MediaQuery.of(context).size.width / 5.5,
-                        child: Text(cart.productName.toUpperCase(),
+                        child: Text(
+                            cart.attrName != null
+                                ? cart.productName.toUpperCase() +
+                                    " (" +
+                                    cart.attrName +
+                                    ")"
+                                : cart.productName.toUpperCase(),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: Styles.greysmall()),

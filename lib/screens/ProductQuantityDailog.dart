@@ -622,7 +622,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   produtAddTocart() async {
     MST_Cart cart = new MST_Cart();
     SaveOrder orderData = new SaveOrder();
-    MSTSubCartdetails subCartData = new MSTSubCartdetails();
     var branchid = await CommunFun.getbranchId();
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
     var customerData =
@@ -721,6 +720,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
     if (selectedModifier.length > 0) {
       for (var i = 0; i < selectedModifier.length; i++) {
+        MSTSubCartdetails subCartData = new MSTSubCartdetails();
         var modifire = selectedModifier[i];
         subCartData.cartdetailsId = detailID;
         subCartData.localID = cart.localID;
@@ -732,6 +732,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     if (selectedAttr.length > 0) {
       for (var i = 0; i < selectedAttr.length; i++) {
+        MSTSubCartdetails subCartData = new MSTSubCartdetails();
         var attr = selectedAttr[i];
         subCartData.cartdetailsId = detailID;
         subCartData.localID = cart.localID;
@@ -747,7 +748,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         if (cartitem.isSendKichen == 1) {
           var items = [];
           items.add(cartitem);
-          //  senditemtoKitchen(items);
+             //senditemtoKitchen(items);
         }
       }
     }
