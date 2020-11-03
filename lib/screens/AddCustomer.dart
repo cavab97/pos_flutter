@@ -99,9 +99,21 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             ),
           ),
           Positioned(
-            left: 30,
-            top: 15,
-            child: GestureDetector(
+            left: 15,
+            top: 10,
+            child:RaisedButton(
+              padding: EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 0),
+              onPressed: () {
+                addCustomer();
+              },
+              child: Text(Strings.btn_Add_customer, style: Styles.whiteBoldsmall()
+              ),
+              color: Colors.deepOrange,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50.0),
+              ),
+            )
+            /*child: GestureDetector(
               onTap: () {
                 addCustomer();
               },
@@ -109,7 +121,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                 Strings.add.toUpperCase(),
                 style: Styles.whiteBoldsmall(),
               ),
-            ),
+            )*/,
           ),
           closeButton(context),
         ],

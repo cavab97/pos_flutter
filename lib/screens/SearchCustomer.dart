@@ -97,9 +97,20 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
             ),
           ),
           Positioned(
-            left: 18,
-            top: 18,
-            child: GestureDetector(
+              left: 15,
+              top: 10,
+              child: RaisedButton(
+                padding: EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
+                onPressed: () {
+                  addCustomer();
+                },
+                child: Text(Strings.add_new,
+                    style: Styles.whiteBoldsmall()),
+                color: Colors.deepOrange,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50.0),
+                ),
+              ) /*GestureDetector(
               onTap: () {
                 addCustomer();
               },
@@ -107,8 +118,8 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
                 Strings.add_new.toUpperCase(),
                 style: Styles.whiteSimpleSmall(),
               ),
-            ),
-          ),
+            ),*/
+              ),
           closeButton(context),
         ],
       ),
