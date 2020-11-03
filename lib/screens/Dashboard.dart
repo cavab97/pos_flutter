@@ -438,6 +438,7 @@ class _DashboradPageState extends State<DashboradPage>
                 grandTotal,
                 tax,
                 branchData,
+                currency,
                 customer != null ? customer.name : "Walk-in customer");
           } else {
             CommunFun.showToast(context, Strings.printer_not_available);
