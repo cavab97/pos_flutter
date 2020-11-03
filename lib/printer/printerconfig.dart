@@ -985,7 +985,6 @@ class PrintReceipt {
             bold: false,
           )),
     ]);
-    ticket.hr();
     if (taxJson.length > 0) {
       taxJson.forEach((element) {
         ticket.row([
@@ -1020,7 +1019,7 @@ class PrintReceipt {
           text: "Adjustment : ",
           width: 8,
           styles: PosStyles(
-              align: PosAlign.left, fontType: PosFontType.fontA, bold: false)),
+              align: PosAlign.right, fontType: PosFontType.fontA, bold: false)),
       PosColumn(
           text: calRounded(total, grandTotal).toStringAsFixed(2),
           width: 4,
