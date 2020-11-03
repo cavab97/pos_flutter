@@ -102,6 +102,7 @@ class _DashboradPageState extends State<DashboradPage>
   var currency = "RM";
   bool isScreenLoad = false;
   Timer timer;
+
   @override
   void initState() {
     super.initState();
@@ -621,6 +622,15 @@ class _DashboradPageState extends State<DashboradPage>
           return OpeningAmmountPage(
               ammountext: isopning,
               onEnter: (ammountext) {
+                if (printerreceiptList.length > 0) {
+                  printKOT.testReceiptPrint(
+                      printerreceiptList[0].printerIp.toString(),
+                      context,
+                      "",
+                      "OpenDrawer");
+                } else {
+                  CommunFun.showToast(context, Strings.printer_not_available);
+                }
                 sendOpenShft(ammountext);
               });
         });

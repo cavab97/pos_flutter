@@ -23,8 +23,8 @@ import 'package:image/image.dart';
 class PrintReceipt {
   PaperSize paper = PaperSize.mm80;
 
-  Future<Ticket> KOTReceipt(PaperSize paper, String tableName,
-      List<MSTCartdetails> cartList, String pax) async {
+  Future<Ticket> KOTReceipt(
+      String tableName, List<MSTCartdetails> cartList, String pax) async {
     final profile = await CapabilityProfile.load();
 
     final Ticket ticket = Ticket(paper, profile);
@@ -139,7 +139,7 @@ class PrintReceipt {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
     final PosPrintResult res = await printerManager
-        .printTicket(await KOTReceipt(paper, tableName, cartList, pax));
+        .printTicket(await KOTReceipt(tableName, cartList, pax));
 
     CommunFun.showToast(ctx, res.msg);
   }
@@ -353,20 +353,27 @@ class PrintReceipt {
 
     for (var i = 0; i < orderdetail.length; i++) {
       var item = orderdetail[i];
-      if (item.issetMeal == 1) {
+
+      /*if (item.issetMeal == 1) {
         var setmealproduct = json.decode(item.setmeal_product_detail);
         print(setmealproduct);
       }
+
       var contain =
           orderAttr.where((element) => element.detail_id == item.app_id);
       List<OrderAttributes> attrList = [];
-     
+
       if (contain.isNotEmpty) {
         var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
         attrList.addAll((json.decode(jsonString) as List)
             .map((i) => OrderAttributes.fromJson(i))
             .toList());
+       //  print("=====================");
+        //print(attrList.length);
+      } else {
+         print("********************");
       }
+
       var contain1 =
           orderAttr.where((element) => element.detail_id == item.app_id);
       List<OrderModifire> modiList = [];
@@ -375,7 +382,12 @@ class PrintReceipt {
         modiList.addAll((json.decode(jsonString) as List)
             .map((i) => OrderModifire.fromJson(i))
             .toList());
-      }
+       // print("22222222222222222222222");
+       // print(modiList.length);
+      } else {
+       // print("22222222222222222222222");
+      }*/
+
       var name = jsonDecode(item.product_detail);
       ticket.row([
         PosColumn(
@@ -413,7 +425,7 @@ class PrintReceipt {
       ]);
 
       ticket.setStyles(PosStyles(align: PosAlign.left));
-      for (var i = 0; i < attrList.length; i++) {
+    /*  for (var i = 0; i < attrList.length; i++) {
         ticket.row([
           PosColumn(
               text: attrList[i].name,
@@ -424,7 +436,7 @@ class PrintReceipt {
                 fontType: PosFontType.fontA,
               ))
         ]);
-      }
+      }*/
       if (name["name_2"] != null) {
         if (name["name_2"].isNotEmpty) {
           ticket.row([
@@ -560,7 +572,7 @@ class PrintReceipt {
           ))
     ]);
     ticket.hr(len: 15);
-    ticket.hr();
+   /* ticket.hr();
     ticket.row([
       PosColumn(
           text: "Cash Received ",
@@ -597,7 +609,7 @@ class PrintReceipt {
             bold: false,
           ))
     ]);
-    ticket.hr();
+    ticket.hr();*/
 
     ticket.setStyles(PosStyles(align: PosAlign.center));
     /* ticket.emptyLines(1);
@@ -624,7 +636,8 @@ class PrintReceipt {
     if (paymentdata.name.toString().toLowerCase() == "cash") {
       ticket.drawer();
     }
-    //  return ticket;
+
+    return ticket;
   }
 
   String checkRoundData(String total) {
@@ -702,14 +715,10 @@ class PrintReceipt {
         customerName));
 
     CommunFun.showToast(ctx, res.msg);
-
-/*final snackBar =
-        SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
-    Scaffold.of(ctx).showSnackBar(snackBar);*/
   }
 
 /*========================================================================
-  ===========================Print Draft print==================================
+  ===========================Print Draft print==============================
   ========================================================================*/
 
   Future<Ticket> DraftReceipt(
@@ -724,7 +733,6 @@ class PrintReceipt {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
-    // Print image
     ticket.setStyles(
         PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
 
@@ -1018,14 +1026,10 @@ class PrintReceipt {
             tax, branchData, custName));
 
     CommunFun.showToast(ctx, res.msg);
-
-/*final snackBar =
-        SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
-    Scaffold.of(ctx).showSnackBar(snackBar);*/
   }
 
 /*========================================================================
-  ===========================Print Order check list print=======================
+  ===========================Print Order check list print==================
   ========================================================================*/
 
   Future<Ticket> CheckListReceipt(List<MSTCartdetails> cartList,
@@ -1190,54 +1194,49 @@ class PrintReceipt {
         await CheckListReceipt(cartList, tableName, branchData, custName));
 
     CommunFun.showToast(ctx, res.msg);
-
-/*final snackBar =
-        SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
-    Scaffold.of(ctx).showSnackBar(snackBar);*/
   }
 
 /*========================================================================
   ===========================Test print=====================================
   ========================================================================*/
 
-  void testReceiptPrint(
-      String printerIp, BuildContext ctx, String printerName) async {
+  void testReceiptPrint(String printerIp, BuildContext ctx, String printerName,
+      String isFor) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager
-        .printTicket(await testPrintReceipt(paper, printerName, printerIp));
+        .printTicket(await testPrintReceipt(printerName, printerIp, isFor));
 
     CommunFun.showToast(ctx, res.msg);
-
-/* final snackBar = SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
-    Scaffold.of(ctx).showSnackBar(snackBar);*/
   }
 
   Future<Ticket> testPrintReceipt(
-      PaperSize paper, String printerName, String printerIp) async {
+      String printerName, String printerIp, String isFor) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
-    ticket.setStyles(
-        PosStyles(align: PosAlign.center, fontType: PosFontType.fontB));
-    ticket.text(printerName + " Tested",
-        styles: PosStyles(
-            align: PosAlign.center, bold: true, width: PosTextSize.size1));
+    if (isFor == "Testing") {
+      ticket.setStyles(
+          PosStyles(align: PosAlign.center, fontType: PosFontType.fontB));
+      ticket.text(printerName + " Tested",
+          styles: PosStyles(
+              align: PosAlign.center, bold: true, width: PosTextSize.size1));
 
-    ticket.text("Printer IP : " + printerIp,
-        styles: PosStyles(
-            align: PosAlign.center, bold: true, width: PosTextSize.size1));
+      ticket.text("Printer IP : " + printerIp,
+          styles: PosStyles(
+              align: PosAlign.center, bold: true, width: PosTextSize.size1));
 
-    final now = DateTime.now();
-    final formatter = DateFormat('MM/dd/yyyy H:m');
-    final String timestamp = formatter.format(now);
+      final now = DateTime.now();
+      final formatter = DateFormat('MM/dd/yyyy H:m');
+      final String timestamp = formatter.format(now);
 
-    ticket.text("Test Date time : " + timestamp,
-        styles: PosStyles(align: PosAlign.center, bold: true));
+      ticket.text("Test Date time : " + timestamp,
+          styles: PosStyles(align: PosAlign.center, bold: true));
 
-    ticket.feed(2);
-    ticket.cut();
+      ticket.feed(2);
+      ticket.cut();
+    }
     ticket.drawer();
     return ticket;
   }

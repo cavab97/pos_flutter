@@ -331,7 +331,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       onTap: () => testPrint.testReceiptPrint(
                           printerList[index].printerIp,
                           context,
-                          printerList[index].printerName),
+                          printerList[index].printerName,
+                          "Testing"),
                       child: Column(
                         children: <Widget>[
                           Container(
