@@ -103,7 +103,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
     if (widget.cartID != null) {
       getCartData();
-      // getcartItemsDetails();
+      getcartItemList();
     }
     var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
     setState(() {
@@ -270,7 +270,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 //                     }
 //                   }
 //                 }
-  getcartItemsDetails() async {
+  getcartItemList() async {
     List<MSTCartdetails> cartItemslist =
         await localAPI.getCurrentCartItems(widget.cartID);
     if (cartItemslist.length != 0) {
@@ -278,7 +278,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         cartItems = cartItemslist;
       });
     }
+  }
 
+  getcartItemsDetails() async {
     if (!isSetMeal) {
       var contain = cartItems
           .where((element) => element.productId == productItem.productId);
@@ -539,26 +541,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   countGrandtotal(subt, tax, dis) {
     double grandTotal = 0;
-    // if (cartItems.length > 0) {
-    //   for (var i = 0; i < cartItems.length; i++) {
-    //     var item = cartItems[i];
-    //     if (isSetMeal) {
-    //       if (item.productId == setmeal.setmealId) {
-    //         item.productQty = product_qty;
-    //       }
-    //     } else {
-    //       if (item.productId == productItem.productId) {
-    //         item.productPrice = price;
-    //       }
-    //     }
-    //     grandTotal += item.productPrice;
-    //   }
-    //   if (!isEditing) {
-    //     grandTotal += price;
-    //   }
-    // } else {
-    //   grandTotal += price;
-    // }
     grandTotal = ((subt - dis) + tax);
     return grandTotal;
   }
@@ -667,7 +649,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
     ///insert
     var cartid = await localAPI.insertItemTocart(
-        currentCart.id, cart, productItem, orderData, tableData.number_of_pax);
+        currentCart.id, cart, productItem, orderData, tableData.table_id);
     ProductDetails cartItemproduct = new ProductDetails();
 
     if (!isSetMeal) {
@@ -688,9 +670,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         .removeWhere((String key, dynamic value) => value == null);
     var data = cartItemproduct;
     MSTCartdetails cartdetails = new MSTCartdetails();
-    if (!isEditing && !isSetMeal) {
-      await getcartItemsDetails();
-    }
+    // if (!isEditing && !isSetMeal) {
+    //   await getcartItemsDetails();
+    // }
     if (isEditing) {
       cartdetails.id = cartitem.id;
     }
@@ -748,7 +730,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         if (cartitem.isSendKichen == 1) {
           var items = [];
           items.add(cartitem);
-             //senditemtoKitchen(items);
+          //senditemtoKitchen(items);
         }
       }
     }
