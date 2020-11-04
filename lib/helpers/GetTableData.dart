@@ -746,7 +746,8 @@ class TableData {
           if (count == 0) {
             await db.insert("orders", order.toJson());
           } else {
-            await db.update("orders", order.toJson());
+            await db.update("orders", order.toJson(),
+                where: "order_id =?", whereArgs: [order.order_id]);
           }
         }
       }
@@ -763,7 +764,8 @@ class TableData {
           if (count == 0) {
             await db.insert("order_detail", orderdeta.toJson());
           } else {
-            await db.update("order_detail", orderdeta.toJson());
+            await db.update("order_detail", orderdeta.toJson(),
+                where: "detail_id =?", whereArgs: [orderdeta.detailId]);
           }
         }
       }

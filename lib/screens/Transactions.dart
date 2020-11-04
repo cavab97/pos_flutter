@@ -399,88 +399,96 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       child: orderLists.length > 0
                           ? SingleChildScrollView(
                               physics: BouncingScrollPhysics(),
-                              child: Stack(children: <Widget>[
+                              child: Column(children: <Widget>[
                                 Container(
                                   padding: EdgeInsets.symmetric(horizontal: 50),
-                                  height: MediaQuery.of(context).size.height,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      SizedBox(height: 10),
-                                      Text(orderDate,
-                                          style: Styles.whiteMediumBold()),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Text(
-                                        selectedOrder.grand_total != null
-                                            ? selectedOrder.grand_total
-                                                .toStringAsFixed(2)
-                                            : "",
-                                        style: TextStyle(
-                                            fontSize:
-                                                SizeConfig.safeBlockVertical *
-                                                    4,
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                Theme.of(context).accentColor),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      selectedOrder != null &&
-                                              paymemtUser.username != null
-                                          ? Text(
-                                              selectedOrder.invoice_no +
-                                                  " - Processed by " +
-                                                  paymemtUser.username,
-                                              style: Styles.whiteBoldsmall(),
-                                            )
-                                          : SizedBox(),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Container(
-                                        height:
-                                            SizeConfig.safeBlockVertical * 8,
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        child: Center(
-                                          child: Text(
-                                            customer.firstName != null
-                                                ? customer.firstName
-                                                : "Walk-In Customer",
-                                            style: Styles.orangeSmall(),
-                                          ),
+                                  height:
+                                      MediaQuery.of(context).size.height / 2,
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: <Widget>[
+                                        SizedBox(height: 10),
+                                        Text(orderDate,
+                                            style: Styles.whiteMediumBold()),
+                                        SizedBox(
+                                          height: 10,
                                         ),
-                                        color:
-                                            Colors.grey[900].withOpacity(0.4),
-                                      ),
-                                      productList(),
-                                    ],
+                                        Text(
+                                          selectedOrder.grand_total != null
+                                              ? selectedOrder.grand_total
+                                                  .toStringAsFixed(2)
+                                              : "",
+                                          style: TextStyle(
+                                              fontSize:
+                                                  SizeConfig.safeBlockVertical *
+                                                      4,
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context)
+                                                  .accentColor),
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        selectedOrder != null &&
+                                                paymemtUser.username != null
+                                            ? Text(
+                                                selectedOrder.invoice_no +
+                                                    " - Processed by " +
+                                                    paymemtUser.username,
+                                                style: Styles.whiteBoldsmall(),
+                                              )
+                                            : SizedBox(),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Container(
+                                          height:
+                                              SizeConfig.safeBlockVertical * 8,
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          child: Center(
+                                            child: Text(
+                                              customer.firstName != null
+                                                  ? customer.firstName
+                                                  : "Walk-In Customer",
+                                              style: Styles.orangeSmall(),
+                                            ),
+                                          ),
+                                          color:
+                                              Colors.grey[900].withOpacity(0.4),
+                                        ),
+                                        productList(),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                Positioned(
-                                  bottom: 30,
-                                  left: 0,
-                                  right: 0,
-                                  child: Container(
-                                    color: StaticColor.backgroundColor,
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 50),
-                                    child: Column(children: <Widget>[
-                                      Divider(),
-                                      totalAmountValues(),
-                                      Divider(),
-                                      Column(
-                                          children: orderpayment.map((payment) {
-                                        return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Padding(
+                                // Positioned(
+                                //   bottom: 30,
+                                //   left: 0,
+                                //   right: 0,
+                                //   child:
+                                Container(
+                                  height:
+                                      MediaQuery.of(context).size.height / 2,
+                                  // color: StaticColor.backgroundColor,
+                                  padding: EdgeInsets.symmetric(horizontal: 50),
+                                  child: Column(children: <Widget>[
+                                    Divider(),
+                                    totalAmountValues(),
+                                    Divider(),
+                                    Column(
+                                        children: orderpayment.map((payment) {
+                                      return Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: <Widget>[
+                                          new Expanded(
+                                            flex: 7,
+                                            child: Padding(
                                               padding: EdgeInsets.only(
                                                 top: 0,
                                               ),
@@ -489,11 +497,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                                     ? paumentMethod.name
                                                         .toUpperCase()
                                                     : "",
+                                                textAlign: TextAlign.end,
                                                 style: Styles.darkGray(),
                                               ),
                                             ),
-                                            SizedBox(width: 70),
-                                            Padding(
+                                          ),
+                                          new Expanded(
+                                            flex: 3,
+                                            child: Padding(
                                                 padding: EdgeInsets.only(
                                                   top: 0,
                                                 ),
@@ -502,20 +513,22 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                                       ? payment.op_amount
                                                           .toStringAsFixed(2)
                                                       : "00:00",
+                                                  textAlign: TextAlign.end,
                                                   style: Styles.darkGray(),
                                                 )),
-                                          ],
-                                        );
-                                      }).toList()),
-                                      isRefunding
-                                          ? refundButtons(context)
-                                          : permissions.contains(
-                                                  Constant.DELETE_ORDER)
-                                              ? transationsButton()
-                                              : SizedBox()
-                                    ]),
-                                  ),
+                                          )
+                                        ],
+                                      );
+                                    }).toList()),
+                                    isRefunding
+                                        ? refundButtons(context)
+                                        : permissions
+                                                .contains(Constant.DELETE_ORDER)
+                                            ? transationsButton()
+                                            : SizedBox()
+                                  ]),
                                 ),
+                                // ),
                               ])
                               // : Text(
                               //     "No Transations Found",
@@ -699,33 +712,33 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   Widget totalAmountValues() {
-    return Table(defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-        // border: TableBorder(
-        //     horizontalInside: BorderSide(
-        //         width: 1, color: Colors.grey, style: BorderStyle.solid)),
-        // columnWidths: {
-        //   0: FractionColumnWidth(.3),
-        //   1: FractionColumnWidth(.6),
-        // },
+    return Table(
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         children: [
           TableRow(children: [
             TableCell(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Text(
-                    Strings.sub_total.toUpperCase(),
-                    style: Styles.darkGray(),
+                  new Expanded(
+                    flex: 7,
+                    child: Text(
+                      Strings.sub_total.toUpperCase(),
+                      textAlign: TextAlign.end,
+                      style: Styles.darkGray(),
+                    ),
                   ),
-                  SizedBox(width: 70),
-                  Padding(
-                      padding: EdgeInsets.only(top: 0, bottom: 5),
-                      child: Text(
-                        selectedOrder.sub_total != null
-                            ? selectedOrder.sub_total.toStringAsFixed(2)
-                            : "00:00",
-                        style: Styles.darkGray(),
-                      )),
+                  new Expanded(
+                      flex: 3,
+                      child: Padding(
+                          padding: EdgeInsets.only(top: 0, bottom: 5),
+                          child: Text(
+                            selectedOrder.sub_total != null
+                                ? selectedOrder.sub_total.toStringAsFixed(2)
+                                : "00:00",
+                            textAlign: TextAlign.end,
+                            style: Styles.darkGray(),
+                          ))),
                 ],
               ),
             ),
@@ -735,28 +748,34 @@ class _TransactionsPageState extends State<TransactionsPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Padding(
-                      padding: EdgeInsets.symmetric(vertical: 5),
-                      child: Text(
-                        Strings.discount.toUpperCase(),
-                        style: TextStyle(
-                            fontSize: SizeConfig.safeBlockVertical * 2.8,
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).accentColor),
-                      )),
-                  SizedBox(width: 70),
-                  Padding(
-                      padding: EdgeInsets.symmetric(vertical: 5),
-                      child: Text(
-                        selectedOrder.voucher_amount != null &&
-                                selectedOrder.voucher_amount.toString() != '0.0'
-                            ? selectedOrder.voucher_amount.toStringAsFixed(2)
-                            : "00.00",
-                        style: TextStyle(
-                            fontSize: SizeConfig.safeBlockVertical * 2.8,
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).accentColor),
-                      )),
+                  new Expanded(
+                    flex: 7,
+                    child: Text(
+                      Strings.discount.toUpperCase(),
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                          fontSize: SizeConfig.safeBlockVertical * 2.8,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).accentColor),
+                    ),
+                  ),
+                  new Expanded(
+                      flex: 3,
+                      child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 5),
+                          child: Text(
+                            selectedOrder.voucher_amount != null &&
+                                    selectedOrder.voucher_amount.toString() !=
+                                        '0.0'
+                                ? selectedOrder.voucher_amount
+                                    .toStringAsFixed(2)
+                                : "00.00",
+                            textAlign: TextAlign.end,
+                            style: TextStyle(
+                                fontSize: SizeConfig.safeBlockVertical * 2.8,
+                                fontWeight: FontWeight.w700,
+                                color: Theme.of(context).accentColor),
+                          ))),
                 ],
               ),
             ),
@@ -769,8 +788,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       return Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.symmetric(vertical: 5),
+                            new Expanded(
+                              flex: 7,
                               child: Text(
                                 Strings.tax.toUpperCase() +
                                     " " +
@@ -778,39 +797,47 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     "(" +
                                     taxitem["rate"] +
                                     "%)",
+                                textAlign: TextAlign.end,
                                 style: Styles.darkGray(),
                               ),
                             ),
-                            SizedBox(width: 70),
-                            Padding(
-                              padding: EdgeInsets.symmetric(vertical: 5),
-                              child: Text(
-                                  double.parse(taxitem["taxAmount"])
-                                      .toStringAsFixed(2),
-                                  style: Styles.darkGray()),
-                            )
+                            new Expanded(
+                                flex: 3,
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: 5,
+                                  ),
+                                  child: Text(
+                                      double.parse(taxitem["taxAmount"])
+                                          .toStringAsFixed(2),
+                                      textAlign: TextAlign.end,
+                                      style: Styles.darkGray()),
+                                ))
                           ]);
                     }).toList())
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5),
+                          new Expanded(
+                            flex: 7,
                             child: Text(
                               Strings.tax.toUpperCase(),
+                              textAlign: TextAlign.end,
                               style: Styles.darkGray(),
                             ),
                           ),
-                          SizedBox(width: 70),
-                          Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5),
-                            child: Text(
-                                selectedOrder != null
-                                    ? selectedOrder.tax_amount
-                                        .toStringAsFixed(2)
-                                    : 0.00,
-                                style: Styles.darkGray()),
-                          )
+                          new Expanded(
+                              flex: 3,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 5),
+                                child: Text(
+                                    selectedOrder != null
+                                        ? selectedOrder.tax_amount
+                                            .toStringAsFixed(2)
+                                        : 0.00,
+                                    textAlign: TextAlign.end,
+                                    style: Styles.darkGray()),
+                              ))
                         ]),
             ),
           ]),
@@ -819,24 +846,25 @@ class _TransactionsPageState extends State<TransactionsPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(
-                      top: 10,
-                    ),
+                  new Expanded(
+                    flex: 7,
                     child: Text(
                       Strings.grand_total,
+                      textAlign: TextAlign.end,
                       style: Styles.darkGray(),
                     ),
                   ),
-                  SizedBox(width: 70),
-                  Padding(
-                      padding: EdgeInsets.symmetric(vertical: 5),
-                      child: Text(
-                        selectedOrder.grand_total != null
-                            ? selectedOrder.grand_total.toStringAsFixed(2)
-                            : "00:00",
-                        style: Styles.darkGray(),
-                      )),
+                  new Expanded(
+                      flex: 3,
+                      child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 5),
+                          child: Text(
+                            selectedOrder.grand_total != null
+                                ? selectedOrder.grand_total.toStringAsFixed(2)
+                                : "00:00",
+                            textAlign: TextAlign.end,
+                            style: Styles.darkGray(),
+                          ))),
                 ],
               ),
             ),
@@ -893,105 +921,105 @@ class _TransactionsPageState extends State<TransactionsPage> {
     return Container(
       //color: Colors.white,
       padding: EdgeInsets.only(left: 20, right: 20, bottom: 0),
-      height: MediaQuery.of(context).size.height / 3,
-      child: SingleChildScrollView(
-        physics: BouncingScrollPhysics(),
-        child: Column(
-            children: orderItemList.map((product) {
-          var index = orderItemList.indexOf(product);
-          var item = orderItemList[index];
-          print(item.product_detail);
-          var producrdata = json.decode(item.product_detail);
-          // print(producrdata);
-          return InkWell(
-              onTap: () {},
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Hero(
-                      tag: product.product_id,
-                      child: Container(
-                        height: SizeConfig.safeBlockVertical * 8,
-                        width: SizeConfig.safeBlockVertical * 9,
-                        decoration: new BoxDecoration(
-                          color: Colors.greenAccent,
-                        ),
-                        child: producrdata["base64"] != ""
-                            ? CommonUtils.imageFromBase64String(
-                                producrdata["base64"])
-                            : new Image.asset(
-                                Strings.no_imageAsset,
-                                fit: BoxFit.cover,
-                                gaplessPlayback: true,
-                              ),
+      // height: MediaQuery.of(context).size.height / 2,
+      child: Column(
+          children: orderItemList.map((product) {
+        var index = orderItemList.indexOf(product);
+        var item = orderItemList[index];
+        print(item.product_detail);
+        var producrdata = json.decode(item.product_detail);
+        // print(producrdata);
+        return InkWell(
+            onTap: () {},
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+              child: Row(
+              //  mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Hero(
+                    tag: product.product_id,
+                    child: Container(
+                      height: SizeConfig.safeBlockVertical * 8,
+                      width: SizeConfig.safeBlockVertical * 9,
+                      decoration: new BoxDecoration(
+                        color: Colors.greenAccent,
                       ),
-                    ),
-                    SizedBox(width: 15),
-                    Flexible(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                    producrdata["name"]
-                                        .toString()
-                                        .toUpperCase(),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                    style: TextStyle(
-                                        fontSize:
-                                            SizeConfig.safeBlockVertical * 2.8,
-                                        color: Theme.of(context).primaryColor)),
-                              ],
+                      child: producrdata["base64"] != ""
+                          ? CommonUtils.imageFromBase64String(
+                              producrdata["base64"])
+                          : new Image.asset(
+                              Strings.no_imageAsset,
+                              fit: BoxFit.cover,
+                              gaplessPlayback: true,
                             ),
+                    ),
+                  ),
+                  SizedBox(width: 15),
+                  Flexible(
+                    child: Row(
+                     // crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Expanded(
+                          flex: 6,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(producrdata["name"].toString().toUpperCase(),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                  textAlign: TextAlign.start,
+                                  style: TextStyle(
+                                      fontSize:
+                                          SizeConfig.safeBlockVertical * 2.8,
+                                      color: Theme.of(context).primaryColor)),
+                            ],
                           ),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          Text(product.detail_qty.toString(),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(product.detail_qty.toString(),
                               style: TextStyle(
                                   fontSize: SizeConfig.safeBlockVertical * 2.8,
                                   color: Theme.of(context).primaryColor)),
-                          SizedBox(width: 90),
-                          Text(product.product_price.toStringAsFixed(2),
-                              style: TextStyle(
-                                  fontSize: SizeConfig.safeBlockVertical * 2.8,
-                                  color: Theme.of(context).primaryColor)),
-                          isRefunding
-                              ? IconButton(
-                                  icon: Icon(
-                                    Icons.remove_circle_outline,
-                                    color: Colors.red,
-                                    size: SizeConfig.safeBlockVertical * 5,
-                                  ),
-                                  onPressed: () {
-                                    CommonUtils.showAlertDialog(context, () {
-                                      Navigator.of(context).pop();
-                                    }, () {
-                                      Navigator.of(context).pop();
-                                      deleteItemFormList(product);
-                                    },
-                                        "Alert",
-                                        "Are you sure you want to delete this item?",
-                                        "Yes",
-                                        "No",
-                                        true);
-                                    //deleteItemFormList(product);
-                                  })
-                              : SizedBox(),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ));
-        }).toList()),
-      ),
+                        ),
+                        Expanded(
+                            flex: 2,
+                            child: Text(
+                                product.product_price.toStringAsFixed(2),
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                    fontSize:
+                                        SizeConfig.safeBlockVertical * 2.8,
+                                    color: Theme.of(context).primaryColor))),
+                        // isRefunding
+                        //     ? IconButton(
+                        //         icon: Icon(
+                        //           Icons.remove_circle_outline,
+                        //           color: Colors.red,
+                        //           size: SizeConfig.safeBlockVertical * 5,
+                        //         ),
+                        //         onPressed: () {
+                        //           CommonUtils.showAlertDialog(context, () {
+                        //             Navigator.of(context).pop();
+                        //           }, () {
+                        //             Navigator.of(context).pop();
+                        //             deleteItemFormList(product);
+                        //           },
+                        //               "Alert",
+                        //               "Are you sure you want to delete this item?",
+                        //               "Yes",
+                        //               "No",
+                        //               true);
+                        //           //deleteItemFormList(product);
+                        //         })
+                        //     : SizedBox(),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ));
+      }).toList()),
     );
   }
 

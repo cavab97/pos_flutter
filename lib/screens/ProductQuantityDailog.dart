@@ -27,14 +27,14 @@ class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
   ProductQuantityDailog(
       {Key key,
-      this.product,
+      this.selproduct,
       this.issetMeal,
       this.cartID,
       this.cartItem,
       this.onClose})
       : super(key: key);
   final bool issetMeal;
-  final product;
+  final selproduct;
   final int cartID;
   final cartItem;
   Function onClose;
@@ -49,7 +49,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   LocalAPI localAPI = LocalAPI();
   List<Attribute_Data> attributeList = [];
   ProductDetails productItem = new ProductDetails();
-  ProductDetails selectedProdut = new ProductDetails();
   SetMeal setmeal;
   MSTCartdetails cartitem;
   List<SetMealProduct> tempCart = new List<SetMealProduct>();
@@ -86,15 +85,15 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   setInitstate() async {
     if (isSetMeal) {
       setState(() {
-        setmeal = widget.product;
+        setmeal = widget.selproduct;
         price = setmeal.price;
         productnetprice = setmeal.price;
       });
       getMealProducts();
     } else {
       setState(() {
-        productItem = widget.product;
-        selectedProdut = productItem;
+        productItem = widget.selproduct;
+
         price = productItem.price;
         productnetprice = productItem.price;
       });
@@ -655,14 +654,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var cartid = await localAPI.insertItemTocart(
         currentCart.id, cart, productItem, orderData, tableData.table_id);
     ProductDetails cartItemproduct = new ProductDetails();
-
     if (!isSetMeal) {
-      cartItemproduct = selectedProdut;
-      cartItemproduct.qty = product_qty;
-      cartItemproduct.price = double.parse(price.toStringAsFixed(2));
+      cartItemproduct = productItem;
     } else {
       cartItemproduct.qty = product_qty;
-      cartItemproduct.price = double.parse(price.toStringAsFixed(2));
       cartItemproduct.status = setmeal.status;
       cartItemproduct.productId = setmeal.setmealId;
       cartItemproduct.base64 = setmeal.base64;

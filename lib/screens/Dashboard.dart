@@ -791,7 +791,8 @@ class _DashboradPageState extends State<DashboradPage>
     scaffoldKey.currentState.openDrawer();
   }
 
-  showQuantityDailog(selectedProduct, isSetMeal) async {
+  showQuantityDailog(product, isSetMeal) async {
+    var selectedProduct = product;
     if (!isSetMeal) {
       if (selectedProduct.isSetMeal != null) {
         isSetMeal = true;
@@ -814,7 +815,7 @@ class _DashboradPageState extends State<DashboradPage>
           barrierDismissible: false,
           builder: (BuildContext context) {
             return ProductQuantityDailog(
-                product: selectedProduct,
+                selproduct: selectedProduct,
                 issetMeal: isSetMeal,
                 cartID: currentCart,
                 onClose: () {
@@ -1406,7 +1407,7 @@ class _DashboradPageState extends State<DashboradPage>
         barrierDismissible: false,
         builder: (BuildContext context) {
           return ProductQuantityDailog(
-              product: prod,
+              selproduct: prod,
               issetMeal: cart.issetMeal == 1 ? true : false,
               cartID: currentCart,
               cartItem: cart,
@@ -2167,7 +2168,7 @@ class _DashboradPageState extends State<DashboradPage>
         shrinkWrap: true,
         physics: BouncingScrollPhysics(),
         children: mealsList.map((meal) {
-          var price = meal.price.toStringAsFixed(2);
+          var proprice = meal.price.toStringAsFixed(2);
           return InkWell(
             onTap: () {
               if (permissions.contains(Constant.EDIT_ORDER)) {
@@ -2233,8 +2234,8 @@ class _DashboradPageState extends State<DashboradPage>
                       child: Center(
                         child: Text(
                             currency != null
-                                ? currency + ' ' + price.toString()
-                                : price.toString(),
+                                ? currency + ' ' + proprice.toString()
+                                : proprice.toString(),
                             style: Styles.whiteSimpleSmall()),
                       ),
                     ),
@@ -2268,7 +2269,7 @@ class _DashboradPageState extends State<DashboradPage>
         crossAxisSpacing: 9.0,
         mainAxisSpacing: 9.0,
         children: productList.map((product) {
-          var price = product.price.toStringAsFixed(2);
+          final prodprice = product.price.toStringAsFixed(2);
           return InkWell(
             onTap: () {
               if (product.qty == null ||
@@ -2340,8 +2341,8 @@ class _DashboradPageState extends State<DashboradPage>
                       child: Center(
                         child: Text(
                             currency != null
-                                ? currency + ' ' + price.toString()
-                                : price.toString(),
+                                ? currency + ' ' + prodprice.toString()
+                                : prodprice.toString(),
                             style: Styles.whiteSimpleSmall()),
                       ),
                     ),

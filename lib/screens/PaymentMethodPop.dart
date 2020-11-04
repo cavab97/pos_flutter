@@ -449,8 +449,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       validator: (value) {
         if (value.isEmpty) {
           return 'Please enter last 4 digit of your card.';
-        }else  if(value.length < 4 ){
-        return 'Minimum 4 digits required.';
+        } else if (value.length < 4) {
+          return 'Minimum 4 digits required.';
         }
         return null;
       },

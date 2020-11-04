@@ -16,7 +16,7 @@ class OpeningAmmountPage extends StatefulWidget {
 }
 
 class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
-  String currentNumber = "00";
+  String currentNumber = "0";
 
   @override
   Widget build(BuildContext context) {
