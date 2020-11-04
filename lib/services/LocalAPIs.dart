@@ -211,35 +211,40 @@ class LocalAPI {
       if (list[0].save_order_id != 0) {
         List<SaveOrder> cartIDs =
             await localAPI.gettableCartID(list[0].save_order_id);
-        if (cartIDs.length > 0) {
-          if (table_order.save_order_id == 0 && list[0].save_order_id != 0) {
+        if (table_order.save_order_id == 0 && list[0].save_order_id != 0) {
+          if (cartIDs.length > 0) {
             var qry1 = "UPDATE mst_cart SET table_id = " +
                 table_order.table_id.toString() +
-                " where table_id = " +
-                list[0].table_id.toString();
+                " where id = " +
+                cartIDs[0].cartId.toString();
             var result1 = await db.rawQuery(qry1);
-
             list[0].table_id = table_order.table_id;
-
             var qry2 = "UPDATE table_order SET table_id = " +
                 table_order.table_id.toString() +
                 " where table_id = " +
                 list[0].table_id.toString();
-
             var res = await db.rawQuery(qry2);
-
             var qrysabve = "UPDATE save_order SET cart_id = " +
                 cartIDs[0].cartId.toString() +
                 " where id = " +
                 list[0].save_order_id.toString();
-
             var res1 = await db.rawQuery(qrysabve);
-
             table_order.save_order_id = list[0].save_order_id;
-          } else {
-            await deleteTableOrder(list[0].table_id);
-            await deleteSaveOrder(list[0].save_order_id);
           }
+        } else {
+          if (table_order.save_order_id != 0 && cartIDs.length > 0) {
+            List<SaveOrder> carts =
+                await localAPI.gettableCartID(table_order.save_order_id);
+            if (carts.length > 0) {
+              var detailqry = "UPDATE mst_cart_detail SET cart_id = " +
+                  carts[0].cartId.toString() +
+                  " where cart_id = " +
+                  cartIDs[0].cartId.toString();
+              var res1 = await db.rawQuery(detailqry);
+            }
+          }
+          await deleteTableOrder(list[0].table_id);
+          await deleteSaveOrder(list[0].save_order_id);
         }
       } else {
         await deleteTableOrder(list[0].table_id);
@@ -484,13 +489,6 @@ class LocalAPI {
     await SyncAPICalls.logActivity(
         "product", "get cart list", "mst_cart_detail", cartId);
 
-    var ett =
-        "Select * from mst_cart_detail where cart_id = " + cartId.toString();
-    var res1 = await DatabaseHelper.dbHelper.getDatabse().rawQuery(ett);
-    List<MSTCartdetails> list1 = res.isNotEmpty
-        ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
-        : [];
-    print(list1);
     return list;
   }
 

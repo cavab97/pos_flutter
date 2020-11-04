@@ -262,7 +262,7 @@ class SyncAPICalls {
         }
       } else {
         //CommunFun.showToast(context, "All orders upto dates.");
-       // Navigator.of(context).pop();
+        // Navigator.of(context).pop();
       }
       await SyncAPICalls.sendCancledOrderTable(context);
     } catch (e) {
@@ -478,7 +478,7 @@ class SyncAPICalls {
         }
       } else {
         //Navigator.of(context).pop();
-       // CommunFun.showToast(context, "all cancel tables up to dates.");
+        // CommunFun.showToast(context, "all cancel tables up to dates.");
       }
     } catch (e) {
       print(e);
@@ -525,7 +525,7 @@ class SyncAPICalls {
           saveInvToTable(context, res);
         }
       } else {
-      //  CommunFun.showToast(context, "all cancel tables up to dates.");
+        //  CommunFun.showToast(context, "all cancel tables up to dates.");
       }
     } catch (e) {
       print(e);
