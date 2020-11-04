@@ -1,6 +1,6 @@
 class Configrations {
-  static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
-  //static String base_URL = "https://mcnpos.com.my/api/v1/en/";
+  //static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
+  static String base_URL = "https://mcnpos.com.my/api/v1/en/";
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String config = "configs";
@@ -17,4 +17,6 @@ class Configrations {
   static String web_orders = "web-order-table-data";
   static String cancle_order = "create-cancel-order-data";
   static String update_inventory_table = "update-product-inventory-data";
+
+   static String country_state_city_datatable = "country-state-city-datatable";
 }

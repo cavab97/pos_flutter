@@ -5,6 +5,8 @@ import 'package:mcncashier/models/Attribute_data.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/CheckInout.dart';
+import 'package:mcncashier/models/Citys.dart';
+import 'package:mcncashier/models/Countrys.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
@@ -22,6 +24,7 @@ import 'package:mcncashier/models/Role.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
 import 'package:mcncashier/models/ShiftInvoice.dart';
+import 'package:mcncashier/models/States.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
@@ -1802,5 +1805,32 @@ class LocalAPI {
     var res =
         await db.delete("orders", where: "app_id =?", whereArgs: [orderid]);
     print(res);
+  }
+
+  Future<List<Countrys>> getCountrysList() async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var contryList = await db.query("country");
+    List<Countrys> list = contryList.isNotEmpty
+        ? contryList.map((c) => Countrys.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<States>> getStatesList() async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var stateList = await db.query("state");
+    List<States> list = stateList.isNotEmpty
+        ? stateList.map((c) => States.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<Citys>> getCitysList() async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var cityList = await db.query("city");
+    List<Citys> list = cityList.isNotEmpty
+        ? cityList.map((c) => Citys.fromJson(c)).toList()
+        : [];
+    return list;
   }
 }

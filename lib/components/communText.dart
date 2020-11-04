@@ -349,6 +349,19 @@ class CommunFun {
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
+
+    var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
+    if (countrys != null) {
+      var result = await databaseHelper.insertAddressData(countrys["data"]);
+      print(result);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "4");
+      } else {
+        print("Error when getting counry state city");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
     getAssetsData(context, isOpen);
   }
 
@@ -477,10 +490,27 @@ class CommunFun {
     var data4_2 =
         await SyncAPICalls.getDataServerBulk4_2(context); //api call 4_2
     if (data4_2 != null) {
-      databaseHelper.insertData4_2(data4_2["data"]);
+      var result = databaseHelper.insertData4_2(data4_2["data"]);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "4");
+      } else {
+        print("Error when getting bulk4_2");
+      }
     } else {
       // handle Exaption
       print("Error when getting data4_2");
+    }
+    var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
+    if (countrys != null) {
+      var result = await databaseHelper.insertAddressData(countrys["data"]);
+      print(result);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "4");
+      } else {
+        print("Error when getting counry state city");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
     }
   }
 
@@ -509,6 +539,18 @@ class CommunFun {
       // handle Exaption
       print("Error when getting data4_2");
     }
+    var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
+    if (countrys != null) {
+      var result = await databaseHelper.insertAddressData(countrys["data"]);
+      print(result);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "4");
+      } else {
+        print("Error when getting counry state city");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
   }
 
   static getDataTables4(context) async {
@@ -529,26 +571,21 @@ class CommunFun {
       // handle Exaption
       print("Error when getting data4_2");
     }
+    var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
+    if (countrys != null) {
+      var result = await databaseHelper.insertAddressData(countrys["data"]);
+      print(result);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "4");
+      } else {
+        print("Error when getting counry state city");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
   }
 
-  static syncSingleTable(context) async {
-    // For Single table data
-    var data = {'serverdatetime': "2020-09-01 12:30:25", 'table': "users"};
-    var isReturn;
-    await repo.syncTable(data).then((value) async {
-      if (value["status"] == Constant.STATUS200) {
-        CommunFun.showToast(context, value["message"]);
-        isReturn = true;
-      } else {
-        CommunFun.showToast(context, value["message"]);
-        isReturn = false;
-      }
-    }).catchError((e) {
-      CommunFun.showToast(context, e.message);
-      isReturn = false;
-    }).whenComplete(() {});
-    return isReturn;
-  }
+ 
 
   static checkDatabaseExit() async {
     var db = await DatabaseHelper.dbHelper.getDatabse();

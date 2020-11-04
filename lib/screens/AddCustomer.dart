@@ -3,8 +3,10 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
-
+import 'package:mcncashier/models/Citys.dart';
+import 'package:mcncashier/models/Countrys.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/States.dart';
 import 'package:mcncashier/screens/Dashboard.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -32,19 +34,113 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   String _selectedCountry = "India";
   List<String> countries = ['A', 'B', 'C', 'D'];
   final _formKey = GlobalKey<FormState>();
+  List<Countrys> countrys = [];
+  List<States> states = [];
+  List<Citys> citys = [];
+  List<States> filterstates = [];
+  List<Citys> filtercitys = [];
+  var selectedCountry;
+  var selectedCity;
+  var selectedState;
+  var selectedCountryError = "";
+  var selectedStateError = "";
+  var selectedCityError = "";
   @override
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
+    getaddresFileds();
+  }
+
+  getaddresFileds() {
+    getCountrysList();
+    getStatesList();
+    getCitysList();
+  }
+
+  getCountrysList() async {
+    List<Countrys> country = await localAPI.getCountrysList();
+    if (country.length > 0) {
+      setState(() {
+        countrys = country;
+      });
+    }
+  }
+
+  getStatesList() async {
+    List<States> state = await localAPI.getStatesList();
+    if (state.length > 0) {
+      setState(() {
+        states = state;
+        filterstates = state;
+      });
+    }
+  }
+
+  getCitysList() async {
+    List<Citys> city = await localAPI.getCitysList();
+    if (city.length > 0) {
+      setState(() {
+        citys = city;
+        filtercitys = city;
+      });
+    }
+  }
+
+  filterState() async {
+    if (selectedCountry != null) {
+      var list =
+          await states.where((x) => x.countryId == selectedCountry).toList();
+      print(list);
+      setState(() {
+        filterstates = list;
+      });
+    } else {
+      setState(() {
+        filterstates = states;
+      });
+    }
+  }
+
+  filterCity() {
+    if (selectedState != null) {
+      var list = citys.where((x) => x.stateId == selectedState).toList();
+      print(list);
+      setState(() {
+        filtercitys = list;
+      });
+    } else {
+      setState(() {
+        filtercitys = citys;
+      });
+    }
   }
 
   validateFields() {
     return true;
   }
 
+  __validateForm() {
+    bool _isValid = _formKey.currentState.validate();
+
+    if (selectedCountry == null) {
+      setState(() => selectedCountryError = "Please select country!");
+      _isValid = false;
+    }
+    if (selectedState == null) {
+      setState(() => selectedStateError = "Please select state!");
+      _isValid = false;
+    }
+    if (selectedCity == null) {
+      setState(() => selectedCityError = "Please select city!");
+      _isValid = false;
+    }
+
+    return _isValid;
+  }
+
   addCustomer() async {
-    var isvalid = validateFields();
-    if (_formKey.currentState.validate()) {
+    if (__validateForm()) {
       var terminalkey = await CommunFun.getTeminalKey();
       Customer customer = new Customer();
       customer.terminalId = int.parse(terminalkey);
@@ -57,11 +153,16 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
       customer.email = email_controller.text;
       customer.status = 1;
       customer.uuid = await CommunFun.getLocalID();
-      customer.cityId = 0;
-      customer.stateId = 0;
-      customer.countryId = 0;
+      customer.cityId = selectedCity != null ? selectedCity : 0;
+      customer.stateId = selectedState != null ? selectedState : 0;
+      customer.countryId = selectedCountry != null ? selectedCountry : 0;
       var result = await localAPI.addCustomer(customer);
       Navigator.of(context).pop();
+      setState(() {
+        selectedCityError = "";
+        selectedCountryError = "";
+        selectedStateError = "";
+      });
       showDialog(
           context: context,
           barrierDismissible: false,
@@ -100,28 +201,19 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
           ),
           Positioned(
             left: 15,
-            top: 10,
-            child:RaisedButton(
+            top: 0,
+            child: RaisedButton(
               padding: EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 0),
               onPressed: () {
                 addCustomer();
               },
-              child: Text(Strings.btn_Add_customer, style: Styles.whiteBoldsmall()
-              ),
+              child: Text(Strings.btn_Add_customer,
+                  style: Styles.whiteBoldsmall()),
               color: Colors.deepOrange,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50.0),
               ),
-            )
-            /*child: GestureDetector(
-              onTap: () {
-                addCustomer();
-              },
-              child: Text(
-                Strings.add.toUpperCase(),
-                style: Styles.whiteBoldsmall(),
-              ),
-            )*/,
+            ),
           ),
           closeButton(context),
         ],
@@ -160,107 +252,180 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
 
   Widget countryselect() {
     return new Padding(
-        padding: EdgeInsets.all(10),
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                Strings.countrys,
-                style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: SizeConfig.safeBlockVertical * 2.5),
+      padding: EdgeInsets.all(10),
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              Strings.countrys,
+              style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: SizeConfig.safeBlockVertical * 2.5),
+            ),
+            Container(
+              padding: EdgeInsets.all(5),
+              height: SizeConfig.safeBlockVertical * 9,
+              width: MediaQuery.of(context).size.width,
+              child: new DropdownButton(
+                value: selectedCountry,
+                isExpanded: true,
+                selectedItemBuilder: (BuildContext context) {
+                  return countrys.map((item) {
+                    return Text(
+                      item.name,
+                      style: Theme.of(context).textTheme.subtitle,
+                    );
+                  }).toList();
+                },
+                items: countrys.map((value) {
+                  return new DropdownMenuItem(
+                    value: value.countryId,
+                    child: new Text(
+                      value.name,
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: SizeConfig.safeBlockVertical * 3),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedCountry = value;
+                    selectedCityError = "";
+                    selectedCountryError = "";
+                    selectedStateError = "";
+                  });
+                },
               ),
-              Container(
-                  height: SizeConfig.safeBlockVertical * 9,
-                  width: MediaQuery.of(context).size.width,
-                  child: new DropdownButton<String>(
-                    isExpanded: true,
-                    items: <String>['India', 'Canada', 'UK', 'USA']
-                        .map((String value) {
-                      return new DropdownMenuItem<String>(
-                        value: value,
-                        child: new Text(
-                          value,
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: SizeConfig.safeBlockVertical * 3),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (_) {},
-                  ))
-            ]));
+            ),
+            selectedCountryError == ""
+                ? SizedBox.shrink()
+                : Text(
+                    selectedCountryError ?? "",
+                    style: TextStyle(color: Colors.red),
+                  ),
+          ]),
+    );
   }
 
   Widget cityselect() {
     return new Padding(
-        padding: EdgeInsets.all(10),
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                Strings.city,
-                style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: SizeConfig.safeBlockVertical * 2.5),
+      padding: EdgeInsets.all(10),
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              Strings.city,
+              style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: SizeConfig.safeBlockVertical * 2.5),
+            ),
+            Container(
+              padding: EdgeInsets.all(5),
+              height: SizeConfig.safeBlockVertical * 9,
+              width: MediaQuery.of(context).size.width,
+              child: new DropdownButton(
+                value: selectedCity,
+                isExpanded: true,
+                selectedItemBuilder: (BuildContext context) {
+                  return filtercitys.map((item) {
+                    return Text(
+                      item.name,
+                      style: Theme.of(context).textTheme.subtitle,
+                    );
+                  }).toList();
+                },
+                items: filtercitys.map((value) {
+                  return new DropdownMenuItem(
+                    value: value.cityId,
+                    child: new Text(
+                      value.name,
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: SizeConfig.safeBlockVertical * 3),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedCity = value;
+                    selectedCityError = "";
+                    selectedCountryError = "";
+                    selectedStateError = "";
+                  });
+                },
               ),
-              Container(
-                  height: SizeConfig.safeBlockVertical * 9,
-                  width: MediaQuery.of(context).size.width,
-                  child: new DropdownButton<String>(
-                    isExpanded: true,
-                    items: <String>['India', 'Canada', 'UK', 'USA']
-                        .map((String value) {
-                      return new DropdownMenuItem<String>(
-                        value: value,
-                        child: new Text(
-                          value,
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: SizeConfig.safeBlockVertical * 3),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (_) {},
-                  ))
-            ]));
+            ),
+            selectedCityError == ""
+                ? SizedBox.shrink()
+                : Text(
+                    selectedCityError ?? "",
+                    style: TextStyle(color: Colors.red),
+                  ),
+          ]),
+    );
   }
 
   Widget stateSelect() {
     return new Padding(
-        padding: EdgeInsets.all(10),
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                Strings.state,
-                style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: SizeConfig.safeBlockVertical * 2.5),
+      padding: EdgeInsets.all(10),
+      child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              Strings.state,
+              style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: SizeConfig.safeBlockVertical * 2.5),
+            ),
+            Container(
+              padding: EdgeInsets.all(5),
+              height: SizeConfig.safeBlockVertical * 9,
+              width: MediaQuery.of(context).size.width,
+              child: new DropdownButton(
+                value: selectedState,
+                isExpanded: true,
+                selectedItemBuilder: (BuildContext context) {
+                  return filterstates.map((item) {
+                    return Text(
+                      item.name,
+                      style: Theme.of(context).textTheme.subtitle,
+                    );
+                  }).toList();
+                },
+                items: filterstates.map((value) {
+                  return new DropdownMenuItem(
+                    value: value.stateId,
+                    child: new Text(
+                      value.name,
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: SizeConfig.safeBlockVertical * 3),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedState = value;
+                    selectedCityError = "";
+                    selectedCountryError = "";
+                    selectedStateError = "";
+                  });
+                  filterCity();
+                },
               ),
-              Container(
-                  height: SizeConfig.safeBlockVertical * 9,
-                  width: MediaQuery.of(context).size.width,
-                  child: new DropdownButton<String>(
-                    isExpanded: true,
-                    items: <String>['Gujarat', 'Mumbai', 'Rajastan', 'Maharast']
-                        .map((String value) {
-                      return new DropdownMenuItem<String>(
-                        value: value,
-                        child: new Text(
-                          value,
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: SizeConfig.safeBlockVertical * 3),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (_) {},
-                  ))
-            ]));
+            ),
+            selectedStateError == ""
+                ? SizedBox.shrink()
+                : Text(
+                    selectedStateError ?? "",
+                    style: TextStyle(color: Colors.red),
+                  ),
+          ]),
+    );
   }
 
   Widget inputfield(lable, type, isCompal, isPassword, Function _onchnage) {
@@ -353,19 +518,12 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     addressLine1_controller.text = e;
                   })),
                 ]),
-                // TableRow(children: [
-                //   TableCell(child: cityselect()),
-                //   TableCell(child: stateSelect()),
-                // ]),
-                // TableRow(children: [
-                //   TableCell(child: countryselect()),
-                //   TableCell(
-                //       child: inputfield(
-                //           Strings.postcode, TextInputType.number, false, false,
-                //           (e) {
-                //     postcode_controller.text = e;
-                //   })),
-                // ]),
+                TableRow(children: [
+                  TableCell(child: countryselect()),
+                  TableCell(child: stateSelect()),
+                ]),
+                TableRow(
+                    children: [TableCell(child: cityselect()), SizedBox()]),
               ],
             ),
           )),

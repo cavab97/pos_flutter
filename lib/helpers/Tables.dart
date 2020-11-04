@@ -856,6 +856,39 @@ class CreateTables {
         "terminalid INTEGERT" +
         ")");
 
+    // country
+    datatables = db.execute("CREATE TABLE country ( " +
+        "country_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "sortname TEXT," +
+        "name TEXT," +
+        "slug TEXT," +
+        "phoneCode INTEGER," +
+        "created_at TEXT," +
+        "updated_at TEXT," +
+        "deleted_at TEXT" +
+        ")");
+
+    datatables = db.execute("CREATE TABLE state ( " +
+        "state_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "name TEXT," +
+        "slug TEXT," +
+        "country_id INTEGER," +
+        "created_at TEXT," +
+        "updated_at TEXT," +
+        "deleted_at TEXT" +
+        ")");
+
+    // City
+    datatables = db.execute("CREATE TABLE city ( " +
+        "city_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "name TEXT," +
+        "slug TEXT," +
+        "state_id INTEGER," +
+        "created_at TEXT," +
+        "updated_at INTEGER," +
+        "deleted_at INTEGER" +
+        ")");
+
     return datatables;
   }
 }

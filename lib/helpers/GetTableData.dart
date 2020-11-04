@@ -6,6 +6,8 @@ import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Category_Attributes.dart';
+import 'package:mcncashier/models/Citys.dart';
+import 'package:mcncashier/models/Countrys.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Modifier.dart';
 import 'package:mcncashier/models/Payment.dart';
@@ -26,6 +28,7 @@ import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/SetMealBranch.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
 import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/States.dart';
 import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/Terminal.dart';
@@ -792,7 +795,75 @@ class TableData {
           if (count == 0) {
             await db.insert("shift", shift.toJson());
           } else {
-            await db.update("shift", shift.toJson());
+            await db.update("shift", shift.toJson(),
+                where: "shift_id = ?", whereArgs: [shift.shiftId]);
+          }
+        }
+      }
+      return 1;
+    } catch (e) {
+      print(e);
+      return 0;
+    }
+  }
+
+  Future<dynamic> insertAdressData(Database db, dynamic tablesData) async {
+    var countrys = tablesData["country"];
+    var states = tablesData["state"];
+    var citys = tablesData["city"];
+
+    try {
+      if (countrys.length != 0) {
+        for (var i = 0; i < countrys.length; i++) {
+          var country = countrys[i];
+          Countrys countr = Countrys.fromJson(country);
+          var data = {
+            'table': "country",
+            'key': "country_id",
+            'value': countr.countryId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            await db.insert("country", countr.toJson());
+          } else {
+            await db.update("country", countr.toJson(),
+                where: "country_id =?", whereArgs: [countr.countryId]);
+          }
+        }
+      }
+      if (states.length != 0) {
+        for (var i = 0; i < states.length; i++) {
+          var state = states[i];
+          States stateObj = States.fromJson(state);
+          var data = {
+            'table': "state",
+            'key': "state_id",
+            'value': stateObj.stateId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            await db.insert("state", stateObj.toJson());
+          } else {
+            await db.update("state", stateObj.toJson(),
+                where: "state_id =?", whereArgs: [stateObj.stateId]);
+          }
+        }
+      }
+      if (citys.length != 0) {
+        for (var i = 0; i < citys.length; i++) {
+          var city = citys[i];
+          Citys cityObj = Citys.fromJson(city);
+          var data = {
+            'table': "city",
+            'key': "city_id",
+            'value': cityObj.stateId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            await db.insert("city", cityObj.toJson());
+          } else {
+            await db.update("city", cityObj.toJson(),
+                where: "city_id =?", whereArgs: [cityObj.cityId]);
           }
         }
       }

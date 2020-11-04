@@ -98,6 +98,12 @@ class DatabaseHelper {
     return result;
   }
 
+  Future<dynamic> insertAddressData(tablesData) async {
+    Database db = await this.database;
+    var result = await tableDataHelper.insertAdressData(db, tablesData);
+    return result;
+  }
+
   Future<dynamic> accetsData(tablesData) async {
     Database db = await this.database;
     var result = await tableDataHelper.insertProductImage(db, tablesData);

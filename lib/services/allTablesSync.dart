@@ -120,6 +120,20 @@ class SyncAPICalls {
     return await APICalls.apiCall(apiurl, context, stringParams);
   }
 
+  static getDataServerBulkAddressData(context) async {
+    var apiurl = Configrations.country_state_city_datatable;
+    var branchid = await CommunFun.getbranchId();
+    var terminalId = await CommunFun.getTeminalKey();
+    var serverTime =
+        await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+    var stringParams = {
+      'datetime': serverTime != null ? serverTime : '',
+      'branchId': branchid,
+      'terminal_id': terminalId
+    };
+    return await APICalls.apiCall(apiurl, context, stringParams);
+  }
+
   static getAssets(context) async {
     var apiurl = Configrations.product_image;
     var terminalId = await CommunFun.getTeminalKey();
@@ -610,5 +624,9 @@ class SyncAPICalls {
         var result2 = await localAPI.saveSyncCancelTable(cancle_order);
       }
     }
+  }
+
+  static sendCustomerTable() async {
+    
   }
 }
