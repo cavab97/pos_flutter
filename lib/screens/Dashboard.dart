@@ -357,6 +357,11 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         builder: (BuildContext context) {
           return CloseShiftPage(onClose: () {
+            printKOT.testReceiptPrint(
+                printerreceiptList[0].printerIp.toString(),
+                context,
+                "",
+                "OpenDrawer");
             openOpningAmmountPop(Strings.title_closing_amount);
           });
         });
@@ -623,14 +628,16 @@ class _DashboradPageState extends State<DashboradPage>
           return OpeningAmmountPage(
               ammountext: isopning,
               onEnter: (ammountext) {
-                if (printerreceiptList.length > 0) {
-                  printKOT.testReceiptPrint(
-                      printerreceiptList[0].printerIp.toString(),
-                      context,
-                      "",
-                      "OpenDrawer");
-                } else {
-                  CommunFun.showToast(context, Strings.printer_not_available);
+                if (isopning == Strings.title_opening_amount) {
+                  if (printerreceiptList.length > 0) {
+                    printKOT.testReceiptPrint(
+                        printerreceiptList[0].printerIp.toString(),
+                        context,
+                        "",
+                        "OpenDrawer");
+                  } else {
+                    CommunFun.showToast(context, Strings.printer_not_available);
+                  }
                 }
                 sendOpenShft(ammountext);
               });
