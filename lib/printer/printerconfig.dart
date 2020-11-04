@@ -19,6 +19,7 @@ import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:image/image.dart';
+import 'package:mcncashier/models/SetMealProduct.dart';
 
 class PrintReceipt {
   PaperSize paper = PaperSize.mm80;
@@ -129,9 +130,31 @@ class PrintReceipt {
             ]);
           }
         }
+        /*For set meal product*/
+        if (item.issetMeal == 1) {
+          List<dynamic> setmealproduct =
+              json.decode(item.setmeal_product_detail);
+          List<SetMealProduct> setMealProducts = [];
+          if (setmealproduct[0] != null) {
+            setMealProducts = setmealproduct.isNotEmpty
+                ? setmealproduct.map((c) => SetMealProduct.fromJson(c)).toList()
+                : [];
+          }
 
+          setMealProducts.forEach((element) {
+            ticket.text(
+                " " +
+                    element.quantity.toStringAsFixed(0) +
+                    " x " +
+                    element.name.toString().trim(),
+                styles: PosStyles(
+                    align: PosAlign.left,
+                    fontType: PosFontType.fontB,
+                    bold: false));
+          });
+        }
         /*Print attributes without price*/
-        if (cartList[i].attrName!=null) {
+        if (cartList[i].attrName != null) {
           ticket.row([
             PosColumn(
                 text: "  " + cartList[i].attrName,
@@ -152,11 +175,8 @@ class PrintReceipt {
     return ticket;
   }
 
-  void checkKOTPrint(String printerIp,
-      String tableName,
-      BuildContext ctx,
-      List<MSTCartdetails> cartList,
-      String pax) async {
+  void checkKOTPrint(String printerIp, String tableName, BuildContext ctx,
+      List<MSTCartdetails> cartList, String pax) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
     final PosPrintResult res = await printerManager
@@ -322,10 +342,6 @@ class PrintReceipt {
     for (var i = 0; i < orderdetail.length; i++) {
       var item = orderdetail[i];
 
-      if (item.issetMeal == 1) {
-        var setmealproduct = json.decode(item.setmeal_product_detail);
-      }
-
       var name = jsonDecode(item.product_detail);
 
       String nameOfProduct =
@@ -355,6 +371,29 @@ class PrintReceipt {
                 ))
           ]);
         }
+      }
+
+      /*For set meal product*/
+      if (item.issetMeal == 1) {
+        List<dynamic> setmealproduct = json.decode(item.setmeal_product_detail);
+        List<SetMealProduct> setMealProducts = [];
+        if (setmealproduct[0] != null) {
+          setMealProducts = setmealproduct.isNotEmpty
+              ? setmealproduct.map((c) => SetMealProduct.fromJson(c)).toList()
+              : [];
+        }
+
+        setMealProducts.forEach((element) {
+          ticket.text(
+              " " +
+                  element.quantity.toStringAsFixed(0) +
+                  " x " +
+                  element.name.toString().trim(),
+              styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontB,
+                  bold: false));
+        });
       }
 
       var contain =
@@ -809,7 +848,6 @@ class PrintReceipt {
     ticket.hr();
 
     for (var i = 0; i < cartList.length; i++) {
-
       var total = cartList[i].productQty * cartList[i].productPrice;
 
       String nameOfProduct = printColumnWitSpace(
@@ -842,8 +880,30 @@ class PrintReceipt {
         }
       }
 
+      /*For set meal product*/
+      if (cartList[i].issetMeal == 1) {
+        List<dynamic> setmealproduct = json.decode(cartList[i].setmeal_product_detail);
+        List<SetMealProduct> setMealProducts = [];
+        if (setmealproduct[0] != null) {
+          setMealProducts = setmealproduct.isNotEmpty
+              ? setmealproduct.map((c) => SetMealProduct.fromJson(c)).toList()
+              : [];
+        }
+
+        setMealProducts.forEach((element) {
+          ticket.text(
+              " " +
+                  element.quantity.toStringAsFixed(0) +
+                  " x " +
+                  element.name.toString().trim(),
+              styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontB,
+                  bold: false));
+        });
+      }
       /*Print attributes without price*/
-      if (cartList[i].attrName!=null) {
+      if (cartList[i].attrName != null) {
         ticket.row([
           PosColumn(
               text: "  " + cartList[i].attrName,
@@ -1174,8 +1234,31 @@ class PrintReceipt {
           ]);
         }
       }
+      /*For set meal product*/
+      if (cartList[i].issetMeal == 1) {
+        List<dynamic> setmealproduct =
+        json.decode(cartList[i].setmeal_product_detail);
+        List<SetMealProduct> setMealProducts = [];
+        if (setmealproduct[0] != null) {
+          setMealProducts = setmealproduct.isNotEmpty
+              ? setmealproduct.map((c) => SetMealProduct.fromJson(c)).toList()
+              : [];
+        }
+
+        setMealProducts.forEach((element) {
+          ticket.text(
+              " " +
+                  element.quantity.toStringAsFixed(0) +
+                  " x " +
+                  element.name.toString().trim(),
+              styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontB,
+                  bold: false));
+        });
+      }
       /*Print attributes without price*/
-      if (cartList[i].attrName!=null) {
+      if (cartList[i].attrName != null) {
         ticket.row([
           PosColumn(
               text: "  " + cartList[i].attrName,
@@ -1290,6 +1373,4 @@ class PrintReceipt {
       return values + printSpace;
     }
   }
-
-
 }
