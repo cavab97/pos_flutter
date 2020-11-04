@@ -264,10 +264,16 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                   fontSize: SizeConfig.safeBlockVertical * 2.5),
             ),
             Container(
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(5)),
               padding: EdgeInsets.all(5),
               height: SizeConfig.safeBlockVertical * 9,
               width: MediaQuery.of(context).size.width,
               child: new DropdownButton(
+                underline: Container(
+                  color: Colors.transparent,
+                ),
                 value: selectedCountry,
                 isExpanded: true,
                 selectedItemBuilder: (BuildContext context) {
@@ -301,10 +307,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             ),
             selectedCountryError == ""
                 ? SizedBox.shrink()
-                : Text(
-                    selectedCountryError ?? "",
-                    style: TextStyle(color: Colors.red),
-                  ),
+                : Text(selectedCountryError ?? "",
+                    style: TextStyle(color: Colors.red[700], fontSize: 12)),
           ]),
     );
   }
@@ -324,9 +328,15 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             ),
             Container(
               padding: EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(5)),
               height: SizeConfig.safeBlockVertical * 9,
               width: MediaQuery.of(context).size.width,
               child: new DropdownButton(
+                underline: Container(
+                  color: Colors.transparent,
+                ),
                 value: selectedCity,
                 isExpanded: true,
                 selectedItemBuilder: (BuildContext context) {
@@ -360,10 +370,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             ),
             selectedCityError == ""
                 ? SizedBox.shrink()
-                : Text(
-                    selectedCityError ?? "",
-                    style: TextStyle(color: Colors.red),
-                  ),
+                : Text(selectedCityError ?? "",
+                    style: TextStyle(color: Colors.red[700], fontSize: 12)),
           ]),
     );
   }
@@ -382,10 +390,16 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                   fontSize: SizeConfig.safeBlockVertical * 2.5),
             ),
             Container(
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(5)),
               padding: EdgeInsets.all(5),
               height: SizeConfig.safeBlockVertical * 9,
               width: MediaQuery.of(context).size.width,
               child: new DropdownButton(
+                underline: Container(
+                  color: Colors.transparent,
+                ),
                 value: selectedState,
                 isExpanded: true,
                 selectedItemBuilder: (BuildContext context) {
@@ -422,7 +436,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                 ? SizedBox.shrink()
                 : Text(
                     selectedStateError ?? "",
-                    style: TextStyle(color: Colors.red),
+                    style: TextStyle(color: Colors.red[700], fontSize: 12),
                   ),
           ]),
     );

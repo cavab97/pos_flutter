@@ -406,8 +406,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     Container(
                                       padding:
                                           EdgeInsets.symmetric(horizontal: 50),
-                                      // height:
-                                      //     MediaQuery.of(context).size.height / 2,
+                                      height:
+                                          MediaQuery.of(context).size.height /
+                                              1.8,
                                       child: SingleChildScrollView(
                                         child: Column(
                                           crossAxisAlignment:
