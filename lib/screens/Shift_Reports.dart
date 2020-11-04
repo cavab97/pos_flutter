@@ -784,9 +784,12 @@ class AddOtherReasonState extends State<AddOtherReason> {
     return AlertDialog(
       titlePadding: EdgeInsets.all(0),
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(15.0))),
+        borderRadius: BorderRadius.all(
+          Radius.circular(15.0),
+        ),
+      ),
       content: Container(
-        height: MediaQuery.of(context).size.height / 4,
+        height: MediaQuery.of(context).size.height / 3.6,
         width: MediaQuery.of(context).size.width / 3.4,
         child: SingleChildScrollView(
             physics: BouncingScrollPhysics(),
@@ -801,7 +804,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
                 SizedBox(height: 10),
                 TextField(
                   controller: reasonController,
-                  maxLines: 4,
+                  maxLines: 3,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),

@@ -607,7 +607,7 @@ class CommunFun {
           new tz.TZDateTime.from(dateTime, tz.getLocation(timeZone));
       print('Local India Time: ' + dateTime.toString());
       print('Detroit Time: ' + detroitTime.toString());
-     // DateTime serverDate = DateTime.parse(detroitTime.toString());
+      // DateTime serverDate = DateTime.parse(detroitTime.toString());
       String formattedDate =
           DateFormat('yyyy-MM-dd HH:mm:ss').format(detroitTime);
       print(formattedDate);
@@ -966,11 +966,7 @@ class CommunFun {
         allcartData.id, cart, productItem, orderData, table.table_id);
     ProductDetails cartItemproduct = new ProductDetails();
     cartItemproduct = productItem;
-    cartItemproduct.qty = isEditing ? sameitem.productQty + 1.0 : 1.0;
-    cartItemproduct.price = isEditing
-        ? double.parse(productItem.price.toStringAsFixed(2)) +
-            sameitem.productPrice
-        : double.parse(productItem.price.toStringAsFixed(2));
+
     cartItemproduct
         .toJson()
         .removeWhere((String key, dynamic value) => value == null);
@@ -983,7 +979,7 @@ class CommunFun {
     cartdetails.productId = productItem.productId;
     cartdetails.productName = productItem.name;
     cartdetails.productSecondName = productItem.name_2;
-    cartdetails.productPrice = cartdetails.productPrice = isEditing
+    cartdetails.productPrice = isEditing
         ? double.parse(productItem.price.toStringAsFixed(2)) +
             sameitem.productPrice
         : double.parse(productItem.price.toStringAsFixed(2));

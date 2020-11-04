@@ -452,6 +452,8 @@ class LocalAPI {
 
   Future<int> addsubCartData(MSTSubCartdetails data) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
+    var result = await db.delete("mst_cart_sub_detail",
+        where: "cart_details_id =?", whereArgs: [data.cartdetailsId]);
     var result1 = await db.insert("mst_cart_sub_detail", data.toJson());
     await SyncAPICalls.logActivity(
         "product", "insert sub cart details", "mst_cart_sub_detail", result1);
@@ -488,7 +490,13 @@ class LocalAPI {
         : [];
     await SyncAPICalls.logActivity(
         "product", "get cart list", "mst_cart_detail", cartId);
-
+    // var qry1 =
+    //     " SELECT * from mst_cart_detail where cart_id =  " + cartId.toString();
+    // var res1 = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    // List<MSTCartdetails> list1 = res.isNotEmpty
+    //     ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
+    //     : [];
+    // print(list1);
     return list;
   }
 
