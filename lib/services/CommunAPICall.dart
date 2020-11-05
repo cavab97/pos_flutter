@@ -30,7 +30,7 @@ class APICalls {
     } catch (e) {
       print(e);
       CommunFun.showToast(context, e.message.toString());
-      return null;
+      //return null;
     }
   }
 }

@@ -541,6 +541,7 @@ class TableData {
             'value': producatstore.inventoryId,
           };
           var count = await ifExists(db, data);
+          producatstore.serverid = producatstore.inventoryId;
           if (count == 0) {
             var result = await db.insert(
                 "product_store_inventory", producatstore.toJson());
@@ -563,6 +564,7 @@ class TableData {
             'value': producatstorelog.il_id,
           };
           var count = await ifExists(db, data);
+          producatstorelog.serverid = producatstorelog.il_id;
           if (count == 0) {
             var result = await db.insert(
                 "product_store_inventory_log", producatstorelog.toJson());
@@ -643,6 +645,7 @@ class TableData {
             'value': customer.customerId,
           };
           var count = await ifExists(db, data);
+          customer.serverId = customer.customerId;
           if (count == 0) {
             var result = await db.insert("customer", customer.toJson());
           } else {
@@ -746,6 +749,7 @@ class TableData {
             'value': order.order_id,
           };
           var count = await ifExists(db, data);
+          order.server_id = order.order_id;
           if (count == 0) {
             await db.insert("orders", order.toJson());
           } else {

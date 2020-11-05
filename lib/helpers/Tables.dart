@@ -565,6 +565,7 @@ class CreateTables {
         "zipcode	TEXT," +
         "api_token	TEXT," +
         "profile	TEXT," +
+        "server_id INTEGER," +
         "last_login	TEXT," +
         "status	INTEGER," +
         "created_at	TEXT," +

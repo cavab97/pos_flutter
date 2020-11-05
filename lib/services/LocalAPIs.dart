@@ -152,6 +152,21 @@ class LocalAPI {
     return list;
   }
 
+  Future<int> saveCustomersFromServer(Customer customer) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM customer where customer_id =" +
+        customer.customerId.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var result;
+    if (checkisExit.length > 0) {
+      result = await db.update("customer", customer.toJson(),
+          where: "customer_id =?", whereArgs: [customer.customerId]);
+    } else {
+      result = await db.insert("customer", customer.toJson());
+    }
+    return result;
+  }
+
   Future<int> addCustomer(Customer customer) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var result = await db.insert("customer", customer.toJson());
@@ -1832,5 +1847,32 @@ class LocalAPI {
         ? cityList.map((c) => Citys.fromJson(c)).toList()
         : [];
     return list;
+  }
+
+  Future<List<Customer>> getCustomersforSend(teminalID) async {
+    var query =
+        "SELECT * from customer WHERE IFNULL(server_id,'')='' AND terminal_id = " +
+            teminalID.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+    List<Customer> list =
+        res.isNotEmpty ? res.map((c) => Customer.fromJson(c)).toList() : [];
+    await SyncAPICalls.logActivity(
+        "Customer", "geting customer list for sync", "customer", teminalID);
+    return list;
+  }
+
+  Future<int> getLastCustomerid(terminalid) async {
+    var qry = "SELECT customer.app_id from customer where terminal_id =" +
+        terminalid +
+        "  ORDER BY app_id DESC LIMIT 1";
+    var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<Customer> list = checkisExit.length > 0
+        ? checkisExit.map((c) => Customer.fromJson(c)).toList()
+        : [];
+    if (list.length > 0) {
+      return list[0].appId;
+    } else {
+      return 0;
+    }
   }
 }

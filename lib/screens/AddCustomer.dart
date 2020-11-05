@@ -7,7 +7,7 @@ import 'package:mcncashier/models/Citys.dart';
 import 'package:mcncashier/models/Countrys.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/States.dart';
-import 'package:mcncashier/screens/Dashboard.dart';
+import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
@@ -143,6 +143,13 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
     if (__validateForm()) {
       var terminalkey = await CommunFun.getTeminalKey();
       Customer customer = new Customer();
+      User userdata = await CommunFun.getuserDetails();
+      int appid = await localAPI.getLastCustomerid(terminalkey);
+      if (appid != 0) {
+        customer.appId = appid + 1;
+      } else {
+        customer.appId = int.parse(terminalkey);
+      }
       customer.terminalId = int.parse(terminalkey);
       customer.name = firstname_controller.text;
       customer.username = lastname_controller.text;
@@ -156,6 +163,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
       customer.cityId = selectedCity != null ? selectedCity : 0;
       customer.stateId = selectedState != null ? selectedState : 0;
       customer.countryId = selectedCountry != null ? selectedCountry : 0;
+      customer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+      customer.createdBy = userdata.id;
       var result = await localAPI.addCustomer(customer);
       Navigator.of(context).pop();
       setState(() {

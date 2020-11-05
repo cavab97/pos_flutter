@@ -9,6 +9,7 @@ class Customer {
   String username;
   String email;
   int role;
+  int serverId;
   int phonecode;
   String mobile;
   String password;
@@ -43,6 +44,7 @@ class Customer {
       this.mobile,
       this.password,
       this.address,
+      this.serverId,
       this.countryId,
       this.stateId,
       this.cityId,
@@ -76,6 +78,7 @@ class Customer {
     countryId = json['country_id'] != "" ? json['country_id'] : 0;
     stateId = json['state_id'] != "" ? json['state_id'] : 0;
     cityId = json['city_id'] != "" ? json['city_id'] : 0;
+    serverId = json["server_id"];
     zipcode = json['zipcode'];
     apiToken = json['api_token'];
     profile = json['profile'];
@@ -108,6 +111,7 @@ class Customer {
     data['country_id'] = this.countryId;
     data['state_id'] = this.stateId;
     data['city_id'] = this.cityId;
+    data["server_id"] = this.serverId;
     data['zipcode'] = this.zipcode;
     data['api_token'] = this.apiToken;
     data['profile'] = this.profile;

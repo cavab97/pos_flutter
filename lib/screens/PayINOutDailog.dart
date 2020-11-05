@@ -20,6 +20,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
   double ammount = 0.00;
   var selectedreason;
   List<String> reasonList = [
+    "Add Change",
     "Deposit",
     "Other",
   ];

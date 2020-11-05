@@ -273,7 +273,7 @@ class _DashboradPageState extends State<DashboradPage>
     await Preferences.removeSinglePref(Constant.OFFSET);
     await CommunFun.opneSyncPop(context);
     await CommunFun.syncOrdersANDStore(context, false);
-    await CommunFun.syncAfterSuccess(context, false);
+    // await CommunFun.syncAfterSuccess(context, false);
     //  Navigator.of(context).pop();
     await checkisInit();
   }

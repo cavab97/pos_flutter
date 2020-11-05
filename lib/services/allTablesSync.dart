@@ -5,6 +5,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/config.dart';
+import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
@@ -626,7 +627,40 @@ class SyncAPICalls {
     }
   }
 
-  static sendCustomerTable() async {
-    
+  static sendCustomerTable(context) async {
+    try {
+      var apiurl = Configrations.create_customer_data;
+      var terminalId = await CommunFun.getTeminalKey();
+      var branchid = await CommunFun.getbranchId();
+      LocalAPI localAPI = LocalAPI();
+      List<Customer> custstoreData =
+          await localAPI.getCustomersforSend(terminalId);
+      if (custstoreData.length > 0) {
+        var stringParams = {
+          'branch_id': branchid,
+          'terminal_id': terminalId,
+          'customer': json.encode(custstoreData)
+        };
+        var res = await APICalls.apiCall(apiurl, context, stringParams);
+        if (res["status"] == Constant.STATUS200) {
+          saveCustomerToTable(context, res);
+        }
+      }
+    } catch (e) {
+      print(e);
+      CommunFun.showToast(context, e.message);
+    }
+  }
+
+  static saveCustomerToTable(context, data) {
+    LocalAPI localAPI = LocalAPI();
+    var customers = data["data"]["customer"];
+    if (customers.length > 0) {
+      for (var i = 0; i < customers.length; i++) {
+        Customer customer = new Customer();
+        customer = Customer.fromJson(customers[i]);
+        localAPI.saveCustomersFromServer(customer);
+      }
+    }
   }
 }
