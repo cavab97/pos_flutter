@@ -1020,10 +1020,7 @@ class CommunFun {
             sameitem.productPrice
         : double.parse(productItem.price.toStringAsFixed(2));
     cartdetails.productQty = isEditing ? sameitem.productQty + 1.0 : 1.0;
-    cartdetails.productNetPrice = isEditing
-        ? sameitem.productNetPrice +
-            double.parse(productItem.price.toStringAsFixed(2))
-        : double.parse(productItem.price.toStringAsFixed(2));
+    cartdetails.productNetPrice =  productItem.price;
     cartdetails.createdBy = loginUser.id;
     cartdetails.cart_detail = jsonEncode(data);
     cartdetails.discount = isEditing ? sameitem.discount : 0;
@@ -1037,25 +1034,25 @@ class CommunFun {
     callback();
   }
 
-  // sendTokitched(itemList) async {
-  //   String ids = "";
-  //   var list = [];
-  //   for (var i = 0; i < itemList.length; i++) {
-  //     if (itemList[i].isSendKichen == null || itemList[i].isSendKichen == 0) {
-  //       if (ids == "") {
-  //         ids = itemList[i].id.toString();
-  //       } else {
-  //         ids = ids + "," + itemList[i].id.toString();
-  //       }
-  //       list.add(itemList[i]);
-  //     }
-  //     if (i == itemList.length - 1) {
-  //       if (list.length > 0) {
-  //         dynamic send = await localAPI.sendToKitched(ids);
-  //         openPrinterPop(list);
-  //       }
-  //     }
-  //   }
-  // }
+// sendTokitched(itemList) async {
+//   String ids = "";
+//   var list = [];
+//   for (var i = 0; i < itemList.length; i++) {
+//     if (itemList[i].isSendKichen == null || itemList[i].isSendKichen == 0) {
+//       if (ids == "") {
+//         ids = itemList[i].id.toString();
+//       } else {
+//         ids = ids + "," + itemList[i].id.toString();
+//       }
+//       list.add(itemList[i]);
+//     }
+//     if (i == itemList.length - 1) {
+//       if (list.length > 0) {
+//         dynamic send = await localAPI.sendToKitched(ids);
+//         openPrinterPop(list);
+//       }
+//     }
+//   }
+// }
 
 }
