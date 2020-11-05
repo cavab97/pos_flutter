@@ -467,10 +467,15 @@ class LocalAPI {
     return cartdetailid;
   }
 
-  Future<int> addsubCartData(MSTSubCartdetails data) async {
+  Future<int> deletesubcartDetail(cartdetailsId) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var result = await db.delete("mst_cart_sub_detail",
-        where: "cart_details_id =?", whereArgs: [data.cartdetailsId]);
+        where: "cart_details_id =?", whereArgs: [cartdetailsId]);
+    return result;
+  }
+
+  Future<int> addsubCartData(MSTSubCartdetails data) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var result1 = await db.insert("mst_cart_sub_detail", data.toJson());
     await SyncAPICalls.logActivity(
         "product", "insert sub cart details", "mst_cart_sub_detail", result1);
@@ -492,13 +497,13 @@ class LocalAPI {
   }
 
   Future<List<MSTCartdetails>> getCartItem(cartId) async {
-    var qry = " SELECT mst_cart_detail.* , attributes.name as attrName from mst_cart_detail " +
+    var qry = " SELECT mst_cart_detail.* ,group_concat(attributes.name) as attrName from mst_cart_detail " +
         " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  mst_cart_sub_detail.attribute_id != " +
         " '' " +
         " LEFT JOIN attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != " +
         " '' " +
         " where cart_id =" +
-        cartId.toString();
+        cartId.toString() +" group by mst_cart_detail.id";
     // var qry =
     //     " SELECT * from mst_cart_detail where cart_id =  " + cartId.toString();
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
