@@ -93,7 +93,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     } else {
       setState(() {
         productItem = widget.selproduct;
-
         price = productItem.price;
         productnetprice = productItem.price;
       });
@@ -871,7 +870,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             SizedBox(height: 5),
             isSetMeal
                 ? SizedBox()
-                : modifireList.length != 0 ? modifireItmeList() : SizedBox(),
+                : modifireList.length != 0
+                    ? modifireItmeList()
+                    : SizedBox(),
             SizedBox(height: 10),
             _extraNotesTitle(),
             SizedBox(height: 5),

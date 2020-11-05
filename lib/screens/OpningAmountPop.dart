@@ -67,7 +67,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
     // add  value in prev value
     if (currentNumber.length <= 8) {
       var currentnumber = currentNumber;
-      if (currentnumber == "00") {
+      if (currentnumber == "0") {
         currentnumber = "";
       }
       currentnumber += val;
@@ -109,11 +109,11 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
     return SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         child: Column(
-      children: [
-        getAmount(), // dynamic enter ammount
-        getNumbers(context), // numbers buttons
-      ],
-    ));
+          children: [
+            getAmount(), // dynamic enter ammount
+            getNumbers(context), // numbers buttons
+          ],
+        ));
   }
 
   Widget _button(String number, Function() f) {

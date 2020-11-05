@@ -735,7 +735,8 @@ class TableData {
           if (count == 0) {
             var result = await db.insert("voucher", vouchers.toJson());
           } else {
-            var result = await db.update("voucher", vouchers.toJson());
+            var result = await db.update("voucher", vouchers.toJson(),
+                where: "voucher_id =?", whereArgs: [vouchers.voucherId]);
           }
         }
       }

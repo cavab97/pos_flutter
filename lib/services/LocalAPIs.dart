@@ -873,18 +873,19 @@ class LocalAPI {
         "mst_cart_sub_detail",
         cartItem.id);
 
-    if (isLast) {
-      await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartID]);
-      await SyncAPICalls.logActivity(
-          "cart", "delete cart all item", "mst_Cart", cartItem.id);
-      await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartID]);
-      await SyncAPICalls.logActivity("cart",
-          "delete cart all item from save_order", "save_order", cartItem.id);
-    } else {
-      //Update cart
-      await db.update("mst_cart", mainCart.toJson(),
-          where: 'id = ?', whereArgs: [cartID]);
-    }
+    // if (isLast) {
+    //   await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartID]);
+    //   await SyncAPICalls.logActivity(
+    //       "cart", "delete cart all item", "mst_Cart", cartItem.id);
+    //   await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartID]);
+
+    //   await SyncAPICalls.logActivity("cart",
+    //       "delete cart all item from save_order", "save_order", cartItem.id);
+    // } else {
+    //Update cart
+    await db.update("mst_cart", mainCart.toJson(),
+        where: 'id = ?', whereArgs: [cartID]);
+    // }
     return cartID;
   }
 

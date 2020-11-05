@@ -1289,12 +1289,21 @@ class _DashboradPageState extends State<DashboradPage>
       var disc = allcartData.discount != null
           ? allcartData.discount - cartitemdata.discount
           : 0;
-      cart = allcartData;
-      cart.sub_total = subt;
-      cart.discount = disc;
-      cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
-      cart.grand_total = (subt - disc) + taxvalues;
-      cart.tax_json = json.encode(taxjson);
+      if (cartList.length == 1) {
+        cart = allcartData;
+        cart.sub_total = 0.0;
+        cart.discount = 0.0;
+        cart.total_qty = 0.0;
+        cart.grand_total = 0.0;
+        cart.tax_json = "";
+      } else {
+        cart = allcartData;
+        cart.sub_total = subt;
+        cart.discount = disc;
+        cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
+        cart.grand_total = (subt - disc) + taxvalues;
+        cart.tax_json = json.encode(taxjson);
+      }
       await localAPI.deleteCartItem(
           cartitem, currentCart, cart, cartList.length == 1);
       if (cartitem.isSendKichen == 1) {
