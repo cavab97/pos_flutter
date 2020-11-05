@@ -154,13 +154,13 @@ class LocalAPI {
 
   Future<int> saveCustomersFromServer(Customer customer) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM customer where customer_id =" +
-        customer.customerId.toString();
+    var checkisExitqry =
+        "SELECT *  FROM customer where app_id =" + customer.appId.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var result;
     if (checkisExit.length > 0) {
       result = await db.update("customer", customer.toJson(),
-          where: "customer_id =?", whereArgs: [customer.customerId]);
+          where: "app_id =?", whereArgs: [customer.appId]);
     } else {
       result = await db.insert("customer", customer.toJson());
     }
