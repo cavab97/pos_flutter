@@ -36,7 +36,6 @@ import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
-
 import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
@@ -49,7 +48,7 @@ import 'package:sqflite/sqflite.dart';
 class LocalAPI {
   Future<int> terminalLog(TerminalLog log) async {
     try {
-      var db = await DatabaseHelper.dbHelper.getDatabse();
+      var db = DatabaseHelper.dbHelper.getDatabse();
       var result = await db.insert("terminal_log", log.toJson());
       return result;
     } catch (e) {
@@ -154,13 +153,13 @@ class LocalAPI {
 
   Future<int> saveCustomersFromServer(Customer customer) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM customer where customer_id =" +
-        customer.customerId.toString();
+    var checkisExitqry =
+        "SELECT *  FROM customer where app_id =" + customer.appId.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var result;
     if (checkisExit.length > 0) {
       result = await db.update("customer", customer.toJson(),
-          where: "customer_id =?", whereArgs: [customer.customerId]);
+          where: "app_id =?", whereArgs: [customer.appId]);
     } else {
       result = await db.insert("customer", customer.toJson());
     }
@@ -354,7 +353,7 @@ class LocalAPI {
   }
 
   Future<List<Shift>> getShiftData(shiftId) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var result =
         await db.query('shift', where: "shift_id = ?", whereArgs: [shiftId]);
     List<Shift> list =

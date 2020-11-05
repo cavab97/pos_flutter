@@ -209,21 +209,26 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             ),
           ),
           Positioned(
-            left: 15,
-            top: 0,
-            child: RaisedButton(
-              padding: EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 0),
-              onPressed: () {
-                addCustomer();
-              },
-              child: Text(Strings.btn_Add_customer,
-                  style: Styles.whiteBoldsmall()),
-              color: Colors.deepOrange,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50.0),
-              ),
-            ),
-          ),
+              left: 15,
+              top: 0,
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    RaisedButton(
+                      padding:
+                          EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 0),
+                      onPressed: () {
+                        addCustomer();
+                      },
+                      child: Text(Strings.btn_Add_customer,
+                          style: Styles.whiteBoldsmall()),
+                      color: Colors.deepOrange,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                      ),
+                    ),
+                  ])),
           closeButton(context),
         ],
       ),

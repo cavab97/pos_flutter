@@ -273,7 +273,7 @@ class _DashboradPageState extends State<DashboradPage>
     await Preferences.removeSinglePref(Constant.OFFSET);
     await CommunFun.opneSyncPop(context);
     await CommunFun.syncOrdersANDStore(context, false);
-    // await CommunFun.syncAfterSuccess(context, false);
+    await CommunFun.syncAfterSuccess(context, false);
     //  Navigator.of(context).pop();
     await checkisInit();
   }
@@ -1707,20 +1707,22 @@ class _DashboradPageState extends State<DashboradPage>
               ],
             ),
             CommunFun.divider(),
-            ListTile(
-              onTap: () {
-                gotoTansactionPage();
-              },
-              leading: Icon(
-                Icons.art_track,
-                color: Colors.black,
-                size: SizeConfig.safeBlockVertical * 5,
-              ),
-              title: Text(
-                "Transaction",
-                style: Styles.drawerText(),
-              ),
-            ),
+            permissions.contains(Constant.VIEW_ORDER)
+                ? ListTile(
+                    onTap: () {
+                      gotoTansactionPage();
+                    },
+                    leading: Icon(
+                      Icons.art_track,
+                      color: Colors.black,
+                      size: SizeConfig.safeBlockVertical * 5,
+                    ),
+                    title: Text(
+                      "Transaction",
+                      style: Styles.drawerText(),
+                    ),
+                  )
+                : SizedBox(),
             permissions.contains(Constant.VIEW_ORDER)
                 ? ListTile(
                     onTap: () {
@@ -1769,6 +1771,7 @@ class _DashboradPageState extends State<DashboradPage>
                     ),
                   )
                 : SizedBox(),
+            // permissions.contains(Constant.VIEW_ORDER)
             ListTile(
                 onTap: () {
                   Navigator.of(context).pop();
@@ -1780,6 +1783,7 @@ class _DashboradPageState extends State<DashboradPage>
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
                 title: Text("Sync Orders", style: Styles.drawerText())),
+            // : SizedBox(),
             ListTile(
                 onTap: () async {
                   syncAllTables();
@@ -2018,7 +2022,9 @@ class _DashboradPageState extends State<DashboradPage>
         onSelected: selectOption,
         itemBuilder: (BuildContext context) => [
               PopupMenuItem(
-                enabled: isShiftOpen ? true : false,
+                enabled: permissions.contains(Constant.ADD_ORDER) && isShiftOpen
+                    ? true
+                    : false,
                 value: 0,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2037,7 +2043,10 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: isTableSelected ? true : false,
+                enabled:
+                    permissions.contains(Constant.ADD_ORDER) && isTableSelected
+                        ? true
+                        : false,
                 value: 1,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2056,7 +2065,10 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: cartList.length > 1 ? true : false,
+                enabled: permissions.contains(Constant.EDIT_ORDER) &&
+                        cartList.length > 1
+                    ? true
+                    : false,
                 value: 2,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2094,7 +2106,11 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: cartList.length > 0 ? true : false,
+                enabled: (permissions.contains(Constant.ADD_ORDER) ||
+                            permissions.contains(Constant.EDIT_ORDER)) &&
+                        cartList.length > 0
+                    ? true
+                    : false,
                 value: 4,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2113,7 +2129,11 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: cartList.length > 0 ? true : false,
+                enabled: (permissions.contains(Constant.ADD_ORDER) ||
+                            permissions.contains(Constant.EDIT_ORDER)) &&
+                        cartList.length > 0
+                    ? true
+                    : false,
                 value: 5,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2132,7 +2152,10 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: cartList.length > 0 ? true : false,
+                enabled: permissions.contains(Constant.DELETE_ORDER) &&
+                        cartList.length > 0
+                    ? true
+                    : false,
                 value: 6,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2624,7 +2647,7 @@ class _DashboradPageState extends State<DashboradPage>
                       },
                     )
                   : SizedBox(),
-              permissions.contains(Constant.EDIT_ITEM)
+              permissions.contains(Constant.EDIT_ORDER)
                   ? IconSlideAction(
                       color: Colors.black45,
                       icon: Icons.edit,
@@ -2825,7 +2848,7 @@ class _DashboradPageState extends State<DashboradPage>
                               )),
                         )
                       : SizedBox(),
-                  !isWebOrder
+                  permissions.contains(Constant.EDIT_ORDER) && !isWebOrder
                       ? Padding(
                           padding: EdgeInsets.all(10),
                           child: RaisedButton(
