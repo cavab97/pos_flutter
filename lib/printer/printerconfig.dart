@@ -882,7 +882,8 @@ class PrintReceipt {
 
       /*For set meal product*/
       if (cartList[i].issetMeal == 1) {
-        List<dynamic> setmealproduct = json.decode(cartList[i].setmeal_product_detail);
+        List<dynamic> setmealproduct =
+            json.decode(cartList[i].setmeal_product_detail);
         List<SetMealProduct> setMealProducts = [];
         if (setmealproduct[0] != null) {
           setMealProducts = setmealproduct.isNotEmpty
@@ -980,8 +981,11 @@ class PrintReceipt {
             bold: false,
           ))
     ]);
-    ticket.setStyles(PosStyles(align: PosAlign.right));
-    ticket.hr(len: 15);
+    ticket.text(printColumnWitSpace(48, Strings.print15line, true),
+        styles: PosStyles(
+          align: PosAlign.right,
+          fontType: PosFontType.fontA,
+        ));
     ticket.setStyles(PosStyles(align: PosAlign.right));
 
     ticket.row([
@@ -1005,8 +1009,11 @@ class PrintReceipt {
             width: PosTextSize.size1,
           ))
     ]);
-    ticket.setStyles(PosStyles(align: PosAlign.right));
-    ticket.hr(len: 15);
+    ticket.text(printColumnWitSpace(48, Strings.print15line, true),
+        styles: PosStyles(
+          align: PosAlign.right,
+          fontType: PosFontType.fontA,
+        ));
     ticket.setStyles(PosStyles(align: PosAlign.center));
     /* ticket.emptyLines(1);
     ticket.qrcode('www.MCN.com', size: QRSize.Size5, align: PosAlign.center);*/
@@ -1237,7 +1244,7 @@ class PrintReceipt {
       /*For set meal product*/
       if (cartList[i].issetMeal == 1) {
         List<dynamic> setmealproduct =
-        json.decode(cartList[i].setmeal_product_detail);
+            json.decode(cartList[i].setmeal_product_detail);
         List<SetMealProduct> setMealProducts = [];
         if (setmealproduct[0] != null) {
           setMealProducts = setmealproduct.isNotEmpty

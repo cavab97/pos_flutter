@@ -273,9 +273,9 @@ class _DashboradPageState extends State<DashboradPage>
     await Preferences.removeSinglePref(Constant.OFFSET);
     await CommunFun.opneSyncPop(context);
     await CommunFun.syncOrdersANDStore(context, false);
-    // await CommunFun.syncAfterSuccess(context, false);
+    await CommunFun.syncAfterSuccess(context, false);
     //  Navigator.of(context).pop();
-    await checkisInit();
+    //await checkisInit();
   }
 
   syncOrdersTodatabase() async {
@@ -466,14 +466,14 @@ class _DashboradPageState extends State<DashboradPage>
       cartitem.discount = 0.0;
       cartitem.discountType = 0;
     }
-    allcartData.discount = 0.0;
-    allcartData.discount_type = 0;
+
     allcartData.grand_total = allcartData.grand_total + allcartData.discount;
     allcartData.voucher_detail = "";
+    allcartData.discount = 0.0;
+    allcartData.discount_type = 0;
     allcartData.voucher_id = null;
     Voucher voucher = Voucher.fromJson(voucherdata);
     await localAPI.addVoucherInOrder(allcartData, voucher);
-    // await localAPI.updateCartList(cartListUpdate);
     await countTotals(currentCart);
   }
 
@@ -519,9 +519,10 @@ class _DashboradPageState extends State<DashboradPage>
     var cat = tabsList[_tabController.index].categoryId;
     if (tabsList[_tabController.index].isSetmeal == 1) {
       getMeals();
-    } else {
-      getProductList(cat);
     }
+    //  else {
+    //   getProductList(cat);
+    // }
   }
 
   getProductList(categoryId) async {
@@ -789,6 +790,20 @@ class _DashboradPageState extends State<DashboradPage>
 
   openDrawer() {
     scaffoldKey.currentState.openDrawer();
+  }
+
+  checkshiftopne(product) {
+    if (isShiftOpen) {
+      if (isTableSelected && !isWebOrder) {
+        showQuantityDailog(product, false);
+      } else {
+        if (!isWebOrder) {
+          selectTable();
+        }
+      }
+    } else {
+      CommunFun.showToast(context, Strings.shift_open_message);
+    }
   }
 
   showQuantityDailog(product, isSetMeal) async {
@@ -1289,12 +1304,23 @@ class _DashboradPageState extends State<DashboradPage>
       var disc = allcartData.discount != null
           ? allcartData.discount - cartitemdata.discount
           : 0;
-      cart = allcartData;
-      cart.sub_total = subt;
-      cart.discount = disc;
-      cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
-      cart.grand_total = (subt - disc) + taxvalues;
-      cart.tax_json = json.encode(taxjson);
+      if (cartList.length == 1) {
+        cart = allcartData;
+        cart.sub_total = 0.0;
+        cart.discount = 0.0;
+        cart.total_qty = 0.0;
+        cart.grand_total = 0.0;
+        cart.tax_json = "";
+        cart.voucher_id = 0;
+        cart.voucher_detail = "";
+      } else {
+        cart = allcartData;
+        cart.sub_total = subt;
+        cart.discount = disc;
+        cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
+        cart.grand_total = (subt - disc) + taxvalues;
+        cart.tax_json = json.encode(taxjson);
+      }
       await localAPI.deleteCartItem(
           cartitem, currentCart, cart, cartList.length == 1);
       if (cartitem.isSendKichen == 1) {
@@ -1707,20 +1733,22 @@ class _DashboradPageState extends State<DashboradPage>
               ],
             ),
             CommunFun.divider(),
-            ListTile(
-              onTap: () {
-                gotoTansactionPage();
-              },
-              leading: Icon(
-                Icons.art_track,
-                color: Colors.black,
-                size: SizeConfig.safeBlockVertical * 5,
-              ),
-              title: Text(
-                "Transaction",
-                style: Styles.drawerText(),
-              ),
-            ),
+            permissions.contains(Constant.VIEW_ORDER)
+                ? ListTile(
+                    onTap: () {
+                      gotoTansactionPage();
+                    },
+                    leading: Icon(
+                      Icons.art_track,
+                      color: Colors.black,
+                      size: SizeConfig.safeBlockVertical * 5,
+                    ),
+                    title: Text(
+                      "Transaction",
+                      style: Styles.drawerText(),
+                    ),
+                  )
+                : SizedBox(),
             permissions.contains(Constant.VIEW_ORDER)
                 ? ListTile(
                     onTap: () {
@@ -1769,6 +1797,7 @@ class _DashboradPageState extends State<DashboradPage>
                     ),
                   )
                 : SizedBox(),
+            // permissions.contains(Constant.VIEW_ORDER)
             ListTile(
                 onTap: () {
                   Navigator.of(context).pop();
@@ -1780,6 +1809,7 @@ class _DashboradPageState extends State<DashboradPage>
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
                 title: Text("Sync Orders", style: Styles.drawerText())),
+            // : SizedBox(),
             ListTile(
                 onTap: () async {
                   syncAllTables();
@@ -1901,22 +1931,24 @@ class _DashboradPageState extends State<DashboradPage>
                         : SizedBox());
               },
               onSuggestionSelected: (suggestion) {
-                if (suggestion.qty == null ||
-                    suggestion.hasInventory != 1 ||
-                    suggestion.qty > 0.0) {
-                  if (isShiftOpen) {
-                    if (isTableSelected && !isWebOrder) {
-                      showQuantityDailog(suggestion, false);
-                    } else {
-                      if (!isWebOrder) {
-                        selectTable();
+                if (permissions.contains(Constant.ADD_ORDER)) {
+                  if (suggestion.qty == null ||
+                      suggestion.hasInventory != 1 ||
+                      suggestion.qty > 0.0) {
+                    if (isShiftOpen) {
+                      if (isTableSelected && !isWebOrder) {
+                        showQuantityDailog(suggestion, false);
+                      } else {
+                        if (!isWebOrder) {
+                          selectTable();
+                        }
                       }
+                    } else {
+                      CommunFun.showToast(context, Strings.shift_open_message);
                     }
                   } else {
-                    CommunFun.showToast(context, Strings.shift_open_message);
+                    CommunFun.showToast(context, "Product Out of Stock");
                   }
-                } else {
-                  CommunFun.showToast(context, "Product Out of Stock");
                 }
                 // Navigator.of(context).push(MaterialPageRoute(
                 //     //builder: (context) => ProductPage(product: suggestion)
@@ -2018,7 +2050,9 @@ class _DashboradPageState extends State<DashboradPage>
         onSelected: selectOption,
         itemBuilder: (BuildContext context) => [
               PopupMenuItem(
-                enabled: isShiftOpen ? true : false,
+                enabled: permissions.contains(Constant.ADD_ORDER) && isShiftOpen
+                    ? true
+                    : false,
                 value: 0,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2037,7 +2071,10 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: isTableSelected ? true : false,
+                enabled:
+                    permissions.contains(Constant.ADD_ORDER) && isTableSelected
+                        ? true
+                        : false,
                 value: 1,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2056,7 +2093,10 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: cartList.length > 1 ? true : false,
+                enabled: permissions.contains(Constant.EDIT_ORDER) &&
+                        cartList.length > 1
+                    ? true
+                    : false,
                 value: 2,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2094,7 +2134,11 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: cartList.length > 0 ? true : false,
+                enabled: (permissions.contains(Constant.ADD_ORDER) ||
+                            permissions.contains(Constant.EDIT_ORDER)) &&
+                        cartList.length > 0
+                    ? true
+                    : false,
                 value: 4,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2113,7 +2157,11 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: cartList.length > 0 ? true : false,
+                enabled: (permissions.contains(Constant.ADD_ORDER) ||
+                            permissions.contains(Constant.EDIT_ORDER)) &&
+                        cartList.length > 0
+                    ? true
+                    : false,
                 value: 5,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2132,7 +2180,10 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: cartList.length > 0 ? true : false,
+                enabled: permissions.contains(Constant.DELETE_ORDER) &&
+                        cartList.length > 0
+                    ? true
+                    : false,
                 value: 6,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2275,18 +2326,13 @@ class _DashboradPageState extends State<DashboradPage>
               if (product.qty == null ||
                   product.hasInventory != 1 ||
                   product.qty > 0.0) {
-                if (permissions.contains(Constant.EDIT_ORDER)) {
-                  if (isShiftOpen) {
-                    if (isTableSelected && !isWebOrder) {
-                      showQuantityDailog(product, false);
-                    } else {
-                      if (!isWebOrder) {
-                        selectTable();
-                      }
-                    }
-                  } else {
-                    CommunFun.showToast(context, Strings.shift_open_message);
-                  }
+                if (permissions.contains(Constant.ADD_ORDER)) {
+                  checkshiftopne(product);
+                } else {
+                  CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
+                      () {
+                    checkshiftopne(product);
+                  });
                 }
               } else {
                 CommunFun.showToast(context, "Product Out of Stock");
@@ -2624,7 +2670,7 @@ class _DashboradPageState extends State<DashboradPage>
                       },
                     )
                   : SizedBox(),
-              permissions.contains(Constant.EDIT_ITEM)
+              permissions.contains(Constant.EDIT_ORDER)
                   ? IconSlideAction(
                       color: Colors.black45,
                       icon: Icons.edit,
@@ -2825,7 +2871,7 @@ class _DashboradPageState extends State<DashboradPage>
                               )),
                         )
                       : SizedBox(),
-                  !isWebOrder
+                  permissions.contains(Constant.EDIT_ORDER) && !isWebOrder
                       ? Padding(
                           padding: EdgeInsets.all(10),
                           child: RaisedButton(

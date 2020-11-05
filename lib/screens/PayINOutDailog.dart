@@ -144,7 +144,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
               },
               child: Text(ammount.toStringAsFixed(2),
                   style: Styles.blackBoldLarge())),
-          Text('reason', style: Styles.drawerText()),
+          Text('Please select reason', style: Styles.drawerText()),
           Container(
               width: MediaQuery.of(context).size.width / 4,
               padding: EdgeInsets.all(12),

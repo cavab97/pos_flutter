@@ -52,26 +52,34 @@ class VoucherPopState extends State<VoucherPop> {
   checkMinMaxValue(vaocher) async {
     // Check in minimum  max value with cart value
     var isReturn;
-    if (vaocher.minimumAmount == 0.0 ||
-        vaocher.minimumAmount <= cartData.sub_total) {
-      isReturn = true;
-    } else {
-      CommunFun.showToast(
-          context,
-          "Required minimum cart amount " +
-              vaocher.minimumAmount.toString() +
-              " for this voucher.");
-    }
+    if (vaocher.voucherDiscount < cartData.sub_total) {
+      if (vaocher.minimumAmount == 0.0 ||
+          vaocher.minimumAmount <= cartData.sub_total) {
+        isReturn = true;
+      } else {
+        CommunFun.showToast(
+            context,
+            "Required minimum cart amount " +
+                vaocher.minimumAmount.toString() +
+                " for this voucher.");
+      }
 
-    if (vaocher.maximumAmount == 0.0 ||
-        vaocher.maximumAmount >= cartData.sub_total) {
-      isReturn = true;
+      if (vaocher.maximumAmount == 0.0 ||
+          vaocher.maximumAmount >= cartData.sub_total) {
+        isReturn = true;
+      } else {
+        CommunFun.showToast(
+            context,
+            "Required maximum cart amount " +
+                vaocher.maximumAmount.toString() +
+                " for this voucher.");
+      }
     } else {
       CommunFun.showToast(
           context,
-          "Required maximum cart amount " +
-              vaocher.maximumAmount.toString() +
-              " for this voucher.");
+          "Required cart amount more than discount ammount " +
+              vaocher.voucherDiscount.toString() +
+              ".");
     }
     return await isReturn;
   }
@@ -147,9 +155,13 @@ class VoucherPopState extends State<VoucherPop> {
               totaldiscount = vaocher.voucherDiscount;
             }
           }
+          cartData.grand_total = cartData.grand_total + cartData.discount;
           cartData.discount = totaldiscount;
           cartData.discount_type = vaocher.voucherDiscountType;
-          cartData.grand_total = cartData.grand_total - cartData.discount;
+          //  if (vaocher.voucherId != cartData.voucher_id) {
+          cartData.grand_total =
+              cartData.grand_total = cartData.grand_total - cartData.discount;
+          //}
           cartData.voucher_detail = json.encode(vaocher);
           cartData.voucher_id = vaocher.voucherId;
           var result1 = await localAPI.addVoucherInOrder(cartData, vaocher);

@@ -1,7 +1,7 @@
 class Strings {
   /*Print horizontal 64 lines*/
   static String print64line = "————————————————————————————————————————————————————————————————";
-  static String print20line = "—————————————";
+  static String print15line = "---------------";
   static String print1BlankLine = " ";
 
   static String fontFamily = "Roboto";

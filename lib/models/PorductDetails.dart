@@ -102,7 +102,7 @@ class ProductDetails {
     data['deleted_by'] = this.deletedBy;
     data['base64'] = this.base64;
     data['attr_cat'] = this.attrCat;
-    data["modifire_Name"] = this.modifireName; 
+    data["modifire_Name"] = this.modifireName;
     return data;
   }
 }

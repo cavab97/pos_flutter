@@ -36,7 +36,6 @@ import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
-
 import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
@@ -49,7 +48,7 @@ import 'package:sqflite/sqflite.dart';
 class LocalAPI {
   Future<int> terminalLog(TerminalLog log) async {
     try {
-      var db = await DatabaseHelper.dbHelper.getDatabse();
+      var db = DatabaseHelper.dbHelper.getDatabse();
       var result = await db.insert("terminal_log", log.toJson());
       return result;
     } catch (e) {
@@ -354,7 +353,7 @@ class LocalAPI {
   }
 
   Future<List<Shift>> getShiftData(shiftId) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var result =
         await db.query('shift', where: "shift_id = ?", whereArgs: [shiftId]);
     List<Shift> list =
@@ -874,18 +873,19 @@ class LocalAPI {
         "mst_cart_sub_detail",
         cartItem.id);
 
-    if (isLast) {
-      await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartID]);
-      await SyncAPICalls.logActivity(
-          "cart", "delete cart all item", "mst_Cart", cartItem.id);
-      await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartID]);
-      await SyncAPICalls.logActivity("cart",
-          "delete cart all item from save_order", "save_order", cartItem.id);
-    } else {
-      //Update cart
-      await db.update("mst_cart", mainCart.toJson(),
-          where: 'id = ?', whereArgs: [cartID]);
-    }
+    // if (isLast) {
+    //   await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartID]);
+    //   await SyncAPICalls.logActivity(
+    //       "cart", "delete cart all item", "mst_Cart", cartItem.id);
+    //   await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartID]);
+
+    //   await SyncAPICalls.logActivity("cart",
+    //       "delete cart all item from save_order", "save_order", cartItem.id);
+    // } else {
+    //Update cart
+    await db.update("mst_cart", mainCart.toJson(),
+        where: 'id = ?', whereArgs: [cartID]);
+    // }
     return cartID;
   }
 
