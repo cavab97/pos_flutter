@@ -952,6 +952,7 @@ class CommunFun {
 
   static addItemToCart(productItem, List<MSTCartdetails> cartItems,
       MST_Cart allcartData, callback) async {
+    taxvalues = 0;
     MST_Cart cart = new MST_Cart();
     SaveOrder orderData = new SaveOrder();
     var branchid = await CommunFun.getbranchId();
@@ -1020,7 +1021,7 @@ class CommunFun {
             sameitem.productPrice
         : double.parse(productItem.price.toStringAsFixed(2));
     cartdetails.productQty = isEditing ? sameitem.productQty + 1.0 : 1.0;
-    cartdetails.productNetPrice =  productItem.price;
+    cartdetails.productNetPrice = productItem.price;
     cartdetails.createdBy = loginUser.id;
     cartdetails.cart_detail = jsonEncode(data);
     cartdetails.discount = isEditing ? sameitem.discount : 0;
