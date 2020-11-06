@@ -8,6 +8,7 @@ import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Table_order.dart';
@@ -951,7 +952,8 @@ class CommunFun {
   }
 
   static addItemToCart(productItem, List<MSTCartdetails> cartItems,
-      MST_Cart allcartData, callback) async {
+      MST_Cart allcartData, callback, context) async {
+    taxvalues = 0;
     MST_Cart cart = new MST_Cart();
     SaveOrder orderData = new SaveOrder();
     var branchid = await CommunFun.getbranchId();
@@ -970,6 +972,22 @@ class CommunFun {
           .map((i) => MSTCartdetails.fromJson(i))
           .toList();
       sameitem = myModels[0];
+    }
+    if (productItem.hasInventory == 1) {
+      var qty = 1.0;
+      if (isEditing) {
+        qty = sameitem.productQty + qty;
+      }
+      List<ProductStoreInventory> cartval =
+          await localAPI.checkItemAvailableinStore(productItem.productId);
+      if (cartval.length > 0) {
+        double storeqty = cartval[0].qty;
+        if (storeqty < qty) {
+          CommunFun.showToast(context, Strings.stock_not_valilable);
+          callback();
+          return false;
+        }
+      }
     }
     var qty = await CommunFun.countTotalQty(cartItems, productItem, 1.0);
     var disc = await CommunFun.countDiscount(allcartData);
@@ -1020,7 +1038,7 @@ class CommunFun {
             sameitem.productPrice
         : double.parse(productItem.price.toStringAsFixed(2));
     cartdetails.productQty = isEditing ? sameitem.productQty + 1.0 : 1.0;
-    cartdetails.productNetPrice =  productItem.price;
+    cartdetails.productNetPrice = productItem.price;
     cartdetails.createdBy = loginUser.id;
     cartdetails.cart_detail = jsonEncode(data);
     cartdetails.discount = isEditing ? sameitem.discount : 0;

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/screens/PermissionPop.dart';
 
 class CommonUtils {
   /*load image from base64*/
@@ -69,5 +70,18 @@ class CommonUtils {
         );
       },
     );
+  }
+
+  static openPermissionPop(context, permissionFor, callback) {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return OpenPermissionPop(
+              perFor: permissionFor,
+              onEnter: () {
+                callback();
+              });
+        });
   }
 }

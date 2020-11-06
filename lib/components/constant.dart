@@ -20,6 +20,7 @@ class Constant {
   static final String SHIFT_ID = "Shift_Id";
   static final String DASH_SHIFT = "dashShift";
   static final String IS_LOGIN = "IsLogin";
+  static final String MANAGER = "manager";
   static final String SYNC_TIMER = "syncTimer";
   static final String CURRENCY = "Currency";
   static final String OFFSET = "image_offset";

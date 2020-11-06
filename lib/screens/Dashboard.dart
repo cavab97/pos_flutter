@@ -275,7 +275,7 @@ class _DashboradPageState extends State<DashboradPage>
     await CommunFun.syncOrdersANDStore(context, false);
     await CommunFun.syncAfterSuccess(context, false);
     //  Navigator.of(context).pop();
-    await checkisInit();
+    //await checkisInit();
   }
 
   syncOrdersTodatabase() async {
@@ -466,14 +466,14 @@ class _DashboradPageState extends State<DashboradPage>
       cartitem.discount = 0.0;
       cartitem.discountType = 0;
     }
-    allcartData.discount = 0.0;
-    allcartData.discount_type = 0;
+
     allcartData.grand_total = allcartData.grand_total + allcartData.discount;
     allcartData.voucher_detail = "";
+    allcartData.discount = 0.0;
+    allcartData.discount_type = 0;
     allcartData.voucher_id = null;
     Voucher voucher = Voucher.fromJson(voucherdata);
     await localAPI.addVoucherInOrder(allcartData, voucher);
-    // await localAPI.updateCartList(cartListUpdate);
     await countTotals(currentCart);
   }
 
@@ -519,9 +519,10 @@ class _DashboradPageState extends State<DashboradPage>
     var cat = tabsList[_tabController.index].categoryId;
     if (tabsList[_tabController.index].isSetmeal == 1) {
       getMeals();
-    } else {
-      getProductList(cat);
     }
+    //  else {
+    //   getProductList(cat);
+    // }
   }
 
   getProductList(categoryId) async {
@@ -791,6 +792,20 @@ class _DashboradPageState extends State<DashboradPage>
     scaffoldKey.currentState.openDrawer();
   }
 
+  checkshiftopne(product) {
+    if (isShiftOpen) {
+      if (isTableSelected && !isWebOrder) {
+        showQuantityDailog(product, false);
+      } else {
+        if (!isWebOrder) {
+          selectTable();
+        }
+      }
+    } else {
+      CommunFun.showToast(context, Strings.shift_open_message);
+    }
+  }
+
   showQuantityDailog(product, isSetMeal) async {
     var selectedProduct = product;
     if (!isSetMeal) {
@@ -831,7 +846,7 @@ class _DashboradPageState extends State<DashboradPage>
         setState(() {
           isScreenLoad = false;
         });
-      });
+      }, context);
     }
   }
 
@@ -1296,6 +1311,8 @@ class _DashboradPageState extends State<DashboradPage>
         cart.total_qty = 0.0;
         cart.grand_total = 0.0;
         cart.tax_json = "";
+        cart.voucher_id = 0;
+        cart.voucher_detail = "";
       } else {
         cart = allcartData;
         cart.sub_total = subt;
@@ -1914,22 +1931,24 @@ class _DashboradPageState extends State<DashboradPage>
                         : SizedBox());
               },
               onSuggestionSelected: (suggestion) {
-                if (suggestion.qty == null ||
-                    suggestion.hasInventory != 1 ||
-                    suggestion.qty > 0.0) {
-                  if (isShiftOpen) {
-                    if (isTableSelected && !isWebOrder) {
-                      showQuantityDailog(suggestion, false);
-                    } else {
-                      if (!isWebOrder) {
-                        selectTable();
+                if (permissions.contains(Constant.ADD_ORDER)) {
+                  if (suggestion.qty == null ||
+                      suggestion.hasInventory != 1 ||
+                      suggestion.qty > 0.0) {
+                    if (isShiftOpen) {
+                      if (isTableSelected && !isWebOrder) {
+                        showQuantityDailog(suggestion, false);
+                      } else {
+                        if (!isWebOrder) {
+                          selectTable();
+                        }
                       }
+                    } else {
+                      CommunFun.showToast(context, Strings.shift_open_message);
                     }
                   } else {
-                    CommunFun.showToast(context, Strings.shift_open_message);
+                    CommunFun.showToast(context, "Product Out of Stock");
                   }
-                } else {
-                  CommunFun.showToast(context, "Product Out of Stock");
                 }
                 // Navigator.of(context).push(MaterialPageRoute(
                 //     //builder: (context) => ProductPage(product: suggestion)
@@ -2307,18 +2326,13 @@ class _DashboradPageState extends State<DashboradPage>
               if (product.qty == null ||
                   product.hasInventory != 1 ||
                   product.qty > 0.0) {
-                if (permissions.contains(Constant.EDIT_ORDER)) {
-                  if (isShiftOpen) {
-                    if (isTableSelected && !isWebOrder) {
-                      showQuantityDailog(product, false);
-                    } else {
-                      if (!isWebOrder) {
-                        selectTable();
-                      }
-                    }
-                  } else {
-                    CommunFun.showToast(context, Strings.shift_open_message);
-                  }
+                if (permissions.contains(Constant.ADD_ORDER)) {
+                  checkshiftopne(product);
+                } else {
+                  CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
+                      () {
+                    checkshiftopne(product);
+                  });
                 }
               } else {
                 CommunFun.showToast(context, "Product Out of Stock");
