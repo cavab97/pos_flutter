@@ -177,7 +177,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                   if (item.attributeId == aattrid) {
                     onSelectAttr(a, attribute.ca_id, attributType[a],
                         attrIDs[a], attrtypesPrice[a], null);
-                    break;
                   }
                 }
               }
@@ -425,15 +424,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   onSelectAttr(i, id, attribute, attrTypeIDs, attrPrice, setmealid) {
-    if (!isSetMeal) {
-      if (isSelectedAttr == i) {
-        isSelectedAttr = -1;
-      } else {
-        isSelectedAttr = i;
-      }
-      selectedAttr.clear();
-      if (isSelectedAttr != -1) {
-        selectedAttr.add({
+    var prvSeelected = selectedAttr;
+    var isSelected = selectedAttr.any((item) => item['ca_id'] == id);
+    if (isSelected) {
+      var isarrSelected =
+          selectedAttr.any((item) => item['attribute'] == attribute);
+      selectedAttr.removeWhere((item) => item['ca_id'] == id);
+      if (!isarrSelected) {
+        prvSeelected.add({
           'ca_id': id,
           'attribute': attribute,
           'attrType_ID': attrTypeIDs,
@@ -444,9 +442,38 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         selectedAttr = selectedAttr;
       });
     } else {
-      //Setmenal attribute
-
+      prvSeelected.add({
+        'ca_id': id,
+        'attribute': attribute,
+        'attrType_ID': attrTypeIDs,
+        'attr_price': attrPrice
+      });
+      setState(() {
+        selectedAttr = prvSeelected;
+      });
     }
+    // if (!isSetMeal) {
+    //   if (isSelectedAttr == i) {
+    //     isSelectedAttr = -1;
+    //   } else {
+    //     isSelectedAttr = i;
+    //   }
+    //   selectedAttr.clear();
+    //   if (isSelectedAttr != -1) {
+    //     selectedAttr.add({
+    //       'ca_id': id,
+    //       'attribute': attribute,
+    //       'attrType_ID': attrTypeIDs,
+    //       'attr_price': attrPrice
+    //     });
+    //   }
+    //   setState(() {
+    //     selectedAttr = selectedAttr;
+    //   });
+    // } else {
+    //   //Setmenal attribute
+
+    // }
     setPrice();
   }
 
@@ -697,7 +724,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       cartdetails.setmeal_product_detail = json.encode(tempCart);
     }
     var detailID = await localAPI.addintoCartDetails(cartdetails);
-
+    await localAPI.deletesubcartDetail(detailID);
     if (selectedModifier.length > 0) {
       for (var i = 0; i < selectedModifier.length; i++) {
         MSTSubCartdetails subCartData = new MSTSubCartdetails();
@@ -870,9 +897,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             SizedBox(height: 5),
             isSetMeal
                 ? SizedBox()
-                : modifireList.length != 0
-                    ? modifireItmeList()
-                    : SizedBox(),
+                : modifireList.length != 0 ? modifireItmeList() : SizedBox(),
             SizedBox(height: 10),
             _extraNotesTitle(),
             SizedBox(height: 5),
@@ -1121,7 +1146,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                           borderRadius:
                                               BorderRadius.circular(10.0),
                                           side: BorderSide(
-                                            color: i == isSelectedAttr
+                                            color: selectedAttr.any((item) =>
+                                                    item['ca_id'] ==
+                                                        attribute.ca_id &&
+                                                    item['attribute'] == attr)
                                                 ? Colors.green
                                                 : Colors.grey[300],
                                             width: 4,
