@@ -149,7 +149,7 @@ class PrintReceipt {
                     element.name.toString().trim(),
                 styles: PosStyles(
                     align: PosAlign.left,
-                    fontType: PosFontType.fontB,
+                    fontType: PosFontType.fontA,
                     bold: false));
           });
         }
@@ -391,7 +391,7 @@ class PrintReceipt {
                   element.name.toString().trim(),
               styles: PosStyles(
                   align: PosAlign.left,
-                  fontType: PosFontType.fontB,
+                  fontType: PosFontType.fontA,
                   bold: false));
         });
       }
@@ -409,16 +409,18 @@ class PrintReceipt {
 
       /*Print attributes without price*/
       if (attrList.length > 0) {
-        ticket.row([
-          PosColumn(
-              text: "  " + attrList[0].name.trim(),
-              width: 12,
-              containsChinese: true,
-              styles: PosStyles(
-                align: PosAlign.left,
-                fontType: PosFontType.fontA,
-              ))
-        ]);
+        for (var a = 0; a < attrList.length; a++) {
+          ticket.row([
+            PosColumn(
+                text: "  " + attrList[a].name.trim(),
+                width: 12,
+                containsChinese: true,
+                styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontA,
+                ))
+          ]);
+        }
       }
 
       var contain1 =
@@ -544,8 +546,11 @@ class PrintReceipt {
           ))
     ]);
 
-    ticket.setStyles(PosStyles(align: PosAlign.right));
-    ticket.hr(len: 15);
+    ticket.text(printColumnWitSpace(48, Strings.print15line, true),
+        styles: PosStyles(
+          align: PosAlign.right,
+          fontType: PosFontType.fontA,
+        ));
     ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
@@ -568,9 +573,11 @@ class PrintReceipt {
             width: PosTextSize.size1,
           ))
     ]);
-    ticket.setStyles(PosStyles(align: PosAlign.right));
-    ticket.hr(len: 15);
-    ticket.setStyles(PosStyles(align: PosAlign.right));
+    ticket.text(printColumnWitSpace(48, Strings.print15line, true),
+        styles: PosStyles(
+          align: PosAlign.right,
+          fontType: PosFontType.fontA,
+        ));
     ticket.hr();
     ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
@@ -899,7 +906,7 @@ class PrintReceipt {
                   element.name.toString().trim(),
               styles: PosStyles(
                   align: PosAlign.left,
-                  fontType: PosFontType.fontB,
+                  fontType: PosFontType.fontA,
                   bold: false));
         });
       }
@@ -1260,7 +1267,7 @@ class PrintReceipt {
                   element.name.toString().trim(),
               styles: PosStyles(
                   align: PosAlign.left,
-                  fontType: PosFontType.fontB,
+                  fontType: PosFontType.fontA,
                   bold: false));
         });
       }
