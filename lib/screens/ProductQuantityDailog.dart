@@ -1020,82 +1020,99 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   Widget getsetMealAttrList(SetMealProduct product) {
-    List<String> attrs = [];
-    List<String> categorys = [];
-    List<String> attrIDS = [];
-    List<String> attrPrice = [];
-    if (product.attr_name != null) {
-      attrs = product.attr_name.split(',');
-    }
-    if (product.cateAtt != null) {
-      categorys = product.cateAtt.split(',');
+    List<Attribute_Data> attrList = [];
+    if (product.attributeDetails != "" && product.attributeDetails != null) {
+      List<dynamic> attrdata = jsonDecode(product.attributeDetails);
+      attrList = attrdata.isNotEmpty
+          ? attrdata.map((c) => Attribute_Data.fromJson(c)).toList()
+          : [];
+      print(attrList);
     }
 
-    if (product.attributeId != null) {
-      attrIDS = product.attributeId.split(',');
-    }
-    if (product.attr_types_price != null) {
-      attrPrice = product.attr_types_price.split(',');
-    }
-
-    print(product);
     return Container(
+      //color: Colors.white,
       margin: EdgeInsets.only(bottom: isSetMeal ? 0 : 10, top: 0),
-      child: ListView.builder(
-          shrinkWrap: true,
-          scrollDirection: Axis.vertical,
-          physics: BouncingScrollPhysics(),
-          itemCount: categorys.length,
-          itemBuilder: (BuildContext ctxt, int index) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                SizedBox(
-                  height: 5,
-                ),
-                Text(
-                  categorys[index],
-                  style: TextStyle(fontSize: SizeConfig.safeBlockVertical * 2),
-                ),
-                Container(
-                    margin: EdgeInsets.symmetric(horizontal: 0, vertical: 4.0),
-                    height: SizeConfig.safeBlockVertical * 8,
-                    child: ListView.builder(
-                        physics: BouncingScrollPhysics(),
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        itemCount: attrs.length,
-                        itemBuilder: (BuildContext ctxt, int i) {
-                          print(product.selectedid == int.parse(attrIDS[i]));
-                          return Padding(
-                              padding: EdgeInsets.all(5),
-                              child: MaterialButton(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    side: BorderSide(
-                                      color: product.selectedid ==
-                                              int.parse(attrIDS[i])
-                                          ? Colors.green
-                                          : Colors.grey[300],
-                                      width: 4,
-                                    )),
-                                minWidth: 50,
-                                child: Text(attrs[i].toString(),
-                                    style: Styles.blackMediumBold()),
-                                textColor: Colors.black,
-                                color: Colors.grey[300],
-                                onPressed: () {
-                                  product.selectedid = int.parse(attrIDS[i]);
-                                  setState(() {
-                                    mealProducts = mealProducts;
-                                  });
-                                },
-                              ));
-                        }))
-              ],
-            );
-          }),
+      // MediaQuery.of(context).size.height /8,
+      child: ListView(
+        shrinkWrap: true,
+        scrollDirection: Axis.vertical,
+        physics: BouncingScrollPhysics(),
+        children: attrList.map((attribute) {
+          var attributType = [];
+          Map attrIDs;
+          Map attrtypesPrice;
+          if (attribute.ca_id != null) {
+            attributType = attribute.attr_types.split(',');
+            attrIDs = attribute.attributeId.split(',').asMap();
+            attrtypesPrice = attribute.attr_types_price.split(',').asMap();
+          }
+          /*Set attribute name for selection toast*/
+          attributeTitle = attribute.attr_name;
+          return attribute.ca_id != null
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      attribute.attr_name != null ? attribute.attr_name : "",
+                      style:
+                          TextStyle(fontSize: SizeConfig.safeBlockVertical * 3),
+                    ),
+                    Container(
+                        margin:
+                            EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
+                        height: SizeConfig.safeBlockVertical * 9,
+                        child: ListView(
+                            physics: BouncingScrollPhysics(),
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            children: attributType
+                                .asMap()
+                                .map((i, attr) {
+                                  return MapEntry(
+                                      i,
+                                      Padding(
+                                          padding: EdgeInsets.all(5),
+                                          child: MaterialButton(
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                                side: BorderSide(
+                                                  color: selectedAttr.any(
+                                                          (item) =>
+                                                              item['ca_id'] ==
+                                                                  attribute
+                                                                      .ca_id &&
+                                                              item['attribute'] ==
+                                                                  attr)
+                                                      ? Colors.green
+                                                      : Colors.grey[300],
+                                                  width: 4,
+                                                )),
+                                            minWidth: 50,
+                                            child: Text(attr.toString(),
+                                                style:
+                                                    Styles.blackMediumBold()),
+                                            textColor: Colors.black,
+                                            color: Colors.grey[300],
+                                            onPressed: () {
+                                              onSelectAttr(
+                                                  i,
+                                                  attribute.ca_id,
+                                                  attr,
+                                                  attrIDs[i],
+                                                  attrtypesPrice[i],
+                                                  null);
+                                            },
+                                          )));
+                                })
+                                .values
+                                .toList()))
+                  ],
+                )
+              : SizedBox();
+        }).toList(),
+      ),
     );
   }
 
@@ -1112,7 +1129,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           var attributType = attribute.attr_types.split(',');
           var attrIDs = attribute.attributeId.split(',').asMap();
           var attrtypesPrice = attribute.attr_types_price.split(',').asMap();
-
           /*Set attribute name for selection toast*/
           attributeTitle = attribute.attr_name;
           return Column(

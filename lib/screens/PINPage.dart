@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -91,7 +92,6 @@ class _PINPageState extends State<PINPage> {
           await CommunFun.checkUserPermission(user.id);
           await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
           await Preferences.setStringToSF(Constant.SHIFT_ID, result.toString());
-          // await Navigator.pushNamed(context, Constant.SelectTableScreen);
           await Navigator.pushNamedAndRemoveUntil(context,
               Constant.SelectTableScreen, (Route<dynamic> route) => false,
               arguments: {"isAssign": false});
@@ -171,52 +171,57 @@ class _PINPageState extends State<PINPage> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return WillPopScope(
-      child: SafeArea(
-        child: Scaffold(
-          key: scaffoldKey,
-          body: Container(
-            //page background image
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage(Strings.assetsBG), fit: BoxFit.cover),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30.0),
-                      color: Colors.white),
-                  width: MediaQuery.of(context).size.width / 1.2,
-                  height: MediaQuery.of(context).size.height / 1.2,
-                  child: Table(
-                    defaultVerticalAlignment: TableCellVerticalAlignment.top,
-                    border: TableBorder(
-                        horizontalInside: BorderSide(
-                            width: 1,
-                            color: Colors.grey,
-                            style: BorderStyle.solid)),
-                    columnWidths: {
-                      0: FractionColumnWidth(.2),
-                      1: FractionColumnWidth(.4),
-                    },
-                    children: [
-                      TableRow(children: [
-                        imageview(context),
-                        getNumbers(context)
-                      ]) // Part 1 image with logo
-                      , // Part 2  Muber keypade
-                    ],
-                  ),
+      child: LoadingOverlay(
+          child: SafeArea(
+            child: Scaffold(
+              key: scaffoldKey,
+              body: Container(
+                //page background image
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage(Strings.assetsBG), fit: BoxFit.cover),
                 ),
-              ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30.0),
+                          color: Colors.white),
+                      width: MediaQuery.of(context).size.width / 1.2,
+                      height: MediaQuery.of(context).size.height / 1.2,
+                      child: Table(
+                        defaultVerticalAlignment:
+                            TableCellVerticalAlignment.top,
+                        border: TableBorder(
+                            horizontalInside: BorderSide(
+                                width: 1,
+                                color: Colors.grey,
+                                style: BorderStyle.solid)),
+                        columnWidths: {
+                          0: FractionColumnWidth(.2),
+                          1: FractionColumnWidth(.4),
+                        },
+                        children: [
+                          TableRow(children: [
+                            imageview(context),
+                            getNumbers(context)
+                          ]) // Part 1 image with logo
+                          , // Part 2  Muber keypade
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+          isLoading: isLoading,
+          color: Colors.black87,
+          progressIndicator: CommunFun.overLayLoader()),
       onWillPop: _willPopCallback,
     );
   }
@@ -431,19 +436,17 @@ class _PINPageState extends State<PINPage> {
                   SizedBox(
                     height: SizeConfig.safeBlockVertical * 2,
                   ),
-                  isLoading
-                      ? CommunFun.loader(context)
-                      : Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                              FlatButton(
-                                  onPressed: () {
-                                    clearPin();
-                                  },
-                                  child: Text(Strings.clear,
-                                      style: Styles.orangeMedium()))
-                            ])
+                  Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        FlatButton(
+                            onPressed: () {
+                              clearPin();
+                            },
+                            child: Text(Strings.clear,
+                                style: Styles.orangeMedium()))
+                      ])
                 ],
               ),
             )

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -20,8 +21,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController emailAddress =
-      new TextEditingController(text: "");
+  TextEditingController emailAddress = new TextEditingController(text: "");
   TextEditingController userPin = new TextEditingController(text: "");
   GlobalKey<ScaffoldState> scaffoldKey;
 
@@ -30,8 +30,7 @@ class _LoginPageState extends State<LoginPage> {
   var errorPin = "";
   bool isValidateEmail = true;
   bool isValidatePassword = true;
-  bool isLoading = false;
-
+  bool isScreenLoad = false;
   @override
   void initState() {
     super.initState();
@@ -77,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
     if (connected) {
       if (isValid) {
         setState(() {
-          isLoading = true;
+          isScreenLoad = true;
         });
         User user = new User();
         var terkey = await CommunFun.getTeminalKey();
@@ -93,17 +92,17 @@ class _LoginPageState extends State<LoginPage> {
             user = User.fromJson(value["data"]);
             await CommunFun.syncAfterSuccess(context, true);
             setState(() {
-              isLoading = false;
+              isScreenLoad = false;
             });
           } else {
             setState(() {
-              isLoading = false;
+              isScreenLoad = false;
             });
             CommunFun.showToast(context, value["message"]);
           }
         }).catchError((e) {
           setState(() {
-            isLoading = false;
+            isScreenLoad = false;
           });
           CommunFun.showToast(context, e.message);
         }).whenComplete(() {});
@@ -119,58 +118,58 @@ class _LoginPageState extends State<LoginPage> {
     return WillPopScope(
       child: Scaffold(
         key: scaffoldKey,
-        body: SafeArea(
-          child: Center(
-            // Login main part
-            child: Container(
-              width: MediaQuery.of(context).size.width / 1.8,
-              padding: EdgeInsets.only(left: 30, right: 30),
-              child: new SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    loginlogo(), // logo
-                    SizedBox(height: SizeConfig.safeBlockVertical * 5),
-                    CommunFun.loginText(),
-                    SizedBox(height: SizeConfig.safeBlockVertical * 6),
-                    // username input
-                    emailInput((e) {
-                      if (e.length > 0) {
-                        setState(() {
-                          errorUserName = "";
-                          isValidateEmail = true;
-                        });
-                      }
-                    }),
-                    SizedBox(height: SizeConfig.safeBlockVertical * 6),
-                    // password input
-                    passwordInput((e) {
-                      setState(() {
-                        errorPin = "";
-                        isValidatePassword = true;
-                      });
-                    }),
-                    SizedBox(height: SizeConfig.safeBlockVertical * 6),
-
-                    isLoading
-                        ? CommunFun.loader(context)
-                        : Container(
-                            // Login button
-                            width: MediaQuery.of(context).size.width,
-                            child:
-                                CommunFun.roundedButton("LOGIN", context, () {
-                              // LOGIN API
-                              sendlogin();
-                            }),
-                          )
-                  ],
+        body: LoadingOverlay(
+            child: SafeArea(
+              child: Center(
+                // Login main part
+                child: Container(
+                  width: MediaQuery.of(context).size.width / 1.8,
+                  padding: EdgeInsets.only(left: 30, right: 30),
+                  child: new SingleChildScrollView(
+                    physics: BouncingScrollPhysics(),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        loginlogo(), // logo
+                        SizedBox(height: SizeConfig.safeBlockVertical * 5),
+                        CommunFun.loginText(),
+                        SizedBox(height: SizeConfig.safeBlockVertical * 6),
+                        // username input
+                        emailInput((e) {
+                          if (e.length > 0) {
+                            setState(() {
+                              errorUserName = "";
+                              isValidateEmail = true;
+                            });
+                          }
+                        }),
+                        SizedBox(height: SizeConfig.safeBlockVertical * 6),
+                        // password input
+                        passwordInput((e) {
+                          setState(() {
+                            errorPin = "";
+                            isValidatePassword = true;
+                          });
+                        }),
+                        SizedBox(height: SizeConfig.safeBlockVertical * 6),
+                        Container(
+                          // Login button
+                          width: MediaQuery.of(context).size.width,
+                          child: CommunFun.roundedButton("LOGIN", context, () {
+                            // LOGIN API
+                            sendlogin();
+                          }),
+                        )
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
+            isLoading: isScreenLoad,
+            color: Colors.black87,
+            progressIndicator: CommunFun.overLayLoader()),
       ),
       onWillPop: _willPopCallback,
     );

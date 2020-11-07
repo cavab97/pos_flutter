@@ -49,6 +49,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   bool isAssigning = false;
   bool isChanging = false;
   bool isShiftOpen = true;
+  bool isMenuOpne = false;
   TabController _tabController;
   @override
   void initState() {
@@ -62,7 +63,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     );
     _tabController = new TabController(length: 2, vsync: this);
     checkshift();
-    checkSelectedTable();
+
     getAllPrinter();
   }
 
@@ -73,12 +74,8 @@ class _SelectTablePageState extends State<SelectTablePage>
     });
   }
 
-  checkSelectedTable() async {
-    var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
-    if (tableid != null) {}
-  }
-
   getTables() async {
+    // Tables List call
     setState(() {
       isLoading = true;
     });
@@ -91,27 +88,30 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   viewOrder() async {
+    // view order data if already order in table
     var tableid = selectedTable.tableId;
     List<Table_order> order = await localAPI.getTableOrders(tableid);
     await Preferences.setStringToSF(Constant.TABLE_DATA, json.encode(order[0]));
-    Navigator.of(context).pop();
     Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
   ontableTap(table) {
+    // select table for new order
     setState(() {
       selectedTable = table;
+      isMenuOpne = true;
     });
-    if (isAssigning) {
-      opnPaxDailog();
-    } else {
-      paxController.text =
-          table.numberofpax != null ? table.numberofpax.toString() : "";
-      openSelectTablePop();
-    }
+    // if (isAssigning) {
+    //   opnPaxDailog();
+    // } else {
+    paxController.text =
+        table.numberofpax != null ? table.numberofpax.toString() : "";
+    //   openSelectTablePop();
+    // }
   }
 
   mergeTabledata(TablesDetails table) async {
+    // Merge table
     TablesDetails table1 = mergeInTable;
     TablesDetails table2 = table;
     Table_order table_order = new Table_order();
@@ -126,7 +126,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       isMergeing = false;
       mergeInTable = null;
     });
-    CommunFun.showToast(context, "Table merged");
+    CommunFun.showToast(context, Strings.table_mearged_msg);
     getTables();
   }
 
@@ -135,8 +135,6 @@ class _SelectTablePageState extends State<SelectTablePage>
       isMergeing = true;
       mergeInTable = table;
     });
-    Navigator.of(context).pop();
-    //opnPaxDailog();
   }
 
   selectTableForNewOrder() async {
@@ -146,14 +144,12 @@ class _SelectTablePageState extends State<SelectTablePage>
       table_order.number_of_pax = int.parse(paxController.text);
       table_order.save_order_id = selectedTable.saveorderid;
       var result = await localAPI.insertTableOrder(table_order);
-
       await Preferences.setStringToSF(
           Constant.TABLE_DATA, json.encode(table_order));
+      paxController.text = "";
       Navigator.of(context).pop();
       if (!isChanging) {
         Navigator.pushNamed(context, Constant.DashboardScreen);
-      } else {
-        Navigator.of(context).pop();
       }
       getTables();
     } else {
@@ -174,7 +170,6 @@ class _SelectTablePageState extends State<SelectTablePage>
       await localAPI.insertTableOrder(tableorder);
       await localAPI.insertSaveOrders(orderData, selectedTable.tableId);
       await localAPI.updateTableidintocart(orderid, selectedTable.tableId);
-      Navigator.of(context).pop();
       Navigator.pushNamed(context, Constant.WebOrderPages);
     } else {
       CommunFun.showToast(context, "Please enter pax minimum table capcity.");
@@ -186,7 +181,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       context: context,
       // barrierDismissible: false,
       builder: (BuildContext context) {
-        return alertDailog(context);
+        //return alertDailog(context);
       },
     );
   }
@@ -213,11 +208,9 @@ class _SelectTablePageState extends State<SelectTablePage>
     }
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await getTables();
-    Navigator.of(context).pop();
   }
 
   changeTablePop() {
-    Navigator.of(context).pop();
     CommonUtils.showAlertDialog(context, () {
       Navigator.of(context).pop();
     }, () {
@@ -264,6 +257,31 @@ class _SelectTablePageState extends State<SelectTablePage>
     opnPaxDailog();
   }
 
+  addNewOrder() {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return QRCodesImagePop(
+            ip: selectedTable.tableQr,
+            onClose: () {
+              setState(() {
+                isChanging = false;
+              });
+              opnPaxDailog();
+            },
+          );
+        });
+  }
+
+  void selectOption(choice) {
+    // Causes the app to rebuild with the new _selectedChoice.
+  }
+
+  openDrawer() {
+    scaffoldKey.currentState.openDrawer();
+  }
+
   @override
   Widget build(BuildContext context) {
     Future<bool> _willPopCallback() async {
@@ -278,87 +296,110 @@ class _SelectTablePageState extends State<SelectTablePage>
     });
     return WillPopScope(
       child: Scaffold(
-        key: scaffoldKey,
-        drawer: DrawerWid(),
-        appBar: AppBar(
-          centerTitle: false,
-          leading: IconButton(
-              onPressed: () {
-                scaffoldKey.currentState.openDrawer();
-              },
-              icon: Icon(
-                Icons.dehaze,
-                color: Colors.white,
-                size: SizeConfig.safeBlockVertical * 5,
-              )),
-          iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          title: SizedBox(
-            height: SizeConfig.safeBlockVertical * 5,
-            child: Image.asset(Strings.asset_headerLogo,
-                fit: BoxFit.contain, gaplessPlayback: true),
-          ),
-          bottom: TabBar(
-            controller: _tabController,
-            indicatorSize: TabBarIndicatorSize.tab,
-            unselectedLabelColor: Colors.white,
-            unselectedLabelStyle: Styles.whiteBoldsmall(),
-            indicator: BoxDecoration(color: Colors.deepOrange),
-            labelColor: Colors.white,
-            labelStyle: Styles.whiteBoldsmall(),
-            tabs: [
-              Tab(
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Text(
-                    "Dine In",
-                  ),
-                ),
-              ),
-              Tab(
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Text(
-                    "Take Away",
+          key: scaffoldKey,
+          drawer: DrawerWid(),
+          appBar: AppBar(
+            centerTitle: false,
+            leading: IconButton(
+                onPressed: () {
+                  scaffoldKey.currentState.openDrawer();
+                },
+                icon: Icon(
+                  Icons.dehaze,
+                  color: Colors.white,
+                  size: SizeConfig.safeBlockVertical * 5,
+                )),
+            iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            title: SizedBox(
+              height: SizeConfig.safeBlockVertical * 5,
+              child: Image.asset(Strings.asset_headerLogo,
+                  fit: BoxFit.contain, gaplessPlayback: true),
+            ),
+            bottom: TabBar(
+              controller: _tabController,
+              indicatorSize: TabBarIndicatorSize.tab,
+              unselectedLabelColor: Colors.white,
+              unselectedLabelStyle: Styles.whiteBoldsmall(),
+              indicator: BoxDecoration(color: Colors.deepOrange),
+              labelColor: Colors.white,
+              labelStyle: Styles.whiteBoldsmall(),
+              tabs: [
+                Tab(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Text(
+                      "Dine In",
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        body: new GestureDetector(
-            onTap: () {
-              FocusScope.of(context).requestFocus(new FocusNode());
-            },
-            child: SafeArea(
-                child: Stack(
-              children: <Widget>[
-                TabBarView(
-                  controller: _tabController,
-                  physics: AlwaysScrollableScrollPhysics(),
-                  children: [
-                    Container(
-                        padding: EdgeInsets.all(10),
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.width,
-                        child: tablesListwidget(1)),
-                    Container(
-                        padding: EdgeInsets.all(10),
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.width,
-                        child: tablesListwidget(2))
-                  ],
+                Tab(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Text(
+                      "Take Away",
+                    ),
+                  ),
                 ),
-                !isShiftOpen ? openShiftButton(context) : SizedBox(),
               ],
-            ))),
-      ),
+            ),
+          ),
+          body: new GestureDetector(
+              onTap: () {
+                FocusScope.of(context).requestFocus(new FocusNode());
+              },
+              child: SafeArea(
+                child: Stack(children: <Widget>[
+                  TabBarView(
+                    controller: _tabController,
+                    physics: AlwaysScrollableScrollPhysics(),
+                    children: [
+                      Container(
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Container(
+                                padding: EdgeInsets.all(10),
+                                height: MediaQuery.of(context).size.height,
+                                width: isMenuOpne
+                                    ? MediaQuery.of(context).size.width / 1.5
+                                    : MediaQuery.of(context).size.width,
+                                child: tablesListwidget(1)),
+                            menuItemDiv()
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Container(
+                                padding: EdgeInsets.all(10),
+                                height: MediaQuery.of(context).size.height,
+                                width: isMenuOpne
+                                    ? MediaQuery.of(context).size.width / 1.5
+                                    : MediaQuery.of(context).size.width,
+                                child: tablesListwidget(2)),
+                            menuItemDiv()
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                ]),
+              ))),
       onWillPop: _willPopCallback,
     );
   }
@@ -481,6 +522,71 @@ class _SelectTablePageState extends State<SelectTablePage>
     );
   }
 
+  Widget menuItemDiv() {
+    return isMenuOpne
+        ? Container(
+            margin: EdgeInsets.all(10),
+            padding: EdgeInsets.all(10),
+            width: MediaQuery.of(context).size.width / 3.5,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+            ),
+            child: optionsList(context))
+        : SizedBox();
+  }
+
+  Widget optionsList(context) {
+    return ListView(
+      physics: BouncingScrollPhysics(),
+      shrinkWrap: true,
+      children: [
+        selectedTable != null
+            ? Text(
+                selectedTable.numberofpax == null
+                    ? selectedTable.tableName
+                    : selectedTable.tableName +
+                        " : " +
+                        selectedTable.numberofpax.toString(),
+                textAlign: TextAlign.center,
+                style: Styles.whiteMediumBold(),
+              )
+            : SizedBox(),
+        selectedTable.numberofpax == null
+            ? neworder_button(
+                Icons.supervised_user_circle, Strings.new_order, context, () {
+                addNewOrder();
+              })
+            : SizedBox(),
+        selectedTable.numberofpax != null
+            ? neworder_button(
+                Icons.supervised_user_circle, Strings.change_pax, context, () {
+                changePax();
+              })
+            : SizedBox(),
+        selectedTable.numberofpax != null
+            ? neworder_button(Icons.remove_red_eye, Strings.view_order, context,
+                () {
+                viewOrder();
+              })
+            : SizedBox(),
+        selectedTable.numberofpax != null
+            ? neworder_button(
+                Icons.change_history, Strings.change_table, context, () {
+                changeTablePop();
+              })
+            : SizedBox(),
+        selectedTable.numberofpax != null
+            ? neworder_button(Icons.cancel, Strings.cancle_order, context, () {
+                cancleTableOrder();
+              })
+            : SizedBox(),
+        neworder_button(Icons.call_merge, Strings.merge_order, context, () {
+          mergeTable(selectedTable);
+        })
+      ],
+    );
+  }
+
   Widget closeButton(context) {
     return Positioned(
       top: -30,
@@ -509,64 +615,6 @@ class _SelectTablePageState extends State<SelectTablePage>
     );
   }
 
-  Widget alertDailog(context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0))),
-      content: Builder(
-        builder: (context) {
-          return Container(
-              //height: MediaQuery.of(context).size.height / 4,
-              width: MediaQuery.of(context).size.width / 4.5,
-              child: ListView(
-                physics: BouncingScrollPhysics(),
-                shrinkWrap: true,
-                children: ListTile.divideTiles(
-                  context: context,
-                  tiles: [
-                    selectedTable.numberofpax == null
-                        ? ListTile(
-                            title: neworder_button(context),
-                          )
-                        : SizedBox(),
-                    selectedTable.numberofpax != null
-                        ? ListTile(
-                            title: changePaxbtn(context),
-                          )
-                        : SizedBox(),
-                    selectedTable.numberofpax != null
-                        ? ListTile(
-                            title: viewOrderBtn(context),
-                          )
-                        : SizedBox(),
-                    selectedTable.numberofpax != null
-                        ? ListTile(
-                            title: changeTable(context),
-                          )
-                        : SizedBox(),
-                    selectedTable.numberofpax != null
-                        ? ListTile(
-                            title: cancleOrder(context),
-                          )
-                        : SizedBox(),
-                    ListTile(
-                      onTap: () {
-                        mergeTable(selectedTable);
-                      },
-                      title: Text(
-                        Strings.merge_order,
-                        textAlign: TextAlign.center,
-                        style: Styles.bluesmall(),
-                      ),
-                    )
-                  ],
-                ).toList(),
-              ));
-        },
-      ),
-    );
-  }
-
   Widget changeTable(context) {
     return GestureDetector(
       onTap: () {
@@ -577,44 +625,25 @@ class _SelectTablePageState extends State<SelectTablePage>
     );
   }
 
-  /*Widget neworder_button(context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).pop();
-        setState(() {
-          isChanging = false;
-        });
-        opnPaxDailog();
-      },
-      child: Text(Strings.new_order,
-          textAlign: TextAlign.center, style: Styles.bluesmall()),
-    );
-  }*/
-
-  Widget neworder_button(context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).pop();
-        showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext context) {
-              return QRCodesImagePop(
-                ip: selectedTable.tableQr,
-                onClose: () {
-                  //  Navigator.of(context).pop();
-                  setState(() {
-                    isChanging = false;
-                  });
-                  opnPaxDailog();
-                },
-              );
-            });
-        // opnPaxDailog();
-      },
-      child: Text(Strings.new_order,
-          textAlign: TextAlign.center, style: Styles.bluesmall()),
-    );
+  Widget neworder_button(icon, name, context, onclick) {
+    return new OutlineButton(
+        padding: EdgeInsets.all(10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Icon(icon, color: Colors.white),
+            SizedBox(width: 20),
+            Text(name,
+                textAlign: TextAlign.center, style: Styles.whiteSimpleSmall())
+          ],
+        ),
+        borderSide:
+            BorderSide(color: Colors.black, width: 1, style: BorderStyle.solid),
+        onPressed: onclick,
+        shape: new RoundedRectangleBorder(
+            side: BorderSide(
+                color: Colors.black, width: 1, style: BorderStyle.solid),
+            borderRadius: new BorderRadius.circular(0.0)));
   }
 
   Widget changePaxbtn(context) {
@@ -778,7 +807,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   Widget tablesListwidget(type) {
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2.4;
-    final double itemWidth = size.width / 4.2;
+    final double itemWidth = size.width / 4.5;
     if (isAssigning) {
       var list = tableList
           .where((x) => x.numberofpax == 0 || x.numberofpax == null)
@@ -810,11 +839,13 @@ class _SelectTablePageState extends State<SelectTablePage>
     return GridView.count(
       physics: BouncingScrollPhysics(),
       shrinkWrap: true,
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
       childAspectRatio: (itemWidth / itemHeight),
-      crossAxisCount: 6,
+      crossAxisCount: isMenuOpne ? 4 : 6,
       children: newtableList.map((table) {
         return InkWell(
-          borderRadius: BorderRadius.all(Radius.circular(30.0)),
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
           onTap: () {
             if (isMergeing) {
               if (table.merged_table_id == null) {
@@ -847,8 +878,8 @@ class _SelectTablePageState extends State<SelectTablePage>
                     decoration: new BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(20.0),
-                            topRight: Radius.circular(20.0))),
+                            topLeft: Radius.circular(8.0),
+                            topRight: Radius.circular(8.0))),
                     width: MediaQuery.of(context).size.width,
                     height: itemHeight / 2,
                     child: Column(
@@ -876,8 +907,8 @@ class _SelectTablePageState extends State<SelectTablePage>
                           ? Colors.deepOrange
                           : Colors.grey[600],
                       borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(20.0),
-                          bottomRight: Radius.circular(20.0))),
+                          bottomLeft: Radius.circular(8.0),
+                          bottomRight: Radius.circular(8.0))),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -903,8 +934,8 @@ class _SelectTablePageState extends State<SelectTablePage>
                     left: 10,
                     child: Text(
                         table.numberofpax != null
-                            ? Strings.orders + " 1"
-                            : Strings.orders + "0",
+                            ? Strings.orders + " 1 "
+                            : Strings.orders + " 0 ",
                         style: Styles.blackMediumBold()))
               ],
             ),

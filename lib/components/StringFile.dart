@@ -1,6 +1,7 @@
 class Strings {
   /*Print horizontal 64 lines*/
-  static String print64line = "————————————————————————————————————————————————————————————————";
+  static String print64line =
+      "————————————————————————————————————————————————————————————————";
   static String print15line = "---------------";
   static String print1BlankLine = " ";
 
@@ -134,5 +135,8 @@ class Strings {
   static String shift_opne_alert_msg_webOrder =
       "Currently shift was closed,Please opne shift after you  can see web Orders.";
 
-   static String auto_sync = "Auto sync";   
+  static String auto_sync = "Auto sync";
+  static String take_away = "Take Away";
+  static String dine_in = "Dine In";
+  static String table_mearged_msg = "Table merged.";
 }

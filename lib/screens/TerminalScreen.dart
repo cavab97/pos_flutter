@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -89,44 +90,46 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
     return Scaffold(
       //  main part of the page
       key: scaffoldKey,
-      body: SafeArea(
-        child: Center(
-          child: Container(
-            width: MediaQuery.of(context).size.width / 1.7,
-            child: new SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  loginlogo(), // Login logo
-                  SizedBox(height: 80),
-                  terminalKeyInput((e) {
-                    if (e.length > 0) {
-                      setState(() {
-                        errormessage = "";
-                        isValidatekey = true;
-                      });
-                    }
-                  }),
-                  SizedBox(height: 50),
-                  isLoading
-                      ? CommunFun.loader(context)
-                      : Container(
-                          // Key add button
-                          width: MediaQuery.of(context).size.width,
-                          child: CommunFun.roundedButton(
-                              Strings.set_terminal_key.toUpperCase(), context,
-                              () {
-                            setTerminalkey();
-                          }),
-                        )
-                ],
+      body: LoadingOverlay(
+          child: SafeArea(
+            child: Center(
+              child: Container(
+                width: MediaQuery.of(context).size.width / 1.7,
+                child: new SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      loginlogo(), // Login logo
+                      SizedBox(height: 80),
+                      terminalKeyInput((e) {
+                        if (e.length > 0) {
+                          setState(() {
+                            errormessage = "";
+                            isValidatekey = true;
+                          });
+                        }
+                      }),
+                      SizedBox(height: 50),
+                      Container(
+                        // Key add button
+                        width: MediaQuery.of(context).size.width,
+                        child: CommunFun.roundedButton(
+                            Strings.set_terminal_key.toUpperCase(), context,
+                            () {
+                          setTerminalkey();
+                        }),
+                      )
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
+          isLoading: isLoading,
+          color: Colors.black87,
+          progressIndicator: CommunFun.overLayLoader()),
     );
   }
 
