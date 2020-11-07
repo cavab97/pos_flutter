@@ -43,9 +43,15 @@ class SplashScreenstate extends State<SplashScreen> {
       final bool isLogged = await CommunFun.isLogged();
       if (isLogged) {
         setTimer();
-        await Navigator.of(context).pushNamed(Constant.DashboardScreen);
+        await Navigator.pushNamedAndRemoveUntil(context,
+            Constant.SelectTableScreen, (Route<dynamic> route) => false,
+            arguments: {"isAssign": false});
       } else {
-        await Navigator.of(context).pushNamed(Constant.TerminalScreen);
+        await Navigator.pushNamedAndRemoveUntil(
+          context,
+          Constant.TerminalScreen,
+          (Route<dynamic> route) => false,
+        );
       }
     });
   }

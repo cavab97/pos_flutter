@@ -60,7 +60,8 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
                 Constant.TERMINAL_KEY, value["terminal_id"].toString());
             Preferences.setStringToSF(
                 Constant.BRANCH_ID, value["branch_id"].toString());
-            Navigator.pushNamed(context, Constant.LoginScreen,
+            Navigator.pushNamedAndRemoveUntil(
+                context, Constant.LoginScreen, (Route<dynamic> route) => false,
                 arguments: {"terminalId": value["terminal_id"]});
           } else if (value != null && value["status"] == Constant.STATUS422) {
             CommunFun.showToast(context, value["message"]);
@@ -68,7 +69,6 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
             CommunFun.showToast(context, value["message"]);
           }
         }).catchError((e) {
-        
           CommunFun.showToast(context, e.message);
           setState(() {
             isLoading = false;

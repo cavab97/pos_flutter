@@ -389,8 +389,9 @@ class CommunFun {
         } else {
           await checkUserDeleted(context);
           await checkpermission();
-          Navigator.pushNamed(context, Constant.DashboardScreen);
-        }
+          await Navigator.pushNamedAndRemoveUntil(context,
+              Constant.SelectTableScreen, (Route<dynamic> route) => false,
+              arguments: {"isAssign": false});        }
       } else {
         if (aceets["data"]["next_offset"] == 0) {
           await CommunFun.setServerTime(aceets, "4");

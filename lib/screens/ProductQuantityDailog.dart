@@ -1123,7 +1123,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               isSetMeal
                   ? SizedBox()
                   : Text(
-                      attribute.attr_name,
+                      attribute.attr_name != null ? attribute.attr_name : "",
                       style:
                           TextStyle(fontSize: SizeConfig.safeBlockVertical * 3),
                     ),

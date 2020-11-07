@@ -91,7 +91,10 @@ class _PINPageState extends State<PINPage> {
           await CommunFun.checkUserPermission(user.id);
           await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
           await Preferences.setStringToSF(Constant.SHIFT_ID, result.toString());
-          await Navigator.pushNamed(context, Constant.DashboardScreen);
+          // await Navigator.pushNamed(context, Constant.SelectTableScreen);
+          await Navigator.pushNamedAndRemoveUntil(context,
+              Constant.SelectTableScreen, (Route<dynamic> route) => false,
+              arguments: {"isAssign": false});
           setState(() {
             isLoading = false;
           });

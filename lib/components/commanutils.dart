@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PermissionPop.dart';
 
 class CommonUtils {
@@ -81,6 +83,19 @@ class CommonUtils {
               perFor: permissionFor,
               onEnter: () {
                 callback();
+              });
+        });
+  }
+
+  static openOpningAmmountPop(context, isopning,callback) {
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return OpeningAmmountPage(
+              ammountext: isopning,
+              onEnter: (ammountext) {
+              callback(ammountext);
               });
         });
   }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:mcncashier/components/DrawerWidget.dart';
 import 'package:mcncashier/components/QrScanAndGenrate.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
@@ -9,8 +10,12 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/saveOrder.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -30,6 +35,9 @@ class _SelectTablePageState extends State<SelectTablePage>
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
   List<TablesDetails> tableList = new List<TablesDetails>();
+  PrintReceipt printKOT = PrintReceipt();
+  List<Printer> printerList = new List<Printer>();
+  List<Printer> printerreceiptList = new List<Printer>();
   var selectedTable;
   var number_of_pax;
   var orderid;
@@ -40,6 +48,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   bool isChangingTable = false;
   bool isAssigning = false;
   bool isChanging = false;
+  bool isShiftOpen = true;
   TabController _tabController;
   @override
   void initState() {
@@ -52,7 +61,16 @@ class _SelectTablePageState extends State<SelectTablePage>
       },
     );
     _tabController = new TabController(length: 2, vsync: this);
+    checkshift();
     checkSelectedTable();
+    getAllPrinter();
+  }
+
+  checkshift() async {
+    var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
+    setState(() {
+      isShiftOpen = isOpen != null && isOpen == "true" ? true : false;
+    });
   }
 
   checkSelectedTable() async {
@@ -132,7 +150,12 @@ class _SelectTablePageState extends State<SelectTablePage>
       await Preferences.setStringToSF(
           Constant.TABLE_DATA, json.encode(table_order));
       Navigator.of(context).pop();
-      Navigator.pushNamed(context, Constant.DashboardScreen);
+      if (!isChanging) {
+        Navigator.pushNamed(context, Constant.DashboardScreen);
+      } else {
+        Navigator.of(context).pop();
+      }
+      getTables();
     } else {
       CommunFun.showToast(context, "Please enter pax minimum table capcity.");
     }
@@ -243,97 +266,218 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   @override
   Widget build(BuildContext context) {
-    final Map arguments = ModalRoute.of(context).settings.arguments as Map;
+    Future<bool> _willPopCallback() async {
+      return false;
+    }
 
+    final Map arguments = ModalRoute.of(context).settings.arguments as Map;
+    SizeConfig().init(context);
     setState(() {
       isAssigning = arguments['isAssign'];
       orderid = arguments['orderID'];
     });
-    return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-        leading: new IconButton(
-          icon: new Icon(
-            Icons.arrow_back,
-            size: 30.0,
+    return WillPopScope(
+      child: Scaffold(
+        key: scaffoldKey,
+        drawer: DrawerWid(),
+        appBar: AppBar(
+          centerTitle: false,
+          leading: IconButton(
+              onPressed: () {
+                scaffoldKey.currentState.openDrawer();
+              },
+              icon: Icon(
+                Icons.dehaze,
+                color: Colors.white,
+                size: SizeConfig.safeBlockVertical * 5,
+              )),
+          iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: SizedBox(
+            height: SizeConfig.safeBlockVertical * 5,
+            child: Image.asset(Strings.asset_headerLogo,
+                fit: BoxFit.contain, gaplessPlayback: true),
           ),
-          onPressed: () {
-            if (isMergeing || isChangingTable) {
-              setState(() {
-                isMergeing = false;
-                mergeInTable = null;
-                isChangingTable = false;
-                changeInTable = null;
-              });
-            } else {
-              Navigator.pushNamed(context, Constant.DashboardScreen);
-            }
-          },
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorSize: TabBarIndicatorSize.tab,
+            unselectedLabelColor: Colors.white,
+            unselectedLabelStyle: Styles.whiteBoldsmall(),
+            indicator: BoxDecoration(color: Colors.deepOrange),
+            labelColor: Colors.white,
+            labelStyle: Styles.whiteBoldsmall(),
+            tabs: [
+              Tab(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Text(
+                    "Dine In",
+                  ),
+                ),
+              ),
+              Tab(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Text(
+                    "Take Away",
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Text(
-            isMergeing
-                ? Strings.merge_table
-                : isChangingTable ? Strings.change_table : Strings.select_table,
-            style: Styles.whiteMediumBold()),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorSize: TabBarIndicatorSize.tab,
-          unselectedLabelColor: Colors.white,
-          unselectedLabelStyle: Styles.whiteBoldsmall(),
-          indicator: BoxDecoration(color: Colors.deepOrange),
-          labelColor: Colors.white,
-          labelStyle: Styles.whiteBoldsmall(),
-          tabs: [
-            Tab(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
+        body: new GestureDetector(
+            onTap: () {
+              FocusScope.of(context).requestFocus(new FocusNode());
+            },
+            child: SafeArea(
+                child: Stack(
+              children: <Widget>[
+                TabBarView(
+                  controller: _tabController,
+                  physics: AlwaysScrollableScrollPhysics(),
+                  children: [
+                    Container(
+                        padding: EdgeInsets.all(10),
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        child: tablesListwidget(1)),
+                    Container(
+                        padding: EdgeInsets.all(10),
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        child: tablesListwidget(2))
+                  ],
                 ),
-                child: Text(
-                  "Dine In",
-                ),
+                !isShiftOpen ? openShiftButton(context) : SizedBox(),
+              ],
+            ))),
+      ),
+      onWillPop: _willPopCallback,
+    );
+  }
+
+  sendOpenShft(ammount) async {
+    setState(() {
+      isShiftOpen = true;
+    });
+    Preferences.setStringToSF(Constant.IS_SHIFT_OPEN, isShiftOpen.toString());
+    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+    var terminalId = await CommunFun.getTeminalKey();
+    var branchid = await CommunFun.getbranchId();
+    User userdata = await CommunFun.getuserDetails();
+    Shift shift = new Shift();
+    shift.appId = int.parse(terminalId);
+    shift.terminalId = int.parse(terminalId);
+    shift.branchId = int.parse(branchid);
+    shift.userId = userdata.id;
+    shift.uuid = await CommunFun.getLocalID();
+    shift.status = 1;
+    if (shiftid == null) {
+      shift.startAmount = int.parse(ammount);
+    } else {
+      shift.shiftId = int.parse(shiftid);
+      shift.endAmount = int.parse(ammount);
+    }
+    shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    shift.updatedBy = userdata.id;
+    var result = await localAPI.insertShift(shift);
+    if (shiftid == null) {
+      await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
+    } else {
+      await Preferences.removeSinglePref(Constant.DASH_SHIFT);
+      await Preferences.removeSinglePref(Constant.IS_SHIFT_OPEN);
+      await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
+      checkshift();
+    }
+  }
+
+  openOpningAmmountPop(isopning) {
+    CommonUtils.openOpningAmmountPop(context, isopning, (ammount) {
+      if (isopning == Strings.title_opening_amount) {
+        if (printerreceiptList.length > 0) {
+          printKOT.testReceiptPrint(printerreceiptList[0].printerIp.toString(),
+              context, "", "OpenDrawer");
+        } else {
+          CommunFun.showToast(context, Strings.printer_not_available);
+        }
+      }
+      sendOpenShft(ammount);
+    });
+  }
+
+  getAllPrinter() async {
+    List<Printer> printer = await localAPI.getAllPrinterForKOT();
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    setState(() {
+      printerList = printer;
+      printerreceiptList = printerDraft;
+    });
+  }
+
+  Widget openShiftButton(context) {
+    // Payment button
+    return Positioned(
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+      child: Center(
+        child: Container(
+          color: Colors.black87,
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                Strings.shiftTextLable,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: SizeConfig.safeBlockVertical * 4),
               ),
-            ),
-            Tab(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Text(
-                  "Take Away",
-                ),
+              SizedBox(height: 25),
+              Text(
+                Strings.closed,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: SizeConfig.safeBlockVertical * 6,
+                    fontWeight: FontWeight.bold),
               ),
-            ),
-          ],
+              SizedBox(height: 40),
+              shiftbtn(() {
+                openOpningAmmountPop(Strings.title_opening_amount);
+              })
+            ],
+          ),
         ),
       ),
-      body: new GestureDetector(
-          onTap: () {
-            FocusScope.of(context).requestFocus(new FocusNode());
-          },
-          child: SafeArea(
-            child: TabBarView(
-              controller: _tabController,
-              physics: AlwaysScrollableScrollPhysics(),
-              children: [
-                Container(
-                    padding: EdgeInsets.all(10),
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    child: tablesListwidget(1)),
-                Container(
-                    padding: EdgeInsets.all(10),
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    child: tablesListwidget(2)),
-              ],
-            ),
-          )),
+    );
+  }
+
+  Widget shiftbtn(Function onPress) {
+    return RaisedButton(
+      padding: EdgeInsets.only(top: 15, left: 30, right: 30, bottom: 15),
+      onPressed: onPress,
+      child: Text(
+        Strings.open_shift,
+        style: TextStyle(
+            color: Colors.deepOrange,
+            fontSize: SizeConfig.safeBlockVertical * 4),
+      ),
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+            width: 1, style: BorderStyle.solid, color: Colors.deepOrange),
+        borderRadius: BorderRadius.circular(10.0),
+      ),
     );
   }
 
@@ -458,7 +602,7 @@ class _SelectTablePageState extends State<SelectTablePage>
               return QRCodesImagePop(
                 ip: selectedTable.tableQr,
                 onClose: () {
-                //  Navigator.of(context).pop();
+                  //  Navigator.of(context).pop();
                   setState(() {
                     isChanging = false;
                   });

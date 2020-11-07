@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:mcncashier/components/DrawerWidget.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/commanutils.dart';
@@ -171,27 +172,6 @@ class _DashboradPageState extends State<DashboradPage>
     );
   }
 
-  // checkisAutoSync() async {
-  //   var isSync = await Preferences.getStringValuesSF(Constant.IS_AUTO_SYNC);
-  //   if (isSync != null) {
-  //     print(isSync);
-  //     if (isSync == "true") {
-  //       startAutosync();
-  //     }
-  //   }
-  // }
-
-  // startAutosync() async {
-  //   int timertime = 3;
-  //   var isSynctimer = await Preferences.getStringValuesSF(Constant.SYNC_TIMER);
-  //   if (isSynctimer != null) {
-  //     timertime = int.parse(isSynctimer);
-  //   }
-  //   timer = new Timer.periodic(new Duration(minutes: 1), (timer) async {
-  //     await CommunFun.autosyncAllTables(context);
-  //   });
-  // }
-
   void handleSlideAnimationChanged(Animation<double> slideAnimation) {}
 
   void handleSlideIsOpenChanged(bool isOpen) {}
@@ -231,11 +211,9 @@ class _DashboradPageState extends State<DashboradPage>
         getCurrentCart();
       }
     } else {
-      // clearCart();
-      // if (isShiftOpen) {
-      //   Navigator.pushNamed(context, Constant.SelectTableScreen,
-      //       arguments: {"isAssign": false});
-      // }
+      Navigator.pushNamedAndRemoveUntil(
+          context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
+          arguments: {"isAssign": false});
     }
   }
 
@@ -264,31 +242,6 @@ class _DashboradPageState extends State<DashboradPage>
       if (isShiftOpen) {
         getCartItem(currentCart);
       }
-    }
-  }
-
-  syncAllTables() async {
-    Navigator.of(context).pop();
-    await Preferences.removeSinglePref(Constant.LastSync_Table);
-    await Preferences.removeSinglePref(Constant.OFFSET);
-    await CommunFun.opneSyncPop(context);
-    await CommunFun.syncOrdersANDStore(context, false);
-    await CommunFun.syncAfterSuccess(context, false);
-    //  Navigator.of(context).pop();
-    //await checkisInit();
-  }
-
-  syncOrdersTodatabase() async {
-    await CommunFun.opneSyncPop(context);
-    await CommunFun.syncOrdersANDStore(context, true);
-  }
-
-  gotoShiftReport() {
-    if (isShiftOpen) {
-      Navigator.of(context).pop();
-      Navigator.pushNamed(context, Constant.ShiftOrders);
-    } else {
-      CommunFun.showToast(context, Strings.shift_opne_alert_msg);
     }
   }
 
@@ -1199,11 +1152,9 @@ class _DashboradPageState extends State<DashboradPage>
       shiftinvoice.terminal_id = int.parse(terminalId);
       shiftinvoice.shift_terminal_id = int.parse(terminalId);
       var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
-      await clearCartAfterSuccess(orderid);
       await printReceipt(orderid);
+      await clearCartAfterSuccess(orderid);
     }
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
   }
 
   printReceipt(int orderid) async {
@@ -1237,20 +1188,14 @@ class _DashboradPageState extends State<DashboradPage>
   clearCartAfterSuccess(orderid) async {
     Table_order tables = await getTableData();
     var result = await localAPI.removeCartItem(currentCart, tables.table_id);
-
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     clearCart();
-
     refreshAfterAction(true);
     getCategoryList();
-    // Navigator.pushNamed(context, Constant.DashboardScreen);
-    // await showDialog(
-    //     // Opning Ammount Popup
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //       return InvoiceReceiptDailog(orderid: orderid);
-    //     });
+    await Navigator.pushNamedAndRemoveUntil(
+        context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
+        arguments: {"isAssign": false});
   }
 
   getTaxs() async {
@@ -1447,26 +1392,9 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   selectTable() {
-    Navigator.pushNamed(context, Constant.SelectTableScreen,
+    Navigator.pushNamedAndRemoveUntil(
+        context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
         arguments: {"isAssign": false});
-  }
-
-  gotoTansactionPage() {
-    if (isShiftOpen) {
-      Navigator.of(context).pop();
-      Navigator.pushNamed(context, Constant.TransactionScreen);
-    } else {
-      CommunFun.showToast(context, Strings.shift_opne_alert_msg_transaction);
-    }
-  }
-
-  gotoWebCart() {
-    if (isShiftOpen) {
-      Navigator.of(context).pop();
-      Navigator.pushNamed(context, Constant.WebOrderPages);
-    } else {
-      CommunFun.showToast(context, Strings.shift_opne_alert_msg_webOrder);
-    }
   }
 
   @override
@@ -1530,312 +1458,266 @@ class _DashboradPageState extends State<DashboradPage>
       }),
     );
 
-    return WillPopScope(
-      child: Scaffold(
-        key: scaffoldKey,
-        drawer: drawerWidget(),
-        body: LoadingOverlay(
-            child: SafeArea(
-              child: new GestureDetector(
-                onTap: () {
-                  FocusScope.of(context).requestFocus(new FocusNode());
-                  slidableController.activeState?.close();
-                },
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  child: Table(
-                    border: TableBorder.all(color: Colors.white, width: 0.6),
-                    columnWidths: {
-                      0: FractionColumnWidth(.6),
-                      1: FractionColumnWidth(.3),
-                    },
-                    children: [
-                      TableRow(children: [
-                        TableCell(child: tableHeader1()),
-                        TableCell(child: tableHeader2()),
-                      ]),
-                      TableRow(children: [
-                        TableCell(
-                          child: Container(
-                            padding: EdgeInsets.all(
-                                SizeConfig.safeBlockVertical * 1),
-                            child: Column(
-                              children: <Widget>[
-                                subCatList.length == 0
-                                    ? Container(
-                                        //margin: EdgeInsets.only(left: 5, right: 5),
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        height:
-                                            SizeConfig.safeBlockVertical * 8,
-                                        color: Colors.black26,
-                                        padding: EdgeInsets.all(
-                                            SizeConfig.safeBlockVertical * 1.2),
-                                        child: DefaultTabController(
-                                            initialIndex: 0,
-                                            length: tabsList.length,
-                                            child: _tabs),
-                                      )
-                                    : Container(
-                                        //  margin: EdgeInsets.only(left: 5, right: 5),
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        height:
-                                            SizeConfig.safeBlockVertical * 8,
-                                        color: Colors.black26,
-                                        padding: EdgeInsets.all(
-                                            SizeConfig.safeBlockVertical * 1.2),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: <Widget>[
-                                            IconButton(
-                                                onPressed: _backtoMainCat,
-                                                icon: Icon(
-                                                  Icons.arrow_back,
-                                                  color: Colors.white,
-                                                  size: SizeConfig
-                                                          .safeBlockVertical *
-                                                      4,
-                                                )),
-                                            DefaultTabController(
-                                                initialIndex: 0,
-                                                length: subCatList.length,
-                                                child: _subtabs),
-                                          ],
-                                        ),
-                                      ),
-                                SingleChildScrollView(
-                                  physics: BouncingScrollPhysics(),
-                                  child: Container(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        mealsList.length > 0
-                                            ? setMealsList()
-                                            : SizedBox(),
-                                        isLoading
-                                            ? CommunFun.loader(context)
-                                            : productList.length > 0
-                                                ? porductsList()
-                                                : SizedBox(),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                        TableCell(
-                          child: Stack(
+    return Scaffold(
+      key: scaffoldKey,
+      drawer: DrawerWid(),
+      body: LoadingOverlay(
+          child: SafeArea(
+            child: new GestureDetector(
+              onTap: () {
+                FocusScope.of(context).requestFocus(new FocusNode());
+                slidableController.activeState?.close();
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Table(
+                  border: TableBorder.all(color: Colors.white, width: 0.6),
+                  columnWidths: {
+                    0: FractionColumnWidth(.6),
+                    1: FractionColumnWidth(.3),
+                  },
+                  children: [
+                    TableRow(children: [
+                      TableCell(child: tableHeader1()),
+                      TableCell(child: tableHeader2()),
+                    ]),
+                    TableRow(children: [
+                      TableCell(
+                        child: Container(
+                          padding:
+                              EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
+                          child: Column(
                             children: <Widget>[
-                              Container(
-                                // color: Colors.white,
-                                child: SizedBox(
-                                    height: MediaQuery.of(context).size.height -
-                                        SizeConfig.safeBlockVertical * 10,
-                                    width: SizeConfig.safeBlockHorizontal * 50,
-                                    child: cartITems()),
-                              ),
-                              Positioned(
-                                bottom: 25,
-                                left: 0,
-                                right: 0,
+                              subCatList.length == 0
+                                  ? Container(
+                                      //margin: EdgeInsets.only(left: 5, right: 5),
+                                      width: MediaQuery.of(context).size.width,
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      color: Colors.black26,
+                                      padding: EdgeInsets.all(
+                                          SizeConfig.safeBlockVertical * 1.2),
+                                      child: DefaultTabController(
+                                          initialIndex: 0,
+                                          length: tabsList.length,
+                                          child: _tabs),
+                                    )
+                                  : Container(
+                                      //  margin: EdgeInsets.only(left: 5, right: 5),
+                                      width: MediaQuery.of(context).size.width,
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      color: Colors.black26,
+                                      padding: EdgeInsets.all(
+                                          SizeConfig.safeBlockVertical * 1.2),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          IconButton(
+                                              onPressed: _backtoMainCat,
+                                              icon: Icon(
+                                                Icons.arrow_back,
+                                                color: Colors.white,
+                                                size: SizeConfig
+                                                        .safeBlockVertical *
+                                                    4,
+                                              )),
+                                          DefaultTabController(
+                                              initialIndex: 0,
+                                              length: subCatList.length,
+                                              child: _subtabs),
+                                        ],
+                                      ),
+                                    ),
+                              SingleChildScrollView(
+                                physics: BouncingScrollPhysics(),
                                 child: Container(
-                                  height: 80,
-                                  color: StaticColor.backgroundColor,
-                                  child: paybutton(context),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      mealsList.length > 0
+                                          ? setMealsList()
+                                          : SizedBox(),
+                                      isLoading
+                                          ? CommunFun.loader(context)
+                                          : productList.length > 0
+                                              ? porductsList()
+                                              : SizedBox(),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              !isShiftOpen
-                                  ? openShiftButton(context)
-                                  : SizedBox()
+                              )
                             ],
                           ),
                         ),
-                      ]),
-                    ],
-                  ),
+                      ),
+                      TableCell(
+                        child: Stack(
+                          children: <Widget>[
+                            Container(
+                              // color: Colors.white,
+                              child: SizedBox(
+                                  height: MediaQuery.of(context).size.height -
+                                      SizeConfig.safeBlockVertical * 10,
+                                  width: SizeConfig.safeBlockHorizontal * 50,
+                                  child: cartITems()),
+                            ),
+                            Positioned(
+                              bottom: 25,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                height: 80,
+                                color: StaticColor.backgroundColor,
+                                child: paybutton(context),
+                              ),
+                            ),
+                            !isShiftOpen ? openShiftButton(context) : SizedBox()
+                          ],
+                        ),
+                      ),
+                    ]),
+                  ],
                 ),
               ),
             ),
-            isLoading: isScreenLoad,
-            color: Colors.black87,
-            progressIndicator: CommunFun.overLayLoader()),
-      ),
-      onWillPop: _willPopCallback,
+          ),
+          isLoading: isScreenLoad,
+          color: Colors.black87,
+          progressIndicator: CommunFun.overLayLoader()),
     );
   }
 
-  Widget checkoutbtn() {
-    return Expanded(
-      child: RaisedButton(
-        padding: EdgeInsets.all(10),
-        onPressed: () {
-          Navigator.pushNamed(context, Constant.PINScreen);
-        },
-        child: Text(Strings.checkout, style: Styles.whiteBoldsmall()),
-        color: Colors.deepOrange,
-        textColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(50.0),
-        ),
-      ),
-    );
-  }
-
-  Widget nameBtn() {
-    return Expanded(
-        child: RaisedButton(
-      padding: EdgeInsets.all(10),
-      onPressed: () {
-        Navigator.pushNamed(context, Constant.PINScreen);
-      },
-      child: Text(
-        userDetails != null ? userDetails["name"] : "",
-        style: Styles.whiteBoldsmall(),
-      ),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50.0),
-      ),
-    ));
-  }
-
-  Widget drawerWidget() {
-    return Container(
-      width: MediaQuery.of(context).size.width / 3.2,
-      height: MediaQuery.of(context).size.height,
-      padding: EdgeInsets.only(
-        top: 20,
-      ),
-      color: Colors.white,
-      child: Drawer(
-        child: ListView(
-          padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-          physics: BouncingScrollPhysics(),
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                checkoutbtn(),
-                SizedBox(width: SizeConfig.safeBlockVertical * 3),
-                nameBtn()
-              ],
-            ),
-            CommunFun.divider(),
-            permissions.contains(Constant.VIEW_ORDER)
-                ? ListTile(
-                    onTap: () {
-                      gotoTansactionPage();
-                    },
-                    leading: Icon(
-                      Icons.art_track,
-                      color: Colors.black,
-                      size: SizeConfig.safeBlockVertical * 5,
-                    ),
-                    title: Text(
-                      "Transaction",
-                      style: Styles.drawerText(),
-                    ),
-                  )
-                : SizedBox(),
-            permissions.contains(Constant.VIEW_ORDER)
-                ? ListTile(
-                    onTap: () {
-                      gotoWebCart();
-                    },
-                    leading: Icon(
-                      Icons.shopping_cart,
-                      color: Colors.black,
-                      size: SizeConfig.safeBlockVertical * 5,
-                    ),
-                    title: Text(
-                      "Web Orders",
-                      style: Styles.drawerText(),
-                    ),
-                  )
-                : SizedBox(),
-            ListTile(
-                onTap: () {
-                  Navigator.of(context).pop();
-                  if (isShiftOpen) {
-                    closeShift();
-                  } else {
-                    openOpningAmmountPop(Strings.title_opening_amount);
-                  }
-                },
-                leading: Icon(
-                  Icons.open_in_new,
-                  color: Colors.black,
-                  size: SizeConfig.safeBlockVertical * 5,
-                ),
-                title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
-                    style: Styles.drawerText())),
-            permissions.contains(Constant.VIEW_REPORT)
-                ? ListTile(
-                    onTap: () {
-                      gotoShiftReport();
-                    },
-                    leading: Icon(
-                      Icons.filter_tilt_shift,
-                      color: Colors.black,
-                      size: SizeConfig.safeBlockVertical * 5,
-                    ),
-                    title: Text(
-                      "Shift Report",
-                      style: Styles.drawerText(),
-                    ),
-                  )
-                : SizedBox(),
-            // permissions.contains(Constant.VIEW_ORDER)
-            ListTile(
-                onTap: () {
-                  Navigator.of(context).pop();
-                  syncOrdersTodatabase();
-                },
-                leading: Icon(
-                  Icons.transform,
-                  color: Colors.black,
-                  size: SizeConfig.safeBlockVertical * 5,
-                ),
-                title: Text("Sync Orders", style: Styles.drawerText())),
-            // : SizedBox(),
-            ListTile(
-                onTap: () async {
-                  syncAllTables();
-                },
-                leading: Icon(
-                  Icons.sync,
-                  color: Colors.black,
-                  size: SizeConfig.safeBlockVertical * 5,
-                ),
-                title: Text("Sync", style: Styles.drawerText())),
-            ListTile(
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Navigator.pushNamed(context, Constant.SettingsScreen);
-                },
-                leading: Icon(
-                  Icons.settings,
-                  color: Colors.black,
-                  size: SizeConfig.safeBlockVertical * 5,
-                ),
-                title: Text("Settings", style: Styles.drawerText())),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget drawerWidget() {
+  //   return Container(
+  //     width: MediaQuery.of(context).size.width / 3.2,
+  //     height: MediaQuery.of(context).size.height,
+  //     padding: EdgeInsets.only(
+  //       top: 20,
+  //     ),
+  //     color: Colors.white,
+  //     child: Drawer(
+  //       child: ListView(
+  //         padding: EdgeInsets.only(top: 10, left: 10, right: 10),
+  //         physics: BouncingScrollPhysics(),
+  //         children: <Widget>[
+  //           Row(
+  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //             crossAxisAlignment: CrossAxisAlignment.center,
+  //             children: <Widget>[
+  //               checkoutbtn(),
+  //               SizedBox(width: SizeConfig.safeBlockVertical * 3),
+  //               nameBtn()
+  //             ],
+  //           ),
+  //           CommunFun.divider(),
+  //           permissions.contains(Constant.VIEW_ORDER)
+  //               ? ListTile(
+  //                   onTap: () {
+  //                     gotoTansactionPage();
+  //                   },
+  //                   leading: Icon(
+  //                     Icons.art_track,
+  //                     color: Colors.black,
+  //                     size: SizeConfig.safeBlockVertical * 5,
+  //                   ),
+  //                   title: Text(
+  //                     "Transaction",
+  //                     style: Styles.drawerText(),
+  //                   ),
+  //                 )
+  //               : SizedBox(),
+  //           permissions.contains(Constant.VIEW_ORDER)
+  //               ? ListTile(
+  //                   onTap: () {
+  //                     gotoWebCart();
+  //                   },
+  //                   leading: Icon(
+  //                     Icons.shopping_cart,
+  //                     color: Colors.black,
+  //                     size: SizeConfig.safeBlockVertical * 5,
+  //                   ),
+  //                   title: Text(
+  //                     "Web Orders",
+  //                     style: Styles.drawerText(),
+  //                   ),
+  //                 )
+  //               : SizedBox(),
+  //           ListTile(
+  //               onTap: () {
+  //                 Navigator.of(context).pop();
+  //                 if (isShiftOpen) {
+  //                   closeShift();
+  //                 } else {
+  //                   openOpningAmmountPop(Strings.title_opening_amount);
+  //                 }
+  //               },
+  //               leading: Icon(
+  //                 Icons.open_in_new,
+  //                 color: Colors.black,
+  //                 size: SizeConfig.safeBlockVertical * 5,
+  //               ),
+  //               title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
+  //                   style: Styles.drawerText())),
+  //           permissions.contains(Constant.VIEW_REPORT)
+  //               ? ListTile(
+  //                   onTap: () {
+  //                     gotoShiftReport();
+  //                   },
+  //                   leading: Icon(
+  //                     Icons.filter_tilt_shift,
+  //                     color: Colors.black,
+  //                     size: SizeConfig.safeBlockVertical * 5,
+  //                   ),
+  //                   title: Text(
+  //                     "Shift Report",
+  //                     style: Styles.drawerText(),
+  //                   ),
+  //                 )
+  //               : SizedBox(),
+  //           // permissions.contains(Constant.VIEW_ORDER)
+  //           ListTile(
+  //               onTap: () {
+  //                 Navigator.of(context).pop();
+  //                 syncOrdersTodatabase();
+  //               },
+  //               leading: Icon(
+  //                 Icons.transform,
+  //                 color: Colors.black,
+  //                 size: SizeConfig.safeBlockVertical * 5,
+  //               ),
+  //               title: Text("Sync Orders", style: Styles.drawerText())),
+  //           // : SizedBox(),
+  //           ListTile(
+  //               onTap: () async {
+  //                 syncAllTables();
+  //               },
+  //               leading: Icon(
+  //                 Icons.sync,
+  //                 color: Colors.black,
+  //                 size: SizeConfig.safeBlockVertical * 5,
+  //               ),
+  //               title: Text("Sync", style: Styles.drawerText())),
+  //           ListTile(
+  //               onTap: () {
+  //                 Navigator.of(context).pop();
+  //                 Navigator.pushNamed(context, Constant.SettingsScreen);
+  //               },
+  //               leading: Icon(
+  //                 Icons.settings,
+  //                 color: Colors.black,
+  //                 size: SizeConfig.safeBlockVertical * 5,
+  //               ),
+  //               title: Text("Settings", style: Styles.drawerText())),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget tableHeader1() {
     // products Header part 1
@@ -1851,10 +1733,10 @@ class _DashboradPageState extends State<DashboradPage>
             children: <Widget>[
               IconButton(
                   onPressed: () {
-                    openDrawer();
+                    Navigator.of(context).pop();
                   },
                   icon: Icon(
-                    Icons.dehaze,
+                    Icons.arrow_back,
                     color: Colors.white,
                     size: SizeConfig.safeBlockVertical * 5,
                   )),

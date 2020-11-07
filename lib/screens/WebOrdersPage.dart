@@ -59,7 +59,8 @@ class _WebOrderPagesState extends State<WebOrderPages>
   }
 
   assignTable(cart) {
-    Navigator.pushNamed(context, Constant.SelectTableScreen,
+    Navigator.pushNamedAndRemoveUntil(
+        context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
         arguments: {'isAssign': true, 'orderID': cart.id});
   }
 
@@ -72,7 +73,10 @@ class _WebOrderPagesState extends State<WebOrderPages>
       if (tableorder.length > 0) {
         await Preferences.setStringToSF(
             Constant.TABLE_DATA, json.encode(tableorder[0]));
-        Navigator.pushNamed(context, Constant.DashboardScreen);
+
+        await Navigator.pushNamedAndRemoveUntil(context,
+            Constant.SelectTableScreen, (Route<dynamic> route) => false,
+            arguments: {"isAssign": false});
       } else {
         assignTable(cart);
       }
