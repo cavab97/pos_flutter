@@ -34,6 +34,7 @@ class DrawerWidState extends State<DrawerWid> {
     checkshift();
     setPermissons();
     getUserData();
+    getAllPrinter();
   }
 
   setPermissons() async {
@@ -78,24 +79,27 @@ class DrawerWidState extends State<DrawerWid> {
     }
   }
 
+  getAllPrinter() async {
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    setState(() {
+      printerreceiptList = printerDraft;
+    });
+  }
+
   closeShift() {
     showDialog(
         // Opning Ammount Popup
         context: context,
         builder: (BuildContext context) {
           return CloseShiftPage(onClose: () {
-            printKOT.testReceiptPrint(
-                printerreceiptList[0].printerIp.toString(),
-                context,
-                "",
-                "OpenDrawer");
+            Navigator.of(context).pop();
             openOpningAmmountPop(Strings.title_closing_amount);
           });
         });
   }
 
-  openOpningAmmountPop(isopning) {
-    CommonUtils.openOpningAmmountPop(context, isopning, (ammountext) {
+  openOpningAmmountPop(isopning) async {
+    await CommonUtils.openOpningAmmountPop(context, isopning, (ammountext) {
       if (isopning == Strings.title_opening_amount) {
         if (printerreceiptList.length > 0) {
           printKOT.testReceiptPrint(printerreceiptList[0].printerIp.toString(),
@@ -158,12 +162,13 @@ class DrawerWidState extends State<DrawerWid> {
   }
 
   syncAllTables() async {
-    Navigator.of(context).pop();
+    //Navigator.of(context).pop();
     await Preferences.removeSinglePref(Constant.LastSync_Table);
     await Preferences.removeSinglePref(Constant.OFFSET);
     await CommunFun.opneSyncPop(context);
     await CommunFun.syncOrdersANDStore(context, false);
     await CommunFun.syncAfterSuccess(context, false);
+    
   }
 
   @override

@@ -830,7 +830,7 @@ class _DashboradPageState extends State<DashboradPage>
           return PaymentMethodPop(
             subTotal: subtotal,
             grandTotal: grandTotal,
-            onClose: (mehtod) {
+            onClose: (mehtod, change) {
               CommunFun.processingPopup(context);
               paymentWithMethod(mehtod);
             },
@@ -1125,8 +1125,8 @@ class _DashboradPageState extends State<DashboradPage>
           orderpayment.order_id = orderid;
           orderpayment.branch_id = int.parse(branchid);
           orderpayment.terminal_id = int.parse(terminalId);
-          // orderpayment.op_method_id = payment[i].op_method_id;
-          // orderpayment.op_amount = payment[i].op_amount.toDouble();
+          orderpayment.op_method_id = payment[i].op_method_id;
+          orderpayment.op_amount = payment[i].op_amount.toDouble();
           orderpayment.op_method_response = '';
           orderpayment.op_status = 1;
           orderpayment.op_datetime =
@@ -2222,7 +2222,10 @@ class _DashboradPageState extends State<DashboradPage>
             },
             child: Container(
               height: itemHeight,
-              // padding: EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
               margin: EdgeInsets.all(0),
               child: Stack(
                 alignment: AlignmentDirectional.topCenter,
@@ -2230,23 +2233,36 @@ class _DashboradPageState extends State<DashboradPage>
                   Hero(
                       tag: product.productId != null ? product.productId : 0,
                       child: Container(
-                        color: Colors.grey,
-                        width: MediaQuery.of(context).size.width,
-                        height: itemHeight / 2.2,
-                        child: product.base64 != ""
-                            ? CommonUtils.imageFromBase64String(product.base64)
-                            : new Image.asset(
-                                Strings.no_image,
-                                fit: BoxFit.cover,
-                                gaplessPlayback: true,
-                              ),
-                      )),
+                          width: MediaQuery.of(context).size.width,
+                          decoration: BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(8),
+                                topRight: Radius.circular(8)),
+                          ),
+                          height: itemHeight / 2.2,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(8),
+                                topRight: Radius.circular(8)),
+                            child: product.base64 != ""
+                                ? CommonUtils.imageFromBase64String(
+                                    product.base64)
+                                : new Image.asset(
+                                    Strings.no_image,
+                                    fit: BoxFit.cover,
+                                    gaplessPlayback: true,
+                                  ),
+                          ))),
                   Container(
                     padding: EdgeInsets.all(2),
                     margin: EdgeInsets.only(top: itemHeight / 2.2),
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
                       color: Colors.grey[600],
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(8),
+                          bottomRight: Radius.circular(8)),
                     ),
                     child: Center(
                       child: Text(
@@ -2482,107 +2498,103 @@ class _DashboradPageState extends State<DashboradPage>
       shrinkWrap: true,
       itemExtent: 50.0,
       padding: EdgeInsets.only(bottom: 150),
-      children: ListTile.divideTiles(
-        context: context,
-        tiles: cartList.map((cart) {
-          return Slidable(
-            key: Key(cart.id.toString()),
-            controller: slidableController,
-            actionPane: SlidableDrawerActionPane(),
-            actionExtentRatio: 0.15,
-            direction: Axis.horizontal,
-            child: Container(
-              margin: EdgeInsets.all(0),
-              padding: EdgeInsets.only(left: 5, right: 5),
-              child: new ListTile(
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 0, horizontal: 5),
-                // dense: false,
-                title: new Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.all(0),
-                        padding: EdgeInsets.all(0),
-                        width: MediaQuery.of(context).size.width / 5.5,
-                        child: Text(
-                            cart.attrName != null
-                                ? cart.productName.toUpperCase() +
-                                    " (" +
-                                    cart.attrName +
-                                    ")"
-                                : cart.productName.toUpperCase(),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: Styles.greysmall()),
-                      ),
-                      Container(
-                        margin: EdgeInsets.all(0),
-                        padding: EdgeInsets.all(0),
-                        width: MediaQuery.of(context).size.width / 7.5,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Padding(
-                                padding: EdgeInsets.symmetric(vertical: 0),
-                                child: Text(cart.productQty.toString(),
-                                    style: Styles.greysmall())),
-                            Padding(
+      children: cartList.map((cart) {
+        return Slidable(
+          key: Key(cart.id.toString()),
+          controller: slidableController,
+          actionPane: SlidableDrawerActionPane(),
+          actionExtentRatio: 0.15,
+          direction: Axis.horizontal,
+          child: Container(
+            margin: EdgeInsets.all(0),
+            padding: EdgeInsets.only(left: 5, right: 5),
+            child: new ListTile(
+              contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 5),
+              // dense: false,
+              title: new Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.all(0),
+                      padding: EdgeInsets.all(0),
+                      width: MediaQuery.of(context).size.width / 5.5,
+                      child: Text(
+                          cart.attrName != null
+                              ? cart.productName.toUpperCase() +
+                                  " (" +
+                                  cart.attrName +
+                                  ")"
+                              : cart.productName.toUpperCase(),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Styles.greysmall()),
+                    ),
+                    Container(
+                      margin: EdgeInsets.all(0),
+                      padding: EdgeInsets.all(0),
+                      width: MediaQuery.of(context).size.width / 7.5,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Padding(
                               padding: EdgeInsets.symmetric(vertical: 0),
-                              child: Text(
-                                cart.productPrice.toStringAsFixed(2),
-                                style: Styles.greysmall(),
-                              ),
+                              child: Text(cart.productQty.toString(),
+                                  style: Styles.greysmall())),
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 0),
+                            child: Text(
+                              cart.productPrice.toStringAsFixed(2),
+                              style: Styles.greysmall(),
                             ),
-                          ],
-                        ),
-                      )
-                    ]),
-              ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ]),
             ),
-            secondaryActions: <Widget>[
-              permissions.contains(Constant.EDIT_ITEM) && cart.issetMeal == 0
-                  ? IconSlideAction(
-                      color: Colors.blueAccent,
-                      icon: Icons.free_breakfast,
-                      onTap: () {
-                        // if (!isWebOrder) {
-                        applyforFocProduct(cart);
-                        // }
-                      },
-                    )
-                  : SizedBox(),
-              permissions.contains(Constant.EDIT_ORDER)
-                  ? IconSlideAction(
-                      color: Colors.black45,
-                      icon: Icons.edit,
-                      onTap: () {
-                        if (!isWebOrder && cart.isFocProduct != 1) {
-                          editCartItem(cart);
-                        } else {
-                          if (cart.isFocProduct == 1) {
-                            CommunFun.showToast(
-                                context, "FOC Product is not editable.");
-                          }
+          ),
+          secondaryActions: <Widget>[
+            permissions.contains(Constant.EDIT_ITEM) && cart.issetMeal == 0
+                ? IconSlideAction(
+                    color: Colors.blueAccent,
+                    icon: Icons.free_breakfast,
+                    onTap: () {
+                      // if (!isWebOrder) {
+                      applyforFocProduct(cart);
+                      // }
+                    },
+                  )
+                : SizedBox(),
+            permissions.contains(Constant.EDIT_ORDER)
+                ? IconSlideAction(
+                    color: Colors.black45,
+                    icon: Icons.edit,
+                    onTap: () {
+                      if (!isWebOrder && cart.isFocProduct != 1) {
+                        editCartItem(cart);
+                      } else {
+                        if (cart.isFocProduct == 1) {
+                          CommunFun.showToast(
+                              context, "FOC Product is not editable.");
                         }
-                      },
-                    )
-                  : SizedBox(),
-              permissions.contains(Constant.EDIT_ITEM)
-                  ? IconSlideAction(
-                      color: Colors.red,
-                      icon: Icons.delete_outline,
-                      onTap: () {
-                        if (!isWebOrder) {
-                          itememovefromCart(cart);
-                        }
-                      },
-                    )
-                  : SizedBox(),
-            ],
-          );
-        }),
-      ).toList(),
+                      }
+                    },
+                  )
+                : SizedBox(),
+            permissions.contains(Constant.EDIT_ITEM)
+                ? IconSlideAction(
+                    color: Colors.red,
+                    icon: Icons.delete_outline,
+                    onTap: () {
+                      if (!isWebOrder) {
+                        itememovefromCart(cart);
+                      }
+                    },
+                  )
+                : SizedBox(),
+          ],
+        );
+      }).toList(),
     );
     var vaucher =
         allcartData.voucher_detail != null && allcartData.voucher_detail != ""

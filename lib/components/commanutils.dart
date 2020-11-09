@@ -17,6 +17,7 @@ class CommonUtils {
           strImage = base64.split("base64,")[1];
         }
         return Image.memory(base64Decode(strImage),
+        
             fit: BoxFit.cover, gaplessPlayback: true);
       }
     }

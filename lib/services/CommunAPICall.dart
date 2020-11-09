@@ -21,8 +21,8 @@ class APICalls {
           headers: headers,
           body: params,
         );
-        print(response);
         var data = json.decode(response.body);
+        print(data);
         return data;
       } else {
         CommunFun.showToast(context, Strings.internet_connection_lost);

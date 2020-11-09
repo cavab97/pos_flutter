@@ -15,6 +15,8 @@ class Orders {
   double sub_total;
   double sub_total_after_discount;
   double grand_total;
+  double serviceCharge;
+  double serviceChargePercent;
   int order_source;
   int order_status;
   int order_item_count;
@@ -26,34 +28,35 @@ class Orders {
   String updated_at;
   int updated_by;
 
-  Orders({
-    this.order_id,
-    this.uuid,
-    this.branch_id,
-    this.terminal_id,
-    this.app_id,
-    this.table_no,
-    this.table_id,
-    this.invoice_no,
-    this.customer_id,
-    this.tax_percent,
-    this.tax_amount,
-    this.voucher_id,
-    this.voucher_amount,
-    this.sub_total,
-    this.sub_total_after_discount,
-    this.grand_total,
-    this.order_source,
-    this.order_status,
-    this.order_item_count,
-    this.order_date,
-    this.order_by,
-    this.voucher_detail,
-    this.server_id,
-    this.tax_json,
-    this.updated_at,
-    this.updated_by,
-  });
+  Orders(
+      {this.order_id,
+      this.uuid,
+      this.branch_id,
+      this.terminal_id,
+      this.app_id,
+      this.table_no,
+      this.table_id,
+      this.invoice_no,
+      this.customer_id,
+      this.tax_percent,
+      this.tax_amount,
+      this.voucher_id,
+      this.voucher_amount,
+      this.sub_total,
+      this.sub_total_after_discount,
+      this.grand_total,
+      this.order_source,
+      this.order_status,
+      this.order_item_count,
+      this.order_date,
+      this.order_by,
+      this.voucher_detail,
+      this.server_id,
+      this.tax_json,
+      this.updated_at,
+      this.updated_by,
+      this.serviceCharge,
+      this.serviceChargePercent});
 
   Orders.fromJson(Map<String, dynamic> json) {
     order_id = json["order_id"];
@@ -93,6 +96,8 @@ class Orders {
     tax_json = json['tax_json'];
     updated_at = json["updated_at"];
     updated_by = json["updated_by"];
+    serviceCharge = json["service_charge"];
+    serviceChargePercent = json["service_charge_percent"];
   }
 
   Map<String, dynamic> toJson() {
@@ -123,6 +128,8 @@ class Orders {
     data["order_by"] = this.order_by;
     data["updated_at"] = this.updated_at;
     data["updated_by"] = this.updated_by;
+    data["service_charge"] = this.serviceCharge;
+    data["service_charge_percent "] = this.serviceChargePercent;
     return data;
   }
 }

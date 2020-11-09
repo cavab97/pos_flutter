@@ -25,35 +25,37 @@ class MST_Cart {
   int cart_payment_id;
   String cart_payment_response;
   int cart_payment_status;
-
-  MST_Cart({
-    this.id,
-    this.localID,
-    this.user_id,
-    this.branch_id,
-    this.sub_total,
-    this.discount,
-    this.discount_type,
-    this.remark,
-    this.table_id,
-    this.tax,
-    this.tax_json,
-    this.voucher_id,
-    this.grand_total,
-    this.total_qty,
-    this.is_deleted,
-    this.created_by,
-    this.created_at,
-    this.customer_terminal,
-    this.voucher_detail,
-    this.sub_total_after_discount,
-    this.source,
-    this.total_item,
-    this.cart_order_number,
-    this.cart_payment_id,
-    this.cart_payment_response,
-    this.cart_payment_status,
-  });
+  double serviceChargePercent;
+  double serviceCharge;
+  MST_Cart(
+      {this.id,
+      this.localID,
+      this.user_id,
+      this.branch_id,
+      this.sub_total,
+      this.discount,
+      this.discount_type,
+      this.remark,
+      this.table_id,
+      this.tax,
+      this.tax_json,
+      this.voucher_id,
+      this.grand_total,
+      this.total_qty,
+      this.is_deleted,
+      this.created_by,
+      this.created_at,
+      this.customer_terminal,
+      this.voucher_detail,
+      this.sub_total_after_discount,
+      this.source,
+      this.total_item,
+      this.cart_order_number,
+      this.cart_payment_id,
+      this.cart_payment_response,
+      this.cart_payment_status,
+      this.serviceChargePercent,
+      this.serviceCharge});
 
   MST_Cart.fromJson(Map<String, dynamic> json) {
     id = json["id"];
@@ -92,6 +94,8 @@ class MST_Cart {
     cart_payment_id = json["cart_payment_id"];
     cart_payment_response = json["cart_payment_response"];
     cart_payment_status = json["cart_payment_status"];
+    serviceChargePercent = json["service_charge_percent"];
+    serviceCharge = json["service_charge"];
   }
 
   Map<String, dynamic> toJson() {
@@ -123,7 +127,8 @@ class MST_Cart {
     data["cart_payment_response"] = this.cart_payment_response;
     data["cart_payment_status"] = this.cart_payment_status;
     data["customer_terminal"] = this.customer_terminal;
-
+    data["service_charge_percent"] = this.serviceChargePercent;
+    data["service_charge"] = this.serviceCharge;
     return data;
   }
 }

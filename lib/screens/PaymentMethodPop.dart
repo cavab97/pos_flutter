@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
+import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Payment.dart';
+import 'package:mcncashier/screens/CashPayment.dart';
+import 'package:mcncashier/screens/FinalPaymentScreen.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -83,11 +86,25 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       });
       enterDigitCode();
     } else {
-      finalPayment(payment);
+      cashPayment(payment);
     }
   }
 
-  finalPayment(payment) {
+  cashPayment(payment) {
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return CashPaymentPage(
+              ammountext: newAmmount.toString(),
+              onEnter: (ammount) {
+                Navigator.of(context).pop();
+                finalPayment(payment);
+              });
+        });
+  }
+
+  finalPayment(payment) async {
     List<OrderPayment> totalPayment = [];
     if (!isSpliting) {
       OrderPayment orderpayment = new OrderPayment();
@@ -100,7 +117,21 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       orderpayment.is_split = isSpliting ? 1 : 0;
       orderpayment.op_amount = newAmmount;
       totalPayment.add(orderpayment);
-      widget.onClose(totalPayment);
+      var change = 0;
+      if (newAmmount > widget.grandTotal) {
+        change = newAmmount - widget.grandTotal;
+      }
+      await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return FinalEndScreen(
+                total: widget.grandTotal,
+                totalPaid: newAmmount,
+                change: change,
+                onClose: () {
+                  widget.onClose(totalPayment, change);
+                });
+          });
     } else if (isSpliting && splitedPayment >= newAmmount) {
       for (var i = 0; i < splitpaymentList.length; i++) {
         OrderPayment orderpayment = splitpaymentList[i];
@@ -153,14 +184,15 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   checkPIN() {
     if (_formKey.currentState.validate()) {
       Navigator.of(context).pop();
-      finalPayment(seletedPayment);
+      cashPayment(seletedPayment);
     }
   }
 
   checkRefNum() {
     if (_formKey1.currentState.validate()) {
       Navigator.of(context).pop();
-      finalPayment(seletedPayment);
+      cashPayment(seletedPayment);
+      // finalPayment(seletedPayment);
     }
   }
 
@@ -212,13 +244,15 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: SizeConfig.safeBlockVertical * 9,
-            color: Colors.black,
+            decoration: BoxDecoration(
+                color: Colors.white, border: Border.all(color: Colors.black)),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
+                Text("Total", style: Styles.blackMediumBold()),
                 Text(widget.grandTotal.toStringAsFixed(2),
-                    style: Styles.whiteBoldsmall()),
+                    style: Styles.blackMediumBold()),
               ],
             ),
           ),
@@ -315,6 +349,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                 ),
                 title: Text(
                   ispaymented ? "Split Payment" : "Ammount to Pay",
+                  // "Ammount to Pay",
                   style: Styles.blackMediumBold(),
                 ),
                 trailing: Text(

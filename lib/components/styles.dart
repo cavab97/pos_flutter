@@ -126,7 +126,16 @@ class Styles {
     return TextStyle(
         color: Color(0xFF000000),
         fontSize: SizeConfig.safeBlockVertical * 5,
-        fontWeight: FontWeight.w800,
+        fontWeight: FontWeight.w400,
+        fontFamily: Strings.fontFamily);
+  }
+
+  static blackExtraLarge() {
+    // Back Text
+    return TextStyle(
+        color: Color(0xFF000000),
+        fontSize: SizeConfig.safeBlockVertical * 10,
+        fontWeight: FontWeight.w400,
         fontFamily: Strings.fontFamily);
   }
 

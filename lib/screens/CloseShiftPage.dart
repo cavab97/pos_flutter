@@ -21,7 +21,6 @@ class CloseShiftPageState extends State<CloseShiftPage> {
   @override
   void initState() {
     super.initState();
-
     getshiftData();
   }
 
@@ -105,7 +104,6 @@ class CloseShiftPageState extends State<CloseShiftPage> {
               ),
               SizedBox(height: 30),
               shiftbtn(() {
-                Navigator.of(context).pop();
                 widget.onClose();
               })
             ],

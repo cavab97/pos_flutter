@@ -102,6 +102,7 @@ class CreateTables {
         "invoice_start TEXT," +
         "order_prefix TEXT," +
         "branch_banner TEXT," +
+        "service_charge REAL," +
         "latitude	TEXT," +
         "longitude	TEXT," +
         "status	INTEGER," +
@@ -351,6 +352,7 @@ class CreateTables {
         "table_qr	TEXT," +
         "table_capacity	INTEGER," +
         "status	INTEGER," +
+        "table_service_charge REAL," +
         "available_status INTEGER," +
         "updated_at	TEXT," +
         "updated_by	INTEGER," +
@@ -431,6 +433,8 @@ class CreateTables {
         "voucher_detail TEXT," +
         "voucher_amount REAL," +
         "sub_total REAL," +
+        "service_charge_percent REAL," +
+        "service_charge REAL," +
         "sub_total_after_discount REAL," +
         "grand_total REAL," +
         "order_source INTEGER," + // 1  web, 2  app
@@ -617,6 +621,8 @@ class CreateTables {
         'sub_total_after_discount REAL,' +
         'source NUMERIC,' + //1 For Web, 2 For App
         'total_item REAL,' +
+        'service_charge_percent  REAL,' +
+        'service_charge  REAL,' +
         'cart_order_number TEXT,' +
         'cart_payment_id INTEGER,' +
         'cart_payment_response TEXT,' +

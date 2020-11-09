@@ -63,7 +63,6 @@ class _SelectTablePageState extends State<SelectTablePage>
     );
     _tabController = new TabController(length: 2, vsync: this);
     checkshift();
-
     getAllPrinter();
   }
 
@@ -115,7 +114,9 @@ class _SelectTablePageState extends State<SelectTablePage>
     TablesDetails table1 = mergeInTable;
     TablesDetails table2 = table;
     Table_order table_order = new Table_order();
-    table_order.number_of_pax = table1.numberofpax + table2.numberofpax;
+    var pax = table1.numberofpax != null ? table1.numberofpax : 0;
+    pax += table2.numberofpax != null ? table2.numberofpax : 0;
+    table_order.number_of_pax = pax;
     table_order.table_id = table1.tableId;
     table_order.save_order_id =
         table1.saveorderid != 0 ? table1.saveorderid : 0;
@@ -179,7 +180,6 @@ class _SelectTablePageState extends State<SelectTablePage>
   openSelectTablePop() {
     showDialog(
       context: context,
-      // barrierDismissible: false,
       builder: (BuildContext context) {
         //return alertDailog(context);
       },
@@ -197,17 +197,24 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   cancleTableOrder() async {
-    if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
-      List<SaveOrder> cartID =
-          await localAPI.gettableCartID(selectedTable.saveorderid);
-      if (cartID.length > 0) {
-        await localAPI.removeCartItem(cartID[0].cartId, selectedTable.tableId);
+    CommonUtils.showAlertDialog(context, () {
+      Navigator.of(context).pop();
+    }, () async {
+      Navigator.of(context).pop();
+      if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
+        List<SaveOrder> cartID =
+            await localAPI.gettableCartID(selectedTable.saveorderid);
+        if (cartID.length > 0) {
+          await localAPI.removeCartItem(
+              cartID[0].cartId, selectedTable.tableId);
+        }
+      } else {
+        await localAPI.deleteTableOrder(selectedTable.tableId);
       }
-    } else {
-      await localAPI.deleteTableOrder(selectedTable.tableId);
-    }
-    await Preferences.removeSinglePref(Constant.TABLE_DATA);
-    await getTables();
+      await Preferences.removeSinglePref(Constant.TABLE_DATA);
+      await getTables();
+    }, "Warning", "Are you want sure cancel this table order?", "Yes", "No",
+        true);
   }
 
   changeTablePop() {

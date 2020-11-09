@@ -405,19 +405,12 @@ class TableData {
             'key': "setmeal_product_id",
             'value': setMealProduct.setmealProductId,
           };
-          // await setMealProduct
-          //     .toJson()
-          //     .removeWhere((String key, dynamic value) => key == "Base64");
+
           var count = await ifExists(db, data);
           var setMealP = setMealProduct.toJson();
           await setMealP.remove("base64");
           await setMealP.remove("name");
-          await setMealP.remove("cateAtt");
-          await setMealP.remove("attr_name");
-          await setMealP.remove("ca_id");
-          await setMealP.remove("attr_types_price");
-          await setMealP.remove("attributeId");
-          await setMealP.remove("selectedid");
+          await setMealP.remove("setMealProductData");
           if (count == 0) {
             var result = await db.insert("setmeal_product", setMealP);
           } else {

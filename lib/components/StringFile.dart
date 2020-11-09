@@ -21,7 +21,7 @@ class Strings {
   static String sub_total = "Sub Total";
   static String size = "Size";
   static String header_name = "Name";
-  static String qty = "Qty";
+  static String qty = "QTY";
   static String amount = "Amount";
   static String discount = "Discount";
   static String tax = "TAX";
