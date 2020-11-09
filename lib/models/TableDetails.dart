@@ -1,4 +1,3 @@
-
 class TablesDetails {
   int tableId;
   String uuid;
@@ -18,7 +17,7 @@ class TablesDetails {
   int updatedBy;
   String deletedAt;
   int deletedBy;
-
+  double tableServiceCharge;
   TablesDetails(
       {this.tableId,
       this.uuid,
@@ -36,6 +35,7 @@ class TablesDetails {
       this.deletedAt,
       this.deletedBy,
       this.saveorderid,
+      this.tableServiceCharge,
       this.numberofpax,
       this.merge_table_name});
 
@@ -58,6 +58,7 @@ class TablesDetails {
     updatedBy = json['updated_by'];
     deletedAt = json['deleted_at'];
     deletedBy = json['deleted_by'];
+    tableServiceCharge = json["service_charge_percent"];
   }
 
   Map<String, dynamic> toJson() {
@@ -80,6 +81,7 @@ class TablesDetails {
     data['deleted_by'] = this.deletedBy;
     // data['number_of_pax'] = this.numberofpax;
     data['save_order_id'] = this.saveorderid;
+    data["service_charge_percent"] = this.tableServiceCharge;
     return data;
   }
 }
