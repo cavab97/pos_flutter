@@ -410,7 +410,7 @@ class TableData {
           var setMealP = setMealProduct.toJson();
           await setMealP.remove("base64");
           await setMealP.remove("name");
-          await setMealP.remove("setMealProductData");
+          await setMealP.remove("attributeDetails");
           if (count == 0) {
             var result = await db.insert("setmeal_product", setMealP);
           } else {

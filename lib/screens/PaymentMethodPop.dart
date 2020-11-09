@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
-import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
-import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/screens/CashPayment.dart';
 import 'package:mcncashier/screens/FinalPaymentScreen.dart';
@@ -96,76 +94,113 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         context: context,
         builder: (BuildContext context) {
           return CashPaymentPage(
-              ammountext: newAmmount.toString(),
+              ammountext: updatedAmmount,
               onEnter: (ammount) {
                 Navigator.of(context).pop();
-                finalPayment(payment);
+                if (double.parse(ammount) < widget.grandTotal) {
+                  setState(() {
+                    isSpliting = true;
+                    ispaymented = false;
+                  });
+                }
+                finalPayment(payment, double.parse(ammount));
               });
         });
   }
 
-  finalPayment(payment) async {
+  finalPayment(payment, ammount) async {
     List<OrderPayment> totalPayment = [];
     if (!isSpliting) {
       OrderPayment orderpayment = new OrderPayment();
       orderpayment.op_method_id = payment.paymentId;
-      orderpayment.op_method_id = seletedPayment.paymentId;
       orderpayment.remark = remarkInputController.text;
       orderpayment.approval_code = codeInput.text;
       orderpayment.last_digits = digitController.text;
       orderpayment.reference_number = refInputController.text;
       orderpayment.is_split = isSpliting ? 1 : 0;
-      orderpayment.op_amount = newAmmount;
+      orderpayment.op_amount = ammount;
+      double change = 0.0;
+      if (ammount > widget.grandTotal) {
+        change = ammount - widget.grandTotal;
+        orderpayment.op_amount_change = change;
+      }
       totalPayment.add(orderpayment);
-      var change = 0;
-      if (newAmmount > widget.grandTotal) {
-        change = newAmmount - widget.grandTotal;
+      await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return FinalEndScreen(
+                total: widget.grandTotal,
+                totalPaid: ammount,
+                change: change,
+                onClose: () {
+                  widget.onClose(totalPayment);
+                });
+          });
+    } else if (isSpliting && splitedPayment >= widget.grandTotal) {
+      for (var i = 0; i < splitpaymentList.length; i++) {
+        OrderPayment orderpayment = splitpaymentList[i];
+        totalPayment.add(orderpayment);
+      }
+      double change = 0.0;
+      if (splitedPayment > widget.grandTotal) {
+        change = splitedPayment - widget.grandTotal;
       }
       await showDialog(
           context: context,
           builder: (BuildContext context) {
             return FinalEndScreen(
                 total: widget.grandTotal,
-                totalPaid: newAmmount,
+                totalPaid: splitedPayment,
                 change: change,
                 onClose: () {
-                  widget.onClose(totalPayment, change);
+                  Navigator.of(context).pop();
+                  widget.onClose(totalPayment);
                 });
           });
-    } else if (isSpliting && splitedPayment >= newAmmount) {
-      for (var i = 0; i < splitpaymentList.length; i++) {
-        OrderPayment orderpayment = splitpaymentList[i];
-        orderpayment.op_amount = orderpayment.op_amount;
-        orderpayment.op_method_id = payment.paymentId;
-        orderpayment.op_method_id = seletedPayment.paymentId;
-        orderpayment.remark = remarkInputController.text;
-        orderpayment.approval_code = codeInput.text;
-        orderpayment.last_digits = digitController.text;
-        orderpayment.reference_number = refInputController.text;
-        orderpayment.is_split = isSpliting ? 1 : 0;
-        totalPayment.add(orderpayment);
-      }
-      widget.onClose(totalPayment);
     } else {
-      var lastamount = newAmmount;
-      for (var i = 0; i < splitpaymentList.length; i++) {
-        OrderPayment orderpayment = splitpaymentList[i];
-        orderpayment.op_amount = orderpayment.op_amount;
-        orderpayment.op_method_id = payment.paymentId;
-        orderpayment.op_method_id = seletedPayment.paymentId;
-        orderpayment.remark = remarkInputController.text;
-        orderpayment.approval_code = codeInput.text;
-        orderpayment.last_digits = digitController.text;
-        orderpayment.reference_number = refInputController.text;
-        orderpayment.is_split = isSpliting ? 1 : 0;
-        totalPayment.add(orderpayment);
-        lastamount = lastamount - orderpayment.op_amount;
+      var lastamount = widget.grandTotal;
+      if (splitpaymentList.length > 0) {
+        for (var i = 0; i < splitpaymentList.length; i++) {
+          OrderPayment orderpayment = splitpaymentList[i];
+          totalPayment.add(orderpayment);
+          lastamount = lastamount - orderpayment.op_amount;
+        }
       }
+      OrderPayment orderpayment = new OrderPayment();
+      orderpayment.op_amount = ammount;
+      orderpayment.op_method_id = seletedPayment.paymentId;
+      orderpayment.remark = remarkInputController.text;
+      orderpayment.approval_code = codeInput.text;
+      orderpayment.last_digits = digitController.text;
+      orderpayment.reference_number = refInputController.text;
+      orderpayment.is_split = isSpliting ? 1 : 0;
+      lastamount = lastamount - orderpayment.op_amount;
       setState(() {
+        splitedPayment = splitedPayment + ammount;
         updatedAmmount = lastamount;
         splitpaymentList = totalPayment;
         ispaymented = true;
       });
+      double change = 0.0;
+      if (splitedPayment > widget.grandTotal) {
+        change = splitedPayment - widget.grandTotal;
+        orderpayment.op_amount_change = change;
+      }
+      totalPayment.add(orderpayment);
+      if (splitedPayment >= widget.grandTotal) {
+        await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return FinalEndScreen(
+                  total: widget.grandTotal,
+                  totalPaid: splitedPayment,
+                  change: change,
+                  onClose: () {
+                    Navigator.of(context).pop();
+                    widget.onClose(totalPayment);
+                  });
+            });
+      }
       refInputController.text = "";
       remarkInputController.text = "";
       codeInput.text = "";
@@ -332,23 +367,23 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                   ),
                   borderRadius: BorderRadius.circular(5.0)),
               child: ListTile(
-                onTap: () {
-                  {
-                    splitPayment();
-                  }
-                },
-                leading: IconButton(
-                  onPressed: () {
-                    closeSplit();
-                  },
-                  icon: Icon(
-                    ispaymented ? Icons.call_split : Icons.close,
-                    color: Colors.black,
-                    size: SizeConfig.safeBlockVertical * 4,
-                  ),
-                ),
+                // onTap: () {
+                //   {
+                //     splitPayment();
+                //   }
+                // },
+                // leading: IconButton(
+                //   onPressed: () {
+                //    // closeSplit();
+                //   },
+                //   icon: Icon(
+                //     ispaymented ? Icons.call_split : Icons.close,
+                //     color: Colors.black,
+                //     size: SizeConfig.safeBlockVertical * 4,
+                //   ),
+                // ),
                 title: Text(
-                  ispaymented ? "Split Payment" : "Ammount to Pay",
+                  "Ammount to Pay",
                   // "Ammount to Pay",
                   style: Styles.blackMediumBold(),
                 ),
@@ -375,7 +410,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
             grandTotal: widget.grandTotal,
             onClose: (mehtod) {
               Navigator.of(context).pop();
-              // widget.onClose(mehtod);
               insertPaymentOption(mehtod);
             },
           );

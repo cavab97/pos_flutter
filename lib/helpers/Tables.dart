@@ -525,6 +525,7 @@ class CreateTables {
         "op_method_id INTEGER," +
         "op_amount REAL," +
         "op_method_response TEXT," +
+        "op_amount_change REAL," +
         "op_status INTEGER," + // 1 New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
         "op_datetime TEXT," +
         "op_by INTEGER," +

@@ -86,30 +86,40 @@ class DrawerWidState extends State<DrawerWid> {
     });
   }
 
-  closeShift() {
+  closeShift(context) {
     showDialog(
         // Opning Ammount Popup
         context: context,
         builder: (BuildContext context) {
           return CloseShiftPage(onClose: () {
             Navigator.of(context).pop();
-            openOpningAmmountPop(Strings.title_closing_amount);
+            openOpningAmmountPop(context, Strings.title_closing_amount);
           });
         });
   }
 
-  openOpningAmmountPop(isopning) async {
-    await CommonUtils.openOpningAmmountPop(context, isopning, (ammountext) {
-      if (isopning == Strings.title_opening_amount) {
-        if (printerreceiptList.length > 0) {
-          printKOT.testReceiptPrint(printerreceiptList[0].printerIp.toString(),
-              context, "", "OpenDrawer");
-        } else {
-          CommunFun.showToast(context, Strings.printer_not_available);
-        }
-      }
-      sendOpenShft(ammountext);
-    });
+  openOpningAmmountPop(context, isopning) async {
+    await showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return OpeningAmmountPage(
+              ammountext: isopning,
+              onEnter: (ammountext) {
+                sendOpenShft(ammountext);
+                if (isopning == Strings.title_opening_amount) {
+                  if (printerreceiptList.length > 0) {
+                    printKOT.testReceiptPrint(
+                        printerreceiptList[0].printerIp.toString(),
+                        context,
+                        "",
+                        "OpenDrawer");
+                  } else {
+                    CommunFun.showToast(context, Strings.printer_not_available);
+                  }
+                }
+              });
+        });
   }
 
   sendOpenShft(ammount) async {
@@ -145,6 +155,9 @@ class DrawerWidState extends State<DrawerWid> {
       await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
       checkshift();
     }
+    Navigator.pushNamedAndRemoveUntil(
+        context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
+        arguments: {"isAssign": false});
   }
 
   gotoShiftReport() {
@@ -168,7 +181,6 @@ class DrawerWidState extends State<DrawerWid> {
     await CommunFun.opneSyncPop(context);
     await CommunFun.syncOrdersANDStore(context, false);
     await CommunFun.syncAfterSuccess(context, false);
-    
   }
 
   @override
@@ -230,11 +242,10 @@ class DrawerWidState extends State<DrawerWid> {
                 : SizedBox(),
             ListTile(
                 onTap: () {
-                  Navigator.of(context).pop();
                   if (isShiftOpen) {
-                    closeShift();
+                    closeShift(context);
                   } else {
-                    openOpningAmmountPop(Strings.title_opening_amount);
+                    openOpningAmmountPop(context, Strings.title_opening_amount);
                   }
                 },
                 leading: Icon(

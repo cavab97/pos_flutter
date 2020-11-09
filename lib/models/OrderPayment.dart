@@ -18,28 +18,29 @@ class OrderPayment {
   String last_digits;
   String approval_code;
   String reference_number;
+  double op_amount_change;
 
-  OrderPayment({
-    this.op_id,
-    this.uuid,
-    this.order_id,
-    this.branch_id,
-    this.terminal_id,
-    this.app_id,
-    this.op_method_id,
-    this.op_amount,
-    this.op_method_response,
-    this.op_status,
-    this.op_datetime,
-    this.op_by,
-    this.updated_at,
-    this.updated_by,
-    this.is_split,
-    this.remark,
-    this.last_digits,
-    this.approval_code,
-    this.reference_number,
-  });
+  OrderPayment(
+      {this.op_id,
+      this.uuid,
+      this.order_id,
+      this.branch_id,
+      this.terminal_id,
+      this.app_id,
+      this.op_method_id,
+      this.op_amount,
+      this.op_method_response,
+      this.op_status,
+      this.op_datetime,
+      this.op_by,
+      this.updated_at,
+      this.updated_by,
+      this.is_split,
+      this.remark,
+      this.last_digits,
+      this.approval_code,
+      this.reference_number,
+      this.op_amount_change});
 
   OrderPayment.fromJson(Map<String, dynamic> json) {
     op_id = json["op_id"];
@@ -63,6 +64,7 @@ class OrderPayment {
     last_digits = json["last_digits"];
     approval_code = json["approval_code"];
     reference_number = json["reference_number"];
+    op_amount_change = json["op_amount_change"];
   }
 
   Map<String, dynamic> toJson() {
@@ -86,6 +88,7 @@ class OrderPayment {
     data["last_digits"] = this.last_digits;
     data["approval_code"] = this.approval_code;
     data["reference_number"] = this.reference_number;
+    data["op_amount_change"] = this.op_amount_change;
     return data;
   }
 }

@@ -8,7 +8,7 @@ class CashPaymentPage extends StatefulWidget {
   // Opning ammount popup
   CashPaymentPage({Key key, this.ammountext, this.onEnter}) : super(key: key);
   Function onEnter;
-  final String ammountext;
+  final double ammountext;
 
   @override
   _CashPaymentState createState() => _CashPaymentState();
@@ -356,8 +356,8 @@ class _CashPaymentState extends State<CashPaymentPage> {
                   ]),
                   Row(
                     children: <Widget>[
-                      _totalbutton(widget.ammountext.toString(), () {
-                        widget.onEnter(currentNumber);
+                      _totalbutton(widget.ammountext.toStringAsFixed(2), () {
+                        widget.onEnter(widget.ammountext.toString());
                       }),
                     ],
                   ),

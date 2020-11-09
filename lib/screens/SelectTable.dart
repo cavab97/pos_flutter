@@ -16,6 +16,7 @@ import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
+import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -303,110 +304,153 @@ class _SelectTablePageState extends State<SelectTablePage>
     });
     return WillPopScope(
       child: Scaffold(
-          key: scaffoldKey,
-          drawer: DrawerWid(),
-          appBar: AppBar(
-            centerTitle: false,
-            leading: IconButton(
-                onPressed: () {
-                  scaffoldKey.currentState.openDrawer();
-                },
-                icon: Icon(
-                  Icons.dehaze,
-                  color: Colors.white,
-                  size: SizeConfig.safeBlockVertical * 5,
-                )),
-            iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            title: SizedBox(
-              height: SizeConfig.safeBlockVertical * 5,
-              child: Image.asset(Strings.asset_headerLogo,
-                  fit: BoxFit.contain, gaplessPlayback: true),
-            ),
-            bottom: TabBar(
-              controller: _tabController,
-              indicatorSize: TabBarIndicatorSize.tab,
-              unselectedLabelColor: Colors.white,
-              unselectedLabelStyle: Styles.whiteBoldsmall(),
-              indicator: BoxDecoration(color: Colors.deepOrange),
-              labelColor: Colors.white,
-              labelStyle: Styles.whiteBoldsmall(),
-              tabs: [
-                Tab(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Text(
-                      "Dine In",
-                    ),
-                  ),
-                ),
-                Tab(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Text(
-                      "Take Away",
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          body: new GestureDetector(
-              onTap: () {
-                FocusScope.of(context).requestFocus(new FocusNode());
+        key: scaffoldKey,
+        drawer: DrawerWid(),
+        appBar: AppBar(
+          centerTitle: false,
+          leading: IconButton(
+              onPressed: () {
+                scaffoldKey.currentState.openDrawer();
               },
-              child: SafeArea(
-                child: Stack(children: <Widget>[
-                  TabBarView(
-                    controller: _tabController,
-                    physics: AlwaysScrollableScrollPhysics(),
-                    children: [
-                      Container(
+              icon: Icon(
+                Icons.dehaze,
+                color: Colors.white,
+                size: SizeConfig.safeBlockVertical * 5,
+              )),
+          iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: SizedBox(
+            height: SizeConfig.safeBlockVertical * 5,
+            child: Image.asset(Strings.asset_headerLogo,
+                fit: BoxFit.contain, gaplessPlayback: true),
+          ),
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorSize: TabBarIndicatorSize.tab,
+            unselectedLabelColor: Colors.white,
+            unselectedLabelStyle: Styles.whiteBoldsmall(),
+            indicator: BoxDecoration(color: Colors.deepOrange),
+            labelColor: Colors.white,
+            labelStyle: Styles.whiteBoldsmall(),
+            tabs: [
+              Tab(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Text(
+                    "Dine In",
+                  ),
+                ),
+              ),
+              Tab(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Text(
+                    "Take Away",
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        body: Stack(
+          children: <Widget>[
+            new GestureDetector(
+                onTap: () {
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                },
+                child: SafeArea(
+                  child: Stack(children: <Widget>[
+                    TabBarView(
+                      controller: _tabController,
+                      physics: AlwaysScrollableScrollPhysics(),
+                      children: [
+                        Container(
+                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Container(
+                                  padding: EdgeInsets.all(10),
+                                  height: MediaQuery.of(context).size.height,
+                                  width: isMenuOpne
+                                      ? MediaQuery.of(context).size.width / 1.5
+                                      : MediaQuery.of(context).size.width,
+                                  child: tablesListwidget(1)),
+                              menuItemDiv()
+                            ],
+                          ),
+                        ),
+                        Container(
+                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Container(
+                                  padding: EdgeInsets.all(10),
+                                  height: MediaQuery.of(context).size.height,
+                                  width: isMenuOpne
+                                      ? MediaQuery.of(context).size.width / 1.5
+                                      : MediaQuery.of(context).size.width,
+                                  child: tablesListwidget(2)),
+                              menuItemDiv()
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  ]),
+                )),
+            !isShiftOpen
+                ? Positioned(
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: Container(
+                        color: Colors.white70.withOpacity(0.9),
                         height: MediaQuery.of(context).size.height,
                         width: MediaQuery.of(context).size.width,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Container(
-                                padding: EdgeInsets.all(10),
-                                height: MediaQuery.of(context).size.height,
-                                width: isMenuOpne
-                                    ? MediaQuery.of(context).size.width / 1.5
-                                    : MediaQuery.of(context).size.width,
-                                child: tablesListwidget(1)),
-                            menuItemDiv()
+                            Text(
+                              Strings.shiftTextLable,
+                              style: TextStyle(
+                                  fontSize: SizeConfig.safeBlockVertical * 4),
+                            ),
+                            SizedBox(height: 15),
+                            Text(
+                              Strings.closed,
+                              style: TextStyle(
+                                  fontSize: SizeConfig.safeBlockVertical * 6,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 30),
+                            shiftbtn(() {
+                              openOpningAmmountPop(
+                                  Strings.title_opening_amount);
+                            })
                           ],
                         ),
                       ),
-                      Container(
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.width,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Container(
-                                padding: EdgeInsets.all(10),
-                                height: MediaQuery.of(context).size.height,
-                                width: isMenuOpne
-                                    ? MediaQuery.of(context).size.width / 1.5
-                                    : MediaQuery.of(context).size.width,
-                                child: tablesListwidget(2)),
-                            menuItemDiv()
-                          ],
-                        ),
-                      ),
-                    ],
+                    ),
                   )
-                ]),
-              ))),
+                : SizedBox()
+          ],
+        ),
+      ),
       onWillPop: _willPopCallback,
     );
   }
@@ -446,18 +490,28 @@ class _SelectTablePageState extends State<SelectTablePage>
     }
   }
 
-  openOpningAmmountPop(isopning) {
-    CommonUtils.openOpningAmmountPop(context, isopning, (ammount) {
-      if (isopning == Strings.title_opening_amount) {
-        if (printerreceiptList.length > 0) {
-          printKOT.testReceiptPrint(printerreceiptList[0].printerIp.toString(),
-              context, "", "OpenDrawer");
-        } else {
-          CommunFun.showToast(context, Strings.printer_not_available);
-        }
-      }
-      sendOpenShft(ammount);
-    });
+  openOpningAmmountPop(isopning) async {
+    await showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return OpeningAmmountPage(
+              ammountext: isopning,
+              onEnter: (ammountext) {
+                sendOpenShft(ammountext);
+                if (isopning == Strings.title_opening_amount) {
+                  if (printerreceiptList.length > 0) {
+                    printKOT.testReceiptPrint(
+                        printerreceiptList[0].printerIp.toString(),
+                        context,
+                        "",
+                        "OpenDrawer");
+                  } else {
+                    CommunFun.showToast(context, Strings.printer_not_available);
+                  }
+                }
+              });
+        });
   }
 
   getAllPrinter() async {

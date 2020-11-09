@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
-import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -47,6 +46,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   bool isWeborder = true;
   var permissions = "";
   var orderDate = "";
+  double change = 0.0;
   bool isScreenLoad = false;
   Customer customer = new Customer();
   Payments paumentMethod = new Payments();
@@ -421,7 +421,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                           height: MediaQuery.of(context)
                                                   .size
                                                   .height /
-                                              1.8,
+                                              2,
                                           child: SingleChildScrollView(
                                             child: Column(
                                               crossAxisAlignment:
@@ -495,86 +495,129 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                             ),
                                           ),
                                         ),
-                                        // Positioned(
-                                        //   bottom: 30,
-                                        //   left: 0,
-                                        //   right: 0,
-                                        //   child:
                                         Container(
-                                          // height:
-                                          //     MediaQuery.of(context).size.height / 2,
-                                          // color: StaticColor.backgroundColor,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height /
+                                              2.2,
                                           padding: EdgeInsets.symmetric(
                                               horizontal: 50),
-                                          child: Column(children: <Widget>[
-                                            Divider(),
-                                            totalAmountValues(),
-                                            Divider(),
-                                            Column(
-                                                children:
-                                                    orderpayment.map((payment) {
-                                              return Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: <Widget>[
-                                                  new Expanded(
-                                                    flex: 7,
-                                                    child: Padding(
-                                                      padding: EdgeInsets.only(
-                                                        top: 0,
-                                                      ),
-                                                      child: Text(
-                                                        paumentMethod.name !=
-                                                                null
-                                                            ? paumentMethod.name
-                                                                .toUpperCase()
-                                                            : "",
-                                                        textAlign:
-                                                            TextAlign.end,
-                                                        style:
-                                                            Styles.darkGray(),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  new Expanded(
-                                                    flex: 3,
-                                                    child: Padding(
+                                          child: SingleChildScrollView(
+                                            child: Column(children: <Widget>[
+                                              Divider(),
+                                              totalAmountValues(),
+                                              Divider(),
+                                              Column(
+                                                  children: orderpayment
+                                                      .map((payment) {
+                                                change = payment
+                                                            .op_amount_change !=
+                                                        null
+                                                    ? payment.op_amount_change
+                                                    : 0.0;
+                                                return Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: <Widget>[
+                                                    new Expanded(
+                                                      flex: 7,
+                                                      child: Padding(
                                                         padding:
                                                             EdgeInsets.only(
                                                           top: 0,
                                                         ),
                                                         child: Text(
-                                                          payment.op_amount !=
+                                                          paumentMethod.name !=
                                                                   null
-                                                              ? payment
-                                                                  .op_amount
-                                                                  .toStringAsFixed(
-                                                                      2)
-                                                              : "00:00",
+                                                              ? paumentMethod
+                                                                  .name
+                                                                  .toUpperCase()
+                                                              : "",
                                                           textAlign:
                                                               TextAlign.end,
                                                           style:
                                                               Styles.darkGray(),
-                                                        )),
-                                                  )
-                                                ],
-                                              );
-                                            }).toList()),
-                                            isRefunding
-                                                ? refundButtons(context)
-                                                : permissions.contains(
-                                                        Constant.DELETE_ORDER)
-                                                    ? transationsButton()
-                                                    : SizedBox()
-                                          ]),
-                                        ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    new Expanded(
+                                                      flex: 3,
+                                                      child: Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                            top: 0,
+                                                          ),
+                                                          child: Text(
+                                                            payment.op_amount !=
+                                                                    null
+                                                                ? payment
+                                                                    .op_amount
+                                                                    .toStringAsFixed(
+                                                                        2)
+                                                                : "00:00",
+                                                            textAlign:
+                                                                TextAlign.end,
+                                                            style: Styles
+                                                                .darkGray(),
+                                                          )),
+                                                    )
+                                                  ],
+                                                );
+                                              }).toList()),
+                                              change != null
+                                                  ? Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.end,
+                                                      children: <Widget>[
+                                                        new Expanded(
+                                                          flex: 7,
+                                                          child: Padding(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                              top: 0,
+                                                            ),
+                                                            child: Text(
+                                                              "Change",
+                                                              textAlign:
+                                                                  TextAlign.end,
+                                                              style: Styles
+                                                                  .darkGray(),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        new Expanded(
+                                                          flex: 3,
+                                                          child: Padding(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .only(
+                                                                top: 0,
+                                                              ),
+                                                              child: Text(
+                                                                change
+                                                                    .toStringAsFixed(
+                                                                        2),
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .end,
+                                                                style: Styles
+                                                                    .darkGray(),
+                                                              )),
+                                                        )
+                                                      ],
+                                                    )
+                                                  : SizedBox(),
+                                              isRefunding
+                                                  ? refundButtons(context)
+                                                  : permissions.contains(
+                                                          Constant.DELETE_ORDER)
+                                                      ? transationsButton()
+                                                      : SizedBox()
+                                            ]),
+                                          ),
+                                        )
                                         // ),
-                                      ])
-                                  // : Text(
-                                  //     "No Transations Found",
-                                  //     style: Styles.whiteBold(),
-                                  //   )
-                                  )
+                                      ]))
                               : Column(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.center,

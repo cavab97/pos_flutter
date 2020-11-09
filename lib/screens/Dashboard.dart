@@ -830,7 +830,7 @@ class _DashboradPageState extends State<DashboradPage>
           return PaymentMethodPop(
             subTotal: subtotal,
             grandTotal: grandTotal,
-            onClose: (mehtod, change) {
+            onClose: (mehtod) {
               CommunFun.processingPopup(context);
               paymentWithMethod(mehtod);
             },
@@ -1127,6 +1127,7 @@ class _DashboradPageState extends State<DashboradPage>
           orderpayment.terminal_id = int.parse(terminalId);
           orderpayment.op_method_id = payment[i].op_method_id;
           orderpayment.op_amount = payment[i].op_amount.toDouble();
+          orderpayment.op_amount_change = payment[i].op_amount_change;
           orderpayment.op_method_response = '';
           orderpayment.op_status = 1;
           orderpayment.op_datetime =
