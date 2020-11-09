@@ -814,10 +814,6 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
-  openSendReceiptPop(orderID) {
-    // Send receipt Popup
-  }
-
   opneShowAddCustomerDailog() {
     // Send receipt Popup
     showDialog(

@@ -478,9 +478,11 @@ class PrintReceipt {
             bold: false,
           )),
     ]);
-    /* ticket.row([
+    ticket.row([
       PosColumn(
-          text: "Service Charge@10% : ",
+          text: "Service Charge(" +
+              orderData.serviceChargePercent.toString() +
+              "%) : ",
           width: 8,
           styles: PosStyles(
             align: PosAlign.right,
@@ -488,14 +490,14 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: "50.00",
+          text: orderData.serviceCharge.toStringAsFixed(2),
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
             fontType: PosFontType.fontA,
             bold: false,
           )),
-    ]);*/
+    ]);
 
     if (taxJson.length > 0) {
       taxJson.forEach((element) {
@@ -1098,8 +1100,18 @@ class PrintReceipt {
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
-        await DraftReceipt(taxJson, cartList, tableName, subTotal,serviceChargePer,serviceCharge, grandTotal,
-            tax, branchData, currency, custName));
+        await DraftReceipt(
+            taxJson,
+            cartList,
+            tableName,
+            subTotal,
+            serviceChargePer,
+            serviceCharge,
+            grandTotal,
+            tax,
+            branchData,
+            currency,
+            custName));
 
     CommunFun.showToast(ctx, res.msg);
   }

@@ -8,7 +8,7 @@ class Table_order {
   String merged_pax;
   int table_locked_by;
   int is_order_merged;
-  int service_charge;
+  double service_charge;
 
   Table_order(
       {this.table_id,

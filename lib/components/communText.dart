@@ -936,9 +936,9 @@ class CommunFun {
     return subT;
   }
 
-  static countGrandtotal(subt, tax, dis) {
+  static countGrandtotal(subt, serviceCharge, tax, dis) {
     double grandTotal = 0;
-    grandTotal = ((subt - dis) + tax);
+    grandTotal = ((subt - dis) + serviceCharge + tax);
     return grandTotal;
   }
 
@@ -1036,12 +1036,21 @@ class CommunFun {
     var qty = await CommunFun.countTotalQty(cartItems, productItem, 1.0);
     var disc = await CommunFun.countDiscount(allcartData);
     var subtotal = await CommunFun.countSubtotal(cartItems, productItem.price);
+    var serviceCharge =
+        await CommunFun.countServiceCharge(table.service_charge, subtotal);
+    var serviceChargePer = table.service_charge == null
+        ? await CommunFun.getServiceChargePer()
+        : table.service_charge;
+
     var totalTax = await CommunFun.countTax(subtotal);
-    var grandTotal = await CommunFun.countGrandtotal(subtotal, taxvalues, disc);
+    var grandTotal = await CommunFun.countGrandtotal(
+        subtotal, serviceCharge, taxvalues, disc);
     cart.user_id = customerData.customerId;
     cart.branch_id = int.parse(branchid);
     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
     cart.discount = disc;
+    cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
+    cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
     cart.table_id = table.table_id;
     cart.discount_type = allcartData.discount_type;
     cart.total_qty = qty;

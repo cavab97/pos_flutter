@@ -27,6 +27,7 @@ class MST_Cart {
   int cart_payment_status;
   double serviceChargePercent;
   double serviceCharge;
+
   MST_Cart(
       {this.id,
       this.localID,

@@ -144,7 +144,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       table_order.table_id = selectedTable.tableId;
       table_order.number_of_pax = int.parse(paxController.text);
       table_order.save_order_id = selectedTable.saveorderid;
-      table_order.service_charge = selectedTable.tableServiceCharge;
+      table_order.service_charge = CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
 
       var result = await localAPI.insertTableOrder(table_order);
       await Preferences.setStringToSF(
