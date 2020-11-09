@@ -585,6 +585,7 @@ class CreateTables {
     datatables = db.execute("CREATE TABLE table_order (" +
         "id	INTEGER PRIMARY KEY AUTOINCREMENT," +
         "table_id	INTEGER," +
+        "service_charge	REAl," +
         "is_merge_table  TEXT," +
         "merged_table_id  INTEGER," +
         "number_of_pax  INTEGER," +

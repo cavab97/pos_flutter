@@ -18,6 +18,7 @@ class TablesDetails {
   String deletedAt;
   int deletedBy;
   double tableServiceCharge;
+
   TablesDetails(
       {this.tableId,
       this.uuid,
