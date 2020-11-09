@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/CheckInout.dart';
 import 'package:mcncashier/models/Customer.dart';
@@ -157,6 +158,48 @@ class CommunFun {
         print(e);
       },
     );
+  }
+
+  /*Cal Service Charge*/
+  static countServiceCharge(service_charge, subtotal) async {
+    if (service_charge == null) {
+      var branchid = await getbranchId();
+      Branch branchData = await localAPI.getBranchData(branchid);
+      service_charge = branchData.serviceCharge;
+    } else if (service_charge < 0) {
+      var branchid = await getbranchId();
+      Branch branchData = await localAPI.getBranchData(branchid);
+      service_charge = branchData.serviceCharge;
+    }
+
+    if (service_charge != null) {
+      return subtotal * service_charge / 100;
+    } else {
+      return 0.00;
+    }
+  }
+
+  /*get Service Percentage*/
+  static getServiceChargePer() async {
+    var branchID = await getbranchId();
+    Branch branchData = await localAPI.getBranchData(branchID);
+    var service_charge = branchData.serviceCharge;
+
+    if (service_charge != null) {
+      return service_charge;
+    } else {
+      return 0;
+    }
+  }
+
+  static getDoubleValue(var value) {
+    if (value is int) {
+      return value.toDouble();
+    } else if (value is String) {
+      return double.parse(value);
+    } else {
+      return value;
+    }
   }
 
   static deviceInfo() async {
@@ -893,9 +936,9 @@ class CommunFun {
     return subT;
   }
 
-  static countGrandtotal(subt, tax, dis) {
+  static countGrandtotal(subt, serviceCharge, tax, dis) {
     double grandTotal = 0;
-    grandTotal = ((subt - dis) + tax);
+    grandTotal = ((subt - dis) + serviceCharge + tax);
     return grandTotal;
   }
 
@@ -993,12 +1036,21 @@ class CommunFun {
     var qty = await CommunFun.countTotalQty(cartItems, productItem, 1.0);
     var disc = await CommunFun.countDiscount(allcartData);
     var subtotal = await CommunFun.countSubtotal(cartItems, productItem.price);
+    var serviceCharge =
+        await CommunFun.countServiceCharge(table.service_charge, subtotal);
+    var serviceChargePer = table.service_charge == null
+        ? await CommunFun.getServiceChargePer()
+        : table.service_charge;
+
     var totalTax = await CommunFun.countTax(subtotal);
-    var grandTotal = await CommunFun.countGrandtotal(subtotal, taxvalues, disc);
+    var grandTotal = await CommunFun.countGrandtotal(
+        subtotal, serviceCharge, taxvalues, disc);
     cart.user_id = customerData.customerId;
     cart.branch_id = int.parse(branchid);
     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
     cart.discount = disc;
+    cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
+    cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
     cart.table_id = table.table_id;
     cart.discount_type = allcartData.discount_type;
     cart.total_qty = qty;

@@ -145,6 +145,8 @@ class _SelectTablePageState extends State<SelectTablePage>
       table_order.table_id = selectedTable.tableId;
       table_order.number_of_pax = int.parse(paxController.text);
       table_order.save_order_id = selectedTable.saveorderid;
+      table_order.service_charge = CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
+
       var result = await localAPI.insertTableOrder(table_order);
       await Preferences.setStringToSF(
           Constant.TABLE_DATA, json.encode(table_order));
@@ -169,6 +171,8 @@ class _SelectTablePageState extends State<SelectTablePage>
       Table_order tableorder = new Table_order();
       tableorder.table_id = selectedTable.tableId;
       tableorder.number_of_pax = int.parse(paxController.text);
+      tableorder.service_charge = selectedTable.tableServiceCharge;
+
       await localAPI.insertTableOrder(tableorder);
       await localAPI.insertSaveOrders(orderData, selectedTable.tableId);
       await localAPI.updateTableidintocart(orderid, selectedTable.tableId);
@@ -251,6 +255,8 @@ class _SelectTablePageState extends State<SelectTablePage>
       Table_order tabledata = Table_order.fromJson(tableddata);
       if (tabledata.table_id == selectedTable.tableId) {
         tabledata.table_id = table.tableId;
+        tabledata.service_charge = table.tableServiceCharge;
+
         await Preferences.setStringToSF(
             Constant.TABLE_DATA, jsonEncode(tabledata));
       }

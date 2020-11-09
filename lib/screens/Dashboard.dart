@@ -87,6 +87,8 @@ class _DashboradPageState extends State<DashboradPage>
   Branch branchData;
   Table_order selectedTable;
   double subtotal = 0;
+  double serviceCharge = 0;
+  double serviceChargePer = 0;
   Customer customer;
   String tableName = "";
   bool isWebOrder = false;
@@ -226,6 +228,8 @@ class _DashboradPageState extends State<DashboradPage>
       discount = 0.0;
       tax = 0.0;
       subtotal = 0.0;
+      serviceCharge = 0.0;
+      serviceChargePer = 0;
       isTableSelected = false;
       currentCart = null;
     });
@@ -271,6 +275,11 @@ class _DashboradPageState extends State<DashboradPage>
     setState(() {
       allcartData = cart;
       subtotal = cart.sub_total;
+      serviceCharge = cart.serviceCharge == null
+          ? 0.00
+          : cart.serviceCharge;
+      serviceChargePer =
+          cart.serviceChargePercent == null ? 0 : cart.serviceChargePercent;
       discount = cart.discount;
       tax = cart.tax;
       isWebOrder = cart.source == 1 ? true : false;
@@ -393,6 +402,8 @@ class _DashboradPageState extends State<DashboradPage>
                 cartList,
                 tableName,
                 subtotal,
+                serviceChargePer,
+                serviceCharge,
                 grandTotal,
                 tax,
                 branchData,
@@ -803,10 +814,6 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
-  openSendReceiptPop(orderID) {
-    // Send receipt Popup
-  }
-
   opneShowAddCustomerDailog() {
     // Send receipt Popup
     showDialog(
@@ -923,6 +930,8 @@ class _DashboradPageState extends State<DashboradPage>
     order.invoice_no = invoiceNo;
     order.customer_id = cartData.user_id;
     order.sub_total = cartData.sub_total;
+    order.serviceCharge = cartData.serviceCharge;
+    order.serviceChargePercent = cartData.serviceChargePercent;
     order.sub_total_after_discount = cartData.sub_total;
     order.grand_total = cartData.grand_total;
     order.order_item_count = cartData.total_qty.toInt();
@@ -1253,6 +1262,7 @@ class _DashboradPageState extends State<DashboradPage>
       if (cartList.length == 1) {
         cart = allcartData;
         cart.sub_total = 0.0;
+        cart.serviceCharge = 0.0;
         cart.discount = 0.0;
         cart.total_qty = 0.0;
         cart.grand_total = 0.0;
@@ -1263,6 +1273,9 @@ class _DashboradPageState extends State<DashboradPage>
         cart = allcartData;
         cart.sub_total = subt;
         cart.discount = disc;
+        cart.serviceCharge =
+            await CommunFun.countServiceCharge(cart.serviceChargePercent, subt);
+        ;
         cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
         cart.grand_total = (subt - disc) + taxvalues;
         cart.tax_json = json.encode(taxjson);
@@ -1283,6 +1296,8 @@ class _DashboradPageState extends State<DashboradPage>
           discount = 0.0;
           tax = 0.0;
           subtotal = 0.0;
+          serviceCharge = 0.0;
+          serviceChargePer = 0;
         });
       }
     } catch (e) {
@@ -2651,6 +2666,24 @@ class _DashboradPageState extends State<DashboradPage>
                           color: Theme.of(context).accentColor),
                     ),
                   ),
+                ],
+              ),
+            ),
+          ]),
+          /*Row for service charge*/
+          TableRow(children: [
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Text(Strings.service_charge.toUpperCase()+"($serviceChargePer%)",
+                          style: Styles.darkBlue())),
+                  Padding(
+                      padding: EdgeInsets.only(right: 15),
+                      child: Text(serviceCharge.toStringAsFixed(2),
+                          style: Styles.darkBlue())),
                 ],
               ),
             ),

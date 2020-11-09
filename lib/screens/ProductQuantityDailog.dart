@@ -7,6 +7,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
+import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
@@ -567,9 +568,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return subT;
   }
 
-  countGrandtotal(subt, tax, dis) {
+  countGrandtotal(subt, serviceCharge, tax, dis) {
     double grandTotal = 0;
-    grandTotal = ((subt - dis) + tax);
+    grandTotal = (((subt - dis) + serviceCharge) + tax);
     return grandTotal;
   }
 
@@ -645,13 +646,23 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var qty = await countTotalQty();
     var disc = await countDiscount();
     var subtotal = await countSubtotal();
+    var serviceCharge =
+        await CommunFun.countServiceCharge(tableData.service_charge, subtotal);
+    var serviceChargePer =
+        tableData.service_charge == null
+            ? await CommunFun.getServiceChargePer()
+            : tableData.service_charge;
+
     var totalTax = await countTax(subtotal);
-    var grandTotal = await countGrandtotal(subtotal, taxvalues, disc);
+    var grandTotal =
+        await countGrandtotal(subtotal, serviceCharge, taxvalues, disc);
 
     //cart data
     cart.user_id = customerid;
     cart.branch_id = int.parse(branchid);
     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
+    cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
+    cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
     cart.discount = disc;
     cart.table_id = tableData.table_id;
     cart.discount_type = currentCart.discount_type;

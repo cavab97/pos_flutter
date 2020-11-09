@@ -325,6 +325,7 @@ class LocalAPI {
     return result;
   }
 
+
   Future<List<Printer>> selectPrinterForPrint() async {
     var qry =
         "SELECT * from printer LEFT JOIN product_branch on product_branch.product_id = 1  AND printer.printer_id = product_branch.printer_id";

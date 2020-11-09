@@ -462,7 +462,7 @@ class PrintReceipt {
     ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
-          text: "SUB TOTAL : ",
+          text: "Sub Total : ",
           width: 8,
           styles: PosStyles(
             align: PosAlign.right,
@@ -478,9 +478,11 @@ class PrintReceipt {
             bold: false,
           )),
     ]);
-    /* ticket.row([
+    ticket.row([
       PosColumn(
-          text: "Service Charge@10% : ",
+          text: "Service Charge(" +
+              orderData.serviceChargePercent.toString() +
+              "%) : ",
           width: 8,
           styles: PosStyles(
             align: PosAlign.right,
@@ -488,14 +490,14 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: "50.00",
+          text: orderData.serviceCharge.toStringAsFixed(2),
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
             fontType: PosFontType.fontA,
             bold: false,
           )),
-    ]);*/
+    ]);
 
     if (taxJson.length > 0) {
       taxJson.forEach((element) {
@@ -739,6 +741,8 @@ class PrintReceipt {
       List<MSTCartdetails> cartList,
       String tableName,
       double subTotal,
+      double serviceChargePer,
+      double serviceCharge,
       double grandTotal,
       double tax,
       Branch branchData,
@@ -944,7 +948,7 @@ class PrintReceipt {
     ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
-          text: "SUB TOTAL : ",
+          text: "Sub Total : ",
           width: 8,
           styles: PosStyles(
             align: PosAlign.right,
@@ -953,6 +957,24 @@ class PrintReceipt {
           )),
       PosColumn(
           text: subTotal.toStringAsFixed(2),
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Service Charge($serviceChargePer%) : ",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: serviceCharge.toStringAsFixed(2),
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
@@ -1067,6 +1089,8 @@ class PrintReceipt {
       List<MSTCartdetails> cartList,
       String tableName,
       double subTotal,
+      double serviceChargePer,
+      double serviceCharge,
       double grandTotal,
       double tax,
       Branch branchData,
@@ -1076,8 +1100,18 @@ class PrintReceipt {
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
-        await DraftReceipt(taxJson, cartList, tableName, subTotal, grandTotal,
-            tax, branchData, currency, custName));
+        await DraftReceipt(
+            taxJson,
+            cartList,
+            tableName,
+            subTotal,
+            serviceChargePer,
+            serviceCharge,
+            grandTotal,
+            tax,
+            branchData,
+            currency,
+            custName));
 
     CommunFun.showToast(ctx, res.msg);
   }
