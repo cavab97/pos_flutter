@@ -636,7 +636,7 @@ class PrintReceipt {
     for (int p = 0; p < paymentdata.length; p++) {
       ticket.row([
         PosColumn(
-            text: paymentdata[p].op_method_id.toString()+" ",
+            text: paymentdata[p].op_method_id.toString() + " ",
             width: 8,
             styles: PosStyles(
               align: PosAlign.right,
@@ -738,6 +738,7 @@ class PrintReceipt {
       List<OrderModifire> orderModifire,
       Orders orderData,
       List<OrderPayment> paymentdata,
+      List<Payments> paymentMethods,
       String tableName,
       var currency,
       String customerName) async {

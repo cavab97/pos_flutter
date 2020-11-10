@@ -1168,7 +1168,7 @@ class _DashboradPageState extends State<DashboradPage>
   printReceipt(int orderid) async {
     List<OrderPayment> orderpaymentdata =
         await localAPI.getOrderpaymentData(orderid);
-    List<Payments> paument_method =
+    List<Payments> paymentMethod =
         await localAPI.getOrderpaymentmethod(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     var branchID = await CommunFun.getbranchId();
@@ -1187,6 +1187,7 @@ class _DashboradPageState extends State<DashboradPage>
         modifires,
         order,
         orderpaymentdata,
+        paymentMethod,
         tableName,
         currency,
         customer != null ? customer.name : "Walk-in customer");
