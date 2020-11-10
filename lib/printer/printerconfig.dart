@@ -590,7 +590,10 @@ class PrintReceipt {
       if (paymentMethods[p].name.toLowerCase() == "cash") {
         isCashPayment = true;
         cashPaymentTotal = cashPaymentTotal + paymentdata[p].op_amount;
-        cashPaymentChange = cashPaymentChange + paymentdata[p].op_amount_change;
+        cashPaymentChange = cashPaymentChange +
+            (paymentdata[p].op_amount_change == null
+                ? 0.00
+                : paymentdata[p].op_amount_change);
       }
     }
 
