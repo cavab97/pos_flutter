@@ -1178,7 +1178,7 @@ class _DashboradPageState extends State<DashboradPage>
     List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
 
     printKOT.checkReceiptPrint(
-        printerreceiptList[0].printerIp,
+        "192.168.0.109",//printerreceiptList[0].printerIp,
         context,
         branchData,
         taxJson,

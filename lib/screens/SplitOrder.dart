@@ -934,7 +934,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     Branch branchAddress = await localAPI.getBranchData(branchID);
     List<OrderPayment> orderpaymentdata =
         await localAPI.getOrderpaymentData(orderid);
-    List<Payments> paumentMethod =
+    List<Payments> paymentMethod =
         await localAPI.getOrderpaymentmethod(orderid);
     User user = await localAPI.getPaymentUser(orderpaymentdata[0].op_by);
     // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
@@ -943,12 +943,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     List<OrderAttributes> attributes =
         await localAPI.getOrderAttributes(orderid);
     List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
-    print(branchAddress);
-    print(orderpaymentdata);
-    print(paumentMethod);
-    print(orderitem);
-    print(user);
-    print(order);
+
     if (widget.printerIP.isNotEmpty) {
       _printReceipt.checkReceiptPrint(
           widget.printerIP,
@@ -960,6 +955,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           modifires,
           order,
           orderpaymentdata,
+          paymentMethod,
           "", // Add table name here
           "", // Add Currency here
           widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
