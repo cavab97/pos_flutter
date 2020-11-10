@@ -208,22 +208,20 @@ class DrawerWidState extends State<DrawerWid> {
               ],
             ),
             CommunFun.divider(),
-            permissions.contains(Constant.VIEW_ORDER)
-                ? ListTile(
-                    onTap: () {
-                      gotoTansactionPage();
-                    },
-                    leading: Icon(
-                      Icons.art_track,
-                      color: Colors.black,
-                      size: SizeConfig.safeBlockVertical * 5,
-                    ),
-                    title: Text(
-                      "Transaction",
-                      style: Styles.drawerText(),
-                    ),
-                  )
-                : SizedBox(),
+            ListTile(
+              onTap: () {
+                gotoTansactionPage();
+              },
+              leading: Icon(
+                Icons.art_track,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 5,
+              ),
+              title: Text(
+                "Transaction",
+                style: Styles.drawerText(),
+              ),
+            ),
             permissions.contains(Constant.VIEW_ORDER)
                 ? ListTile(
                     onTap: () {

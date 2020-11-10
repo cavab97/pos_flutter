@@ -51,6 +51,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   bool isChanging = false;
   bool isShiftOpen = true;
   bool isMenuOpne = false;
+  var permissions = "";
   TabController _tabController;
   @override
   void initState() {
@@ -65,6 +66,14 @@ class _SelectTablePageState extends State<SelectTablePage>
     _tabController = new TabController(length: 2, vsync: this);
     checkshift();
     getAllPrinter();
+    setPermissons();
+  }
+
+  setPermissons() async {
+    var permission = await CommunFun.getPemission();
+    setState(() {
+      permissions = permission;
+    });
   }
 
   checkshift() async {
@@ -647,7 +656,14 @@ class _SelectTablePageState extends State<SelectTablePage>
             : SizedBox(),
         selectedTable.numberofpax != null
             ? neworder_button(Icons.cancel, Strings.cancle_order, context, () {
-                cancleTableOrder();
+                if (permissions.contains(Constant.DELETE_ORDER)) {
+                  cancleTableOrder();
+                } else {
+                  CommonUtils.openPermissionPop(context, Constant.DELETE_ORDER,
+                      () {
+                    cancleTableOrder();
+                  });
+                }
               })
             : SizedBox(),
         neworder_button(Icons.call_merge, Strings.merge_order, context, () {

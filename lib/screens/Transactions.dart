@@ -616,10 +616,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                                   : SizedBox(),
                                               isRefunding
                                                   ? refundButtons(context)
-                                                  : permissions.contains(
-                                                          Constant.DELETE_ORDER)
-                                                      ? transationsButton()
-                                                      : SizedBox()
+                                                  : transationsButton()
                                             ]),
                                           ),
                                         )
@@ -779,25 +776,48 @@ class _TransactionsPageState extends State<TransactionsPage> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         refundButton(() {
-          if (orderpayment[0].op_status == 1) {
-            // refund ordr
-            refundProcessStart();
+          if (permissions.contains(Constant.DELETE_ORDER)) {
+            if (orderpayment[0].op_status == 1) {
+              refundProcessStart();
+            }
+          } else {
+            CommonUtils.openPermissionPop(context, Constant.EDIT_ORDER, () {
+              refundProcessStart();
+            });
           }
         }),
         SizedBox(width: 10),
         cancelButton(() {
-          if (orderpayment[0].op_status == 1) {
-            CommonUtils.showAlertDialog(context, () {
-              Navigator.of(context).pop();
-            }, () {
-              Navigator.of(context).pop();
-              showReasontypePop();
-            },
-                "Warning",
-                "This action can not be undone. Do you want to avoid this transaction?",
-                "Yes",
-                "No",
-                true);
+          if (permissions.contains(Constant.DELETE_ORDER)) {
+            if (orderpayment[0].op_status == 1) {
+              CommonUtils.showAlertDialog(context, () {
+                Navigator.of(context).pop();
+              }, () {
+                Navigator.of(context).pop();
+                showReasontypePop();
+              },
+                  "Warning",
+                  "This action can not be undone. Do you want to avoid this transaction?",
+                  "Yes",
+                  "No",
+                  true);
+            }
+          } else {
+            CommonUtils.openPermissionPop(context, Constant.EDIT_ORDER, () {
+              if (orderpayment[0].op_status == 1) {
+                CommonUtils.showAlertDialog(context, () {
+                  Navigator.of(context).pop();
+                }, () {
+                  Navigator.of(context).pop();
+                  showReasontypePop();
+                },
+                    "Warning",
+                    "This action can not be undone. Do you want to avoid this transaction?",
+                    "Yes",
+                    "No",
+                    true);
+              }
+            });
           }
         }),
       ],
@@ -1231,7 +1251,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 height: 100.0,
                 padding: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
                 decoration: new BoxDecoration(
-                    color: selectedOrder.app_id == item.app_id
+                    color: selectedOrder.app_id == item.app_id &&
+                            selectedOrder.terminal_id == item.terminal_id
                         ? Colors.grey[200]
                         : Colors.white),
                 child: ListTile(
@@ -1271,7 +1292,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           : SizedBox()
                     ],
                   ),
-                  subtitle: Text(Strings.invoice + item.invoice_no.toString(),
+                  subtitle: Text(
+                      Strings.invoice +
+                          item.invoice_no.toString() +
+                          "(" +
+                          item.terminal_id.toString() +
+                          ")",
                       style: Styles.greysmall()),
                   isThreeLine: true,
                   trailing: Text(item.grand_total.toStringAsFixed(2),
