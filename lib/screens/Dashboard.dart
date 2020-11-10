@@ -906,7 +906,6 @@ class _DashboradPageState extends State<DashboradPage>
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
-    //var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
     List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
     int length = branchdata.invoiceStart.length;
     var invoiceNo;
@@ -915,7 +914,7 @@ class _DashboradPageState extends State<DashboradPage>
       invoiceNo =
           branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     } else {
-      order.app_id = int.parse(terminalId);
+      order.app_id = 1;
       invoiceNo =
           branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
@@ -1943,9 +1942,7 @@ class _DashboradPageState extends State<DashboradPage>
         onSelected: selectOption,
         itemBuilder: (BuildContext context) => [
               PopupMenuItem(
-                enabled: permissions.contains(Constant.ADD_ORDER) && isShiftOpen
-                    ? true
-                    : false,
+                enabled: isShiftOpen ? true : false,
                 value: 0,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -1964,10 +1961,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled:
-                    permissions.contains(Constant.ADD_ORDER) && isTableSelected
-                        ? true
-                        : false,
+                enabled: isTableSelected ? true : false,
                 value: 1,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -1986,10 +1980,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: permissions.contains(Constant.EDIT_ORDER) &&
-                        cartList.length > 1
-                    ? true
-                    : false,
+                enabled: cartList.length > 1 ? true : false,
                 value: 2,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2336,7 +2327,7 @@ class _DashboradPageState extends State<DashboradPage>
             ? MainAxisAlignment.spaceAround
             : MainAxisAlignment.center,
         children: <Widget>[
-          !isWebOrder && permissions.contains(Constant.EDIT_ORDER)
+          !isWebOrder
               ? Container(
                   //margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3),
                   height: SizeConfig.safeBlockVertical * 7,
@@ -2344,7 +2335,14 @@ class _DashboradPageState extends State<DashboradPage>
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () {
-                      sendTokitched(cartList);
+                      if (permissions.contains(Constant.ADD_ORDER)) {
+                        sendTokitched(cartList);
+                      } else {
+                        CommonUtils.openPermissionPop(
+                            context, Constant.ADD_ORDER, () {
+                          sendTokitched(cartList);
+                        });
+                      }
                     },
                     child: Text(
                       Strings.send,
@@ -2361,38 +2359,52 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                 )
               : SizedBox(),
-          permissions.contains(Constant.EDIT_ORDER)
-              ? Container(
-                  /* margin: EdgeInsets.only(
+          Container(
+            /* margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height / 1.3 + 10),*/
-                  height: SizeConfig.safeBlockVertical * 7,
-                  width: MediaQuery.of(context).size.width / 7,
-                  child: RaisedButton(
-                    padding: EdgeInsets.only(top: 5, bottom: 5),
-                    onPressed: () {
-                      if (!isWebOrder) {
-                        sendPayment();
-                        //  openPrinterPop(cartList);
-                      } else {
-                        //weborder payment
-                        checkoutWebOrder();
-                      }
-                    },
-                    child: Text(
-                      !isWebOrder ? Strings.title_pay : "CheckOut",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: SizeConfig.safeBlockVertical * 2.8,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    color: Colors.deepOrange,
-                    textColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50.0),
-                    ),
-                  ),
-                )
-              : SizedBox(),
+            height: SizeConfig.safeBlockVertical * 7,
+            width: MediaQuery.of(context).size.width / 7,
+            child: RaisedButton(
+              padding: EdgeInsets.only(top: 5, bottom: 5),
+              onPressed: () {
+                if (!isWebOrder) {
+                  if (permissions.contains(Constant.ADD_ORDER) ||
+                      permissions.contains(Constant.EDIT_ORDER)) {
+                    sendPayment();
+                  } else {
+                    CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
+                        () {
+                      sendPayment();
+                    });
+                  }
+                } else {
+                  //weborder payment
+                  if (permissions.contains(Constant.ADD_ORDER) ||
+                      permissions.contains(Constant.EDIT_ORDER)) {
+                    checkoutWebOrder();
+                  } else {
+                    CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
+                        () {
+                      checkoutWebOrder();
+                    });
+                  }
+                  checkoutWebOrder();
+                }
+              },
+              child: Text(
+                !isWebOrder ? Strings.title_pay : "CheckOut",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: SizeConfig.safeBlockVertical * 2.8,
+                    fontWeight: FontWeight.bold),
+              ),
+              color: Colors.deepOrange,
+              textColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50.0),
+              ),
+            ),
+          )
         ]);
   }
 
@@ -2505,10 +2517,10 @@ class _DashboradPageState extends State<DashboradPage>
         ]);
 
     final cartTable = ListView(
-      physics: BouncingScrollPhysics(),
+      //physics: BouncingScrollPhysics(),
       shrinkWrap: true,
       itemExtent: 50.0,
-      padding: EdgeInsets.only(bottom: 150),
+      padding: EdgeInsets.only(bottom: 200),
       children: cartList.map((cart) {
         return Slidable(
           key: Key(cart.id.toString()),
@@ -2565,44 +2577,59 @@ class _DashboradPageState extends State<DashboradPage>
             ),
           ),
           secondaryActions: <Widget>[
-            permissions.contains(Constant.EDIT_ITEM) && cart.issetMeal == 0
+            cart.issetMeal == 0
                 ? IconSlideAction(
                     color: Colors.blueAccent,
                     icon: Icons.free_breakfast,
                     onTap: () {
-                      // if (!isWebOrder) {
-                      applyforFocProduct(cart);
-                      // }
-                    },
-                  )
-                : SizedBox(),
-            permissions.contains(Constant.EDIT_ORDER)
-                ? IconSlideAction(
-                    color: Colors.black45,
-                    icon: Icons.edit,
-                    onTap: () {
-                      if (!isWebOrder && cart.isFocProduct != 1) {
-                        editCartItem(cart);
+                      if (permissions.contains(Constant.EDIT_ITEM)) {
+                        applyforFocProduct(cart);
                       } else {
-                        if (cart.isFocProduct == 1) {
-                          CommunFun.showToast(
-                              context, "FOC Product is not editable.");
-                        }
+                        CommonUtils.openPermissionPop(
+                            context, Constant.EDIT_ITEM, () {
+                          applyforFocProduct(cart);
+                        });
                       }
                     },
                   )
                 : SizedBox(),
-            permissions.contains(Constant.EDIT_ITEM)
-                ? IconSlideAction(
-                    color: Colors.red,
-                    icon: Icons.delete_outline,
-                    onTap: () {
-                      if (!isWebOrder) {
-                        itememovefromCart(cart);
-                      }
-                    },
-                  )
-                : SizedBox(),
+            IconSlideAction(
+              color: Colors.black45,
+              icon: Icons.edit,
+              onTap: () {
+                if (!isWebOrder && cart.isFocProduct != 1) {
+                  if (permissions.contains(Constant.EDIT_ORDER)) {
+                    editCartItem(cart);
+                  } else {
+                    CommonUtils.openPermissionPop(context, Constant.EDIT_ORDER,
+                        () {
+                      editCartItem(cart);
+                    });
+                  }
+                } else {
+                  if (cart.isFocProduct == 1) {
+                    CommunFun.showToast(
+                        context, "FOC Product is not editable.");
+                  }
+                }
+              },
+            ),
+            IconSlideAction(
+              color: Colors.red,
+              icon: Icons.delete_outline,
+              onTap: () {
+                if (!isWebOrder) {
+                  if (permissions.contains(Constant.EDIT_ORDER)) {
+                    itememovefromCart(cart);
+                  } else {
+                    CommonUtils.openPermissionPop(context, Constant.EDIT_ORDER,
+                        () {
+                      itememovefromCart(cart);
+                    });
+                  }
+                }
+              },
+            )
           ],
         );
       }).toList(),
@@ -2796,36 +2823,38 @@ class _DashboradPageState extends State<DashboradPage>
                               )),
                         )
                       : SizedBox(),
-                  permissions.contains(Constant.EDIT_ORDER) && !isWebOrder
-                      ? Padding(
-                          padding: EdgeInsets.all(10),
-                          child: RaisedButton(
-                            padding: EdgeInsets.only(
-                                left: 10, top: 5, bottom: 5, right: 10),
-                            onPressed: () {
-                              openVoucherPop();
-                            },
-                            child: Row(
-                              children: <Widget>[
-                                Text(Strings.apply_promocode,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize:
-                                          SizeConfig.safeBlockVertical * 2.5,
-                                    )),
-                              ],
-                            ),
-                            color: Colors.deepOrange,
-                            textColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50.0),
-                            ),
-                          ),
-                        )
-                      : Padding(
-                          padding: EdgeInsets.only(right: 15),
-                          child: Text(grandTotal.toStringAsFixed(2),
-                              style: Styles.darkBlue())),
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                    child: RaisedButton(
+                      padding: EdgeInsets.only(
+                          left: 10, top: 5, bottom: 5, right: 10),
+                      onPressed: () {
+                        if (permissions.contains(Constant.EDIT_ORDER) &&
+                            !isWebOrder) {
+                          openVoucherPop();
+                        } else {
+                          CommonUtils.openPermissionPop(
+                              context, Constant.EDIT_ORDER, () {
+                            openVoucherPop();
+                          });
+                        }
+                      },
+                      child: Row(
+                        children: <Widget>[
+                          Text(Strings.apply_promocode,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: SizeConfig.safeBlockVertical * 2.5,
+                              )),
+                        ],
+                      ),
+                      color: Colors.deepOrange,
+                      textColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),

@@ -478,6 +478,43 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     setPrice();
   }
 
+  onSelectSetmealAttr(
+      i, id, attribute, attrTypeIDs, attrPrice, setmealproduct) {
+    var prvSeelected = selectedSetMealAttr;
+    var isSelected = selectedSetMealAttr.any((item) =>
+        item['ca_id'] == id && item["setmeal_productID"] == setmealproduct);
+    if (isSelected) {
+      var isarrSelected =
+          selectedSetMealAttr.any((item) => item['attribute'] == attribute);
+      selectedSetMealAttr.removeWhere((item) =>
+          item['ca_id'] == id && item["setmeal_productID"] == setmealproduct);
+      if (!isarrSelected) {
+        prvSeelected.add({
+          'setmeal_productID': setmealproduct,
+          'ca_id': id,
+          'attribute': attribute,
+          'attrType_ID': attrTypeIDs,
+          'attr_price': attrPrice
+        });
+      }
+      setState(() {
+        selectedSetMealAttr = selectedSetMealAttr;
+      });
+    } else {
+      prvSeelected.add({
+        'setmeal_productID': setmealproduct,
+        'ca_id': id,
+        'attribute': attribute,
+        'attrType_ID': attrTypeIDs,
+        'attr_price': attrPrice
+      });
+      setState(() {
+        selectedSetMealAttr = prvSeelected;
+      });
+    }
+    setPrice();
+  }
+
   setPrice() {
     var productPrice = productnetprice;
     var newPrice = productPrice;
@@ -648,10 +685,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var subtotal = await countSubtotal();
     var serviceCharge =
         await CommunFun.countServiceCharge(tableData.service_charge, subtotal);
-    var serviceChargePer =
-        tableData.service_charge == null
-            ? await CommunFun.getServiceChargePer()
-            : tableData.service_charge;
+    var serviceChargePer = tableData.service_charge == null
+        ? await CommunFun.getServiceChargePer()
+        : tableData.service_charge;
 
     var totalTax = await countTax(subtotal);
     var grandTotal =
@@ -761,6 +797,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         var res = await localAPI.addsubCartData(subCartData);
       }
     }
+
     if (isEditing) {
       if (!isSetMeal) {
         if (cartitem.isSendKichen == 1) {
@@ -1089,13 +1126,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                                 borderRadius:
                                                     BorderRadius.circular(10.0),
                                                 side: BorderSide(
-                                                  color: selectedAttr.any(
-                                                          (item) =>
-                                                              item['ca_id'] ==
-                                                                  attribute
-                                                                      .ca_id &&
-                                                              item['attribute'] ==
-                                                                  attr)
+                                                  color: selectedSetMealAttr.any((item) =>
+                                                          item['ca_id'] ==
+                                                              attribute.ca_id &&
+                                                          item['attribute'] ==
+                                                              attr &&
+                                                          product.setmealProductId ==
+                                                              item[
+                                                                  "setmeal_productID"])
                                                       ? Colors.green
                                                       : Colors.grey[300],
                                                   width: 4,
@@ -1107,13 +1145,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                             textColor: Colors.black,
                                             color: Colors.grey[300],
                                             onPressed: () {
-                                              onSelectAttr(
+                                              onSelectSetmealAttr(
                                                   i,
                                                   attribute.ca_id,
                                                   attr,
                                                   attrIDs[i],
                                                   attrtypesPrice[i],
-                                                  null);
+                                                  product.setmealProductId);
                                             },
                                           )));
                                 })

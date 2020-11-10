@@ -960,6 +960,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           modifires,
           order,
           orderpaymentdata,
+          paumentMethod,
           "", // Add table name here
           "", // Add Currency here
           widget.customer.isEmpty ? "Walk-in customer" : widget.customer);

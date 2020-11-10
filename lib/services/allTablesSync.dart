@@ -189,7 +189,7 @@ class SyncAPICalls {
       var branchid = await CommunFun.getbranchId();
       LocalAPI localAPI = LocalAPI();
       var apiurl = Configrations.order_sync;
-      List<Orders> orders = await localAPI.getOrdersListTable(branchid);
+      List<Orders> orders = await localAPI.getOrdersListTable(branchid,terminalId);
       if (orders.length > 0) {
         List ordersList = [];
         for (var i = 0; i < orders.length; i++) {
