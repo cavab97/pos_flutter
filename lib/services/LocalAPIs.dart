@@ -912,15 +912,17 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<ProductDetails>> getOrderDetails(orderid) async {
+  Future<List<ProductDetails>> getOrderDetails(orderid, terminalID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT P.product_id,P.name,P.price, base64" +
         " FROM order_detail O " +
         " LEFT JOIN product P ON O.product_id = P.product_id" +
         " LEFT join asset on asset.asset_type_id = P.product_id " +
-        " WHERE  O.order_id = " +
+        " WHERE O.terminal_id = " +
+        terminalID.toString() +
+        "  AND O.order_id = " +
         orderid.toString();
-
-    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    var ordersList = await db.rawQuery(qry);
     List<ProductDetails> list = ordersList.isNotEmpty
         ? ordersList.map((c) => ProductDetails.fromJson(c)).toList()
         : [];
@@ -929,10 +931,13 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<OrderDetail>> getOrderDetailsList(orderid) async {
+  Future<List<OrderDetail>> getOrderDetailsList(orderid, terminalid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var ordersList = await db
-        .query("order_detail", where: "order_id =?", whereArgs: [orderid]);
+    var qry = "SELECT * from order_detail WHERE terminal_id = " +
+        terminalid.toString() +
+        " AND order_id = " +
+        orderid.toString();
+    var ordersList = await db.rawQuery(qry);
     List<OrderDetail> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
         : [];
@@ -941,10 +946,12 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<OrderPayment>> getOrderpaymentData(orderid) async {
+  Future<List<OrderPayment>> getOrderpaymentData(orderid, terminalid) async {
     OrderPayment data = new OrderPayment();
-    var qry =
-        "SELECT * from order_payment where order_id = " + orderid.toString();
+    var qry = "SELECT * from order_payment where terminal_id = " +
+        terminalid.toString() +
+        " AND order_id = " +
+        orderid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderPayment> list = ordersList.length > 0
         ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
@@ -1063,11 +1070,13 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<Payments>> getOrderpaymentmethod(orderid) async {
+  Future<List<Payments>> getOrderpaymentmethod(orderid, terminalid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from payment " +
         " LEFT JOIN order_payment on order_payment.op_method_id = payment.payment_id " +
-        " WHERE order_payment.order_id = " +
+        " WHERE order_payment.terminal_id = " +
+        terminalid.toString() +
+        " AND order_payment.order_id = " +
         orderid.toString();
     var paymentMeth = await db.rawQuery(qry);
     List<Payments> list = paymentMeth.isNotEmpty
@@ -1118,9 +1127,11 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<OrderDetail>> getOrderDetailTable(orderid) async {
-    var qry =
-        "SELECT * from order_detail where order_id = " + orderid.toString();
+  Future<List<OrderDetail>> getOrderDetailTable(orderid, terminalId) async {
+    var qry = "SELECT * from order_detail where terminal_id = " +
+        terminalId.toString() +
+        " AND order_id = " +
+        orderid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderDetail> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
@@ -1130,8 +1141,11 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<OrderAttributes>> getOrderAttributesTable(detailid) async {
-    var qry = "SELECT * from order_attributes where detail_id = " +
+  Future<List<OrderAttributes>> getOrderAttributesTable(
+      detailid, terminalId) async {
+    var qry = "SELECT * from order_attributes where terminal_id = " +
+        terminalId.toString() +
+        " AND detail_id = " +
         detailid.toString();
 
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
@@ -1143,9 +1157,12 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<OrderModifire>> getOrderModifireTable(detailid) async {
-    var qry =
-        "SELECT * from order_modifier where detail_id = " + detailid.toString();
+  Future<List<OrderModifire>> getOrderModifireTable(
+      detailid, terminalId) async {
+    var qry = "SELECT * from order_modifier where  terminal_id = " +
+        terminalId.toString() +
+        " AND detail_id = " +
+        detailid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderModifire> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderModifire.fromJson(c)).toList()
@@ -1155,9 +1172,11 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<OrderPayment>> getOrderPaymentTable(orderid) async {
-    var qry =
-        "SELECT * from order_payment where order_id = " + orderid.toString();
+  Future<List<OrderPayment>> getOrderPaymentTable(orderid, terminalid) async {
+    var qry = "SELECT * from order_payment where  terminal_id = " +
+        terminalid.toString() +
+        " AND order_id = " +
+        orderid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderPayment> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()

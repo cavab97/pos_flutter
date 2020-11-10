@@ -88,7 +88,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
   }
 
-  getOrderDetails(order) async {
+  getOrderDetails(Orders order) async {
     setState(() {
       isScreenLoad = true;
     });
@@ -107,8 +107,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
 
     List<OrderDetail> orderItem =
-        await localAPI.getOrderDetailsList(order.app_id);
-    List<ProductDetails> details = await localAPI.getOrderDetails(order.app_id);
+        await localAPI.getOrderDetailsList(order.app_id, order.terminal_id);
+    List<ProductDetails> details =
+        await localAPI.getOrderDetails(order.app_id, order.terminal_id);
     if (details.length > 0) {
       setState(() {
         detailsList = details;
@@ -117,13 +118,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
     }
     //  if (order.order_source == 2) {
     List<OrderPayment> orderpaymentdata =
-        await localAPI.getOrderpaymentData(order.app_id);
+        await localAPI.getOrderpaymentData(order.app_id,order.terminal_id);
     setState(() {
       orderpayment = orderpaymentdata;
     });
     if (orderpayment.length > 0) {
       List<Payments> payMethod =
-          await localAPI.getOrderpaymentmethod(order.app_id);
+          await localAPI.getOrderpaymentmethod(order.app_id,order.terminal_id);
       setState(() {
         paymentMethod = payMethod;
       });

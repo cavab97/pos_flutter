@@ -933,12 +933,12 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     var treminalID = await CommunFun.getTeminalKey();
     Branch branchAddress = await localAPI.getBranchData(branchID);
     List<OrderPayment> orderpaymentdata =
-        await localAPI.getOrderpaymentData(orderid);
+        await localAPI.getOrderpaymentData(orderid,treminalID);
     List<Payments> paymentMethod =
-        await localAPI.getOrderpaymentmethod(orderid);
+        await localAPI.getOrderpaymentmethod(orderid,treminalID);
     User user = await localAPI.getPaymentUser(orderpaymentdata[0].op_by);
     // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
-    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
+    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid,treminalID);
     Orders order = await localAPI.getcurrentOrders(orderid, treminalID);
     List<OrderAttributes> attributes =
         await localAPI.getOrderAttributes(orderid);

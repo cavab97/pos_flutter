@@ -1165,11 +1165,13 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   printReceipt(int orderid) async {
+    var terminalid = await CommunFun.getTeminalKey();
     List<OrderPayment> orderpaymentdata =
-        await localAPI.getOrderpaymentData(orderid);
+        await localAPI.getOrderpaymentData(orderid, terminalid);
     List<Payments> paymentMethod =
-        await localAPI.getOrderpaymentmethod(orderid);
-    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
+        await localAPI.getOrderpaymentmethod(orderid, terminalid);
+    List<OrderDetail> orderitem =
+        await localAPI.getOrderDetailsList(orderid, terminalid);
     var branchID = await CommunFun.getbranchId();
     Orders order = await localAPI.getcurrentOrders(orderid, branchID);
     List<OrderAttributes> attributes =
@@ -1177,7 +1179,7 @@ class _DashboradPageState extends State<DashboradPage>
     List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
 
     printKOT.checkReceiptPrint(
-        "192.168.0.109",//printerreceiptList[0].printerIp,
+        "192.168.0.109", //printerreceiptList[0].printerIp,
         context,
         branchData,
         taxJson,

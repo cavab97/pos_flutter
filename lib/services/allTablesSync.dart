@@ -189,20 +189,21 @@ class SyncAPICalls {
       var branchid = await CommunFun.getbranchId();
       LocalAPI localAPI = LocalAPI();
       var apiurl = Configrations.order_sync;
-      List<Orders> orders = await localAPI.getOrdersListTable(branchid,terminalId);
+      List<Orders> orders =
+          await localAPI.getOrdersListTable(branchid, terminalId);
       if (orders.length > 0) {
         List ordersList = [];
         for (var i = 0; i < orders.length; i++) {
           var order = orders[i];
           List<OrderDetail> ordersDetail =
-              await localAPI.getOrderDetailTable(order.app_id);
+              await localAPI.getOrderDetailTable(order.app_id, terminalId);
           List detailList = [];
           for (var j = 0; j < ordersDetail.length; j++) {
             var details = ordersDetail[j];
-            List<OrderAttributes> ordersAttribute =
-                await localAPI.getOrderAttributesTable(details.app_id);
-            List<OrderModifire> ordersModifire =
-                await localAPI.getOrderModifireTable(details.app_id);
+            List<OrderAttributes> ordersAttribute = await localAPI
+                .getOrderAttributesTable(details.app_id, terminalId);
+            List<OrderModifire> ordersModifire = await localAPI
+                .getOrderModifireTable(details.app_id, terminalId);
             var productMap = {
               "detailId": details.detailId,
               "uuid": details.uuid,
@@ -231,7 +232,7 @@ class SyncAPICalls {
             detailList.add(productMap);
           }
           List<OrderPayment> ordersPayment =
-              await localAPI.getOrderPaymentTable(order.app_id);
+              await localAPI.getOrderPaymentTable(order.app_id, terminalId);
           var orderMap = {
             "order_id": order.order_id,
             "uuid": order.uuid,
