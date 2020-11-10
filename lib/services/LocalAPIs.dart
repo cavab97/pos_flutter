@@ -688,7 +688,7 @@ class LocalAPI {
   Future<List<Orders>> getLastOrderAppid(terminalid) async {
     var qey = "SELECT orders.app_id from orders where terminal_id =" +
         terminalid +
-        "  ORDER BY order_date DESC LIMIT 1";
+        " ORDER BY order_date DESC LIMIT 1";
     var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
     List<Orders> list = checkisExit.length > 0
         ? checkisExit.map((c) => Orders.fromJson(c)).toList()

@@ -1176,8 +1176,7 @@ class _DashboradPageState extends State<DashboradPage>
     List<OrderAttributes> attributes =
         await localAPI.getOrderAttributes(orderid);
     List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
-    print(attributes);
-    print(modifires);
+
     printKOT.checkReceiptPrint(
         printerreceiptList[0].printerIp,
         context,
@@ -1187,7 +1186,7 @@ class _DashboradPageState extends State<DashboradPage>
         attributes,
         modifires,
         order,
-        paument_method[0],
+        orderpaymentdata,
         tableName,
         currency,
         customer != null ? customer.name : "Walk-in customer");
