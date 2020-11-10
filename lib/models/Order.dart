@@ -96,8 +96,12 @@ class Orders {
     tax_json = json['tax_json'];
     updated_at = json["updated_at"];
     updated_by = json["updated_by"];
-    serviceCharge = json["service_charge"];
-    serviceChargePercent = json["service_charge_percent"];
+    serviceCharge = json["service_charge"] is int
+        ? (json['service_charge'] as int).toDouble()
+        : json['service_charge'];
+    serviceChargePercent = json["service_charge_percent"]is int
+        ? (json['service_charge_percent'] as int).toDouble()
+        : json['service_charge_percent'];
   }
 
   Map<String, dynamic> toJson() {

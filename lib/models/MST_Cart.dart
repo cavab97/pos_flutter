@@ -95,8 +95,12 @@ class MST_Cart {
     cart_payment_id = json["cart_payment_id"];
     cart_payment_response = json["cart_payment_response"];
     cart_payment_status = json["cart_payment_status"];
-    serviceChargePercent = json["service_charge_percent"];
-    serviceCharge = json["service_charge"];
+    serviceChargePercent = json["service_charge_percent"] is int
+        ? (json['service_charge_percent'] as int).toDouble()
+        : json['service_charge_percent'];
+    serviceCharge = json["service_charge"]is int
+        ? (json['service_charge'] as int).toDouble()
+        : json['service_charge'];
   }
 
   Map<String, dynamic> toJson() {

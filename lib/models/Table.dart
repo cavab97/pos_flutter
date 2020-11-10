@@ -39,7 +39,9 @@ class Tables {
     tableQr = json['table_qr'];
     tableCapacity = json['table_capacity'];
     status = json['status'];
-    tableServiceCharge = json["table_service_charge"];
+    tableServiceCharge = json["table_service_charge"] is int
+        ? (json['table_service_charge'] as int).toDouble()
+        : json["table_service_charge"];
     availableStatus = json["available_status"];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];

@@ -67,7 +67,9 @@ class Branch {
     deletedAt = json['deleted_at'];
     deletedBy = json['deleted_by'];
     base64 = json['base64'];
-    serviceCharge = json["service_charge"];
+    serviceCharge = json["service_charge"] is int
+        ? (json['service_charge'] as int).toDouble()
+        : json['service_charge'];
   }
 
   Map<String, dynamic> toJson() {

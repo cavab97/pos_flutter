@@ -249,6 +249,8 @@ class SyncAPICalls {
             "voucher_id": order.voucher_id,
             "voucher_amount": order.voucher_amount,
             "sub_total": order.sub_total,
+            "service_charge_percent": order.serviceChargePercent,
+            "service_charge": order.serviceCharge,
             "sub_total_after_discount": order.sub_total_after_discount,
             "grand_total": order.grand_total,
             "order_source": order.order_source,

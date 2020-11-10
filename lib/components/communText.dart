@@ -246,14 +246,18 @@ class CommunFun {
   }
 
   static showToast(context, message) {
-    Toast.show(
-      message,
-      context,
-      duration: Toast.LENGTH_SHORT,
-      gravity: Toast.CENTER,
-      backgroundColor: Colors.black,
-      textColor: Colors.white,
-    );
+    try {
+      Toast.show(
+        message,
+        context,
+        duration: Toast.LENGTH_SHORT,
+        gravity: Toast.CENTER,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+      );
+    } catch (e) {
+      print(e);
+    }
   }
 
   static syncDailog(context, title) {

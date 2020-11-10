@@ -1397,7 +1397,6 @@ class PrintReceipt {
 
     final PosPrintResult res = await printerManager
         .printTicket(await testPrintReceipt(printerName, printerIp, isFor));
-
     CommunFun.showToast(ctx, res.msg);
   }
 

@@ -275,9 +275,7 @@ class _DashboradPageState extends State<DashboradPage>
     setState(() {
       allcartData = cart;
       subtotal = cart.sub_total;
-      serviceCharge = cart.serviceCharge == null
-          ? 0.00
-          : cart.serviceCharge;
+      serviceCharge = cart.serviceCharge == null ? 0.00 : cart.serviceCharge;
       serviceChargePer =
           cart.serviceChargePercent == null ? 0 : cart.serviceChargePercent;
       discount = cart.discount;
@@ -1200,9 +1198,6 @@ class _DashboradPageState extends State<DashboradPage>
     var result = await localAPI.removeCartItem(currentCart, tables.table_id);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
-    clearCart();
-    refreshAfterAction(true);
-    getCategoryList();
     await Navigator.pushNamedAndRemoveUntil(
         context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
         arguments: {"isAssign": false});
@@ -2678,7 +2673,9 @@ class _DashboradPageState extends State<DashboradPage>
                 children: <Widget>[
                   Padding(
                       padding: EdgeInsets.all(10),
-                      child: Text(Strings.service_charge.toUpperCase()+"($serviceChargePer%)",
+                      child: Text(
+                          Strings.service_charge.toUpperCase() +
+                              "($serviceChargePer%)",
                           style: Styles.darkBlue())),
                   Padding(
                       padding: EdgeInsets.only(right: 15),

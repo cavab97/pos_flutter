@@ -325,7 +325,6 @@ class LocalAPI {
     return result;
   }
 
-
   Future<List<Printer>> selectPrinterForPrint() async {
     var qry =
         "SELECT * from printer LEFT JOIN product_branch on product_branch.product_id = 1  AND printer.printer_id = product_branch.printer_id";
@@ -1042,8 +1041,11 @@ class LocalAPI {
   }
 
   Future<List<BranchTax>> getTaxList(branchid) async {
-    var tax = await DatabaseHelper.dbHelper.getDatabse().query('branch_tax',
-        where: 'branch_id = ?', whereArgs: [branchid.toString()]);
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from branch_tax WHERE branch_id = " +
+        branchid.toString() +
+        " AND status = 1";
+    var tax = await db.rawQuery(qry);
     List<BranchTax> list =
         tax.isNotEmpty ? tax.map((c) => BranchTax.fromJson(c)).toList() : [];
     return list;
@@ -1467,7 +1469,7 @@ class LocalAPI {
         " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id " +
         " WHERE setmeal.setmeal_id = " +
         mealid.toString() +
-        " GROUP by setmeal.setmeal_id ";
+        " AND setmeal.status = 1 GROUP by setmeal.setmeal_id ";
     var mealList = await db.rawQuery(qry);
     List<SetMeal> list = mealList.isNotEmpty
         ? mealList.map((c) => SetMeal.fromJson(c)).toList()
@@ -1702,7 +1704,7 @@ class LocalAPI {
         branchid +
         " AND setmeal_branch.setmeal_id = setmeal.setmeal_id " +
         " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
-        " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id  GROUP by setmeal.setmeal_id ";
+        " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id where setmeal.status = 1  GROUP by setmeal.setmeal_id ";
     var mealList = await db.rawQuery(qry);
     List<SetMeal> list = mealList.isNotEmpty
         ? mealList.map((c) => SetMeal.fromJson(c)).toList()
@@ -1715,10 +1717,11 @@ class LocalAPI {
   Future<List<SetMealProduct>> getMealsProductData(setmealid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT setmeal_product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name  FROM setmeal_product " +
-        " LEFT JOIN product ON product.product_id = setmeal_product.product_id " +
-        " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id " +
+        " LEFT JOIN product ON product.product_id = setmeal_product.product_id AND product.status = 1 " +
+        " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id AND asset.status = 1 " +
         " WHERE setmeal_product.setmeal_id = " +
         setmealid.toString() +
+        " AND setmeal_product.status = 1 " +
         " GROUP by setmeal_product.setmeal_product_id";
     // var qry = "SELECT setmeal_product.*,group_concat(attributes. name, ',') as attr_name," +
     //     " attributes.ca_id, group_concat(product_attribute.price) as attr_types_price," +

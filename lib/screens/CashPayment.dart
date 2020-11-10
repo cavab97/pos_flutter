@@ -2,12 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 
 class CashPaymentPage extends StatefulWidget {
   // Opning ammount popup
-  CashPaymentPage({Key key, this.ammountext, this.onEnter}) : super(key: key);
+  CashPaymentPage({Key key, this.paymentType, this.ammountext, this.onEnter})
+      : super(key: key);
   Function onEnter;
+  final Payments paymentType;
   final double ammountext;
 
   @override
@@ -35,7 +38,7 @@ class _CashPaymentState extends State<CashPaymentPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text("Cash".toString(), style: Styles.communBlack()),
+                Text(widget.paymentType.name, style: Styles.communBlack()),
                 Text(currentNumber, style: Styles.communBlack()),
               ],
             ),

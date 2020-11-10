@@ -94,6 +94,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         context: context,
         builder: (BuildContext context) {
           return CashPaymentPage(
+              paymentType: payment,
               ammountext: updatedAmmount,
               onEnter: (ammount) {
                 Navigator.of(context).pop();
@@ -407,7 +408,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
           return SubPaymentMethodPop(
             subList: subList,
             subTotal: widget.subTotal,
-            grandTotal: widget.grandTotal,
+            grandTotal: updatedAmmount,
             onClose: (mehtod) {
               Navigator.of(context).pop();
               insertPaymentOption(mehtod);
