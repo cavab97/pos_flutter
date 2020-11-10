@@ -206,6 +206,7 @@ class PrintReceipt {
       List<OrderModifire> orderModifire,
       Orders orderData,
       List<OrderPayment> paymentdata,
+      List<Payments> paymentMethods,
       String tableName,
       var currency,
       String customerName) async {
@@ -585,8 +586,8 @@ class PrintReceipt {
     ticket.hr();
     ticket.setStyles(PosStyles(align: PosAlign.right));
 
-    for (int p = 0; p < paymentdata.length; p++) {
-      if (paymentdata[p].op_method_id == 2) {
+    for (int p = 0; p < paymentMethods.length; p++) {
+      if (paymentMethods[p].name.toLowerCase() == "cash") {
         isCashPayment = true;
         cashPaymentTotal = cashPaymentTotal + paymentdata[p].op_amount;
         cashPaymentChange = cashPaymentChange + paymentdata[p].op_amount_change;
@@ -621,7 +622,9 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: cashPaymentChange.toStringAsFixed(2),
+          text: cashPaymentChange > 0
+              ? "-" + cashPaymentChange.toStringAsFixed(2)
+              : cashPaymentChange.toStringAsFixed(2),
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
@@ -633,10 +636,16 @@ class PrintReceipt {
     ticket.hr();
     ticket.setStyles(PosStyles(align: PosAlign.right));
 
-    for (int p = 0; p < paymentdata.length; p++) {
+    for (int p = 0; p < paymentMethods.length; p++) {
+      double amount = 0.00;
+      if (paymentMethods[p].name.toLowerCase() == "cash") {
+        amount = cashPaymentTotal - cashPaymentChange;
+      } else {
+        amount = paymentdata[p].op_amount;
+      }
       ticket.row([
         PosColumn(
-            text: paymentdata[p].op_method_id.toString() + " ",
+            text: paymentMethods[p].name.toString() + " ",
             width: 8,
             styles: PosStyles(
               align: PosAlign.right,
@@ -644,7 +653,7 @@ class PrintReceipt {
               bold: false,
             )),
         PosColumn(
-            text: paymentdata[p].op_amount.toStringAsFixed(2),
+            text: amount.toStringAsFixed(2),
             width: 4,
             styles: PosStyles(
               align: PosAlign.right,
@@ -753,6 +762,7 @@ class PrintReceipt {
         orderModifire,
         orderData,
         paymentdata,
+        paymentMethods,
         tableName,
         currency,
         customerName));
