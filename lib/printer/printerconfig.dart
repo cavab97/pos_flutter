@@ -16,6 +16,7 @@ import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:image/image.dart';
@@ -204,10 +205,14 @@ class PrintReceipt {
       List<OrderAttributes> orderAttr,
       List<OrderModifire> orderModifire,
       Orders orderData,
-      Payments paymentdata,
+      List<OrderPayment> paymentdata,
       String tableName,
       var currency,
       String customerName) async {
+    bool isCashPayment = false;
+    double cashPaymentTotal = 0.00;
+    double cashPaymentChange = 0.00;
+
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
@@ -526,18 +531,7 @@ class PrintReceipt {
         ]);
       });
     }
-    ticket.row([
-      PosColumn(
-          text: "PAYMENT TYPE : ",
-          width: 8,
-          styles: PosStyles(
-              align: PosAlign.right, fontType: PosFontType.fontA, bold: false)),
-      PosColumn(
-          text: paymentdata.name.toString(),
-          width: 4,
-          styles: PosStyles(
-              align: PosAlign.right, fontType: PosFontType.fontA, bold: false))
-    ]);
+
     double total =
         double.parse(checkRoundData(orderData.grand_total.toStringAsFixed(2)));
     ticket.row([
@@ -590,6 +584,15 @@ class PrintReceipt {
         ));
     ticket.hr();
     ticket.setStyles(PosStyles(align: PosAlign.right));
+
+    for (int p = 0; p < paymentdata.length; p++) {
+      if (paymentdata[p].op_method_id == 2) {
+        isCashPayment = true;
+        cashPaymentTotal = cashPaymentTotal + paymentdata[p].op_amount;
+        cashPaymentChange = cashPaymentChange + paymentdata[p].op_amount_change;
+      }
+    }
+
     ticket.row([
       PosColumn(
           text: "Cash Received ",
@@ -600,7 +603,7 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: total.toStringAsFixed(2),
+          text: cashPaymentTotal.toStringAsFixed(2),
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
@@ -618,7 +621,7 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: "0.00",
+          text: cashPaymentChange.toStringAsFixed(2),
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
@@ -626,7 +629,31 @@ class PrintReceipt {
             bold: false,
           ))
     ]);
+
     ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.right));
+
+    for (int p = 0; p < paymentdata.length; p++) {
+      ticket.row([
+        PosColumn(
+            text: paymentdata[p].op_method_id.toString()+" ",
+            width: 8,
+            styles: PosStyles(
+              align: PosAlign.right,
+              fontType: PosFontType.fontA,
+              bold: false,
+            )),
+        PosColumn(
+            text: paymentdata[p].op_amount.toStringAsFixed(2),
+            width: 4,
+            styles: PosStyles(
+              align: PosAlign.right,
+              fontType: PosFontType.fontA,
+              bold: false,
+            ))
+      ]);
+    }
+
     ticket.emptyLines(1);
     ticket.setStyles(PosStyles(align: PosAlign.center));
     /* ticket.emptyLines(1);
@@ -649,7 +676,7 @@ class PrintReceipt {
     ticket.cut();
 
     /*Open Drawer only when select payment method cash*/
-    if (paymentdata.name.toString().toLowerCase() == "cash") {
+    if (isCashPayment) {
       ticket.drawer();
     }
     return ticket;
@@ -710,7 +737,7 @@ class PrintReceipt {
       List<OrderAttributes> orderAttr,
       List<OrderModifire> orderModifire,
       Orders orderData,
-      Payments paymentdata,
+      List<OrderPayment> paymentdata,
       String tableName,
       var currency,
       String customerName) async {
