@@ -1059,10 +1059,13 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<Payments>> getOrderpaymentmethod(methodID) async {
+  Future<List<Payments>> getOrderpaymentmethod(orderid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var paymentMeth = await db.query('payment',
-        where: 'payment_id = ?', whereArgs: [methodID.toString()]);
+    var qry = "SELECT * from payment " +
+        " LEFT JOIN order_payment on order_payment.op_method_id = payment.payment_id " +
+        " WHERE order_payment.order_id = " +
+        orderid.toString();
+    var paymentMeth = await db.rawQuery(qry);
     List<Payments> list = paymentMeth.isNotEmpty
         ? paymentMeth.map((c) => Payments.fromJson(c)).toList()
         : [];

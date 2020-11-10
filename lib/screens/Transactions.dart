@@ -49,7 +49,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   double change = 0.0;
   bool isScreenLoad = false;
   Customer customer = new Customer();
-  Payments paumentMethod = new Payments();
+  List<Payments> paymentMethod = new List<Payments>();
 
   @override
   void initState() {
@@ -122,10 +122,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
       orderpayment = orderpaymentdata;
     });
     if (orderpayment.length > 0) {
-      List<Payments> paument_method =
-          await localAPI.getOrderpaymentmethod(orderpayment[0].op_method_id);
+      List<Payments> payMethod =
+          await localAPI.getOrderpaymentmethod(order.app_id);
       setState(() {
-        paumentMethod = paument_method[0];
+        paymentMethod = payMethod;
       });
       User user = await localAPI.getPaymentUser(orderpayment[0].op_by);
       if (user != null) {
@@ -510,6 +510,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                               Column(
                                                   children: orderpayment
                                                       .map((payment) {
+                                                var index = orderpayment
+                                                    .indexOf(payment);
                                                 change = payment
                                                             .op_amount_change !=
                                                         null
@@ -527,9 +529,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                                           top: 0,
                                                         ),
                                                         child: Text(
-                                                          paumentMethod.name !=
-                                                                  null
-                                                              ? paumentMethod
+                                                          paymentMethod.length >
+                                                                      0 &&
+                                                                  paymentMethod[
+                                                                              index]
+                                                                          .name !=
+                                                                      null
+                                                              ? paymentMethod[
+                                                                      index]
                                                                   .name
                                                                   .toUpperCase()
                                                               : "",
@@ -855,6 +862,47 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                         '0.0'
                                 ? selectedOrder.voucher_amount
                                     .toStringAsFixed(2)
+                                : "00.00",
+                            textAlign: TextAlign.end,
+                            style: TextStyle(
+                                fontSize: SizeConfig.safeBlockVertical * 2.8,
+                                fontWeight: FontWeight.w700,
+                                color: Theme.of(context).accentColor),
+                          ))),
+                ],
+              ),
+            ),
+          ]),
+          TableRow(children: [
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  new Expanded(
+                    flex: 7,
+                    child: Text(
+                      selectedOrder.serviceChargePercent == null
+                          ? Strings.service_charge.toUpperCase()
+                          : Strings.service_charge.toUpperCase() +
+                              "(" +
+                              selectedOrder.serviceChargePercent.toString() +
+                              "%)",
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                          fontSize: SizeConfig.safeBlockVertical * 2.8,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).accentColor),
+                    ),
+                  ),
+                  new Expanded(
+                      flex: 3,
+                      child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 5),
+                          child: Text(
+                            selectedOrder.serviceCharge != null &&
+                                    selectedOrder.serviceCharge.toString() !=
+                                        '0.0'
+                                ? selectedOrder.serviceCharge.toStringAsFixed(2)
                                 : "00.00",
                             textAlign: TextAlign.end,
                             style: TextStyle(

@@ -1169,7 +1169,7 @@ class _DashboradPageState extends State<DashboradPage>
     List<OrderPayment> orderpaymentdata =
         await localAPI.getOrderpaymentData(orderid);
     List<Payments> paument_method =
-        await localAPI.getOrderpaymentmethod(orderpaymentdata[0].op_method_id);
+        await localAPI.getOrderpaymentmethod(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);
     var branchID = await CommunFun.getbranchId();
     Orders order = await localAPI.getcurrentOrders(orderid, branchID);

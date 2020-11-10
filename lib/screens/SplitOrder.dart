@@ -935,7 +935,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     List<OrderPayment> orderpaymentdata =
         await localAPI.getOrderpaymentData(orderid);
     List<Payments> paumentMethod =
-        await localAPI.getOrderpaymentmethod(orderpaymentdata[0].op_method_id);
+        await localAPI.getOrderpaymentmethod(orderid);
     User user = await localAPI.getPaymentUser(orderpaymentdata[0].op_by);
     // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
     List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid);

@@ -39,7 +39,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   List<Citys> citys = [];
   List<States> filterstates = [];
   List<Citys> filtercitys = [];
-  var selectedCountry;
+  var selectedCountry = 132;
   var selectedCity;
   var selectedState;
   var selectedCountryError = "";
@@ -89,11 +89,12 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
 
   filterState() async {
     if (selectedCountry != null) {
-      var list =
-          await states.where((x) => x.countryId == selectedCountry).toList();
+      var list = states.where((x) => x.countryId == selectedCountry).toList();
       print(list);
       setState(() {
         filterstates = list;
+        filtercitys = [];
+        selectedCity = null;
       });
     } else {
       setState(() {
@@ -108,10 +109,12 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
       print(list);
       setState(() {
         filtercitys = list;
+        selectedCity = filtercitys.length > 0 ? filtercitys[0].cityId : null;
       });
     } else {
       setState(() {
         filtercitys = citys;
+        selectedCity = filtercitys.length > 0 ? filtercitys[0].cityId : null;
       });
     }
   }
@@ -281,8 +284,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(5)),
-              padding: EdgeInsets.all(5),
-              height: SizeConfig.safeBlockVertical * 9,
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+              height: SizeConfig.safeBlockVertical * 10,
               width: MediaQuery.of(context).size.width,
               child: new DropdownButton(
                 underline: Container(
@@ -294,7 +297,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                   return countrys.map((item) {
                     return Text(
                       item.name,
-                      style: Theme.of(context).textTheme.subtitle,
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: SizeConfig.safeBlockVertical * 3),
                     );
                   }).toList();
                 },
@@ -316,6 +321,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     selectedCountryError = "";
                     selectedStateError = "";
                   });
+                  filterState();
                 },
               ),
             ),
@@ -341,11 +347,11 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                   fontSize: SizeConfig.safeBlockVertical * 2.5),
             ),
             Container(
-              padding: EdgeInsets.all(5),
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(5)),
-              height: SizeConfig.safeBlockVertical * 9,
+              height: SizeConfig.safeBlockVertical * 10,
               width: MediaQuery.of(context).size.width,
               child: new DropdownButton(
                 underline: Container(
@@ -357,7 +363,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                   return filtercitys.map((item) {
                     return Text(
                       item.name,
-                      style: Theme.of(context).textTheme.subtitle,
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: SizeConfig.safeBlockVertical * 3),
                     );
                   }).toList();
                 },
@@ -407,8 +415,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(5)),
-              padding: EdgeInsets.all(5),
-              height: SizeConfig.safeBlockVertical * 9,
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+              height: SizeConfig.safeBlockVertical * 10,
               width: MediaQuery.of(context).size.width,
               child: new DropdownButton(
                 underline: Container(
@@ -420,7 +428,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                   return filterstates.map((item) {
                     return Text(
                       item.name,
-                      style: Theme.of(context).textTheme.subtitle,
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: SizeConfig.safeBlockVertical * 3),
                     );
                   }).toList();
                 },

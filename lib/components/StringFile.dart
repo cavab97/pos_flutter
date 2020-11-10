@@ -24,6 +24,7 @@ class Strings {
   static String qty = "QTY";
   static String amount = "Amount";
   static String discount = "Discount";
+  
   static String service_charge = "Service Charge";
   static String tax = "TAX";
   static String grand_total = "GRAND TOTAL";
@@ -64,7 +65,8 @@ class Strings {
   static String cancle_order = "Cancel Order";
   static String merge_order = "Merge Order";
   static String enterPax = "Enter Pax";
-
+ static String scanQRcode = "Scan QRCode";
+ 
   static String open_shift = "Open Shift";
   static String shiftTextLable = "Sorry,we're";
   static String shiftTextLableOpen = "Yes,we're\nOpen";

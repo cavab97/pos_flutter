@@ -145,7 +145,8 @@ class _SelectTablePageState extends State<SelectTablePage>
       table_order.table_id = selectedTable.tableId;
       table_order.number_of_pax = int.parse(paxController.text);
       table_order.save_order_id = selectedTable.saveorderid;
-      table_order.service_charge = CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
+      table_order.service_charge =
+          CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
 
       var result = await localAPI.insertTableOrder(table_order);
       await Preferences.setStringToSF(
@@ -199,6 +200,18 @@ class _SelectTablePageState extends State<SelectTablePage>
         return paxalertDailog(context);
       },
     );
+  }
+
+  opneQrcodePop() async {
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return QRCodesImagePop(
+            ip: selectedTable.tableQr,
+            onClose: () {},
+          );
+        });
   }
 
   cancleTableOrder() async {
@@ -272,20 +285,10 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   addNewOrder() {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return QRCodesImagePop(
-            ip: selectedTable.tableQr,
-            onClose: () {
-              setState(() {
-                isChanging = false;
-              });
-              opnPaxDailog();
-            },
-          );
-        });
+    setState(() {
+      isChanging = false;
+    });
+    opnPaxDailog();
   }
 
   void selectOption(choice) {
@@ -649,7 +652,12 @@ class _SelectTablePageState extends State<SelectTablePage>
             : SizedBox(),
         neworder_button(Icons.call_merge, Strings.merge_order, context, () {
           mergeTable(selectedTable);
-        })
+        }),
+        selectedTable.tableQr != null
+            ? neworder_button(Icons.cancel, Strings.scanQRcode, context, () {
+                opneQrcodePop();
+              })
+            : SizedBox(),
       ],
     );
   }

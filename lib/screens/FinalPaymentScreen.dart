@@ -51,23 +51,20 @@ class FinalEndScreentate extends State<FinalEndScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      color: Colors.grey,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          SizedBox(
+                    Stack(
+                      children: <Widget>[
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          padding: EdgeInsets.all(10),
+                          color: Colors.grey,
+                          child: SizedBox(
                             height: SizeConfig.safeBlockVertical * 15,
                             child: Image.asset(Strings.asset_headerLogo,
                                 fit: BoxFit.contain, gaplessPlayback: true),
                           ),
-                          SizedBox(
-                            width: SizeConfig.safeBlockHorizontal * 15,
-                          ),
-                          closeButton(context)
-                        ],
-                      ),
+                        ),
+                        closeButton(context)
+                      ],
                     ),
                     Container(
                       padding: EdgeInsets.all(20),
@@ -181,23 +178,27 @@ class FinalEndScreentate extends State<FinalEndScreen> {
   }
 
   Widget closeButton(context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).pop();
-      },
-      child: Container(
-        width: 50.0,
-        height: 50.0,
-        decoration: BoxDecoration(
-            color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
-        child: IconButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          icon: Icon(
-            Icons.clear,
-            color: Colors.white,
-            size: 30,
+    return Positioned(
+      top: 0,
+      right: 0,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          width: 50.0,
+          height: 50.0,
+          decoration: BoxDecoration(
+              color: Colors.red, borderRadius: BorderRadius.circular(0.0)),
+          child: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: Icon(
+              Icons.clear,
+              color: Colors.white,
+              size: 30,
+            ),
           ),
         ),
       ),
