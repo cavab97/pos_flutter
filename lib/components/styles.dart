@@ -161,6 +161,14 @@ class Styles {
         fontFamily: Strings.fontFamily);
   }
 
+  static orangeDis() {
+    return TextStyle(
+        fontSize: SizeConfig.safeBlockVertical * 2.5,
+        fontWeight: FontWeight.w700,
+        color: Color(0xffff531a),
+        fontFamily: Strings.fontFamily);
+  }
+
   static darkGray() {
     return TextStyle(
         fontSize: SizeConfig.safeBlockVertical * 2.8,

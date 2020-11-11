@@ -2521,7 +2521,7 @@ class _DashboradPageState extends State<DashboradPage>
     final cartTable = ListView(
       //physics: BouncingScrollPhysics(),
       shrinkWrap: true,
-      itemExtent: 50.0,
+      // itemExtent:60.0,
       padding: EdgeInsets.only(bottom: 200),
       children: cartList.map((cart) {
         return Slidable(
@@ -2540,20 +2540,31 @@ class _DashboradPageState extends State<DashboradPage>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      margin: EdgeInsets.all(0),
-                      padding: EdgeInsets.all(0),
-                      width: MediaQuery.of(context).size.width / 5.5,
-                      child: Text(
-                          cart.attrName != null
-                              ? cart.productName.toUpperCase() +
-                                  " (" +
-                                  cart.attrName +
-                                  ")"
-                              : cart.productName.toUpperCase(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: Styles.greysmall()),
-                    ),
+                        margin: EdgeInsets.all(0),
+                        padding: EdgeInsets.all(0),
+                        width: MediaQuery.of(context).size.width / 5.5,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(cart.productName.toUpperCase(),
+                                maxLines: 2,
+                                overflow: TextOverflow.clip,
+                                style: Styles.greysmall()),
+                            cart.attrName != null
+                                ? Text(" (" + cart.attrName + ") ",
+                                    maxLines: 2,
+                                    overflow: TextOverflow.clip,
+                                    style: Styles.greysmall())
+                                : SizedBox(),
+                            cart.modiName != null
+                                ? Text(" (" + cart.modiName + ") ",
+                                    maxLines: 2,
+                                    overflow: TextOverflow.clip,
+                                    style: Styles.greysmall())
+                                : SizedBox(),
+                          ],
+                        )),
                     Container(
                       margin: EdgeInsets.all(0),
                       padding: EdgeInsets.all(0),
@@ -2654,11 +2665,11 @@ class _DashboradPageState extends State<DashboradPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Padding(
-                      padding: EdgeInsets.all(10),
+                      padding: EdgeInsets.all(5),
                       child: Text(Strings.sub_total.toUpperCase(),
                           style: Styles.darkBlue())),
                   Padding(
-                      padding: EdgeInsets.only(right: 15),
+                      padding: EdgeInsets.only(right: 10),
                       child: Text(subtotal.toStringAsFixed(2),
                           style: Styles.darkBlue())),
                 ],
@@ -2671,17 +2682,12 @@ class _DashboradPageState extends State<DashboradPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Text(
-                      Strings.discount.toUpperCase(),
-                      style: TextStyle(
-                          fontSize: SizeConfig.safeBlockVertical * 2.8,
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).accentColor),
-                    ),
+                    padding: EdgeInsets.all(5),
+                    child: Text(Strings.discount.toUpperCase(),
+                        style: Styles.orangeDis()),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(right: 15),
+                    padding: EdgeInsets.only(right: 10),
                     child: Text(
                       discount.toStringAsFixed(2),
                       style: TextStyle(
@@ -2701,13 +2707,13 @@ class _DashboradPageState extends State<DashboradPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Padding(
-                      padding: EdgeInsets.all(10),
+                      padding: EdgeInsets.all(5),
                       child: Text(
                           Strings.service_charge.toUpperCase() +
                               "($serviceChargePer%)",
                           style: Styles.darkBlue())),
                   Padding(
-                      padding: EdgeInsets.only(right: 15),
+                      padding: EdgeInsets.only(right: 10),
                       child: Text(serviceCharge.toStringAsFixed(2),
                           style: Styles.darkBlue())),
                 ],
@@ -2723,7 +2729,7 @@ class _DashboradPageState extends State<DashboradPage>
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Padding(
-                              padding: EdgeInsets.all(10),
+                              padding: EdgeInsets.all(5),
                               child: Text(
                                 Strings.tax.toUpperCase() +
                                     " " +
@@ -2735,7 +2741,7 @@ class _DashboradPageState extends State<DashboradPage>
                               ),
                             ),
                             Padding(
-                              padding: EdgeInsets.only(right: 15),
+                              padding: EdgeInsets.only(right: 10),
                               child: Text(taxitem["taxAmount"].toString(),
                                   style: Styles.darkBlue()),
                             )
@@ -2745,14 +2751,14 @@ class _DashboradPageState extends State<DashboradPage>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                           Padding(
-                            padding: EdgeInsets.all(10),
+                            padding: EdgeInsets.all(5),
                             child: Text(
                               Strings.tax.toUpperCase(),
                               style: Styles.darkBlue(),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsets.only(right: 15),
+                            padding: EdgeInsets.only(right: 10),
                             child: Text(tax.toStringAsFixed(2),
                                 style: Styles.darkBlue()),
                           )
@@ -2765,11 +2771,11 @@ class _DashboradPageState extends State<DashboradPage>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(5),
                     child: Text(Strings.grand_total, style: Styles.darkBlue()),
                   ),
                   Padding(
-                      padding: EdgeInsets.only(right: 15),
+                      padding: EdgeInsets.only(right: 10),
                       child: Text(grandTotal.toStringAsFixed(2),
                           style: Styles.darkBlue())),
                 ],
@@ -2784,7 +2790,7 @@ class _DashboradPageState extends State<DashboradPage>
                 children: <Widget>[
                   isWebOrder
                       ? Padding(
-                          padding: EdgeInsets.all(10),
+                          padding: EdgeInsets.all(5),
                           child: Text("CASH : ", style: Styles.darkBlue()),
                         )
                       : SizedBox(),
@@ -2826,10 +2832,8 @@ class _DashboradPageState extends State<DashboradPage>
                         )
                       : SizedBox(),
                   Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(3),
                     child: RaisedButton(
-                      padding: EdgeInsets.only(
-                          left: 10, top: 5, bottom: 5, right: 10),
                       onPressed: () {
                         if (permissions.contains(Constant.EDIT_ORDER) &&
                             !isWebOrder) {
@@ -2841,14 +2845,12 @@ class _DashboradPageState extends State<DashboradPage>
                           });
                         }
                       },
-                      child: Row(
-                        children: <Widget>[
-                          Text(Strings.apply_promocode,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: SizeConfig.safeBlockVertical * 2.5,
-                              )),
-                        ],
+                      child: Text(
+                        Strings.apply_promocode,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: SizeConfig.safeBlockVertical * 2.5,
+                        ),
                       ),
                       color: Colors.deepOrange,
                       textColor: Colors.white,

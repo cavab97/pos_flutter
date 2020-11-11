@@ -483,11 +483,11 @@ class LocalAPI {
   }
 
   Future<List<MSTSubCartdetails>> itemmodifireList(detailid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var qry =
         "SELECT  *  from   mst_cart_sub_detail WHERE cart_details_id  = " +
             detailid.toString();
-
-    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    var res = await db.rawQuery(qry);
     List<MSTSubCartdetails> list = res.isNotEmpty
         ? res.map((c) => MSTSubCartdetails.fromJson(c)).toList()
         : [];
@@ -497,29 +497,22 @@ class LocalAPI {
   }
 
   Future<List<MSTCartdetails>> getCartItem(cartId) async {
-    var qry = " SELECT mst_cart_detail.* ,group_concat(attributes.name) as attrName from mst_cart_detail " +
-        " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  mst_cart_sub_detail.attribute_id != " +
-        " '' " +
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = " SELECT mst_cart_detail.* ,group_concat(attributes.name) as attrName ,group_concat(modifier.name) as modiName from mst_cart_detail " +
+        " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  (mst_cart_sub_detail.attribute_id != '' OR mst_cart_sub_detail.modifier_id != '' )" +
         " LEFT JOIN attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != " +
+        " '' " +
+        " LEFT JOIN modifier on modifier.modifier_id = mst_cart_sub_detail.modifier_id AND mst_cart_sub_detail.modifier_id != " +
         " '' " +
         " where cart_id =" +
         cartId.toString() +
         " group by mst_cart_detail.id";
-    // var qry =
-    //     " SELECT * from mst_cart_detail where cart_id =  " + cartId.toString();
-    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    var res = await db.rawQuery(qry);
     List<MSTCartdetails> list = res.isNotEmpty
         ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
         "product", "get cart list", "mst_cart_detail", cartId);
-    // var qry1 =
-    //     " SELECT * from mst_cart_detail where cart_id =  " + cartId.toString();
-    // var res1 = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    // List<MSTCartdetails> list1 = res.isNotEmpty
-    //     ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
-    //     : [];
-    // print(list1);
     return list;
   }
 
@@ -572,7 +565,7 @@ class LocalAPI {
   }
 
   Future<int> userCheckInOut(CheckinOut clockinOutData) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var shiftid;
     if (clockinOutData.status == "IN") {
       shiftid = await db.insert("user_checkinout", clockinOutData.toJson());
