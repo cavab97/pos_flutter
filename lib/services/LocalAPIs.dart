@@ -26,6 +26,7 @@ import 'package:mcncashier/models/SetMealProduct.dart';
 import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/States.dart';
 import 'package:mcncashier/models/Tax.dart';
+import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/Product_Categroy.dart';
@@ -54,6 +55,19 @@ class LocalAPI {
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<Terminal> getTerminalDetails(terminalkey) async {
+    var query = "SELECT * from terminal WHERE terminal_id  =$terminalkey";
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+    Terminal terminalDat;
+    List<Terminal> list =
+        res.length > 0 ? res.map((c) => Terminal.fromJson(c)).toList() : [];
+    print(list.length);
+    if (list.length > 0) {
+      terminalDat = list[0];
+    }
+    return terminalDat;
   }
 
   Future<List<Category>> getAllCategory() async {

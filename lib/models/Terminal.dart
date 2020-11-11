@@ -46,8 +46,8 @@ class Terminal {
     status = json['status'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
-    deletedAt = json['deleted_at'] != null ? json['deleted_by'] : "x";
-    deletedBy = json['deleted_by'] != null ? json['deleted_by'] : 0;
+    deletedAt = json['deleted_at'];
+    deletedBy = json['deleted_by'];
   }
 
   Map<String, dynamic> toJson() {

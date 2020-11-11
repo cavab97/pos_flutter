@@ -13,6 +13,7 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
@@ -53,6 +54,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   bool isMenuOpne = false;
   var permissions = "";
   TabController _tabController;
+
   @override
   void initState() {
     super.initState();
@@ -77,6 +79,15 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   checkshift() async {
+    /*Set terminal name for print receipt only */
+    if (Strings.terminalName.isEmpty) {
+      var terminalkey = await CommunFun.getTeminalKey();
+      Terminal terminalData = await localAPI.getTerminalDetails(terminalkey);
+      if (terminalData != null) {
+        Strings.terminalName = terminalData.terminalName;
+      }
+    }
+
     var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
     setState(() {
       isShiftOpen = isOpen != null && isOpen == "true" ? true : false;
