@@ -93,6 +93,11 @@ class DrawerWidState extends State<DrawerWid> {
         builder: (BuildContext context) {
           return CloseShiftPage(onClose: () {
             Navigator.of(context).pop();
+            printKOT.testReceiptPrint(
+                printerreceiptList[0].printerIp.toString(),
+                context,
+                "",
+                "OpenDrawer");
             openOpningAmmountPop(context, Strings.title_closing_amount);
           });
         });

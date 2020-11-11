@@ -1,9 +1,8 @@
 class Strings {
-  /*Print horizontal 64 lines*/
-  static String print64line =
-      "————————————————————————————————————————————————————————————————";
   static String print15line = "---------------";
-  static String print1BlankLine = " ";
+  /*Only for set name */
+  static String terminalName = "";
+
 
   static String fontFamily = "Roboto";
   static String something_wrong = "Something went wrong!";
@@ -24,7 +23,7 @@ class Strings {
   static String qty = "QTY";
   static String amount = "Amount";
   static String discount = "Discount";
-  
+
   static String service_charge = "Service Charge";
   static String tax = "TAX";
   static String grand_total = "GRAND TOTAL";
@@ -66,7 +65,7 @@ class Strings {
   static String merge_order = "Merge Order";
   static String enterPax = "Enter Pax";
  static String scanQRcode = "Scan QRCode";
- 
+
   static String open_shift = "Open Shift";
   static String shiftTextLable = "Sorry,we're";
   static String shiftTextLableOpen = "Yes,we're\nOpen";

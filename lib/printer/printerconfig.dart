@@ -66,6 +66,13 @@ class PrintReceipt {
           fontType: PosFontType.fontB,
           width: PosTextSize.size2,
         ));
+    ticket.text("Terminal : " + Strings.terminalName,
+        styles: PosStyles(
+          align: PosAlign.left,
+          bold: true,
+          fontType: PosFontType.fontB,
+          width: PosTextSize.size2,
+        ));
 
     ticket.hr();
     ticket.setStyles(PosStyles(align: PosAlign.left));
@@ -281,6 +288,7 @@ class PrintReceipt {
             bold: true,
           )),
     ]);
+
     final now = DateTime.now();
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
@@ -313,6 +321,24 @@ class PrintReceipt {
           )),
       PosColumn(
           text: " : " + branchData.contactPerson,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Terminal",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + Strings.terminalName,
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -877,6 +903,24 @@ class PrintReceipt {
     ]);
     ticket.row([
       PosColumn(
+          text: "Terminal",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + Strings.terminalName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
           text: "Customer",
           width: 4,
           styles: PosStyles(
@@ -1248,6 +1292,24 @@ class PrintReceipt {
     ]);
     ticket.row([
       PosColumn(
+          text: "Terminal",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + Strings.terminalName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
           text: "Customer",
           width: 4,
           styles: PosStyles(
@@ -1363,9 +1425,7 @@ class PrintReceipt {
         });
       }
       /*Print attributes without price*/
-      /*Print attributes without price*/
       if (cartList[i].attrName != null) {
-        print("=== String into List ===");
         List<String> attributes = cartList[i].attrName.split(",");
         if (attributes.length > 0) {
           for (var a = 0; a < attributes.length; a++) {
@@ -1454,6 +1514,9 @@ class PrintReceipt {
               align: PosAlign.center, bold: true, width: PosTextSize.size1));
 
       ticket.text("Printer IP : " + printerIp,
+          styles: PosStyles(
+              align: PosAlign.center, bold: true, width: PosTextSize.size1));
+      ticket.text("Terminal : " + Strings.terminalName,
           styles: PosStyles(
               align: PosAlign.center, bold: true, width: PosTextSize.size1));
 

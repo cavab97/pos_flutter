@@ -6,9 +6,11 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -23,6 +25,9 @@ class ShiftReports extends StatefulWidget {
 
 class _ShiftReportsState extends State<ShiftReports> {
   LocalAPI localAPI = LocalAPI();
+  PrintReceipt printKOT = PrintReceipt();
+  List<Printer> printerreceiptList = new List<Printer>();
+
   Shift shifittem = new Shift();
   var screenArea = 1.6;
   int _current = 0;
@@ -49,18 +54,27 @@ class _ShiftReportsState extends State<ShiftReports> {
     'Payment Summary'
   ];
   var permissions = "";
+
   @override
   void initState() {
     super.initState();
     getShiftData();
     getOrders();
     setPermissons();
+    getAllPrinter();
   }
 
   setPermissons() async {
     var permission = await CommunFun.getPemission();
     setState(() {
       permissions = permission;
+    });
+  }
+
+  getAllPrinter() async {
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    setState(() {
+      printerreceiptList = printerDraft;
     });
   }
 
@@ -680,7 +694,16 @@ class _ShiftReportsState extends State<ShiftReports> {
                   child: RaisedButton(
                     padding: EdgeInsets.all(20),
                     onPressed: () {
-                      CommunFun.showToast(context, "Comming Soon");
+                      if (printerreceiptList.length > 0) {
+                        printKOT.testReceiptPrint(
+                            printerreceiptList[0].printerIp.toString(),
+                            context,
+                            "",
+                            "OpenDrawer");
+                      } else {
+                        CommunFun.showToast(
+                            context, Strings.printer_not_available);
+                      }
                     },
                     child: Text(
                       "Open Cash Drawer",
