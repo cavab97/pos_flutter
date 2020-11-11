@@ -166,11 +166,12 @@ class CommunFun {
       var branchid = await getbranchId();
       Branch branchData = await localAPI.getBranchData(branchid);
       service_charge = branchData.serviceCharge;
-    } else if (service_charge < 0) {
-      var branchid = await getbranchId();
-      Branch branchData = await localAPI.getBranchData(branchid);
-      service_charge = branchData.serviceCharge;
-    }
+    } 
+    // else if (service_charge < 0) {
+    //   var branchid = await getbranchId();
+    //   Branch branchData = await localAPI.getBranchData(branchid);
+    //   service_charge = branchData.serviceCharge;
+    // }
 
     if (service_charge != null) {
       return subtotal * service_charge / 100;
@@ -184,7 +185,6 @@ class CommunFun {
     var branchID = await getbranchId();
     Branch branchData = await localAPI.getBranchData(branchID);
     var service_charge = branchData.serviceCharge;
-
     if (service_charge != null) {
       return service_charge;
     } else {
@@ -1045,7 +1045,6 @@ class CommunFun {
     var serviceChargePer = table.service_charge == null
         ? await CommunFun.getServiceChargePer()
         : table.service_charge;
-
     var totalTax = await CommunFun.countTax(subtotal);
     var grandTotal = await CommunFun.countGrandtotal(
         subtotal, serviceCharge, taxvalues, disc);

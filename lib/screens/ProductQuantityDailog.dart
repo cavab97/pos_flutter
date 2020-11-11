@@ -453,28 +453,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         selectedAttr = prvSeelected;
       });
     }
-    // if (!isSetMeal) {
-    //   if (isSelectedAttr == i) {
-    //     isSelectedAttr = -1;
-    //   } else {
-    //     isSelectedAttr = i;
-    //   }
-    //   selectedAttr.clear();
-    //   if (isSelectedAttr != -1) {
-    //     selectedAttr.add({
-    //       'ca_id': id,
-    //       'attribute': attribute,
-    //       'attrType_ID': attrTypeIDs,
-    //       'attr_price': attrPrice
-    //     });
-    //   }
-    //   setState(() {
-    //     selectedAttr = selectedAttr;
-    //   });
-    // } else {
-    //   //Setmenal attribute
-
-    // }
     setPrice();
   }
 
@@ -541,10 +519,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   setModifire(mod) {
     var isSelected = selectedModifier.any((item) => item.pmId == mod.pmId);
     if (isSelected) {
-      selectedModifier.removeWhere((item) => item.pmId == mod.pmId);
-      setState(() {
-        selectedModifier = selectedModifier;
-      });
+      if (mod.isDefault == 0) {
+        selectedModifier.removeWhere((item) => item.pmId == mod.pmId);
+        setState(() {
+          selectedModifier = selectedModifier;
+        });
+      }
     } else {
       selectedModifier.add(mod);
       setState(() {
