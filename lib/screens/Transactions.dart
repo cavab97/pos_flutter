@@ -118,13 +118,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
     }
     //  if (order.order_source == 2) {
     List<OrderPayment> orderpaymentdata =
-        await localAPI.getOrderpaymentData(order.app_id,order.terminal_id);
+        await localAPI.getOrderpaymentData(order.app_id, order.terminal_id);
     setState(() {
       orderpayment = orderpaymentdata;
     });
     if (orderpayment.length > 0) {
       List<Payments> payMethod =
-          await localAPI.getOrderpaymentmethod(order.app_id,order.terminal_id);
+          await localAPI.getOrderpaymentmethod(order.app_id, order.terminal_id);
       setState(() {
         paymentMethod = payMethod;
       });
@@ -216,8 +216,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   cancleTransation(reason) async {
     //TODO :Cancle Transation Pop // 1 for  cancle
-    var orderid = await localAPI.updateOrderStatus(selectedOrder.app_id, 3);
-    var payment = await localAPI.updatePaymentStatus(orderpayment[0].app_id, 3);
+    var orderid = await localAPI.updateOrderStatus(
+        selectedOrder.app_id, selectedOrder.terminal_id, 3);
+    var payment = await localAPI.updatePaymentStatus(
+        selectedOrder.app_id, selectedOrder.terminal_id, 3);
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
@@ -300,8 +302,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   returnPayment(paymentMehtod) async {
     // TODO : update payment tables
-    var orderid = await localAPI.updateOrderStatus(selectedOrder.app_id, 5);
-    var payment = await localAPI.updatePaymentStatus(orderpayment[0].app_id, 5);
+    var orderid = await localAPI.updateOrderStatus(
+        selectedOrder.app_id, selectedOrder.terminal_id, 5);
+    var payment = await localAPI.updatePaymentStatus(
+        selectedOrder.app_id, selectedOrder.terminal_id, 5);
     var terID = await CommunFun.getTeminalKey();
     // TODO update store inventory
     setState(() {

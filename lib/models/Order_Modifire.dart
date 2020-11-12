@@ -14,7 +14,7 @@ class OrderModifire {
   String updated_at;
   int updated_by;
   String name;
-  
+
   OrderModifire(
       {this.om_id,
       this.uuid,
@@ -44,7 +44,6 @@ class OrderModifire {
     om_amount = json["om_amount"] is int
         ? (json['om_amount'] as int).toDouble()
         : json['om_amount'];
-    ;
     om_status = json["om_status"];
     om_datetime = json["om_datetime"];
     om_by = json["om_by"];

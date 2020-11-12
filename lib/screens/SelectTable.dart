@@ -956,8 +956,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                 CommunFun.showToast(
                     context, "Table already merged with other table");
               }
-            }
-            if (isChangingTable) {
+            } else if (isChangingTable) {
               if (table.saveorderid == 0) {
                 changeTableToOtherTable(table);
               } else {

@@ -1289,11 +1289,13 @@ class LocalAPI {
   }
 
   // 1 For New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
-  Future<int> updateOrderStatus(orderid, status) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+  Future<int> updateOrderStatus(orderid, terminalid, status) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "UPDATE orders SET order_status = " +
         status.toString() +
-        " where app_id = " +
+        " where terminal_id = " +
+        terminalid.toString() +
+        " AND app_id = " +
         orderid.toString();
     var result = db.rawUpdate(qry);
     await SyncAPICalls.logActivity(
@@ -1305,13 +1307,16 @@ class LocalAPI {
     }
   }
 
-  Future<int> updatePaymentStatus(paymentid, status) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+  Future<int> updatePaymentStatus(orderid, terminalid, status) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var result;
     var qry = "UPDATE order_payment SET op_status = " +
         status.toString() +
-        " where app_id = " +
-        paymentid.toString();
-    var result = db.rawUpdate(qry);
+        " where terminal_id = " +
+        terminalid.toString() +
+        " AND order_id = " +
+        orderid.toString();
+    result = db.rawUpdate(qry);
     if (result != null) {
       return 1;
     } else {
@@ -1320,7 +1325,7 @@ class LocalAPI {
   }
 
   Future<int> insertCancelOrder(CancelOrder order) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var result = db.insert('order_cancel', order.toJson());
     return result;
   }
@@ -1520,13 +1525,16 @@ class LocalAPI {
 
   Future saveSyncOrder(Orders orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry =
-        "SELECT *  FROM orders where app_id =" + orderData.app_id.toString();
+    var checkisExitqry = "SELECT * FROM orders where terminal_id = " +
+        orderData.terminal_id.toString() +
+        " AND app_id =" +
+        orderData.app_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var orderid;
     if (checkisExit.length > 0) {
       orderid = await db.update("orders", orderData.toJson(),
-          where: "app_id =?", whereArgs: [orderData.app_id]);
+          where: "app_id =? AND terminal_id =?",
+          whereArgs: [orderData.app_id, orderData.terminal_id]);
     } else {
       orderid = await db.insert("orders", orderData.toJson());
     }
@@ -1535,13 +1543,16 @@ class LocalAPI {
 
   Future saveSyncOrderDetails(OrderDetail orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_detail where app_id =" +
+    var checkisExitqry = "SELECT *  FROM order_detail where terminal_id = " +
+        orderData.terminal_id.toString() +
+        " AND app_id =" +
         orderData.app_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var orderid;
     if (checkisExit.length > 0) {
       orderid = await db.update("order_detail", orderData.toJson(),
-          where: "app_id =?", whereArgs: [orderData.app_id]);
+          where: "app_id =?  AND terminal_id =? ",
+          whereArgs: [orderData.app_id, orderData.terminal_id]);
     } else {
       orderid = await db.insert("order_detail", orderData.toJson());
     }
@@ -1550,13 +1561,16 @@ class LocalAPI {
 
   Future saveSyncOrderPaymet(OrderPayment paymentdata) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_payment where app_id =" +
+    var checkisExitqry = "SELECT *  FROM order_payment where terminal_id = " +
+        paymentdata.terminal_id.toString() +
+        " AND app_id =" +
         paymentdata.app_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var orderid;
     if (checkisExit.length > 0) {
       orderid = await db.update("order_payment", paymentdata.toJson(),
-          where: "app_id =?", whereArgs: [paymentdata.app_id]);
+          where: "app_id =? AND terminal_id =?",
+          whereArgs: [paymentdata.app_id, paymentdata.terminal_id]);
     } else {
       orderid = await db.insert("order_payment", paymentdata.toJson());
     }
@@ -1565,7 +1579,9 @@ class LocalAPI {
 
   Future saveSyncOrderModifire(OrderModifire orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_modifier where app_id =" +
+    var checkisExitqry = "SELECT *  FROM order_modifier where terminal_id = " +
+        orderData.terminal_id.toString() +
+        " AND app_id =" +
         orderData.app_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var orderid;
@@ -1573,7 +1589,8 @@ class LocalAPI {
     newObj.remove("name");
     if (checkisExit.length > 0) {
       orderid = await db.update("order_modifier", newObj,
-          where: "app_id =?", whereArgs: [orderData.app_id]);
+          where: "app_id =?  AND terminal_id =?",
+          whereArgs: [orderData.app_id, orderData.terminal_id]);
     } else {
       orderid = await db.insert("order_modifier", newObj);
     }
@@ -1582,15 +1599,19 @@ class LocalAPI {
 
   Future saveSyncOrderAttribute(OrderAttributes orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_attributes where app_id =" +
-        orderData.app_id.toString();
+    var checkisExitqry =
+        "SELECT *  FROM order_attributes where terminal_id = " +
+            orderData.terminal_id.toString() +
+            " AND app_id =" +
+            orderData.app_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var orderid;
     var newObj = orderData.toJson();
     newObj.remove("name");
     if (checkisExit.length > 0) {
       orderid = await db.update("order_attributes", newObj,
-          where: "app_id =?", whereArgs: [orderData.app_id]);
+          where: "app_id =? AND  terminal_id =?",
+          whereArgs: [orderData.app_id, orderData.terminal_id]);
     } else {
       orderid = await db.insert("order_attributes", newObj);
     }
@@ -1601,7 +1622,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from order_cancel where terminal_id = " +
         terminalid.toString() +
-        "  AND server_id = 0";
+        " AND server_id = 0";
     var ordersList = await db.rawQuery(qry);
     List<CancelOrder> list = ordersList.length > 0
         ? ordersList.map((c) => CancelOrder.fromJson(c)).toList()

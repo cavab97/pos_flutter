@@ -10,6 +10,9 @@ import 'package:mcncashier/models/Citys.dart';
 import 'package:mcncashier/models/Countrys.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Modifier.dart';
+import 'package:mcncashier/models/OrderAttributes.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/PosRolePermission.dart';
@@ -36,6 +39,7 @@ import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/Voucher.dart';
+import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/models/category_branch.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -714,6 +718,11 @@ class TableData {
     var voucherData = tablesData["voucher"];
     var orders = tablesData["order"];
     var orderdetail = tablesData["order_detail"];
+    var orderAttributes = tablesData["order_attributes"];
+    var orderModifiers = tablesData["order_modifier"];
+    var orderPayments = tablesData["order_payment"];
+    var cancleOrders = tablesData["order_cancel"];
+
     try {
       if (voucherData.length != 0) {
         for (var i = 0; i < voucherData.length; i++) {
@@ -755,18 +764,99 @@ class TableData {
       if (orderdetail.length != 0) {
         for (var i = 0; i < orderdetail.length; i++) {
           var orderdetailitem = orderdetail[i];
-          OrderDetail orderdeta = OrderDetail.fromJson(orderdetailitem);
+          OrderDetail orderdetails = OrderDetail.fromJson(orderdetailitem);
           var data = {
             'table': "order_detail",
             'key': "detail_id",
-            'value': orderdeta.detailId,
+            'value': orderdetails.detailId,
+          };
+
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            if (orderdetails.detailId != null) {
+              await db.insert("order_detail", orderdetails.toJson());
+            }
+          } else {
+            await db.update("order_detail", orderdetails.toJson(),
+                where: "detail_id =?", whereArgs: [orderdetails.detailId]);
+          }
+        }
+      }
+      if (orderAttributes.length != 0) {
+        for (var i = 0; i < orderAttributes.length; i++) {
+          var orderAttributesitem = orderAttributes[i];
+          OrderAttributes attrData =
+              OrderAttributes.fromJson(orderAttributesitem);
+          var attrr = attrData.toJson();
+          await attrr.remove("name");
+          var data = {
+            'table': "order_attributes",
+            'key': "oa_id",
+            'value': attrData.oa_id,
           };
           var count = await ifExists(db, data);
           if (count == 0) {
-            await db.insert("order_detail", orderdeta.toJson());
+            await db.insert("order_attributes", attrr);
           } else {
-            await db.update("order_detail", orderdeta.toJson(),
-                where: "detail_id =?", whereArgs: [orderdeta.detailId]);
+            await db.update("order_attributes", attrr,
+                where: "oa_id =?", whereArgs: [attrData.oa_id]);
+          }
+        }
+      }
+      if (orderModifiers.length != 0) {
+        for (var i = 0; i < orderModifiers.length; i++) {
+          var orderModifiersitem = orderModifiers[i];
+          OrderModifire modiData = OrderModifire.fromJson(orderModifiersitem);
+
+          var data = {
+            'table': "order_modifier",
+            'key': "om_id",
+            'value': modiData.om_id,
+          };
+          var mod = modiData.toJson();
+          await mod.remove("name");
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            await db.insert("order_modifier", mod);
+          } else {
+            await db.update("order_modifier", mod,
+                where: "om_id =?", whereArgs: [modiData.om_id]);
+          }
+        }
+      }
+      if (orderPayments.length != 0) {
+        for (var i = 0; i < orderPayments.length; i++) {
+          var orderPaymentsitem = orderPayments[i];
+          OrderPayment paymentData = OrderPayment.fromJson(orderPaymentsitem);
+          var data = {
+            'table': "order_payment",
+            'key': "op_id",
+            'value': paymentData.op_id,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            await db.insert("order_payment", paymentData.toJson());
+          } else {
+            await db.update("order_payment", paymentData.toJson(),
+                where: "op_id =?", whereArgs: [paymentData.op_id]);
+          }
+        }
+      }
+      if (cancleOrders.length != 0) {
+        for (var i = 0; i < cancleOrders.length; i++) {
+          var cancleOrdersitem = cancleOrders[i];
+          CancelOrder cancleOrder = CancelOrder.fromJson(cancleOrdersitem);
+          var data = {
+            'table': "order_cancel",
+            'key': "id",
+            'value': cancleOrder.id,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            await db.insert("order_cancel", cancleOrder.toJson());
+          } else {
+            await db.update("order_cancel", cancleOrder.toJson(),
+                where: "id =?", whereArgs: [cancleOrder.id]);
           }
         }
       }
@@ -854,7 +944,7 @@ class TableData {
           var data = {
             'table': "city",
             'key': "city_id",
-            'value': cityObj.stateId,
+            'value': cityObj.cityId,
           };
           var count = await ifExists(db, data);
           if (count == 0) {

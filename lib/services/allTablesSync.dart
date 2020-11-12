@@ -340,7 +340,7 @@ class SyncAPICalls {
             for (var i = 0; i < orderdetail.length; i++) {
               var detail = orderdetail[i];
               OrderDetail o_details = new OrderDetail();
-              o_details.detailId = detail["detailId"];
+              o_details.detailId = detail["detail_id"];
               o_details.uuid = detail["uuid"];
               o_details.order_id = detail["order_id"];
               o_details.branch_id = detail["branch_id"];
@@ -437,7 +437,12 @@ class SyncAPICalls {
               paymentdat.terminal_id = paydat["terminal_id"];
               paymentdat.app_id = paydat["app_id"];
               paymentdat.op_method_id = paydat["op_method_id"];
-              paymentdat.op_amount = paydat["op_amount"];
+              paymentdat.op_amount = paydat["op_amount"] is int
+                  ? (paydat['op_amount'] as int).toDouble()
+                  : paydat['op_amount'];
+              paymentdat.op_amount_change = paydat["op_amount_change"] is int
+                  ? (paydat['op_amount_change'] as int).toDouble()
+                  : paydat['op_amount_change'];
               paymentdat.op_method_response = paydat["op_method_response"];
               paymentdat.op_status = paydat["op_status"];
               paymentdat.op_datetime = paydat["op_datetime"];

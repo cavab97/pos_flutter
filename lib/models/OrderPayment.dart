@@ -64,7 +64,9 @@ class OrderPayment {
     last_digits = json["last_digits"];
     approval_code = json["approval_code"];
     reference_number = json["reference_number"];
-    op_amount_change = json["op_amount_change"];
+    op_amount_change = json["op_amount_change"] is int
+        ? (json['op_amount_change'] as int).toDouble()
+        : json['op_amount_change'];
   }
 
   Map<String, dynamic> toJson() {
