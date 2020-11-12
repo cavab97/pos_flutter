@@ -103,7 +103,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
       orderDate = orderDateF;
       isWeborder = order.order_source == 1 ? true : false;
       taxJson = json.decode(selectedOrder.tax_json);
-      isScreenLoad = false;
     });
 
     List<OrderDetail> orderItem =
@@ -135,7 +134,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
         });
       }
     }
-
+    setState(() {
+      isScreenLoad = false;
+    });
     //}
   }
 
@@ -226,15 +227,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
     var terID = await CommunFun.getTeminalKey();
     User userdata = await CommunFun.getuserDetails();
     CancelOrder order = new CancelOrder();
-    order.id = selectedOrder.order_id;
-    order.orderId = selectedOrder.app_id;
+    order.id = order.orderId;
+    order.order_app_id = selectedOrder.app_id;
     order.localID = await CommunFun.getLocalID();
     order.reason = reason;
     order.status = 3;
     order.serverId = 0;
     order.createdBy = userdata.id;
-    order.updatedBy = userdata.id;
-    order.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     order.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     order.terminalId = int.parse(terID);
     var addTocancle = await localAPI.insertCancelOrder(order);
@@ -535,11 +534,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                                         ),
                                                         child: Text(
                                                           paymentMethod.length >
-                                                                      0 &&
-                                                                  paymentMethod[
-                                                                              index]
-                                                                          .name !=
-                                                                      null
+                                                                  0
                                                               ? paymentMethod[
                                                                       index]
                                                                   .name

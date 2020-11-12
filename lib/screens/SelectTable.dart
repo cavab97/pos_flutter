@@ -95,7 +95,6 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   getTables() async {
-    // Tables List call
     setState(() {
       isLoading = true;
     });
@@ -112,25 +111,25 @@ class _SelectTablePageState extends State<SelectTablePage>
     var tableid = selectedTable.tableId;
     List<Table_order> order = await localAPI.getTableOrders(tableid);
     await Preferences.setStringToSF(Constant.TABLE_DATA, json.encode(order[0]));
+    setState(() {
+      isMenuOpne = false;
+    });
     Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
   ontableTap(table) {
-    // select table for new order
     setState(() {
       selectedTable = table;
       isMenuOpne = true;
     });
-    // if (isAssigning) {
-    //   opnPaxDailog();
-    // } else {
     paxController.text =
         table.numberofpax != null ? table.numberofpax.toString() : "";
-    //   openSelectTablePop();
-    // }
   }
 
   mergeTabledata(TablesDetails table) async {
+    setState(() {
+      isLoading = true;
+    });
     // Merge table
     TablesDetails table1 = mergeInTable;
     TablesDetails table2 = table;
@@ -147,6 +146,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     setState(() {
       isMergeing = false;
       mergeInTable = null;
+      isLoading = false;
     });
     CommunFun.showToast(context, Strings.table_mearged_msg);
     getTables();
@@ -154,6 +154,7 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   mergeTable(table) {
     setState(() {
+      isMenuOpne = false;
       isMergeing = true;
       mergeInTable = table;
     });
@@ -174,6 +175,9 @@ class _SelectTablePageState extends State<SelectTablePage>
       paxController.text = "";
       Navigator.of(context).pop();
       if (!isChanging) {
+        setState(() {
+          isMenuOpne = false;
+        });
         Navigator.pushNamed(context, Constant.DashboardScreen);
       }
       getTables();
@@ -183,6 +187,9 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   assignTabletoOrder() async {
+    setState(() {
+      isLoading = true;
+    });
     if (int.parse(paxController.text) <= selectedTable.tableCapacity) {
       SaveOrder orderData = new SaveOrder();
       orderData.orderName = selectedTable.tableName;
@@ -193,23 +200,16 @@ class _SelectTablePageState extends State<SelectTablePage>
       tableorder.table_id = selectedTable.tableId;
       tableorder.number_of_pax = int.parse(paxController.text);
       tableorder.service_charge = selectedTable.tableServiceCharge;
-
       await localAPI.insertTableOrder(tableorder);
       await localAPI.insertSaveOrders(orderData, selectedTable.tableId);
       await localAPI.updateTableidintocart(orderid, selectedTable.tableId);
+      setState(() {
+        isLoading = false;
+      });
       Navigator.pushNamed(context, Constant.WebOrderPages);
     } else {
       CommunFun.showToast(context, "Please enter pax minimum table capcity.");
     }
-  }
-
-  openSelectTablePop() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        //return alertDailog(context);
-      },
-    );
   }
 
   opnPaxDailog() {
@@ -239,20 +239,30 @@ class _SelectTablePageState extends State<SelectTablePage>
       Navigator.of(context).pop();
     }, () async {
       Navigator.of(context).pop();
-      if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
-        List<SaveOrder> cartID =
-            await localAPI.gettableCartID(selectedTable.saveorderid);
-        if (cartID.length > 0) {
-          await localAPI.removeCartItem(
-              cartID[0].cartId, selectedTable.tableId);
-        }
-      } else {
-        await localAPI.deleteTableOrder(selectedTable.tableId);
-      }
-      await Preferences.removeSinglePref(Constant.TABLE_DATA);
-      await getTables();
+      cancleTOrder();
     }, "Warning", "Are you want sure cancel this table order?", "Yes", "No",
         true);
+  }
+
+  cancleTOrder() async {
+    setState(() {
+      isLoading = true;
+    });
+    if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
+      List<SaveOrder> cartID =
+          await localAPI.gettableCartID(selectedTable.saveorderid);
+      if (cartID.length > 0) {
+        await localAPI.removeCartItem(cartID[0].cartId, selectedTable.tableId);
+      }
+    } else {
+      await localAPI.deleteTableOrder(selectedTable.tableId);
+    }
+    await Preferences.removeSinglePref(Constant.TABLE_DATA);
+    setState(() {
+      isLoading = false;
+      isMenuOpne = false;
+    });
+    await getTables();
   }
 
   changeTablePop() {
@@ -261,6 +271,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     }, () {
       Navigator.of(context).pop();
       setState(() {
+        isMenuOpne = false;
         isChangingTable = true;
       });
     }, "Warning", "Are you want sure to change your table?", "Yes", "No", true);

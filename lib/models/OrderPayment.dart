@@ -2,6 +2,7 @@ class OrderPayment {
   int op_id;
   String uuid;
   int order_id;
+  int order_app_id;
   int branch_id;
   int terminal_id;
   int app_id;
@@ -24,6 +25,7 @@ class OrderPayment {
       {this.op_id,
       this.uuid,
       this.order_id,
+      this.order_app_id,
       this.branch_id,
       this.terminal_id,
       this.app_id,
@@ -46,6 +48,7 @@ class OrderPayment {
     op_id = json["op_id"];
     uuid = json["uuid"];
     order_id = json["order_id"];
+    order_app_id = json["order_app_id"];
     branch_id = json["branch_id"];
     terminal_id = json["terminal_id"];
     app_id = json["app_id"];
@@ -74,6 +77,7 @@ class OrderPayment {
     data["op_id"] = this.op_id;
     data["uuid"] = this.uuid;
     data["order_id"] = this.order_id;
+    data["order_app_id"] = this.order_app_id;
     data["branch_id"] = this.branch_id;
     data["terminal_id"] = this.terminal_id;
     data["app_id"] = this.app_id;

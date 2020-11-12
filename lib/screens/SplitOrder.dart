@@ -611,7 +611,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       invoiceNo =
           branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     } else {
-      order.app_id = int.parse(terminalId);
+      order.app_id = 1;
       invoiceNo =
           branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
@@ -670,10 +670,10 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           if (lappid.length > 0) {
             orderDetail.app_id = lappid[0].app_id + 1;
           } else {
-            orderDetail.app_id = int.parse(terminalId);
+            orderDetail.app_id = 1;
           }
           orderDetail.uuid = uuid;
-          orderDetail.order_id = orderId;
+          orderDetail.order_app_id = orderId;
           orderDetail.branch_id = int.parse(branchid);
           orderDetail.terminal_id = int.parse(terminalId);
           orderDetail.product_id = cartItem.productId;
@@ -762,11 +762,11 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             if (lapMpid.length > 0) {
               modifireData.app_id = lapMpid[0].app_id + 1;
             } else {
-              modifireData.app_id = int.parse(terminalId);
+              modifireData.app_id = 1;
             }
             modifireData.uuid = uuid;
-            modifireData.order_id = orderId;
-            modifireData.detail_id = orderDetailid;
+            modifireData.order_app_id = orderId;
+            modifireData.detail_app_id = orderDetailid;
             modifireData.terminal_id = int.parse(terminalId);
             modifireData.product_id = modifire.productId;
             modifireData.modifier_id = modifire.modifierId;
@@ -787,11 +787,11 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             if (lapApid.length > 0) {
               attributes.app_id = lapApid[0].app_id + 1;
             } else {
-              attributes.app_id = int.parse(terminalId);
+              attributes.app_id = 1;
             }
             attributes.uuid = uuid;
-            attributes.order_id = orderId;
-            attributes.detail_id = orderDetailid;
+            attributes.order_app_id = orderId;
+            attributes.detail_app_id = orderDetailid;
             attributes.terminal_id = int.parse(terminalId);
             attributes.product_id = modifire.productId;
             attributes.attribute_id = modifire.attributeId;
@@ -817,10 +817,10 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     if (lapPpid.length > 0) {
       orderpayment.app_id = lapPpid[0].app_id + 1;
     } else {
-      orderpayment.app_id = int.parse(terminalId);
+      orderpayment.app_id = 1;
     }
     orderpayment.uuid = uuid;
-    orderpayment.order_id = orderid;
+    orderpayment.order_app_id = orderid;
     orderpayment.branch_id = int.parse(branchid);
     orderpayment.terminal_id = int.parse(terminalId);
     orderpayment.op_method_id = payment.op_method_id;
@@ -933,12 +933,13 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     var treminalID = await CommunFun.getTeminalKey();
     Branch branchAddress = await localAPI.getBranchData(branchID);
     List<OrderPayment> orderpaymentdata =
-        await localAPI.getOrderpaymentData(orderid,treminalID);
+        await localAPI.getOrderpaymentData(orderid, treminalID);
     List<Payments> paymentMethod =
-        await localAPI.getOrderpaymentmethod(orderid,treminalID);
+        await localAPI.getOrderpaymentmethod(orderid, treminalID);
     User user = await localAPI.getPaymentUser(orderpaymentdata[0].op_by);
     // List<ProductDetails> itemsList = await localAPI.getOrderDetails(orderid);
-    List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(orderid,treminalID);
+    List<OrderDetail> orderitem =
+        await localAPI.getOrderDetailsList(orderid, treminalID);
     Orders order = await localAPI.getcurrentOrders(orderid, treminalID);
     List<OrderAttributes> attributes =
         await localAPI.getOrderAttributes(orderid);

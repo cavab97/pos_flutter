@@ -675,7 +675,7 @@ class LocalAPI {
 
   Future<List<OrderAttributes>> getOrderAttributes(orderid) async {
     var query = "SELECT order_attributes.*,attributes.name from order_attributes " +
-        " LEFT join attributes on attributes.attribute_id =  order_attributes.attribute_id WHERE order_attributes.order_id = " +
+        " LEFT join attributes on attributes.attribute_id =  order_attributes.attribute_id WHERE order_attributes.order_app_id = " +
         orderid.toString();
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<OrderAttributes> list = res.isNotEmpty
@@ -687,7 +687,7 @@ class LocalAPI {
   Future<List<OrderModifire>> getOrderModifire(orderid) async {
     var query = "SELECT order_modifier.*,modifier.name  from order_modifier " +
         " LEFT JOIN modifier on modifier.modifier_id = order_modifier.modifier_id" +
-        " WHERE order_modifier.order_id  = " +
+        " WHERE order_modifier.order_app_id  = " +
         orderid.toString();
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<OrderModifire> list = res.isNotEmpty
@@ -927,7 +927,7 @@ class LocalAPI {
         " LEFT JOIN asset on asset.asset_type_id = P.product_id " +
         " WHERE O.terminal_id = " +
         terminalID.toString() +
-        "  AND O.order_id = " +
+        "  AND O.order_app_id = " +
         orderid.toString();
     var ordersList = await db.rawQuery(qry);
     List<ProductDetails> list = ordersList.isNotEmpty
@@ -942,7 +942,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from order_detail WHERE terminal_id = " +
         terminalid.toString() +
-        " AND order_id = " +
+        " AND order_app_id = " +
         orderid.toString();
     var ordersList = await db.rawQuery(qry);
     List<OrderDetail> list = ordersList.isNotEmpty
@@ -957,7 +957,7 @@ class LocalAPI {
     OrderPayment data = new OrderPayment();
     var qry = "SELECT * from order_payment where terminal_id = " +
         terminalid.toString() +
-        " AND order_id = " +
+        " AND order_app_id = " +
         orderid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderPayment> list = ordersList.length > 0
@@ -1083,7 +1083,7 @@ class LocalAPI {
         " LEFT JOIN order_payment on order_payment.op_method_id = payment.payment_id " +
         " WHERE order_payment.terminal_id = " +
         terminalid.toString() +
-        " AND order_payment.order_id = " +
+        " AND order_payment.order_app_id = " +
         orderid.toString();
     var paymentMeth = await db.rawQuery(qry);
     List<Payments> list = paymentMeth.isNotEmpty
@@ -1137,7 +1137,7 @@ class LocalAPI {
   Future<List<OrderDetail>> getOrderDetailTable(orderid, terminalId) async {
     var qry = "SELECT * from order_detail where terminal_id = " +
         terminalId.toString() +
-        " AND order_id = " +
+        " AND order_app_id = " +
         orderid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderDetail> list = ordersList.isNotEmpty
@@ -1152,7 +1152,7 @@ class LocalAPI {
       detailid, terminalId) async {
     var qry = "SELECT * from order_attributes where terminal_id = " +
         terminalId.toString() +
-        " AND detail_id = " +
+        " AND detail_app_id = " +
         detailid.toString();
 
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
@@ -1168,7 +1168,7 @@ class LocalAPI {
       detailid, terminalId) async {
     var qry = "SELECT * from order_modifier where  terminal_id = " +
         terminalId.toString() +
-        " AND detail_id = " +
+        " AND detail_app_id = " +
         detailid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderModifire> list = ordersList.isNotEmpty
@@ -1182,7 +1182,7 @@ class LocalAPI {
   Future<List<OrderPayment>> getOrderPaymentTable(orderid, terminalid) async {
     var qry = "SELECT * from order_payment where  terminal_id = " +
         terminalid.toString() +
-        " AND order_id = " +
+        " AND order_app_id = " +
         orderid.toString();
     var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<OrderPayment> list = ordersList.isNotEmpty
@@ -1314,7 +1314,7 @@ class LocalAPI {
         status.toString() +
         " where terminal_id = " +
         terminalid.toString() +
-        " AND order_id = " +
+        " AND order_app_id = " +
         orderid.toString();
     result = db.rawUpdate(qry);
     if (result != null) {
@@ -1722,13 +1722,14 @@ class LocalAPI {
 
   Future<int> saveSyncCancelTable(CancelOrder orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_cancel where order_id =" +
-        orderData.orderId.toString();
+    var checkisExitqry = "SELECT *  FROM order_cancel where order_app_id =" +
+        orderData.order_app_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var inveID;
     if (checkisExit.length > 0) {
       inveID = await db.update("order_cancel", orderData.toJson(),
-          where: "order_id =?", whereArgs: [orderData.orderId]);
+          where: "order_app_id =? AND terminal_id =?",
+          whereArgs: [orderData.order_app_id, orderData.terminalId]);
     } else {
       inveID = await db.insert("order_cancel", orderData.toJson());
     }
@@ -1826,16 +1827,7 @@ class LocalAPI {
 
   Future<int> saveInOutDrawerData(Drawerdata drawerData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    // var checkisExitqry = "SELECT *  FROM drawer where id =" +
-    //     drawerData.id.toString();
-    // var checkisExit = await db.rawQuery(checkisExitqry);
-    // var inveID;
-    // if (checkisExit.length > 0) {
-    //   inveID = await db.update("order_cancel", orderData.toJson(),
-    //       where: "order_id =?", whereArgs: [orderData.orderId]);
-    // } else {
     var inveID = await db.insert("drawer", drawerData.toJson());
-    //}
     return inveID;
   }
 

@@ -386,6 +386,7 @@ class CreateTables {
         "uuid TEXT," +
         "voucher_id INTEGER," +
         "order_id INTEGER," +
+        "app_order_id INTEGER," +
         "user_id INTEGER," +
         "amount REAL," +
         "created_at TEXT" +
@@ -453,6 +454,7 @@ class CreateTables {
         "detail_id INTEGER," +
         "uuid TEXT," +
         "order_id INTEGER," +
+        "order_app_id INTEGER," +
         "branch_id INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
@@ -479,6 +481,8 @@ class CreateTables {
         "uuid TEXT," +
         "order_id INTEGER," +
         "detail_id INTEGER," +
+        "order_app_id INTEGER," +
+        "detail_app_id INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
         "product_id INTEGER," +
@@ -496,6 +500,8 @@ class CreateTables {
         "uuid TEXT," +
         "order_id INTEGER," +
         "detail_id INTEGER," +
+        "order_app_id INTEGER," +
+        "detail_app_id INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
         "product_id INTEGER," +
@@ -514,6 +520,7 @@ class CreateTables {
         "op_id INTEGER," +
         "uuid TEXT," +
         "order_id INTEGER," +
+        "order_app_id INTEGER," +
         "branch_id  INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
@@ -534,8 +541,9 @@ class CreateTables {
         ")");
 // TABLE order_payment
     datatables = db.execute("CREATE TABLE order_cancel (" +
-        "id INTEGER ," +
+        "id INTEGER," +
         "order_id INTEGER," +
+        "order_app_id INTEGER," +
         "localID TEXT," +
         "reason TEXT," +
         "status INTEGER," + // New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded

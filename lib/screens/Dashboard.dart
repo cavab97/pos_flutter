@@ -804,7 +804,12 @@ class _DashboradPageState extends State<DashboradPage>
         isScreenLoad = true;
       });
       await CommunFun.addItemToCart(selectedProduct, cartList, allcartData, () {
-        checkidTableSelected();
+        if (selectedTable.save_order_id != null &&
+            selectedTable.save_order_id != 0) {
+          getCurrentCart();
+        } else {
+          checkidTableSelected();
+        }
         setState(() {
           isScreenLoad = false;
         });
@@ -950,7 +955,7 @@ class _DashboradPageState extends State<DashboradPage>
       history.voucher_id = cartData.voucher_id;
       history.amount = cartData.discount;
       history.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
-      history.order_id = orderid;
+      history.app_order_id = orderid;
       history.uuid = uuid;
       var hisID = await localAPI.saveVoucherHistory(history);
     }
@@ -986,11 +991,11 @@ class _DashboradPageState extends State<DashboradPage>
           if (lappid.length > 0) {
             orderDetail.app_id = lappid[0].app_id + 1;
           } else {
-            orderDetail.app_id = int.parse(terminalId);
+            orderDetail.app_id = 1;
           }
           print(productdata);
           orderDetail.uuid = uuid;
-          orderDetail.order_id = orderId;
+          orderDetail.order_app_id = orderId;
           orderDetail.branch_id = int.parse(branchid);
           orderDetail.terminal_id = int.parse(terminalId);
           orderDetail.product_id = cartItem.productId;
@@ -1029,11 +1034,11 @@ class _DashboradPageState extends State<DashboradPage>
                   if (lapMpid.length > 0) {
                     modifireData.app_id = lapMpid[0].app_id + 1;
                   } else {
-                    modifireData.app_id = int.parse(terminalId);
+                    modifireData.app_id = 1;
                   }
                   modifireData.uuid = uuid;
-                  modifireData.order_id = orderId;
-                  modifireData.detail_id = orderDetailid;
+                  modifireData.order_app_id = orderId;
+                  modifireData.detail_app_id = orderDetailid;
                   modifireData.terminal_id = int.parse(terminalId);
                   modifireData.product_id = modifire.productId;
                   modifireData.modifier_id = modifire.modifierId;
@@ -1057,8 +1062,8 @@ class _DashboradPageState extends State<DashboradPage>
                     attributes.app_id = int.parse(terminalId);
                   }
                   attributes.uuid = uuid;
-                  attributes.order_id = orderId;
-                  attributes.detail_id = orderDetailid;
+                  attributes.order_app_id = orderId;
+                  attributes.detail_app_id = orderDetailid;
                   attributes.terminal_id = int.parse(terminalId);
                   attributes.product_id = modifire.productId;
                   attributes.attribute_id = modifire.attributeId;
@@ -1125,10 +1130,10 @@ class _DashboradPageState extends State<DashboradPage>
           if (lapPpid.length > 0) {
             orderpayment.app_id = lapPpid[0].app_id + 1;
           } else {
-            orderpayment.app_id = int.parse(terminalId);
+            orderpayment.app_id = 1;
           }
           orderpayment.uuid = uuid;
-          orderpayment.order_id = orderid;
+          orderpayment.order_app_id = orderid;
           orderpayment.branch_id = int.parse(branchid);
           orderpayment.terminal_id = int.parse(terminalId);
           orderpayment.op_method_id = payment[i].op_method_id;
@@ -2635,8 +2640,8 @@ class _DashboradPageState extends State<DashboradPage>
                   if (permissions.contains(Constant.DELETE_ORDER)) {
                     itememovefromCart(cart);
                   } else {
-                    CommonUtils.openPermissionPop(context, Constant.DELETE_ORDER,
-                        () {
+                    CommonUtils.openPermissionPop(
+                        context, Constant.DELETE_ORDER, () {
                       itememovefromCart(cart);
                     });
                   }

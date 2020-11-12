@@ -468,7 +468,7 @@ class PrintReceipt {
       }
 
       var contain =
-          orderAttr.where((element) => element.detail_id == item.app_id);
+          orderAttr.where((element) => element.detail_app_id == item.app_id);
       List<OrderAttributes> attrList = [];
 
       if (contain.isNotEmpty) {
@@ -494,8 +494,8 @@ class PrintReceipt {
         }
       }
 
-      var contain1 =
-          orderModifire.where((element) => element.detail_id == item.app_id);
+      var contain1 = orderModifire
+          .where((element) => element.detail_app_id == item.app_id);
       List<OrderModifire> modiList = [];
       if (contain1.isNotEmpty) {
         var jsonString = jsonEncode(contain1.map((e) => e.toJson()).toList());

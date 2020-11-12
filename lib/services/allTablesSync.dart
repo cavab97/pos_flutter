@@ -205,9 +205,10 @@ class SyncAPICalls {
             List<OrderModifire> ordersModifire = await localAPI
                 .getOrderModifireTable(details.app_id, terminalId);
             var productMap = {
-              "detailId": details.detailId,
+              "detail_id": details.detailId,
               "uuid": details.uuid,
               "order_id": details.order_id,
+              "order_app_id": details.order_app_id,
               "branch_id": details.branch_id,
               "terminal_id": details.terminal_id,
               "app_id": details.app_id,
@@ -239,7 +240,6 @@ class SyncAPICalls {
             "branch_id": order.branch_id,
             "terminal_id": order.terminal_id,
             "app_id": order.app_id,
-            // "table_no": order.table_no,
             "table_id": order.table_id,
             "invoice_no": order.invoice_no,
             "customer_id": order.customer_id,
@@ -342,6 +342,7 @@ class SyncAPICalls {
               OrderDetail o_details = new OrderDetail();
               o_details.detailId = detail["detail_id"];
               o_details.uuid = detail["uuid"];
+              o_details.order_app_id = detail["order_app_id"];
               o_details.order_id = detail["order_id"];
               o_details.branch_id = detail["branch_id"];
               o_details.terminal_id = detail["terminal_id"];
@@ -383,6 +384,8 @@ class SyncAPICalls {
                   m_data.uuid = modifiredata["uuid"];
                   m_data.order_id = modifiredata["order_id"];
                   m_data.detail_id = modifiredata["detail_id"];
+                  m_data.order_app_id = modifiredata["order_app_id"];
+                  m_data.detail_app_id = modifiredata["detail_app_id"];
                   m_data.terminal_id = modifiredata["terminal_id"];
                   m_data.app_id = modifiredata["app_id"];
                   m_data.product_id = modifiredata["product_id"];
@@ -407,6 +410,8 @@ class SyncAPICalls {
                   attr.uuid = attributeDt["uuid"];
                   attr.order_id = attributeDt["order_id"];
                   attr.detail_id = attributeDt["detail_id"];
+                  attr.order_app_id = attributeDt["order_app_id"];
+                  attr.detail_app_id = attributeDt["detail_app_id"];
                   attr.terminal_id = attributeDt["terminal_id"];
                   attr.app_id = attributeDt["app_id"];
                   attr.product_id = attributeDt["product_id"];
@@ -433,6 +438,7 @@ class SyncAPICalls {
               paymentdat.op_id = paydat["op_id"];
               paymentdat.uuid = paydat["uuid"];
               paymentdat.order_id = paydat["order_id"];
+              paymentdat.order_app_id = paydat["order_app_id"];
               paymentdat.branch_id = paydat["branch_id"];
               paymentdat.terminal_id = paydat["terminal_id"];
               paymentdat.app_id = paydat["app_id"];
@@ -621,6 +627,7 @@ class SyncAPICalls {
         CancelOrder cancle_order = new CancelOrder();
         cancle_order.id = order['id'];
         cancle_order.orderId = order['order_id'];
+        cancle_order.order_app_id = order["order_app_id"];
         cancle_order.localID = order['localID'];
         cancle_order.reason = order['reason'];
         cancle_order.status = order['status'];

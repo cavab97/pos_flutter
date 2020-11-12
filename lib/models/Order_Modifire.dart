@@ -2,6 +2,8 @@ class OrderModifire {
   int om_id;
   String uuid;
   int order_id;
+  int order_app_id;
+  int detail_app_id;
   int detail_id;
   int terminal_id;
   int app_id;
@@ -19,6 +21,8 @@ class OrderModifire {
       {this.om_id,
       this.uuid,
       this.order_id,
+      this.order_app_id,
+      this.detail_app_id,
       this.detail_id,
       this.terminal_id,
       this.app_id,
@@ -35,6 +39,8 @@ class OrderModifire {
   OrderModifire.fromJson(Map<String, dynamic> json) {
     om_id = json["om_id"];
     uuid = json["uuid"];
+    order_app_id = json["order_app_id"];
+    detail_app_id = json["detail_app_id"];
     order_id = json["order_id"];
     detail_id = json["detail_id"];
     terminal_id = json["terminal_id"];
@@ -56,6 +62,8 @@ class OrderModifire {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data["om_id"] = this.om_id;
     data["uuid"] = this.uuid;
+    data["detail_app_id"] = this.detail_app_id;
+    data["order_app_id"] = this.order_app_id;
     data["order_id"] = this.order_id;
     data["detail_id"] = this.detail_id;
     data["terminal_id"] = this.terminal_id;
