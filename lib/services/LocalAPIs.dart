@@ -924,7 +924,7 @@ class LocalAPI {
     var qry = "SELECT P.product_id,P.name,P.price, base64" +
         " FROM order_detail O " +
         " LEFT JOIN product P ON O.product_id = P.product_id" +
-        " LEFT join asset on asset.asset_type_id = P.product_id " +
+        " LEFT JOIN asset on asset.asset_type_id = P.product_id " +
         " WHERE O.terminal_id = " +
         terminalID.toString() +
         "  AND O.order_id = " +
@@ -934,7 +934,7 @@ class LocalAPI {
         ? ordersList.map((c) => ProductDetails.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
-        "Transactions", "get Orders  details list", "ProductDetails", orderid);
+        "Transactions", "get Orders details list", "ProductDetails", orderid);
     return list;
   }
 
@@ -1635,7 +1635,7 @@ class LocalAPI {
   Future<List<PosPermission>> getUserPermissions(userid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = " SELECT  group_concat(pos_permission.pos_permission_name) as pos_permission_name  from users" +
-        " Left join user_pos_permission on user_pos_permission.user_id = users.id" +
+        " Left join user_pos_permission on user_pos_permission.user_id = users.id  AND user_pos_permission.status = 1" +
         " left join pos_permission on pos_permission.pos_permission_id = user_pos_permission.pos_permission_id" +
         " WHERE user_id  =" +
         userid.toString();

@@ -2632,10 +2632,10 @@ class _DashboradPageState extends State<DashboradPage>
               icon: Icons.delete_outline,
               onTap: () {
                 if (!isWebOrder) {
-                  if (permissions.contains(Constant.EDIT_ORDER)) {
+                  if (permissions.contains(Constant.DELETE_ORDER)) {
                     itememovefromCart(cart);
                   } else {
-                    CommonUtils.openPermissionPop(context, Constant.EDIT_ORDER,
+                    CommonUtils.openPermissionPop(context, Constant.DELETE_ORDER,
                         () {
                       itememovefromCart(cart);
                     });
