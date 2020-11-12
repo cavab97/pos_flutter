@@ -78,8 +78,8 @@ class PrintReceipt {
     ticket.setStyles(PosStyles(align: PosAlign.left));
     ticket.row([
       PosColumn(
-          text: 'Description',
-          width: 10,
+          text: 'Qty',
+          width: 2,
           styles: PosStyles(
             align: PosAlign.left,
             bold: true,
@@ -87,8 +87,8 @@ class PrintReceipt {
             width: PosTextSize.size2,
           )),
       PosColumn(
-          text: 'Qty',
-          width: 2,
+          text: 'Description',
+          width: 10,
           styles: PosStyles(
             align: PosAlign.left,
             bold: true,
@@ -103,16 +103,6 @@ class PrintReceipt {
       if (item.isSendKichen == null) {
         ticket.row([
           PosColumn(
-              text: item.productName,
-              width: 10,
-              styles: PosStyles(
-                align: PosAlign.left,
-                fontType: PosFontType.fontA,
-                bold: false,
-                width: PosTextSize.size2,
-                height: PosTextSize.size1,
-              )),
-          PosColumn(
               text: item.productQty.toString(),
               width: 2,
               styles: PosStyles(
@@ -121,13 +111,33 @@ class PrintReceipt {
                 width: PosTextSize.size2,
                 bold: false,
               )),
+          PosColumn(
+              text: item.productName,
+              width: 10,
+              containsChinese: false,
+              styles: PosStyles(
+                align: PosAlign.left,
+                fontType: PosFontType.fontA,
+                bold: false,
+                width: PosTextSize.size2,
+                height: PosTextSize.size1,
+              )),
         ]);
         if (item.productSecondName != null) {
           if (item.productSecondName.isNotEmpty) {
             ticket.row([
               PosColumn(
+                  text: "",
+                  width: 2,
+                  styles: PosStyles(
+                    align: PosAlign.left,
+                    fontType: PosFontType.fontA,
+                    width: PosTextSize.size2,
+                    bold: false,
+                  )),
+              PosColumn(
                   text: item.productSecondName.toString(),
-                  width: 12,
+                  width: 10,
                   containsChinese: true,
                   styles: PosStyles(
                     align: PosAlign.left,
@@ -150,29 +160,50 @@ class PrintReceipt {
           }
 
           setMealProducts.forEach((element) {
-            ticket.text(
-                " " +
-                    element.quantity.toStringAsFixed(0) +
-                    " x " +
-                    element.name.toString().trim(),
-                styles: PosStyles(
-                  align: PosAlign.left,
-                  fontType: PosFontType.fontA,
-                  width: PosTextSize.size2,
-                  bold: false,
-                ));
+            ticket.row([
+              PosColumn(
+                  text: "",
+                  width: 2,
+                  styles: PosStyles(
+                    align: PosAlign.left,
+                    fontType: PosFontType.fontA,
+                    width: PosTextSize.size2,
+                    bold: false,
+                  )),
+              PosColumn(
+                  text: " " +
+                      element.quantity.toStringAsFixed(0) +
+                      " x " +
+                      element.name.toString().trim(),
+                  width: 10,
+                  containsChinese: true,
+                  styles: PosStyles(
+                    align: PosAlign.left,
+                    fontType: PosFontType.fontA,
+                    width: PosTextSize.size2,
+                    bold: false,
+                  ))
+            ]);
           });
         }
         /*Print attributes without price*/
         if (cartList[i].attrName != null) {
-          print("=== String into List ===");
           List<String> attributes = cartList[i].attrName.split(",");
           if (attributes.length > 0) {
             for (var a = 0; a < attributes.length; a++) {
               ticket.row([
                 PosColumn(
+                    text: "",
+                    width: 2,
+                    styles: PosStyles(
+                      align: PosAlign.left,
+                      fontType: PosFontType.fontA,
+                      width: PosTextSize.size2,
+                      bold: false,
+                    )),
+                PosColumn(
                     text: "  " + attributes[a],
-                    width: 12,
+                    width: 10,
                     containsChinese: true,
                     styles: PosStyles(
                       align: PosAlign.left,
@@ -718,52 +749,6 @@ class PrintReceipt {
       ticket.drawer();
     }
     return ticket;
-  }
-
-  String checkRoundData(String total) {
-    var parts = total.split('.');
-    //First values
-    String prefix = parts[0].trim();
-    //Second values
-    String postFilx = parts[1].trim();
-
-    String round = total;
-
-    int tempValue = int.parse(postFilx.substring(1));
-    if (tempValue != 0 && tempValue != 5) {
-      if (tempValue <= 2) {
-        round = prefix + "." + postFilx.substring(0, 1) + "0";
-      } else if (tempValue <= 7) {
-        print(postFilx.substring(0, 1));
-        round = prefix + "." + postFilx.substring(0, 1) + "5";
-        print(round);
-      } else {
-        int values = 0;
-        if (int.parse(postFilx.substring(1)) == 9) {
-          values = 1;
-        } else {
-          values = 2;
-        }
-
-        String tempRound = (int.parse(postFilx) + values).toString();
-        double sum = 0.00;
-        if (tempRound == "100") {
-          sum = double.parse(prefix + ".00") + double.parse("1.00");
-        } else {
-          sum = double.parse(prefix + ".00") + double.parse("." + tempRound);
-        }
-        round = sum.toStringAsFixed(2);
-      }
-    }
-    return round;
-  }
-
-  double calRounded(double total, double oldTotal) {
-    if (total == oldTotal) {
-      return 0.00;
-    } else {
-      return (total - oldTotal);
-    }
   }
 
   void checkReceiptPrint(
@@ -1532,6 +1517,52 @@ class PrintReceipt {
     }
     ticket.drawer();
     return ticket;
+  }
+
+  String checkRoundData(String total) {
+    var parts = total.split('.');
+    //First values
+    String prefix = parts[0].trim();
+    //Second values
+    String postFilx = parts[1].trim();
+
+    String round = total;
+
+    int tempValue = int.parse(postFilx.substring(1));
+    if (tempValue != 0 && tempValue != 5) {
+      if (tempValue <= 2) {
+        round = prefix + "." + postFilx.substring(0, 1) + "0";
+      } else if (tempValue <= 7) {
+        print(postFilx.substring(0, 1));
+        round = prefix + "." + postFilx.substring(0, 1) + "5";
+        print(round);
+      } else {
+        int values = 0;
+        if (int.parse(postFilx.substring(1)) == 9) {
+          values = 1;
+        } else {
+          values = 2;
+        }
+
+        String tempRound = (int.parse(postFilx) + values).toString();
+        double sum = 0.00;
+        if (tempRound == "100") {
+          sum = double.parse(prefix + ".00") + double.parse("1.00");
+        } else {
+          sum = double.parse(prefix + ".00") + double.parse("." + tempRound);
+        }
+        round = sum.toStringAsFixed(2);
+      }
+    }
+    return round;
+  }
+
+  double calRounded(double total, double oldTotal) {
+    if (total == oldTotal) {
+      return 0.00;
+    } else {
+      return (total - oldTotal);
+    }
   }
 
   String printColumnWitSpace(
