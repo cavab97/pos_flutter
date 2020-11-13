@@ -141,11 +141,9 @@ class _DashboradPageState extends State<DashboradPage>
     if (isInit == true) {
       await getCategoryList();
       await getAllPrinter();
-      //await checkisAutoSync();
     } else {
       await databaseHelper.initializeDatabase();
       await getCategoryList();
-      //await checkisAutoSync();
     }
     var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
     setState(() {
@@ -153,15 +151,17 @@ class _DashboradPageState extends State<DashboradPage>
     });
     await checkshift();
     await checkidTableSelected();
-    await getUserData();
-    await setPermissons();
-    await getTaxs();
-    _textController.addListener(() {
-      getSearchList(_textController.text.toString());
-    });
     setState(() {
       isScreenLoad = false;
     });
+    await getUserData();
+    await setPermissons();
+    await getTaxs();
+    await getbranch();
+    _textController.addListener(() {
+      getSearchList(_textController.text.toString());
+    });
+
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
     KeyboardVisibilityNotification().addNewListener(
       onHide: () {
@@ -195,7 +195,6 @@ class _DashboradPageState extends State<DashboradPage>
   checkidTableSelected() async {
     var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
     var branchid = await CommunFun.getbranchId();
-    Branch branchAddress = await localAPI.getBranchData(branchid);
     if (tableid != null) {
       var tableddata = json.decode(tableid);
       Table_order table = Table_order.fromJson(tableddata);
@@ -203,7 +202,6 @@ class _DashboradPageState extends State<DashboradPage>
           await localAPI.getTableData(branchid, table.table_id);
       table.save_order_id = tabledata[0].saveorderid;
       setState(() {
-        branchData = branchAddress;
         isTableSelected = true;
         selectedTable = table;
         tableName = tabledata[0].tableName;
@@ -238,7 +236,6 @@ class _DashboradPageState extends State<DashboradPage>
   getCurrentCart() async {
     List<SaveOrder> currentOrder =
         await localAPI.getSaveOrder(selectedTable.save_order_id);
-
     if (currentOrder.length != 0) {
       setState(() {
         currentCart = currentOrder[0].cartId;
@@ -328,10 +325,9 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   deleteCurrentCart() async {
-    //TODO : Delete current order
+    // Delete current order
     Table_order tables = await getTableData();
     var result = await localAPI.clearCartItem(currentCart, tables.table_id);
-
     await refreshAfterAction(true);
   }
 
@@ -348,7 +344,6 @@ class _DashboradPageState extends State<DashboradPage>
       case 2:
         showDialog(
             // Opning Ammount Popup
-
             barrierDismissible: false,
             context: context,
             builder: (BuildContext context) {
@@ -888,6 +883,9 @@ class _DashboradPageState extends State<DashboradPage>
   getbranch() async {
     var branchid = await CommunFun.getbranchId();
     var branch = await localAPI.getbranchData(branchid);
+    setState(() {
+      branchData = branch;
+    });
     return branch;
   }
 
@@ -902,7 +900,6 @@ class _DashboradPageState extends State<DashboradPage>
 
   sendPaymentByCash(List<OrderPayment> payment) async {
     var cartData = await getcartData();
-    var branchdata = await getbranch();
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     Orders order = new Orders();
     Table_order tables = await getTableData();
@@ -912,16 +909,16 @@ class _DashboradPageState extends State<DashboradPage>
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
     List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
-    int length = branchdata.invoiceStart.length;
+    int length = branchData.invoiceStart.length;
     var invoiceNo;
     if (lastappid.length > 0) {
       order.app_id = lastappid[0].app_id + 1;
       invoiceNo =
-          branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
+          branchData.orderPrefix + order.app_id.toString().padLeft(length, "0");
     } else {
       order.app_id = 1;
       invoiceNo =
-          branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
+          branchData.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
 
     order.uuid = uuid;

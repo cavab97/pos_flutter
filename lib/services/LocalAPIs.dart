@@ -1022,7 +1022,7 @@ class LocalAPI {
   }
 
   Future<Branch> getbranchData(branchID) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var cartdata = await db.query('branch',
         where: 'branch_id = ?', whereArgs: [branchID.toString()]);
     List<Branch> list = cartdata.isNotEmpty
