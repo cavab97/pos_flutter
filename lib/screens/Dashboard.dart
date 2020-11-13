@@ -47,6 +47,7 @@ import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/screens/ChangeQtyDailog.dart';
 import 'package:mcncashier/screens/SplitOrder.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
+import 'package:mcncashier/screens/ReprintPopup.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
@@ -369,21 +370,7 @@ class _DashboradPageState extends State<DashboradPage>
         closeShift();
         break;
       case 4:
-        if (cartList.length > 0) {
-          if (printerreceiptList.length > 0) {
-            printKOT.checkListReceiptPrint(
-                printerreceiptList[0].printerIp.toString(),
-                context,
-                cartList,
-                tableName,
-                branchData,
-                customer != null ? customer.name : "Walk-in customer");
-          } else {
-            CommunFun.showToast(context, Strings.printer_not_available);
-          }
-        } else {
-          CommunFun.showToast(context, Strings.cart_empty);
-        }
+        printCheckList();
         break;
       case 5:
         if (cartList.length > 0) {
@@ -412,6 +399,45 @@ class _DashboradPageState extends State<DashboradPage>
       case 6:
         deleteCurrentCart();
         break;
+      case 7:
+        resendToKitchen();
+        break;
+    }
+  }
+
+  resendToKitchen() async {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return ReprintKitchenPirntPop(
+              cartList: cartList,
+              onClose: (resendList) {
+                if (resendList.length > 0 && printerreceiptList.length > 0) {
+                  Navigator.of(context).pop();
+                  openPrinterPop(resendList);
+                } else {
+                  CommunFun.showToast(context, Strings.printer_not_available);
+                }
+              });
+        });
+  }
+
+  printCheckList() async {
+    if (cartList.length > 0) {
+      if (printerreceiptList.length > 0) {
+        printKOT.checkListReceiptPrint(
+            printerreceiptList[0].printerIp.toString(),
+            context,
+            cartList,
+            tableName,
+            branchData,
+            customer != null ? customer.name : "Walk-in customer");
+      } else {
+        CommunFun.showToast(context, Strings.printer_not_available);
+      }
+    } else {
+      CommunFun.showToast(context, Strings.cart_empty);
     }
   }
 
@@ -511,10 +537,8 @@ class _DashboradPageState extends State<DashboradPage>
       var branchid = await CommunFun.getbranchId();
       List<ProductDetails> product =
           await localAPI.getSeachProduct(seachText.toString(), branchid);
-
       List<SetMeal> setMeal =
           await localAPI.getSearchSetMealsData(seachText.toString(), branchid);
-
       setMeal.forEach((element) {
         ProductDetails cartItemproduct = new ProductDetails();
         cartItemproduct.price = double.parse(element.price.toStringAsFixed(2));
@@ -526,7 +550,6 @@ class _DashboradPageState extends State<DashboradPage>
         cartItemproduct.isSetMeal = true;
         product.add(cartItemproduct);
       });
-
       setState(() {
         SearchProductList = product.length > 0 ? product : [];
       });
@@ -2084,6 +2107,28 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       SizedBox(width: 15),
                       Text(Strings.delete_order,
+                          style: Styles.communBlacksmall()),
+                    ],
+                  ),
+                ),
+              ),
+              PopupMenuItem(
+                // enabled: permissions.contains(Constant.DELETE_ORDER) &&
+                //         cartList.length > 0
+                //     ? true
+                //     : false,
+                value: 7,
+                child: Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.send,
+                        color: Colors.black,
+                        size: SizeConfig.safeBlockVertical * 5,
+                      ),
+                      SizedBox(width: 15),
+                      Text(Strings.reprint_Order,
                           style: Styles.communBlacksmall()),
                     ],
                   ),

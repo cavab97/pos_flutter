@@ -2,8 +2,6 @@ class Strings {
   static String print15line = "---------------";
   /*Only for set name */
   static String terminalName = "";
-
-
   static String fontFamily = "Roboto";
   static String something_wrong = "Something went wrong!";
   static String pin_Dialog_title = "Pin Verification";
@@ -91,6 +89,7 @@ class Strings {
   static String check_list = "Check list";
   static String no_image = "assets/no_image.png";
   static String delete_order = "Delete Order";
+  static String reprint_Order = "Resend to Kitchen";
   static String out_of_stoke = "OUT OF STOCK";
   static String apply_promocode = "Apply Promocode";
   static String item_not_available = "No item available";
@@ -141,4 +140,5 @@ class Strings {
   static String take_away = "Take Away";
   static String dine_in = "Dine In";
   static String table_mearged_msg = "Table merged.";
+   static String rePrint_kitchen_Print = "Reprint Kitchen Bill";
 }

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PermissionPop.dart';
@@ -17,7 +16,6 @@ class CommonUtils {
           strImage = base64.split("base64,")[1];
         }
         return Image.memory(base64Decode(strImage),
-        
             fit: BoxFit.cover, gaplessPlayback: true);
       }
     }
@@ -88,7 +86,7 @@ class CommonUtils {
         });
   }
 
-  static openOpningAmmountPop(context, isopning,callback) {
+  static openOpningAmmountPop(context, isopning, callback) {
     showDialog(
         // Opning Ammount Popup
         context: context,
@@ -96,7 +94,7 @@ class CommonUtils {
           return OpeningAmmountPage(
               ammountext: isopning,
               onEnter: (ammountext) {
-              callback(ammountext);
+                callback(ammountext);
               });
         });
   }
