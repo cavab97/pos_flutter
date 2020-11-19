@@ -182,7 +182,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       }
       getTables();
     } else {
-      CommunFun.showToast(context, "Please enter pax minimum table capcity.");
+      CommunFun.showToast(context, Strings.table_pax_msg);
     }
   }
 
@@ -208,7 +208,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       });
       Navigator.pushNamed(context, Constant.WebOrderPages);
     } else {
-      CommunFun.showToast(context, "Please enter pax minimum table capcity.");
+      CommunFun.showToast(context, Strings.table_pax_msg);
     }
   }
 
@@ -240,7 +240,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     }, () async {
       Navigator.of(context).pop();
       cancleTOrder();
-    }, "Warning", "Are you want sure cancel this table order?", "Yes", "No",
+    }, Strings.warning, Strings.cancle_order_msg, Strings.yes, Strings.no,
         true);
   }
 
@@ -274,7 +274,8 @@ class _SelectTablePageState extends State<SelectTablePage>
         isMenuOpne = false;
         isChangingTable = true;
       });
-    }, "Warning", "Are you want sure to change your table?", "Yes", "No", true);
+    }, Strings.warning, Strings.change_table_msg, Strings.yes, Strings.no,
+        true);
   }
 
   changeTableToOtherTable(table) async {
@@ -380,7 +381,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Text(
-                    "Dine In",
+                    Strings.dine_in,
                   ),
                 ),
               ),
@@ -391,7 +392,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Text(
-                    "Take Away",
+                    Strings.take_away,
                   ),
                 ),
               ),
@@ -545,7 +546,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                         printerreceiptList[0].printerIp.toString(),
                         context,
                         "",
-                        "OpenDrawer");
+                        Strings.openDrawer);
                   } else {
                     CommunFun.showToast(context, Strings.printer_not_available);
                   }
@@ -936,7 +937,7 @@ class _SelectTablePageState extends State<SelectTablePage>
         tableList = list;
       });
       if (tableList.length == 0) {
-        CommunFun.showToast(context, "Table not available for merge.");
+        CommunFun.showToast(context, Strings.table_not_avalilable);
       }
     }
     List<TablesDetails> newtableList = new List<TablesDetails>();
@@ -965,13 +966,13 @@ class _SelectTablePageState extends State<SelectTablePage>
                 mergeTabledata(table);
               } else {
                 CommunFun.showToast(
-                    context, "Table already merged with other table");
+                    context,Strings.table_already_merged);
               }
             } else if (isChangingTable) {
               if (table.saveorderid == 0) {
                 changeTableToOtherTable(table);
               } else {
-                CommunFun.showToast(context, "Table already occupied");
+                CommunFun.showToast(context, Strings.table_already_occupied);
               }
             } else {
               ontableTap(table);

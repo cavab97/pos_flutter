@@ -57,7 +57,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Select Printer", style: Styles.whiteBold()),
+                Text(Strings.select_printer, style: Styles.whiteBold()),
               ],
             ),
           ),

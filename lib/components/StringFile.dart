@@ -175,4 +175,29 @@ class Strings {
   static String permission_msg =
       "This user have not permission to perform this action";
   static String test_print_msg = 'Click to print a test receipt';
+  static String select_printer = "Select Printer";
+  static String printer_type = "Printer Type";
+  static String recipt_printer = "Receipt Printer";
+  static String kitchen_printer = "Kitchen Printer";
+  static String reprint_all = "Reprint All";
+  static String reprint = "Reprint";
+  static String scan_printer = "Scan Printer";
+  static String scan = "Scan";
+  static String list = "List";
+  static String table_pax_msg = "Please enter pax minimum table capcity.";
+  static String cancle_order_msg = "Are you want sure cancel this table order?";
+  static String change_table_msg = "Are you want sure to change your table?";
+  static String table_not_avalilable = "Table not available for merge.";
+  static String table_already_merged = "Table already merged with other table.";
+  static String table_already_occupied = "Table already occupied";
+  static String general = "General";
+  static String printer = "Printer";
+  static String change_lag = "Change Language";
+  static String change_theme = "Change Theme";
+  static String printing = "Printing";
+  static String always_print_msg = "Always Print Receipt";
+  static String testing = "Testing";
+  static String print_test_Rec = "Print Test Receipt";
+  static String click_to_print_test = 'Click to print a test receipt';
+  static String search_printer = "Search Printer";
 }

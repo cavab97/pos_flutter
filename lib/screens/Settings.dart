@@ -182,10 +182,10 @@ class _SettingsPageState extends State<SettingsPage> {
                             contentPadding: EdgeInsets.only(left: 0, top: 10),
                             selected: isGeneralSettings,
                             onTap: () {
-                              openSideData("General");
+                              openSideData(Strings.general);
                             },
                             title: Text(
-                              "General",
+                              Strings.general,
                               style: Styles.blackBoldsmall(),
                             ),
                           ),
@@ -193,11 +193,11 @@ class _SettingsPageState extends State<SettingsPage> {
                             contentPadding: EdgeInsets.only(left: 0, top: 10),
                             selected: isPrinterSettings,
                             onTap: () {
-                              openSideData("Printer");
+                              openSideData(Strings.printer);
                               getAllPrinter();
                             },
                             title: Text(
-                              "Printer",
+                              Strings.printer,
                               style: Styles.blackBoldsmall(),
                             ),
                           ),
@@ -206,7 +206,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             selected: isChangeLanguage,
                             onTap: () {},
                             title: Text(
-                              "Change Language",
+                              Strings.change_lag,
                               style: Styles.blackBoldsmall(),
                             ),
                           ),
@@ -215,7 +215,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             selected: isChangeTheme,
                             onTap: () {},
                             title: Text(
-                              "Change Theme",
+                              Strings.change_theme,
                               style: Styles.blackBoldsmall(),
                             ),
                           )
@@ -251,7 +251,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         Center(
           child: Text(
-            "General",
+            Strings.general,
             style: Styles.whiteBold(),
           ),
         ),
@@ -293,7 +293,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               Center(
                 child: Text(
-                  "Printing",
+                  Strings.printing,
                   style: Styles.whiteBold(),
                 ),
               ),
@@ -304,7 +304,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 decoration: new BoxDecoration(
                     border: new Border.all(color: Colors.white)),
                 child: ListTile(
-                    title: Text("Always Print Receipt",
+                    title: Text(Strings.always_print_msg,
                         style: Styles.whiteSimpleSmall()),
                     trailing: Transform.scale(
                       scale: 1,
@@ -332,7 +332,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           printerList[index].printerIp,
                           context,
                           printerList[index].printerName,
-                          "Testing"),
+                          Strings.testing),
                       child: Column(
                         children: <Widget>[
                           Container(
@@ -355,7 +355,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                         style: TextStyle(fontSize: 16),
                                       ),
                                       Text(
-                                        'Click to print a test receipt',
+                                        Strings.click_to_print_test,
                                         style:
                                             TextStyle(color: Colors.grey[700]),
                                       ),
@@ -402,7 +402,7 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
           onPressed: _onPress,
           child: Text(
-            "Print Test Receipt",
+            Strings.print_test_Rec,
             style: Styles.whiteSimpleSmall(),
           ),
           color: StaticColor.backgroundColor,
@@ -421,7 +421,7 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
           onPressed: _onPress,
           child: Text(
-            "Search Printer",
+            Strings.search_printer,
             style: Styles.whiteSimpleSmall(),
           ),
           color: StaticColor.backgroundColor,

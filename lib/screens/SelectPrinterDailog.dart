@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
@@ -30,7 +31,6 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
     super.initState();
   }
 
-
   addPrinter(ip) {
     widget.onClose(ip);
     //TODO: save printer  apic call
@@ -51,7 +51,7 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Scan Printer", style: Styles.whiteBold()),
+                Text(Strings.scan_printer, style: Styles.whiteBold()),
               ],
             ),
           ),
@@ -59,9 +59,8 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
               right: 30,
               top: 10,
               child: FlatButton(
-                  onPressed: () {
-                  },
-                  child: Text("Scan", style: Styles.whiteSimpleSmall()))),
+                  onPressed: () {},
+                  child: Text(Strings.scan, style: Styles.whiteSimpleSmall()))),
           closeButton(context),
         ],
       ),
@@ -107,7 +106,7 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Text("List", style: Styles.communBlack()),
+          Text(Strings.list, style: Styles.communBlack()),
           SizedBox(height: 10),
           Container(
             // height: MediaQuery.of(context).size.height / 2.2,

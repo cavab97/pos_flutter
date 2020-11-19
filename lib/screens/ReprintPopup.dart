@@ -45,7 +45,7 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
       onPressed: () {
         widget.onClose(tempCart);
       },
-      child: Text("Reprint",
+      child: Text(Strings.reprint,
           style: TextStyle(
             color: Colors.white,
             fontSize: SizeConfig.safeBlockVertical * 3,
@@ -63,7 +63,7 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
       onPressed: () {
         widget.onClose(cartList);
       },
-      child: Text("Reprint All",
+      child: Text(Strings.reprint_all,
           style: TextStyle(
             color: Colors.white,
             fontSize: SizeConfig.safeBlockVertical * 3,
