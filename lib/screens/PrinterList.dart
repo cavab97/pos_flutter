@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
@@ -36,11 +37,9 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
     });
   }
 
-
   void testPrint(String printerIp, BuildContext ctx) async {
     //sendTokitched();
-  //  printKOT.checkKOTPrint(printerIp, ctx, itemList);
-
+    //  printKOT.checkKOTPrint(printerIp, ctx, itemList);
   }
 
   @override
@@ -76,10 +75,10 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
               top: 15,
               child: IconButton(
                   icon: Icon(
-                    Icons.sync,
-                    color: Colors.white,
-                    size: 40,
-                  ))),
+                Icons.sync,
+                color: Colors.white,
+                size: 40,
+              ))),
           closeButton(context),
         ],
       ),
@@ -158,7 +157,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
                                     style: TextStyle(fontSize: 16),
                                   ),
                                   Text(
-                                    'Click to print a test receipt',
+                                    Strings.test_print_msg,
                                     style: TextStyle(color: Colors.grey[700]),
                                   ),
                                 ],

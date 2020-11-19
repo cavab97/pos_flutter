@@ -62,7 +62,7 @@ class Strings {
   static String cancle_order = "Cancel Order";
   static String merge_order = "Merge Order";
   static String enterPax = "Enter Pax";
- static String scanQRcode = "Scan QRCode";
+  static String scanQRcode = "Scan QRCode";
 
   static String open_shift = "Open Shift";
   static String shiftTextLable = "Sorry,we're";
@@ -91,6 +91,7 @@ class Strings {
   static String delete_order = "Delete Order";
   static String reprint_Order = "Resend to Kitchen";
   static String out_of_stoke = "OUT OF STOCK";
+  static String out_of_stoke_msg = "Product Out of Stock";
   static String apply_promocode = "Apply Promocode";
   static String item_not_available = "No item available";
   static String asset_headerLogo = "assets/headerlogo.png";
@@ -140,5 +141,38 @@ class Strings {
   static String take_away = "Take Away";
   static String dine_in = "Dine In";
   static String table_mearged_msg = "Table merged.";
-   static String rePrint_kitchen_Print = "Reprint Kitchen Bill";
+  static String rePrint_kitchen_Print = "Reprint Kitchen Bill";
+  static String please_Select_country = "Please select country!";
+  static String please_select_state = "Please select state!";
+  static String please_select_city = "Please select city!";
+  static String print_reciept = "Print receipt";
+  static String enter_qty = "Enter Qty";
+  static String remark = "Remark :";
+  static String done = "Done";
+  static String dateFormat = "EEE, MMM d yyyy, hh:mm aaa";
+  static String walkin_customer = "Walk-in customer";
+  static String openDrawer = "OpenDrawer";
+  static String warning = "Warning";
+  static String warning_msg = "Are you want sure to add this prodoct as free?";
+  static String yes = "Yes";
+  static String no = "No";
+  static String foc_product_msg = "FOC Product is not editable.";
+  static String total = "Total :";
+  static String amountPaid = "Amount Paid :";
+  static String change = "Change :";
+  static String enterMsg = "Press screen to Continue";
+  static String pay_in_ammount = "Pay In Amount";
+  static String please_select_reason = 'Please select reason';
+  static String enter_last = "Enter last 4 digits : ";
+  static String approval_code = "Approval Code: ";
+  static String digit_validation_msg =
+      'Please enter last 4 digit of your card.';
+  static String minimum_Req_msg = 'Minimum 4 digits required.';
+  static String approval_code_msg = "Please enter appoval code.";
+  static String reference_num_msg = 'Please enter ref Number';
+  static String walletPayment = "Wallet Payment";
+  static String enter_ref_num = "Enter Ref Number : ";
+  static String permission_msg =
+      "This user have not permission to perform this action";
+  static String test_print_msg = 'Click to print a test receipt';
 }

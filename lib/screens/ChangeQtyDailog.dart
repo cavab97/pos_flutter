@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 
@@ -56,7 +57,7 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text("Enter Qty",
+                Text(Strings.enter_qty,
                     style: TextStyle(
                         fontSize: SizeConfig.safeBlockVertical * 3,
                         color: Colors.white)),
@@ -77,7 +78,7 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                "Remark :",
+                Strings.remark,
                 style: Styles.greysmall(),
               ),
               remarkfield(),
@@ -169,7 +170,7 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
       child: Row(
         children: <Widget>[
           Text(
-            "Done",
+            Strings.done,
             style: TextStyle(
               color: Colors.white,
               fontSize: SizeConfig.safeBlockVertical * 3,

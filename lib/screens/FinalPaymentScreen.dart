@@ -82,7 +82,7 @@ class FinalEndScreentate extends State<FinalEndScreen> {
                               new Expanded(
                                 flex: 7,
                                 child: Text(
-                                  "Total :",
+                                  Strings.total,
                                   textAlign: TextAlign.end,
                                   style: Styles.blackExtraLarge(),
                                 ),
@@ -107,7 +107,7 @@ class FinalEndScreentate extends State<FinalEndScreen> {
                               new Expanded(
                                 flex: 7,
                                 child: Text(
-                                  "Amount Paid :",
+                                  Strings.amountPaid,
                                   textAlign: TextAlign.end,
                                   style: Styles.blackExtraLarge(),
                                 ),
@@ -132,7 +132,7 @@ class FinalEndScreentate extends State<FinalEndScreen> {
                               new Expanded(
                                 flex: 7,
                                 child: Text(
-                                  "Change :",
+                                  Strings.change,
                                   textAlign: TextAlign.end,
                                   style: Styles.blackExtraLarge(),
                                 ),
@@ -158,7 +158,7 @@ class FinalEndScreentate extends State<FinalEndScreen> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: <Widget>[
                               Text(
-                                "Press screen to Continue",
+                               Strings.enterMsg,
                                 textAlign: TextAlign.end,
                                 style: Styles.communBlack(),
                               )

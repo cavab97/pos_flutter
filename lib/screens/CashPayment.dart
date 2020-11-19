@@ -277,7 +277,7 @@ class _CashPaymentState extends State<CashPaymentPage> {
                         SizedBox(
                           width: 20,
                         ),
-                        Text("Print receipt")
+                        Text(Strings.print_reciept)
                       ],
                     )
                   ]),

@@ -468,8 +468,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text("Enter last 4 digits : ",
-                      style: Styles.blackMediumBold()),
+                  Text(Strings.enter_last, style: Styles.blackMediumBold()),
                   SizedBox(
                     height: 20,
                   ),
@@ -477,7 +476,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                   SizedBox(
                     height: 10,
                   ),
-                  Text("Approval Code: ", style: Styles.blackMediumBold()),
+                  Text(Strings.approval_code, style: Styles.blackMediumBold()),
                   SizedBox(
                     height: 20,
                   ),
@@ -485,7 +484,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                   SizedBox(
                     height: 10,
                   ),
-                  Text("Remark: ", style: Styles.blackMediumBold()),
+                  Text(Strings.remark, style: Styles.blackMediumBold()),
                   SizedBox(
                     height: 20,
                   ),
@@ -499,13 +498,13 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text("Cancel", style: Styles.orangeSmall()),
+              child: Text(Strings.cancel, style: Styles.orangeSmall()),
             ),
             FlatButton(
               onPressed: () {
                 checkPIN();
               },
-              child: Text("Done", style: Styles.orangeSmall()),
+              child: Text(Strings.done, style: Styles.orangeSmall()),
             ),
           ],
         );
@@ -518,9 +517,9 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       controller: digitController,
       validator: (value) {
         if (value.isEmpty) {
-          return 'Please enter last 4 digit of your card.';
+          return Strings.digit_validation_msg;
         } else if (value.length < 4) {
-          return 'Minimum 4 digits required.';
+          return Strings.minimum_Req_msg;
         }
         return null;
       },
@@ -560,7 +559,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     return TextFormField(
       validator: (value) {
         if (value.isEmpty) {
-          return 'Please enter appoval code.';
+          return Strings.approval_code_msg;
         }
         return null;
       },
@@ -629,7 +628,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       controller: refInputController,
       validator: (value) {
         if (value.isEmpty) {
-          return 'Please enter ref Number';
+          return Strings.reference_num_msg;
         }
         return null;
       },
@@ -673,7 +672,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
             borderRadius: BorderRadius.circular(20.0),
           ),
           titlePadding: EdgeInsets.all(20),
-          title: Center(child: Text("Wallet Payment")),
+          title: Center(child: Text(Strings.walletPayment)),
           content: Container(
             width: MediaQuery.of(context).size.width / 2.4,
             height: MediaQuery.of(context).size.height / 2.4,
@@ -684,7 +683,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text("Enter Ref Number : ", style: Styles.blackMediumBold()),
+                  Text(Strings.enter_ref_num, style: Styles.blackMediumBold()),
                   SizedBox(
                     height: 20,
                   ),
@@ -692,7 +691,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                   SizedBox(
                     height: 20,
                   ),
-                  Text("Remark: ", style: Styles.blackMediumBold()),
+                  Text(Strings.remark, style: Styles.blackMediumBold()),
                   SizedBox(
                     height: 20,
                   ),
@@ -706,13 +705,13 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text("Cancel", style: Styles.orangeSmall()),
+              child: Text(Strings.cancel, style: Styles.orangeSmall()),
             ),
             FlatButton(
               onPressed: () {
                 checkRefNum();
               },
-              child: Text("Done", style: Styles.orangeSmall()),
+              child: Text(Strings.done, style: Styles.orangeSmall()),
             ),
           ],
         );

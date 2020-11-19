@@ -30,9 +30,6 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   TextEditingController addressLine1_controller = new TextEditingController();
   TextEditingController postcode_controller = new TextEditingController();
   LocalAPI localAPI = LocalAPI();
-
-  String _selectedCountry = "India";
-  List<String> countries = ['A', 'B', 'C', 'D'];
   final _formKey = GlobalKey<FormState>();
   List<Countrys> countrys = [];
   List<States> states = [];
@@ -127,15 +124,15 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
     bool _isValid = _formKey.currentState.validate();
 
     if (selectedCountry == null) {
-      setState(() => selectedCountryError = "Please select country!");
+      setState(() => selectedCountryError = Strings.please_Select_country);
       _isValid = false;
     }
     if (selectedState == null) {
-      setState(() => selectedStateError = "Please select state!");
+      setState(() => selectedStateError = Strings.please_select_state);
       _isValid = false;
     }
     if (selectedCity == null) {
-      setState(() => selectedCityError = "Please select city!");
+      setState(() => selectedCityError = Strings.please_Select_country);
       _isValid = false;
     }
 

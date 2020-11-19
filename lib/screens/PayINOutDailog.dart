@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
@@ -38,7 +39,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         context: context,
         builder: (BuildContext context) {
           return OpeningAmmountPage(
-              ammountext: "Pay In Amount",
+              ammountext: Strings.pay_in_ammount,
               onEnter: (ammountext) {
                 print(ammountext);
                 setamount(ammountext);
@@ -144,7 +145,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
               },
               child: Text(ammount.toStringAsFixed(2),
                   style: Styles.blackBoldLarge())),
-          Text('Please select reason', style: Styles.drawerText()),
+          Text(Strings.please_select_reason, style: Styles.drawerText()),
           Container(
               width: MediaQuery.of(context).size.width / 4,
               padding: EdgeInsets.all(12),
@@ -161,7 +162,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
                     Icons.arrow_forward_ios,
                     size: 12,
                   ),
-                  hint: Text("Please select reason"),
+                  hint: Text(Strings.please_select_reason),
                   value: selectedreason,
                   isExpanded: true,
                   onChanged: (String string) {

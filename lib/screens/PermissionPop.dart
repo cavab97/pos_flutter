@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/PosPermission.dart';
@@ -53,15 +54,14 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
             Navigator.of(context).pop();
             widget.onEnter();
           } else {
-            CommunFun.showToast(context,
-                "This user have not permission to perform this action");
+            CommunFun.showToast(context, Strings.permission_msg);
           }
         }
       } else {
-        CommunFun.showToast(context, "Invalid PIN");
+        CommunFun.showToast(context, Strings.invalid_pin_msg);
       }
     } else {
-      CommunFun.showToast(context, "Invalid PIN");
+      CommunFun.showToast(context, Strings.invalid_pin_msg);
     }
   }
 
@@ -80,7 +80,7 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Please enter PIN", style: Styles.whiteBoldsmall()),
+                Text(Strings.invalid_pin_msg, style: Styles.whiteBoldsmall()),
               ],
             ),
           ),

@@ -388,7 +388,7 @@ class _DashboradPageState extends State<DashboradPage>
                 tax,
                 branchData,
                 currency,
-                customer != null ? customer.name : "Walk-in customer");
+                customer != null ? customer.name : Strings.walkin_customer);
           } else {
             CommunFun.showToast(context, Strings.printer_not_available);
           }
@@ -432,7 +432,7 @@ class _DashboradPageState extends State<DashboradPage>
             cartList,
             tableName,
             branchData,
-            customer != null ? customer.name : "Walk-in customer");
+            customer != null ? customer.name : Strings.walkin_customer);
       } else {
         CommunFun.showToast(context, Strings.printer_not_available);
       }
@@ -615,7 +615,7 @@ class _DashboradPageState extends State<DashboradPage>
                         printerreceiptList[0].printerIp.toString(),
                         context,
                         "",
-                        "OpenDrawer");
+                        Strings.openDrawer);
                   } else {
                     CommunFun.showToast(context, Strings.printer_not_available);
                   }
@@ -1216,7 +1216,7 @@ class _DashboradPageState extends State<DashboradPage>
         paymentMethod,
         tableName,
         currency,
-        customer != null ? customer.name : "Walk-in customer");
+        customer != null ? customer.name : Strings.walkin_customer);
   }
 
   clearCartAfterSuccess(orderid) async {
@@ -1332,8 +1332,7 @@ class _DashboradPageState extends State<DashboradPage>
     }, () {
       Navigator.of(context).pop();
       opneSelectQtyPop(cartitem);
-    }, "Warning", "Are you want sure to add this prodoct as free?", "Yes", "No",
-        true);
+    }, Strings.warning, Strings.warning_msg, Strings.yes, Strings.no, true);
   }
 
   opneSelectQtyPop(cartitem) async {
@@ -1845,7 +1844,7 @@ class _DashboradPageState extends State<DashboradPage>
                     trailing: SearchProductList.qty != null &&
                             SearchProductList.hasInventory == 1 &&
                             SearchProductList.qty <= 0
-                        ? Text("OUT OF STOCK",
+                        ? Text(Strings.out_of_stoke,
                             style: Styles.orangesimpleSmall())
                         : SizedBox());
               },
@@ -1866,7 +1865,7 @@ class _DashboradPageState extends State<DashboradPage>
                       CommunFun.showToast(context, Strings.shift_open_message);
                     }
                   } else {
-                    CommunFun.showToast(context, "Product Out of Stock");
+                    CommunFun.showToast(context, Strings.out_of_stoke_msg);
                   }
                 }
                 // Navigator.of(context).push(MaterialPageRoute(
@@ -2268,7 +2267,7 @@ class _DashboradPageState extends State<DashboradPage>
                   });
                 }
               } else {
-                CommunFun.showToast(context, "Product Out of Stock");
+                CommunFun.showToast(context, Strings.out_of_stoke_msg);
               }
             },
             child: Container(
@@ -2354,7 +2353,7 @@ class _DashboradPageState extends State<DashboradPage>
                             padding: EdgeInsets.all(2),
                             color: Colors.deepOrange,
                             child: Center(
-                              child: Text("OUT OF STOCK",
+                              child: Text(Strings.out_of_stoke,
                                   style: Styles.whiteSimpleSmall()),
                             ),
                           ),
@@ -2441,7 +2440,7 @@ class _DashboradPageState extends State<DashboradPage>
                 }
               },
               child: Text(
-                !isWebOrder ? Strings.title_pay : "CheckOut",
+                !isWebOrder ? Strings.title_pay : Strings.checkout,
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: SizeConfig.safeBlockVertical * 2.8,
@@ -2668,8 +2667,7 @@ class _DashboradPageState extends State<DashboradPage>
                   }
                 } else {
                   if (cart.isFocProduct == 1) {
-                    CommunFun.showToast(
-                        context, "FOC Product is not editable.");
+                    CommunFun.showToast(context, Strings.foc_product_msg);
                   }
                 }
               },
