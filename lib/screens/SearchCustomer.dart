@@ -156,22 +156,26 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
   }
 
   Widget mainContent() {
-    return Container(
-      width: MediaQuery.of(context).size.width / 1.8,
-      height: MediaQuery.of(context).size.height / 1.8,
-      child: SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.all(0),
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          color: Colors.white,
-          child: Column(children: <Widget>[
-            customerSearchBox(),
-            SizedBox(
-              height: 10,
-            ),
-            customerLists()
-          ]),
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+        setState(() {
+          isFiltring = false;
+        });
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width / 1.8,
+        height: MediaQuery.of(context).size.height / 1.8,
+        child: SingleChildScrollView(
+          child: Container(
+            child: Column(children: <Widget>[
+              customerSearchBox(),
+              SizedBox(
+                height: 10,
+              ),
+              customerLists()
+            ]),
+          ),
         ),
       ),
     );
@@ -215,6 +219,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
             isFiltring = true;
           });
         },
+        onSubmitted: (e) {},
         onChanged: (e) {
           filterCustomer(e);
         },

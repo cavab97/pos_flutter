@@ -16,6 +16,7 @@ class OrderDetail {
   int detail_status;
   String product_detail;
   int issetMeal;
+  int hasRacManagemant;
   String setmeal_product_detail;
   int detail_by;
   int updated_by;
@@ -42,6 +43,7 @@ class OrderDetail {
     this.detail_by,
     this.updated_by,
     this.issetMeal,
+    this.hasRacManagemant,
     this.updated_at,
     this.detail_datetime,
   });
@@ -71,6 +73,7 @@ class OrderDetail {
     detail_status = json["detail_status"];
     detail_by = json["detail_by"];
     issetMeal = json["issetMeal"];
+    hasRacManagemant = json["has_rac_managemant"];
     product_discount = json["product_discount"] is int
         ? (json['product_discount'] as int).toDouble()
         : json['product_discount'];
@@ -98,6 +101,7 @@ class OrderDetail {
     data["detail_amount"] = this.detail_amount;
     data["detail_qty"] = this.detail_qty;
     data["issetMeal"] = this.issetMeal;
+    data["has_rac_managemant"] = this.hasRacManagemant;
     data["detail_status"] = this.detail_status;
     data["detail_by"] = this.detail_by;
     data["product_discount"] = this.product_discount;

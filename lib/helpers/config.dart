@@ -19,4 +19,8 @@ class Configrations {
   static String update_inventory_table = "update-product-inventory-data";
   static String country_state_city_datatable = "country-state-city-datatable";
   static String create_customer_data = "create-customer-data";
+  static String rac_box_liquor_inventor_datatable =
+      "rac-box-liquor-inventory-datatable";
+  static String update_customer_liquor_inventory_data =
+      "update-customer-liquor-inventory-data";
 }

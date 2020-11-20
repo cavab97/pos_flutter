@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
-import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
@@ -15,6 +14,7 @@ import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/CloseShiftPage.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/screens/WineStorage.dart';
 
 class DrawerWid extends StatefulWidget {
   DrawerWid({Key key}) : super(key: key);
@@ -79,6 +79,15 @@ class DrawerWidState extends State<DrawerWid> {
     }
   }
 
+  gotoWineStorage() {
+    if (isShiftOpen) {
+      Navigator.of(context).pop();
+      Navigator.pushNamed(context, Constant.WineStorage);
+    } else {
+      CommunFun.showToast(context, Strings.shift_opne_alert_wineStorage);
+    }
+  }
+
   getAllPrinter() async {
     List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
     setState(() {
@@ -97,7 +106,7 @@ class DrawerWidState extends State<DrawerWid> {
                 printerreceiptList[0].printerIp.toString(),
                 context,
                 "",
-                "OpenDrawer");
+                Strings.openDrawer);
             openOpningAmmountPop(context, Strings.title_closing_amount);
           });
         });
@@ -118,7 +127,7 @@ class DrawerWidState extends State<DrawerWid> {
                         printerreceiptList[0].printerIp.toString(),
                         context,
                         "",
-                        "OpenDrawer");
+                        Strings.openDrawer);
                   } else {
                     CommunFun.showToast(context, Strings.printer_not_available);
                   }
@@ -223,7 +232,7 @@ class DrawerWidState extends State<DrawerWid> {
                 size: SizeConfig.safeBlockVertical * 5,
               ),
               title: Text(
-                "Transaction",
+                Strings.transaction,
                 style: Styles.drawerText(),
               ),
             ),
@@ -238,11 +247,25 @@ class DrawerWidState extends State<DrawerWid> {
                       size: SizeConfig.safeBlockVertical * 5,
                     ),
                     title: Text(
-                      "Web Orders",
+                      Strings.web_orders,
                       style: Styles.drawerText(),
                     ),
                   )
                 : SizedBox(),
+            ListTile(
+              onTap: () {
+                gotoWineStorage();
+              },
+              leading: Icon(
+                Icons.local_bar,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 5,
+              ),
+              title: Text(
+                Strings.wineStorage,
+                style: Styles.drawerText(),
+              ),
+            ),
             ListTile(
                 onTap: () {
                   if (isShiftOpen) {
@@ -256,7 +279,8 @@ class DrawerWidState extends State<DrawerWid> {
                   color: Colors.black,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
-                title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
+                title: Text(
+                    isShiftOpen ? Strings.close_shift : Strings.opne_shift,
                     style: Styles.drawerText())),
             permissions.contains(Constant.VIEW_REPORT)
                 ? ListTile(
@@ -269,7 +293,7 @@ class DrawerWidState extends State<DrawerWid> {
                       size: SizeConfig.safeBlockVertical * 5,
                     ),
                     title: Text(
-                      "Shift Report",
+                      Strings.shift_Report,
                       style: Styles.drawerText(),
                     ),
                   )
@@ -285,7 +309,7 @@ class DrawerWidState extends State<DrawerWid> {
                   color: Colors.black,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
-                title: Text("Sync Orders", style: Styles.drawerText())),
+                title: Text(Strings.sync_orders, style: Styles.drawerText())),
             // : SizedBox(),
             ListTile(
                 onTap: () async {
@@ -296,7 +320,7 @@ class DrawerWidState extends State<DrawerWid> {
                   color: Colors.black,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
-                title: Text("Sync", style: Styles.drawerText())),
+                title: Text(Strings.sync, style: Styles.drawerText())),
             ListTile(
                 onTap: () {
                   Navigator.of(context).pop();
@@ -307,7 +331,7 @@ class DrawerWidState extends State<DrawerWid> {
                   color: Colors.black,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
-                title: Text("Settings", style: Styles.drawerText())),
+                title: Text(Strings.settings, style: Styles.drawerText())),
           ],
         ),
       ),

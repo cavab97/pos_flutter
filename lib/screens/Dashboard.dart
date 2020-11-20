@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:intl/intl.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/components/DrawerWidget.dart';
 import 'package:mcncashier/components/StringFile.dart';
@@ -11,10 +12,13 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/models/Box.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Customer_Liquor_Inventory.dart';
+import 'package:mcncashier/models/Customer_Liquor_Inventory_Log.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
@@ -187,7 +191,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   checkCustomerSelected() async {
-    Customer customerData = await getCustomer();
+    Customer customerData = await CommunFun.getCustomer();
     setState(() {
       customer = customerData;
     });
@@ -515,7 +519,6 @@ class _DashboradPageState extends State<DashboradPage>
     var branchid = await CommunFun.getbranchId();
     List<ProductDetails> product =
         await localAPI.getProduct(categoryId.toString(), branchid);
-
     if (product.length > 0) {
       setState(() {
         // productList = [];
@@ -645,28 +648,6 @@ class _DashboradPageState extends State<DashboradPage>
           );
         });
   }
-
-// opneVoucherPop() async {
-//   // var customerData =
-//   //     await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
-//   // if (customerData != null) {
-//   showDialog(
-//       // Opning Ammount Popup
-//       context: context,
-//       builder: (BuildContext context) {
-//         return VoucherApplyconfirmPop(
-//           onEnter: () {
-//             openVoucherPopFinal();
-//           },
-//           onCancel: () {
-//             sendPayment();
-//           },
-//         );
-//       });
-//   // } else {
-//   //   sendPayment();
-//   // }
-// }
 
 /*This method used for print KOT receipt print*/
   openPrinterPop(cartLists) {
@@ -866,19 +847,6 @@ class _DashboradPageState extends State<DashboradPage>
         });
   }
 
-  Future<Customer> getCustomer() async {
-    Customer customer;
-    var customerData =
-        await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
-    if (customerData != null) {
-      var customers = json.decode(customerData);
-      customer = Customer.fromJson(customers);
-      return customer;
-    } else {
-      return customer;
-    }
-  }
-
   Future<Table_order> getTableData() async {
     Table_order tables = new Table_order();
     var tabledata = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
@@ -1034,12 +1002,12 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.detail_status = 1;
           orderDetail.detail_by = userdata.id;
           orderDetail.issetMeal = cartItem.issetMeal;
+          orderDetail.hasRacManagemant = cartItem.hasRacManagemant;
           if (cartItem.issetMeal == 1) {
             orderDetail.setmeal_product_detail =
                 cartItem.setmeal_product_detail;
           }
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
-
           if (orderDetailid != null) {
             List<MSTSubCartdetails> modifireList =
                 await getmodifireList(cartItem.id);
@@ -1100,7 +1068,7 @@ class _DashboradPageState extends State<DashboradPage>
                 }
               }
             }
-            if (cartItem.issetMeal == 0) {
+            if (cartItem.issetMeal == 0 || cartItem.hasRacManagemant == 0) {
               if (productdata["has_inventory"] == 1) {
                 List<ProductStoreInventory> inventory = await localAPI
                     .getStoreInventoryData(orderDetail.product_id);
@@ -1131,6 +1099,9 @@ class _DashboradPageState extends State<DashboradPage>
                   updatedLog.add(log);
                 }
               }
+            }
+            if (cartItem.hasRacManagemant == 1) {
+              insertRacInv(userdata, cartItem, cartData.user_id);
             }
           }
           var ulog = await localAPI.updateInvetory(updatedInt);
@@ -1186,6 +1157,62 @@ class _DashboradPageState extends State<DashboradPage>
       var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
       await printReceipt(orderid);
       await clearCartAfterSuccess(orderid);
+    }
+  }
+
+  insertRacInv(user, cartItem, customer) async {
+    Customer_Liquor_Inventory inventory = new Customer_Liquor_Inventory();
+    var orderDateF;
+
+    var appid = await localAPI.getLastCustomerInventory();
+    if (appid != 0) {
+      inventory.appId = appid + 1;
+    } else {
+      inventory.appId = 1;
+    }
+    var branchid = await CommunFun.getbranchId();
+    var now = DateTime.now();
+    var newDate = new DateTime(now.year, now.month + 1, now.day);
+    orderDateF = DateFormat('yyyy-MM-dd HH:mm:ss').format(newDate);
+    List<Box> boxList = await localAPI.getBoxForProduct(cartItem.productId);
+    if (boxList.length > 0) {
+      inventory.uuid = await CommunFun.getLocalID();
+      inventory.clCustomerId = customer;
+      inventory.clProductId = cartItem.productId;
+      inventory.clBranchId = int.parse(branchid);
+      inventory.clRacId = boxList[0].racId;
+      inventory.clBoxId = boxList[0].boxId;
+      inventory.type = boxList[0].boxFor;
+      inventory.clTotalQuantity = boxList[0].wineQty;
+      inventory.clExpiredOn = orderDateF;
+      inventory.clLeftQuantity = boxList[0].wineQty != null
+          ? (boxList[0].wineQty - cartItem.productQty)
+          : 0;
+      inventory.status = 1;
+      inventory.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
+      inventory.updatedBy = user.id;
+      var clid = await localAPI.insertWineInventory(inventory, false);
+      Customer_Liquor_Inventory_Log log = new Customer_Liquor_Inventory_Log();
+      var lastappid = await localAPI.getLastCustomerInventoryLog();
+      if (lastappid != 0) {
+        log.appId = lastappid + 1;
+      } else {
+        log.appId = 1;
+      }
+      log.uuid = await CommunFun.getLocalID();
+      log.clAppId = inventory.appId;
+      log.branchId = int.parse(branchid);
+      log.productId = cartItem.productId;
+      log.customerId = customer;
+      log.liType = boxList[0].boxFor;
+      log.qty = cartItem.productQty;
+      log.qtyBeforeChange = boxList[0].wineQty;
+      log.qtyAfterChange = boxList[0].wineQty != null
+          ? (boxList[0].wineQty - cartItem.productQty)
+          : 0;
+      log.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
+      log.updatedBy = user.id;
+      var lid = await localAPI.insertWineInventoryLog(log);
     }
   }
 
@@ -1296,7 +1323,6 @@ class _DashboradPageState extends State<DashboradPage>
         cart.discount = disc;
         cart.serviceCharge =
             await CommunFun.countServiceCharge(cart.serviceChargePercent, subt);
-        ;
         cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
         cart.grand_total = (subt - disc) + taxvalues;
         cart.tax_json = json.encode(taxjson);
@@ -1341,8 +1367,10 @@ class _DashboradPageState extends State<DashboradPage>
         barrierDismissible: false,
         builder: (BuildContext context) {
           return ChangeQtyDailog(
+              type: null,
               qty: cartitem.productQty,
               onClose: (qty, remark) {
+                Navigator.of(context).pop();
                 splitproductfromItem(qty, cartitem, remark);
               });
         });
@@ -2843,37 +2871,38 @@ class _DashboradPageState extends State<DashboradPage>
                       ? Padding(
                           padding: EdgeInsets.only(right: 15),
                           child: InkWell(
-                              onTap: () {
-                                CommonUtils.showAlertDialog(context, () {
-                                  Navigator.of(context).pop();
-                                }, () {
-                                  Navigator.of(context).pop();
-                                  removePromoCode(vaucher);
-                                  // setState(() {
-                                  //   vaucher = null;
-                                  // });
-                                },
-                                    "Alert",
-                                    "Are you sure you want to remove this promocode?",
-                                    "Yes",
-                                    "No",
-                                    true);
+                            onTap: () {
+                              CommonUtils.showAlertDialog(context, () {
+                                Navigator.of(context).pop();
+                              }, () {
+                                Navigator.of(context).pop();
+                                removePromoCode(vaucher);
+                                // setState(() {
+                                //   vaucher = null;
+                                // });
                               },
-                              child: Chip(
-                                backgroundColor: Colors.grey,
-                                avatar: CircleAvatar(
-                                  backgroundColor: Colors.grey.shade800,
-                                  child: Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
+                                  "Alert",
+                                  "Are you sure you want to remove this promocode?",
+                                  "Yes",
+                                  "No",
+                                  true);
+                            },
+                            child: Chip(
+                              backgroundColor: Colors.grey,
+                              avatar: CircleAvatar(
+                                backgroundColor: Colors.grey.shade800,
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 20,
                                 ),
-                                label: Text(
-                                  vaucher["voucher_name"],
-                                  style: Styles.whiteBoldsmall(),
-                                ),
-                              )),
+                              ),
+                              label: Text(
+                                vaucher["voucher_name"],
+                                style: Styles.whiteBoldsmall(),
+                              ),
+                            ),
+                          ),
                         )
                       : SizedBox(),
                   Padding(

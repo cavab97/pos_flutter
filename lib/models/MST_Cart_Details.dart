@@ -22,6 +22,7 @@ class MSTCartdetails {
   String cart_detail;
   String setmeal_product_detail;
   int issetMeal;
+  int hasRacManagemant;
   int hasCompositeInventory;
   int productPoints;
   int productTotalPoints;
@@ -47,6 +48,7 @@ class MSTCartdetails {
       this.remark,
       this.isDeleted,
       this.issetMeal,
+      this.hasRacManagemant,
       this.isSendKichen,
       this.isFocProduct,
       this.itemUnit,
@@ -90,6 +92,7 @@ class MSTCartdetails {
     isSendKichen = json["is_send_kichen"];
     itemUnit = json["item_unit"];
     issetMeal = json["issetMeal"];
+    hasRacManagemant = json["has_rac_managemant"];
     hasCompositeInventory = json["has_composite_inventory"];
     createdAt = json["created_at"];
     createdBy = json["created_by"];
@@ -122,6 +125,7 @@ class MSTCartdetails {
     data["has_composite_inventory"] = this.hasCompositeInventory;
     data["item_unit"] = this.itemUnit;
     data["issetMeal"] = this.issetMeal;
+    data["has_rac_managemant"] = this.hasRacManagemant;
     data["created_by"] = this.createdBy;
     data["created_at"] = this.createdAt;
     data["isFoc_Product"] = this.isFocProduct;

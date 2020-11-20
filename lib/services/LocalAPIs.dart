@@ -2,12 +2,15 @@ import 'dart:convert';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
+import 'package:mcncashier/models/Box.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/CheckInout.dart';
 import 'package:mcncashier/models/Citys.dart';
 import 'package:mcncashier/models/Countrys.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Customer_Liquor_Inventory.dart';
+import 'package:mcncashier/models/Customer_Liquor_Inventory_Log.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
@@ -20,6 +23,7 @@ import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/BranchTax.dart';
+import 'package:mcncashier/models/Rac.dart';
 import 'package:mcncashier/models/Role.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
@@ -1945,5 +1949,187 @@ class LocalAPI {
     } else {
       return 0;
     }
+  }
+
+  Future<List<Rac>> getRacList(branchID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from rac where branch_id = " +
+        branchID.toString() +
+        " AND status = 1";
+    var result = await db.rawQuery(qry);
+    List<Rac> list =
+        result.length > 0 ? result.map((c) => Rac.fromJson(c)).toList() : [];
+    return list;
+  }
+
+  Future<List<Box>> getBoxList(branchID, racID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from box where branch_id = " +
+        branchID.toString() +
+        " AND rac_id = " +
+        racID.toString() +
+        "  AND status = 1";
+    var result = await db.rawQuery(qry);
+    List<Box> list =
+        result.length > 0 ? result.map((c) => Box.fromJson(c)).toList() : [];
+    return list;
+  }
+
+  Future<int> getLastCustomerInventory() async {
+    var qey = "SELECT app_id from customer_liquor_inventory " +
+        " ORDER BY app_id DESC LIMIT 1";
+    var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
+    List<Customer_Liquor_Inventory> list = checkisExit.length > 0
+        ? checkisExit.map((c) => Customer_Liquor_Inventory.fromJson(c)).toList()
+        : [];
+    if (list.length > 0) {
+      return list[0].appId;
+    } else {
+      return 0;
+    }
+  }
+
+  Future<int> getLastCustomerInventoryLog() async {
+    var qey = "SELECT app_id from customer_liquor_inventory_log " +
+        " ORDER BY app_id DESC LIMIT 1";
+    var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
+    List<Customer_Liquor_Inventory_Log> list = checkisExit.length > 0
+        ? checkisExit
+            .map((c) => Customer_Liquor_Inventory_Log.fromJson(c))
+            .toList()
+        : [];
+    if (list.length > 0) {
+      return list[0].appId;
+    } else {
+      return 0;
+    }
+  }
+
+  Future<int> insertWineInventory(
+      Customer_Liquor_Inventory data, isUpdate) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var invData = data.toJson();
+    await invData.remove("name");
+    var result;
+    if (isUpdate) {
+      result = await db.update("customer_liquor_inventory", invData,
+          where: "app_id =?", whereArgs: [data.appId]);
+    } else {
+      result = await db.insert("customer_liquor_inventory", invData);
+    }
+    await SyncAPICalls.logActivity("customer liquor inventory",
+        "insert Wine inventory", "customer_liquor_inventory", data.clBranchId);
+    return result;
+  }
+
+  Future<int> insertWineInventoryLog(Customer_Liquor_Inventory_Log data) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var result =
+        await db.insert("customer_liquor_inventory_log", data.toJson());
+    await SyncAPICalls.logActivity(
+        "customer liquor inventory log",
+        "insert Wine inventory log",
+        "customer_liquor_inventory_log",
+        data.branchId);
+    return result;
+  }
+
+  Future<List<Customer_Liquor_Inventory>> getCustomerRedeem(customerid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry =
+        "SELECT customer_liquor_inventory.*,box.name from customer_liquor_inventory" +
+            " LEFT JOIN box on box.box_id = customer_liquor_inventory.cl_box_id " +
+            " WHERE cl_customer_id = " +
+            customerid.toString();
+    var result = await db.rawQuery(qry);
+    List<Customer_Liquor_Inventory> list = result.length > 0
+        ? result.map((c) => Customer_Liquor_Inventory.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<Customer_Liquor_Inventory>> getCustomersWineInventory(
+      branchID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var query =
+        "SELECT * from customer_liquor_inventory WHERE IFNULL(server_id,'')='' AND cl_branch_id = " +
+            branchID.toString();
+    var res = await db.rawQuery(query);
+    List<Customer_Liquor_Inventory> list = res.isNotEmpty
+        ? res.map((c) => Customer_Liquor_Inventory.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "customer_liquor_inventory",
+        "geting customer Wine inventory list for sync",
+        "customer_liquor_inventory",
+        branchID);
+    return list;
+  }
+
+  Future<List<Customer_Liquor_Inventory_Log>> getCustomersWineInventoryLogs(
+      branchID, appid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var query =
+        "SELECT * from customer_liquor_inventory_log WHERE IFNULL(server_id,'')='' AND cl_appId = " +
+            appid.toString();
+    var res = await db.rawQuery(query);
+    List<Customer_Liquor_Inventory_Log> list = res.isNotEmpty
+        ? res.map((c) => Customer_Liquor_Inventory_Log.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "customer_liquor_inventory",
+        "geting customer Wine inventory Log list for sync",
+        "customer_liquor_inventory",
+        branchID);
+    return list;
+  }
+
+  Future<int> saveSuctomerWineInventory(
+      Customer_Liquor_Inventory customerInv) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry =
+        "SELECT *  FROM customer_liquor_inventory where app_id =" +
+            customerInv.appId.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var result;
+    if (checkisExit.length > 0) {
+      result = await db.update(
+          "customer_liquor_inventory", customerInv.toJson(),
+          where: "app_id =?", whereArgs: [customerInv.appId]);
+    } else {
+      result =
+          await db.insert("customer_liquor_inventory", customerInv.toJson());
+    }
+    return result;
+  }
+
+  Future<int> saveSuctomerWineInventoryLogs(
+      Customer_Liquor_Inventory_Log customerInv) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry =
+        "SELECT *  FROM customer_liquor_inventory_log where app_id =" +
+            customerInv.appId.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var result;
+    if (checkisExit.length > 0) {
+      result = await db.update(
+          "customer_liquor_inventory_log", customerInv.toJson(),
+          where: "app_id =?", whereArgs: [customerInv.appId]);
+    } else {
+      result = await db.insert(
+          "customer_liquor_inventory_log", customerInv.toJson());
+    }
+    return result;
+  }
+
+  Future<List<Box>> getBoxForProduct(productId) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from box where product_id = " +
+        productId.toString() +
+        " AND status = 1";
+    var result = await db.rawQuery(qry);
+    List<Box> list =
+        result.length > 0 ? result.map((c) => Box.fromJson(c)).toList() : [];
+    return list;
   }
 }

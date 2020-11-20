@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -158,10 +157,8 @@ class VoucherPopState extends State<VoucherPop> {
           cartData.grand_total = cartData.grand_total + cartData.discount;
           cartData.discount = totaldiscount;
           cartData.discount_type = vaocher.voucherDiscountType;
-          //  if (vaocher.voucherId != cartData.voucher_id) {
           cartData.grand_total =
               cartData.grand_total = cartData.grand_total - cartData.discount;
-          //}
           cartData.voucher_detail = json.encode(vaocher);
           cartData.voucher_id = vaocher.voucherId;
           var result1 = await localAPI.addVoucherInOrder(cartData, vaocher);

@@ -27,6 +27,7 @@ class Strings {
   static String grand_total = "GRAND TOTAL";
   static String search_bar_text = "Search product here...";
   static String btn_Add_customer = "Add Customer";
+  static String select_customer = "Select Customer";
   static String pin_Number = "PIN Number";
   static String pin_validation_message = "Please enter your PIN number";
   static String already_clockin_msg = "User Already checkedIN.";
@@ -85,6 +86,7 @@ class Strings {
   static String close_table = "Close Table";
   static String split_order = "Split Order";
   static String close_shift = "Close Shift";
+  static String opne_shift = "Open Shift";
   static String draft_report = "Draft Report";
   static String check_list = "Check list";
   static String no_image = "assets/no_image.png";
@@ -109,6 +111,7 @@ class Strings {
   static String set_terminal_key = "Set Terminal Key";
   static String terminalKey = "Terminal Key";
   static String transaction = "Transaction";
+  static String web_orders = "Web Orders";
   static String no_order_found = "No Orders Found";
   static String no_details_found = "No Details Found";
   static String searchbox_hint = "Invoice Number or S/N";
@@ -136,6 +139,8 @@ class Strings {
       "Currently shift was closed,Please opne shift after you  can see Transactions.";
   static String shift_opne_alert_msg_webOrder =
       "Currently shift was closed,Please opne shift after you  can see web Orders.";
+  static String shift_opne_alert_wineStorage =
+      "Currently shift was closed,Please opne shift after you  can see wine storage.";
 
   static String auto_sync = "Auto sync";
   static String take_away = "Take Away";
@@ -200,4 +205,10 @@ class Strings {
   static String print_test_Rec = "Print Test Receipt";
   static String click_to_print_test = 'Click to print a test receipt';
   static String search_printer = "Search Printer";
+  static String wineStorage = "Wine Storage";
+  static String shift_Report = "Shift Report";
+  static String sync_orders = "Sync Orders";
+  static String sync = "Sync";
+  static String settings = "Settings";
+  static String please_select_customer = "Please select customer";
 }

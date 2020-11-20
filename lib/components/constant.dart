@@ -66,6 +66,7 @@ class Constant {
   static final String SettingsScreen = "/Settings";
   static final String WebOrderPages = "/WebOrders";
   static final String ShiftOrders = "/ShiftReport";
+  static final String WineStorage = "/WineStorage";
 
   /************************Just for identify on navigation*********************************/
   static final String dashboard = "dashboard";

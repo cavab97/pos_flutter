@@ -76,6 +76,15 @@ class Styles {
         fontFamily: Strings.fontFamily);
   }
 
+  static whiteCommun() {
+    return TextStyle(
+        // White text
+        color: Color(0xFFffffff),
+        fontSize: SizeConfig.safeBlockVertical * 4.1,
+        fontWeight: FontWeight.w300,
+        fontFamily: Strings.fontFamily);
+  }
+
   static whiteSmall() {
     return TextStyle(
         // White text

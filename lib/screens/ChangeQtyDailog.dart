@@ -5,8 +5,10 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 
 class ChangeQtyDailog extends StatefulWidget {
-  ChangeQtyDailog({Key key, this.qty, this.onClose}) : super(key: key);
+  ChangeQtyDailog({Key key, this.type, this.qty, this.onClose})
+      : super(key: key);
   final qty;
+  final type;
   Function onClose;
   @override
   ChangeQtyDailogState createState() => ChangeQtyDailogState();
@@ -212,7 +214,9 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
       decoration:
           BoxDecoration(border: Border.all(width: 1, color: Colors.grey)),
       child: Center(
-          child: Text(productQty.toString(),
+          child: Text(
+              productQty.toString() +
+                  (widget.type != null ? " " + widget.type : ""),
               style: TextStyle(color: Colors.grey, fontSize: 20))),
     );
   }

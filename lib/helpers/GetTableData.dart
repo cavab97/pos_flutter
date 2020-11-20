@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:mcncashier/models/Asset.dart';
 import 'package:mcncashier/models/Attributes.dart';
+import 'package:mcncashier/models/Box.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Category.dart';
@@ -9,6 +10,8 @@ import 'package:mcncashier/models/Category_Attributes.dart';
 import 'package:mcncashier/models/Citys.dart';
 import 'package:mcncashier/models/Countrys.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Customer_Liquor_Inventory.dart';
+import 'package:mcncashier/models/Customer_Liquor_Inventory_Log.dart';
 import 'package:mcncashier/models/Modifier.dart';
 import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
@@ -26,6 +29,7 @@ import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Product_Modifire.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/Product_branch.dart';
+import 'package:mcncashier/models/Rac.dart';
 import 'package:mcncashier/models/Role.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/SetMealBranch.dart';
@@ -439,6 +443,7 @@ class TableData {
     var productbranchData = tablesData["product_branch"];
     var productstoreData = tablesData["product_store_inventory"];
     var productstoreLogData = tablesData["product_store_inventory_log"];
+
     try {
       if (productattributeData.length != 0) {
         for (var i = 0; i < productattributeData.length; i++) {
@@ -952,6 +957,96 @@ class TableData {
           } else {
             await db.update("city", cityObj.toJson(),
                 where: "city_id =?", whereArgs: [cityObj.cityId]);
+          }
+        }
+      }
+      return 1;
+    } catch (e) {
+      print(e);
+      return 0;
+    }
+  }
+
+  Future<dynamic> insertWineStorageData(Database db, dynamic tablesData) async {
+    try {
+      var customerLiquorInt = tablesData["customer_liquor_inventory"];
+      var customerliquorIntLogs = tablesData["customer_liquor_inventory_log"];
+      var boxData = tablesData["box"];
+      var racData = tablesData["rac"];
+
+      if (customerLiquorInt.length != 0) {
+        for (var i = 0; i < customerLiquorInt.length; i++) {
+          var customerInv = customerLiquorInt[i];
+          Customer_Liquor_Inventory custinvt =
+              Customer_Liquor_Inventory.fromJson(customerInv);
+          var data = {
+            'table': "customer_liquor_inventory",
+            'key': "cl_id",
+            'value': custinvt.clId,
+          };
+          var count = await ifExists(db, data);
+          var custoInv = custinvt.toJson();
+          await custoInv.remove("name");
+          if (count == 0) {
+            await db.insert("customer_liquor_inventory", custoInv);
+          } else {
+            await db.update("customer_liquor_inventory", custoInv,
+                where: "cl_id =?", whereArgs: [custinvt.clId]);
+          }
+        }
+      }
+      if (customerliquorIntLogs.length != 0) {
+        for (var i = 0; i < customerliquorIntLogs.length; i++) {
+          var customerInvLogs = customerliquorIntLogs[i];
+          Customer_Liquor_Inventory_Log invLog =
+              Customer_Liquor_Inventory_Log.fromJson(customerInvLogs);
+          var data = {
+            'table': "customer_liquor_inventory_log",
+            'key': "li_id",
+            'value': invLog.liId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            await db.insert("customer_liquor_inventory_log", invLog.toJson());
+          } else {
+            await db.update("customer_liquor_inventory_log", invLog.toJson(),
+                where: "li_id =?", whereArgs: [invLog.liId]);
+          }
+        }
+      }
+      if (boxData.length != 0) {
+        for (var i = 0; i < boxData.length; i++) {
+          var boxitem = boxData[i];
+          Box box = Box.fromJson(boxitem);
+          var data = {
+            'table': "box",
+            'key': "box_id",
+            'value': box.boxId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            await db.insert("box", box.toJson());
+          } else {
+            await db.update("box", box.toJson(),
+                where: "box_id =?", whereArgs: [box.boxId]);
+          }
+        }
+      }
+      if (racData.length != 0) {
+        for (var i = 0; i < racData.length; i++) {
+          var racItem = racData[i];
+          Rac rac = Rac.fromJson(racItem);
+          var data = {
+            'table': "rac",
+            'key': "rac_id",
+            'value': rac.racId,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            await db.insert("rac", rac.toJson());
+          } else {
+            await db.update("rac", rac.toJson(),
+                where: "rac_id =?", whereArgs: [rac.racId]);
           }
         }
       }

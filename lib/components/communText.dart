@@ -10,11 +10,7 @@ import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
-import 'package:mcncashier/models/SetMeal.dart';
-import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Table_order.dart';
-import 'package:mcncashier/models/SetMeal.dart';
-import 'package:mcncashier/models/Table.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
@@ -26,7 +22,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:device_info/device_info.dart';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -34,7 +29,6 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
-import 'package:mcncashier/services/tableSyncAPI.dart' as repo;
 import 'package:toast/toast.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:intl/intl.dart';
@@ -161,20 +155,20 @@ class CommunFun {
   }
 
   /*Cal Service Charge*/
-  static countServiceCharge(service_charge, subtotal) async {
-    if (service_charge == null) {
+  static countServiceCharge(serviceCharge, subtotal) async {
+    if (serviceCharge == null) {
       var branchid = await getbranchId();
       Branch branchData = await localAPI.getBranchData(branchid);
-      service_charge = branchData.serviceCharge;
-    } 
+      serviceCharge = branchData.serviceCharge;
+    }
     // else if (service_charge < 0) {
     //   var branchid = await getbranchId();
     //   Branch branchData = await localAPI.getBranchData(branchid);
     //   service_charge = branchData.serviceCharge;
     // }
 
-    if (service_charge != null) {
-      return subtotal * service_charge / 100;
+    if (serviceCharge != null) {
+      return subtotal * serviceCharge / 100;
     } else {
       return 0.00;
     }
@@ -184,9 +178,9 @@ class CommunFun {
   static getServiceChargePer() async {
     var branchID = await getbranchId();
     Branch branchData = await localAPI.getBranchData(branchID);
-    var service_charge = branchData.serviceCharge;
-    if (service_charge != null) {
-      return service_charge;
+    var serviceCharge = branchData.serviceCharge;
+    if (serviceCharge != null) {
+      return serviceCharge;
     } else {
       return 0;
     }
@@ -298,10 +292,11 @@ class CommunFun {
 
   static syncOrdersANDStore(context, isClose) async {
     await CommunFun.getsetWebOrders(context);
-    await SyncAPICalls.sendCustomerTable(context);
-    await SyncAPICalls.syncOrderstoDatabase(context);
-    await SyncAPICalls.sendInvenotryTable(context);
-    await SyncAPICalls.sendCancledOrderTable(context);
+    //await SyncAPICalls.sendCustomerTable(context);
+    //await SyncAPICalls.syncOrderstoDatabase(context);
+    //  await SyncAPICalls.sendInvenotryTable(context);
+    await SyncAPICalls.sendCustomerWineInventory(context);
+    //  await SyncAPICalls.sendCancledOrderTable(context);
     if (isClose) {
       Navigator.of(context).pop();
     }
@@ -315,11 +310,13 @@ class CommunFun {
     if (lastSync == null) {
       CommunFun.getDataTables1(context, isOpen);
     } else if (lastSync == "1") {
-      CommunFun.getDataTables2(context);
+      CommunFun.getDataTables2(context, isOpen);
     } else if (lastSync == "2") {
-      CommunFun.getDataTables3(context);
+      CommunFun.getDataTables3(context, isOpen);
     } else if (lastSync == "3") {
-      CommunFun.getDataTables4(context);
+      CommunFun.getDataTables4(context, isOpen);
+    } else if (lastSync == "4") {
+      CommunFun.getDataTables5(context, isOpen);
     } else {
       Navigator.of(context).pop();
       Navigator.pushNamed(context, Constant.PINScreen);
@@ -382,14 +379,13 @@ class CommunFun {
     var data4_1 = await SyncAPICalls.getDataServerBulk4_1(context);
     if (data4_1 != null) {
       databaseHelper.insertData4_1(data4_1["data"]);
-      CommunFun.setServerTime(null, "3");
+      CommunFun.setServerTime(null, "4");
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
     var data4_2 = await SyncAPICalls.getDataServerBulk4_2(context);
     if (data4_2 != null) {
       var result = await databaseHelper.insertData4_2(data4_2["data"]);
-      print(result);
       if (result == 1) {
         CommunFun.setServerTime(null, "4");
       } else {
@@ -402,11 +398,23 @@ class CommunFun {
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
     if (countrys != null) {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print(result);
       if (result == 1) {
-        CommunFun.setServerTime(null, "4");
+        CommunFun.setServerTime(null, "5");
       } else {
         print("Error when getting counry state city");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+
+    var wineStorageData = await SyncAPICalls.getWineStorageData(context);
+    if (wineStorageData != null) {
+      var result =
+          await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting wine storage data.");
       }
     } else {
       CommunFun.showToast(context, "something want wrong!");
@@ -483,7 +491,7 @@ class CommunFun {
     checkIn.status = "OUT";
     checkIn.timeInOut = date.toString();
     checkIn.sync = 0;
-    var result = await localAPI.userCheckInOut(checkIn);
+    await localAPI.userCheckInOut(checkIn);
     clearAfterCheckout(context);
     CommunFun.showToast(context, "User deleted from database.");
   }
@@ -496,7 +504,7 @@ class CommunFun {
     await Navigator.pushNamed(context, Constant.PINScreen);
   }
 
-  static getDataTables2(context) async {
+  static getDataTables2(context, isOpen) async {
     // start api call fron second api
     var data2_1 =
         await SyncAPICalls.getDataServerBulk2_1(context); //api call 2_1
@@ -555,16 +563,29 @@ class CommunFun {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
       print(result);
       if (result == 1) {
-        CommunFun.setServerTime(null, "4");
+        CommunFun.setServerTime(null, "5");
       } else {
         print("Error when getting counry state city");
       }
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
+    var wineStorageData = await SyncAPICalls.getWineStorageData(context);
+    if (wineStorageData != null) {
+      var result =
+          await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting wine storage data.");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    getAssetsData(context, isOpen);
   }
 
-  static getDataTables3(context) async {
+  static getDataTables3(context, isOpen) async {
     var data3 = await SyncAPICalls.getDataServerBulk3(context); // call from  3
     if (data3 != null) {
       databaseHelper.insertData3(data3["data"]);
@@ -594,16 +615,29 @@ class CommunFun {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
       print(result);
       if (result == 1) {
-        CommunFun.setServerTime(null, "4");
+        CommunFun.setServerTime(null, "5");
       } else {
         print("Error when getting counry state city");
       }
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
+    var wineStorageData = await SyncAPICalls.getWineStorageData(context);
+    if (wineStorageData != null) {
+      var result =
+          await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting wine storage data.");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    getAssetsData(context, isOpen);
   }
 
-  static getDataTables4(context) async {
+  static getDataTables4(context, isOpen) async {
     //start from tables 4 API calls
     var data4_1 =
         await SyncAPICalls.getDataServerBulk4_1(context); //api call 4_1
@@ -626,13 +660,54 @@ class CommunFun {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
       print(result);
       if (result == 1) {
-        CommunFun.setServerTime(null, "4");
+        CommunFun.setServerTime(null, "5");
       } else {
         print("Error when getting counry state city");
       }
     } else {
       CommunFun.showToast(context, "something want wrong!");
     }
+    var wineStorageData = await SyncAPICalls.getWineStorageData(context);
+    if (wineStorageData != null) {
+      var result =
+          await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting wine storage data.");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    getAssetsData(context, isOpen);
+  }
+
+  static getDataTables5(context, isOpen) async {
+    var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
+    if (countrys != null) {
+      var result = await databaseHelper.insertAddressData(countrys["data"]);
+      print(result);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting counry state city");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    var wineStorageData = await SyncAPICalls.getWineStorageData(context);
+    if (wineStorageData != null) {
+      var result =
+          await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting wine storage data.");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    getAssetsData(context, isOpen);
   }
 
   static checkDatabaseExit() async {
@@ -1100,6 +1175,7 @@ class CommunFun {
     cartdetails.discount = isEditing ? sameitem.discount : 0;
     cartdetails.remark = isEditing ? sameitem.remark : "";
     cartdetails.issetMeal = 0;
+    cartdetails.hasRacManagemant = productItem.hasRacManagemant;
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = await CommunFun.getLocalID();
@@ -1108,6 +1184,18 @@ class CommunFun {
     callback();
   }
 
+  static getCustomer() async {
+    Customer customer;
+    var customerData =
+        await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
+    if (customerData != null) {
+      var customers = json.decode(customerData);
+      customer = Customer.fromJson(customers);
+      return customer;
+    } else {
+      return customer;
+    }
+  }
 // sendTokitched(itemList) async {
 //   String ids = "";
 //   var list = [];

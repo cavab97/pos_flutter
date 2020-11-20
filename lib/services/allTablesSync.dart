@@ -6,6 +6,8 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/config.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Customer_Liquor_Inventory.dart';
+import 'package:mcncashier/models/Customer_Liquor_Inventory_Log.dart';
 import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
@@ -123,6 +125,20 @@ class SyncAPICalls {
 
   static getDataServerBulkAddressData(context) async {
     var apiurl = Configrations.country_state_city_datatable;
+    var branchid = await CommunFun.getbranchId();
+    var terminalId = await CommunFun.getTeminalKey();
+    var serverTime =
+        await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+    var stringParams = {
+      'datetime': serverTime != null ? serverTime : '',
+      'branchId': branchid,
+      'terminal_id': terminalId
+    };
+    return await APICalls.apiCall(apiurl, context, stringParams);
+  }
+
+  static getWineStorageData(context) async {
+    var apiurl = Configrations.rac_box_liquor_inventor_datatable;
     var branchid = await CommunFun.getbranchId();
     var terminalId = await CommunFun.getTeminalKey();
     var serverTime =
@@ -675,6 +691,113 @@ class SyncAPICalls {
         Customer customer = new Customer();
         customer = Customer.fromJson(customers[i]);
         localAPI.saveCustomersFromServer(customer);
+      }
+    }
+  }
+
+  static sendCustomerWineInventory(context) async {
+    try {
+      var apiurl = Configrations.update_customer_liquor_inventory_data;
+      var terminalId = await CommunFun.getTeminalKey();
+      var branchid = await CommunFun.getbranchId();
+      LocalAPI localAPI = LocalAPI();
+      List<Customer_Liquor_Inventory> custstoreData =
+          await localAPI.getCustomersWineInventory(branchid);
+      var custData = [];
+      if (custstoreData.length > 0) {
+        for (var i = 0; i < custstoreData.length; i++) {
+          Customer_Liquor_Inventory custInv = custstoreData[i];
+          List<Customer_Liquor_Inventory_Log> custLogData = await localAPI
+              .getCustomersWineInventoryLogs(branchid, custInv.appId);
+          var data = {
+            "cl_id": custInv.clId,
+            "uuid": custInv.uuid,
+            "app_id": custInv.appId,
+            "server_id": custInv.serverId,
+            "cl_customer_id": custInv.clCustomerId,
+            "cl_product_id": custInv.clProductId,
+            "cl_branch_id": custInv.clBranchId,
+            "cl_rac_id": custInv.clRacId,
+            "cl_box_id": custInv.clBoxId,
+            "type": custInv.type,
+            "cl_total_quantity": custInv.clTotalQuantity,
+            "cl_expired_on": custInv.clExpiredOn,
+            "cl_left_quantity": custInv.clLeftQuantity,
+            "status": custInv.status,
+            "updated_at": custInv.updatedAt,
+            "updated_by": custInv.updatedBy,
+            "customer_liquor_inventory_log": json.encode(custLogData)
+          };
+          custData.add(data);
+        }
+        var stringParams = {
+          'branch_id': branchid,
+          'terminal_id': terminalId,
+          'customer_inventory': json.encode(custData)
+        };
+        var res = await APICalls.apiCall(apiurl, context, stringParams);
+        if (res["status"] == Constant.STATUS200) {
+          saveCustomerWineInventory(context, res);
+        }
+      }
+    } catch (e) {
+      print(e);
+      CommunFun.showToast(context, e.message);
+    }
+  }
+
+  static saveCustomerWineInventory(context, data) async {
+    LocalAPI localAPI = LocalAPI();
+    var customerWineInv = data["data"]["customer_inventory"];
+    if (customerWineInv.length > 0) {
+      for (var i = 0; i < customerWineInv.length; i++) {
+        var custInv = customerWineInv[i];
+        Customer_Liquor_Inventory customerWineInt =
+            new Customer_Liquor_Inventory();
+        var data = {
+          customerWineInt.clId: custInv["cl_id"],
+          customerWineInt.uuid: custInv["uuid"],
+          customerWineInt.appId: custInv["app_id"],
+          customerWineInt.serverId: custInv["server_id"],
+          customerWineInt.clCustomerId: custInv["cl_customer_id"],
+          customerWineInt.clProductId: custInv["cl_product_id"],
+          customerWineInt.clBranchId: custInv["cl_branch_id"],
+          customerWineInt.clRacId: custInv["cl_rac_id"],
+          customerWineInt.clBoxId: custInv["cl_box_id"],
+          customerWineInt.type: custInv["type"],
+          customerWineInt.clTotalQuantity: custInv["cl_total_quantity"],
+          customerWineInt.clExpiredOn: custInv["cl_expired_on"],
+          customerWineInt.clLeftQuantity: custInv["cl_left_quantity"],
+          customerWineInt.status: custInv["status"],
+          customerWineInt.updatedAt: custInv["updated_at"],
+          customerWineInt.updatedBy: custInv["updated_by"],
+        };
+        var result = await localAPI.saveSuctomerWineInventory(customerWineInt);
+
+        var storLodGata = custInv["product_store_inventory_log"];
+        for (var j = 0; j < storLodGata.length; j++) {
+          var logint = storLodGata[j];
+          Customer_Liquor_Inventory_Log invLog =
+              new Customer_Liquor_Inventory_Log();
+          var logdata = {
+            invLog.liId: logint['li_id'],
+            invLog.appId: logint["app_id"],
+            invLog.clAppId: logint["cl_appId"],
+            invLog.serverId: logint["server_id"],
+            invLog.uuid: logint['uuid'],
+            invLog.clId: logint['cl_id'],
+            invLog.branchId: logint['branch_id'],
+            invLog.productId: logint['product_id'],
+            invLog.customerId: logint['customer_id'],
+            invLog.liType: logint['li_type'],
+            invLog.qty: logint['qty'],
+            invLog.qtyBeforeChange: logint['qty_before_change'],
+            invLog.qtyAfterChange: logint['qty_after_change'],
+            invLog.updatedAt: logint['updated_at'],
+            invLog.updatedBy: logint['updated_by'],
+          };
+          var result = await localAPI.saveSuctomerWineInventoryLogs(invLog);
+        }
       }
     }
   }

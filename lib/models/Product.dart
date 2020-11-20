@@ -10,6 +10,7 @@ class Product {
   double price;
   double oldPrice;
   int hasInventory;
+  int hasRacManagemant;
   int status;
   int hasSetmeal;
   String updatedAt;
@@ -30,6 +31,7 @@ class Product {
     this.price,
     this.oldPrice,
     this.hasInventory,
+    this.hasRacManagemant,
     this.status,
     this.hasSetmeal,
     this.updatedAt,
@@ -55,6 +57,7 @@ class Product {
         ? (json['old_price'] as int).toDouble()
         : json['old_price'];
     hasInventory = json['has_inventory'];
+    hasRacManagemant = json['has_rac_managemant'];
     status = json['status'];
     hasSetmeal = json['has_setmeal'];
     updatedAt = json['updated_at'];
@@ -77,6 +80,7 @@ class Product {
     data['price'] = this.price;
     data['old_price'] = this.oldPrice;
     data['has_inventory'] = this.hasInventory;
+    data["has_rac_managemant"] = this.hasRacManagemant;
     data['status'] = this.status;
     data['has_setmeal'] = this.hasSetmeal;
     data['updated_at'] = this.updatedAt;

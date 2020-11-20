@@ -15,6 +15,7 @@ class ProductDetails {
   int hasInventory;
   int status;
   int hasSetmeal;
+  int hasRacManagemant;
   String updatedAt;
   String deletedAt;
   int updatedBy;
@@ -39,6 +40,7 @@ class ProductDetails {
       this.qty,
       this.status,
       this.hasSetmeal,
+      this.hasRacManagemant,
       this.updatedAt,
       this.deletedAt,
       this.updatedBy,
@@ -68,6 +70,7 @@ class ProductDetails {
     hasInventory = json['has_inventory'];
     status = json['status'];
     hasSetmeal = json['has_setmeal'];
+    hasRacManagemant = json["has_rac_managemant"];
     qty = json['qty'] is int ? (json['qty'] as int).toDouble() : json['qty'];
     updatedAt = json['updated_at'];
     deletedAt = json['deleted_at'];
@@ -96,6 +99,7 @@ class ProductDetails {
     data['has_inventory'] = this.hasInventory;
     data['status'] = this.status;
     data['has_setmeal'] = this.hasSetmeal;
+    data["has_rac_managemant"] = this.hasRacManagemant;
     data['updated_at'] = this.updatedAt;
     data['deleted_at'] = this.deletedAt;
     data['updated_by'] = this.updatedBy;
