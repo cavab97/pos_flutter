@@ -802,18 +802,22 @@ class _DashboradPageState extends State<DashboradPage>
       setState(() {
         isScreenLoad = true;
       });
-      await CommunFun.addItemToCart(selectedProduct, cartList, allcartData, () {
-        if (selectedTable.save_order_id != null &&
-            selectedTable.save_order_id != 0) {
-          getCurrentCart();
-        } else {
-          checkidTableSelected();
-        }
-        setState(() {
-          isScreenLoad = false;
-        });
-      }, context);
+      await addTocartItem(selectedProduct);
     }
+  }
+
+  addTocartItem(selectedProduct) async {
+    await CommunFun.addItemToCart(selectedProduct, cartList, allcartData, () {
+      if (selectedTable.save_order_id != null &&
+          selectedTable.save_order_id != 0) {
+        getCurrentCart();
+      } else {
+        checkidTableSelected();
+      }
+      setState(() {
+        isScreenLoad = false;
+      });
+    }, context);
   }
 
   opneShowAddCustomerDailog() {

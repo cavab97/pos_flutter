@@ -143,26 +143,35 @@ class _WineStorageState extends State<WineStorage>
   }
 
   openInvtQtyPop(Box box) async {
-    var bqty = box.wineQty != null ? box.wineQty : 0.0;
-    if (inventoryData.length > 0) {
-      var isSelected = inventoryData
-          .firstWhere((item) => item.clBoxId == box.boxId, orElse: () => null);
-      if (isSelected != null) {
-        bqty = isSelected.clLeftQuantity;
-      }
-    }
-    await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return ChangeQtyDailog(
-              type: "cm",
-              qty: bqty,
-              onClose: (qty, remark) {
-                Navigator.of(context).pop();
-                addtoInventory(box, qty);
+    if (customer != null) {
+      var bqty = box.wineQty != null ? box.wineQty : 0.0;
+      if (inventoryData.length > 0) {
+        var isSelected = inventoryData.firstWhere(
+            (item) => item.clBoxId == box.boxId && item.clLeftQuantity > 0,
+            orElse: () => null);
+        if (isSelected != null) {
+          bqty = isSelected.clLeftQuantity;
+        }
+        if (isSelected != null) {
+          await showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) {
+                return ChangeQtyDailog(
+                    type: "cm",
+                    qty: bqty,
+                    onClose: (qty, remark) {
+                      Navigator.of(context).pop();
+                      addtoInventory(box, qty);
+                    });
               });
-        });
+        }
+      } else {
+        CommunFun.showToast(context, "Item is not available in you redeem.");
+      }
+    } else {
+      CommunFun.showToast(context, Strings.please_select_customer);
+    }
   }
 
   addtoInventory(Box box, qty) async {
@@ -174,7 +183,7 @@ class _WineStorageState extends State<WineStorage>
       var isSelected;
       if (inventoryData.length > 0) {
         isSelected = inventoryData.firstWhere(
-            (item) => item.clBoxId == box.boxId,
+            (item) => item.clBoxId == box.boxId && item.clLeftQuantity > 0,
             orElse: () => null);
       }
       if (isSelected != null) {
@@ -186,67 +195,51 @@ class _WineStorageState extends State<WineStorage>
           });
         } else {
           CommunFun.showToast(context, "Your redeem is expired.");
+          return false;
         }
       }
       User user = await CommunFun.getuserDetails();
       Customer_Liquor_Inventory inventory = new Customer_Liquor_Inventory();
-      var orderDateF;
       if (!isUpdate) {
-        var appid = await localAPI.getLastCustomerInventory();
-        if (appid != 0) {
-          inventory.appId = appid + 1;
-        } else {
-          inventory.appId = 1;
-        }
-        var now = DateTime.now();
-        var newDate = new DateTime(now.year, now.month + 1, now.day);
-        orderDateF = DateFormat('yyyy-MM-dd HH:mm:ss').format(newDate);
-        inventory.uuid = await CommunFun.getLocalID();
-        inventory.clCustomerId = customer.customerId;
-        inventory.clProductId = box.productId;
-        inventory.clBranchId = box.branchId;
-        inventory.clRacId = box.racId;
-        inventory.clBoxId = box.boxId;
-        inventory.type = box.boxFor;
-        inventory.clTotalQuantity = box.wineQty;
-        inventory.clExpiredOn = orderDateF;
-        inventory.clLeftQuantity =
-            box.wineQty != null ? (box.wineQty - qty) : 0;
-        inventory.status = 1;
-        inventory.updatedAt =
-            await CommunFun.getCurrentDateTime(DateTime.now());
-        inventory.updatedBy = user.id;
-      } else {
+        await CommunFun.showToast(
+            context, "This is not available in your redeem.");
+      } else if (isSelected.clLeftQuantity > 0) {
         inventory = isSelected;
         inventory.clLeftQuantity = isSelected.clLeftQuantity - qty;
         inventory.updatedAt =
             await CommunFun.getCurrentDateTime(DateTime.now());
         inventory.updatedBy = user.id;
-      }
-      var clid = await localAPI.insertWineInventory(inventory, isUpdate);
-      Customer_Liquor_Inventory_Log log = new Customer_Liquor_Inventory_Log();
-      var lastappid = await localAPI.getLastCustomerInventoryLog();
-      if (lastappid != 0) {
-        log.appId = lastappid + 1;
+        var clid = await localAPI.insertWineInventory(inventory, isUpdate);
+        Customer_Liquor_Inventory_Log log = new Customer_Liquor_Inventory_Log();
+        var lastappid = await localAPI.getLastCustomerInventoryLog();
+        if (lastappid != 0) {
+          log.appId = lastappid + 1;
+        } else {
+          log.appId = 1;
+        }
+        log.uuid = await CommunFun.getLocalID();
+        log.clAppId = isUpdate ? isSelected.appId : inventory.appId;
+        log.branchId = box.branchId;
+        log.productId = box.productId;
+        log.customerId = customer.customerId;
+        log.liType = box.boxFor;
+        log.qty = qty;
+        log.qtyBeforeChange = box.wineQty;
+        log.qtyAfterChange = box.wineQty != null ? (box.wineQty - qty) : 0;
+        log.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
+        log.updatedBy = user.id;
+        var lid = await localAPI.insertWineInventoryLog(log);
+        getCustomerRedeem(customer);
+        setState(() {
+          isLoading = false;
+        });
       } else {
-        log.appId = 1;
+        await CommunFun.showToast(
+            context, "You have finished you purchased item.");
+        setState(() {
+          isLoading = false;
+        });
       }
-      log.uuid = await CommunFun.getLocalID();
-      log.clAppId = isUpdate ? isSelected.appId : inventory.appId;
-      log.branchId = box.branchId;
-      log.productId = box.productId;
-      log.customerId = customer.customerId;
-      log.liType = box.boxFor;
-      log.qty = qty;
-      log.qtyBeforeChange = box.wineQty;
-      log.qtyAfterChange = box.wineQty != null ? (box.wineQty - qty) : 0;
-      log.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
-      log.updatedBy = user.id;
-      var lid = await localAPI.insertWineInventoryLog(log);
-      getCustomerRedeem(customer);
-      setState(() {
-        isLoading = false;
-      });
     } else {
       CommunFun.showToast(context, Strings.please_select_customer);
     }

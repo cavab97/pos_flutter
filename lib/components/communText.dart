@@ -292,11 +292,11 @@ class CommunFun {
 
   static syncOrdersANDStore(context, isClose) async {
     await CommunFun.getsetWebOrders(context);
-    //await SyncAPICalls.sendCustomerTable(context);
-    //await SyncAPICalls.syncOrderstoDatabase(context);
-    //  await SyncAPICalls.sendInvenotryTable(context);
+    await SyncAPICalls.sendCustomerTable(context);
+    await SyncAPICalls.syncOrderstoDatabase(context);
+    await SyncAPICalls.sendInvenotryTable(context);
     await SyncAPICalls.sendCustomerWineInventory(context);
-    //  await SyncAPICalls.sendCancledOrderTable(context);
+    await SyncAPICalls.sendCancledOrderTable(context);
     if (isClose) {
       Navigator.of(context).pop();
     }
@@ -941,6 +941,7 @@ class CommunFun {
     await getsetWebOrders(context);
     await SyncAPICalls.syncOrderstoDatabase(context);
     await SyncAPICalls.sendInvenotryTable(context);
+    await SyncAPICalls.sendCustomerWineInventory(context);
     await SyncAPICalls.sendCancledOrderTable(context);
     await Preferences.removeSinglePref(Constant.LastSync_Table);
     await Preferences.removeSinglePref(Constant.OFFSET);
