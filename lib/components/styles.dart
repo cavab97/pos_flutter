@@ -76,6 +76,15 @@ class Styles {
         fontFamily: Strings.fontFamily);
   }
 
+  static whiteCommun() {
+    return TextStyle(
+        // White text
+        color: Color(0xFFffffff),
+        fontSize: SizeConfig.safeBlockVertical * 4.1,
+        fontWeight: FontWeight.w300,
+        fontFamily: Strings.fontFamily);
+  }
+
   static whiteSmall() {
     return TextStyle(
         // White text
@@ -126,7 +135,16 @@ class Styles {
     return TextStyle(
         color: Color(0xFF000000),
         fontSize: SizeConfig.safeBlockVertical * 5,
-        fontWeight: FontWeight.w800,
+        fontWeight: FontWeight.w400,
+        fontFamily: Strings.fontFamily);
+  }
+
+  static blackExtraLarge() {
+    // Back Text
+    return TextStyle(
+        color: Color(0xFF000000),
+        fontSize: SizeConfig.safeBlockVertical * 10,
+        fontWeight: FontWeight.w400,
         fontFamily: Strings.fontFamily);
   }
 
@@ -139,8 +157,8 @@ class Styles {
   static bluesmall() {
     return TextStyle(
         color: Color(0xFF0388fc),
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
         fontFamily: Strings.fontFamily);
   }
 
@@ -149,6 +167,14 @@ class Styles {
         fontSize: SizeConfig.safeBlockVertical * 2.5,
         fontWeight: FontWeight.w700,
         color: Color(0xff100c56),
+        fontFamily: Strings.fontFamily);
+  }
+
+  static orangeDis() {
+    return TextStyle(
+        fontSize: SizeConfig.safeBlockVertical * 2.5,
+        fontWeight: FontWeight.w700,
+        color: Color(0xffff531a),
         fontFamily: Strings.fontFamily);
   }
 
@@ -180,6 +206,14 @@ class Styles {
     return TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.w600,
+        color: Color(0xffff531a),
+        fontFamily: Strings.fontFamily);
+  }
+
+  static orangesimpleSmall() {
+    return TextStyle(
+        fontSize: 10,
+        fontWeight: FontWeight.w400,
         color: Color(0xffff531a),
         fontFamily: Strings.fontFamily);
   }

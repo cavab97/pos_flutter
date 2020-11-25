@@ -49,7 +49,6 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
     Navigator.of(context).pop();
     showDialog(
         // Opning Ammount Popup
-
         barrierDismissible: false,
         context: context,
         builder: (BuildContext context) {
@@ -71,8 +70,9 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
 
   filterCustomer(val) {
     var list = customerList
-        .where(
-            (x) => x.name.toString().toLowerCase().contains(val.toLowerCase()))
+        .where((x) =>
+            x.name.toString().toLowerCase().contains(val.toLowerCase()) ||
+            x.email.toString().toLowerCase().contains(val.toLowerCase()))
         .toList();
     setState(() {
       filterList = list;
@@ -100,9 +100,26 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
             ),
           ),
           Positioned(
-            left: 18,
-            top: 18,
-            child: GestureDetector(
+            left: 15,
+            //  top: 0,
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  RaisedButton(
+                    padding:
+                        EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
+                    onPressed: () {
+                      addCustomer();
+                    },
+                    child:
+                        Text(Strings.add_new, style: Styles.whiteBoldsmall()),
+                    color: Colors.deepOrange,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                    ),
+                  )
+                ]), /*GestureDetector(
               onTap: () {
                 addCustomer();
               },
@@ -110,7 +127,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
                 Strings.add_new.toUpperCase(),
                 style: Styles.whiteSimpleSmall(),
               ),
-            ),
+            ),*/
           ),
           closeButton(context),
         ],
@@ -142,21 +159,27 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
   }
 
   Widget mainContent() {
-    return Container(
-      width: MediaQuery.of(context).size.width / 1.8,
-      height: MediaQuery.of(context).size.height / 1.8,
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).requestFocus(new FocusNode());
+        setState(() {
+          isFiltring = false;
+        });
+      },
       child: Container(
-        padding: EdgeInsets.all(0),
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        color: Colors.white,
-        child: Column(children: <Widget>[
-          customerSearchBox(),
-          SizedBox(
-            height: 10,
+        width: MediaQuery.of(context).size.width / 1.8,
+        height: MediaQuery.of(context).size.height / 1.8,
+        child: SingleChildScrollView(
+          child: Container(
+            child: Column(children: <Widget>[
+              customerSearchBox(),
+              SizedBox(
+                height: 10,
+              ),
+              customerLists()
+            ]),
           ),
-          customerLists()
-        ]),
+        ),
       ),
     );
   }
@@ -179,7 +202,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           ),
           hintText: Strings.customer_Search_Hint,
           hintStyle: TextStyle(
-              fontSize: SizeConfig.safeBlockVertical * 2.9,
+              fontSize: SizeConfig.safeBlockVertical * 2.5,
               fontWeight: FontWeight.bold,
               color: Colors.grey[400]),
           border: OutlineInputBorder(
@@ -193,12 +216,13 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           contentPadding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
           fillColor: Colors.white,
         ),
-        style: TextStyle(color: Colors.black, fontSize: 25.0),
+        style: TextStyle(color: Colors.black, fontSize: 18.0),
         onTap: () {
           setState(() {
             isFiltring = true;
           });
         },
+        onSubmitted: (e) {},
         onChanged: (e) {
           filterCustomer(e);
         },
@@ -209,6 +233,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
   Widget customerLists() {
     if (isFiltring) {
       return ListView(
+          physics: BouncingScrollPhysics(),
           shrinkWrap: true,
           children: filterList.map((customer) {
             return ListTile(
@@ -224,6 +249,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           }).toList());
     } else {
       return ListView(
+        physics: BouncingScrollPhysics(),
         shrinkWrap: true,
         children: customerList.map((customer) {
           return ListTile(

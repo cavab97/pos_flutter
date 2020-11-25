@@ -5,14 +5,18 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
 import 'package:mcncashier/helpers/LocalAPI/ShiftList.dart';
 import 'package:mcncashier/models/Order.dart';
-import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+
+import '../models/Shift.dart';
 
 class ShiftReports extends StatefulWidget {
   // PIN Enter PAGE
@@ -25,6 +29,9 @@ class ShiftReports extends StatefulWidget {
 class _ShiftReportsState extends State<ShiftReports> {
   LocalAPI localAPI = LocalAPI();
   ShiftList shiftList = new ShiftList();
+
+  PrintReceipt printKOT = PrintReceipt();
+  List<Printer> printerreceiptList = new List<Printer>();
   Shift shifittem = new Shift();
   var screenArea = 1.6;
   int _current = 0;
@@ -51,12 +58,14 @@ class _ShiftReportsState extends State<ShiftReports> {
     'Payment Summary'
   ];
   var permissions = "";
+
   @override
   void initState() {
     super.initState();
     getShiftData();
     getOrders();
     setPermissons();
+    getAllPrinter();
   }
 
   setPermissons() async {
@@ -66,12 +75,21 @@ class _ShiftReportsState extends State<ShiftReports> {
     });
   }
 
+  getAllPrinter() async {
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    setState(() {
+      printerreceiptList = printerDraft;
+    });
+  }
+
   getOrders() async {
+    OrdersList orderApi = new OrdersList();
+    var terminalid = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
-    List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
-    if (ordersList.length > 0) {
+    List<Orders> orderList = await orderApi.getOrdersList(branchid, terminalid);
+    if (orderList.length > 0) {
       setState(() {
-        orders = ordersList;
+        orders = orderList;
       });
       var grosssale = 0.00;
       var netsale = 0.00;
@@ -126,8 +144,27 @@ class _ShiftReportsState extends State<ShiftReports> {
             title: title,
             ammount: amount,
             onClose: (amount, reson) {
+              if (reson == "Other") {
+                Navigator.of(context).pop();
+                otherReasonPop(amount);
+              } else {
+                Navigator.of(context).pop();
+                insertPayinOUT(amount, reson);
+              }
+            },
+          );
+        });
+  }
+
+  otherReasonPop(amount) {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AddOtherReason(
+            onClose: (otherText) {
               Navigator.of(context).pop();
-              insertPayinOUT(amount, reson);
+              insertPayinOUT(amount, otherText);
             },
           );
         });
@@ -154,7 +191,7 @@ class _ShiftReportsState extends State<ShiftReports> {
   getpayInOutAmmount() async {
     if (shifittem.shiftId != null) {
       List<Drawerdata> result =
-          await localAPI.getPayinOutammount(shifittem.shiftId);
+          await shiftList.getPayinOutammount(shifittem.shiftId);
       print(result);
       if (result.length > 0) {
         setState(() {
@@ -244,6 +281,7 @@ class _ShiftReportsState extends State<ShiftReports> {
         ),
       ),
       body: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         child: Container(
           padding: EdgeInsets.all(20),
           child: Column(
@@ -283,6 +321,7 @@ class _ShiftReportsState extends State<ShiftReports> {
         items: imgList
             .map(
               (item) => SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
                 child: Container(
                   width: MediaQuery.of(context).size.width / screenArea,
                   child: Column(
@@ -375,6 +414,7 @@ class _ShiftReportsState extends State<ShiftReports> {
     return Container(
         height: MediaQuery.of(context).size.height / 1.8,
         child: ListView(
+          physics: BouncingScrollPhysics(),
           shrinkWrap: true,
           children: <Widget>[
             Container(
@@ -463,6 +503,7 @@ class _ShiftReportsState extends State<ShiftReports> {
     return Container(
         height: MediaQuery.of(context).size.height / 1.8,
         child: new ListView(
+          physics: BouncingScrollPhysics(),
           shrinkWrap: true,
           children: <Widget>[
             Container(
@@ -497,7 +538,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               color: Colors.grey,
               child: ListTile(
                 title: Text(
-                  "Case Deposit",
+                  "Cash Deposit",
                   style: Styles.whiteMediumBold(),
                 ),
                 trailing: Text(
@@ -579,6 +620,7 @@ class _ShiftReportsState extends State<ShiftReports> {
     return Container(
         height: MediaQuery.of(context).size.height / 1.8,
         child: ListView(
+          physics: BouncingScrollPhysics(),
           shrinkWrap: true,
           children: <Widget>[
             Container(
@@ -658,7 +700,16 @@ class _ShiftReportsState extends State<ShiftReports> {
                   child: RaisedButton(
                     padding: EdgeInsets.all(20),
                     onPressed: () {
-                      CommunFun.showToast(context, "Comming Soon");
+                      if (printerreceiptList.length > 0) {
+                        printKOT.testReceiptPrint(
+                            printerreceiptList[0].printerIp.toString(),
+                            context,
+                            "",
+                            "OpenDrawer");
+                      } else {
+                        CommunFun.showToast(
+                            context, Strings.printer_not_available);
+                      }
                     },
                     child: Text(
                       "Open Cash Drawer",
@@ -742,6 +793,83 @@ class _ShiftReportsState extends State<ShiftReports> {
           ],
         )
       ],
+    );
+  }
+}
+
+class AddOtherReason extends StatefulWidget {
+  AddOtherReason({Key key, this.onClose}) : super(key: key);
+  Function onClose;
+
+  @override
+  AddOtherReasonState createState() => AddOtherReasonState();
+}
+
+class AddOtherReasonState extends State<AddOtherReason> {
+  TextEditingController reasonController = new TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      titlePadding: EdgeInsets.all(0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(15.0),
+        ),
+      ),
+      content: Container(
+        height: MediaQuery.of(context).size.height / 3.6,
+        width: MediaQuery.of(context).size.width / 3.4,
+        child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "Reason",
+                  style: Styles.communBlack(),
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: reasonController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(width: 1, color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(width: 1, color: Colors.grey),
+                    ),
+                  ),
+                ),
+              ],
+            )),
+      ),
+      actions: <Widget>[canclebutton(context), confirmBtn(context)],
+    );
+  }
+
+  Widget confirmBtn(context) {
+    // Add button header rounded
+    return FlatButton(
+      onPressed: () {
+        widget.onClose(reasonController.text);
+      },
+      child: Text("Confirm", style: Styles.orangeSmall()),
+      textColor: Colors.white,
+    );
+  }
+
+  Widget canclebutton(context) {
+    return FlatButton(
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+      child: Text("Cancel", style: Styles.orangeSmall()),
+      textColor: Colors.white,
     );
   }
 }

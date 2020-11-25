@@ -97,7 +97,7 @@ class CloseShiftPageState extends State<CloseShiftPage> {
               ),
               SizedBox(height: 30),
               Text(
-                DateFormat('EEE, MMM d yyyy, hh:mm aaa').format(DateTime.parse(
+                DateFormat(Strings.dateFormat).format(DateTime.parse(
                     shifittem.updatedAt != null
                         ? shifittem.updatedAt
                         : DateTime.now().toString())),
@@ -106,7 +106,6 @@ class CloseShiftPageState extends State<CloseShiftPage> {
               ),
               SizedBox(height: 30),
               shiftbtn(() {
-                Navigator.of(context).pop();
                 widget.onClose();
               })
             ],

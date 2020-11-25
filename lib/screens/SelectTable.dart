@@ -2,20 +2,32 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:mcncashier/components/DrawerWidget.dart';
 import 'package:mcncashier/components/QrScanAndGenrate.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
 import 'package:mcncashier/helpers/LocalAPI/TablesList.dart';
+import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/Terminal.dart';
+import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/saveOrder.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
+import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+
+import '../components/communText.dart';
+import '../helpers/LocalAPI/OrdersList.dart';
+import '../helpers/LocalAPI/ShiftList.dart';
 
 class SelectTablePage extends StatefulWidget {
   // PIN Enter PAGE
@@ -32,16 +44,28 @@ class _SelectTablePageState extends State<SelectTablePage>
   LocalAPI localAPI = LocalAPI();
   TablesList tabList = new TablesList();
   Cartlist cartlist = new Cartlist();
+  OrdersList ordersList = new OrdersList();
+  ShiftList shiftList = new ShiftList();
   List<TablesDetails> tableList = new List<TablesDetails>();
+  PrintReceipt printKOT = PrintReceipt();
+  List<Printer> printerList = new List<Printer>();
+  List<Printer> printerreceiptList = new List<Printer>();
   var selectedTable;
   var number_of_pax;
   var orderid;
   var mergeInTable;
+  var changeInTable;
   bool isLoading = false;
   bool isMergeing = false;
+  bool isChangingTable = false;
   bool isAssigning = false;
   String qrCodeString = "";
+  bool isChanging = false;
+  bool isShiftOpen = true;
+  bool isMenuOpne = false;
+  var permissions = "";
   TabController _tabController;
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +77,40 @@ class _SelectTablePageState extends State<SelectTablePage>
       },
     );
     _tabController = new TabController(length: 2, vsync: this);
+    checkISlogin();
+    checkshift();
+    getAllPrinter();
+    setPermissons();
+  }
+
+  setPermissons() async {
+    var permission = await CommunFun.getPemission();
+    setState(() {
+      permissions = permission;
+    });
+  }
+
+  checkISlogin() async {
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    if (loginUser == null) {
+      Navigator.pushNamed(context, Constant.PINScreen);
+    }
+  }
+
+  checkshift() async {
+    /*Set terminal name for print receipt only */
+    if (Strings.terminalName.isEmpty) {
+      var terminalkey = await CommunFun.getTeminalKey();
+      Terminal terminalData = await branchapi.getTerminalDetails(terminalkey);
+      if (terminalData != null) {
+        Strings.terminalName = terminalData.terminalName;
+      }
+    }
+
+    var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
+    setState(() {
+      isShiftOpen = isOpen != null && isOpen == "true" ? true : false;
+    });
   }
 
   getTables() async {
@@ -68,52 +126,57 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   viewOrder() async {
+    // view order data if already order in table
     var tableid = selectedTable.tableId;
     List<Table_order> order = await tabList.getTableOrders(tableid);
     await Preferences.setStringToSF(Constant.TABLE_DATA, json.encode(order[0]));
-    Navigator.of(context).pop();
+    setState(() {
+      isMenuOpne = false;
+    });
     Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
   ontableTap(table) {
     setState(() {
       selectedTable = table;
+      isMenuOpne = true;
     });
-    if (isAssigning) {
-      opnPaxDailog();
-    } else {
-      paxController.text =
-          table.numberofpax != null ? table.numberofpax.toString() : "";
-      openSelectTablePop();
-    }
+    paxController.text =
+        table.numberofpax != null ? table.numberofpax.toString() : "";
   }
 
-  mergeTabledata(table) async {
+  mergeTabledata(TablesDetails table) async {
+    setState(() {
+      isLoading = true;
+    });
+    // Merge table
+    TablesDetails table1 = mergeInTable;
+    TablesDetails table2 = table;
     Table_order table_order = new Table_order();
-    var pax = mergeInTable.numberofpax != null ? mergeInTable.numberofpax : 0;
-    pax += table.numberofpax != null ? table.numberofpax : 0;
-    table_order.table_id = mergeInTable.tableId;
-    table_order.save_order_id =
-        mergeInTable.saveorderid != 0 ? mergeInTable.saveorderid : null;
-    table_order.is_merge_table = "1";
-    table_order.merged_table_id = table.tableId;
+    var pax = table1.numberofpax != null ? table1.numberofpax : 0;
+    pax += table2.numberofpax != null ? table2.numberofpax : 0;
     table_order.number_of_pax = pax;
-    var result = await tabList.insertTableOrder(context, table_order);
+    table_order.table_id = table1.tableId;
+    table_order.save_order_id =
+        table1.saveorderid != 0 ? table1.saveorderid : 0;
+    table_order.is_merge_table = "1";
+    table_order.merged_table_id = table2.tableId;
+    var result = await tabList.mergeTableOrder(context, table_order);
     setState(() {
       isMergeing = false;
       mergeInTable = null;
+      isLoading = false;
     });
-    CommunFun.showToast(context, "Table merged");
+    CommunFun.showToast(context, Strings.table_mearged_msg);
     getTables();
   }
 
   mergeTable(table) {
     setState(() {
+      isMenuOpne = false;
       isMergeing = true;
       mergeInTable = table;
     });
-    Navigator.of(context).pop();
-    //opnPaxDailog();
   }
 
   selectTableForNewOrder() async {
@@ -122,17 +185,29 @@ class _SelectTablePageState extends State<SelectTablePage>
       table_order.table_id = selectedTable.tableId;
       table_order.number_of_pax = int.parse(paxController.text);
       table_order.save_order_id = selectedTable.saveorderid;
+      table_order.service_charge =
+          CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
       await tabList.insertTableOrder(context, table_order);
       await Preferences.setStringToSF(
           Constant.TABLE_DATA, json.encode(table_order));
+      paxController.text = "";
       Navigator.of(context).pop();
-      Navigator.pushNamed(context, Constant.DashboardScreen);
+      if (!isChanging) {
+        setState(() {
+          isMenuOpne = false;
+        });
+        Navigator.pushNamed(context, Constant.DashboardScreen);
+      }
+      getTables();
     } else {
-      CommunFun.showToast(context, "Please enter pax minimum table capcity.");
+      CommunFun.showToast(context, Strings.table_pax_msg);
     }
   }
 
   assignTabletoOrder() async {
+    setState(() {
+      isLoading = true;
+    });
     if (int.parse(paxController.text) <= selectedTable.tableCapacity) {
       SaveOrder orderData = new SaveOrder();
       orderData.orderName = selectedTable.tableName;
@@ -142,6 +217,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       Table_order tableorder = new Table_order();
       tableorder.table_id = selectedTable.tableId;
       tableorder.number_of_pax = int.parse(paxController.text);
+      tableorder.service_charge = selectedTable.tableServiceCharge;
       var saveorderid =
           await cartlist.addSaveOrder(orderData, selectedTable.tableId);
       tableorder.save_order_id = saveorderid;
@@ -149,18 +225,8 @@ class _SelectTablePageState extends State<SelectTablePage>
       Navigator.of(context).pop();
       Navigator.pushNamed(context, Constant.WebOrderPages);
     } else {
-      CommunFun.showToast(context, "Please enter pax minimum table capcity.");
+      CommunFun.showToast(context, Strings.table_pax_msg);
     }
-  }
-
-  openSelectTablePop() {
-    showDialog(
-      context: context,
-      // barrierDismissible: false,
-      builder: (BuildContext context) {
-        return alertDailog(context);
-      },
-    );
   }
 
   opnPaxDailog() {
@@ -173,95 +239,483 @@ class _SelectTablePageState extends State<SelectTablePage>
     );
   }
 
+  opneQrcodePop() async {
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return QRCodesImagePop(
+            ip: selectedTable.tableQr,
+            onClose: () {},
+          );
+        });
+  }
+
+  cancleTableOrder() async {
+    CommonUtils.showAlertDialog(context, () {
+      Navigator.of(context).pop();
+    }, () async {
+      Navigator.of(context).pop();
+      cancleTOrder();
+    }, Strings.warning, Strings.cancle_order_msg, Strings.yes, Strings.no,
+        true);
+  }
+
+  cancleTOrder() async {
+    setState(() {
+      isLoading = true;
+    });
+    if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
+      List<SaveOrder> cartID =
+          await localAPI.gettableCartID(selectedTable.saveorderid);
+      if (cartID.length > 0) {
+        await OrdersList.removeCartItem(
+            cartID[0].cartId, selectedTable.tableId);
+      }
+    } else {
+      await tabList.deleteTableOrder(selectedTable.tableId);
+    }
+    await Preferences.removeSinglePref(Constant.TABLE_DATA);
+    setState(() {
+      isLoading = false;
+      isMenuOpne = false;
+    });
+    await getTables();
+  }
+
+  changeTablePop() {
+    CommonUtils.showAlertDialog(context, () {
+      Navigator.of(context).pop();
+    }, () {
+      Navigator.of(context).pop();
+      setState(() {
+        isMenuOpne = false;
+        isChangingTable = true;
+      });
+    }, Strings.warning, Strings.change_table_msg, Strings.yes, Strings.no,
+        true);
+  }
+
+  changeTableToOtherTable(table) async {
+    var cartid;
+    if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
+      List<SaveOrder> cartID =
+          await localAPI.gettableCartID(selectedTable.saveorderid);
+      if (cartID.length > 0) {
+        cartid = cartID[0].cartId;
+      }
+    }
+    var tables = await tabList.changeTable(
+        selectedTable.tableId, table.tableId, cartid);
+    print(tables);
+    setState(() {
+      changeInTable = null;
+      isChangingTable = false;
+    });
+    var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+    if (tableid != null) {
+      var tableddata = json.decode(tableid);
+      Table_order tabledata = Table_order.fromJson(tableddata);
+      if (tabledata.table_id == selectedTable.tableId) {
+        tabledata.table_id = table.tableId;
+        tabledata.service_charge = table.tableServiceCharge;
+
+        await Preferences.setStringToSF(
+            Constant.TABLE_DATA, jsonEncode(tabledata));
+      }
+    }
+    await getTables();
+  }
+
+  changePax() {
+    setState(() {
+      isChanging = true;
+    });
+    opnPaxDailog();
+  }
+
+  addNewOrder() {
+    setState(() {
+      isChanging = false;
+    });
+    opnPaxDailog();
+  }
+
+  void selectOption(choice) {
+    // Causes the app to rebuild with the new _selectedChoice.
+  }
+
+  openDrawer() {
+    scaffoldKey.currentState.openDrawer();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Map arguments = ModalRoute.of(context).settings.arguments as Map;
+    Future<bool> _willPopCallback() async {
+      return false;
+    }
 
+    final Map arguments = ModalRoute.of(context).settings.arguments as Map;
+    SizeConfig().init(context);
     setState(() {
       isAssigning = arguments['isAssign'];
       orderid = arguments['orderID'];
     });
-    return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-        leading: new IconButton(
-          icon: new Icon(
-            Icons.arrow_back,
-            size: 30.0,
+    return WillPopScope(
+      child: Scaffold(
+        key: scaffoldKey,
+        drawer: DrawerWid(),
+        appBar: AppBar(
+          centerTitle: false,
+          leading: IconButton(
+              onPressed: () {
+                scaffoldKey.currentState.openDrawer();
+              },
+              icon: Icon(
+                Icons.dehaze,
+                color: Colors.white,
+                size: SizeConfig.safeBlockVertical * 5,
+              )),
+          iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: SizedBox(
+            height: SizeConfig.safeBlockVertical * 5,
+            child: Image.asset(Strings.asset_headerLogo,
+                fit: BoxFit.contain, gaplessPlayback: true),
           ),
-          onPressed: () {
-            if (isMergeing) {
-              setState(() {
-                isMergeing = false;
-                mergeInTable = null;
-              });
-            } else {
-              Navigator.of(context).pop();
-            }
-          },
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorSize: TabBarIndicatorSize.tab,
+            unselectedLabelColor: Colors.white,
+            unselectedLabelStyle: Styles.whiteBoldsmall(),
+            indicator: BoxDecoration(color: Colors.deepOrange),
+            labelColor: Colors.white,
+            labelStyle: Styles.whiteBoldsmall(),
+            tabs: [
+              Tab(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Text(
+                    Strings.dine_in,
+                  ),
+                ),
+              ),
+              Tab(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Text(
+                    Strings.take_away,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Text(isMergeing ? Strings.merge_table : Strings.select_table,
-            style: Styles.whiteMediumBold()),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorSize: TabBarIndicatorSize.tab,
-          unselectedLabelColor: Colors.white,
-          unselectedLabelStyle: Styles.whiteBoldsmall(),
-          indicator: BoxDecoration(color: Colors.deepOrange),
-          labelColor: Colors.white,
-          labelStyle: Styles.whiteBoldsmall(),
-          tabs: [
-            Tab(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Text(
-                  "Dine In",
-                ),
-              ),
-            ),
-            Tab(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Text(
-                  "Take Away",
-                ),
-              ),
-            ),
+        body: Stack(
+          children: <Widget>[
+            new GestureDetector(
+                onTap: () {
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                },
+                child: SafeArea(
+                  child: Stack(children: <Widget>[
+                    TabBarView(
+                      controller: _tabController,
+                      physics: AlwaysScrollableScrollPhysics(),
+                      children: [
+                        Container(
+                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Container(
+                                  padding: EdgeInsets.all(10),
+                                  height: MediaQuery.of(context).size.height,
+                                  width: isMenuOpne
+                                      ? MediaQuery.of(context).size.width / 1.5
+                                      : MediaQuery.of(context).size.width,
+                                  child: tablesListwidget(1)),
+                              menuItemDiv()
+                            ],
+                          ),
+                        ),
+                        Container(
+                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Container(
+                                  padding: EdgeInsets.all(10),
+                                  height: MediaQuery.of(context).size.height,
+                                  width: isMenuOpne
+                                      ? MediaQuery.of(context).size.width / 1.5
+                                      : MediaQuery.of(context).size.width,
+                                  child: tablesListwidget(2)),
+                              menuItemDiv()
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  ]),
+                )),
+            !isShiftOpen
+                ? Positioned(
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: Container(
+                        color: Colors.white70.withOpacity(0.9),
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              Strings.shiftTextLable,
+                              style: TextStyle(
+                                  fontSize: SizeConfig.safeBlockVertical * 4),
+                            ),
+                            SizedBox(height: 15),
+                            Text(
+                              Strings.closed,
+                              style: TextStyle(
+                                  fontSize: SizeConfig.safeBlockVertical * 6,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 30),
+                            shiftbtn(() {
+                              openOpningAmmountPop(
+                                  Strings.title_opening_amount);
+                            })
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                : SizedBox()
           ],
         ),
       ),
-      body: new GestureDetector(
-          onTap: () {
-            FocusScope.of(context).requestFocus(new FocusNode());
-          },
-          child: SafeArea(
-            
-            child: TabBarView(
-              controller: _tabController,
-              physics: AlwaysScrollableScrollPhysics(),
-              children: [
-                Container(
-                  padding: EdgeInsets.all(10),
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    child: tablesListwidget(1)),
-                Container(
-                  padding: EdgeInsets.all(10),
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    child: tablesListwidget(2)),
-              ],
+      onWillPop: _willPopCallback,
+    );
+  }
+
+  sendOpenShft(ammount) async {
+    setState(() {
+      isShiftOpen = true;
+    });
+    Preferences.setStringToSF(Constant.IS_SHIFT_OPEN, isShiftOpen.toString());
+    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+    var terminalId = await CommunFun.getTeminalKey();
+    var branchid = await CommunFun.getbranchId();
+    User userdata = await CommunFun.getuserDetails();
+    Shift shift = new Shift();
+    shift.appId = int.parse(terminalId);
+    shift.terminalId = int.parse(terminalId);
+    shift.branchId = int.parse(branchid);
+    shift.userId = userdata.id;
+    shift.uuid = await CommunFun.getLocalID();
+    shift.status = 1;
+    if (shiftid == null) {
+      shift.startAmount = int.parse(ammount);
+    } else {
+      shift.shiftId = int.parse(shiftid);
+      shift.endAmount = int.parse(ammount);
+    }
+    shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    shift.updatedBy = userdata.id;
+    var result = await shiftList.insertShift(context, shift);
+    if (shiftid == null) {
+      await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
+    } else {
+      await Preferences.removeSinglePref(Constant.DASH_SHIFT);
+      await Preferences.removeSinglePref(Constant.IS_SHIFT_OPEN);
+      await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
+      checkshift();
+    }
+  }
+
+  openOpningAmmountPop(isopning) async {
+    await showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return OpeningAmmountPage(
+              ammountext: isopning,
+              onEnter: (ammountext) {
+                sendOpenShft(ammountext);
+                if (isopning == Strings.title_opening_amount) {
+                  if (printerreceiptList.length > 0) {
+                    printKOT.testReceiptPrint(
+                        printerreceiptList[0].printerIp.toString(),
+                        context,
+                        "",
+                        Strings.openDrawer);
+                  } else {
+                    CommunFun.showToast(context, Strings.printer_not_available);
+                  }
+                }
+              });
+        });
+  }
+
+  getAllPrinter() async {
+    List<Printer> printer = await localAPI.getAllPrinterForKOT();
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    setState(() {
+      printerList = printer;
+      printerreceiptList = printerDraft;
+    });
+  }
+
+  Widget openShiftButton(context) {
+    // Payment button
+    return Positioned(
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+      child: Center(
+        child: Container(
+          color: Colors.black87,
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                Strings.shiftTextLable,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: SizeConfig.safeBlockVertical * 4),
+              ),
+              SizedBox(height: 25),
+              Text(
+                Strings.closed,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: SizeConfig.safeBlockVertical * 6,
+                    fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 40),
+              shiftbtn(() {
+                openOpningAmmountPop(Strings.title_opening_amount);
+              })
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget shiftbtn(Function onPress) {
+    return RaisedButton(
+      padding: EdgeInsets.only(top: 15, left: 30, right: 30, bottom: 15),
+      onPressed: onPress,
+      child: Text(
+        Strings.open_shift,
+        style: TextStyle(
+            color: Colors.deepOrange,
+            fontSize: SizeConfig.safeBlockVertical * 4),
+      ),
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+            width: 1, style: BorderStyle.solid, color: Colors.deepOrange),
+        borderRadius: BorderRadius.circular(10.0),
+      ),
+    );
+  }
+
+  Widget menuItemDiv() {
+    return isMenuOpne
+        ? Container(
+            margin: EdgeInsets.all(10),
+            padding: EdgeInsets.all(10),
+            width: MediaQuery.of(context).size.width / 3.5,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
             ),
-          )),
+            child: optionsList(context))
+        : SizedBox();
+  }
+
+  Widget optionsList(context) {
+    return ListView(
+      physics: BouncingScrollPhysics(),
+      shrinkWrap: true,
+      children: [
+        selectedTable != null
+            ? Text(
+                selectedTable.numberofpax == null
+                    ? selectedTable.tableName
+                    : selectedTable.tableName +
+                        " : " +
+                        selectedTable.numberofpax.toString(),
+                textAlign: TextAlign.center,
+                style: Styles.whiteMediumBold(),
+              )
+            : SizedBox(),
+        selectedTable.numberofpax == null
+            ? neworder_button(
+                Icons.supervised_user_circle, Strings.new_order, context, () {
+                addNewOrder();
+              })
+            : SizedBox(),
+        selectedTable.numberofpax != null
+            ? neworder_button(
+                Icons.supervised_user_circle, Strings.change_pax, context, () {
+                changePax();
+              })
+            : SizedBox(),
+        selectedTable.numberofpax != null
+            ? neworder_button(Icons.remove_red_eye, Strings.view_order, context,
+                () {
+                viewOrder();
+              })
+            : SizedBox(),
+        selectedTable.numberofpax != null
+            ? neworder_button(
+                Icons.change_history, Strings.change_table, context, () {
+                changeTablePop();
+              })
+            : SizedBox(),
+        selectedTable.numberofpax != null
+            ? neworder_button(Icons.cancel, Strings.cancle_order, context, () {
+                if (permissions.contains(Constant.DELETE_ORDER)) {
+                  cancleTableOrder();
+                } else {
+                  CommonUtils.openPermissionPop(context, Constant.DELETE_ORDER,
+                      () {
+                    cancleTableOrder();
+                  });
+                }
+              })
+            : SizedBox(),
+        neworder_button(Icons.call_merge, Strings.merge_order, context, () {
+          mergeTable(selectedTable);
+        }),
+        selectedTable.tableQr != null
+            ? neworder_button(Icons.cancel, Strings.scanQRcode, context, () {
+                opneQrcodePop();
+              })
+            : SizedBox(),
+      ],
     );
   }
 
@@ -293,79 +747,53 @@ class _SelectTablePageState extends State<SelectTablePage>
     );
   }
 
-  Widget alertDailog(context) {
-    return AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0))),
-        content: Builder(
-          builder: (context) {
-            return Container(
-              height: MediaQuery.of(context).size.height / 4,
-              width: MediaQuery.of(context).size.width / 4,
-              child: Center(
-                child: Stack(
-                  children: <Widget>[
-                    ListView(
-                      shrinkWrap: true,
-                      children: <Widget>[
-                        selectedTable.numberofpax == null
-                            ? Column(
-                                children: <Widget>[
-                                  ListTile(
-                                    title: neworder_button(context),
-                                  ),
-                                  Divider(),
-                                ],
-                              )
-                            : SizedBox(),
-                        selectedTable.numberofpax != null
-                            ? Column(
-                                children: <Widget>[
-                                  ListTile(
-                                    title: viewOrderBtn(context),
-                                  ),
-                                  Divider(),
-                                ],
-                              )
-                            : SizedBox(),
-                        ListTile(
-                          onTap: () {
-                            mergeTable(selectedTable);
-                          },
-                          title: Text(
-                            Strings.merge_order,
-                            textAlign: TextAlign.center,
-                            style: Styles.bluesmall(),
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ));
-  }
-
-  Widget neworder_button(context) {
+  Widget changeTable(context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).pop();
-        showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext context) {
-              return QRCodesImagePop(
-                ip: qrCodeString,
-                onClose: () {
-                  opnPaxDailog();
-                },
-              );
-            });
-        // opnPaxDailog();
+        changeTablePop();
       },
-      child: Text(Strings.new_order,
+      child: Text(Strings.change_table,
+          textAlign: TextAlign.center, style: Styles.bluesmall()),
+    );
+  }
+
+  Widget neworder_button(icon, name, context, onclick) {
+    return new OutlineButton(
+        padding: EdgeInsets.all(10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Icon(icon, color: Colors.white),
+            SizedBox(width: 20),
+            Text(name,
+                textAlign: TextAlign.center, style: Styles.whiteSimpleSmall())
+          ],
+        ),
+        borderSide:
+            BorderSide(color: Colors.black, width: 1, style: BorderStyle.solid),
+        onPressed: onclick,
+        shape: new RoundedRectangleBorder(
+            side: BorderSide(
+                color: Colors.black, width: 1, style: BorderStyle.solid),
+            borderRadius: new BorderRadius.circular(0.0)));
+  }
+
+  Widget changePaxbtn(context) {
+    return GestureDetector(
+      onTap: () {
+        changePax();
+      },
+      child: Text(Strings.change_pax,
+          textAlign: TextAlign.center, style: Styles.bluesmall()),
+    );
+  }
+
+  Widget cancleOrder(context) {
+    return GestureDetector(
+      onTap: () {
+        cancleTableOrder();
+      },
+      child: Text(Strings.cancle_order,
           textAlign: TextAlign.center, style: Styles.bluesmall()),
     );
   }
@@ -426,7 +854,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
       onPressed: _onPress,
       child: Text(
-        Strings.enterPax,
+        isChanging ? Strings.change_pax : Strings.enterPax,
         style: TextStyle(
             color: Colors.white, fontSize: SizeConfig.safeBlockVertical * 4),
       ),
@@ -461,7 +889,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(Strings.enterPax,
+                  Text(isChanging ? Strings.change_pax : Strings.enterPax,
                       style: TextStyle(
                           fontSize: SizeConfig.safeBlockVertical * 3,
                           color: Colors.white)),
@@ -483,6 +911,7 @@ class _SelectTablePageState extends State<SelectTablePage>
               width: MediaQuery.of(context).size.width / 3,
               child: Center(
                 child: SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
                   child: Column(
                     children: <Widget>[
                       paxTextInput(),
@@ -510,7 +939,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   Widget tablesListwidget(type) {
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2.4;
-    final double itemWidth = size.width / 4.2;
+    final double itemWidth = size.width / 4.5;
     if (isAssigning) {
       var list = tableList
           .where((x) => x.numberofpax == 0 || x.numberofpax == null)
@@ -518,6 +947,16 @@ class _SelectTablePageState extends State<SelectTablePage>
       setState(() {
         tableList = list;
       });
+    }
+    if (isMergeing || isChangingTable) {
+      var list =
+          tableList.where((x) => x.tableId != selectedTable.tableId).toList();
+      setState(() {
+        tableList = list;
+      });
+      if (tableList.length == 0) {
+        CommunFun.showToast(context, Strings.table_not_avalilable);
+      }
     }
     List<TablesDetails> newtableList = new List<TablesDetails>();
     if (type == 1) {
@@ -530,19 +969,27 @@ class _SelectTablePageState extends State<SelectTablePage>
       newtableList = takeAway;
     }
     return GridView.count(
+      physics: BouncingScrollPhysics(),
       shrinkWrap: true,
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
       childAspectRatio: (itemWidth / itemHeight),
-      crossAxisCount: 6,
+      crossAxisCount: isMenuOpne ? 4 : 6,
       children: newtableList.map((table) {
         return InkWell(
-          borderRadius: BorderRadius.all(Radius.circular(30.0)),
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
           onTap: () {
             if (isMergeing) {
               if (table.merged_table_id == null) {
                 mergeTabledata(table);
               } else {
-                CommunFun.showToast(
-                    context, "Table already merged with other table");
+                CommunFun.showToast(context, Strings.table_already_merged);
+              }
+            } else if (isChangingTable) {
+              if (table.saveorderid == 0) {
+                changeTableToOtherTable(table);
+              } else {
+                CommunFun.showToast(context, Strings.table_already_occupied);
               }
             } else {
               setState(() {
@@ -564,8 +1011,8 @@ class _SelectTablePageState extends State<SelectTablePage>
                     decoration: new BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(20.0),
-                            topRight: Radius.circular(20.0))),
+                            topLeft: Radius.circular(8.0),
+                            topRight: Radius.circular(8.0))),
                     width: MediaQuery.of(context).size.width,
                     height: itemHeight / 2,
                     child: Column(
@@ -593,8 +1040,8 @@ class _SelectTablePageState extends State<SelectTablePage>
                           ? Colors.deepOrange
                           : Colors.grey[600],
                       borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(20.0),
-                          bottomRight: Radius.circular(20.0))),
+                          bottomLeft: Radius.circular(8.0),
+                          bottomRight: Radius.circular(8.0))),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -620,8 +1067,8 @@ class _SelectTablePageState extends State<SelectTablePage>
                     left: 10,
                     child: Text(
                         table.numberofpax != null
-                            ? Strings.orders + " 1"
-                            : Strings.orders + "0",
+                            ? Strings.orders + " 1 "
+                            : Strings.orders + " 0 ",
                         style: Styles.blackMediumBold()))
               ],
             ),

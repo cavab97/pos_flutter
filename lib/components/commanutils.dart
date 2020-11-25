@@ -3,13 +3,21 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/screens/OpningAmountPop.dart';
+import 'package:mcncashier/screens/PermissionPop.dart';
 
 class CommonUtils {
   /*load image from base64*/
   static Image imageFromBase64String(String base64) {
     if (base64 != null) {
-      return Image.memory(base64Decode(base64),
-          fit: BoxFit.cover, gaplessPlayback: true);
+      if (base64.isNotEmpty) {
+        var strImage = base64;
+        if (base64.contains("base64,")) {
+          strImage = base64.split("base64,")[1];
+        }
+        return Image.memory(base64Decode(strImage),
+            fit: BoxFit.cover, gaplessPlayback: true);
+      }
     }
   }
 
@@ -65,6 +73,29 @@ class CommonUtils {
     );
   }
 
-  // flutter defined function
+  static openPermissionPop(context, permissionFor, callback) {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return OpenPermissionPop(
+              perFor: permissionFor,
+              onEnter: () {
+                callback();
+              });
+        });
+  }
 
+  static openOpningAmmountPop(context, isopning, callback) {
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return OpeningAmmountPage(
+              ammountext: isopning,
+              onEnter: (ammountext) {
+                callback(ammountext);
+              });
+        });
+  }
 }

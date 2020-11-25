@@ -1,50 +1,44 @@
-class Payments {
-  int paymentId;
+class Rac {
+  int racId;
   String uuid;
+  int branchId;
   String name;
   String slug;
   int status;
-  int isParent;
   String updatedAt;
   int updatedBy;
-  String base64;
 
-  Payments(
-      {this.paymentId,
+  Rac(
+      {this.racId,
       this.uuid,
+      this.branchId,
       this.name,
       this.slug,
       this.status,
-      this.isParent,
       this.updatedAt,
-      this.updatedBy,
-      this.base64});
+      this.updatedBy});
 
-  Payments.fromJson(Map<String, dynamic> json) {
-    paymentId = json['payment_id'];
+  Rac.fromJson(Map<String, dynamic> json) {
+    racId = json['rac_id'];
     uuid = json['uuid'];
+    branchId = json['branch_id'];
     name = json['name'];
     slug = json['slug'];
     status = json['status'];
-    isParent = json['is_parent'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
-    base64 = json['base64'] != null ? json['base64'] : "";
-
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['payment_id'] = this.paymentId;
+    data['rac_id'] = this.racId;
     data['uuid'] = this.uuid;
+    data['branch_id'] = this.branchId;
     data['name'] = this.name;
     data['slug'] = this.slug;
     data['status'] = this.status;
-    data['is_parent'] = this.isParent;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;
-    data['base64'] = this.base64;
-
     return data;
   }
 }

@@ -10,6 +10,7 @@ class Tables {
   String updatedAt;
   int availableStatus;
   int updatedBy;
+  double tableServiceCharge;
   String deletedAt;
   int deletedBy;
 
@@ -25,6 +26,7 @@ class Tables {
       this.updatedAt,
       this.availableStatus,
       this.updatedBy,
+      this.tableServiceCharge,
       this.deletedAt,
       this.deletedBy});
 
@@ -37,6 +39,9 @@ class Tables {
     tableQr = json['table_qr'];
     tableCapacity = json['table_capacity'];
     status = json['status'];
+    tableServiceCharge = json["table_service_charge"] is int
+        ? (json['table_service_charge'] as int).toDouble()
+        : json["table_service_charge"];
     availableStatus = json["available_status"];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
@@ -55,6 +60,7 @@ class Tables {
     data['table_capacity'] = this.tableCapacity;
     data['status'] = this.status;
     data["available_status"] = this.availableStatus;
+    data["table_service_charge"] = this.tableServiceCharge;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;
     data['deleted_at'] = this.deletedAt;

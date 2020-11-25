@@ -28,7 +28,6 @@ class CreateTables {
         "rp_module_id INTEGER," +
         "rp_updated_at TEXT," +
         "rp_updated_by INTEGER);");
-
     // user  table
 
     datatables = db.execute("CREATE TABLE users (" +
@@ -77,6 +76,70 @@ class CreateTables {
         "updated_by INTEGER" +
         ")");
 
+    datatables = db.execute("CREATE TABLE customer_liquor_inventory(" +
+        "cl_id INTEGER," +
+        "uuid TEXT," +
+        "app_id INTEGER," +
+        "cl_customer_id INTEGER," +
+        "cl_product_id INTEGER," +
+        "cl_branch_id INTEGER," +
+        "cl_rac_id INTEGER," +
+        "cl_box_id INTEGER," +
+        "type INTEGER," +
+        "server_id INTEGER," +
+        "cl_total_quantity REAL," +
+        "cl_expired_on TEXT," +
+        "cl_left_quantity REAL," +
+        "status NUMERIC," +
+        "updated_at TEXT," +
+        "updated_by INTEGER" +
+        ")");
+
+    datatables = db.execute("CREATE TABLE customer_liquor_inventory_log(" +
+        "li_id INTEGER," +
+        "app_id INTEGER," +
+        "server_id INTEGER," +
+        "uuid TEXT," +
+        "cl_appId INTEGER," +
+        "cl_id INTEGER," +
+        "branch_id INTEGER," +
+        "product_id INTEGER," +
+        "customer_id INTEGER," +
+        "li_type INTEGER ," +
+        "qty REAL," +
+        "qty_before_change REAL," +
+        "qty_after_change REAL," +
+        "updated_at TEXT," +
+        "updated_by INTEGER" +
+        ")");
+
+    datatables = db.execute("CREATE TABLE box(" +
+        "box_id INTEGER PRIMARY KEY," +
+        "uuid TEXT," +
+        "branch_id INTEGER," +
+        "rac_id INTEGER," +
+        "product_id INTEGER," +
+        "name TEXT," +
+        "slug TEXT," +
+        "box_for INTEGER," +
+        "wine_qty REAL," +
+        "box_limit INTEGER," +
+        "status NUMERIC," +
+        "updated_at	TEXT," +
+        "updated_by	INTEGER" +
+        ")");
+
+    datatables = db.execute("CREATE TABLE rac(" +
+        "rac_id INTEGER PRIMARY KEY," +
+        "uuid TEXT," +
+        "branch_id INTEGER," +
+        "name TEXT," +
+        "slug TEXT," +
+        "status NUMERIC," +
+        "updated_at	TEXT," +
+        "updated_by	INTEGER" +
+        ")");
+
     // user_permission table
     datatables = db.execute("CREATE TABLE user_permission(" +
         "up_id INTEGER PRIMARY KEY," +
@@ -102,6 +165,7 @@ class CreateTables {
         "invoice_start TEXT," +
         "order_prefix TEXT," +
         "branch_banner TEXT," +
+        "service_charge REAL," +
         "latitude	TEXT," +
         "longitude	TEXT," +
         "status	INTEGER," +
@@ -122,6 +186,7 @@ class CreateTables {
         "parent_id INTEGER," +
         "is_setmeal  INTEGER," + //(0 For No, 1 For Yes)
         "is_for_web INTEGER," +
+        "has_rac_managemant INTEGER," +
         "status INTEGER," +
         "updated_at TEXT," +
         "updated_by INTEGER," +
@@ -188,6 +253,7 @@ class CreateTables {
     datatables = db.execute("CREATE TABLE product(" +
         "product_id INTEGER PRIMARY KEY," +
         "name TEXT," +
+        "name_2 TEXT," +
         "uuid TEXT," +
         "description TEXT," +
         "sku TEXT," +
@@ -196,7 +262,9 @@ class CreateTables {
         "price REAL," +
         "old_price REAL," +
         "has_inventory INTEGER," +
+        "has_rac_managemant INTEGER," +
         "status INTEGER," +
+        "has_setmeal INTEGER," +
         "updated_at TEXT," +
         "updated_by INTEGER," +
         "deleted_at TEXT," +
@@ -275,6 +343,7 @@ class CreateTables {
         "branch_id	INTEGER," +
         "qty	REAL," +
         "rac_id INTEGER," +
+        "server_id INTEGER," +
         "box_id INTEGER," +
         "warningStockLevel	INTEGER," +
         "status	INTEGER," +
@@ -291,6 +360,7 @@ class CreateTables {
         "product_id	INTEGER," +
         "employe_id	INTEGER," +
         "il_type	INTEGER," +
+        "server_id INTEGER," +
         "qty	REAL," +
         "qty_before_change	REAL," +
         "qty_after_change	REAL," +
@@ -330,7 +400,9 @@ class CreateTables {
         "payment_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "name	TEXT," +
+        "slug	TEXT," +
         "status	INTEGER," +
+        "is_parent	INTEGER," +
         "updated_at	INTEGER," +
         "updated_by	INTEGER" +
         ")");
@@ -345,6 +417,7 @@ class CreateTables {
         "table_qr	TEXT," +
         "table_capacity	INTEGER," +
         "status	INTEGER," +
+        "table_service_charge REAL," +
         "available_status INTEGER," +
         "updated_at	TEXT," +
         "updated_by	INTEGER," +
@@ -378,13 +451,14 @@ class CreateTables {
         "uuid TEXT," +
         "voucher_id INTEGER," +
         "order_id INTEGER," +
+        "app_order_id INTEGER," +
         "user_id INTEGER," +
         "amount REAL," +
         "created_at TEXT" +
         ")");
 
     // TABLE voucher
-    datatables = db.execute("CREATE TABLE voucher (" +
+    datatables = db.execute("CREATE TABLE voucher(" +
         "voucher_id	INTEGER PRIMARY KEY," +
         "uuid	TEXT," +
         "voucher_name	TEXT," +
@@ -425,6 +499,8 @@ class CreateTables {
         "voucher_detail TEXT," +
         "voucher_amount REAL," +
         "sub_total REAL," +
+        "service_charge_percent REAL," +
+        "service_charge REAL," +
         "sub_total_after_discount REAL," +
         "grand_total REAL," +
         "order_source INTEGER," + // 1  web, 2  app
@@ -443,6 +519,7 @@ class CreateTables {
         "detail_id INTEGER," +
         "uuid TEXT," +
         "order_id INTEGER," +
+        "order_app_id INTEGER," +
         "branch_id INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
@@ -452,6 +529,7 @@ class CreateTables {
         "product_discount REAL," +
         "product_detail TEXT," +
         "issetMeal NUMERIC," +
+        "has_rac_managemant NUMERIC," +
         "setmeal_product_detail TEXT," +
         "category_id INTEGER," +
         "detail_amount REAL," +
@@ -469,6 +547,8 @@ class CreateTables {
         "uuid TEXT," +
         "order_id INTEGER," +
         "detail_id INTEGER," +
+        "order_app_id INTEGER," +
+        "detail_app_id INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
         "product_id INTEGER," +
@@ -486,6 +566,8 @@ class CreateTables {
         "uuid TEXT," +
         "order_id INTEGER," +
         "detail_id INTEGER," +
+        "order_app_id INTEGER," +
+        "detail_app_id INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
         "product_id INTEGER," +
@@ -504,12 +586,19 @@ class CreateTables {
         "op_id INTEGER," +
         "uuid TEXT," +
         "order_id INTEGER," +
+        "order_app_id INTEGER," +
         "branch_id  INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
+        "is_split NUMERIC," +
+        "remark TEXT," +
+        "last_digits TEXT," +
+        "approval_code TEXT," +
+        "reference_number TEXT," +
         "op_method_id INTEGER," +
         "op_amount REAL," +
         "op_method_response TEXT," +
+        "op_amount_change REAL," +
         "op_status INTEGER," + // 1 New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
         "op_datetime TEXT," +
         "op_by INTEGER," +
@@ -518,8 +607,9 @@ class CreateTables {
         ")");
 // TABLE order_payment
     datatables = db.execute("CREATE TABLE order_cancel (" +
-        "id INTEGER ," +
+        "id INTEGER," +
         "order_id INTEGER," +
+        "order_app_id INTEGER," +
         "localID TEXT," +
         "reason TEXT," +
         "status INTEGER," + // New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
@@ -554,6 +644,7 @@ class CreateTables {
         "zipcode	TEXT," +
         "api_token	TEXT," +
         "profile	TEXT," +
+        "server_id INTEGER," +
         "last_login	TEXT," +
         "status	INTEGER," +
         "created_at	TEXT," +
@@ -569,6 +660,7 @@ class CreateTables {
     datatables = db.execute("CREATE TABLE table_order (" +
         "id	INTEGER PRIMARY KEY AUTOINCREMENT," +
         "table_id	INTEGER," +
+        "service_charge	REAl," +
         "is_merge_table  TEXT," +
         "merged_table_id  INTEGER," +
         "number_of_pax  INTEGER," +
@@ -605,6 +697,8 @@ class CreateTables {
         'sub_total_after_discount REAL,' +
         'source NUMERIC,' + //1 For Web, 2 For App
         'total_item REAL,' +
+        'service_charge_percent  REAL,' +
+        'service_charge  REAL,' +
         'cart_order_number TEXT,' +
         'cart_payment_id INTEGER,' +
         'cart_payment_response TEXT,' +
@@ -630,6 +724,7 @@ class CreateTables {
         'product_id INTEGER,' +
         'printer_id INTEGER,' +
         'product_name TEXT,' +
+        'name_2 TEXT,' +
         'product_price REAL,' +
         'product_net_price REAL,' +
         'product_qty REAL,' +
@@ -639,6 +734,8 @@ class CreateTables {
         'discount_type  INTEGER,' + //int
         'remark TEXT,' +
         'issetMeal NUMERIC,' +
+        'has_rac_managemant NUMERIC,' +
+        'isFoc_Product NUMERIC,' +
         'setmeal_product_detail TEXT,' +
         'cart_detail TEXT,' +
         'is_deleted   INTEGER,' +
@@ -794,15 +891,15 @@ class CreateTables {
 
     //set Meal Tables \
     datatables = db.execute("CREATE TABLE setmeal ( " +
-        "setmeal_id INTIGER PRIMARYKEY," +
+        "setmeal_id INTEGER PRIMARYKEY," +
         "uuid TEXT," +
         "name TEXT," +
         "price REAL," +
         "status NUMERIC," +
         "created_at TEXT," +
-        "created_by INTIGER," +
+        "created_by INTEGER," +
         "updated_at TEXT," +
-        "updated_by INTIGER" +
+        "updated_by INTEGER" +
         ")");
 
     datatables = db.execute("CREATE TABLE setmeal_branch ( " +
@@ -841,6 +938,39 @@ class CreateTables {
         "serverId INTEGERT," +
         "localID TEXT," +
         "terminalid INTEGERT" +
+        ")");
+
+    // country
+    datatables = db.execute("CREATE TABLE country ( " +
+        "country_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "sortname TEXT," +
+        "name TEXT," +
+        "slug TEXT," +
+        "phoneCode INTEGER," +
+        "created_at TEXT," +
+        "updated_at TEXT," +
+        "deleted_at TEXT" +
+        ")");
+
+    datatables = db.execute("CREATE TABLE state ( " +
+        "state_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "name TEXT," +
+        "slug TEXT," +
+        "country_id INTEGER," +
+        "created_at TEXT," +
+        "updated_at TEXT," +
+        "deleted_at TEXT" +
+        ")");
+
+    // City
+    datatables = db.execute("CREATE TABLE city ( " +
+        "city_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "name TEXT," +
+        "slug TEXT," +
+        "state_id INTEGER," +
+        "created_at TEXT," +
+        "updated_at INTEGER," +
+        "deleted_at INTEGER" +
         ")");
 
     return datatables;

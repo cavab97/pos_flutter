@@ -1,9 +1,7 @@
 class Strings {
-
-  /*Print horizontal 64 lines*/
-  static String print64line = "----------------------------------------------------------------";
-
-
+  static String print15line = "---------------";
+  /*Only for set name */
+  static String terminalName = "";
   static String fontFamily = "Roboto";
   static String something_wrong = "Something went wrong!";
   static String pin_Dialog_title = "Pin Verification";
@@ -20,13 +18,16 @@ class Strings {
   static String sub_total = "Sub Total";
   static String size = "Size";
   static String header_name = "Name";
-  static String qty = "Qty";
+  static String qty = "QTY";
   static String amount = "Amount";
   static String discount = "Discount";
+
+  static String service_charge = "Service Charge";
   static String tax = "TAX";
   static String grand_total = "GRAND TOTAL";
   static String search_bar_text = "Search product here...";
   static String btn_Add_customer = "Add Customer";
+  static String select_customer = "Select Customer";
   static String pin_Number = "PIN Number";
   static String pin_validation_message = "Please enter your PIN number";
   static String already_clockin_msg = "User Already checkedIN.";
@@ -38,8 +39,8 @@ class Strings {
   static String update = "Update";
   static String add_new = "Add New";
   static String pay = "Pay";
-  static String fisrtname = "Name";
-  static String lastname = "User Name";
+  static String fisrtname = "First Name";
+  static String lastname = "Last Name";
   static String email = "Email";
   static String phone = "Mobile";
   static String password = "Password";
@@ -52,13 +53,18 @@ class Strings {
   static String countrys = "Countrys";
   static String search_customer = "Search Customer";
   static String customer_Search_Hint =
-      "Search Customer Name,Email,Phone or Memeber id";
+      "Search Customer Name,Email,Phone or member ID";
   static String select_table = "Select Table";
   static String merge_table = "Merge Table";
   static String new_order = "New Order";
   static String view_order = "View Order";
+  static String change_pax = "Change Pax";
+  static String change_table = "Change Table";
+  static String cancle_order = "Cancel Order";
   static String merge_order = "Merge Order";
   static String enterPax = "Enter Pax";
+  static String scanQRcode = "Scan QRCode";
+
   static String open_shift = "Open Shift";
   static String shiftTextLable = "Sorry,we're";
   static String shiftTextLableOpen = "Yes,we're\nOpen";
@@ -80,10 +86,14 @@ class Strings {
   static String close_table = "Close Table";
   static String split_order = "Split Order";
   static String close_shift = "Close Shift";
+  static String opne_shift = "Open Shift";
   static String draft_report = "Draft Report";
+  static String check_list = "Check list";
   static String no_image = "assets/no_image.png";
   static String delete_order = "Delete Order";
+  static String reprint_Order = "Resend to Kitchen";
   static String out_of_stoke = "OUT OF STOCK";
+  static String out_of_stoke_msg = "Product Out of Stock";
   static String apply_promocode = "Apply Promocode";
   static String item_not_available = "No item available";
   static String asset_headerLogo = "assets/headerlogo.png";
@@ -101,6 +111,7 @@ class Strings {
   static String set_terminal_key = "Set Terminal Key";
   static String terminalKey = "Terminal Key";
   static String transaction = "Transaction";
+  static String web_orders = "Web Orders";
   static String no_order_found = "No Orders Found";
   static String no_details_found = "No Details Found";
   static String searchbox_hint = "Invoice Number or S/N";
@@ -110,6 +121,9 @@ class Strings {
   static String apply = "Apply";
   static String vauchercode = "Voucher code :";
   static String enter_Code = "Enter code";
+  static String enter_remark = "Enter Remark";
+  static String enter_digit = "Enter last 4 digits";
+  static String enterref_number = "Enter Ref Number";
   static String voucher_not_exit = "Voucher not exist.";
   static String voucher_code_msg = "Voucher code must be required.";
   static String voucher_already_used = "Voucher already used 5 times.";
@@ -126,4 +140,76 @@ class Strings {
       "Currently shift was closed,Please opne shift after you  can see Transactions.";
   static String shift_opne_alert_msg_webOrder =
       "Currently shift was closed,Please opne shift after you  can see web Orders.";
+  static String shift_opne_alert_wineStorage =
+      "Currently shift was closed,Please opne shift after you  can see wine storage.";
+
+  static String auto_sync = "Auto sync";
+  static String take_away = "Take Away";
+  static String dine_in = "Dine In";
+  static String table_mearged_msg = "Table merged.";
+  static String rePrint_kitchen_Print = "Reprint Kitchen Bill";
+  static String please_Select_country = "Please select country!";
+  static String please_select_state = "Please select state!";
+  static String please_select_city = "Please select city!";
+  static String print_reciept = "Print receipt";
+  static String enter_qty = "Enter Qty";
+  static String remark = "Remark :";
+  static String done = "Done";
+  static String dateFormat = "EEE, MMM d yyyy, hh:mm aaa";
+  static String walkin_customer = "Walk-in customer";
+  static String openDrawer = "OpenDrawer";
+  static String warning = "Warning";
+  static String warning_msg = "Are you want sure to add this prodoct as free?";
+  static String yes = "Yes";
+  static String no = "No";
+  static String foc_product_msg = "FOC Product is not editable.";
+  static String total = "Total :";
+  static String amountPaid = "Amount Paid :";
+  static String change = "Change :";
+  static String enterMsg = "Press screen to Continue";
+  static String pay_in_ammount = "Pay In Amount";
+  static String please_select_reason = 'Please select reason';
+  static String enter_last = "Enter last 4 digits : ";
+  static String approval_code = "Approval Code: ";
+  static String digit_validation_msg =
+      'Please enter last 4 digit of your card.';
+  static String minimum_Req_msg = 'Minimum 4 digits required.';
+  static String approval_code_msg = "Please enter appoval code.";
+  static String reference_num_msg = 'Please enter ref Number';
+  static String walletPayment = "Wallet Payment";
+  static String enter_ref_num = "Enter Ref Number : ";
+  static String permission_msg =
+      "This user have not permission to perform this action";
+  static String test_print_msg = 'Click to print a test receipt';
+  static String select_printer = "Select Printer";
+  static String printer_type = "Printer Type";
+  static String recipt_printer = "Receipt Printer";
+  static String kitchen_printer = "Kitchen Printer";
+  static String reprint_all = "Reprint All";
+  static String reprint = "Reprint";
+  static String scan_printer = "Scan Printer";
+  static String scan = "Scan";
+  static String list = "List";
+  static String table_pax_msg = "Please enter pax minimum table capcity.";
+  static String cancle_order_msg = "Are you want sure cancel this table order?";
+  static String change_table_msg = "Are you want sure to change your table?";
+  static String table_not_avalilable = "Table not available for merge.";
+  static String table_already_merged = "Table already merged with other table.";
+  static String table_already_occupied = "Table already occupied";
+  static String general = "General";
+  static String printer = "Printer";
+  static String change_lag = "Change Language";
+  static String change_theme = "Change Theme";
+  static String printing = "Printing";
+  static String always_print_msg = "Always Print Receipt";
+  static String testing = "Testing";
+  static String print_test_Rec = "Print Test Receipt";
+  static String click_to_print_test = 'Click to print a test receipt';
+  static String search_printer = "Search Printer";
+  static String wineStorage = "Wine Storage";
+  static String shift_Report = "Shift Report";
+  static String sync_orders = "Sync Orders";
+  static String sync = "Sync";
+  static String settings = "Settings";
+  static String please_select_customer = "Please select customer";
 }

@@ -7,6 +7,7 @@ class Category {
   int parentId;
   int isForWeb;
   int isSetmeal;
+  int hasRacManagemant;
   int status;
   String updatedAt;
   int updatedBy;
@@ -23,6 +24,7 @@ class Category {
       this.isForWeb,
       this.status,
       this.isSetmeal,
+      this.hasRacManagemant,
       this.updatedAt,
       this.updatedBy,
       this.deletedAt,
@@ -37,6 +39,7 @@ class Category {
     parentId = json['parent_id'];
     isForWeb = json['is_for_web'];
     isSetmeal = json['is_setmeal'];
+    hasRacManagemant = json["has_rac_managemant"];
     status = json['status'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
@@ -54,6 +57,7 @@ class Category {
     data['parent_id'] = this.parentId;
     data['is_for_web'] = this.isForWeb;
     data["is_setmeal"] = this.isSetmeal;
+    data["has_rac_managemant"] = this.hasRacManagemant;
     data['status'] = this.status;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;

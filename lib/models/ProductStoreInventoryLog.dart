@@ -7,6 +7,7 @@ class ProductStoreInventoryLog {
   int employe_id;
   int il_type;
   double qty;
+  int serverid;
   double qty_before_change;
   double qty_after_change;
   String updated_at;
@@ -21,6 +22,7 @@ class ProductStoreInventoryLog {
     this.employe_id,
     this.il_type,
     this.qty,
+    this.serverid,
     this.qty_before_change,
     this.qty_after_change,
     this.updated_at,
@@ -42,6 +44,7 @@ class ProductStoreInventoryLog {
     qty_after_change = json["qty_after_change"] is int
         ? (json['qty_after_change'] as int).toDouble()
         : json['qty_after_change'];
+    serverid = json["server_id"];
     updated_at = json["updated_at"];
     updated_by = json["updated_by"];
   }
@@ -60,6 +63,7 @@ class ProductStoreInventoryLog {
     data["qty_after_change"] = this.qty_after_change;
     data["updated_at"] = this.updated_at;
     data["updated_by"] = this.updated_by;
+    data["server_id"] = this.serverid;
     return data;
   }
 }

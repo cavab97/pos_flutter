@@ -56,7 +56,6 @@ class DatabaseHelper {
     print(data);
   }
 
-
   Future<dynamic> insertData1(tablesData) async {
     Database db = await this.database;
     var result = await tableDataHelper.insertDatatable1(db, tablesData);
@@ -99,8 +98,19 @@ class DatabaseHelper {
     return result;
   }
 
+  Future<dynamic> insertAddressData(tablesData) async {
+    Database db = await this.database;
+    var result = await tableDataHelper.insertAdressData(db, tablesData);
+    return result;
+  }
+
+  Future<dynamic> insertWineStoragedata(tablesData) async {
+    Database db = await this.database;
+    var result = await tableDataHelper.insertWineStorageData(db, tablesData);
+    return result;
+  }
+
   Future<dynamic> accetsData(tablesData) async {
-  
     Database db = await this.database;
     var result = await tableDataHelper.insertProductImage(db, tablesData);
     return result;

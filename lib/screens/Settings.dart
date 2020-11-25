@@ -34,6 +34,7 @@ class _SettingsPageState extends State<SettingsPage> {
   PrinterList printerAPI = new PrinterList();
   PrintReceipt testPrint = PrintReceipt();
   List<Printer> printerList = new List<Printer>();
+  bool isAutoSync = false;
   bool isPrinterSettings = false;
   bool isGeneralSettings = true;
   bool isChangeTheme = false;
@@ -60,6 +61,29 @@ class _SettingsPageState extends State<SettingsPage> {
       setState(() {
         isJoinLoaclServer = isjoined == "true" ? true : false;
       });
+    }
+    checkisAutoSync();
+  }
+
+  checkisAutoSync() async {
+    var isSync = await Preferences.getStringValuesSF(Constant.IS_AUTO_SYNC);
+    if (isSync != null) {
+      setState(() {
+        isAutoSync = isSync == "true" ? true : false;
+      });
+    }
+  }
+
+  setAutosync(issync) async {
+    setState(() {
+      isAutoSync = issync;
+    });
+    if (issync) {
+      await Preferences.setStringToSF(Constant.IS_AUTO_SYNC, issync.toString());
+      await CommunFun.checkisAutoSync(context);
+    } else {
+      await Preferences.removeSinglePref(Constant.IS_AUTO_SYNC);
+      CommunFun.stopAutoSync();
     }
   }
 
@@ -113,6 +137,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 table_printe.printerIp = ip;
                 table_printe.printerIsCashier = selected;
                 //var result = await localAPI.insertTablePrinter(table_printe);
+                var result = await localAPI.insertTablePrinter(table_printe);
               });
         });
   }
@@ -246,6 +271,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       height: MediaQuery.of(context).size.height,
                       color: Colors.white,
                       child: ListView(
+                        physics: BouncingScrollPhysics(),
                         shrinkWrap: true,
                         children: <Widget>[
                           ListTile(
@@ -266,73 +292,45 @@ class _SettingsPageState extends State<SettingsPage> {
                               style: Styles.blackBoldsmall(),
                             ),
                           ),
-                          new Container(
-                            decoration: new BoxDecoration(
-                                color: isGeneralSettings
-                                    ? Colors.grey[200]
-                                    : Colors.white),
-                            child: ListTile(
-                              contentPadding:
-                                  EdgeInsets.only(left: 10, top: 10),
-                              selected: isGeneralSettings,
-                              onTap: () {
-                                openSideData("General");
-                              },
-                              title: Text(
-                                "General",
-                                style: Styles.drawerText(),
-                              ),
+                          ListTile(
+                            contentPadding: EdgeInsets.only(left: 0, top: 10),
+                            selected: isGeneralSettings,
+                            onTap: () {
+                              openSideData(Strings.general);
+                            },
+                            title: Text(
+                              Strings.general,
+                              style: Styles.blackBoldsmall(),
                             ),
                           ),
-                          new Container(
-                            decoration: new BoxDecoration(
-                                color: isPrinterSettings
-                                    ? Colors.grey[200]
-                                    : Colors.white),
-                            child: ListTile(
-                              contentPadding:
-                                  EdgeInsets.only(left: 10, top: 10),
-                              selected: isPrinterSettings,
-                              onTap: () {
-                                openSideData("Printer");
-                                getAllPrinter();
-                              },
-                              title: Text(
-                                "Printer",
-                                style: Styles.drawerText(),
-                              ),
+                          ListTile(
+                            contentPadding: EdgeInsets.only(left: 0, top: 10),
+                            selected: isPrinterSettings,
+                            onTap: () {
+                              openSideData(Strings.printer);
+                              getAllPrinter();
+                            },
+                            title: Text(
+                              Strings.printer,
+                              style: Styles.blackBoldsmall(),
                             ),
                           ),
-                          new Container(
-                            decoration: new BoxDecoration(
-                                color: isChangeLanguage
-                                    ? Colors.grey[200]
-                                    : Colors.white),
-                            child: ListTile(
-                              contentPadding:
-                                  EdgeInsets.only(left: 10, top: 10),
-                              selected: isChangeLanguage,
-                              onTap: () {},
-                              title: Text(
-                                "Change Language",
-                                style: Styles.drawerText(),
-                              ),
+                          ListTile(
+                            contentPadding: EdgeInsets.only(left: 0, top: 10),
+                            selected: isChangeLanguage,
+                            onTap: () {},
+                            title: Text(
+                              Strings.change_lag,
+                              style: Styles.blackBoldsmall(),
                             ),
                           ),
-                          new Container(
-                            decoration: new BoxDecoration(
-                                color: isChangeTheme
-                                    ? Colors.grey[200]
-                                    : Colors.white),
-                            child: ListTile(
-                              contentPadding:
-                                  EdgeInsets.only(left: 10, top: 10),
-                              selected: isChangeTheme,
-                              onTap: () {},
-                              title: Text(
-                                "Change Theme",
-                                style: Styles.drawerText(),
-                              ),
+                          ListTile(
+                            contentPadding: EdgeInsets.only(left: 0, top: 10),
+                            selected: isChangeTheme,
+                            onTap: () {},
+                            title: Text(
+                              Strings.change_theme,
+                              style: Styles.blackBoldsmall(),
                             ),
                           )
                         ],
@@ -343,6 +341,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     // Part 2 transactions list
                     child: Center(
                       child: SingleChildScrollView(
+                          physics: BouncingScrollPhysics(),
                           child: isGeneralSettings
                               ? generalSettings()
                               : printingSetitngs()),
@@ -357,6 +356,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Widget generalSettings() {
     return ListView(
+      physics: BouncingScrollPhysics(),
       padding: EdgeInsets.all(20),
       shrinkWrap: true,
       children: <Widget>[
@@ -365,7 +365,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         Center(
           child: Text(
-            "General",
+            Strings.general,
             style: Styles.whiteBold(),
           ),
         ),
@@ -376,98 +376,19 @@ class _SettingsPageState extends State<SettingsPage> {
           decoration:
               new BoxDecoration(border: new Border.all(color: Colors.white)),
           child: ListTile(
-            title: Text("Auto Sync After Open Shift",
-                style: Styles.whiteSimpleSmall()),
+            title: Text(Strings.auto_sync, style: Styles.whiteSimpleSmall()),
             trailing: Transform.scale(
-              scale: 1.2,
+              scale: 1,
               child: CupertinoSwitch(
                 activeColor: Colors.deepOrange,
-                value: false,
+                value: isAutoSync,
                 onChanged: (bool value) {
-                  // setState(() {
-                  //   _switchValue = value;
-                  // });
+                  setAutosync(value);
                 },
               ),
             ),
           ),
         ),
-        SizedBox(
-          height: 10,
-        ),
-        Container(
-          decoration:
-              new BoxDecoration(border: new Border.all(color: Colors.white)),
-          child: ListTile(
-            title:
-                Text("This is Local Server", style: Styles.whiteSimpleSmall()),
-            trailing: Container(
-              width: 150,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  isLocalServer
-                      ? IconButton(
-                          icon: Icon(
-                            CustomeIcons.qrcode,
-                            color: Colors.white,
-                            size: 30,
-                          ),
-                          onPressed: () {
-                            opneqrcodePop();
-                          })
-                      : SizedBox(),
-                  SizedBox(
-                    width: 20,
-                  ),
-                  Transform.scale(
-                    scale: 1.2,
-                    child: CupertinoSwitch(
-                      activeColor: Colors.deepOrange,
-                      value: isLocalServer,
-                      onChanged: (bool value) {
-                        setState(() {
-                          isLocalServer = value;
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 10,
-        ),
-        !isLocalServer
-            ? Container(
-                decoration: new BoxDecoration(
-                    border: new Border.all(color: Colors.white)),
-                child: ListTile(
-                  title: Text("Join Local server",
-                      style: Styles.whiteSimpleSmall()),
-                  trailing: Container(
-                    width: 150,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: <Widget>[
-                        Transform.scale(
-                          scale: 1.2,
-                          child: CupertinoSwitch(
-                            activeColor: Colors.deepOrange,
-                            value: isJoinLoaclServer,
-                            onChanged: (bool value) {
-                              joinLocalServer(value);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            : SizedBox(),
         SizedBox(
           height: 10,
         ),
@@ -524,6 +445,7 @@ class _SettingsPageState extends State<SettingsPage> {
         Container(
           height: MediaQuery.of(context).size.height,
           child: ListView(
+            physics: BouncingScrollPhysics(),
             padding: EdgeInsets.all(20),
             shrinkWrap: true,
             children: <Widget>[
@@ -532,7 +454,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               Center(
                 child: Text(
-                  "Printing",
+                  Strings.printing,
                   style: Styles.whiteBold(),
                 ),
               ),
@@ -543,7 +465,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 decoration: new BoxDecoration(
                     border: new Border.all(color: Colors.white)),
                 child: ListTile(
-                    title: Text("Always Print Receipt",
+                    title: Text(Strings.always_print_msg,
                         style: Styles.whiteSimpleSmall()),
                     trailing: Transform.scale(
                       scale: 1,
@@ -562,6 +484,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 margin: EdgeInsets.only(top: 10),
                 // height: MediaQuery.of(context).size.height / 2.2,
                 child: ListView.builder(
+                  physics: BouncingScrollPhysics(),
                   shrinkWrap: true,
                   itemCount: printerList.length,
                   itemBuilder: (BuildContext context, int index) {
@@ -569,7 +492,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       onTap: () => testPrint.testReceiptPrint(
                           printerList[index].printerIp,
                           context,
-                          printerList[index].printerName),
+                          printerList[index].printerName,
+                          Strings.testing),
                       child: Column(
                         children: <Widget>[
                           Container(
@@ -592,7 +516,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                         style: TextStyle(fontSize: 16),
                                       ),
                                       Text(
-                                        'Click to print a test receipt',
+                                        Strings.click_to_print_test,
                                         style:
                                             TextStyle(color: Colors.grey[700]),
                                       ),
@@ -639,7 +563,7 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
           onPressed: _onPress,
           child: Text(
-            "Print Test Receipt",
+            Strings.print_test_Rec,
             style: Styles.whiteSimpleSmall(),
           ),
           color: StaticColor.backgroundColor,
@@ -658,7 +582,7 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
           onPressed: _onPress,
           child: Text(
-            "Search Printer",
+            Strings.search_printer,
             style: Styles.whiteSimpleSmall(),
           ),
           color: StaticColor.backgroundColor,

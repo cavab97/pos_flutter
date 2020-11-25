@@ -2,6 +2,7 @@ class OrderDetail {
   int detailId;
   String uuid;
   int order_id;
+  int order_app_id;
   int branch_id;
   int terminal_id;
   int app_id;
@@ -15,6 +16,7 @@ class OrderDetail {
   int detail_status;
   String product_detail;
   int issetMeal;
+  int hasRacManagemant;
   String setmeal_product_detail;
   int detail_by;
   int updated_by;
@@ -41,6 +43,7 @@ class OrderDetail {
     this.detail_by,
     this.updated_by,
     this.issetMeal,
+    this.hasRacManagemant,
     this.updated_at,
     this.detail_datetime,
   });
@@ -49,6 +52,7 @@ class OrderDetail {
     detailId = json["detail_id"];
     uuid = json["uuid"];
     order_id = json["order_id"];
+    order_app_id = json["order_app_id"];
     branch_id = json["branch_id"];
     terminal_id = json["terminal_id"];
     app_id = json["app_id"];
@@ -69,6 +73,7 @@ class OrderDetail {
     detail_status = json["detail_status"];
     detail_by = json["detail_by"];
     issetMeal = json["issetMeal"];
+    hasRacManagemant = json["has_rac_managemant"];
     product_discount = json["product_discount"] is int
         ? (json['product_discount'] as int).toDouble()
         : json['product_discount'];
@@ -85,6 +90,7 @@ class OrderDetail {
     data["detail_id"] = this.detailId;
     data["uuid"] = this.uuid;
     data["order_id"] = this.order_id;
+    data["order_app_id"] = this.order_app_id;
     data["branch_id"] = this.branch_id;
     data["terminal_id"] = this.terminal_id;
     data["app_id"] = this.app_id;
@@ -95,6 +101,7 @@ class OrderDetail {
     data["detail_amount"] = this.detail_amount;
     data["detail_qty"] = this.detail_qty;
     data["issetMeal"] = this.issetMeal;
+    data["has_rac_managemant"] = this.hasRacManagemant;
     data["detail_status"] = this.detail_status;
     data["detail_by"] = this.detail_by;
     data["product_discount"] = this.product_discount;

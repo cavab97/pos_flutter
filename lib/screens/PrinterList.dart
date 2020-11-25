@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
@@ -56,7 +57,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Select Printer", style: Styles.whiteBold()),
+                Text(Strings.select_printer, style: Styles.whiteBold()),
               ],
             ),
           ),
@@ -72,10 +73,13 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
           Positioned(
             left: 30,
             top: 15,
-            child: Icon(
-              Icons.sync,
-              color: Colors.white,
-              size: 40,
+            child: IconButton(
+              onPressed: () {},
+              icon: Icon(
+                Icons.sync,
+                color: Colors.white,
+                size: 40,
+              ),
             ),
           ),
           closeButton(context),
@@ -129,6 +133,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
           Container(
             // height: MediaQuery.of(context).size.height / 2.2,
             child: ListView.builder(
+              physics: BouncingScrollPhysics(),
               shrinkWrap: true,
               itemCount: devices.length,
               itemBuilder: (BuildContext context, int index) {
@@ -155,7 +160,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
                                     style: TextStyle(fontSize: 16),
                                   ),
                                   Text(
-                                    'Click to print a test receipt',
+                                    Strings.test_print_msg,
                                     style: TextStyle(color: Colors.grey[700]),
                                   ),
                                 ],

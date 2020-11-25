@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
@@ -21,7 +22,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
   var selectedreason;
   List<String> reasonList = [
     "Add Change",
-    "Routine diposit",
+    "Deposit",
     "Other",
   ];
   @override
@@ -38,7 +39,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         context: context,
         builder: (BuildContext context) {
           return OpeningAmmountPage(
-              ammountext: "Pay In Amount",
+              ammountext: Strings.pay_in_ammount,
               onEnter: (ammountext) {
                 print(ammountext);
                 setamount(ammountext);
@@ -69,27 +70,33 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(widget.title, style: Styles.whiteBold()),
+                Text(widget.title, style: Styles.whiteMediumBold()),
               ],
             ),
           ),
-          Positioned(
-            left: 0,
-            top: 10,
-            child: FlatButton(
-              onPressed: () {
-                widget.onClose(ammount, selectedreason);
-              },
-              child: Text(
-                "Confirm",
-                style: Styles.whiteSimpleSmall(),
-              ),
-            ),
-          ),
+          Positioned(left: 5, top: 10, child: addbutton(context)),
           closeButton(context),
         ],
       ),
       content: mainContent(),
+    );
+  }
+
+  Widget addbutton(context) {
+    return RaisedButton(
+      padding: EdgeInsets.all(2),
+      onPressed: () {
+        widget.onClose(ammount, selectedreason);
+      },
+      child: Text(
+        "Confirm",
+        style: Styles.whiteSimpleSmall(),
+      ),
+      color: Colors.deepOrange,
+      textColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50.0),
+      ),
     );
   }
 
@@ -138,13 +145,13 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
               },
               child: Text(ammount.toStringAsFixed(2),
                   style: Styles.blackBoldLarge())),
-          Text('reason', style: Styles.drawerText()),
+          Text(Strings.please_select_reason, style: Styles.drawerText()),
           Container(
-              width: MediaQuery.of(context).size.width / 5,
-              padding: EdgeInsets.all(15),
+              width: MediaQuery.of(context).size.width / 4,
+              padding: EdgeInsets.all(12),
               margin: EdgeInsets.only(top: 5),
               height: 50,
-              color: Colors.grey[400],
+              color: Colors.grey[300],
               child: Center(
                 child: DropdownButton<String>(
                   underline: Container(
@@ -153,8 +160,9 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
                   elevation: 5,
                   icon: Icon(
                     Icons.arrow_forward_ios,
-                    size: 10,
+                    size: 12,
                   ),
+                  hint: Text(Strings.please_select_reason),
                   value: selectedreason,
                   isExpanded: true,
                   onChanged: (String string) {
@@ -164,18 +172,12 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
                   },
                   selectedItemBuilder: (BuildContext context) {
                     return reasonList.map<Widget>((item) {
-                      return Text(
-                        item,
-                        style: Theme.of(context).textTheme.title,
-                      );
+                      return Text(item, style: Styles.communBlacksmall());
                     }).toList();
                   },
                   items: reasonList.map((item) {
                     return DropdownMenuItem<String>(
-                      child: Text(
-                        item,
-                        style: Theme.of(context).textTheme.title,
-                      ),
+                      child: Text(item, style: Styles.communBlacksmall()),
                       value: item,
                     );
                   }).toList(),

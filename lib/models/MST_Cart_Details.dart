@@ -5,6 +5,7 @@ class MSTCartdetails {
   int productId;
   int printer_id;
   String productName;
+  String productSecondName;
   double productPrice;
   double productQty;
   double productNetPrice;
@@ -16,15 +17,19 @@ class MSTCartdetails {
   int isDeleted;
   int sync;
   int isSendKichen;
+  int isFocProduct;
   String itemUnit;
   String cart_detail;
   String setmeal_product_detail;
   int issetMeal;
+  int hasRacManagemant;
   int hasCompositeInventory;
   int productPoints;
   int productTotalPoints;
   String createdAt;
   int createdBy;
+  String attrName;
+  String modiName;
 
   MSTCartdetails(
       {this.cartId,
@@ -32,6 +37,7 @@ class MSTCartdetails {
       this.productId,
       this.printer_id,
       this.productName,
+      this.productSecondName,
       this.productPrice,
       this.productQty,
       this.productNetPrice,
@@ -42,13 +48,17 @@ class MSTCartdetails {
       this.remark,
       this.isDeleted,
       this.issetMeal,
+      this.hasRacManagemant,
       this.isSendKichen,
+      this.isFocProduct,
       this.itemUnit,
       this.hasCompositeInventory,
       this.cart_detail,
       this.setmeal_product_detail,
       this.createdAt,
-      this.createdBy});
+      this.createdBy,
+      this.attrName,
+      this.modiName});
 
   MSTCartdetails.fromJson(Map<String, dynamic> json) {
     id = json["id"];
@@ -57,6 +67,7 @@ class MSTCartdetails {
     productId = json["product_id"];
     printer_id = json["printer_id"];
     productName = json["product_name"];
+    productSecondName = json["name_2"];
     productPrice = json["product_price"] is int
         ? (json['product_price'] as int).toDouble()
         : json["product_price"];
@@ -81,9 +92,13 @@ class MSTCartdetails {
     isSendKichen = json["is_send_kichen"];
     itemUnit = json["item_unit"];
     issetMeal = json["issetMeal"];
+    hasRacManagemant = json["has_rac_managemant"];
     hasCompositeInventory = json["has_composite_inventory"];
     createdAt = json["created_at"];
     createdBy = json["created_by"];
+    isFocProduct = json["isFoc_Product"];
+    attrName = json["attrName"];
+    modiName = json["modiName"];
   }
 
   Map<String, dynamic> toJson() {
@@ -94,6 +109,7 @@ class MSTCartdetails {
     data["product_id"] = this.productId;
     data["printer_id"] = this.printer_id;
     data["product_name"] = this.productName;
+    data["name_2"] = this.productSecondName;
     data["product_price"] = this.productPrice;
     data["product_qty"] = this.productQty;
     data["product_net_price"] = this.productNetPrice;
@@ -109,8 +125,12 @@ class MSTCartdetails {
     data["has_composite_inventory"] = this.hasCompositeInventory;
     data["item_unit"] = this.itemUnit;
     data["issetMeal"] = this.issetMeal;
+    data["has_rac_managemant"] = this.hasRacManagemant;
     data["created_by"] = this.createdBy;
     data["created_at"] = this.createdAt;
+    data["isFoc_Product"] = this.isFocProduct;
+    data["attrName"] = this.attrName;
+    data["modiName"] = this.modiName;
     return data;
   }
 }

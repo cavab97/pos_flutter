@@ -4,6 +4,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/services/Config.dart' as repo;
+
 class SplashScreen extends StatefulWidget {
 // PIN Enter PAGE
   SplashScreen({Key key}) : super(key: key);
@@ -22,7 +23,7 @@ class SplashScreenstate extends State<SplashScreen> {
   }
 
   getconfigdata() async {
-    var res = await  repo.getCongigData();
+    var res = await repo.getCongigData();
     if (res["status"] == Constant.STATUS200) {
       await Preferences.setStringToSF(
           Constant.SYNC_TIMER, res["data"]["sync_timer"]);
@@ -33,13 +34,24 @@ class SplashScreenstate extends State<SplashScreen> {
     }
   }
 
+  setTimer() async {
+    await CommunFun.checkisAutoSync(context);
+  }
+
   navigatePage() {
     Future.delayed(const Duration(seconds: 4), () async {
       final bool isLogged = await CommunFun.isLogged();
       if (isLogged) {
-        await Navigator.of(context).pushNamed(Constant.DashboardScreen);
+        setTimer();
+        await Navigator.pushNamedAndRemoveUntil(context,
+            Constant.SelectTableScreen, (Route<dynamic> route) => false,
+            arguments: {"isAssign": false});
       } else {
-        await Navigator.of(context).pushNamed(Constant.TerminalScreen);
+        await Navigator.pushNamedAndRemoveUntil(
+          context,
+          Constant.TerminalScreen,
+          (Route<dynamic> route) => false,
+        );
       }
     });
   }

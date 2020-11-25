@@ -2,8 +2,8 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 
 class Configrations {
-  static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
-  //static String base_URL = "https://mcnpos.com.my/api/v1/en/";
+  //static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
+  static String base_URL = "https://mcnpos.com.my/api/v1/en/";
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String config = "configs";
@@ -28,11 +28,13 @@ class Configrations {
   static String search_setmeal = "Search_setmeal";
   static String customers = "Customers";
   static String add_customer = "Add_Customer";
+  static String get_addresses = "get_addresses";
   static String add_saveOrder = "Add_SaveOrder";
   static String add_cart = "Add_cart";
   static String tables = "Tables";
   static String add_table_order = "Add_Table_Order";
   static String add_shift = "Add_shift";
+  static String drawer_data = "drawer_data";
   static String shift_datails = "Shift_datails";
   static String product_attributes = "Product_attributes";
   static String product_Modifeirs = "Product_modifires";
@@ -43,6 +45,8 @@ class Configrations {
   static String get_Cart_id = "get_Cart_id";
   static String table_Details = "table_Details";
   static String table_orders = "table_orders";
+  static String merge_table_order = "merge_table_order";
+  static String change_table = "change_table";
   static String cart_data = "cart_data";
   static String payment_Methods = "payment_Methods";
   static String get_order = "get_order";
@@ -61,9 +65,25 @@ class Configrations {
   static String send_to_kitchen = "send_to_kitchen";
   static String set_meals = "set_meals";
   static String branch_tax = "branch_tax";
+  static String terminal_data = "terminal_data";
   static String set_meals_products = "set_meals_products";
-
+  static String check_voucher = "check_voucher";
+  static String add_voucher = "add_voucher";
   static ipAddress() async {
     return await Preferences.getStringValuesSF(Constant.SERVER_IP);
   }
+
+  static String country_state_city_datatable = "country-state-city-datatable";
+  static String create_customer_data = "create-customer-data";
+  static String rac_box_liquor_inventor_datatable =
+      "rac-box-liquor-inventory-datatable";
+  static String update_customer_liquor_inventory_data =
+      "update-customer-liquor-inventory-data";
+  static String order_data = "order_data";
+  static String product_details = "product_details";
+  static String lastcustomer_id = "last_customer";
+  static String add_foc_product = "add_foc_product";
+  static String get_modifires = "get_modifires";
+  static String get_user_permission = "get_user_permission";
+  static String cancel_order = "cancel_order";
 }

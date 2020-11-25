@@ -81,7 +81,7 @@ class QRCodesImagePopState extends State<QRCodesImagePop> {
   }
 
   Future<bool> _onBackPressed() async {
-    Navigator.of(context).pop();
+    // Navigator.of(context).pop();
     widget.onClose();
   }
 
@@ -95,7 +95,7 @@ class QRCodesImagePopState extends State<QRCodesImagePop> {
         version: QrVersions.auto,
         size: 320,
         gapless: false,
-       // embeddedImage: AssetImage('assets/headerlogo_receipt.png'),
+        //embeddedImage: AssetImage('assets/no_image.png'),
         embeddedImageStyle: QrEmbeddedImageStyle(
           size: Size(80, 80),
         ),

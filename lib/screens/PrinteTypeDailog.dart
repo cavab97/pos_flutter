@@ -1,9 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
-import 'package:mcncashier/helpers/sqlDatahelper.dart';
-import 'package:mcncashier/models/MST_Cart_Details.dart';
-import 'package:mcncashier/services/LocalAPIs.dart';
 
 class ChoosePrinterDailog extends StatefulWidget {
   ChoosePrinterDailog({Key key, this.selectedIP, this.onClose})
@@ -36,7 +34,7 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("Printer Type", style: Styles.whiteBold()),
+                Text(Strings.printer_type, style: Styles.whiteBold()),
               ],
             ),
           ),
@@ -47,7 +45,7 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
                   onPressed: () {
                     widget.onClose(1);
                   },
-                  child: Text("Done", style: Styles.whiteSimpleSmall()))),
+                  child: Text(Strings.done, style: Styles.whiteSimpleSmall()))),
           closeButton(context),
         ],
       ),
@@ -94,12 +92,13 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
         children: <Widget>[
           Container(
               child: ListView(
+            physics: BouncingScrollPhysics(),
             padding: EdgeInsets.all(0),
             shrinkWrap: true,
             children: <Widget>[
               ListTile(
                   title: Text(
-                    "Receipt Printer",
+                    Strings.recipt_printer,
                     style: Styles.communBlack(),
                   ),
                   trailing: Transform.scale(
@@ -115,7 +114,7 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
                   )),
               ListTile(
                 title: Text(
-                  "Kitchen Printer",
+                  Strings.kitchen_printer,
                   style: Styles.communBlack(),
                 ),
                 trailing: Transform.scale(

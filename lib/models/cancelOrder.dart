@@ -1,6 +1,7 @@
 class CancelOrder {
   int id;
   int orderId;
+  int order_app_id;
   String localID;
   String reason;
   int status;
@@ -14,6 +15,7 @@ class CancelOrder {
   CancelOrder({
     this.id,
     this.orderId,
+    this.order_app_id,
     this.localID,
     this.reason,
     this.status,
@@ -27,6 +29,7 @@ class CancelOrder {
 
   CancelOrder.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+    order_app_id = json["order_app_id"];
     orderId = json['order_id'];
     localID = json['localID'];
     reason = json['reason'];
@@ -42,6 +45,7 @@ class CancelOrder {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
+    data["order_app_id"] = this.order_app_id;
     data['order_id'] = this.orderId;
     data['localID'] = this.localID;
     data['reason'] = this.reason;

@@ -1,15 +1,23 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:mcncashier/helpers/LocalAPI/Branch.dart';
 import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
 import 'package:mcncashier/helpers/LocalAPI/CheckinOutList.dart';
 import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
+import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/CheckInout.dart';
+import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Payment.dart';
+import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/PosPermission.dart';
+import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/models/Product_Store_Inventory.dart';
+import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
+import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -18,7 +26,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:device_info/device_info.dart';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -26,17 +33,21 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
-import 'package:mcncashier/services/tableSyncAPI.dart' as repo;
 import 'package:toast/toast.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:intl/intl.dart';
 import 'package:wifi_ip/wifi_ip.dart';
+import '../helpers/LocalAPI/PrinterList.dart';
+import '../helpers/LocalAPI/TablesList.dart';
 
 DatabaseHelper databaseHelper = DatabaseHelper();
 Cartlist cartapi = new Cartlist();
 BranchList branchapi = new BranchList();
 PaymentList paymentAPI = new PaymentList();
 LocalAPI localAPI = LocalAPI();
+PrinterList printerList = new PrinterList();
+Timer timer;
+double taxvalues = 0;
 
 class CommunFun {
   static loginText() {
@@ -63,6 +74,20 @@ class CommunFun {
     } else {
       return false;
     }
+  }
+
+  static overLayLoader() {
+    return Container(
+      padding: EdgeInsets.all(10),
+      height: 70,
+      width: 70,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(100), color: Colors.white),
+      child: CircularProgressIndicator(
+        strokeWidth: 4,
+        backgroundColor: Colors.grey[200],
+      ),
+    );
   }
 
   static divider() {
@@ -140,6 +165,48 @@ class CommunFun {
     );
   }
 
+  /*Cal Service Charge*/
+  static countServiceCharge(serviceCharge, subtotal) async {
+    if (serviceCharge == null) {
+      var branchid = await getbranchId();
+      Branch branchData = await branchapi.getbranchData(branchid);
+      serviceCharge = branchData.serviceCharge;
+    }
+    // else if (service_charge < 0) {
+    //   var branchid = await getbranchId();
+    //   Branch branchData = await localAPI.getBranchData(branchid);
+    //   service_charge = branchData.serviceCharge;
+    // }
+
+    if (serviceCharge != null) {
+      return subtotal * serviceCharge / 100;
+    } else {
+      return 0.00;
+    }
+  }
+
+  /*get Service Percentage*/
+  static getServiceChargePer() async {
+    var branchID = await getbranchId();
+    Branch branchData = await branchapi.getbranchData(branchID);
+    var serviceCharge = branchData.serviceCharge;
+    if (serviceCharge != null) {
+      return serviceCharge;
+    } else {
+      return 0;
+    }
+  }
+
+  static getDoubleValue(var value) {
+    if (value is int) {
+      return value.toDouble();
+    } else if (value is String) {
+      return double.parse(value);
+    } else {
+      return value;
+    }
+  }
+
   static deviceInfo() async {
     // Device Info
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -184,14 +251,18 @@ class CommunFun {
   }
 
   static showToast(context, message) {
-    Toast.show(
-      message,
-      context,
-      duration: Toast.LENGTH_SHORT,
-      gravity: Toast.CENTER,
-      backgroundColor: Colors.black,
-      textColor: Colors.white,
-    );
+    try {
+      Toast.show(
+        message,
+        context,
+        duration: Toast.LENGTH_SHORT,
+        gravity: Toast.CENTER,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+      );
+    } catch (e) {
+      print(e);
+    }
   }
 
   static syncDailog(context, title) {
@@ -230,18 +301,33 @@ class CommunFun {
     );
   }
 
-  static syncAfterSuccess(context) async {
-    // sync in 4 part api call
-    opneSyncPop(context);
+  static syncOrdersANDStore(context, isClose) async {
+    await CommunFun.getsetWebOrders(context);
+    await SyncAPICalls.sendCustomerTable(context);
+    await SyncAPICalls.syncOrderstoDatabase(context);
+    await SyncAPICalls.sendInvenotryTable(context);
+    await SyncAPICalls.sendCustomerWineInventory(context);
+    await SyncAPICalls.sendCancledOrderTable(context);
+    if (isClose) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  static syncAfterSuccess(context, isOpen) async {
+    if (isOpen) {
+      opneSyncPop(context);
+    }
     var lastSync = await Preferences.getStringValuesSF(Constant.LastSync_Table);
     if (lastSync == null) {
-      CommunFun.getDataTables1(context);
+      CommunFun.getDataTables1(context, isOpen);
     } else if (lastSync == "1") {
-      CommunFun.getDataTables2(context);
+      CommunFun.getDataTables2(context, isOpen);
     } else if (lastSync == "2") {
-      CommunFun.getDataTables3(context);
+      CommunFun.getDataTables3(context, isOpen);
     } else if (lastSync == "3") {
-      CommunFun.getDataTables4(context);
+      CommunFun.getDataTables4(context, isOpen);
+    } else if (lastSync == "4") {
+      CommunFun.getDataTables5(context, isOpen);
     } else {
       Navigator.of(context).pop();
       Navigator.pushNamed(context, Constant.PINScreen);
@@ -258,7 +344,7 @@ class CommunFun {
     await Preferences.setStringToSF(Constant.LastSync_Table, lastSync);
   }
 
-  static getDataTables1(context) async {
+  static getDataTables1(context, isOpen) async {
     // start with 1 tables
     var data1 = await SyncAPICalls.getDataServerBulk1(context); //api call 1
     if (data1 != null) {
@@ -304,14 +390,13 @@ class CommunFun {
     var data4_1 = await SyncAPICalls.getDataServerBulk4_1(context);
     if (data4_1 != null) {
       databaseHelper.insertData4_1(data4_1["data"]);
-      CommunFun.setServerTime(null, "3");
+      CommunFun.setServerTime(null, "4");
     } else {
       CommunFun.showToast(context, "Something went wrong!");
     }
     var data4_2 = await SyncAPICalls.getDataServerBulk4_2(context);
     if (data4_2 != null) {
-      var result = databaseHelper.insertData4_2(data4_2["data"]);
-      print(result);
+      var result = await databaseHelper.insertData4_2(data4_2["data"]);
       if (result == 1) {
         CommunFun.setServerTime(null, "4");
       } else {
@@ -320,10 +405,35 @@ class CommunFun {
     } else {
       CommunFun.showToast(context, "Something went wrong!");
     }
-    getAssetsData(context);
+
+    var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
+    if (countrys != null) {
+      var result = await databaseHelper.insertAddressData(countrys["data"]);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting counry state city");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+
+    var wineStorageData = await SyncAPICalls.getWineStorageData(context);
+    if (wineStorageData != null) {
+      var result =
+          await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting wine storage data.");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    getAssetsData(context, isOpen);
   }
 
-  static getAssetsData(context) async {
+  static getAssetsData(context, isOpen) async {
     var offset = await CommunFun.getOffset();
     var aceets = await SyncAPICalls.getAssets(context);
     if (aceets != null) {
@@ -333,31 +443,39 @@ class CommunFun {
       print(aceets["data"]["product_image"]);
       if (offset == null) {
         if (aceets["data"]["next_offset"] != 0) {
-          getAssetsData(context);
+          getAssetsData(context, isOpen);
         }
-        Navigator.of(context).pop();
-        var fisrttime =
-            await Preferences.getStringValuesSF(Constant.IS_FIRST_TIME_SYNC);
-        if (fisrttime == null) {
-          await Navigator.pushNamed(context, Constant.PINScreen);
-          await Preferences.setStringToSF(Constant.IS_FIRST_TIME_SYNC, "true");
+        if (isOpen) {
+          Navigator.of(context).pop();
+        }
+        var serverTime =
+            await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+        if (serverTime == null) {
+          Navigator.pushNamed(context, Constant.PINScreen);
         } else {
-          User userdata = await CommunFun.getuserDetails();
-          await CommunFun.checkUserPermission(userdata.id);
           await checkUserDeleted(context);
-          Navigator.pushNamed(context, Constant.DashboardScreen);
+          await checkpermission();
+          await Navigator.pushNamed(context, Constant.SelectTableScreen,
+              arguments: {"isAssign": false});
         }
       } else {
         if (aceets["data"]["next_offset"] == 0) {
           await CommunFun.setServerTime(aceets, "4");
         } else {
-          getAssetsData(context);
+          getAssetsData(context, isOpen);
         }
       }
     } else {
       // handle Exaption
       print("Error when getting product image data");
     }
+  }
+
+  static checkpermission() async {
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var user = json.decode(loginUser);
+    var id = user["id"];
+    checkUserPermission(id);
   }
 
   static checkUserDeleted(context) async {
@@ -368,6 +486,14 @@ class CommunFun {
     if (checkUserExit.length == 0) {
       checkoutMenualy(context, user["id"]);
     }
+  }
+
+  static clearAfterCheckout(context) async {
+    await Preferences.removeSinglePref(Constant.IS_CHECKIN);
+    await Preferences.removeSinglePref(Constant.SHIFT_ID);
+    await Preferences.removeSinglePref(Constant.LOIGN_USER);
+    await Preferences.removeSinglePref(Constant.USER_PERMISSION);
+    await Navigator.pushNamed(context, Constant.PINScreen);
   }
 
   static checkoutMenualy(context, id) async {
@@ -390,15 +516,7 @@ class CommunFun {
     CommunFun.showToast(context, "User deleted from database.");
   }
 
-  static clearAfterCheckout(context) async {
-    await Preferences.removeSinglePref(Constant.IS_CHECKIN);
-    await Preferences.removeSinglePref(Constant.SHIFT_ID);
-    await Preferences.removeSinglePref(Constant.LOIGN_USER);
-    await Preferences.removeSinglePref(Constant.USER_PERMISSION);
-    await Navigator.pushNamed(context, Constant.PINScreen);
-  }
-
-  static getDataTables2(context) async {
+  static getDataTables2(context, isOpen) async {
     // start api call fron second api
     var data2_1 =
         await SyncAPICalls.getDataServerBulk2_1(context); //api call 2_1
@@ -442,14 +560,44 @@ class CommunFun {
     var data4_2 =
         await SyncAPICalls.getDataServerBulk4_2(context); //api call 4_2
     if (data4_2 != null) {
-      databaseHelper.insertData4_2(data4_2["data"]);
+      var result = databaseHelper.insertData4_2(data4_2["data"]);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "4");
+      } else {
+        print("Error when getting bulk4_2");
+      }
     } else {
       // handle Exaption
       print("Error when getting data4_2");
     }
+    var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
+    if (countrys != null) {
+      var result = await databaseHelper.insertAddressData(countrys["data"]);
+      print(result);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting counry state city");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    var wineStorageData = await SyncAPICalls.getWineStorageData(context);
+    if (wineStorageData != null) {
+      var result =
+          await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting wine storage data.");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    getAssetsData(context, isOpen);
   }
 
-  static getDataTables3(context) async {
+  static getDataTables3(context, isOpen) async {
     var data3 = await SyncAPICalls.getDataServerBulk3(context); // call from  3
     if (data3 != null) {
       databaseHelper.insertData3(data3["data"]);
@@ -474,9 +622,34 @@ class CommunFun {
       // handle Exaption
       print("Error when getting data4_2");
     }
+    var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
+    if (countrys != null) {
+      var result = await databaseHelper.insertAddressData(countrys["data"]);
+      print(result);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting counry state city");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    var wineStorageData = await SyncAPICalls.getWineStorageData(context);
+    if (wineStorageData != null) {
+      var result =
+          await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting wine storage data.");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    getAssetsData(context, isOpen);
   }
 
-  static getDataTables4(context) async {
+  static getDataTables4(context, isOpen) async {
     //start from tables 4 API calls
     var data4_1 =
         await SyncAPICalls.getDataServerBulk4_1(context); //api call 4_1
@@ -494,25 +667,59 @@ class CommunFun {
       // handle Exaption
       print("Error when getting data4_2");
     }
+    var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
+    if (countrys != null) {
+      var result = await databaseHelper.insertAddressData(countrys["data"]);
+      print(result);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting counry state city");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    var wineStorageData = await SyncAPICalls.getWineStorageData(context);
+    if (wineStorageData != null) {
+      var result =
+          await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting wine storage data.");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    getAssetsData(context, isOpen);
   }
 
-  static syncSingleTable(context) async {
-    // For Single table data
-    var data = {'serverdatetime': "2020-09-01 12:30:25", 'table': "users"};
-    var isReturn;
-    await repo.syncTable(data).then((value) async {
-      if (value["status"] == Constant.STATUS200) {
-        CommunFun.showToast(context, value["message"]);
-        isReturn = true;
+  static getDataTables5(context, isOpen) async {
+    var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
+    if (countrys != null) {
+      var result = await databaseHelper.insertAddressData(countrys["data"]);
+      print(result);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
       } else {
-        CommunFun.showToast(context, value["message"]);
-        isReturn = false;
+        print("Error when getting counry state city");
       }
-    }).catchError((e) {
-      CommunFun.showToast(context, e.message);
-      isReturn = false;
-    }).whenComplete(() {});
-    return isReturn;
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    var wineStorageData = await SyncAPICalls.getWineStorageData(context);
+    if (wineStorageData != null) {
+      var result =
+          await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
+      if (result == 1) {
+        CommunFun.setServerTime(null, "5");
+      } else {
+        print("Error when getting wine storage data.");
+      }
+    } else {
+      CommunFun.showToast(context, "something want wrong!");
+    }
+    getAssetsData(context, isOpen);
   }
 
   static checkDatabaseExit() async {
@@ -534,6 +741,28 @@ class CommunFun {
     return branchid;
   }
 
+  static getCustomerData() async {
+    Customer customer = new Customer();
+    var localdata = await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
+    if (localdata != null) {
+      var custData = json.decode(localdata);
+      return customer = Customer.fromJson(custData);
+    } else {
+      return customer;
+    }
+  }
+
+  static getTableData() async {
+    Table_order table = new Table_order();
+    var localdata = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+    if (localdata != null) {
+      var tableData = json.decode(localdata);
+      return table = Table_order.fromJson(tableData);
+    } else {
+      return table;
+    }
+  }
+
   static getOffset() async {
     var offset = await Preferences.getStringValuesSF(Constant.OFFSET);
     return offset;
@@ -544,14 +773,16 @@ class CommunFun {
     //converttoserver tiem
     var timeZone =
         await Preferences.getStringValuesSF(Constant.SERVER_TIME_ZONE);
+    print(timeZone);
     if (timeZone != null) {
       final detroitTime =
           new tz.TZDateTime.from(dateTime, tz.getLocation(timeZone));
       print('Local India Time: ' + dateTime.toString());
       print('Detroit Time: ' + detroitTime.toString());
-      DateTime serverDate = DateTime.parse(detroitTime.toString());
+      // DateTime serverDate = DateTime.parse(detroitTime.toString());
       String formattedDate =
-          DateFormat('yyyy-MM-dd HH:mm:ss').format(serverDate);
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(detroitTime);
+      print(formattedDate);
       return formattedDate;
     } else {
       String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
@@ -700,8 +931,8 @@ class CommunFun {
   }
 
   static checkUserPermission(userid) async {
-    LocalAPI localAPI = LocalAPI();
-    List<PosPermission> permissions = await localAPI.getUserPermissions(userid);
+    List<PosPermission> permissions =
+        await branchapi.getUserPermissions(userid);
     if (permissions.length > 0) {
       await Preferences.setStringToSF(
           Constant.USER_PERMISSION, permissions[0].posPermissionName);
@@ -771,4 +1002,423 @@ class CommunFun {
         await paymentAPI.getOrderpaymentmethod(opmethodId);
     return paument_method;
   }
+
+  static autosyncAllTables(context) async {
+    await getsetWebOrders(context);
+    await SyncAPICalls.syncOrderstoDatabase(context);
+    await SyncAPICalls.sendInvenotryTable(context);
+    await SyncAPICalls.sendCustomerWineInventory(context);
+    await SyncAPICalls.sendCancledOrderTable(context);
+    await Preferences.removeSinglePref(Constant.LastSync_Table);
+    await Preferences.removeSinglePref(Constant.OFFSET);
+    await CommunFun.syncAfterSuccess(context, false);
+  }
+
+  static getsetWebOrders(context) async {
+    var res = await SyncAPICalls.getWebOrders(context);
+    var sertvertime = res["data"]["serverdatetime"];
+    await Preferences.setStringToSF(
+        Constant.ORDER_SERVER_DATE_TIME, sertvertime);
+    var cartdata = res["data"]["cart"];
+    await CommunFun.savewebOrdersintoCart(cartdata);
+  }
+
+  static checkisAutoSync(context) async {
+    var isSync = await Preferences.getStringValuesSF(Constant.IS_AUTO_SYNC);
+    if (isSync != null) {
+      print(isSync);
+      if (isSync == "true") {
+        startAutosync(context);
+      }
+    }
+  }
+
+  static startAutosync(context) async {
+    int timertime = 1;
+    var isSynctimer = await Preferences.getStringValuesSF(Constant.SYNC_TIMER);
+    if (isSynctimer != null && isSynctimer != "") {
+      timertime = int.parse(isSynctimer);
+    }
+    print("++++++++++++++++++++++++++++++++++++");
+    print(timertime);
+    var _inactivityTimeout = Duration(minutes: timertime);
+    timer =
+        Timer(_inactivityTimeout, () => CommunFun.autosyncAllTables(context));
+  }
+
+  static stopAutoSync() {
+    timer?.cancel();
+  }
+
+  static countTotalQty(
+      List<MSTCartdetails> cartItems, productItem, productQty) {
+    double qty = 0;
+    if (cartItems.length > 0) {
+      for (var i = 0; i < cartItems.length; i++) {
+        var item = cartItems[i];
+        if (item.productId == productItem.productId) {
+          item.productQty = productQty;
+        }
+        qty += item.productQty;
+      }
+    } else {
+      qty += productQty;
+    }
+    return qty;
+  }
+
+  static countSubtotal(List<MSTCartdetails> cartItems, price) {
+    double subT = 0;
+    if (cartItems.length > 0) {
+      double selectedITemTotal = 0;
+      for (var i = 0; i < cartItems.length; i++) {
+        var item = cartItems[i];
+        selectedITemTotal += item.productPrice;
+      }
+      subT = selectedITemTotal + price;
+    } else {
+      subT += price;
+    }
+    return subT;
+  }
+
+  static countGrandtotal(subt, serviceCharge, tax, dis) {
+    double grandTotal = 0;
+    grandTotal = ((subt - dis) + serviceCharge + tax);
+    return grandTotal;
+  }
+
+  static getTaxs() async {
+    var branchid = await CommunFun.getbranchId();
+    List<BranchTax> taxlists = await branchapi.getTaxList(branchid);
+    return taxlists;
+  }
+
+  static countTax(subT) async {
+    var taxlist = await CommunFun.getTaxs();
+    var totalTax = [];
+    double taxvalue = taxvalues;
+    if (taxlist.length > 0) {
+      for (var i = 0; i < taxlist.length; i++) {
+        var taxlistitem = taxlist[i];
+        var taxval = taxlistitem.rate != null
+            ? subT * double.parse(taxlistitem.rate) / 100
+            : 0.0;
+        taxval = double.parse(taxval.toStringAsFixed(2));
+        taxvalue += taxval;
+        taxvalues = taxvalue;
+        var taxmap = {
+          "id": taxlistitem.id,
+          "tax_id": taxlistitem.taxId,
+          "branch_id": taxlistitem.branchId,
+          "rate": taxlistitem.rate,
+          "status": taxlistitem.status,
+          "updated_at": taxlistitem.updatedAt,
+          "updated_by": taxlistitem.updatedBy,
+          "taxAmount": taxval.toStringAsFixed(2),
+          "taxCode": taxlistitem.code
+        };
+        totalTax.add(taxmap);
+      }
+    }
+    return totalTax;
+  }
+
+  static countDiscount(MST_Cart currentCart) {
+    return currentCart.discount != null
+        ? double.parse(currentCart.discount.toStringAsFixed(2))
+        : 0.00;
+  }
+
+  static getPrinter(context, productItem) async {
+    Printer printer = new Printer();
+    List<Printer> printerlist = await printerList.getPrinterForAddCartProduct(
+        context, productItem.productId.toString());
+    if (printerlist.length > 0) {
+      printer = printerlist[0];
+    }
+    return printer;
+  }
+
+  static addItemToCart(productItem, List<MSTCartdetails> cartItems,
+      MST_Cart allcartData, callback, context) async {
+    taxvalues = 0;
+    MST_Cart cart = new MST_Cart();
+    SaveOrder orderData = new SaveOrder();
+    var branchid = await CommunFun.getbranchId();
+    Table_order table = await CommunFun.getTableData();
+    User loginUser = await CommunFun.getuserDetails();
+    Customer customerData = await CommunFun.getCustomerData();
+    Printer printer = await CommunFun.getPrinter(context, productItem);
+    Cartlist cartlist = new Cartlist();
+    bool isEditing = false;
+    MSTCartdetails sameitem;
+    var contain = cartItems
+        .where((element) => element.productId == productItem.productId);
+    if (contain.isNotEmpty) {
+      isEditing = true;
+      var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
+      List<MSTCartdetails> myModels = (json.decode(jsonString) as List)
+          .map((i) => MSTCartdetails.fromJson(i))
+          .toList();
+      sameitem = myModels[0];
+    }
+    if (productItem.hasInventory == 1) {
+      var qty = 1.0;
+      if (isEditing) {
+        qty = sameitem.productQty + qty;
+      }
+      List<ProductStoreInventory> cartval =
+          await localAPI.checkItemAvailableinStore(productItem.productId);
+      if (cartval.length > 0) {
+        double storeqty = cartval[0].qty;
+        if (storeqty < qty) {
+          CommunFun.showToast(context, Strings.stock_not_valilable);
+          callback();
+          return false;
+        }
+      }
+    }
+    var qty = await CommunFun.countTotalQty(cartItems, productItem, 1.0);
+    var disc = await CommunFun.countDiscount(allcartData);
+    var subtotal = await CommunFun.countSubtotal(cartItems, productItem.price);
+    var serviceCharge =
+        await CommunFun.countServiceCharge(table.service_charge, subtotal);
+    var serviceChargePer = table.service_charge == null
+        ? await CommunFun.getServiceChargePer()
+        : table.service_charge;
+    var totalTax = await CommunFun.countTax(subtotal);
+    var grandTotal = await CommunFun.countGrandtotal(
+        subtotal, serviceCharge, taxvalues, disc);
+    cart.user_id = customerData.customerId;
+    cart.branch_id = int.parse(branchid);
+    cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
+    cart.discount = disc;
+    cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
+    cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
+    cart.table_id = table.table_id;
+    cart.discount_type = allcartData.discount_type;
+    cart.total_qty = qty;
+    cart.tax = double.parse(taxvalues.toStringAsFixed(2));
+    cart.source = 2;
+    cart.tax_json = json.encode(totalTax);
+    cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
+    cart.customer_terminal = customerData != null ? customerData.terminalId : 0;
+    if (!isEditing) {
+      cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    }
+    cart.created_by = loginUser.id;
+    cart.localID = await CommunFun.getLocalID();
+    if (!isEditing) {
+      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    }
+    orderData.numberofPax = table != null ? table.number_of_pax : 0;
+    orderData.isTableOrder = table != null ? 1 : 0;
+    var cartid = await cartlist.addcart(context, cart);
+    ProductDetails cartItemproduct = new ProductDetails();
+    cartItemproduct = productItem;
+
+    cartItemproduct
+        .toJson()
+        .removeWhere((String key, dynamic value) => value == null);
+    var data = cartItemproduct;
+    MSTCartdetails cartdetails = new MSTCartdetails();
+    if (isEditing) {
+      cartdetails.id = sameitem.id;
+    }
+    cartdetails.cartId = cartid;
+    cartdetails.productId = productItem.productId;
+    cartdetails.productName = productItem.name;
+    cartdetails.productSecondName = productItem.name_2;
+    cartdetails.productPrice = isEditing
+        ? double.parse(productItem.price.toStringAsFixed(2)) +
+            sameitem.productPrice
+        : double.parse(productItem.price.toStringAsFixed(2));
+    cartdetails.productQty = isEditing ? sameitem.productQty + 1.0 : 1.0;
+    cartdetails.productNetPrice = productItem.price;
+    cartdetails.createdBy = loginUser.id;
+    cartdetails.cart_detail = jsonEncode(data);
+    cartdetails.discount = isEditing ? sameitem.discount : 0;
+    cartdetails.remark = isEditing ? sameitem.remark : "";
+    cartdetails.issetMeal = 0;
+    cartdetails.hasRacManagemant = productItem.hasRacManagemant;
+    cartdetails.taxValue = taxvalues;
+    cartdetails.printer_id = printer != null ? printer.printerId : 0;
+    cartdetails.createdAt = await CommunFun.getLocalID();
+    var detailID = await cartlist.addintoCartDetails(context, cartdetails);
+    print(detailID);
+    callback();
+  }
+
+  // static addItemToCart(productItem, List<MSTCartdetails> cartItems,
+  //     MST_Cart allcartData, callback, context) async {
+  //   try {
+  //     taxvalues = 0;
+  //     Cartlist cartlist = new Cartlist();
+  //     MST_Cart cart = new MST_Cart();
+  //     SaveOrder orderData = new SaveOrder();
+  //     var branchid = await CommunFun.getbranchId();
+  //     Table_order table = await CommunFun.getTableData();
+  //     User loginUser = await CommunFun.getuserDetails();
+  //     Customer customerData = await CommunFun.getCustomerData();
+  //     Printer printer = await CommunFun.getPrinter(context, productItem);
+  //     bool isEditing = false;
+  //     MSTCartdetails sameitem;
+  //     var contain = cartItems
+  //         .where((element) => element.productId == productItem.productId);
+  //     if (contain.isNotEmpty) {
+  //       isEditing = true;
+  //       var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
+  //       List<MSTCartdetails> myModels = (json.decode(jsonString) as List)
+  //           .map((i) => MSTCartdetails.fromJson(i))
+  //           .toList();
+  //       sameitem = myModels[0];
+  //     }
+  //     if (productItem.hasInventory == 1) {
+  //       var qty = 1.0;
+  //       if (isEditing) {
+  //         qty = sameitem.productQty + qty;
+  //       }
+  //       List<ProductStoreInventory> cartval =
+  //           await localAPI.checkItemAvailableinStore(productItem.productId);
+  //       if (cartval.length > 0) {
+  //         double storeqty = cartval[0].qty;
+  //         if (storeqty < qty) {
+  //           CommunFun.showToast(context, Strings.stock_not_valilable);
+  //           callback();
+  //           return false;
+  //         }
+  //       }
+  //     }
+  //     var qty = await CommunFun.countTotalQty(cartItems, productItem, 1.0);
+  //     var disc = await CommunFun.countDiscount(allcartData);
+  //     var subtotal =
+  //         await CommunFun.countSubtotal(cartItems, productItem.price);
+  //     var serviceCharge =
+  //         await CommunFun.countServiceCharge(table.service_charge, subtotal);
+  //     var serviceChargePer = table.service_charge == null
+  //         ? await CommunFun.getServiceChargePer()
+  //         : table.service_charge;
+  //     var totalTax = await CommunFun.countTax(subtotal);
+  //     var grandTotal = await CommunFun.countGrandtotal(
+  //         subtotal, serviceCharge, taxvalues, disc);
+  //     Table_order tableData = await CommunFun.getTableData();
+  //     cart.user_id = customerData.customerId;
+  //     cart.branch_id = int.parse(branchid);
+  //     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
+  //     cart.discount = disc;
+  //     cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
+  //     cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
+  //     cart.table_id = table.table_id;
+  //     cart.discount_type = allcartData.discount_type;
+  //     cart.total_qty = qty;
+  //     cart.tax = double.parse(taxvalues.toStringAsFixed(2));
+  //     cart.source = 2;
+  //     cart.tax_json = json.encode(totalTax);
+  //     cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
+  //     cart.customer_terminal =
+  //         customerData != null ? customerData.terminalId : 0;
+  //     if (!isEditing) {
+  //       cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+  //     }
+  //     cart.created_by = loginUser.id;
+  //     cart.localID = await CommunFun.getLocalID();
+  //     if (!isEditing) {
+  //       orderData.createdAt =
+  //           await CommunFun.getCurrentDateTime(DateTime.now());
+  //     }
+  //     orderData.numberofPax = table != null ? table.number_of_pax : 0;
+  //     orderData.isTableOrder = table != null ? 1 : 0;
+
+  //     var cartid = await cartlist.addcart(context, cart);
+  //     if (allcartData.id == null) {
+  //       await insertTableData(tableData, cartid, context, isEditing);
+  //     }
+  //     ProductDetails cartItemproduct = new ProductDetails();
+  //     cartItemproduct = productItem;
+  //     cartItemproduct
+  //         .toJson()
+  //         .removeWhere((String key, dynamic value) => value == null);
+  //     var data = cartItemproduct;
+  //     MSTCartdetails cartdetails = new MSTCartdetails();
+  //     if (isEditing) {
+  //       cartdetails.id = sameitem.id;
+  //     }
+  //     cartdetails.cartId = cartid;
+  //     cartdetails.productId = productItem.productId;
+  //     cartdetails.productName = productItem.name;
+  //     cartdetails.productSecondName = productItem.name_2;
+  //     cartdetails.productPrice = isEditing
+  //         ? double.parse(productItem.price.toStringAsFixed(2)) +
+  //             sameitem.productPrice
+  //         : double.parse(productItem.price.toStringAsFixed(2));
+  //     cartdetails.productQty = isEditing ? sameitem.productQty + 1.0 : 1.0;
+  //     cartdetails.productNetPrice = productItem.price;
+  //     cartdetails.createdBy = loginUser.id;
+  //     cartdetails.cart_detail = jsonEncode(data);
+  //     cartdetails.discount = isEditing ? sameitem.discount : 0;
+  //     cartdetails.remark = isEditing ? sameitem.remark : "";
+  //     cartdetails.issetMeal = 0;
+  //     cartdetails.hasRacManagemant = productItem.hasRacManagemant;
+  //     cartdetails.taxValue = taxvalues;
+  //     cartdetails.printer_id = printer != null ? printer.printerId : 0;
+  //     cartdetails.createdAt = await CommunFun.getLocalID();
+  //     var detailID = await cartlist.addintoCartDetails(context, cartdetails);
+  //     callback();
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
+
+  static insertTableData(tableData, cartid, context, isEditing) async {
+    SaveOrder orderData = new SaveOrder();
+    Table_order tableorder = new Table_order();
+    Cartlist cartlist = new Cartlist();
+    TablesList tableList = new TablesList();
+    if (!isEditing) {
+      orderData.numberofPax = tableData != null ? tableData.number_of_pax : 0;
+      orderData.isTableOrder = tableData != null ? 1 : 0;
+      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+      orderData.cartId = cartid;
+      var saveOid = await cartlist.addSaveOrder(orderData, tableData.table_id);
+      tableorder = tableData;
+      tableorder.save_order_id = saveOid;
+      var tableid = await tableList.insertTableOrder(context, tableorder);
+    }
+  }
+
+  static getCustomer() async {
+    Customer customer;
+    var customerData =
+        await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
+    if (customerData != null) {
+      var customers = json.decode(customerData);
+      customer = Customer.fromJson(customers);
+      return customer;
+    } else {
+      return customer;
+    }
+  }
+
+// sendTokitched(itemList) async {
+//   String ids = "";
+//   var list = [];
+//   for (var i = 0; i < itemList.length; i++) {
+//     if (itemList[i].isSendKichen == null || itemList[i].isSendKichen == 0) {
+//       if (ids == "") {
+//         ids = itemList[i].id.toString();
+//       } else {
+//         ids = ids + "," + itemList[i].id.toString();
+//       }
+//       list.add(itemList[i]);
+//     }
+//     if (i == itemList.length - 1) {
+//       if (list.length > 0) {
+//         dynamic send = await localAPI.sendToKitched(ids);
+//         openPrinterPop(list);
+//       }
+//     }
+//   }
+// }
+
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:typed_data';
 
 import 'package:image/image.dart';
@@ -10,27 +9,34 @@ import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Payment.dart';
-import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:image/image.dart';
+import 'package:mcncashier/models/SetMealProduct.dart';
 
 class PrintReceipt {
   PaperSize paper = PaperSize.mm80;
+  String receipt48CharHeader =
+      "Description                  Qty   Price  Amount";
 
   Future<Ticket> KOTReceipt(
-      PaperSize paper, String tableName, List<MSTCartdetails> cartList) async {
+      String tableName, List<MSTCartdetails> cartList, String pax) async {
     final profile = await CapabilityProfile.load();
 
     final Ticket ticket = Ticket(paper, profile);
 
     ticket.setStyles(
         PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
-    ticket.text('K.O.T',
+
+    ticket.text('Table : ' + tableName,
         styles: PosStyles(
           fontType: PosFontType.fontA,
           bold: true,
@@ -40,21 +46,55 @@ class PrintReceipt {
         ),
         linesAfter: 1);
 
-    ticket.setStyles(
-        PosStyles(align: PosAlign.left, fontType: PosFontType.fontB));
+    ticket.text('Pax : ' + pax,
+        styles: PosStyles(
+          fontType: PosFontType.fontA,
+          bold: true,
+          align: PosAlign.center,
+          width: PosTextSize.size2,
+        ),
+        linesAfter: 1);
+
+    ticket.setStyles(PosStyles(align: PosAlign.left));
     final now = DateTime.now();
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
-    ticket.text("Date : " + timestamp, styles: PosStyles(align: PosAlign.left));
-    ticket.text('Table No : ' + tableName,
-        styles: PosStyles(align: PosAlign.left));
+    ticket.text("Date : " + timestamp,
+        styles: PosStyles(
+          align: PosAlign.left,
+          bold: true,
+          fontType: PosFontType.fontB,
+          width: PosTextSize.size2,
+        ));
+    ticket.text("Terminal : " + Strings.terminalName,
+        styles: PosStyles(
+          align: PosAlign.left,
+          bold: true,
+          fontType: PosFontType.fontB,
+          width: PosTextSize.size2,
+        ));
 
     ticket.hr();
     ticket.setStyles(PosStyles(align: PosAlign.left));
     ticket.row([
-      PosColumn(text: 'Qty', width: 2, styles: PosStyles(align: PosAlign.left)),
       PosColumn(
-          text: 'Item', width: 10, styles: PosStyles(align: PosAlign.left)),
+          text: 'Qty',
+          width: 2,
+          styles: PosStyles(
+            align: PosAlign.left,
+            bold: true,
+            fontType: PosFontType.fontA,
+            width: PosTextSize.size2,
+          )),
+      PosColumn(
+          text: 'Description',
+          width: 10,
+          styles: PosStyles(
+            align: PosAlign.left,
+            bold: true,
+            fontType: PosFontType.fontA,
+            width: PosTextSize.size2,
+          )),
     ]);
     ticket.hr();
 
@@ -65,12 +105,116 @@ class PrintReceipt {
           PosColumn(
               text: item.productQty.toString(),
               width: 2,
-              styles: PosStyles(align: PosAlign.left)),
+              styles: PosStyles(
+                align: PosAlign.left,
+                fontType: PosFontType.fontA,
+                width: PosTextSize.size2,
+                bold: false,
+              )),
           PosColumn(
               text: item.productName,
               width: 10,
-              styles: PosStyles(align: PosAlign.left)),
+              containsChinese: false,
+              styles: PosStyles(
+                align: PosAlign.left,
+                fontType: PosFontType.fontA,
+                bold: false,
+                width: PosTextSize.size2,
+                height: PosTextSize.size1,
+              )),
         ]);
+        if (item.productSecondName != null) {
+          if (item.productSecondName.isNotEmpty) {
+            ticket.row([
+              PosColumn(
+                  text: "",
+                  width: 2,
+                  styles: PosStyles(
+                    align: PosAlign.left,
+                    fontType: PosFontType.fontA,
+                    width: PosTextSize.size2,
+                    bold: false,
+                  )),
+              PosColumn(
+                  text: item.productSecondName.toString(),
+                  width: 10,
+                  containsChinese: true,
+                  styles: PosStyles(
+                    align: PosAlign.left,
+                    fontType: PosFontType.fontA,
+                    width: PosTextSize.size2,
+                    bold: false,
+                  ))
+            ]);
+          }
+        }
+        /*For set meal product*/
+        if (item.issetMeal == 1) {
+          List<dynamic> setmealproduct =
+              json.decode(item.setmeal_product_detail);
+          List<SetMealProduct> setMealProducts = [];
+          if (setmealproduct[0] != null) {
+            setMealProducts = setmealproduct.isNotEmpty
+                ? setmealproduct.map((c) => SetMealProduct.fromJson(c)).toList()
+                : [];
+          }
+
+          setMealProducts.forEach((element) {
+            ticket.row([
+              PosColumn(
+                  text: "",
+                  width: 2,
+                  styles: PosStyles(
+                    align: PosAlign.left,
+                    fontType: PosFontType.fontA,
+                    width: PosTextSize.size2,
+                    bold: false,
+                  )),
+              PosColumn(
+                  text: " " +
+                      element.quantity.toStringAsFixed(0) +
+                      " x " +
+                      element.name.toString().trim(),
+                  width: 10,
+                  containsChinese: true,
+                  styles: PosStyles(
+                    align: PosAlign.left,
+                    fontType: PosFontType.fontA,
+                    width: PosTextSize.size2,
+                    bold: false,
+                  ))
+            ]);
+          });
+        }
+        /*Print attributes without price*/
+        if (cartList[i].attrName != null) {
+          List<String> attributes = cartList[i].attrName.split(",");
+          if (attributes.length > 0) {
+            for (var a = 0; a < attributes.length; a++) {
+              ticket.row([
+                PosColumn(
+                    text: "",
+                    width: 2,
+                    styles: PosStyles(
+                      align: PosAlign.left,
+                      fontType: PosFontType.fontA,
+                      width: PosTextSize.size2,
+                      bold: false,
+                    )),
+                PosColumn(
+                    text: "  " + attributes[a],
+                    width: 10,
+                    containsChinese: true,
+                    styles: PosStyles(
+                      align: PosAlign.left,
+                      fontType: PosFontType.fontA,
+                      width: PosTextSize.size2,
+                      bold: false,
+                    ))
+              ]);
+            }
+          }
+        }
       }
     }
     ticket.feed(2);
@@ -79,11 +223,11 @@ class PrintReceipt {
   }
 
   void checkKOTPrint(String printerIp, String tableName, BuildContext ctx,
-      List<MSTCartdetails> cartList) async {
+      List<MSTCartdetails> cartList, String pax) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
     final PosPrintResult res = await printerManager
-        .printTicket(await KOTReceipt(paper, tableName, cartList));
+        .printTicket(await KOTReceipt(tableName, cartList, pax));
 
     CommunFun.showToast(ctx, res.msg);
   }
@@ -92,8 +236,22 @@ class PrintReceipt {
   ===========================Print Receipt==================================
   ========================================================================*/
 
-  Future<Ticket> Receipt(Branch branchData, List<OrderDetail> orderdetail,
-      Orders orderData, Payments paymentdata, String customerName) async {
+  Future<Ticket> Receipt(
+      Branch branchData,
+      List taxJson,
+      List<OrderDetail> orderdetail,
+      List<OrderAttributes> orderAttr,
+      List<OrderModifire> orderModifire,
+      Orders orderData,
+      List<OrderPayment> paymentdata,
+      List<Payments> paymentMethods,
+      String tableName,
+      var currency,
+      String customerName) async {
+    bool isCashPayment = false;
+    double cashPaymentTotal = 0.00;
+    double cashPaymentChange = 0.00;
+
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
@@ -121,118 +279,475 @@ class PrintReceipt {
 
     ticket.emptyLines(1);
 
-    ticket.setStyles(
-        PosStyles(align: PosAlign.left, fontType: PosFontType.fontB));
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+    ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+
+    ticket.row([
+      PosColumn(
+          text: "Document No.",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+      PosColumn(
+          text: " : " + orderData.invoice_no,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Table",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+      PosColumn(
+          text: " : " + tableName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+    ]);
+
     final now = DateTime.now();
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
-
-    ticket.text('Processed by  : ' + branchData.contactPerson,
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text("Invoice Date : " + timestamp,
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text("Invoice No : " + orderData.invoice_no,
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text('Terminal Name : MCN002',
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text('Name : ' + customerName,
-        styles: PosStyles(align: PosAlign.left));
-
-    ticket.hr();
-    ticket.setStyles(PosStyles(align: null));
     ticket.row([
       PosColumn(
-          text: 'ITEM', width: 6, styles: PosStyles(align: PosAlign.left)),
+          text: "Date",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
       PosColumn(
-          text: 'QTY', width: 2, styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: 'PRICE', width: 2, styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: 'AMT', width: 2, styles: PosStyles(align: PosAlign.right)),
+          text: " : " + timestamp,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
     ]);
+    ticket.row([
+      PosColumn(
+          text: "Cashier",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + branchData.contactPerson,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Terminal",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + Strings.terminalName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Customer",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + customerName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    /*For font - A size 1 = 4 Character print */
     ticket.hr();
+    ticket.text("$receipt48CharHeader",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
+    String priceCurrency = printColumnWitSpace(40, currency, true);
+    String amountCurrency = printColumnWitSpace(8, currency, true);
+    ticket.text("$priceCurrency$amountCurrency",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
+
+    ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+
     for (var i = 0; i < orderdetail.length; i++) {
       var item = orderdetail[i];
+
       var name = jsonDecode(item.product_detail);
-      print(name);
-      ticket.row([
-        PosColumn(
-            text: name["name"],
-            width: 6,
-            styles: PosStyles(align: PosAlign.left)),
-        PosColumn(
-            text: item.detail_qty.toString(),
-            width: 2,
-            styles: PosStyles(align: PosAlign.right)),
-        PosColumn(
-            text: item.product_old_price.toStringAsFixed(2),
-            width: 2,
-            styles: PosStyles(align: PosAlign.right)),
-        PosColumn(
-            text: item.product_price.toStringAsFixed(2),
-            width: 2,
-            styles: PosStyles(align: PosAlign.right)),
-      ]);
+
+      String nameOfProduct =
+          printColumnWitSpace(28, name["name"].toString().trim(), false);
+      String qtyOfProduct =
+          printColumnWitSpace(4, item.detail_qty.toStringAsFixed(0), true);
+      String priceOfProduct = printColumnWitSpace(
+          8, item.product_old_price.toStringAsFixed(2), true);
+      String amountOfProduct =
+          printColumnWitSpace(8, item.product_price.toStringAsFixed(2), true);
+
+      ticket.text("$nameOfProduct$qtyOfProduct$priceOfProduct$amountOfProduct",
+          styles: PosStyles(
+              align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+      ticket.setStyles(PosStyles(align: PosAlign.left));
+      if (name["name_2"] != null) {
+        if (name["name_2"].isNotEmpty) {
+          ticket.row([
+            PosColumn(
+                text: name["name_2"].toString(),
+                width: 12,
+                containsChinese: true,
+                styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontA,
+                ))
+          ]);
+        }
+      }
+
+      /*For set meal product*/
+      if (item.issetMeal == 1) {
+        List<dynamic> setmealproduct = json.decode(item.setmeal_product_detail);
+        List<SetMealProduct> setMealProducts = [];
+        if (setmealproduct[0] != null) {
+          setMealProducts = setmealproduct.isNotEmpty
+              ? setmealproduct.map((c) => SetMealProduct.fromJson(c)).toList()
+              : [];
+        }
+
+        setMealProducts.forEach((element) {
+          ticket.text(
+            " " +
+                element.quantity.toStringAsFixed(0) +
+                " x " +
+                element.name.toString().trim(),
+            styles: PosStyles(
+                align: PosAlign.left, fontType: PosFontType.fontA, bold: false),
+            containsChinese: true,
+          );
+        });
+      }
+
+      var contain =
+          orderAttr.where((element) => element.detail_app_id == item.app_id);
+      List<OrderAttributes> attrList = [];
+
+      if (contain.isNotEmpty) {
+        var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
+        attrList.addAll((json.decode(jsonString) as List)
+            .map((i) => OrderAttributes.fromJson(i))
+            .toList());
+      }
+
+      /*Print attributes without price*/
+      if (attrList.length > 0) {
+        for (var a = 0; a < attrList.length; a++) {
+          ticket.row([
+            PosColumn(
+                text: "  " + attrList[a].name.trim(),
+                width: 12,
+                containsChinese: true,
+                styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontA,
+                ))
+          ]);
+        }
+      }
+
+      var contain1 = orderModifire
+          .where((element) => element.detail_app_id == item.app_id);
+      List<OrderModifire> modiList = [];
+      if (contain1.isNotEmpty) {
+        var jsonString = jsonEncode(contain1.map((e) => e.toJson()).toList());
+        modiList.addAll((json.decode(jsonString) as List)
+            .map((i) => OrderModifire.fromJson(i))
+            .toList());
+      }
+
+      /*Print Modifiers without price*/
+      for (var m = 0; m < modiList.length; m++) {
+        ticket.row([
+          PosColumn(
+              text: "  " +
+                  modiList[m].name.trim() +
+                  "@" +
+                  modiList[m].om_amount.toStringAsFixed(2),
+              width: 12,
+              containsChinese: true,
+              styles: PosStyles(
+                align: PosAlign.left,
+                fontType: PosFontType.fontA,
+              ))
+        ]);
+      }
     }
     ticket.hr();
     ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
-          text: "SUB TOTAL(MYR)",
+          text: "Sub Total : ",
           width: 8,
-          styles: PosStyles(align: PosAlign.right)),
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
       PosColumn(
           text: orderData.sub_total.toStringAsFixed(2),
           width: 4,
-          styles: PosStyles(align: PosAlign.right)),
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
     ]);
+    ticket.row([
+      PosColumn(
+          text: "Service Charge(" +
+              orderData.serviceChargePercent.toString() +
+              "%) : ",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: orderData.serviceCharge.toStringAsFixed(2),
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    if (taxJson.length > 0) {
+      taxJson.forEach((element) {
+        ticket.row([
+          PosColumn(
+              text: Strings.tax.toUpperCase() +
+                  " " +
+                  element["taxCode"] +
+                  "@" +
+                  element["rate"] +
+                  "% : ",
+              width: 8,
+              styles: PosStyles(
+                align: PosAlign.right,
+                fontType: PosFontType.fontA,
+                bold: false,
+              )),
+          PosColumn(
+              text: element["taxAmount"].toString(),
+              width: 4,
+              styles: PosStyles(
+                align: PosAlign.right,
+                fontType: PosFontType.fontA,
+                bold: false,
+              ))
+        ]);
+      });
+    }
+
+    double total =
+        double.parse(checkRoundData(orderData.grand_total.toStringAsFixed(2)));
+    ticket.row([
+      PosColumn(
+          text: "Adjustment : ",
+          width: 8,
+          styles: PosStyles(
+              align: PosAlign.right, fontType: PosFontType.fontA, bold: false)),
+      PosColumn(
+          text: calRounded(total, orderData.grand_total).toStringAsFixed(2),
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          ))
+    ]);
+
+    ticket.text(printColumnWitSpace(48, Strings.print15line, true),
+        styles: PosStyles(
+          align: PosAlign.right,
+          fontType: PosFontType.fontA,
+        ));
+    ticket.setStyles(PosStyles(align: PosAlign.right));
+    ticket.row([
+      PosColumn(
+          text: "Total : ",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size1,
+          )),
+      PosColumn(
+          text: total.toStringAsFixed(2),
+          //orderData.grand_total.toStringAsFixed(2),
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size1,
+          ))
+    ]);
+    ticket.text(printColumnWitSpace(48, Strings.print15line, true),
+        styles: PosStyles(
+          align: PosAlign.right,
+          fontType: PosFontType.fontA,
+        ));
     ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.right));
+
+    for (int p = 0; p < paymentMethods.length; p++) {
+      if (paymentMethods[p].name.toLowerCase() == "cash") {
+        isCashPayment = true;
+        cashPaymentTotal = cashPaymentTotal + paymentdata[p].op_amount;
+        cashPaymentChange = cashPaymentChange +
+            (paymentdata[p].op_amount_change == null
+                ? 0.00
+                : paymentdata[p].op_amount_change);
+      }
+    }
 
     ticket.row([
       PosColumn(
-          text: "TAX(MYR)", width: 8, styles: PosStyles(align: PosAlign.right)),
+          text: "Cash Received ",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
       PosColumn(
-          text: orderData.tax_amount.toStringAsFixed(2),
+          text: cashPaymentTotal.toStringAsFixed(2),
           width: 4,
-          styles: PosStyles(align: PosAlign.right))
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          ))
     ]);
     ticket.row([
       PosColumn(
-          text: "GRAND TOTAL(MYR)",
+          text: "Change ",
           width: 8,
-          styles: PosStyles(align: PosAlign.right)),
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
       PosColumn(
-          text: orderData.grand_total.toStringAsFixed(2),
+          text: cashPaymentChange > 0
+              ? "-" + cashPaymentChange.toStringAsFixed(2)
+              : cashPaymentChange.toStringAsFixed(2),
           width: 4,
-          styles: PosStyles(align: PosAlign.right))
-    ]);
-    ticket.row([
-      PosColumn(
-          text: "CASH(MYR)",
-          width: 8,
-          styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: paymentdata.name.toString(),
-          width: 4,
-          styles: PosStyles(align: PosAlign.right))
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          ))
     ]);
 
+    ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.right));
+
+    for (int p = 0; p < paymentMethods.length; p++) {
+      double amount = 0.00;
+      if (paymentMethods[p].name.toLowerCase() == "cash") {
+        amount = cashPaymentTotal - cashPaymentChange;
+      } else {
+        amount = paymentdata[p].op_amount;
+      }
+      ticket.row([
+        PosColumn(
+            text: paymentMethods[p].name.toString() + " ",
+            width: 8,
+            styles: PosStyles(
+              align: PosAlign.right,
+              fontType: PosFontType.fontA,
+              bold: false,
+            )),
+        PosColumn(
+            text: amount.toStringAsFixed(2),
+            width: 4,
+            styles: PosStyles(
+              align: PosAlign.right,
+              fontType: PosFontType.fontA,
+              bold: false,
+            ))
+      ]);
+    }
+
+    ticket.emptyLines(1);
     ticket.setStyles(PosStyles(align: PosAlign.center));
     /* ticket.emptyLines(1);
-    ticket.qrcode('www.example.com',
-    ticket.emptyLines(1);
-    ticket.qrcode('www.MCN.com',
-        size: QRSize.Size5, align: PosAlign.center);
-    ticket.emptyLines(1);*/
+    ticket.qrcode('www.MCN.com', size: QRSize.Size5, align: PosAlign.center);*/
 
     ticket.text('Thank you!',
-        styles: PosStyles(bold: true, align: PosAlign.center));
+        styles: PosStyles(
+          bold: true,
+          align: PosAlign.center,
+          fontType: PosFontType.fontA,
+        ));
     ticket.text('Please visit us again',
-        styles: PosStyles(bold: true, align: PosAlign.center));
+        styles: PosStyles(
+          bold: true,
+          align: PosAlign.center,
+          fontType: PosFontType.fontA,
+        ));
 
     ticket.feed(1);
     ticket.cut();
-    ticket.drawer();
+
+    /*Open Drawer only when select payment method cash*/
+    if (isCashPayment) {
+      ticket.drawer();
+    }
     return ticket;
   }
 
@@ -240,230 +755,828 @@ class PrintReceipt {
       String printerIp,
       BuildContext ctx,
       Branch branchData,
+      List taxJson,
       List<OrderDetail> orderdetail,
+      List<OrderAttributes> orderAttr,
+      List<OrderModifire> orderModifire,
       Orders orderData,
-      Payments paymentdata,
+      List<OrderPayment> paymentdata,
+      List<Payments> paymentMethods,
+      String tableName,
+      var currency,
       String customerName) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(await Receipt(
-        branchData, orderdetail, orderData, paymentdata, customerName));
+        branchData,
+        taxJson,
+        orderdetail,
+        orderAttr,
+        orderModifire,
+        orderData,
+        paymentdata,
+        paymentMethods,
+        tableName,
+        currency,
+        customerName));
 
     CommunFun.showToast(ctx, res.msg);
-
-/*final snackBar =
-        SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
-    Scaffold.of(ctx).showSnackBar(snackBar);*/
   }
 
 /*========================================================================
-  ===========================Print Draft print==================================
+  ===========================Print Draft print==============================
   ========================================================================*/
 
   Future<Ticket> DraftReceipt(
+      List taxJson,
       List<MSTCartdetails> cartList,
       String tableName,
       double subTotal,
+      double serviceChargePer,
+      double serviceCharge,
       double grandTotal,
       double tax,
       Branch branchData,
+      String currency,
       String custName) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
-    // Print image
     ticket.setStyles(
         PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
+
     final ByteData data =
         await rootBundle.load('assets/headerlogo_receipt.png');
     final Uint8List bytes = data.buffer.asUint8List();
     final image = decodeImage(bytes);
     ticket.image(image);
+
     ticket.emptyLines(1);
 
     ticket.text(branchData.address,
         styles: PosStyles(
             fontType: PosFontType.fontA,
             bold: true,
-            align: PosAlign.center,
-            width: PosTextSize.size1));
+            width: PosTextSize.size1,
+            align: PosAlign.center));
     ticket.text("Contact No : " + branchData.contactNo,
         styles: PosStyles(
             fontType: PosFontType.fontA, align: PosAlign.center, bold: true));
-
     ticket.emptyLines(1);
 
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+    ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+
+    ticket.row([
+      PosColumn(
+          text: "Table",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+      PosColumn(
+          text: " : " + tableName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+    ]);
     final now = DateTime.now();
     final formatter = DateFormat('MM/dd/yyyy H:m');
     final String timestamp = formatter.format(now);
-
-    ticket.setStyles(
-        PosStyles(align: PosAlign.left, fontType: PosFontType.fontB));
-    ticket.text('Processed by  : ' + branchData.contactPerson,
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text("Invoice Date : " + timestamp,
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text('Terminal Name : MCN002',
-        styles: PosStyles(align: PosAlign.left));
-    ticket.text('Name : ' + custName, styles: PosStyles(align: PosAlign.left));
-
-    ticket.hr();
-    ticket.setStyles(PosStyles(align: null));
     ticket.row([
       PosColumn(
-          text: 'ITEM', width: 6, styles: PosStyles(align: PosAlign.left)),
+          text: "Date",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
       PosColumn(
-          text: 'QTY', width: 2, styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: 'PRICE', width: 2, styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: 'AMT', width: 2, styles: PosStyles(align: PosAlign.right)),
+          text: " : " + timestamp,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
     ]);
+    ticket.row([
+      PosColumn(
+          text: "Cashier",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + branchData.contactPerson,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Terminal",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + Strings.terminalName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Customer",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + custName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+
+    ticket.hr();
+    ticket.text("$receipt48CharHeader",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
+    String priceCurrency = printColumnWitSpace(40, currency, true);
+    String amountCurrency = printColumnWitSpace(8, currency, true);
+    ticket.text("$priceCurrency$amountCurrency",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
     ticket.hr();
 
     for (var i = 0; i < cartList.length; i++) {
       var total = cartList[i].productQty * cartList[i].productPrice;
 
-      ticket.row([
-        PosColumn(
-            text: cartList[i].productName,
-            width: 6,
-            styles: PosStyles(align: PosAlign.left)),
-        PosColumn(
-            text: cartList[i].productQty.toString(),
-            width: 2,
-            styles: PosStyles(align: PosAlign.right)),
-        PosColumn(
-            text: cartList[i].productPrice.toStringAsFixed(2),
-            width: 2,
-            styles: PosStyles(align: PosAlign.right)),
-        PosColumn(
-            text: total.toStringAsFixed(2),
-            width: 2,
-            styles: PosStyles(align: PosAlign.right)),
-      ]);
+      String nameOfProduct = printColumnWitSpace(
+          28, cartList[i].productName.toString().trim(), false);
+      String qtyOfProduct = printColumnWitSpace(
+          4, cartList[i].productQty.toStringAsFixed(0), true);
+      String priceOfProduct = printColumnWitSpace(
+          8, cartList[i].productPrice.toStringAsFixed(2), true);
+      String amountOfProduct =
+          printColumnWitSpace(8, total.toStringAsFixed(2), true);
+
+      ticket.text("$nameOfProduct$qtyOfProduct$priceOfProduct$amountOfProduct",
+          styles: PosStyles(
+              align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+      ticket.setStyles(PosStyles(align: PosAlign.left));
+
+      if (cartList[i].productSecondName != null) {
+        if (cartList[i].productSecondName.isNotEmpty) {
+          ticket.row([
+            PosColumn(
+                text: cartList[i].productSecondName.toString(),
+                width: 12,
+                containsChinese: true,
+                styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontA,
+                ))
+          ]);
+        }
+      }
+
+      /*For set meal product*/
+      if (cartList[i].issetMeal == 1) {
+        List<dynamic> setmealproduct =
+            json.decode(cartList[i].setmeal_product_detail);
+        List<SetMealProduct> setMealProducts = [];
+        if (setmealproduct[0] != null) {
+          setMealProducts = setmealproduct.isNotEmpty
+              ? setmealproduct.map((c) => SetMealProduct.fromJson(c)).toList()
+              : [];
+        }
+
+        setMealProducts.forEach((element) {
+          ticket.text(
+              " " +
+                  element.quantity.toStringAsFixed(0) +
+                  " x " +
+                  element.name.toString().trim(),
+              styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontA,
+                  bold: false));
+        });
+      }
+      /*Print attributes without price*/
+      /*Print attributes without price*/
+      if (cartList[i].attrName != null) {
+        print("=== String into List ===");
+        List<String> attributes = cartList[i].attrName.split(",");
+        if (attributes.length > 0) {
+          for (var a = 0; a < attributes.length; a++) {
+            ticket.row([
+              PosColumn(
+                  text: "  " + attributes[a],
+                  width: 12,
+                  containsChinese: true,
+                  styles: PosStyles(
+                    align: PosAlign.left,
+                    fontType: PosFontType.fontA,
+                    bold: false,
+                  ))
+            ]);
+          }
+        }
+      }
     }
     ticket.hr();
     ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
-          text: "SUB TOTAL(MYR)",
+          text: "Sub Total : ",
           width: 8,
-          styles: PosStyles(align: PosAlign.right)),
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
       PosColumn(
           text: subTotal.toStringAsFixed(2),
           width: 4,
-          styles: PosStyles(align: PosAlign.right)),
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
     ]);
-    ticket.hr();
-
     ticket.row([
       PosColumn(
-          text: "TAX(MYR)", width: 8, styles: PosStyles(align: PosAlign.right)),
-      PosColumn(
-          text: tax.toStringAsFixed(2),
-          width: 4,
-          styles: PosStyles(align: PosAlign.right)),
-    ]);
-    //ticket.hr();
-    ticket.row([
-      PosColumn(
-          text: "GRAND TOTAL(MYR)",
+          text: "Service Charge($serviceChargePer%) : ",
           width: 8,
-          styles: PosStyles(align: PosAlign.right)),
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
       PosColumn(
-          text: grandTotal.toStringAsFixed(2),
+          text: serviceCharge.toStringAsFixed(2),
           width: 4,
-          styles: PosStyles(align: PosAlign.right)),
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
     ]);
+    if (taxJson.length > 0) {
+      taxJson.forEach((element) {
+        ticket.row([
+          PosColumn(
+              text: Strings.tax.toUpperCase() +
+                  " " +
+                  element["taxCode"] +
+                  "@" +
+                  element["rate"] +
+                  "% : ",
+              width: 8,
+              styles: PosStyles(
+                align: PosAlign.right,
+                fontType: PosFontType.fontA,
+                bold: false,
+              )),
+          PosColumn(
+              text: element["taxAmount"].toString(),
+              width: 4,
+              styles: PosStyles(
+                align: PosAlign.right,
+                fontType: PosFontType.fontA,
+                bold: false,
+              ))
+        ]);
+      });
+    }
 
+    double total = double.parse(checkRoundData(grandTotal.toStringAsFixed(2)));
+    ticket.row([
+      PosColumn(
+          text: "Adjustment : ",
+          width: 8,
+          styles: PosStyles(
+              align: PosAlign.right, fontType: PosFontType.fontA, bold: false)),
+      PosColumn(
+          text: calRounded(total, grandTotal).toStringAsFixed(2),
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          ))
+    ]);
+    ticket.text(printColumnWitSpace(48, Strings.print15line, true),
+        styles: PosStyles(
+          align: PosAlign.right,
+          fontType: PosFontType.fontA,
+        ));
+    ticket.setStyles(PosStyles(align: PosAlign.right));
+
+    ticket.row([
+      PosColumn(
+          text: "Total : ",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size1,
+          )),
+      PosColumn(
+          text: total.toStringAsFixed(2),
+          //orderData.grand_total.toStringAsFixed(2),
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size1,
+          ))
+    ]);
+    ticket.text(printColumnWitSpace(48, Strings.print15line, true),
+        styles: PosStyles(
+          align: PosAlign.right,
+          fontType: PosFontType.fontA,
+        ));
     ticket.setStyles(PosStyles(align: PosAlign.center));
     /* ticket.emptyLines(1);
-    ticket.qrcode('www.example.com',
-        size: QRSize.Size5, align: PosAlign.center);*/
-    ticket.emptyLines(1);
-    ticket.qrcode('www.MCN.com',
-        size: QRSize.Size5, align: PosAlign.center);
+    ticket.qrcode('www.MCN.com', size: QRSize.Size5, align: PosAlign.center);*/
     ticket.emptyLines(1);
 
     ticket.text('Thank you!',
-        styles: PosStyles(bold: true, align: PosAlign.center));
+        styles: PosStyles(
+          bold: true,
+          align: PosAlign.center,
+          fontType: PosFontType.fontA,
+        ));
     ticket.text('Please visit us again',
-        styles: PosStyles(bold: true, align: PosAlign.center));
+        styles: PosStyles(
+          bold: true,
+          align: PosAlign.center,
+          fontType: PosFontType.fontA,
+        ));
 
-    ticket.feed(2);
+    ticket.feed(1);
     ticket.cut();
     return ticket;
   }
 
   void checkDraftPrint(
+      List taxJson,
       String printerIp,
       BuildContext ctx,
       List<MSTCartdetails> cartList,
       String tableName,
       double subTotal,
+      double serviceChargePer,
+      double serviceCharge,
       double grandTotal,
       double tax,
+      Branch branchData,
+      String currency,
+      String custName) async {
+    final PrinterNetworkManager printerManager = PrinterNetworkManager();
+    printerManager.selectPrinter(printerIp, port: 9100);
+
+    final PosPrintResult res = await printerManager.printTicket(
+        await DraftReceipt(
+            taxJson,
+            cartList,
+            tableName,
+            subTotal,
+            serviceChargePer,
+            serviceCharge,
+            grandTotal,
+            tax,
+            branchData,
+            currency,
+            custName));
+
+    CommunFun.showToast(ctx, res.msg);
+  }
+
+/*========================================================================
+  ===========================Print Order check list print==================
+  ========================================================================*/
+
+  Future<Ticket> CheckListReceipt(List<MSTCartdetails> cartList,
+      String tableName, Branch branchData, String custName) async {
+    final profile = await CapabilityProfile.load();
+    final Ticket ticket = Ticket(paper, profile);
+
+    // Print image
+    ticket.setStyles(
+        PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
+
+    ticket.text("Customer Order",
+        styles: PosStyles(
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size2,
+            align: PosAlign.center));
+    ticket.text("Check List",
+        styles: PosStyles(
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size2,
+            align: PosAlign.center));
+
+    ticket.emptyLines(1);
+
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+    ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+
+    ticket.row([
+      PosColumn(
+          text: "Table",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+      PosColumn(
+          text: " : " + tableName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+    ]);
+    final now = DateTime.now();
+    final formatter = DateFormat('MM/dd/yyyy H:m');
+    final String timestamp = formatter.format(now);
+    ticket.row([
+      PosColumn(
+          text: "Date",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + timestamp,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Cashier",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + branchData.contactPerson,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Terminal",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + Strings.terminalName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Customer",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + custName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+
+    ticket.hr();
+
+    ticket.row([
+      PosColumn(
+          text: 'Description',
+          width: 7,
+          styles: PosStyles(
+              align: PosAlign.left, fontType: PosFontType.fontA, bold: true)),
+      PosColumn(
+          text: 'Qty',
+          width: 2,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+      PosColumn(
+          text: 'Check',
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+    ]);
+    ticket.hr();
+
+    double totalQTY = 0.0;
+
+    for (var i = 0; i < cartList.length; i++) {
+      totalQTY = totalQTY + cartList[i].productQty;
+      ticket.row([
+        PosColumn(
+            text: cartList[i].productName,
+            width: 7,
+            styles: PosStyles(
+                align: PosAlign.left,
+                fontType: PosFontType.fontA,
+                bold: false)),
+        PosColumn(
+            text: cartList[i].productQty.toStringAsFixed(0),
+            width: 2,
+            styles: PosStyles(
+              align: PosAlign.right,
+              fontType: PosFontType.fontA,
+              bold: false,
+            )),
+        PosColumn(
+            text: "[  ]",
+            width: 3,
+            styles: PosStyles(
+              align: PosAlign.right,
+              fontType: PosFontType.fontA,
+              bold: false,
+            )),
+      ]);
+      ticket.setStyles(PosStyles(align: PosAlign.left));
+
+      if (cartList[i].productSecondName != null) {
+        if (cartList[i].productSecondName.isNotEmpty) {
+          ticket.row([
+            PosColumn(
+                text: cartList[i].productSecondName.toString(),
+                width: 12,
+                containsChinese: true,
+                styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontA,
+                ))
+          ]);
+        }
+      }
+      /*For set meal product*/
+      if (cartList[i].issetMeal == 1) {
+        List<dynamic> setmealproduct =
+            json.decode(cartList[i].setmeal_product_detail);
+        List<SetMealProduct> setMealProducts = [];
+        if (setmealproduct[0] != null) {
+          setMealProducts = setmealproduct.isNotEmpty
+              ? setmealproduct.map((c) => SetMealProduct.fromJson(c)).toList()
+              : [];
+        }
+
+        setMealProducts.forEach((element) {
+          ticket.text(
+              " " +
+                  element.quantity.toStringAsFixed(0) +
+                  " x " +
+                  element.name.toString().trim(),
+              styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontA,
+                  bold: false));
+        });
+      }
+      /*Print attributes without price*/
+      if (cartList[i].attrName != null) {
+        List<String> attributes = cartList[i].attrName.split(",");
+        if (attributes.length > 0) {
+          for (var a = 0; a < attributes.length; a++) {
+            ticket.row([
+              PosColumn(
+                  text: "  " + attributes[a],
+                  width: 12,
+                  containsChinese: true,
+                  styles: PosStyles(
+                    align: PosAlign.left,
+                    fontType: PosFontType.fontA,
+                    bold: false,
+                  ))
+            ]);
+          }
+        }
+      }
+    }
+    ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.right));
+    ticket.row([
+      PosColumn(
+          text: "Total QTY:",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+      PosColumn(
+          text: totalQTY.toStringAsFixed(1),
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: true,
+          )),
+    ]);
+    ticket.hr();
+
+    ticket.feed(1);
+    ticket.cut();
+    return ticket;
+  }
+
+  void checkListReceiptPrint(
+      String printerIp,
+      BuildContext ctx,
+      List<MSTCartdetails> cartList,
+      String tableName,
       Branch branchData,
       String custName) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
-        await DraftReceipt(cartList, tableName, subTotal, grandTotal, tax,
-            branchData, custName));
+        await CheckListReceipt(cartList, tableName, branchData, custName));
 
     CommunFun.showToast(ctx, res.msg);
-
-/*final snackBar =
-        SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
-    Scaffold.of(ctx).showSnackBar(snackBar);*/
   }
 
 /*========================================================================
   ===========================Test print=====================================
   ========================================================================*/
 
-  void testReceiptPrint(
-      String printerIp, BuildContext ctx, String printerName) async {
+  void testReceiptPrint(String printerIp, BuildContext ctx, String printerName,
+      String isFor) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager
-        .printTicket(await testPrintReceipt(paper, printerName, printerIp));
-
+        .printTicket(await testPrintReceipt(printerName, printerIp, isFor));
     CommunFun.showToast(ctx, res.msg);
-
-/* final snackBar = SnackBar(content: Text(res.msg, textAlign: TextAlign.center));
-    Scaffold.of(ctx).showSnackBar(snackBar);*/
   }
 
   Future<Ticket> testPrintReceipt(
-      PaperSize paper, String printerName, String printerIp) async {
+      String printerName, String printerIp, String isFor) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
-    ticket.setStyles(
-        PosStyles(align: PosAlign.center, fontType: PosFontType.fontB));
-    ticket.text(printerName + " Tested",
-        styles: PosStyles(
-            align: PosAlign.center, bold: true, width: PosTextSize.size1));
+    if (isFor == "Testing") {
+      ticket.setStyles(
+          PosStyles(align: PosAlign.center, fontType: PosFontType.fontB));
+      ticket.text(printerName + " Tested",
+          styles: PosStyles(
+              align: PosAlign.center, bold: true, width: PosTextSize.size1));
 
-    ticket.text("Printer IP : " + printerIp,
-        styles: PosStyles(
-            align: PosAlign.center, bold: true, width: PosTextSize.size1));
+      ticket.text("Printer IP : " + printerIp,
+          styles: PosStyles(
+              align: PosAlign.center, bold: true, width: PosTextSize.size1));
+      ticket.text("Terminal : " + Strings.terminalName,
+          styles: PosStyles(
+              align: PosAlign.center, bold: true, width: PosTextSize.size1));
 
-    final now = DateTime.now();
-    final formatter = DateFormat('MM/dd/yyyy H:m');
-    final String timestamp = formatter.format(now);
+      final now = DateTime.now();
+      final formatter = DateFormat('MM/dd/yyyy H:m');
+      final String timestamp = formatter.format(now);
 
-    ticket.text("Test Date time : " + timestamp,
-        styles: PosStyles(align: PosAlign.center, bold: true));
+      ticket.text("Test Date time : " + timestamp,
+          styles: PosStyles(align: PosAlign.center, bold: true));
 
-    ticket.feed(2);
-    ticket.cut();
+      ticket.feed(2);
+      ticket.cut();
+    }
     ticket.drawer();
     return ticket;
+  }
+
+  String checkRoundData(String total) {
+    var parts = total.split('.');
+    //First values
+    String prefix = parts[0].trim();
+    //Second values
+    String postFilx = parts[1].trim();
+
+    String round = total;
+
+    int tempValue = int.parse(postFilx.substring(1));
+    if (tempValue != 0 && tempValue != 5) {
+      if (tempValue <= 2) {
+        round = prefix + "." + postFilx.substring(0, 1) + "0";
+      } else if (tempValue <= 7) {
+        print(postFilx.substring(0, 1));
+        round = prefix + "." + postFilx.substring(0, 1) + "5";
+        print(round);
+      } else {
+        int values = 0;
+        if (int.parse(postFilx.substring(1)) == 9) {
+          values = 1;
+        } else {
+          values = 2;
+        }
+
+        String tempRound = (int.parse(postFilx) + values).toString();
+        double sum = 0.00;
+        if (tempRound == "100") {
+          sum = double.parse(prefix + ".00") + double.parse("1.00");
+        } else {
+          sum = double.parse(prefix + ".00") + double.parse("." + tempRound);
+        }
+        round = sum.toStringAsFixed(2);
+      }
+    }
+    return round;
+  }
+
+  double calRounded(double total, double oldTotal) {
+    if (total == oldTotal) {
+      return 0.00;
+    } else {
+      return (total - oldTotal);
+    }
+  }
+
+  String printColumnWitSpace(
+      int spaceBetween, String values, bool isLeftSpace) {
+    int totalGivenSpace = spaceBetween - values.length;
+    String space = " ";
+    String printSpace = "";
+    for (int i = 1; i <= totalGivenSpace; i++) {
+      printSpace = printSpace + space;
+    }
+    if (isLeftSpace) {
+      return printSpace + values;
+    } else {
+      return values + printSpace;
+    }
   }
 }

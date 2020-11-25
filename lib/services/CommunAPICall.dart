@@ -10,6 +10,7 @@ class APICalls {
     try {
       var connected = await CommunFun.checkConnectivity();
       if (connected) {
+        print(apiurl);
         Uri url = Uri.parse(Configrations.base_URL + apiurl);
         final client = new http.Client();
         final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
@@ -20,8 +21,8 @@ class APICalls {
           headers: headers,
           body: params,
         );
-        print(response);
         var data = json.decode(response.body);
+        print(data);
         return data;
       } else {
         CommunFun.showToast(context, Strings.internet_connection_lost);
@@ -29,7 +30,7 @@ class APICalls {
     } catch (e) {
       print(e);
       CommunFun.showToast(context, e.message.toString());
-      return null;
+      //return null;
     }
   }
 }

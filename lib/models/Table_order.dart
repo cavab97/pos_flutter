@@ -8,6 +8,7 @@ class Table_order {
   String merged_pax;
   int table_locked_by;
   int is_order_merged;
+  double service_charge;
 
   Table_order(
       {this.table_id,
@@ -18,7 +19,8 @@ class Table_order {
       this.save_order_id,
       this.merged_pax,
       this.table_locked_by,
-      this.is_order_merged});
+      this.is_order_merged,
+      this.service_charge});
 
   Table_order.fromJson(Map<String, dynamic> json) {
     table_id = json["table_id"];
@@ -30,6 +32,7 @@ class Table_order {
     merged_pax = json["merged_pax"];
     table_locked_by = json["table_locked_by"];
     is_order_merged = json["is_order_merge"];
+    service_charge = json["service_charge"];
   }
 
   Map<String, dynamic> toJson() {
@@ -43,6 +46,7 @@ class Table_order {
     data['merged_pax'] = this.merged_pax;
     data["table_locked_by"] = this.table_locked_by;
     data["is_order_merged"] = this.is_order_merged;
+    data["service_charge"] = this.service_charge;
     return data;
   }
 }

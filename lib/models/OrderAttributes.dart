@@ -3,6 +3,8 @@ class OrderAttributes {
   String uuid;
   int order_id;
   int detail_id;
+  int order_app_id;
+  int detail_app_id;
   int terminal_id;
   int app_id;
   int product_id;
@@ -14,12 +16,15 @@ class OrderAttributes {
   String updated_at;
   int updated_by;
   int oa_status;
+  String name;
 
   OrderAttributes({
     this.oa_id,
     this.uuid,
     this.order_id,
     this.detail_id,
+    this.order_app_id,
+    this.detail_app_id,
     this.terminal_id,
     this.app_id,
     this.product_id,
@@ -31,12 +36,15 @@ class OrderAttributes {
     this.oa_status,
     this.updated_at,
     this.updated_by,
+    this.name,
   });
 
   OrderAttributes.fromJson(Map<String, dynamic> json) {
     oa_id = json["oa_id"];
     uuid = json["uuid"];
     order_id = json["order_id"];
+    order_app_id = json["order_app_id"];
+    detail_app_id = json["detail_app_id"];
     detail_id = json["detail_id"];
     terminal_id = json["terminal_id"];
     app_id = json["app_id"];
@@ -51,6 +59,7 @@ class OrderAttributes {
     oa_status = json['oa_status'];
     updated_at = json["updated_at"];
     updated_by = json["updated_by"];
+    name = json["name"];
   }
 
   Map<String, dynamic> toJson() {
@@ -58,7 +67,9 @@ class OrderAttributes {
     data["oa_id"] = this.oa_id;
     data["uuid"] = this.uuid;
     data["order_id"] = this.order_id;
-    data["detail_id"] = this.order_id;
+    data["detail_app_id"] = this.detail_app_id;
+    data["order_app_id"] = this.order_app_id;
+    data["detail_id"] = this.detail_id;
     data["terminal_id"] = this.terminal_id;
     data["app_id"] = this.app_id;
     data["product_id"] = this.product_id;
@@ -70,7 +81,7 @@ class OrderAttributes {
     data["oa_status"] = this.oa_status;
     data["updated_at"] = this.updated_at;
     data["updated_by"] = this.updated_by;
-
+    data["name"] = this.name;
     return data;
   }
 }

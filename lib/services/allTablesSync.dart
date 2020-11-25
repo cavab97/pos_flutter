@@ -5,6 +5,9 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/config.dart';
+import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Customer_Liquor_Inventory.dart';
+import 'package:mcncashier/models/Customer_Liquor_Inventory_Log.dart';
 import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
@@ -120,6 +123,34 @@ class SyncAPICalls {
     return await APICalls.apiCall(apiurl, context, stringParams);
   }
 
+  static getDataServerBulkAddressData(context) async {
+    var apiurl = Configrations.country_state_city_datatable;
+    var branchid = await CommunFun.getbranchId();
+    var terminalId = await CommunFun.getTeminalKey();
+    var serverTime =
+        await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+    var stringParams = {
+      'datetime': serverTime != null ? serverTime : '',
+      'branchId': branchid,
+      'terminal_id': terminalId
+    };
+    return await APICalls.apiCall(apiurl, context, stringParams);
+  }
+
+  static getWineStorageData(context) async {
+    var apiurl = Configrations.rac_box_liquor_inventor_datatable;
+    var branchid = await CommunFun.getbranchId();
+    var terminalId = await CommunFun.getTeminalKey();
+    var serverTime =
+        await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+    var stringParams = {
+      'datetime': serverTime != null ? serverTime : '',
+      'branchId': branchid,
+      'terminal_id': terminalId
+    };
+    return await APICalls.apiCall(apiurl, context, stringParams);
+  }
+
   static getAssets(context) async {
     var apiurl = Configrations.product_image;
     var terminalId = await CommunFun.getTeminalKey();
@@ -131,7 +162,7 @@ class SyncAPICalls {
       'datetime': serverTime != null ? serverTime : '',
       'branchId': branchid, // serverTime,
       'terminal_id': terminalId,
-      'offset': offset != null ? int.parse(offset) : 10
+      'offset': offset != null ? int.parse(offset) : 0
     };
     return await APICalls.apiCall(apiurl, context, stringParams);
   }
@@ -174,24 +205,26 @@ class SyncAPICalls {
       var branchid = await CommunFun.getbranchId();
       LocalAPI localAPI = LocalAPI();
       var apiurl = Configrations.order_sync;
-      List<Orders> orders = await localAPI.getOrdersListTable(branchid);
+      List<Orders> orders =
+          await localAPI.getOrdersListTable(branchid, terminalId);
       if (orders.length > 0) {
         List ordersList = [];
         for (var i = 0; i < orders.length; i++) {
           var order = orders[i];
           List<OrderDetail> ordersDetail =
-              await localAPI.getOrderDetailTable(order.app_id);
+              await localAPI.getOrderDetailTable(order.app_id, terminalId);
           List detailList = [];
           for (var j = 0; j < ordersDetail.length; j++) {
             var details = ordersDetail[j];
-            List<OrderAttributes> ordersAttribute =
-                await localAPI.getOrderAttributesTable(details.app_id);
-            List<OrderModifire> ordersModifire =
-                await localAPI.getOrderModifireTable(details.app_id);
+            List<OrderAttributes> ordersAttribute = await localAPI
+                .getOrderAttributesTable(details.app_id, terminalId);
+            List<OrderModifire> ordersModifire = await localAPI
+                .getOrderModifireTable(details.app_id, terminalId);
             var productMap = {
-              "detailId": details.detailId,
+              "detail_id": details.detailId,
               "uuid": details.uuid,
               "order_id": details.order_id,
+              "order_app_id": details.order_app_id,
               "branch_id": details.branch_id,
               "terminal_id": details.terminal_id,
               "app_id": details.app_id,
@@ -216,14 +249,13 @@ class SyncAPICalls {
             detailList.add(productMap);
           }
           List<OrderPayment> ordersPayment =
-              await localAPI.getOrderPaymentTable(order.app_id);
+              await localAPI.getOrderPaymentTable(order.app_id, terminalId);
           var orderMap = {
             "order_id": order.order_id,
             "uuid": order.uuid,
             "branch_id": order.branch_id,
             "terminal_id": order.terminal_id,
             "app_id": order.app_id,
-            // "table_no": order.table_no,
             "table_id": order.table_id,
             "invoice_no": order.invoice_no,
             "customer_id": order.customer_id,
@@ -234,6 +266,8 @@ class SyncAPICalls {
             "voucher_id": order.voucher_id,
             "voucher_amount": order.voucher_amount,
             "sub_total": order.sub_total,
+            "service_charge_percent": order.serviceChargePercent,
+            "service_charge": order.serviceCharge,
             "sub_total_after_discount": order.sub_total_after_discount,
             "grand_total": order.grand_total,
             "order_source": order.order_source,
@@ -258,11 +292,11 @@ class SyncAPICalls {
 
         if (res["status"] == Constant.STATUS200) {
           await savesyncORderData(res["data"]);
-          await CommunFun.showToast(context, "All orders upto dates.");
+          //await CommunFun.showToast(context, "All orders upto dates.");
         }
       } else {
-        CommunFun.showToast(context, "All orders upto dates.");
-        Navigator.of(context).pop();
+        //CommunFun.showToast(context, "All orders upto dates.");
+        // Navigator.of(context).pop();
       }
       await SyncAPICalls.sendCancledOrderTable(context);
     } catch (e) {
@@ -322,8 +356,9 @@ class SyncAPICalls {
             for (var i = 0; i < orderdetail.length; i++) {
               var detail = orderdetail[i];
               OrderDetail o_details = new OrderDetail();
-              o_details.detailId = detail["detailId"];
+              o_details.detailId = detail["detail_id"];
               o_details.uuid = detail["uuid"];
+              o_details.order_app_id = detail["order_app_id"];
               o_details.order_id = detail["order_id"];
               o_details.branch_id = detail["branch_id"];
               o_details.terminal_id = detail["terminal_id"];
@@ -365,6 +400,8 @@ class SyncAPICalls {
                   m_data.uuid = modifiredata["uuid"];
                   m_data.order_id = modifiredata["order_id"];
                   m_data.detail_id = modifiredata["detail_id"];
+                  m_data.order_app_id = modifiredata["order_app_id"];
+                  m_data.detail_app_id = modifiredata["detail_app_id"];
                   m_data.terminal_id = modifiredata["terminal_id"];
                   m_data.app_id = modifiredata["app_id"];
                   m_data.product_id = modifiredata["product_id"];
@@ -389,6 +426,8 @@ class SyncAPICalls {
                   attr.uuid = attributeDt["uuid"];
                   attr.order_id = attributeDt["order_id"];
                   attr.detail_id = attributeDt["detail_id"];
+                  attr.order_app_id = attributeDt["order_app_id"];
+                  attr.detail_app_id = attributeDt["detail_app_id"];
                   attr.terminal_id = attributeDt["terminal_id"];
                   attr.app_id = attributeDt["app_id"];
                   attr.product_id = attributeDt["product_id"];
@@ -415,11 +454,17 @@ class SyncAPICalls {
               paymentdat.op_id = paydat["op_id"];
               paymentdat.uuid = paydat["uuid"];
               paymentdat.order_id = paydat["order_id"];
+              paymentdat.order_app_id = paydat["order_app_id"];
               paymentdat.branch_id = paydat["branch_id"];
               paymentdat.terminal_id = paydat["terminal_id"];
               paymentdat.app_id = paydat["app_id"];
               paymentdat.op_method_id = paydat["op_method_id"];
-              paymentdat.op_amount = paydat["op_amount"];
+              paymentdat.op_amount = paydat["op_amount"] is int
+                  ? (paydat['op_amount'] as int).toDouble()
+                  : paydat['op_amount'];
+              paymentdat.op_amount_change = paydat["op_amount_change"] is int
+                  ? (paydat['op_amount_change'] as int).toDouble()
+                  : paydat['op_amount_change'];
               paymentdat.op_method_response = paydat["op_method_response"];
               paymentdat.op_status = paydat["op_status"];
               paymentdat.op_datetime = paydat["op_datetime"];
@@ -474,12 +519,11 @@ class SyncAPICalls {
           if (res["status"] == Constant.STATUS200) {
             saveCancleORderTable(res);
           }
-          Navigator.of(context).pop();
           CommunFun.showToast(context, "Sync sucessfully done.");
         }
       } else {
-        Navigator.of(context).pop();
-        CommunFun.showToast(context, "all cancel tables up to dates.");
+        //Navigator.of(context).pop();
+        // CommunFun.showToast(context, "all cancel tables up to dates.");
       }
     } catch (e) {
       print(e);
@@ -522,14 +566,11 @@ class SyncAPICalls {
           'store_inventory': json.encode(invData)
         };
         var res = await APICalls.apiCall(apiurl, context, stringParams);
-
         if (res["status"] == Constant.STATUS200) {
           saveInvToTable(context, res);
         }
-        Navigator.of(context).pop();
-        CommunFun.showToast(context, "Sync sucessfully done.");
       } else {
-        CommunFun.showToast(context, "all cancel tables up to dates.");
+        //  CommunFun.showToast(context, "all cancel tables up to dates.");
       }
     } catch (e) {
       print(e);
@@ -552,6 +593,7 @@ class SyncAPICalls {
           inventory.qty = storeitem['qty'] is int
               ? (storeitem['qty'] as int).toDouble()
               : storeitem['qty'];
+          inventory.serverid = storeitem["server_id"];
           inventory.warningStockLevel = storeitem['warningStockLevel'];
           inventory.status = storeitem['status'];
           inventory.updatedAt = storeitem['updated_at'];
@@ -572,6 +614,7 @@ class SyncAPICalls {
               log.qty = storLoditem["qty"] is int
                   ? (storLoditem['qty'] as int).toDouble()
                   : storLoditem['qty'];
+              log.serverid = storLoditem["server_id"];
               log.qty_before_change = storLoditem["qty_before_change"] is int
                   ? (storLoditem['qty_before_change'] as int).toDouble()
                   : storLoditem['qty_before_change'];
@@ -600,6 +643,7 @@ class SyncAPICalls {
         CancelOrder cancle_order = new CancelOrder();
         cancle_order.id = order['id'];
         cancle_order.orderId = order['order_id'];
+        cancle_order.order_app_id = order["order_app_id"];
         cancle_order.localID = order['localID'];
         cancle_order.reason = order['reason'];
         cancle_order.status = order['status'];
@@ -610,6 +654,150 @@ class SyncAPICalls {
         cancle_order.serverId = order['server_id'];
         cancle_order.terminalId = order['terminal_id'];
         var result2 = await localAPI.saveSyncCancelTable(cancle_order);
+      }
+    }
+  }
+
+  static sendCustomerTable(context) async {
+    try {
+      var apiurl = Configrations.create_customer_data;
+      var terminalId = await CommunFun.getTeminalKey();
+      var branchid = await CommunFun.getbranchId();
+      LocalAPI localAPI = LocalAPI();
+      List<Customer> custstoreData =
+          await localAPI.getCustomersforSend(terminalId);
+      if (custstoreData.length > 0) {
+        var stringParams = {
+          'branch_id': branchid,
+          'terminal_id': terminalId,
+          'customer': json.encode(custstoreData)
+        };
+        var res = await APICalls.apiCall(apiurl, context, stringParams);
+        if (res["status"] == Constant.STATUS200) {
+          saveCustomerToTable(context, res);
+        }
+      }
+    } catch (e) {
+      print(e);
+      CommunFun.showToast(context, e.message);
+    }
+  }
+
+  static saveCustomerToTable(context, data) {
+    LocalAPI localAPI = LocalAPI();
+    var customers = data["data"]["customer"];
+    if (customers.length > 0) {
+      for (var i = 0; i < customers.length; i++) {
+        Customer customer = new Customer();
+        customer = Customer.fromJson(customers[i]);
+        localAPI.saveCustomersFromServer(customer);
+      }
+    }
+  }
+
+  static sendCustomerWineInventory(context) async {
+    try {
+      var apiurl = Configrations.update_customer_liquor_inventory_data;
+      var terminalId = await CommunFun.getTeminalKey();
+      var branchid = await CommunFun.getbranchId();
+      LocalAPI localAPI = LocalAPI();
+      List<Customer_Liquor_Inventory> custstoreData =
+          await localAPI.getCustomersWineInventory(branchid);
+      var custData = [];
+      if (custstoreData.length > 0) {
+        for (var i = 0; i < custstoreData.length; i++) {
+          Customer_Liquor_Inventory custInv = custstoreData[i];
+          List<Customer_Liquor_Inventory_Log> custLogData = await localAPI
+              .getCustomersWineInventoryLogs(branchid, custInv.appId);
+          var data = {
+            "cl_id": custInv.clId,
+            "uuid": custInv.uuid,
+            "app_id": custInv.appId,
+            "server_id": custInv.serverId,
+            "cl_customer_id": custInv.clCustomerId,
+            "cl_product_id": custInv.clProductId,
+            "cl_branch_id": custInv.clBranchId,
+            "cl_rac_id": custInv.clRacId,
+            "cl_box_id": custInv.clBoxId,
+            "type": custInv.type,
+            "cl_total_quantity": custInv.clTotalQuantity,
+            "cl_expired_on": custInv.clExpiredOn,
+            "cl_left_quantity": custInv.clLeftQuantity,
+            "status": custInv.status,
+            "updated_at": custInv.updatedAt,
+            "updated_by": custInv.updatedBy,
+            "customer_liquor_inventory_log": json.encode(custLogData)
+          };
+          custData.add(data);
+        }
+        var stringParams = {
+          'branch_id': branchid,
+          'terminal_id': terminalId,
+          'customer_inventory': json.encode(custData)
+        };
+        var res = await APICalls.apiCall(apiurl, context, stringParams);
+        if (res["status"] == Constant.STATUS200) {
+          saveCustomerWineInventory(context, res);
+        }
+      }
+    } catch (e) {
+      print(e);
+      CommunFun.showToast(context, e.message);
+    }
+  }
+
+  static saveCustomerWineInventory(context, data) async {
+    LocalAPI localAPI = LocalAPI();
+    var customerWineInv = data["data"]["customer_inventory"];
+    if (customerWineInv.length > 0) {
+      for (var i = 0; i < customerWineInv.length; i++) {
+        var custInv = customerWineInv[i];
+        Customer_Liquor_Inventory customerWineInt =
+            new Customer_Liquor_Inventory();
+        var data = {
+          customerWineInt.clId: custInv["cl_id"],
+          customerWineInt.uuid: custInv["uuid"],
+          customerWineInt.appId: custInv["app_id"],
+          customerWineInt.serverId: custInv["server_id"],
+          customerWineInt.clCustomerId: custInv["cl_customer_id"],
+          customerWineInt.clProductId: custInv["cl_product_id"],
+          customerWineInt.clBranchId: custInv["cl_branch_id"],
+          customerWineInt.clRacId: custInv["cl_rac_id"],
+          customerWineInt.clBoxId: custInv["cl_box_id"],
+          customerWineInt.type: custInv["type"],
+          customerWineInt.clTotalQuantity: custInv["cl_total_quantity"],
+          customerWineInt.clExpiredOn: custInv["cl_expired_on"],
+          customerWineInt.clLeftQuantity: custInv["cl_left_quantity"],
+          customerWineInt.status: custInv["status"],
+          customerWineInt.updatedAt: custInv["updated_at"],
+          customerWineInt.updatedBy: custInv["updated_by"],
+        };
+        var result = await localAPI.saveSuctomerWineInventory(customerWineInt);
+
+        var storLodGata = custInv["product_store_inventory_log"];
+        for (var j = 0; j < storLodGata.length; j++) {
+          var logint = storLodGata[j];
+          Customer_Liquor_Inventory_Log invLog =
+              new Customer_Liquor_Inventory_Log();
+          var logdata = {
+            invLog.liId: logint['li_id'],
+            invLog.appId: logint["app_id"],
+            invLog.clAppId: logint["cl_appId"],
+            invLog.serverId: logint["server_id"],
+            invLog.uuid: logint['uuid'],
+            invLog.clId: logint['cl_id'],
+            invLog.branchId: logint['branch_id'],
+            invLog.productId: logint['product_id'],
+            invLog.customerId: logint['customer_id'],
+            invLog.liType: logint['li_type'],
+            invLog.qty: logint['qty'],
+            invLog.qtyBeforeChange: logint['qty_before_change'],
+            invLog.qtyAfterChange: logint['qty_after_change'],
+            invLog.updatedAt: logint['updated_at'],
+            invLog.updatedBy: logint['updated_by'],
+          };
+          var result = await localAPI.saveSuctomerWineInventoryLogs(invLog);
+        }
       }
     }
   }

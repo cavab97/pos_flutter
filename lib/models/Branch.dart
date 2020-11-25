@@ -17,10 +17,10 @@ class Branch {
   String invoiceStart;
   String updatedAt;
   int updatedBy;
-  Null deletedAt;
-  Null deletedBy;
+  String deletedAt;
+  int deletedBy;
   String base64;
-
+  double serviceCharge;
   Branch(
       {this.branchId,
       this.uuid,
@@ -42,7 +42,8 @@ class Branch {
       this.updatedBy,
       this.deletedAt,
       this.deletedBy,
-      this.base64});
+      this.base64,
+      this.serviceCharge});
 
   Branch.fromJson(Map<String, dynamic> json) {
     branchId = json['branch_id'];
@@ -66,6 +67,9 @@ class Branch {
     deletedAt = json['deleted_at'];
     deletedBy = json['deleted_by'];
     base64 = json['base64'];
+    serviceCharge = json["service_charge"] is int
+        ? (json['service_charge'] as int).toDouble()
+        : json['service_charge'];
   }
 
   Map<String, dynamic> toJson() {
@@ -91,6 +95,7 @@ class Branch {
     data['deleted_at'] = this.deletedAt;
     data['deleted_by'] = this.deletedBy;
     data['base64'] = this.base64;
+    data["service_charge"] = this.serviceCharge;
     return data;
   }
 }
