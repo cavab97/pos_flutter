@@ -5,6 +5,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/helpers/ComunAPIcall.dart';
 import 'package:mcncashier/helpers/config.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 
@@ -58,5 +59,30 @@ class ShiftList {
     }
     print(result);
     return result;
+  }
+
+  Future<List<Drawerdata>> getPayinOutammount(shiftid) async {
+    List<Drawerdata> drawerList = new List<Drawerdata>();
+    var isjoin = await CommunFun.checkIsJoinServer();
+    if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.drawer_data;
+      var stringParams = {"shift_id": shiftid};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        List<dynamic> data = result["data"];
+        drawerList = data.length > 0
+            ? data.map((c) => Drawerdata.fromJson(c)).toList()
+            : [];
+      }
+    } else {
+      var qry = "SELECT * from drawer where shift_id = " + shiftid.toString();
+      var mealList = await db.rawQuery(qry);
+      drawerList = mealList.isNotEmpty
+          ? mealList.map((c) => Drawerdata.fromJson(c)).toList()
+          : [];
+      await SyncAPICalls.logActivity(
+          "Meals product List", "Meals product List", "drawer", shiftid);
+    }
+    return drawerList;
   }
 }

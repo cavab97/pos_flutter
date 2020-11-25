@@ -12,6 +12,8 @@ import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import '../components/communText.dart';
+import '../components/communText.dart';
 
 class VoucherPop extends StatefulWidget {
   // Opning ammount popup
@@ -113,7 +115,7 @@ class VoucherPopState extends State<VoucherPop> {
           //check product
           bool isadded = false;
           double totaldiscount = 0;
-          List<MSTCartdetails> cartListUpdate = [];
+          List<MSTCartdetails> cartitemList = [];
           for (int i = 0; i < widget.cartList.length; i++) {
             var cartitem = widget.cartList[i];
             // product
@@ -134,7 +136,7 @@ class VoucherPopState extends State<VoucherPop> {
             // categorys
             if (vaocher.voucherCategories != "") {
               List<ProductCategory> produtCategory =
-                  await localAPI.getProductCategory(cartitem.productId);
+                  await cartapi.getProductCategory(cartitem.productId);
               vaocher.voucherCategories.split(',').forEach((tag) {
                 for (int j = 0; j < produtCategory.length; j++) {
                   ProductCategory cat = produtCategory[j];
@@ -147,11 +149,11 @@ class VoucherPopState extends State<VoucherPop> {
             }
             if (cartitem.discount != null && cartitem.discount != 0.0) {
               totaldiscount += cartitem.discount;
-              // var result = await localAPI.addVoucherIndetail(
+              // var result = await cartapi.addVoucherIndetail(
               //   cartitem,
               //   vaocher.voucherId,
               // );
-              cartListUpdate.add(cartitem);
+              cartitemList.add(cartitem);
             } else {
               totaldiscount = vaocher.voucherDiscount;
             }
@@ -163,8 +165,7 @@ class VoucherPopState extends State<VoucherPop> {
               cartData.grand_total = cartData.grand_total - cartData.discount;
           cartData.voucher_detail = json.encode(vaocher);
           cartData.voucher_id = vaocher.voucherId;
-          await cartapi.updateCartdetails(cartData);
-          await cartapi.updateCartList(cartListUpdate);
+          var result1 = await cartapi.addVoucherInOrder(cartData, cartitemList);
           selectedvoucher = vaocher;
           isadded = true;
           selectedvoucher = vaocher;
@@ -186,7 +187,7 @@ class VoucherPopState extends State<VoucherPop> {
   validateCode() async {
     if (codeConteroller.text.length != 0) {
       List<Voucher> vaocher =
-          await localAPI.checkVoucherIsExit(codeConteroller.text);
+          await cartapi.checkVoucherIsExit(codeConteroller.text);
       if (vaocher.length > 0) {
         checkValidVoucher(vaocher[0]);
       } else {

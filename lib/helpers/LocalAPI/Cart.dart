@@ -9,6 +9,9 @@ import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 
+import '../../models/Product_Categroy.dart';
+import '../../models/Voucher.dart';
+
 class Cartlist {
   var db = DatabaseHelper.dbHelper.getDatabse();
   Future<int> addcart(context, MST_Cart cartData) async {
@@ -94,7 +97,6 @@ class Cartlist {
 
   Future<int> addintoCartDetails(context, MSTCartdetails cartdetails) async {
     var cartdetailid;
-
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
       var apiurl = await Configrations.ipAddress() + Configrations.cart_Details;
@@ -104,12 +106,15 @@ class Cartlist {
         cartdetailid = result["detail_id"];
       }
     } else {
+      var newObj = cartdetails.toJson();
+      newObj.remove("attrName");
+      newObj.remove("modiName");
       if (cartdetails.id != null) {
-        cartdetailid = db.update("mst_cart_detail", cartdetails.toJson(),
+        cartdetailid = db.update("mst_cart_detail", newObj,
             where: 'id = ?', whereArgs: [cartdetails.id]);
         cartdetailid = cartdetails.id;
       } else {
-        cartdetailid = await db.insert("mst_cart_detail", cartdetails.toJson());
+        cartdetailid = await db.insert("mst_cart_detail", newObj);
       }
       await SyncAPICalls.logActivity(
           "product", "insert  cart details", "mst_cart_detail", cartdetailid);
@@ -155,8 +160,15 @@ class Cartlist {
             : [];
       }
     } else {
-      var qry =
-          "SELECT * from mst_cart_detail where cart_id = " + cartId.toString();
+      var qry = " SELECT mst_cart_detail.* ,group_concat(attributes.name) as attrName ,group_concat(modifier.name) as modiName from mst_cart_detail " +
+          " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  (mst_cart_sub_detail.attribute_id != '' OR mst_cart_sub_detail.modifier_id != '' )" +
+          " LEFT JOIN attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != " +
+          " '' " +
+          " LEFT JOIN modifier on modifier.modifier_id = mst_cart_sub_detail.modifier_id AND mst_cart_sub_detail.modifier_id != " +
+          " '' " +
+          " where cart_id =" +
+          cartId.toString() +
+          " group by mst_cart_detail.id";
       var res = await db.rawQuery(qry);
       list = res.isNotEmpty
           ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
@@ -356,6 +368,115 @@ class Cartlist {
       var ordersList = await db.rawQuery(qry);
       await SyncAPICalls.logActivity(
           "Send to kitchen", "send item to kitchen", "mst_cart_detail", 1);
+    }
+  }
+
+  Future<List<Voucher>> checkVoucherIsExit(code) async {
+    List<Voucher> voucherList = [];
+    var isjoin = await CommunFun.checkIsJoinServer();
+    if (isjoin == true) {
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.check_voucher;
+      var stringParams = {
+        "code": code,
+      };
+      var res = await APICall.localapiCall(null, apiurl, stringParams);
+      if (res["status"] == Constant.STATUS200) {
+        List<dynamic> data = res["data"];
+        voucherList = data.length > 0
+            ? data.map((c) => Voucher.fromJson(c)).toList()
+            : [];
+      }
+    } else {
+      var qry = "SELECT * from voucher where voucher_code = '" + code + "'";
+      var vouchers = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+      voucherList = vouchers.length > 0
+          ? vouchers.map((c) => Voucher.fromJson(c)).toList()
+          : [];
+      await SyncAPICalls.logActivity(
+          "voucher", "get voucher list", "voucher", 1);
+    }
+    return voucherList;
+  }
+
+  Future<List<ProductCategory>> getProductCategory(ids) async {
+    var qry =
+        "SELECT * from product_category WHERE product_id =  " + ids.toString();
+    var voucherList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<ProductCategory> list = voucherList.isNotEmpty
+        ? voucherList.map((c) => ProductCategory.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<dynamic> addVoucherIndetail(MSTCartdetails details, voucherId) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var data = await db.update("mst_cart_detail", details.toJson(),
+        where: "id =?", whereArgs: [details.id]);
+    await SyncAPICalls.logActivity(
+        "voucher", "add voucher in cart", "voucher", voucherId);
+    return data;
+  }
+
+  Future<dynamic> addVoucherInOrder(
+      MST_Cart details, List<MSTCartdetails> cartitemList) async {
+    var data1;
+    var isjoin = await CommunFun.checkIsJoinServer();
+    if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.add_voucher;
+      var stringParams = {"cart": details, "details": cartitemList};
+      var res = await APICall.localapiCall(null, apiurl, stringParams);
+      if (res["status"] == Constant.STATUS200) {
+        data1 = 1;
+      }
+    } else {
+      data1 = await db.update("mst_cart", details.toJson(),
+          where: "id =?", whereArgs: [details.id]);
+      if (cartitemList.length > 0) {
+        for (var i = 0; i < cartitemList.length; i++) {
+          var data = await db.update(
+              "mst_cart_detail", cartitemList[i].toJson(),
+              where: "id =?", whereArgs: [cartitemList[i].id]);
+        }
+      }
+      await SyncAPICalls.logActivity(
+          "voucher", "add voucher in cart", "voucher", details.id);
+    }
+    return data1;
+  }
+
+  Future makeAsFocProduct(MSTCartdetails focProduct, isUpdate, MST_Cart cart,
+      MSTCartdetails cartitem) async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    if (isjoin == true) {
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.add_foc_product;
+      var stringParams = {
+        "focProduct": focProduct,
+        "isUpdate": isUpdate,
+        "cart": cart,
+        "cartitem": cartitem
+      };
+      await APICall.localapiCall(null, apiurl, stringParams);
+    } else {
+      var newObj = focProduct.toJson();
+      newObj.remove("attrName");
+      newObj.remove("modiName");
+      if (isUpdate) {
+        await db.update("mst_cart_detail", newObj,
+            where: "id =?", whereArgs: [focProduct.id]);
+      } else {
+        await db.insert(
+          "mst_cart_detail",
+          focProduct.toJson(),
+        );
+        await db.update("mst_cart_detail", newObj,
+            where: "id =?", whereArgs: [cartitem.id]);
+      }
+      await db.update("mst_cart", cart.toJson(),
+          where: "id =?", whereArgs: [cart.id]);
+      await SyncAPICalls.logActivity(
+          "mst_cart_detail", "Added Foc Product", "mst_cart_detail", cart.id);
     }
   }
 }

@@ -49,4 +49,73 @@ class BranchReq {
         ..close();
     }
   }
+
+  static getTerminalData(request) async {
+    BranchList branach = new BranchList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var res = await branach.getTerminalDetails(data["terminal_id"]);
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode(
+            {"status": 200, "message": "terminal Data", "data": res}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static getCustomerAppid(request) async {
+    BranchList branach = new BranchList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var res = await branach.getLastCustomerid(data["terminal_id"]);
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode(
+            {"status": 200, "message": "terminal Data", "data": res}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static getPermissions(request) async {
+    BranchList branach = new BranchList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var res = await branach.getUserPermissions(data["user_id"]);
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode(
+            {"status": 200, "message": "terminal Data", "data": res}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
 }

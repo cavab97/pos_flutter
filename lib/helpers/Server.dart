@@ -13,6 +13,10 @@ import 'package:mcncashier/helpers/APIcalls/ProductsReq.dart';
 import 'package:mcncashier/helpers/APIcalls/ShiftReq.dart';
 import 'package:mcncashier/helpers/APIcalls/TablesReq.dart';
 
+import 'APIcalls/CartReq.dart';
+import 'APIcalls/OrdersReq.dart';
+import 'APIcalls/TablesReq.dart';
+
 class Server {
   static createSetver(ip, context) async {
     var server = await HttpServer.bind(ip, 8080);
@@ -176,9 +180,44 @@ class Server {
         ProductsReq.getSetmealProducts(request);
         break;
       case "/product_details":
-        ProductsReq.getSetmealProducts(request);
+        ProductsReq.getProductSubDetails(request);
         break;
-
+      case "/merge_table_order":
+        TablesReq.mergeTableOrder(request);
+        break;
+      case "/check_voucher":
+        CartReq.vaucherExit(request);
+        break;
+      case "/order_data":
+        OrdersReq.getOrdersDetails(request);
+        break;
+      case "/add_voucher":
+        CartReq.addVoucher(request);
+        break;
+      case "/terminal_data":
+        BranchReq.getTerminalData(request);
+        break;
+      case "/lastcustomer_id":
+        BranchReq.getCustomerAppid(request);
+        break;
+      case "/get_addresses":
+        CustomerReq.getCustomerAddList(request);
+        break;
+      case "/add_foc_product":
+        CartReq.makeProductAsFoc(request);
+        break;
+      case "/change_table":
+        TablesReq.changeTable(request);
+        break;
+      case "/drawer_data":
+        ShiftReq.drawerList(request);
+        break;
+      case "/get_user_permission":
+        BranchReq.getPermissions(request);
+        break;
+      case "/cancel_order":
+        OrdersReq.insertCancelOrd(request);
+        break;
       default:
     }
   }

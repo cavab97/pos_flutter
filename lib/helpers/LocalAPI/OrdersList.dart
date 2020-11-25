@@ -11,37 +11,48 @@ import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
-
 import 'package:mcncashier/models/Lastids.dart';
+import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/ShiftInvoice.dart';
+import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
+import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
+
+import '../../models/Attribute_data.dart';
+import '../../models/ModifireData.dart';
+import '../../models/Payment.dart';
+import '../../models/SetMealProduct.dart';
 
 class OrdersList {
   var db = DatabaseHelper.dbHelper.getDatabse();
 
-  Future<Orders> getcurrentOrders(orderid) async {
+  Future<Orders> getcurrentOrders(orderid, terminalID) async {
     List<Orders> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
       var apiurl = await Configrations.ipAddress() + Configrations.get_order;
-      var stringParams = {"order_id": orderid};
+      var stringParams = {"order_id": orderid, "terminal_Id": terminalID};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
         List<dynamic> data = result["data"];
         list =
             data.length > 0 ? data.map((c) => Orders.fromJson(c)).toList() : [];
+        if (list.length > 0) {
+          return list[0];
+        }
       }
     } else {
-      var result =
-          await db.query('orders', where: "app_id = ?", whereArgs: [orderid]);
-      list = result.length > 0
-          ? result.map((c) => Orders.fromJson(c)).toList()
-          : [];
+      var query =
+          "SELECT * from orders WHERE app_id=$orderid AND terminal_id=$terminalID";
+      var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+      list = res.length > 0 ? res.map((c) => Orders.fromJson(c)).toList() : [];
+      if (list.length > 0) {
+        return list[0];
+      }
     }
-    return list[0];
   }
 
   Future<LastAppids> getLastids(terminalid) async {
@@ -80,7 +91,7 @@ class OrdersList {
       List<OrderDetail> orderDetails,
       List<OrderModifire> orderModifire,
       List<OrderAttributes> orderAttributes,
-      OrderPayment orderPayment,
+      List<OrderPayment> orderPayments,
       VoucherHistory history,
       ShiftInvoice shiftInvoice,
       cartID) async {
@@ -92,7 +103,7 @@ class OrdersList {
         "order_details": jsonEncode(orderDetails),
         "order_modifire": jsonEncode(orderModifire),
         "order_attributes": jsonEncode(orderAttributes),
-        "order_payment": orderPayment,
+        "order_payment": jsonEncode(orderPayments),
         "order_history": history,
         "shift_invoice": shiftInvoice,
         "cart_id": cartID
@@ -104,12 +115,12 @@ class OrdersList {
     } else {
       var orderid = await db.insert("orders", orderData.toJson());
       await SyncAPICalls.logActivity(
-          "orders", "place order", "orders", orderid);
+          "orders", "place order", "orders", orderData.app_id);
       await OrdersList.orderDetails(
-          orderid, orderDetails, orderModifire, orderAttributes);
-      await OrdersList.payment(orderPayment, orderid);
-      await OrdersList.voucherHistory(history, orderid);
-      await OrdersList.shiftInvoice(shiftInvoice, orderid);
+          orderData.app_id, orderDetails, orderModifire, orderAttributes);
+      await OrdersList.payment(orderPayments, orderData.app_id);
+      await OrdersList.voucherHistory(history, orderData.app_id);
+      await OrdersList.shiftInvoice(shiftInvoice, orderData.app_id);
       await OrdersList.removeCartItem(cartID, orderData.table_id);
     }
     return orderData.app_id;
@@ -121,96 +132,123 @@ class OrdersList {
     List<OrderModifire> orderModifire,
     List<OrderAttributes> orderAttributes,
   ) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    for (var i = 0; i < orderDetails.length; i++) {
-      OrderDetail orderdata = orderDetails[i];
-      orderdata.order_id = orderid;
-      var orderdetailid = await db.insert("order_detail", orderdata.toJson());
-      await SyncAPICalls.logActivity(
-          "orders", "insert order details", "order_detail", orderid);
-      // Modifire
-      for (var m = 0; m < orderModifire.length; m++) {
-        OrderModifire modifire = orderModifire[m];
-        modifire.detail_id = orderdetailid;
-        modifire.order_id = orderid;
-        await db.insert("order_modifier", modifire.toJson());
+    try {
+      var db = DatabaseHelper.dbHelper.getDatabse();
+      for (var i = 0; i < orderDetails.length; i++) {
+        OrderDetail orderdata = orderDetails[i];
+        orderdata.order_app_id = orderid;
+        var orderdetailid = await db.insert("order_detail", orderdata.toJson());
         await SyncAPICalls.logActivity(
-            "orders", "insert order modifier", "order_modifier", orderid);
-      }
-      // sttributes update
-      for (var a = 0; a < orderAttributes.length; a++) {
-        OrderAttributes attribute = orderAttributes[a];
-        attribute.detail_id = orderdetailid;
-        attribute.order_id = orderid;
-        await db.insert("order_attributes", attribute.toJson());
-        await SyncAPICalls.logActivity(
-            "orders", "insert order attributes", "order_attributes", orderid);
-      }
+            "orders", "insert order details", "order_detail", orderid);
+        // Modifire
+        for (var m = 0; m < orderModifire.length; m++) {
+          OrderModifire modifire = orderModifire[m];
+          modifire.detail_app_id = orderdetailid;
+          modifire.order_app_id = orderid;
+          var newObj = modifire.toJson();
+          newObj.remove("name");
+          await db.insert("order_modifier", newObj);
+          await SyncAPICalls.logActivity(
+              "orders", "insert order modifier", "order_modifier", orderid);
+        }
+        // sttributes update
+        for (var a = 0; a < orderAttributes.length; a++) {
+          OrderAttributes attribute = orderAttributes[a];
+          attribute.detail_app_id = orderdetailid;
+          attribute.order_app_id = orderid;
+          var newObj = attribute.toJson();
+          newObj.remove("name");
+          await db.insert("order_attributes", newObj);
+          await SyncAPICalls.logActivity(
+              "orders", "insert order attributes", "order_attributes", orderid);
+        }
 
-      // product store inve
-      if (orderdata.issetMeal == 0) {
-        var productdata = jsonDecode(orderdata.product_detail);
-        if (productdata["hasInventory"] == 1) {
-          List<ProductStoreInventory> inventory =
-              await OrdersList.getStoreInventoryData(productdata.product_id);
-          if (inventory.length > 0) {
-            ProductStoreInventory invData = new ProductStoreInventory();
-            invData = inventory[0];
-            var prev = inventory[0];
-            var qty = (invData.qty - orderdata.detail_qty);
-            invData.qty = qty;
-            invData.updatedAt =
-                await CommunFun.getCurrentDateTime(DateTime.now());
-            invData.updatedBy = orderdata.updated_by;
-            var ulog = await OrdersList.updateInvetory(invData);
+        // product store inve
+        if (orderdata.issetMeal == 0) {
+          var productdata = jsonDecode(orderdata.product_detail);
+          if (productdata["hasInventory"] == 1) {
+            List<ProductStoreInventory> inventory =
+                await OrdersList.getStoreInventoryData(productdata.product_id);
+            if (inventory.length > 0) {
+              ProductStoreInventory invData = new ProductStoreInventory();
+              invData = inventory[0];
+              var prev = inventory[0];
+              var qty = (invData.qty - orderdata.detail_qty);
+              invData.qty = qty;
+              invData.updatedAt =
+                  await CommunFun.getCurrentDateTime(DateTime.now());
+              invData.updatedBy = orderdata.updated_by;
+              var ulog = await OrdersList.updateInvetory(invData);
 
-            //Inventory log update
-            ProductStoreInventoryLog log = new ProductStoreInventoryLog();
-            log.uuid = orderdata.uuid;
-            log.inventory_id = prev.inventoryId;
-            log.branch_id = orderdata.branch_id;
-            log.product_id = orderdata.product_id;
-            log.employe_id = orderdata.updated_by;
-            log.qty = prev.qty;
-            log.qty_before_change = prev.qty;
-            log.qty_after_change = qty;
-            log.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
-            log.updated_by = orderdata.updated_by;
-            var inventoryLog =
-                await OrdersList.updateStoreInvetoryLogTable(log);
+              //Inventory log update
+              ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+              log.uuid = orderdata.uuid;
+              log.inventory_id = prev.inventoryId;
+              log.branch_id = orderdata.branch_id;
+              log.product_id = orderdata.product_id;
+              log.employe_id = orderdata.updated_by;
+              log.qty = prev.qty;
+              log.qty_before_change = prev.qty;
+              log.qty_after_change = qty;
+              log.updated_at =
+                  await CommunFun.getCurrentDateTime(DateTime.now());
+              log.updated_by = orderdata.updated_by;
+              var inventoryLog =
+                  await OrdersList.updateStoreInvetoryLogTable(log);
+            }
           }
         }
       }
+    } catch (e) {
+      print(e);
     }
   }
 
-  static payment(OrderPayment orderPayment, orderid) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    orderPayment.order_id = orderid;
-    var res = await db.insert("order_payment", orderPayment.toJson());
-    print(res);
-    await SyncAPICalls.logActivity(
-        "orders", "insert order payment", "order_payment", orderid);
+  static payment(List<OrderPayment> orderPayments, orderid) async {
+    try {
+      var db = DatabaseHelper.dbHelper.getDatabse();
+      for (var i = 0; i < orderPayments.length; i++) {
+        OrderPayment orderPayment = new OrderPayment();
+        orderPayment = orderPayments[i];
+        orderPayment.order_app_id = orderid;
+        var res = await db.insert("order_payment", orderPayment.toJson());
+        print(res);
+        await SyncAPICalls.logActivity(
+            "orders", "insert order payment", "order_payment", orderid);
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 
   static voucherHistory(VoucherHistory voucherHis, orderid) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    voucherHis.order_id = orderid;
-    var res = await db.insert("voucher_history", voucherHis.toJson());
-    print(res);
-    await SyncAPICalls.logActivity(
-        "order", "add voucher history in cart", "voucher_history", orderid);
-    return orderid;
+    try {
+      if (voucherHis != null) {
+        var db = DatabaseHelper.dbHelper.getDatabse();
+        voucherHis.order_id = orderid;
+        var res = await db.insert("voucher_history", voucherHis.toJson());
+        print(res);
+        await SyncAPICalls.logActivity(
+            "order", "add voucher history in cart", "voucher_history", orderid);
+        return orderid;
+      }
+    } catch (e) {
+      print(e);
+    }
   }
 
   static shiftInvoice(ShiftInvoice shiftInvoice, orderid) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    shiftInvoice.invoice_id = orderid;
-    var res = await db.insert("shift_invoice", shiftInvoice.toJson());
-    print(res);
-    await SyncAPICalls.logActivity(
-        "orders", "insert shift invoice", "shift_invoice", orderid);
-    return shiftInvoice.invoice_id;
+    try {
+      var db = DatabaseHelper.dbHelper.getDatabse();
+      shiftInvoice.invoice_id = orderid;
+      var res = await db.insert("shift_invoice", shiftInvoice.toJson());
+      print(res);
+      await SyncAPICalls.logActivity(
+          "orders", "insert shift invoice", "shift_invoice", orderid);
+      return shiftInvoice.invoice_id;
+    } catch (e) {
+      print(e);
+    }
   }
 
   static getStoreInventoryData(productID) async {
@@ -243,24 +281,16 @@ class OrdersList {
 
   static removeCartItem(cartid, tableID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-
     await db.delete("mst_cart", where: 'id =?', whereArgs: [cartid]);
-
     await SyncAPICalls.logActivity("orders", "clear cart", "mst_cart", 1);
-
     await db.delete("save_order", where: 'cart_id =?', whereArgs: [cartid]);
-
     await SyncAPICalls.logActivity(
         "orders", "clear save_order", "save_order", cartid);
-
     await db.delete("table_order", where: 'table_id =?', whereArgs: [tableID]);
-
     await SyncAPICalls.logActivity(
         "orders", "clear table_order", "table_order", cartid);
-
     var cartDetail = await db
         .query("mst_cart_detail", where: 'cart_id =?', whereArgs: [cartid]);
-
     List<MSTCartdetails> list = cartDetail.isNotEmpty
         ? cartDetail.map((c) => MSTCartdetails.fromJson(c)).toList()
         : [];
@@ -272,7 +302,6 @@ class OrdersList {
     }
     await SyncAPICalls.logActivity(
         "orders", "clear cart detail", "mst_cart_sub_detail", cartid);
-
     // cart details
     var cartd = await db
         .delete("mst_cart_detail", where: 'cart_id = ?', whereArgs: [cartid]);
@@ -281,13 +310,13 @@ class OrdersList {
     return cartd;
   }
 
-  Future<List<OrderDetail>> getOrderDetailsList(orderid) async {
+  Future<List<OrderDetail>> getOrderDetailsList(orderid, terminalid) async {
     List<OrderDetail> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
       var apiurl =
           await Configrations.ipAddress() + Configrations.order_details;
-      var stringParams = {"order_id": orderid};
+      var stringParams = {"order_id": orderid, "terminal_Id": terminalid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
         List<dynamic> data = result["data"];
@@ -296,8 +325,11 @@ class OrdersList {
             : [];
       }
     } else {
-      var ordersList = await db
-          .query("order_detail", where: "order_id =?", whereArgs: [orderid]);
+      var qry = "SELECT * from order_detail WHERE terminal_id = " +
+          terminalid.toString() +
+          " AND order_app_id = " +
+          orderid.toString();
+      var ordersList = await db.rawQuery(qry);
       list = ordersList.isNotEmpty
           ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
           : [];
@@ -307,28 +339,29 @@ class OrdersList {
     return list;
   }
 
-  Future<OrderPayment> getOrderpaymentData(orderid) async {
+  Future<List<OrderPayment>> getOrderpaymentData(orderid, terminalid) async {
     var isjoin = await CommunFun.checkIsJoinServer();
-    OrderPayment list;
+    List<OrderPayment> list;
     if (isjoin == true) {
       var apiurl =
           await Configrations.ipAddress() + Configrations.order_details;
-      var stringParams = {"order_id": orderid};
+      var stringParams = {"order_id": orderid, "terminal_Id": terminalid};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
-        var data = result["data"];
-        list = OrderPayment.fromJson(data);
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => OrderPayment.fromJson(c)).toList()
+            : [];
       }
     } else {
-      var qry =
-          "SELECT * from order_payment where order_id = " + orderid.toString();
+      var qry = "SELECT * from order_payment where terminal_id = " +
+          terminalid.toString() +
+          " AND order_app_id = " +
+          orderid.toString();
       var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-      List<OrderPayment> res = ordersList.length > 0
+      list = ordersList.length > 0
           ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
           : [];
-      if (res.length > 0) {
-        list = res[0];
-      }
     }
     return list;
   }
@@ -358,5 +391,129 @@ class OrdersList {
           "Transactions", "get Orders list", "Orders", branchid);
     }
     return list;
+  }
+
+  Future<List<OrderAttributes>> getOrderAttributes(orderid) async {
+    var query = "SELECT order_attributes.*,attributes.name from order_attributes " +
+        " LEFT join attributes on attributes.attribute_id =  order_attributes.attribute_id WHERE order_attributes.order_app_id = " +
+        orderid.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+    List<OrderAttributes> list = res.isNotEmpty
+        ? res.map((c) => OrderAttributes.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<OrderModifire>> getOrderModifire(orderid) async {
+    var query = "SELECT order_modifier.*,modifier.name  from order_modifier " +
+        " LEFT JOIN modifier on modifier.modifier_id = order_modifier.modifier_id" +
+        " WHERE order_modifier.order_app_id  = " +
+        orderid.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+    List<OrderModifire> list = res.isNotEmpty
+        ? res.map((c) => OrderModifire.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<Payments>> getOrderpaymentmethod(orderid, terminalid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from payment " +
+        " LEFT JOIN order_payment on order_payment.op_method_id = payment.payment_id " +
+        " WHERE order_payment.terminal_id = " +
+        terminalid.toString() +
+        " AND order_payment.order_app_id = " +
+        orderid.toString();
+    var paymentMeth = await db.rawQuery(qry);
+    List<Payments> list = paymentMeth.isNotEmpty
+        ? paymentMeth.map((c) => Payments.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<ProductDetails>> getOrderDetails(orderid, terminalID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT P.product_id,P.name,P.price, base64" +
+        " FROM order_detail O " +
+        " LEFT JOIN product P ON O.product_id = P.product_id" +
+        " LEFT JOIN asset on asset.asset_type_id = P.product_id " +
+        " WHERE O.terminal_id = " +
+        terminalID.toString() +
+        "  AND O.order_app_id = " +
+        orderid.toString();
+    var ordersList = await db.rawQuery(qry);
+    List<ProductDetails> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => ProductDetails.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Transactions", "get Orders details list", "ProductDetails", orderid);
+    return list;
+  }
+
+  Future<User> getPaymentUser(userid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var user = await db
+        .query('users', where: 'id = ?', whereArgs: [userid.toString()]);
+    List<User> list =
+        user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
+    return list[0];
+  }
+
+  Future<dynamic> getOrdersDetailsData(orderid, terminalid) async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    dynamic listdata;
+    if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.order_data;
+      var stringParams = {
+        "order_id": orderid,
+        "terminal_id": terminalid,
+      };
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        dynamic data = result["data"];
+        listdata = data;
+      }
+      return listdata;
+    } else {
+      List<OrderPayment> orderpaymentdata =
+          await getOrderpaymentData(orderid, terminalid);
+      List<Payments> paymentMethod =
+          await getOrderpaymentmethod(orderid, terminalid);
+      List<OrderDetail> orderitem =
+          await getOrderDetailsList(orderid, terminalid);
+      List<ProductDetails> orderProductitem =
+          await getOrderDetails(orderid, terminalid);
+      Orders order = await getcurrentOrders(orderid, terminalid);
+      List<OrderAttributes> attributes = await getOrderAttributes(orderid);
+      List<OrderModifire> modifires = await getOrderModifire(orderid);
+      User user;
+      if (orderpaymentdata.length > 0) {
+        user = await getPaymentUser(orderpaymentdata[0].op_by);
+      }
+      dynamic productDetais = {
+        "order_payment": orderpaymentdata,
+        "order_payment_method": paymentMethod,
+        "order_items": orderitem,
+        "order_products": orderProductitem,
+        "order": order,
+        "paymentBy": user,
+        "order_attributes": attributes,
+        "order_modifires": modifires
+      };
+      return productDetais;
+    }
+  }
+
+  Future insertCancelOrder(CancelOrder order) async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.cancel_order;
+      var stringParams = {
+        "order": order,
+      };
+      await APICall.localapiCall(null, apiurl, stringParams);
+    } else {
+      var result = await db.insert('order_cancel', order.toJson());
+    }
   }
 }

@@ -12,7 +12,8 @@ class PaymentList {
     List<Payments> list = [];
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = await Configrations.ipAddress() + Configrations.payment_Methods;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.payment_Methods;
       var stringParams;
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {
@@ -36,7 +37,8 @@ class PaymentList {
     Payments payment = new Payments();
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
-      var apiurl = await Configrations.ipAddress() + Configrations.payment_Methods;
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.payment_Methods;
       var stringParams = {"payment_id": methodID};
       var result = await APICall.localapiCall(null, apiurl, stringParams);
       if (result["status"] == Constant.STATUS200) {

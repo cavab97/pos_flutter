@@ -23,7 +23,8 @@ class CustomerReq {
     } catch (e) {
       request.response
         ..statusCode = HttpStatus.internalServerError
-        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))..close();
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
     }
   }
 
@@ -50,7 +51,32 @@ class CustomerReq {
         ..statusCode = HttpStatus.internalServerError
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))..close();
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static getCustomerAddList(request) async {
+    CustomersList customer = new CustomersList();
+    try {
+      var res = await customer.getCustomerAddressList();
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({
+          "status": 200,
+          "message": "Customer country city state",
+          "data": res
+        }))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
     }
   }
 }

@@ -87,13 +87,66 @@ class TablesReq {
     try {
       String content = await utf8.decoder.bind(request).join();
       var data = await jsonDecode(content);
-      var res =
-          await tablesList.getTableOrders(data["table_id"]);
+      var res = await tablesList.getTableOrders(data["table_id"]);
       request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
         ..write(jsonEncode({"status": 200, "message": "success.", "data": res}))
+        ..close();
+    } catch (e) {
+      print(e);
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode(
+            {"status": 500, "message": "Something went wrong" + e.toString()}))
+        ..close();
+    }
+  }
+
+  static mergeTableOrder(request) async {
+    TablesList tablesList = new TablesList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      Table_order tables = new Table_order();
+      var data = await jsonDecode(content);
+      var tabledata = data["table_order"];
+      tables = Table_order.fromJson(tabledata);
+      var res = await tablesList.mergeTableOrder(null, tables);
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 200, "message": "Table merged."}))
+        ..close();
+    } catch (e) {
+      print(e);
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode(
+            {"status": 500, "message": "Something went wrong" + e.toString()}))
+        ..close();
+    }
+  }
+
+  static changeTable(request) async {
+    TablesList tablesList = new TablesList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var tableid = data["table_id"];
+      var totableId = data["to_table_id"];
+      var cartid = data["cart_id"];
+      await tablesList.changeTable(tableid, totableId, cartid);
+      await request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 200, "message": "Table merged."}))
         ..close();
     } catch (e) {
       print(e);

@@ -168,7 +168,7 @@ class ProductsReq {
     try {
       String content = await utf8.decoder.bind(request).join();
       var data = await jsonDecode(content);
-      var result = await product.getMealsProductData(data["setmeal_id"]);
+      var result = await product.getMealsProductData(data["setmeal_Id"]);
       request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =
@@ -191,12 +191,17 @@ class ProductsReq {
 
 //**********************************************
   //Product details
-  static getProductDetails(request) async {
+  static getProductSubDetails(request) async {
     ProductsList product = new ProductsList();
     try {
       String content = await utf8.decoder.bind(request).join();
       var data = await jsonDecode(content);
-      var result = await product.getMealsProductData(data["setmeal_id"]);
+      var result = await product.getProductDetails(
+          data["branch_id"],
+          data["product_id"],
+          data["setmeal_id"],
+          data["cart_details_id"],
+          data["cartID"]);
       request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =

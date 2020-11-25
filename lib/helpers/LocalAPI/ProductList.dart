@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/helpers/ComunAPIcall.dart';
@@ -31,16 +33,22 @@ class ProductsList {
             : [];
       }
     } else {
-      var query = "SELECT product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64, price_type.name as price_type_Name FROM `product` " +
-          " LEFT join product_category on product_category.product_id = product.product_id " +
-          " LEFT join product_branch on product_branch.product_id = product.product_id " +
-          " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
-          " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
+      var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,product_store_inventory.qty,category_attribute.name as attr_cat ,modifier.name as modifire_Name FROM `product` " +
+          " LEFT JOIN product_category on product_category.product_id = product.product_id AND product_category.status = 1" +
+          " LEFT JOIN product_branch on product_branch.product_id = product.product_id AND product_branch.status = 1" +
+          " LEFT JOIN price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
+          " LEFT JOIN asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id AND asset.status = 1" +
+          " LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1" +
+          " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1" +
+          " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1" +
+          " LEFT JOIN product_modifier on  product_modifier.product_id = product.product_id AND product_modifier.status = 1 " +
+          " LEFT JOIN modifier on modifier.modifier_id = product_modifier.modifier_id AND modifier.status = 1 " +
+          " LEFT JOIN product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
           " where product_category.category_id = " +
           catid.toString() +
           " AND product_branch.branch_id = " +
           branchID.toString() +
-          " AND product.status = 1 GROUP By product.product_id";
+          " AND product.status = 1 AND product.has_setmeal = 0 GROUP By product.product_id";
       List<Map> res = await db.rawQuery(query);
       list = res.length > 0
           ? res.map((c) => ProductDetails.fromJson(c)).toList()
@@ -68,11 +76,12 @@ class ProductsList {
             : [];
       }
     } else {
-      var query = "SELECT product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64 , price_type.name as price_type_Name FROM `product` " +
+      var query = "SELECT product.*,base64 ,product_store_inventory.qty, price_type.name as price_type_Name FROM `product` " +
           " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
           " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
-          " where product.name LIKE '%$searchText%' OR product.sku LIKE '%$searchText%'" +
-          " AND product.status = 1" +
+          " LEFT join product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
+          " where product.status = 1 AND product.has_setmeal = 0 AND " +
+          " (product.name LIKE '%$searchText%' OR product.sku LIKE '%$searchText%')" +
           " GROUP By product.product_id";
       List<Map> res =
           await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
@@ -101,7 +110,7 @@ class ProductsList {
             : [];
       }
     } else {
-      var qry = "select setmeal.* , replace(asset.base64,'data:image/jpg;base64,','') as base64  from setmeal " +
+      var qry = "select setmeal.* ,base64  from setmeal " +
           " LEFT join setmeal_branch on setmeal_branch_id =" +
           branchid +
           " AND setmeal_branch.setmeal_id = setmeal.setmeal_id " +
@@ -109,7 +118,6 @@ class ProductsList {
           " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id  " +
           " where setmeal.name LIKE '%$searchText%'" +
           "GROUP by setmeal.setmeal_id ";
-
       var mealList = await db.rawQuery(qry);
       list = mealList.isNotEmpty
           ? mealList.map((c) => SetMeal.fromJson(c)).toList()
@@ -177,12 +185,12 @@ class ProductsList {
             : [];
       }
     } else {
-      var qry = "select setmeal.* , replace(asset.base64,'data:image/jpg;base64,','') as base64  from setmeal " +
+      var qry = "select setmeal.* ,  base64  from setmeal " +
           " LEFT join setmeal_branch on setmeal_branch_id =" +
           branchid +
           " AND setmeal_branch.setmeal_id = setmeal.setmeal_id " +
           " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
-          " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id  GROUP by setmeal.setmeal_id ";
+          " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id where setmeal.status = 1  GROUP by setmeal.setmeal_id ";
       var mealList = await db.rawQuery(qry);
       list = mealList.isNotEmpty
           ? mealList.map((c) => SetMeal.fromJson(c)).toList()
@@ -195,19 +203,51 @@ class ProductsList {
 
   Future<List<SetMealProduct>> getMealsProductData(setmealid) async {
     List<SetMealProduct> list = [];
-    if (setmealid != null) {
-      var qry = "SELECT setmeal_product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name  FROM setmeal_product " +
-          " LEFT JOIN product ON product.product_id = setmeal_product.product_id " +
-          " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id " +
-          " WHERE setmeal_product.setmeal_id = " +
-          setmealid.toString() +
-          " GROUP by setmeal_product.setmeal_product_id";
-      var mealList = await db.rawQuery(qry);
-      list = mealList.isNotEmpty
-          ? mealList.map((c) => SetMealProduct.fromJson(c)).toList()
-          : [];
-      await SyncAPICalls.logActivity(
-          "Meals product List", "get Meals product List", "setmeal", setmealid);
+    var isjoin = await CommunFun.checkIsJoinServer();
+    if (isjoin == true) {
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.set_meals_products;
+      var stringParams = {"setmeal_Id": setmealid};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => SetMealProduct.fromJson(c)).toList()
+            : [];
+      }
+    } else {
+      if (setmealid != null) {
+        var qry = "SELECT setmeal_product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name  FROM setmeal_product " +
+            " LEFT JOIN product ON product.product_id = setmeal_product.product_id AND product.status = 1 " +
+            " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id AND asset.status = 1 " +
+            " WHERE setmeal_product.setmeal_id = " +
+            setmealid.toString() +
+            " AND setmeal_product.status = 1 " +
+            " GROUP by setmeal_product.setmeal_product_id";
+        var mealList = await db.rawQuery(qry);
+        list = mealList.isNotEmpty
+            ? mealList.map((c) => SetMealProduct.fromJson(c)).toList()
+            : [];
+        for (var i = 0; i < list.length; i++) {
+          var attrQry = "SELECT product.product_id, category_attribute.name as attr_name,attributes.ca_id, " +
+              " group_concat(product_attribute.price) as attr_types_price,group_concat(attributes.name) as attr_types ,group_concat(attributes.attribute_id) as attributeId " +
+              " FROM product LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1 " +
+              " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1 " +
+              " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1 " +
+              " WHERE product.product_id =  " +
+              list[i].productId.toString() +
+              " GROUP by category_attribute.ca_id";
+          List<Map> res = await db.rawQuery(attrQry);
+          List<Attribute_Data> attrlist = res.length > 0
+              ? res.map((c) => Attribute_Data.fromJson(c)).toList()
+              : [];
+          if (attrlist.length > 0) {
+            list[i].attributeDetails = jsonEncode(attrlist);
+          }
+        }
+        await SyncAPICalls.logActivity("Meals product List",
+            "get Meals product List", "setmeal", setmealid);
+      }
     }
     return list;
   }
@@ -216,8 +256,8 @@ class ProductsList {
     List<BranchTax> list = [];
     var tax = await db.rawQuery(
         "SELECT branch_tax.*,tax.code From branch_tax " +
-            " Left join  tax on tax.tax_id = branch_tax.tax_id " +
-            " WHERE branch_id =" +
+            " Left join tax on tax.tax_id = branch_tax.tax_id " +
+            " WHERE branch_tax.status = 1 AND branch_id =" +
             branchid.toString());
     list = tax.isNotEmpty ? tax.map((c) => BranchTax.fromJson(c)).toList() : [];
     return list;
@@ -287,7 +327,7 @@ class ProductsList {
     var isjoin = await CommunFun.checkIsJoinServer();
     if (isjoin == true) {
       var apiurl =
-          await Configrations.ipAddress() + Configrations.product_Modifeirs;
+          await Configrations.ipAddress() + Configrations.product_details;
       var stringParams = {
         "product_id": productid,
         "setmeal_id": setmealid,

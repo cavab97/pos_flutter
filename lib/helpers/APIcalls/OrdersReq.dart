@@ -18,7 +18,8 @@ class OrdersReq {
     try {
       String content = await utf8.decoder.bind(request).join();
       var data = await jsonDecode(content);
-      var res = await order.getcurrentOrders(data["order_id"]);
+      var res =
+          await order.getcurrentOrders(data["order_id"], data["terminal_Id"]);
       request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =
@@ -67,7 +68,7 @@ class OrdersReq {
       List<OrderDetail> orderDetails = data["order_details"];
       List<OrderModifire> orderModifire = data["order_modifire"];
       List<OrderAttributes> orderAttributes = data["order_attributes"];
-      OrderPayment orderPayment = data["order_payment"];
+      List<OrderPayment> orderPayment = data["order_payment"];
       VoucherHistory history = data["order_history"];
       ShiftInvoice shiftInvoice = data["shift_invoice"];
       var res = await order.placeOrder(
@@ -100,7 +101,8 @@ class OrdersReq {
     try {
       String content = await utf8.decoder.bind(request).join();
       var data = await jsonDecode(content);
-      var res = await order.getOrderDetailsList(data["order_id"]);
+      var res = await order.getOrderDetailsList(
+          data["order_id"], data["terminal_Id"]);
       request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =
@@ -122,7 +124,8 @@ class OrdersReq {
     try {
       String content = await utf8.decoder.bind(request).join();
       var data = await jsonDecode(content);
-      var res = await order.getOrderpaymentData(data["order_id"]);
+      var res = await order.getOrderpaymentData(
+          data["order_id"], data["terminal_Id"]);
       request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =
@@ -151,6 +154,52 @@ class OrdersReq {
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
         ..write(jsonEncode({"status": 200, "message": "success.", "data": res}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static getOrdersDetails(request) async {
+    OrdersList order = new OrdersList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var res = await order.getOrdersDetailsData(
+          data["order_id"], data["terminal_id"]);
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 200, "message": "success.", "data": res}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static insertCancelOrd(request) async {
+    OrdersList order = new OrdersList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      await order.insertCancelOrder(data["order"]);
+      await request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(
+            jsonEncode({"status": 200, "message": "order cancel  success."}))
         ..close();
     } catch (e) {
       request.response

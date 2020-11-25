@@ -23,10 +23,10 @@ class CategoriesList {
       }
     } else {
       var query = "select * from category left join category_branch on " +
-          " category_branch.category_id = category.category_id AND category_branch.status = 1 where " +
-          " category_branch.branch_id =" +
-          branchID.toString() +
-          " AND category.status = 1";
+        " category_branch.category_id = category.category_id AND category_branch.status=1 where " +
+        " category_branch.branch_id =" +
+        branchID.toString() +
+        " AND category.status = 1 order by category_branch.display_order ASC";
       var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
       list =
           res.length > 0 ? res.map((c) => Category.fromJson(c)).toList() : [];

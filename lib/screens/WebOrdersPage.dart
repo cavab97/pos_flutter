@@ -4,6 +4,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/LocalAPI/TablesList.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -21,6 +22,7 @@ class WebOrderPages extends StatefulWidget {
 class _WebOrderPagesState extends State<WebOrderPages>
     with SingleTickerProviderStateMixin {
   LocalAPI localAPI = LocalAPI();
+  TablesList tableapi = TablesList();
   List<MST_Cart> onlineList = [];
   List<MST_Cart> offlineList = [];
   TabController _tabController;
@@ -69,7 +71,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
       assignTable(cart);
     } else {
       List<Table_order> tableorder =
-          await localAPI.getTableOrders(cart.table_id);
+          await tableapi.getTableOrders(cart.table_id);
       if (tableorder.length > 0) {
         await Preferences.setStringToSF(
             Constant.TABLE_DATA, json.encode(tableorder[0]));
