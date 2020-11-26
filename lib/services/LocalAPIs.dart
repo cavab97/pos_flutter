@@ -105,9 +105,9 @@ class LocalAPI {
         " LEFT JOIN modifier on modifier.modifier_id = product_modifier.modifier_id AND modifier.status = 1 " +
         " LEFT JOIN product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
         " where product_category.category_id = " +
-        id +
+        id.toString() +
         " AND product_branch.branch_id = " +
-        branchID +
+        branchID.toString() +
         " AND product.status = 1 AND product.has_setmeal = 0 GROUP By product.product_id";
     var res = await db.rawQuery(query);
     List<ProductDetails> list = res.length > 0
@@ -417,7 +417,7 @@ class LocalAPI {
 
   Future<int> insertItemTocart(cartidd, MST_Cart cartData,
       ProductDetails product, SaveOrder orderData, tableiD) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var cartid;
     if (cartidd == null) {
       cartid = await db.insert("mst_cart", cartData.toJson());
@@ -502,9 +502,8 @@ class LocalAPI {
 
   Future<List<MSTSubCartdetails>> itemmodifireList(detailid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry =
-        "SELECT  *  from   mst_cart_sub_detail WHERE cart_details_id  = " +
-            detailid.toString();
+    var qry = "SELECT  * from mst_cart_sub_detail WHERE cart_details_id  = " +
+        detailid.toString();
     var res = await db.rawQuery(qry);
     List<MSTSubCartdetails> list = res.isNotEmpty
         ? res.map((c) => MSTSubCartdetails.fromJson(c)).toList()
@@ -812,11 +811,12 @@ class LocalAPI {
 
   Future<int> clearCartItem(cartid, tableID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var cart = // cart table
-        await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
-
+    await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
     await SyncAPICalls.logActivity("orders", "clear cart", "mst_cart", 1);
     await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartid]);
+    var qry = "Update table_order set save_order_id = 0 where table_id =" +
+        tableID.toString();
+    var res = await db.rawQuery(qry);
     var cartDetail = await db
         .query("mst_cart_detail", where: 'cart_id = ?', whereArgs: [cartid]);
     await SyncAPICalls.logActivity(
@@ -975,6 +975,10 @@ class LocalAPI {
 
   Future<List<Voucher>> checkVoucherIsExit(code) async {
     var qry = "SELECT * from voucher  where voucher_code = '" + code + "'";
+//     var qry = "SELECT voucher.*,count(voucher_history.voucher_id) as total_used from voucher "+
+// " LEFT JOIN voucher_history on voucher_history.voucher_id = voucher.voucher_id "+
+// " where voucher_code = "+ code.toString();
+
     var voucherList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<Voucher> list = voucherList.isNotEmpty
         ? voucherList.map((c) => Voucher.fromJson(c)).toList()

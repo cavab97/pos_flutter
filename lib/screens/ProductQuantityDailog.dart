@@ -691,12 +691,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (!isEditing) {
       cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
     }
+    if (currentCart != null) {
+      cart.voucher_detail = currentCart.voucher_detail;
+      cart.voucher_id = cart.voucher_id;
+    }
     cart.created_by = loginData["id"];
     cart.localID = await CommunFun.getLocalID();
     orderData.orderName = tableData != null ? "" : "test";
-    if (!isEditing) {
-      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-    }
     orderData.numberofPax = tableData != null ? tableData.number_of_pax : 0;
     orderData.isTableOrder = tableData != null ? 1 : 0;
     if (!isEditing) {
@@ -925,7 +926,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             SizedBox(height: 5),
             isSetMeal
                 ? SizedBox()
-                : modifireList.length != 0 ? modifireItmeList() : SizedBox(),
+                : modifireList.length != 0
+                    ? modifireItmeList()
+                    : SizedBox(),
             SizedBox(height: 10),
             _extraNotesTitle(),
             SizedBox(height: 5),

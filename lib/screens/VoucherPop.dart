@@ -50,23 +50,24 @@ class VoucherPopState extends State<VoucherPop> {
 
   checkMinMaxValue(vaocher) async {
     // Check in minimum  max value with cart value
-    var isReturn;
+    bool isReturn = false;
     if (vaocher.voucherDiscount < cartData.sub_total) {
       if (vaocher.minimumAmount == 0.0 ||
           vaocher.minimumAmount <= cartData.sub_total) {
         isReturn = true;
       } else {
+        isReturn = false;
         CommunFun.showToast(
             context,
             "Required minimum cart amount " +
                 vaocher.minimumAmount.toString() +
                 " for this voucher.");
       }
-
       if (vaocher.maximumAmount == 0.0 ||
           vaocher.maximumAmount >= cartData.sub_total) {
         isReturn = true;
       } else {
+        isReturn = false;
         CommunFun.showToast(
             context,
             "Required maximum cart amount " +
@@ -74,13 +75,14 @@ class VoucherPopState extends State<VoucherPop> {
                 " for this voucher.");
       }
     } else {
+      isReturn = false;
       CommunFun.showToast(
           context,
           "Required cart amount more than discount ammount " +
               vaocher.voucherDiscount.toString() +
               ".");
     }
-    return await isReturn;
+    return isReturn;
   }
 
   checkisExpired(vaocher) {

@@ -1060,7 +1060,7 @@ class CommunFun {
   }
 
   static countDiscount(MST_Cart currentCart) {
-    return currentCart.discount != null
+    return currentCart != null && currentCart.discount != null
         ? double.parse(currentCart.discount.toStringAsFixed(2))
         : 0.00;
   }
@@ -1131,7 +1131,7 @@ class CommunFun {
     cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
     cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
     cart.table_id = table.table_id;
-    cart.discount_type = allcartData.discount_type;
+    cart.discount_type = allcartData != null ? allcartData.discount_type : 0;
     cart.total_qty = qty;
     cart.tax = double.parse(taxvalues.toStringAsFixed(2));
     cart.source = 2;
@@ -1143,13 +1143,21 @@ class CommunFun {
     }
     cart.created_by = loginUser.id;
     cart.localID = await CommunFun.getLocalID();
+    if (allcartData != null) {
+      cart.voucher_detail = allcartData.voucher_detail;
+      cart.voucher_id = allcartData.voucher_id;
+    }
     if (!isEditing) {
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
     orderData.numberofPax = table != null ? table.number_of_pax : 0;
     orderData.isTableOrder = table != null ? 1 : 0;
     var cartid = await localAPI.insertItemTocart(
-        allcartData.id, cart, productItem, orderData, table.table_id);
+        allcartData != null ? allcartData.id : null,
+        cart,
+        productItem,
+        orderData,
+        table.table_id);
     ProductDetails cartItemproduct = new ProductDetails();
     cartItemproduct = productItem;
 

@@ -19,7 +19,6 @@ import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Payment.dart';
-import 'package:image/image.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
 
 class PrintReceipt {
@@ -27,8 +26,8 @@ class PrintReceipt {
   String receipt48CharHeader =
       "Description                  Qty   Price  Amount";
 
-  Future<Ticket> KOTReceipt(
-      String tableName, List<MSTCartdetails> cartList, String pax) async {
+  Future<Ticket> KOTReceipt(String tableName, List<MSTCartdetails> cartList,
+      String pax, bool isReprint) async {
     final profile = await CapabilityProfile.load();
 
     final Ticket ticket = Ticket(paper, profile);
@@ -100,7 +99,7 @@ class PrintReceipt {
 
     for (var i = 0; i < cartList.length; i++) {
       var item = cartList[i];
-      if (item.isSendKichen == null) {
+      if (item.isSendKichen == null || isReprint) {
         ticket.row([
           PosColumn(
               text: item.productQty.toString(),
@@ -223,11 +222,11 @@ class PrintReceipt {
   }
 
   void checkKOTPrint(String printerIp, String tableName, BuildContext ctx,
-      List<MSTCartdetails> cartList, String pax) async {
+      List<MSTCartdetails> cartList, String pax, bool isReprint) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
     final PosPrintResult res = await printerManager
-        .printTicket(await KOTReceipt(tableName, cartList, pax));
+        .printTicket(await KOTReceipt(tableName, cartList, pax, isReprint));
 
     CommunFun.showToast(ctx, res.msg);
   }

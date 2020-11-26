@@ -235,6 +235,7 @@ class _DashboradPageState extends State<DashboradPage>
       serviceChargePer = 0;
       isTableSelected = false;
       currentCart = null;
+      allcartData = null;
     });
   }
 
@@ -419,7 +420,7 @@ class _DashboradPageState extends State<DashboradPage>
               onClose: (resendList) {
                 if (resendList.length > 0 && printerreceiptList.length > 0) {
                   Navigator.of(context).pop();
-                  openPrinterPop(resendList);
+                  openPrinterPop(resendList, true);
                 } else {
                   CommunFun.showToast(context, Strings.printer_not_available);
                 }
@@ -447,19 +448,18 @@ class _DashboradPageState extends State<DashboradPage>
 
 /*this function used for remove promocode from cart*/
   removePromoCode(voucherdata) async {
-    List<MSTCartdetails> cartListUpdate = [];
+    Voucher voucher = Voucher.fromJson(voucherdata);
     for (int i = 0; i < cartList.length; i++) {
       var cartitem = cartList[i];
       cartitem.discount = 0.0;
       cartitem.discountType = 0;
+      await localAPI.addVoucherIndetail(cartitem, voucher.voucherId);
     }
-
     allcartData.grand_total = allcartData.grand_total + allcartData.discount;
     allcartData.voucher_detail = "";
     allcartData.discount = 0.0;
     allcartData.discount_type = 0;
     allcartData.voucher_id = null;
-    Voucher voucher = Voucher.fromJson(voucherdata);
     await localAPI.addVoucherInOrder(allcartData, voucher);
     await countTotals(currentCart);
   }
@@ -650,7 +650,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
 /*This method used for print KOT receipt print*/
-  openPrinterPop(cartLists) {
+  openPrinterPop(cartLists, isReprint) {
     for (int i = 0; i < printerList.length; i++) {
       List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
       tempCart.clear();
@@ -665,8 +665,13 @@ class _DashboradPageState extends State<DashboradPage>
         }
       }
       if (tempCart.length > 0) {
-        printKOT.checkKOTPrint(printerList[i].printerIp.toString(), tableName,
-            context, tempCart, selectedTable.number_of_pax.toString());
+        printKOT.checkKOTPrint(
+            printerList[i].printerIp.toString(),
+            tableName,
+            context,
+            tempCart,
+            selectedTable.number_of_pax.toString(),
+            isReprint);
       }
     }
   }
@@ -686,7 +691,7 @@ class _DashboradPageState extends State<DashboradPage>
       if (i == itemList.length - 1) {
         if (list.length > 0) {
           dynamic send = await localAPI.sendToKitched(ids);
-          openPrinterPop(list);
+          openPrinterPop(list, false);
           getCartItem(currentCart);
         }
         return false;
@@ -1228,8 +1233,7 @@ class _DashboradPageState extends State<DashboradPage>
         await localAPI.getOrderpaymentmethod(orderid, terminalid);
     List<OrderDetail> orderitem =
         await localAPI.getOrderDetailsList(orderid, terminalid);
-    var branchID = await CommunFun.getbranchId();
-    Orders order = await localAPI.getcurrentOrders(orderid, branchID);
+    Orders order = await localAPI.getcurrentOrders(orderid, terminalid);
     List<OrderAttributes> attributes =
         await localAPI.getOrderAttributes(orderid);
     List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
@@ -2183,7 +2187,8 @@ class _DashboradPageState extends State<DashboradPage>
         shrinkWrap: true,
         physics: BouncingScrollPhysics(),
         children: mealsList.map((meal) {
-          var proprice = meal.price.toStringAsFixed(2);
+          var proprice =
+              meal.price != null ? meal.price.toStringAsFixed(2) : "";
           return InkWell(
             onTap: () {
               if (permissions.contains(Constant.EDIT_ORDER)) {
@@ -2724,10 +2729,11 @@ class _DashboradPageState extends State<DashboradPage>
         );
       }).toList(),
     );
-    var vaucher =
-        allcartData.voucher_detail != null && allcartData.voucher_detail != ""
-            ? json.decode(allcartData.voucher_detail)
-            : null;
+    var vaucher = allcartData != null &&
+            allcartData.voucher_detail != null &&
+            allcartData.voucher_detail != ""
+        ? json.decode(allcartData.voucher_detail)
+        : null;
 
     final totalPriceTable = Table(
         border: TableBorder(
