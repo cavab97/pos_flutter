@@ -825,14 +825,14 @@ class LocalAPI {
   //   return list[0];
   // }
 
-  Future<dynamic> getVoucherusecount(voucherid) async {
-    var qry =
-        "SELECT count(voucher_id) from voucher_history where voucher_id = " +
-            voucherid.toString();
-    var count = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    int count1 = Sqflite.firstIntValue(count);
-    return count1;
-  }
+  // Future<dynamic> getVoucherusecount(voucherid) async {
+  //   var qry =
+  //       "SELECT count(voucher_id) from voucher_history where voucher_id = " +
+  //           voucherid.toString();
+  //   var count = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+  //   int count1 = Sqflite.firstIntValue(count);
+  //   return count1;
+  // }
 
   // Future<dynamic> saveVoucherHistory(VoucherHistory voucherHis) async {
   //   var db = await DatabaseHelper.dbHelper.getDatabse();

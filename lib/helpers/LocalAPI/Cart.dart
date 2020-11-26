@@ -236,20 +236,8 @@ class Cartlist {
           "delete cart item from mst_cart_sub_detail",
           "mst_cart_sub_detail",
           cartItem.id);
-
-      if (isLast) {
-        await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartID]);
-        await SyncAPICalls.logActivity(
-            "cart", "delete cart all item", "mst_Cart", cartItem.id);
-        await db
-            .delete("save_order", where: 'cart_id = ?', whereArgs: [cartID]);
-        await SyncAPICalls.logActivity("cart",
-            "delete cart all item from save_order", "save_order", cartItem.id);
-      } else {
-        //Update cart
-        await db.update("mst_cart", mainCart.toJson(),
-            where: 'id = ?', whereArgs: [cartID]);
-      }
+      await db.update("mst_cart", mainCart.toJson(),
+          where: 'id = ?', whereArgs: [cartID]);
       list = await cartapi.getCartItem(cartID);
     }
     return list;
@@ -269,6 +257,9 @@ class Cartlist {
       await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
       await SyncAPICalls.logActivity("orders", "clear cart", "mst_cart", 1);
       await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartid]);
+      var qry = "Update table_order set save_order_id = 0 where table_id =" +
+          tableID.toString();
+      await db.rawQuery(qry);
       var cartDetail = await db
           .query("mst_cart_detail", where: 'cart_id = ?', whereArgs: [cartid]);
       await SyncAPICalls.logActivity(
@@ -343,7 +334,10 @@ class Cartlist {
       await APICall.localapiCall(null, apiurl, stringParams);
     } else {
       for (var i = 0; i < details.length; i++) {
-        await db.update("mst_cart_detail", details[i].toJson(),
+        var newObj = details[i].toJson();
+        newObj.remove("attrName");
+        newObj.remove("modiName");
+        await db.update("mst_cart_detail", newObj,
             where: "id =?", whereArgs: [details[i].id]);
         await SyncAPICalls.logActivity(
             "voucher", "add voucher in cart", "voucher", details[i].id);
@@ -388,8 +382,13 @@ class Cartlist {
             : [];
       }
     } else {
-      var qry = "SELECT * from voucher where voucher_code = '" + code + "'";
-      var vouchers = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+      var qry =
+          "SELECT voucher.*,count(voucher_history.voucher_id) as total_used from voucher " +
+              " LEFT JOIN voucher_history on voucher_history.voucher_id = voucher.voucher_id " +
+              " where voucher_code = " +
+              code.toString();
+      //var qry = "SELECT * from voucher where voucher_code = '" + code + "'";
+      var vouchers = await db.rawQuery(qry);
       voucherList = vouchers.length > 0
           ? vouchers.map((c) => Voucher.fromJson(c)).toList()
           : [];
@@ -411,7 +410,10 @@ class Cartlist {
 
   Future<dynamic> addVoucherIndetail(MSTCartdetails details, voucherId) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var data = await db.update("mst_cart_detail", details.toJson(),
+    var newObj = details.toJson();
+    newObj.remove("attrName");
+    newObj.remove("modiName");
+    var data = await db.update("mst_cart_detail", newObj,
         where: "id =?", whereArgs: [details.id]);
     await SyncAPICalls.logActivity(
         "voucher", "add voucher in cart", "voucher", voucherId);
@@ -434,8 +436,10 @@ class Cartlist {
           where: "id =?", whereArgs: [details.id]);
       if (cartitemList.length > 0) {
         for (var i = 0; i < cartitemList.length; i++) {
-          var data = await db.update(
-              "mst_cart_detail", cartitemList[i].toJson(),
+          var newObj = cartitemList[i].toJson();
+          newObj.remove("attrName");
+          newObj.remove("modiName");
+          var data = await db.update("mst_cart_detail", newObj,
               where: "id =?", whereArgs: [cartitemList[i].id]);
         }
       }

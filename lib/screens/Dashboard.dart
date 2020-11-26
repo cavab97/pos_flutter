@@ -35,7 +35,6 @@ import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
-import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Lastids.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Printer.dart';
@@ -120,7 +119,7 @@ class _DashboradPageState extends State<DashboradPage>
   double tax = 0;
   List taxJson = [];
   double grandTotal = 0;
-  MST_Cart allcartData = new MST_Cart();
+  MST_Cart allcartData;
   Voucher selectedvoucher;
   int currentCart;
   bool isLoading = false;
@@ -257,6 +256,7 @@ class _DashboradPageState extends State<DashboradPage>
       serviceChargePer = 0;
       isTableSelected = false;
       currentCart = null;
+      allcartData = null;
     });
   }
 
@@ -446,7 +446,7 @@ class _DashboradPageState extends State<DashboradPage>
               onClose: (resendList) {
                 if (resendList.length > 0 && printerreceiptList.length > 0) {
                   Navigator.of(context).pop();
-                  openPrinterPop(resendList);
+                  openPrinterPop(resendList, true);
                 } else {
                   CommunFun.showToast(context, Strings.printer_not_available);
                 }
@@ -681,7 +681,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
 /*This method used for print KOT receipt print*/
-  openPrinterPop(cartLists) {
+  openPrinterPop(cartLists, isReprint) {
     for (int i = 0; i < printerList.length; i++) {
       List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
       tempCart.clear();
@@ -696,8 +696,13 @@ class _DashboradPageState extends State<DashboradPage>
         }
       }
       if (tempCart.length > 0) {
-        printKOT.checkKOTPrint(printerList[i].printerIp.toString(), tableName,
-            context, tempCart, selectedTable.number_of_pax.toString());
+        printKOT.checkKOTPrint(
+            printerList[i].printerIp.toString(),
+            tableName,
+            context,
+            tempCart,
+            selectedTable.number_of_pax.toString(),
+            isReprint);
       }
     }
   }
@@ -717,7 +722,7 @@ class _DashboradPageState extends State<DashboradPage>
       if (i == itemList.length - 1) {
         if (list.length > 0) {
           dynamic send = await localAPI.sendToKitched(ids);
-          openPrinterPop(list);
+          openPrinterPop(list, false);
           getCartItem(currentCart);
         }
         return false;
@@ -927,7 +932,7 @@ class _DashboradPageState extends State<DashboradPage>
     var cartData = await getcartData();
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     Orders order = new Orders();
-    VoucherHistory history;
+    VoucherHistory history = new VoucherHistory();
     List<OrderModifire> orderModifires = new List<OrderModifire>();
     List<OrderAttributes> orderAttributes = new List<OrderAttributes>();
     List<OrderPayment> orderPaymentList = new List<OrderPayment>();
@@ -2748,10 +2753,11 @@ class _DashboradPageState extends State<DashboradPage>
         );
       }).toList(),
     );
-    var vaucher =
-        allcartData.voucher_detail != null && allcartData.voucher_detail != ""
-            ? json.decode(allcartData.voucher_detail)
-            : null;
+    var vaucher = allcartData != null &&
+            allcartData.voucher_detail != null &&
+            allcartData.voucher_detail != ""
+        ? json.decode(allcartData.voucher_detail)
+        : null;
 
     final totalPriceTable = Table(
         border: TableBorder(

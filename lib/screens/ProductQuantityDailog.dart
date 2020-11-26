@@ -705,8 +705,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         await countGrandtotal(subtotal, serviceCharge, taxvalues, disc);
 
     //cart data
-    if (widget.cartID != null) {
+
+    if (currentCart != null) {
       cart.id = currentCart.id;
+      cart.discount_type = currentCart.discount_type;
+      cart.voucher_detail = currentCart.voucher_detail;
+      cart.voucher_id = cart.voucher_id;
     }
     cart.user_id = customerid;
     cart.branch_id = int.parse(branchid);
@@ -715,7 +719,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
     cart.discount = disc;
     cart.table_id = tableData.table_id;
-    cart.discount_type = currentCart.discount_type;
     cart.total_qty = qty;
     cart.tax = double.parse(taxvalues.toStringAsFixed(2));
     cart.source = 2;
@@ -724,14 +727,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cart.customer_terminal = customer != null ? customer["terminal_id"] : 0;
     cart.created_by = loginData["id"];
     cart.localID = await CommunFun.getLocalID();
-    if (!isEditing) {
-      cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
-    }
+    cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
     var cartid = await cartlist.addcart(context, cart); // Insert Cart
+
     if (widget.cartID == null) {
       await insertTableData(tableData, cartid);
     }
-
     ProductDetails cartItemproduct = new ProductDetails();
     if (!isSetMeal) {
       cartItemproduct = productItem;
@@ -748,9 +749,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         .removeWhere((String key, dynamic value) => value == null);
     var data = cartItemproduct;
     MSTCartdetails cartdetails = new MSTCartdetails();
-    // if (!isEditing && !isSetMeal) {
-    //   await getcartItemsDetails();
-    // }
     if (isEditing) {
       cartdetails.id = cartitem.id;
     }
@@ -777,7 +775,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       cartdetails.setmeal_product_detail = json.encode(tempCart);
     }
     var detailID = await cartlist.addintoCartDetails(context, cartdetails);
-
     List<MSTSubCartdetails> cartModiData = [];
     if (selectedModifier.length > 0) {
       for (var i = 0; i < selectedModifier.length; i++) {
@@ -806,7 +803,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       var res = await cartlist.addsubCartData(context, cartModiData);
       print(res);
     }
-
     if (isEditing) {
       if (!isSetMeal) {
         if (cartitem.isSendKichen == 1) {
@@ -957,7 +953,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             SizedBox(height: 5),
             isSetMeal
                 ? SizedBox()
-                : modifireList.length != 0 ? modifireItmeList() : SizedBox(),
+                : modifireList.length != 0
+                    ? modifireItmeList()
+                    : SizedBox(),
             SizedBox(height: 10),
             _extraNotesTitle(),
             SizedBox(height: 5),

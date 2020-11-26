@@ -70,14 +70,28 @@ class _SelectTablePageState extends State<SelectTablePage>
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
-    getTables();
     KeyboardVisibilityNotification().addNewListener(
       onHide: () {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
     _tabController = new TabController(length: 2, vsync: this);
+    checkisInit();
     checkISlogin();
+  }
+
+  checkisInit() async {
+    var isInit = await CommunFun.checkDatabaseExit();
+    if (isInit == true) {
+      afterInit();
+    } else {
+      await databaseHelper.initializeDatabase();
+      afterInit();
+    }
+  }
+
+  afterInit() {
+    getTables();
     checkshift();
     getAllPrinter();
     setPermissons();
@@ -181,15 +195,15 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   selectTableForNewOrder() async {
     if (int.parse(paxController.text) <= selectedTable.tableCapacity) {
-      Table_order table_order = new Table_order();
-      table_order.table_id = selectedTable.tableId;
-      table_order.number_of_pax = int.parse(paxController.text);
-      table_order.save_order_id = selectedTable.saveorderid;
-      table_order.service_charge =
+      Table_order tableOrder = new Table_order();
+      tableOrder.table_id = selectedTable.tableId;
+      tableOrder.number_of_pax = int.parse(paxController.text);
+      tableOrder.save_order_id = selectedTable.saveorderid;
+      tableOrder.service_charge =
           CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
-      await tabList.insertTableOrder(context, table_order);
+      await tabList.insertTableOrder(context, tableOrder);
       await Preferences.setStringToSF(
-          Constant.TABLE_DATA, json.encode(table_order));
+          Constant.TABLE_DATA, json.encode(tableOrder));
       paxController.text = "";
       Navigator.of(context).pop();
       if (!isChanging) {
@@ -305,8 +319,8 @@ class _SelectTablePageState extends State<SelectTablePage>
         cartid = cartID[0].cartId;
       }
     }
-    var tables = await tabList.changeTable(
-        selectedTable.tableId, table.tableId, cartid);
+    var tables =
+        await tabList.changeTable(selectedTable.tableId, table.tableId, cartid);
     print(tables);
     setState(() {
       changeInTable = null;

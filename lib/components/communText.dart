@@ -1125,7 +1125,7 @@ class CommunFun {
   }
 
   static countDiscount(MST_Cart currentCart) {
-    return currentCart.discount != null
+    return currentCart != null && currentCart.discount != null
         ? double.parse(currentCart.discount.toStringAsFixed(2))
         : 0.00;
   }
@@ -1140,11 +1140,10 @@ class CommunFun {
     return printer;
   }
 
-  static addItemToCart(productItem, List<MSTCartdetails> cartItems,
-      MST_Cart allcartData, callback, context) async {
+  static addItemToCart(productItem, List<MSTCartdetails> cartItems, allcartData,
+      callback, context) async {
     taxvalues = 0;
     MST_Cart cart = new MST_Cart();
-    SaveOrder orderData = new SaveOrder();
     var branchid = await CommunFun.getbranchId();
     Table_order table = await CommunFun.getTableData();
     User loginUser = await CommunFun.getuserDetails();
@@ -1190,6 +1189,12 @@ class CommunFun {
     var totalTax = await CommunFun.countTax(subtotal);
     var grandTotal = await CommunFun.countGrandtotal(
         subtotal, serviceCharge, taxvalues, disc);
+    if (allcartData != null) {
+      cart.id = allcartData.id;
+      cart.discount_type = allcartData.discount_type;
+      cart.voucher_detail = allcartData.voucher_detail;
+      cart.voucher_id = cart.voucher_id;
+    }
     cart.user_id = customerData.customerId;
     cart.branch_id = int.parse(branchid);
     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
@@ -1197,24 +1202,19 @@ class CommunFun {
     cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
     cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
     cart.table_id = table.table_id;
-    cart.discount_type = allcartData.discount_type;
     cart.total_qty = qty;
     cart.tax = double.parse(taxvalues.toStringAsFixed(2));
     cart.source = 2;
     cart.tax_json = json.encode(totalTax);
     cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
     cart.customer_terminal = customerData != null ? customerData.terminalId : 0;
-    if (!isEditing) {
-      cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
-    }
+    cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
     cart.created_by = loginUser.id;
     cart.localID = await CommunFun.getLocalID();
-    if (!isEditing) {
-      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-    }
-    orderData.numberofPax = table != null ? table.number_of_pax : 0;
-    orderData.isTableOrder = table != null ? 1 : 0;
     var cartid = await cartlist.addcart(context, cart);
+    if (allcartData == null) {
+      await insertTableData(table, cartid, context);
+    }
     ProductDetails cartItemproduct = new ProductDetails();
     cartItemproduct = productItem;
 
@@ -1250,141 +1250,19 @@ class CommunFun {
     callback();
   }
 
-  // static addItemToCart(productItem, List<MSTCartdetails> cartItems,
-  //     MST_Cart allcartData, callback, context) async {
-  //   try {
-  //     taxvalues = 0;
-  //     Cartlist cartlist = new Cartlist();
-  //     MST_Cart cart = new MST_Cart();
-  //     SaveOrder orderData = new SaveOrder();
-  //     var branchid = await CommunFun.getbranchId();
-  //     Table_order table = await CommunFun.getTableData();
-  //     User loginUser = await CommunFun.getuserDetails();
-  //     Customer customerData = await CommunFun.getCustomerData();
-  //     Printer printer = await CommunFun.getPrinter(context, productItem);
-  //     bool isEditing = false;
-  //     MSTCartdetails sameitem;
-  //     var contain = cartItems
-  //         .where((element) => element.productId == productItem.productId);
-  //     if (contain.isNotEmpty) {
-  //       isEditing = true;
-  //       var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
-  //       List<MSTCartdetails> myModels = (json.decode(jsonString) as List)
-  //           .map((i) => MSTCartdetails.fromJson(i))
-  //           .toList();
-  //       sameitem = myModels[0];
-  //     }
-  //     if (productItem.hasInventory == 1) {
-  //       var qty = 1.0;
-  //       if (isEditing) {
-  //         qty = sameitem.productQty + qty;
-  //       }
-  //       List<ProductStoreInventory> cartval =
-  //           await localAPI.checkItemAvailableinStore(productItem.productId);
-  //       if (cartval.length > 0) {
-  //         double storeqty = cartval[0].qty;
-  //         if (storeqty < qty) {
-  //           CommunFun.showToast(context, Strings.stock_not_valilable);
-  //           callback();
-  //           return false;
-  //         }
-  //       }
-  //     }
-  //     var qty = await CommunFun.countTotalQty(cartItems, productItem, 1.0);
-  //     var disc = await CommunFun.countDiscount(allcartData);
-  //     var subtotal =
-  //         await CommunFun.countSubtotal(cartItems, productItem.price);
-  //     var serviceCharge =
-  //         await CommunFun.countServiceCharge(table.service_charge, subtotal);
-  //     var serviceChargePer = table.service_charge == null
-  //         ? await CommunFun.getServiceChargePer()
-  //         : table.service_charge;
-  //     var totalTax = await CommunFun.countTax(subtotal);
-  //     var grandTotal = await CommunFun.countGrandtotal(
-  //         subtotal, serviceCharge, taxvalues, disc);
-  //     Table_order tableData = await CommunFun.getTableData();
-  //     cart.user_id = customerData.customerId;
-  //     cart.branch_id = int.parse(branchid);
-  //     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
-  //     cart.discount = disc;
-  //     cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
-  //     cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
-  //     cart.table_id = table.table_id;
-  //     cart.discount_type = allcartData.discount_type;
-  //     cart.total_qty = qty;
-  //     cart.tax = double.parse(taxvalues.toStringAsFixed(2));
-  //     cart.source = 2;
-  //     cart.tax_json = json.encode(totalTax);
-  //     cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
-  //     cart.customer_terminal =
-  //         customerData != null ? customerData.terminalId : 0;
-  //     if (!isEditing) {
-  //       cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
-  //     }
-  //     cart.created_by = loginUser.id;
-  //     cart.localID = await CommunFun.getLocalID();
-  //     if (!isEditing) {
-  //       orderData.createdAt =
-  //           await CommunFun.getCurrentDateTime(DateTime.now());
-  //     }
-  //     orderData.numberofPax = table != null ? table.number_of_pax : 0;
-  //     orderData.isTableOrder = table != null ? 1 : 0;
-
-  //     var cartid = await cartlist.addcart(context, cart);
-  //     if (allcartData.id == null) {
-  //       await insertTableData(tableData, cartid, context, isEditing);
-  //     }
-  //     ProductDetails cartItemproduct = new ProductDetails();
-  //     cartItemproduct = productItem;
-  //     cartItemproduct
-  //         .toJson()
-  //         .removeWhere((String key, dynamic value) => value == null);
-  //     var data = cartItemproduct;
-  //     MSTCartdetails cartdetails = new MSTCartdetails();
-  //     if (isEditing) {
-  //       cartdetails.id = sameitem.id;
-  //     }
-  //     cartdetails.cartId = cartid;
-  //     cartdetails.productId = productItem.productId;
-  //     cartdetails.productName = productItem.name;
-  //     cartdetails.productSecondName = productItem.name_2;
-  //     cartdetails.productPrice = isEditing
-  //         ? double.parse(productItem.price.toStringAsFixed(2)) +
-  //             sameitem.productPrice
-  //         : double.parse(productItem.price.toStringAsFixed(2));
-  //     cartdetails.productQty = isEditing ? sameitem.productQty + 1.0 : 1.0;
-  //     cartdetails.productNetPrice = productItem.price;
-  //     cartdetails.createdBy = loginUser.id;
-  //     cartdetails.cart_detail = jsonEncode(data);
-  //     cartdetails.discount = isEditing ? sameitem.discount : 0;
-  //     cartdetails.remark = isEditing ? sameitem.remark : "";
-  //     cartdetails.issetMeal = 0;
-  //     cartdetails.hasRacManagemant = productItem.hasRacManagemant;
-  //     cartdetails.taxValue = taxvalues;
-  //     cartdetails.printer_id = printer != null ? printer.printerId : 0;
-  //     cartdetails.createdAt = await CommunFun.getLocalID();
-  //     var detailID = await cartlist.addintoCartDetails(context, cartdetails);
-  //     callback();
-  //   } catch (e) {
-  //     print(e);
-  //   }
-  // }
-
-  static insertTableData(tableData, cartid, context, isEditing) async {
+  static insertTableData(tableData, cartid, context) async {
     SaveOrder orderData = new SaveOrder();
     Table_order tableorder = new Table_order();
     Cartlist cartlist = new Cartlist();
     TablesList tableList = new TablesList();
-    if (!isEditing) {
-      orderData.numberofPax = tableData != null ? tableData.number_of_pax : 0;
-      orderData.isTableOrder = tableData != null ? 1 : 0;
-      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-      orderData.cartId = cartid;
-      var saveOid = await cartlist.addSaveOrder(orderData, tableData.table_id);
-      tableorder = tableData;
-      tableorder.save_order_id = saveOid;
-      var tableid = await tableList.insertTableOrder(context, tableorder);
-    }
+    orderData.numberofPax = tableData != null ? tableData.number_of_pax : 0;
+    orderData.isTableOrder = tableData != null ? 1 : 0;
+    orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    orderData.cartId = cartid;
+    var saveOid = await cartlist.addSaveOrder(orderData, tableData.table_id);
+    tableorder = tableData;
+    tableorder.save_order_id = saveOid;
+    var tableid = await tableList.insertTableOrder(context, tableorder);
   }
 
   static getCustomer() async {

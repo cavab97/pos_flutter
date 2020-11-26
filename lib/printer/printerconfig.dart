@@ -28,7 +28,7 @@ class PrintReceipt {
       "Description                  Qty   Price  Amount";
 
   Future<Ticket> KOTReceipt(
-      String tableName, List<MSTCartdetails> cartList, String pax) async {
+      String tableName, List<MSTCartdetails> cartList, String pax, bool isReprint) async {
     final profile = await CapabilityProfile.load();
 
     final Ticket ticket = Ticket(paper, profile);
@@ -100,7 +100,7 @@ class PrintReceipt {
 
     for (var i = 0; i < cartList.length; i++) {
       var item = cartList[i];
-      if (item.isSendKichen == null) {
+      if (item.isSendKichen == null || isReprint) {
         ticket.row([
           PosColumn(
               text: item.productQty.toString(),
@@ -223,11 +223,11 @@ class PrintReceipt {
   }
 
   void checkKOTPrint(String printerIp, String tableName, BuildContext ctx,
-      List<MSTCartdetails> cartList, String pax) async {
+      List<MSTCartdetails> cartList, String pax, bool isReprint) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
     final PosPrintResult res = await printerManager
-        .printTicket(await KOTReceipt(tableName, cartList, pax));
+        .printTicket(await KOTReceipt(tableName, cartList, pax,isReprint));
 
     CommunFun.showToast(ctx, res.msg);
   }

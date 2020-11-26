@@ -728,7 +728,6 @@ class TableData {
     var orderModifiers = tablesData["order_modifier"];
     var orderPayments = tablesData["order_payment"];
     var cancleOrders = tablesData["order_cancel"];
-
     try {
       if (voucherData.length != 0) {
         for (var i = 0; i < voucherData.length; i++) {
@@ -740,10 +739,12 @@ class TableData {
             'value': vouchers.voucherId,
           };
           var count = await ifExists(db, data);
+          var vaoucher = vouchers.toJson();
+          await vaoucher.remove("total_used");
           if (count == 0) {
-            var result = await db.insert("voucher", vouchers.toJson());
+            var result = await db.insert("voucher", vaoucher);
           } else {
-            var result = await db.update("voucher", vouchers.toJson(),
+            var result = await db.update("voucher", vaoucher,
                 where: "voucher_id =?", whereArgs: [vouchers.voucherId]);
           }
         }

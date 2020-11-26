@@ -52,12 +52,13 @@ class VoucherPopState extends State<VoucherPop> {
 
   checkMinMaxValue(vaocher) async {
     // Check in minimum  max value with cart value
-    var isReturn;
+   bool isReturn = false;
     if (vaocher.voucherDiscount < cartData.sub_total) {
       if (vaocher.minimumAmount == 0.0 ||
           vaocher.minimumAmount <= cartData.sub_total) {
         isReturn = true;
       } else {
+        isReturn = false;
         CommunFun.showToast(
             context,
             "Required minimum cart amount " +
@@ -69,6 +70,7 @@ class VoucherPopState extends State<VoucherPop> {
           vaocher.maximumAmount >= cartData.sub_total) {
         isReturn = true;
       } else {
+        isReturn = false;
         CommunFun.showToast(
             context,
             "Required maximum cart amount " +
@@ -76,13 +78,14 @@ class VoucherPopState extends State<VoucherPop> {
                 " for this voucher.");
       }
     } else {
+      isReturn = false;
       CommunFun.showToast(
           context,
           "Required cart amount more than discount ammount " +
               vaocher.voucherDiscount.toString() +
               ".");
     }
-    return await isReturn;
+    return isReturn;
   }
 
   checkisExpired(vaocher) {
@@ -99,10 +102,10 @@ class VoucherPopState extends State<VoucherPop> {
     }
   }
 
-  checkitsUsableorNot(vaocher) async {
-    var count = await localAPI.getVoucherusecount(vaocher.voucherId);
-    return count;
-  }
+  // checkitsUsableorNot(vaocher) async {
+  //   var count = await localAPI.getVoucherusecount(vaocher.voucherId);
+  //   return count;
+  // }
 
   checkValidVoucher(vaocher) async {
     Voucher selectedvoucher;
@@ -110,8 +113,8 @@ class VoucherPopState extends State<VoucherPop> {
     if (chheckIsExpired == true) {
       var isminmaxValid = await checkMinMaxValue(vaocher);
       if (isminmaxValid == true) {
-        var count = await checkitsUsableorNot(vaocher);
-        if (vaocher.usesTotal == 0 || count < vaocher.usesTotal) {
+        //var count = await checkitsUsableorNot(vaocher);
+        if (vaocher.usesTotal == 0 || vaocher.totalUsed < vaocher.usesTotal) {
           //check product
           bool isadded = false;
           double totaldiscount = 0;
