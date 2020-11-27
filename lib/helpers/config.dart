@@ -28,6 +28,7 @@ class Configrations {
   static String search_setmeal = "Search_setmeal";
   static String customers = "Customers";
   static String add_customer = "Add_Customer";
+  static String customer_redeem = "customer_redeem";
   static String get_addresses = "get_addresses";
   static String add_saveOrder = "Add_SaveOrder";
   static String add_cart = "Add_cart";
@@ -35,6 +36,7 @@ class Configrations {
   static String add_table_order = "Add_Table_Order";
   static String add_shift = "Add_shift";
   static String drawer_data = "drawer_data";
+  static String add_drawer = "add_drawer";
   static String shift_datails = "Shift_datails";
   static String product_attributes = "Product_attributes";
   static String product_Modifeirs = "Product_modifires";
@@ -69,6 +71,16 @@ class Configrations {
   static String set_meals_products = "set_meals_products";
   static String check_voucher = "check_voucher";
   static String add_voucher = "add_voucher";
+  static String store_inv_data = "store_inv_data";
+  static String update_order_status = "update_order_status";
+  static String last_wine_int_log_id = "last_wine_int_log_id";
+  static String remove_cart = "remove_cart";
+  static String check_item_into_store = "check_item_into_store";
+  static String cart_list = "cart_list";
+  static String setmealData = "setmeal_Data";
+  static String productData = "product_Data";
+  static String rac_data = "rac_data";
+  static String box_list = "box_list";
   static ipAddress() async {
     return await Preferences.getStringValuesSF(Constant.SERVER_IP);
   }

@@ -6,6 +6,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
+import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
 import 'package:mcncashier/helpers/LocalAPI/ShiftList.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/Printer.dart';
@@ -29,8 +30,9 @@ class ShiftReports extends StatefulWidget {
 class _ShiftReportsState extends State<ShiftReports> {
   LocalAPI localAPI = LocalAPI();
   ShiftList shiftList = new ShiftList();
-
+  PrinterList printerAPI = new PrinterList();
   PrintReceipt printKOT = PrintReceipt();
+  ShiftList shiftAPI = ShiftList();
   List<Printer> printerreceiptList = new List<Printer>();
   Shift shifittem = new Shift();
   var screenArea = 1.6;
@@ -76,7 +78,8 @@ class _ShiftReportsState extends State<ShiftReports> {
   }
 
   getAllPrinter() async {
-    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    List<Printer> printerDraft =
+        await printerAPI.getAllPrinterList(context, "0");
     setState(() {
       printerreceiptList = printerDraft;
     });
@@ -183,8 +186,8 @@ class _ShiftReportsState extends State<ShiftReports> {
     drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     drawer.localID = await CommunFun.getLocalID();
     drawer.terminalid = int.parse(terminalid);
-    var result = await localAPI.saveInOutDrawerData(drawer);
-    print(result);
+    var result = await shiftAPI.saveInOutDrawerData(drawer);
+
     getpayInOutAmmount();
   }
 
@@ -192,7 +195,7 @@ class _ShiftReportsState extends State<ShiftReports> {
     if (shifittem.shiftId != null) {
       List<Drawerdata> result =
           await shiftList.getPayinOutammount(shifittem.shiftId);
-      print(result);
+
       if (result.length > 0) {
         setState(() {
           drawerData = result;

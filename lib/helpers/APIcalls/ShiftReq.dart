@@ -32,11 +32,11 @@ class ShiftReq {
     ShiftList shift = new ShiftList();
     try {
       String content = await utf8.decoder.bind(request).join();
-      print(content);
+
       var data = await jsonDecode(content);
       Shift shifts = new Shift();
       shifts = Shift.fromJson(data);
-      print(shifts);
+
       var res = await shift.insertShift(null, shifts);
       request.response
         ..statusCode = HttpStatus.ok
@@ -70,6 +70,29 @@ class ShiftReq {
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
         ..write(jsonEncode({"status": 200, "message": "success.", "data": res}))
+        ..close();
+    } catch (e) {
+      print(e);
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static addDrawer(request) async {
+    ShiftList shift = new ShiftList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      await shift.saveInOutDrawerData(data["drawer"]);
+      await request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 200, "message": "success."}))
         ..close();
     } catch (e) {
       print(e);

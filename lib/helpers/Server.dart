@@ -54,7 +54,7 @@ class Server {
 
   static handlePOST(request) async {
     var path = request.uri.path;
-    print(path);
+
     switch (path) {
       case "/Categories":
         CategoriesReq.getcategoryCall(request);
@@ -167,10 +167,10 @@ class Server {
       case "/branch_tax":
         BranchReq.branchtax(request);
         break;
-      case "/getPrinter":
+      case "/printer":
         PrinterReq.getAllPrinters(request);
         break;
-      case "/getPrinterForCart":
+      case "/printer_cart":
         PrinterReq.getCartQTYPrinters(request);
         break;
       case "/set_meals":
@@ -217,6 +217,42 @@ class Server {
         break;
       case "/cancel_order":
         OrdersReq.insertCancelOrd(request);
+        break;
+      case "/store_inv_data":
+        OrdersReq.getStoreInvdata(request);
+        break;
+      case "/update_order_status":
+        OrdersReq.updateStatus(request);
+        break;
+      case "/last_wine_int_log_id":
+        OrdersReq.customerInvlastId(request);
+        break;
+      case "/remove_cart":
+        OrdersReq.removeCartItem(request);
+        break;
+      case "/check_item_into_store":
+        OrdersReq.checkitemIntoStore(request);
+        break;
+      case "/cart_list":
+        CartReq.getcartLists(request);
+        break;
+      case "/product_Data":
+        ProductsReq.getcartproductData(request);
+        break;
+      case "/setmeal_Data":
+        ProductsReq.getcartsetMealData(request);
+        break;
+      case "/customer_redeem":
+        CustomerReq.getCustomerRedeem(request);
+        break;
+      case "/rac_data":
+        ProductsReq.getracData(request);
+        break;
+      case "/box_list":
+        ProductsReq.getboxData(request);
+        break;
+      case "/drawer_data":
+        ShiftReq.addDrawer(request);
         break;
       default:
     }

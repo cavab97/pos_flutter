@@ -10,15 +10,14 @@ class PrinterReq {
       var data = await jsonDecode(content);
       var res =
           await printerList.getAllPrinterList(null, data["printer_is_cashier"]);
-
-      request.response
+      await request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
         ..write(jsonEncode({
           "status": 200,
           "message": res.length > 0 ? "" : "No data Found",
-          "cart_id": res
+          "data": res
         }))
         ..close();
     } catch (e) {
@@ -46,7 +45,7 @@ class PrinterReq {
         ..write(jsonEncode({
           "status": 200,
           "message": res.length > 0 ? "" : "No data Found",
-          "cart_id": res
+          "data": res
         }))
         ..close();
     } catch (e) {

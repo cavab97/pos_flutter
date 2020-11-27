@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:mcncashier/helpers/LocalAPI/ProductList.dart';
+import 'package:mcncashier/models/PorductDetails.dart';
 
 class ProductsReq {
   static getProductCall(request) async {
@@ -203,6 +204,116 @@ class ProductsReq {
           data["cart_details_id"],
           data["cartID"]);
       request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({
+          "status": 200,
+          "message": result.length > 0 ? "success" : "No data Found",
+          "data": result
+        }))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static getcartproductData(request) async {
+    ProductsList product = new ProductsList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var result = await product.productdData(
+        data["product_id"],
+      );
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({
+          "status": 200,
+          "message": result.length > 0 ? "success" : "No data Found",
+          "data": result
+        }))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static getcartsetMealData(request) async {
+    ProductsList product = new ProductsList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var result = await product.setmealData(
+        data["setmeal_id"],
+      );
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({
+          "status": 200,
+          "message": result.length > 0 ? "success" : "No data Found",
+          "data": result
+        }))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static getracData(request) async {
+    ProductsList product = new ProductsList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var result = await product.getRacList(
+        data["branch_id"],
+      );
+      await request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({
+          "status": 200,
+          "message": result.length > 0 ? "success" : "No data Found",
+          "data": result
+        }))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static getboxData(request) async {
+    ProductsList product = new ProductsList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var result = await product.getBoxList(data["branch_id"], data["rac_id"]);
+      await request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")

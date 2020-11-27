@@ -11,6 +11,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
+import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
 import 'package:mcncashier/helpers/LocalAPI/TablesList.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Shift.dart';
@@ -45,6 +46,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   TablesList tabList = new TablesList();
   Cartlist cartlist = new Cartlist();
   OrdersList ordersList = new OrdersList();
+  PrinterList printerAPI = new PrinterList();
   ShiftList shiftList = new ShiftList();
   List<TablesDetails> tableList = new List<TablesDetails>();
   PrintReceipt printKOT = PrintReceipt();
@@ -280,12 +282,11 @@ class _SelectTablePageState extends State<SelectTablePage>
       isLoading = true;
     });
     if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
-      List<SaveOrder> cartID =
-          await localAPI.gettableCartID(selectedTable.saveorderid);
-      if (cartID.length > 0) {
-        await OrdersList.removeCartItem(
-            cartID[0].cartId, selectedTable.tableId);
-      }
+      // List<SaveOrder> cartID =
+      //     await localAPI.gettableCartID(selectedTable.saveorderid);
+      // if (cartID.length > 0) {
+      await ordersList.removeCart(null, selectedTable.tableId);
+      // }
     } else {
       await tabList.deleteTableOrder(selectedTable.tableId);
     }
@@ -312,16 +313,14 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   changeTableToOtherTable(table) async {
     var cartid;
-    if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
-      List<SaveOrder> cartID =
-          await localAPI.gettableCartID(selectedTable.saveorderid);
-      if (cartID.length > 0) {
-        cartid = cartID[0].cartId;
-      }
-    }
-    var tables =
-        await tabList.changeTable(selectedTable.tableId, table.tableId, cartid);
-    print(tables);
+    // if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
+    //   List<SaveOrder> cartID =
+    //       await localAPI.gettableCartID(selectedTable.saveorderid);
+    //   if (cartID.length > 0) {
+    //     cartid = cartID[0].cartId;
+    //   }
+    // }
+    await tabList.changeTable(selectedTable.tableId, table.tableId, cartid);
     setState(() {
       changeInTable = null;
       isChangingTable = false;
@@ -588,8 +587,9 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   getAllPrinter() async {
-    List<Printer> printer = await localAPI.getAllPrinterForKOT();
-    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    List<Printer> printer = await printerAPI.getAllPrinterList(context, "0");
+    List<Printer> printerDraft =
+        await printerAPI.getAllPrinterList(context, "1");
     setState(() {
       printerList = printer;
       printerreceiptList = printerDraft;

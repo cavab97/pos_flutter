@@ -10,12 +10,9 @@ import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
-import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
-import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
-import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:intl/intl.dart';
@@ -33,7 +30,6 @@ class TransactionsPage extends StatefulWidget {
 }
 
 class _TransactionsPageState extends State<TransactionsPage> {
-  LocalAPI localAPI = LocalAPI();
   OrdersList orderApi = new OrdersList();
   List<Orders> orderLists = [];
   List<Orders> filterList = [];
@@ -108,7 +104,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
     dynamic data =
         await orderApi.getOrdersDetailsData(order.app_id, order.terminal_id);
-    print(data);
+
     setState(() {
       detailsList =
           data["order_products"].length > 0 ? data["order_products"] : [];
@@ -199,14 +195,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   cancleTransation(reason) async {
-    //TODO :Cancle Transation Pop // 1 for  cancle
-    var orderid = await localAPI.updateOrderStatus(
+    var res = await orderApi.updateOrderStatus(
         selectedOrder.app_id, selectedOrder.terminal_id, 3);
-    var payment = await localAPI.updatePaymentStatus(
-        selectedOrder.app_id, selectedOrder.terminal_id, 3);
-    var terminalId = await CommunFun.getTeminalKey();
-    var branchid = await CommunFun.getbranchId();
-    var uuid = await CommunFun.getLocalID();
     var terID = await CommunFun.getTeminalKey();
     User userdata = await CommunFun.getuserDetails();
     CancelOrder order = new CancelOrder();
@@ -219,50 +209,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     order.createdBy = userdata.id;
     order.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     order.terminalId = int.parse(terID);
-    await orderApi.insertCancelOrder(order);
-    List<OrderDetail> orderItem = orderItemList;
-    if (orderItem.length > 0) {
-      for (var i = 0; i < orderItem.length; i++) {
-        OrderDetail productDetail = orderItem[i];
-        var productData = productDetail.product_detail;
-        var jsonProduct = json.decode(productData);
-        List<ProductStoreInventory> updatedInt = [];
-        List<ProductStoreInventoryLog> updatedIntLog = [];
-        if (jsonProduct["has_inventory"] == 1) {
-          List<ProductStoreInventory> inventory =
-              await localAPI.getStoreInventoryData(productDetail.product_id);
-          if (inventory.length > 0) {
-            ProductStoreInventory invData;
-            invData = inventory[0];
-            invData.qty = invData.qty + productDetail.detail_qty;
-            invData.updatedAt =
-                await CommunFun.getCurrentDateTime(DateTime.now());
-            invData.updatedBy = userdata.id;
-            updatedInt.add(invData);
-            var ulog = await localAPI.updateInvetory(updatedInt);
-            ProductStoreInventoryLog log = new ProductStoreInventoryLog();
-            if (inventory.length > 0) {
-              log.uuid = uuid;
-              log.inventory_id = inventory[0].inventoryId;
-              log.branch_id = int.parse(branchid);
-              log.product_id = productDetail.product_id;
-              log.employe_id = userdata.id;
-              // log.il_type = '';
-              log.qty = invData.qty;
-              log.qty_before_change = invData.qty;
-              log.qty_after_change = invData.qty + productDetail.detail_qty;
-              log.updated_at =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              log.updated_by = userdata.id;
-              updatedIntLog.add(log);
-              var ulog =
-                  await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
-            }
-          }
-        }
-      }
-    }
-
+    await orderApi.insertCancelOrder(order, orderItemList);
     getTansactionList();
   }
 
@@ -284,44 +231,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   returnPayment(paymentMehtod) async {
     // TODO : update payment tables
-    var orderid = await localAPI.updateOrderStatus(
+    var orderid = await orderApi.updateOrderStatus(
         selectedOrder.app_id, selectedOrder.terminal_id, 5);
-    var payment = await localAPI.updatePaymentStatus(
-        selectedOrder.app_id, selectedOrder.terminal_id, 5);
-    var terID = await CommunFun.getTeminalKey();
     // TODO update store inventory
     setState(() {
       isRefunding = false;
     });
     getTansactionList();
-    //CommunFun.showToast(context, "Refund table insert data.. work in progress");
   }
-
-  // deleteItemFormList(product) async {
-  //   Orders order = selectedOrder;
-  //   if (order.order_item_count > 1) {
-  //     OrderDetail details = product;
-  //     var subtotal = order.sub_total - details.product_price;
-  //     var qty = order.order_item_count - details.detail_qty;
-  //     var grandtotal = subtotal;
-  //     order.sub_total = subtotal;
-  //     order.order_item_count = qty.toInt();
-  //     order.grand_total = grandtotal;
-  //     var result = await localAPI.deleteOrderItem(product.app_id);
-  //     var result1 = await localAPI.updateInvoice(order);
-  //     setState(() {
-  //       isRefunding = false;
-  //     });
-  //     getTansactionList();
-  //     // Updated ORder table data
-  //     // CommunFun.showToast(
-  //     //     context, "Refund table insert data.. work in progress");
-  //   } else {
-  //     setState(() {
-  //       isRefunding = false;
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -1063,9 +980,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
           children: orderItemList.map((product) {
         var index = orderItemList.indexOf(product);
         var item = orderItemList[index];
-        print(item.product_detail);
+
         var producrdata = json.decode(item.product_detail);
-        // print(producrdata);
+
         return InkWell(
             onTap: () {},
             child: Container(

@@ -193,13 +193,124 @@ class OrdersReq {
     try {
       String content = await utf8.decoder.bind(request).join();
       var data = await jsonDecode(content);
-      await order.insertCancelOrder(data["order"]);
+      await order.insertCancelOrder(data["order"], data["orderList"]);
       await request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
         ..write(
             jsonEncode({"status": 200, "message": "order cancel  success."}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static getStoreInvdata(request) async {
+    OrdersList order = new OrdersList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var res = await order.getStoreInventoryData(data["product_id"]);
+      await request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 200, "message": "success.", data: res}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static updateStatus(request) async {
+    OrdersList order = new OrdersList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var res = await order.updateOrderStatus(
+          data["order_id"], data["terminal_id"], data["status"]);
+      await request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 200, "message": "success.", data: res}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static customerInvlastId(request) async {
+    OrdersList order = new OrdersList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var res = await order.getLastCustomerInventoryLogid();
+      await request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(
+            jsonEncode({"status": 200, "message": "success.", "last_id": res}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static removeCartItem(request) async {
+     OrdersList order = new OrdersList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      await order.removeCart(data["cart_id"], data["table_id"]);
+      await request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 200, "message": "success."}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
+
+  static checkitemIntoStore(request) async {
+    OrdersList order = new OrdersList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var res = await order.checkItemAvailableinStore(data["product_id"]);
+      await request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 200, "message": "success.", "data": res}))
         ..close();
     } catch (e) {
       request.response

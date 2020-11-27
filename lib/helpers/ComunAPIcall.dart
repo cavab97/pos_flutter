@@ -25,7 +25,7 @@ class APICall {
         return data;
       } else {
         print("Internet Connection lost");
-        CommunFun.showToast(context, Strings.internet_connection_lost);
+        await CommunFun.showToast(context, Strings.internet_connection_lost);
       }
     } catch (e) {
       print(e);

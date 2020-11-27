@@ -8,6 +8,9 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/LocalAPI/CustomerList.dart';
+import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
+import 'package:mcncashier/helpers/LocalAPI/ProductList.dart';
 import 'package:mcncashier/models/Box.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Customer_Liquor_Inventory.dart';
@@ -30,18 +33,20 @@ class WineStorage extends StatefulWidget {
 class _WineStorageState extends State<WineStorage>
     with TickerProviderStateMixin {
   Customer customer;
+  ProductsList prodictAPI = new ProductsList();
+  CustomersList  custAPI = CustomersList();
   LocalAPI localAPI = LocalAPI();
   List<Rac> racList = new List<Rac>();
   List<Box> boxsList = new List<Box>();
   List<Customer_Liquor_Inventory> inventoryData =
       List<Customer_Liquor_Inventory>();
+  OrdersList orderAPI = new OrdersList();
   TabController _tabController;
   bool isLoading = false;
   bool isEditing = false;
   @override
   void initState() {
     super.initState();
-
     getRacList();
   }
 
@@ -57,7 +62,7 @@ class _WineStorageState extends State<WineStorage>
       isLoading = true;
     });
     var branchId = await CommunFun.getbranchId();
-    List<Rac> list = await localAPI.getRacList(branchId);
+    List<Rac> list = await prodictAPI.getRacList(branchId);
     if (list.length > 0) {
       setState(() {
         racList = list;
@@ -79,7 +84,7 @@ class _WineStorageState extends State<WineStorage>
       isLoading = true;
     });
     var branchId = await CommunFun.getbranchId();
-    List<Box> list = await localAPI.getBoxList(branchId, racID);
+    List<Box> list = await prodictAPI.getBoxList(branchId, racID);
     if (list.length > 0) {
       setState(() {
         boxsList = list;
@@ -112,12 +117,11 @@ class _WineStorageState extends State<WineStorage>
     setState(() {
       customer = customerData;
     });
-    getCustomerRedeem(customer);
+    getcustomerRedeemList(customer);
   }
 
-  getCustomerRedeem(Customer customer) async {
-    var result = await localAPI.getCustomerRedeem(customer.customerId);
-    print(result);
+  getcustomerRedeemList(Customer customer) async {
+    var result = await custAPI.getCustomerRedeem(customer.customerId);
     setState(() {
       inventoryData = result;
       isEditing = result.length > 0 ? true : false;
@@ -209,9 +213,9 @@ class _WineStorageState extends State<WineStorage>
         inventory.updatedAt =
             await CommunFun.getCurrentDateTime(DateTime.now());
         inventory.updatedBy = user.id;
-        var clid = await localAPI.insertWineInventory(inventory, isUpdate);
+        var clid = await orderAPI.insertWineInventory(inventory, isUpdate);
         Customer_Liquor_Inventory_Log log = new Customer_Liquor_Inventory_Log();
-        var lastappid = await localAPI.getLastCustomerInventoryLog();
+        var lastappid = await orderAPI.getLastCustomerInventoryLogid();
         if (lastappid != 0) {
           log.appId = lastappid + 1;
         } else {
@@ -228,8 +232,8 @@ class _WineStorageState extends State<WineStorage>
         log.qtyAfterChange = box.wineQty != null ? (box.wineQty - qty) : 0;
         log.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
         log.updatedBy = user.id;
-        var lid = await localAPI.insertWineInventoryLog(log);
-        getCustomerRedeem(customer);
+        var lid = await orderAPI.insertWineInventoryLog(log);
+        getcustomerRedeemList(customer);
         setState(() {
           isLoading = false;
         });

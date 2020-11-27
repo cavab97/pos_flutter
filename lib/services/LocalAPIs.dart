@@ -1,5 +1,4 @@
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
-import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/Box.dart';
 import 'package:mcncashier/models/Customer.dart';
@@ -8,24 +7,18 @@ import 'package:mcncashier/models/Customer_Liquor_Inventory_Log.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
-import 'package:mcncashier/models/PorductDetails.dart';
-import 'package:mcncashier/models/Product.dart';
 import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
-import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/Rac.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
-import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/TerminalLog.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
-import 'package:sqflite/sqflite.dart';
-import '../models/Printer.dart';
 
 class LocalAPI {
   Future<int> terminalLog(TerminalLog log) async {
@@ -899,210 +892,39 @@ class LocalAPI {
   //   return list;
   // }
 
-  Future<List<Orders>> getOrdersListTable(branchid, terminalId) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from orders where branch_id = " +
-        branchid.toString() +
-        " AND order_source = 2 AND server_id = 0 AND terminal_id = " +
-        terminalId.toString();
-    var ordersList = await db.rawQuery(qry);
-    List<Orders> list = ordersList.isNotEmpty
-        ? ordersList.map((c) => Orders.fromJson(c)).toList()
-        : [];
-    await SyncAPICalls.logActivity(
-        "Order sync", "get Orders list", "Orders", branchid);
-    return list;
-  }
+  // Future<dynamic> sendToKitched(ids) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var qry = "update mst_cart_detail set is_send_kichen = 1 WHERE id in(" +
+  //       ids.toString() +
+  //       ")";
+  //   var ordersList = await db.rawQuery(qry);
+  //   await SyncAPICalls.logActivity(
+  //       "Send to kitchen", "send item to kitchen", "mst_cart_detail", 1);
+  //   return ordersList;
+  // }
 
-  Future<List<OrderDetail>> getOrderDetailTable(orderid, terminalId) async {
-    var qry = "SELECT * from order_detail where terminal_id = " +
-        terminalId.toString() +
-        " AND order_app_id = " +
-        orderid.toString();
-    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    List<OrderDetail> list = ordersList.isNotEmpty
-        ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
-        : [];
-    await SyncAPICalls.logActivity(
-        "Order sync", "get Orders detail list", "Orders", orderid);
-    return list;
-  }
-
-  Future<List<OrderAttributes>> getOrderAttributesTable(
-      detailid, terminalId) async {
-    var qry = "SELECT * from order_attributes where terminal_id = " +
-        terminalId.toString() +
-        " AND detail_app_id = " +
-        detailid.toString();
-
-    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    List<OrderAttributes> list = ordersList.isNotEmpty
-        ? ordersList.map((c) => OrderAttributes.fromJson(c)).toList()
-        : [];
-    await SyncAPICalls.logActivity(
-        "Order sync", "get Orders_modifire list", "order_attribute", detailid);
-    return list;
-  }
-
-  Future<List<OrderModifire>> getOrderModifireTable(
-      detailid, terminalId) async {
-    var qry = "SELECT * from order_modifier where  terminal_id = " +
-        terminalId.toString() +
-        " AND detail_app_id = " +
-        detailid.toString();
-    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    List<OrderModifire> list = ordersList.isNotEmpty
-        ? ordersList.map((c) => OrderModifire.fromJson(c)).toList()
-        : [];
-    await SyncAPICalls.logActivity(
-        "Order sync", "get Orders Modifire Table", "order_modifier", detailid);
-    return list;
-  }
-
-  Future<List<OrderPayment>> getOrderPaymentTable(orderid, terminalid) async {
-    var qry = "SELECT * from order_payment where  terminal_id = " +
-        terminalid.toString() +
-        " AND order_app_id = " +
-        orderid.toString();
-    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    List<OrderPayment> list = ordersList.isNotEmpty
-        ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
-        : [];
-    await SyncAPICalls.logActivity(
-        "Order sync", "get Orders payment Table", "order_payment", orderid);
-    return list;
-  }
-
-  Future<dynamic> sendToKitched(ids) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "update mst_cart_detail set is_send_kichen = 1 WHERE id in(" +
-        ids.toString() +
-        ")";
-    var ordersList = await db.rawQuery(qry);
-    await SyncAPICalls.logActivity(
-        "Send to kitchen", "send item to kitchen", "mst_cart_detail", 1);
-    return ordersList;
-  }
-
-  Future<List<ProductStoreInventory>> checkItemAvailableinStore(
-      productId) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var inventoryProd = await db.query("product_store_inventory",
-        where: 'product_id = ?', whereArgs: [productId]);
-    List<ProductStoreInventory> list = inventoryProd.length > 0
-        ? inventoryProd.map((c) => ProductStoreInventory.fromJson(c)).toList()
-        : [];
-    return list;
-  }
-
-  Future<List<ProductStoreInventory>> removeFromInventory(
-      OrderDetail produtdata) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var inventoryProd = await db.query("product",
-        where: 'product_id = ?', whereArgs: [produtdata.product_id]);
-    List<Product> list = inventoryProd.isNotEmpty
-        ? inventoryProd.map((c) => Product.fromJson(c)).toList()
-        : [];
-    var intupdate = "Update product_store_inventory set qty = (qty - " +
-        produtdata.detail_qty.toString() +
-        ") WHERE product_id = " +
-        produtdata.product_id.toString();
-    var updateed = await db.rawUpdate(intupdate);
-    var productitem = await db.query("product_store_inventory",
-        where: 'product_id = ?', whereArgs: [produtdata.product_id]);
-    List<ProductStoreInventory> inventory = productitem.length > 0
-        ? productitem.map((c) => ProductStoreInventory.fromJson(c)).toList()
-        : [];
-    await SyncAPICalls.logActivity("Order", "update InventoryTable",
-        "product_store_inventory", produtdata.product_id);
-    return inventory;
-  }
-
-  Future<List<ProductStoreInventory>> getStoreInventoryData(productID) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var inventoryProd = await db.query("product_store_inventory",
-        where: 'product_id = ?', whereArgs: [productID]);
-    List<ProductStoreInventory> list = inventoryProd.length > 0
-        ? inventoryProd.map((c) => ProductStoreInventory.fromJson(c)).toList()
-        : [];
-    return list;
-  }
-
-  Future<int> updateInvetory(List<ProductStoreInventory> data) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    if (data.length > 0) {
-      for (var i = 0; i < data.length; i++) {
-        var inventory = await db.update(
-            "product_store_inventory", data[i].toJson(),
-            where: "inventory_id =?", whereArgs: [data[i].inventoryId]);
-        await SyncAPICalls.logActivity("Order", "update InventoryTable",
-            "product_store_inventory", data[i].productId);
-      }
-      return 1;
-    }
-  }
-
-  Future<int> updateStoreInvetoryLogTable(
-      List<ProductStoreInventoryLog> log) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    if (log.length > 0) {
-      for (var i = 0; i < log.length; i++) {
-        var inventory =
-            await db.insert("product_store_inventory_log", log[i].toJson());
-        await SyncAPICalls.logActivity("product_store_inventory_log insert",
-            "insert", "product_store_inventory_log", log[i].inventory_id);
-      }
-    }
-    return 1;
-  }
-
-  Future<Branch> getBranchData(branchID) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var result =
-        await db.query("branch", where: 'branch_id = ?', whereArgs: [branchID]);
-    List<Branch> list =
-        result.isNotEmpty ? result.map((c) => Branch.fromJson(c)).toList() : [];
-
-    await SyncAPICalls.logActivity(
-        "branch details", "branch details for invoice", "branch", branchID);
-    return list[0];
-  }
-
-  // 1 For New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
-  Future<int> updateOrderStatus(orderid, terminalid, status) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "UPDATE orders SET order_status = " +
-        status.toString() +
-        " where terminal_id = " +
-        terminalid.toString() +
-        " AND app_id = " +
-        orderid.toString();
-    var result = db.rawUpdate(qry);
-    await SyncAPICalls.logActivity(
-        "order staus change", "update order status", "order_status", orderid);
-    if (result != null) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
-
-  Future<int> updatePaymentStatus(orderid, terminalid, status) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var result;
-    var qry = "UPDATE order_payment SET op_status = " +
-        status.toString() +
-        " where terminal_id = " +
-        terminalid.toString() +
-        " AND order_app_id = " +
-        orderid.toString();
-    result = db.rawUpdate(qry);
-    if (result != null) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
+  // Future<List<ProductStoreInventory>> removeFromInventory(
+  //     OrderDetail produtdata) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var inventoryProd = await db.query("product",
+  //       where: 'product_id = ?', whereArgs: [produtdata.product_id]);
+  //   List<Product> list = inventoryProd.isNotEmpty
+  //       ? inventoryProd.map((c) => Product.fromJson(c)).toList()
+  //       : [];
+  //   var intupdate = "Update product_store_inventory set qty = (qty - " +
+  //       produtdata.detail_qty.toString() +
+  //       ") WHERE product_id = " +
+  //       produtdata.product_id.toString();
+  //   var updateed = await db.rawUpdate(intupdate);
+  //   var productitem = await db.query("product_store_inventory",
+  //       where: 'product_id = ?', whereArgs: [produtdata.product_id]);
+  //   List<ProductStoreInventory> inventory = productitem.length > 0
+  //       ? productitem.map((c) => ProductStoreInventory.fromJson(c)).toList()
+  //       : [];
+  //   await SyncAPICalls.logActivity("Order", "update InventoryTable",
+  //       "product_store_inventory", produtdata.product_id);
+  //   return inventory;
+  // }
 
   // Future<int> insertCancelOrder(CancelOrder order) async {
   //   var db = DatabaseHelper.dbHelper.getDatabse();
@@ -1120,33 +942,12 @@ class LocalAPI {
   //   return list;
   // }
 
-  Future<List<User>> checkUserExit(userpin) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from users where user_pin =" +
-        userpin.toString() +
-        " AND status = 1";
-    var user = await db.rawQuery(qry);
-    List<User> list =
-        user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
-    return list;
-  }
-
   // Future<int> deleteOrderItem(detailid) async {
   //   var db = await DatabaseHelper.dbHelper.getDatabse();
   //   var result =
   //       db.rawDelete("DELETE FROM order_detail WHERE app_id = ?", [detailid]);
   //   return result;
   // }
-
-  Future<List<MST_Cart>> getCartList(branchid) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var result = await db.rawQuery(
-        "SELECT * FROM mst_cart WHERE branch_id = " + branchid.toString());
-    List<MST_Cart> list = result.isNotEmpty
-        ? result.map((c) => MST_Cart.fromJson(c)).toList()
-        : [];
-    return list;
-  }
 
   /*Future<List<Printer>> getPrinter(productID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
@@ -1169,83 +970,6 @@ class LocalAPI {
     return list;
   }
 */
-  Future<List<Printer>> getAllPrinterForKOT() async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from printer where status = 1 ";
-    var result = await db.rawQuery(qry);
-    List<Printer> list = result.isNotEmpty
-        ? result.map((c) => Printer.fromJson(c)).toList()
-        : [];
-    return list;
-  }
-
-  Future<List<Printer>> getAllPrinterForecipt() async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry =
-        "SELECT * from printer where printer_is_cashier = 1 AND status = 1";
-    var result = await db.rawQuery(qry);
-    List<Printer> list = result.isNotEmpty
-        ? result.map((c) => Printer.fromJson(c)).toList()
-        : [];
-    return list;
-  }
-
-  Future updateWebCart(MST_Cart cart) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT id from mst_cart where id = " + cart.id.toString();
-
-    var res = await db.rawQuery(qry);
-    List<MST_Cart> list =
-        res.isNotEmpty ? res.map((c) => MST_Cart.fromJson(c)).toList() : [];
-    var result;
-    if (list.length > 0) {
-      result = await db.update("mst_cart", cart.toJson(),
-          where: "id =?", whereArgs: [cart.id]);
-    } else {
-      result = await db.insert("mst_cart", cart.toJson());
-    }
-    return result;
-  }
-
-  Future updateWebCartdetails(MSTCartdetails details) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry =
-        "SELECT id from mst_cart_detail where id = " + details.id.toString();
-
-    var res = await db.rawQuery(qry);
-    List<MSTCartdetails> list = res.isNotEmpty
-        ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
-        : [];
-    var result;
-    var newObj = details.toJson();
-    newObj.remove("attrName");
-    newObj.remove("modiName");
-    if (list.length > 0) {
-      result = await db.update("mst_cart_detail", newObj,
-          where: "id =?", whereArgs: [details.id]);
-    } else {
-      result = await db.insert("mst_cart_detail", newObj);
-    }
-    return result;
-  }
-
-  Future updateWebCartsubdetails(MSTSubCartdetails subdata) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT id from mst_cart_sub_detail where id = " +
-        subdata.id.toString();
-    var res = await db.rawQuery(qry);
-    List<MSTSubCartdetails> list = res.isNotEmpty
-        ? res.map((c) => MSTSubCartdetails.fromJson(c)).toList()
-        : [];
-    var result;
-    if (list.length > 0) {
-      result = await db.update("mst_cart_sub_detail", subdata.toJson(),
-          where: "id =?", whereArgs: [subdata.id]);
-    } else {
-      result = await db.insert("mst_cart_sub_detail", subdata.toJson());
-    }
-    return result;
-  }
 
   // Future<int> updateInvoice(Orders order) async {
   //   var db = DatabaseHelper.dbHelper.getDatabse();
@@ -1260,40 +984,6 @@ class LocalAPI {
   //   return result;
   // }
 
-  Future<List<ProductDetails>> productdData(productid) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry =
-        " SELECT product.*, price_type.name as price_type_Name , base64   from product " +
-            " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
-            " LEFT join asset on asset.asset_type_id = product.product_id " +
-            " where product_id = " +
-            productid.toString();
-
-    var res = await db.rawQuery(qry);
-    List<ProductDetails> list = res.length > 0
-        ? res.map((c) => ProductDetails.fromJson(c)).toList()
-        : [];
-
-    return list;
-  }
-
-  Future<List<SetMeal>> setmealData(mealid) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "select setmeal.* ,  base64  from setmeal " +
-        " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
-        " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id " +
-        " WHERE setmeal.setmeal_id = " +
-        mealid.toString() +
-        " AND setmeal.status = 1 GROUP by setmeal.setmeal_id ";
-    var mealList = await db.rawQuery(qry);
-    List<SetMeal> list = mealList.isNotEmpty
-        ? mealList.map((c) => SetMeal.fromJson(c)).toList()
-        : [];
-    await SyncAPICalls.logActivity(
-        "Meals List", "get Meals List", "setmeal", mealid);
-    return list;
-  }
-
   // Future<List<Role>> getRoldata(roleID) async {
   //   var db = DatabaseHelper.dbHelper.getDatabse();
   //   var qry = "SELECT * from role WHERE role_id = " + roleID.toString();
@@ -1302,6 +992,655 @@ class LocalAPI {
   //       res.isNotEmpty ? res.map((c) => Role.fromJson(c)).toList() : [];
   //   return list;
   // }
+
+  // Future<List<PosPermission>> getUserPermissions(userid) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var qry = " SELECT  group_concat(pos_permission.pos_permission_name) as pos_permission_name  from users" +
+  //       " Left join user_pos_permission on user_pos_permission.user_id = users.id  AND user_pos_permission.status = 1" +
+  //       " left join pos_permission on pos_permission.pos_permission_id = user_pos_permission.pos_permission_id" +
+  //       " WHERE user_id  =" +
+  //       userid.toString();
+
+  //   var permissionList = await db.rawQuery(qry);
+  //   List<PosPermission> list = permissionList.length > 0
+  //       ? permissionList.map((c) => PosPermission.fromJson(c)).toList()
+  //       : [];
+  //   await SyncAPICalls.logActivity("get PosPermission",
+  //       "get PosPermission list", "pos_permission", userid);
+  //   return list;
+  // }
+
+  // Sync APIs
+
+  // Future<List<Orders>> getShiftInvoiceData(branchid) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var qry = "SELECT * from orders where branch_id = " + branchid.toString();
+  //   var ordersList = await db.rawQuery(qry);
+  //   List<Orders> list = ordersList.isNotEmpty
+  //       ? ordersList.map((c) => Orders.fromJson(c)).toList()
+  //       : [];
+  //   await SyncAPICalls.logActivity(
+  //       "Order sync", "get Orders list", "Orders", branchid);
+  //   return list;
+  // }
+
+  // Future<List<SetMeal>> getMealsData(branchid) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var qry = "select setmeal.* , replace(asset.base64,'data:image/jpg;base64,','') as base64  from setmeal " +
+  //       " LEFT join setmeal_branch on setmeal_branch_id =" +
+  //       branchid +
+  //       " AND setmeal_branch.setmeal_id = setmeal.setmeal_id " +
+  //       " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
+  //       " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id  GROUP by setmeal.setmeal_id ";
+  //   var mealList = await db.rawQuery(qry);
+  //   List<SetMeal> list = mealList.isNotEmpty
+  //       ? mealList.map((c) => SetMeal.fromJson(c)).toList()
+  //       : [];
+  //   await SyncAPICalls.logActivity(
+  //       "Meals List", "get Meals List", "setmeal", branchid);
+  //   return list;
+  // }
+
+  // Future<List<SetMealProduct>> getMealsProductData(setmealid) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var qry = "SELECT setmeal_product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name  FROM setmeal_product " +
+  //       " LEFT JOIN product ON product.product_id = setmeal_product.product_id " +
+  //       " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id " +
+  //       " WHERE setmeal_product.setmeal_id = " +
+  //       setmealid.toString() +
+  //       " GROUP by setmeal_product.setmeal_product_id";
+
+  //   var mealList = await db.rawQuery(qry);
+  //   List<SetMealProduct> list = mealList.isNotEmpty
+  //       ? mealList.map((c) => SetMealProduct.fromJson(c)).toList()
+  //       : [];
+  //   await SyncAPICalls.logActivity(
+  //       "Meals product List", "get Meals product List", "setmeal", setmealid);
+  //   return list;
+  // }
+
+  // Future<List<MSTSubCartdetails>> itemmodifireList(detailid) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var qry = "SELECT  * from mst_cart_sub_detail WHERE cart_details_id  = " +
+  //       detailid.toString();
+  //   var res = await db.rawQuery(qry);
+  //   List<MSTSubCartdetails> list = res.isNotEmpty
+  //       ? res.map((c) => MSTSubCartdetails.fromJson(c)).toList()
+  //       : [];
+  //   await SyncAPICalls.logActivity(
+  //       "product", "get cart modifier list", "mst_cart_sub_detail", detailid);
+  //   return list;
+  // }
+
+  // Future<int> deleteCartItemFromSplitBill(
+  //     cartItem, cartID, mainCart, isLast) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   await db
+  //       .delete("mst_cart_Detail", where: 'id = ?', whereArgs: [cartItem.id]);
+  //   await SyncAPICalls.logActivity(
+  //       "cart",
+  //       "delete cart item from mst_cart_Detail",
+  //       "mst_cart_Detail",
+  //       cartItem.id);
+
+  //   await db.delete("mst_cart_sub_detail",
+  //       where: 'cart_details_id = ?', whereArgs: [cartItem.id]);
+  //   await SyncAPICalls.logActivity(
+  //       "cart",
+  //       "delete cart item from mst_cart_sub_detail",
+  //       "mst_cart_sub_detail",
+  //       cartItem.id);
+
+  //   if (isLast) {
+  //     await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartID]);
+  //     await SyncAPICalls.logActivity(
+  //         "cart", "delete cart all item", "mst_Cart", cartItem.id);
+  //     await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartID]);
+  //     await SyncAPICalls.logActivity("cart",
+  //         "delete cart all item from save_order", "save_order", cartItem.id);
+  //   } else {
+  //     //Update cart
+  //     await db.update("mst_cart", mainCart.toJson(),
+  //         where: 'id = ?', whereArgs: [cartID]);
+  //   }
+  //   return cartID;
+  // }
+
+  // Future<List<Drawerdata>> getPayinOutammount(shiftid) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var qry = "SELECT * from drawer where shift_id = " + shiftid.toString();
+  //   var mealList = await db.rawQuery(qry);
+  //   List<Drawerdata> list = mealList.isNotEmpty
+  //       ? mealList.map((c) => Drawerdata.fromJson(c)).toList()
+  //       : [];
+  //   await SyncAPICalls.logActivity(
+  //       "Meals product List", "Meals product List", "drawer", shiftid);
+  //   return list;
+  // }
+
+  // Future changeTable(tableID, totableid, cartid) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var qry = "UPDATE table_order SET table_id= " +
+  //       totableid.toString() +
+  //       " where table_id = " +
+  //       tableID.toString();
+  //   var result = await db.rawQuery(qry);
+  //   print(result);
+  //   if (cartid != null) {
+  //     var qry1 = "UPDATE mst_cart SET table_id = " +
+  //         totableid.toString() +
+  //         " where  id = " +
+  //         cartid.toString();
+  //     var result1 = await db.rawQuery(qry1);
+  //     print(result1);
+  //   }
+  // }
+
+  // Future makeAsFocProduct(MSTCartdetails focProduct, isUpdate, MST_Cart cart,
+  //     MSTCartdetails cartitem) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var newObj = focProduct.toJson();
+  //   newObj.remove("attrName");
+  //   newObj.remove("modiName");
+  //   if (isUpdate) {
+  //     var data = await db.update("mst_cart_detail", newObj,
+  //         where: "id =?", whereArgs: [focProduct.id]);
+  //   } else {
+  //     var data = await db.insert(
+  //       "mst_cart_detail",
+  //       focProduct.toJson(),
+  //     );
+  //     var res = await db.update("mst_cart_detail", newObj,
+  //         where: "id =?", whereArgs: [cartitem.id]);
+  //   }
+  //   var res = await db.update("mst_cart", cart.toJson(),
+  //       where: "id =?", whereArgs: [cart.id]);
+  //   await SyncAPICalls.logActivity(
+  //       "mst_cart_detail", "Added Foc Product", "mst_cart_detail", cart.id);
+  // }
+
+  // Future deleteOrderid(orderid) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var res =
+  //       await db.delete("orders", where: "app_id =?", whereArgs: [orderid]);
+  //   print(res);
+  // }
+
+  // Future<int> getLastCustomerInventory() async {
+  //   var qey = "SELECT app_id from customer_liquor_inventory " +
+  //       " ORDER BY app_id DESC LIMIT 1";
+  //   var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
+  //   List<Customer_Liquor_Inventory> list = checkisExit.length > 0
+  //       ? checkisExit.map((c) => Customer_Liquor_Inventory.fromJson(c)).toList()
+  //       : [];
+  //   if (list.length > 0) {
+  //     return list[0].appId;
+  //   } else {
+  //     return 0;
+  //   }
+  // }
+
+  // Future<int> insertWineInventory(
+  //     Customer_Liquor_Inventory data, isUpdate) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var invData = data.toJson();
+  //   await invData.remove("name");
+  //   var result;
+  //   if (isUpdate) {
+  //     result = await db.update("customer_liquor_inventory", invData,
+  //         where: "app_id =?", whereArgs: [data.appId]);
+  //   } else {
+  //     result = await db.insert("customer_liquor_inventory", invData);
+  //   }
+  //   await SyncAPICalls.logActivity("customer liquor inventory",
+  //       "insert Wine inventory", "customer_liquor_inventory", data.clBranchId);
+  //   return result;
+  // }
+
+  // Future<int> insertWineInventoryLog(Customer_Liquor_Inventory_Log data) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var result =
+  //       await db.insert("customer_liquor_inventory_log", data.toJson());
+  //   await SyncAPICalls.logActivity(
+  //       "customer liquor inventory log",
+  //       "insert Wine inventory log",
+  //       "customer_liquor_inventory_log",
+  //       data.branchId);
+  //   return result;
+  // }
+
+  // Future<Terminal> getTerminalDetails(terminalkey) async {
+  //   var query = "SELECT * from terminal WHERE terminal_id  =$terminalkey";
+  //   var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+  //   Terminal terminalDat;
+  //   List<Terminal> list =
+  //       res.length > 0 ? res.map((c) => Terminal.fromJson(c)).toList() : [];
+  //   print(list.length);
+  //   if (list.length > 0) {
+  //     terminalDat = list[0];
+  //   }
+  //   return terminalDat;
+  // }
+
+  // Future<int> deletesubcartDetail(cartdetailsId) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var result = await db.delete("mst_cart_sub_detail",
+  //       where: "cart_details_id =?", whereArgs: [cartdetailsId]);
+  //   return result;
+  // }
+
+  // Future<dynamic> addVoucherInOrder(
+  //     MST_Cart details, ,Voucher voucherDetail) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var data1 = await db.update("mst_cart", details.toJson(),
+  //       where: "id =?", whereArgs: [details.id]);
+  //   await SyncAPICalls.logActivity(
+  //       "voucher", "add voucher in cart", "voucher", voucherDetail.voucherId);
+  //   return data1;
+  // }
+
+  // Future<List<OrderAttributes>> getOrderAttributes(orderid) async {
+  //   var query = "SELECT order_attributes.*,attributes.name from order_attributes " +
+  //       " LEFT join attributes on attributes.attribute_id =  order_attributes.attribute_id WHERE order_attributes.order_app_id = " +
+  //       orderid.toString();
+  //   var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+  //   List<OrderAttributes> list = res.isNotEmpty
+  //       ? res.map((c) => OrderAttributes.fromJson(c)).toList()
+  //       : [];
+  //   return list;
+  // }
+
+  // Future<List<OrderModifire>> getOrderModifire(orderid) async {
+  //   var query = "SELECT order_modifier.*,modifier.name  from order_modifier " +
+  //       " LEFT JOIN modifier on modifier.modifier_id = order_modifier.modifier_id" +
+  //       " WHERE order_modifier.order_app_id  = " +
+  //       orderid.toString();
+  //   var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+  //   List<OrderModifire> list = res.isNotEmpty
+  //       ? res.map((c) => OrderModifire.fromJson(c)).toList()
+  //       : [];
+  //   return list;
+  // }
+
+  // Future<List<Payments>> getOrderpaymentmethod(orderid, terminalid) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var qry = "SELECT * from payment " +
+  //       " LEFT JOIN order_payment on order_payment.op_method_id = payment.payment_id " +
+  //       " WHERE order_payment.terminal_id = " +
+  //       terminalid.toString() +
+  //       " AND order_payment.order_app_id = " +
+  //       orderid.toString();
+  //   var paymentMeth = await db.rawQuery(qry);
+  //   List<Payments> list = paymentMeth.isNotEmpty
+  //       ? paymentMeth.map((c) => Payments.fromJson(c)).toList()
+  //       : [];
+  //   return list;
+  // }
+
+  // Future<List<ProductStoreInventory>> getStoreInventoryData(productID) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var inventoryProd = await db.query("product_store_inventory",
+  //       where: 'product_id = ?', whereArgs: [productID]);
+  //   List<ProductStoreInventory> list = inventoryProd.length > 0
+  //       ? inventoryProd.map((c) => ProductStoreInventory.fromJson(c)).toList()
+  //       : [];
+  //   return list;
+  // }
+
+  // Future<int> updateInvetory(List<ProductStoreInventory> data) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   if (data.length > 0) {
+  //     for (var i = 0; i < data.length; i++) {
+  //       var inventory = await db.update(
+  //           "product_store_inventory", data[i].toJson(),
+  //           where: "inventory_id =?", whereArgs: [data[i].inventoryId]);
+  //       await SyncAPICalls.logActivity("Order", "update InventoryTable",
+  //           "product_store_inventory", data[i].productId);
+  //     }
+  //     return 1;
+  //   }
+  // }
+
+  // Future<int> updateStoreInvetoryLogTable(
+  //     List<ProductStoreInventoryLog> log) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   if (log.length > 0) {
+  //     for (var i = 0; i < log.length; i++) {
+  //       var inventory =
+  //           await db.insert("product_store_inventory_log", log[i].toJson());
+  //       await SyncAPICalls.logActivity("product_store_inventory_log insert",
+  //           "insert", "product_store_inventory_log", log[i].inventory_id);
+  //     }
+  //   }
+  //   return 1;
+  // }
+
+  // Future<Branch> getBranchData(branchID) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var result =
+  //       await db.query("branch", where: 'branch_id = ?', whereArgs: [branchID]);
+  //   List<Branch> list =
+  //       result.isNotEmpty ? result.map((c) => Branch.fromJson(c)).toList() : [];
+
+  //   await SyncAPICalls.logActivity(
+  //       "branch details", "branch details for invoice", "branch", branchID);
+  //   return list[0];
+  // }
+  // Future<List<ProductStoreInventory>> checkItemAvailableinStore(
+  //     productId) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var inventoryProd = await db.query("product_store_inventory",
+  //       where: 'product_id = ?', whereArgs: [productId]);
+  //   List<ProductStoreInventory> list = inventoryProd.length > 0
+  //       ? inventoryProd.map((c) => ProductStoreInventory.fromJson(c)).toList()
+  //       : [];
+  //   return list;
+  // }
+  //  Future<List<Printer>> getAllPrinterForecipt() async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var qry =
+  //       "SELECT * from printer where printer_is_cashier = 1 AND status = 1";
+  //   var result = await db.rawQuery(qry);
+  //   List<Printer> list = result.isNotEmpty
+  //       ? result.map((c) => Printer.fromJson(c)).toList()
+  //       : [];
+  //   return list;
+  // }
+// Future<List<Printer>> getAllPrinterForKOT() async {
+//     var db = DatabaseHelper.dbHelper.getDatabse();
+//     var qry = "SELECT * from printer where status = 1 ";
+//     var result = await db.rawQuery(qry);
+//     List<Printer> list = result.isNotEmpty
+//         ? result.map((c) => Printer.fromJson(c)).toList()
+//         : [];
+//     return list;
+//   }
+// Future<List<Printer>> selectPrinterForPrint() async {
+//     var qry =
+//         "SELECT * from printer LEFT JOIN product_branch on product_branch.product_id = 1  AND printer.printer_id = product_branch.printer_id";
+//     // table_printer.printerIp.toString();
+//     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+//     List<Printer> list =
+//         res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
+
+//     await SyncAPICalls.logActivity("Printer",
+//         list.length > 0 ? "Print KOT" : "Print KOT", "printerId", "1");
+//     return list;
+//   }
+//  Future<int> insertTablePrinter(Printer table_printer) async {
+//     var db = DatabaseHelper.dbHelper.getDatabse();
+//     var qry = "SELECT * from printer where printer_ip = 1"; //+
+//     // table_printer.printerIp.toString();
+//     var res = await db.rawQuery(qry);
+//     List<Printer> list =
+//         res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
+//     var result;
+//     if (list.length > 0) {
+//       result = await db.update("printer", table_printer.toJson(),
+//           where: 'printerIp = ?', whereArgs: [table_printer.printerIp]);
+//     } else {
+//       result = await db.insert("printer", table_printer.toJson());
+//     }
+//     await SyncAPICalls.logActivity(
+//         "Printer",
+//         list.length > 0 ? "Update table printer" : "Insert table printer",
+//         "printerId",
+//         table_printer.printerId);
+
+//     return result;
+//   }
+//  Future<List<SaveOrder>> gettableCartID(saveorderid) async {
+//     var db = DatabaseHelper.dbHelper.getDatabse();
+//     var qry = "select save_order.cart_id from table_order " +
+//         " LEFT join save_order on save_order.id = table_order.save_order_id " +
+//         " WHERE table_order.save_order_id = " +
+//         saveorderid.toString();
+//     var result = await db.rawQuery(qry);
+//     List<SaveOrder> list = result.length > 0
+//         ? result.map((c) => SaveOrder.fromJson(c)).toList()
+//         : [];
+
+//     return list;
+//   }
+
+//  Future<List<Customer_Liquor_Inventory>> getCustomerRedeem(customerid) async {
+//     var db = DatabaseHelper.dbHelper.getDatabse();
+//     var qry =
+//         "SELECT customer_liquor_inventory.*,box.name from customer_liquor_inventory" +
+//             " LEFT JOIN box on box.box_id = customer_liquor_inventory.cl_box_id " +
+//             " WHERE cl_customer_id = " +
+//             customerid.toString();
+//     var result = await db.rawQuery(qry);
+//     List<Customer_Liquor_Inventory> list = result.length > 0
+//         ? result.map((c) => Customer_Liquor_Inventory.fromJson(c)).toList()
+//         : [];
+//     return list;
+//   }
+
+// Future<List<Box>> getBoxForProduct(productId) async {
+//     var db = DatabaseHelper.dbHelper.getDatabse();
+//     var qry = "SELECT * from box where product_id = " +
+//         productId.toString() +
+//         " AND status = 1";
+//     var result = await db.rawQuery(qry);
+//     List<Box> list =
+//         result.length > 0 ? result.map((c) => Box.fromJson(c)).toList() : [];
+//     return list;
+//   }
+// Future<int> saveInOutDrawerData(Drawerdata drawerData) async {
+  //   var db = DatabaseHelper.dbHelper.getDatabse();
+  //   var inveID = await db.insert("drawer", drawerData.toJson());
+  //   return inveID;
+  // }
+
+  // ***************************************************
+  // SIMPLE apis
+
+  // after sync
+  Future<List<User>> checkUserExit(userpin) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from users where user_pin =" +
+        userpin.toString() +
+        " AND status = 1";
+    var user = await db.rawQuery(qry);
+    List<User> list =
+        user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
+    return list;
+  }
+
+  // End of Simple apis
+  // ==============================================================================================================
+
+  // ***************************************************
+  // SYNC  tables data APIS
+
+  Future<List<Customer>> getCustomersforSend(teminalID) async {
+    var query =
+        "SELECT * from customer WHERE IFNULL(server_id,'')='' AND terminal_id = " +
+            teminalID.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+    List<Customer> list =
+        res.isNotEmpty ? res.map((c) => Customer.fromJson(c)).toList() : [];
+    await SyncAPICalls.logActivity(
+        "Customer", "geting customer list for sync", "customer", teminalID);
+    return list;
+  }
+
+  Future<int> saveCustomersFromServer(Customer customer) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry =
+        "SELECT *  FROM customer where app_id =" + customer.appId.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var result;
+    if (checkisExit.length > 0) {
+      result = await db.update("customer", customer.toJson(),
+          where: "app_id =?", whereArgs: [customer.appId]);
+    } else {
+      result = await db.insert("customer", customer.toJson());
+    }
+    return result;
+  }
+
+  Future<List<Customer_Liquor_Inventory>> getCustomersWineInventoryTable(
+      branchID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var query =
+        "SELECT * from customer_liquor_inventory WHERE IFNULL(server_id,'')='' AND cl_branch_id = " +
+            branchID.toString();
+    var res = await db.rawQuery(query);
+    List<Customer_Liquor_Inventory> list = res.isNotEmpty
+        ? res.map((c) => Customer_Liquor_Inventory.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "customer_liquor_inventory",
+        "geting customer Wine inventory list for sync",
+        "customer_liquor_inventory",
+        branchID);
+    return list;
+  }
+
+  Future<List<Customer_Liquor_Inventory_Log>>
+      getCustomersWineInventoryLogsTable(branchID, appid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var query =
+        "SELECT * from customer_liquor_inventory_log WHERE IFNULL(server_id,'')='' AND cl_appId = " +
+            appid.toString();
+    var res = await db.rawQuery(query);
+    List<Customer_Liquor_Inventory_Log> list = res.isNotEmpty
+        ? res.map((c) => Customer_Liquor_Inventory_Log.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "customer_liquor_inventory",
+        "geting customer Wine inventory Log list for sync",
+        "customer_liquor_inventory",
+        branchID);
+    return list;
+  }
+
+  Future<int> saveSuctomerWineInventory(
+      Customer_Liquor_Inventory customerInv) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry =
+        "SELECT *  FROM customer_liquor_inventory where app_id =" +
+            customerInv.appId.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var result;
+    if (checkisExit.length > 0) {
+      result = await db.update(
+          "customer_liquor_inventory", customerInv.toJson(),
+          where: "app_id =?", whereArgs: [customerInv.appId]);
+    } else {
+      result =
+          await db.insert("customer_liquor_inventory", customerInv.toJson());
+    }
+    return result;
+  }
+
+  Future<int> saveSuctomerWineInventoryLogs(
+      Customer_Liquor_Inventory_Log customerInv) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry =
+        "SELECT *  FROM customer_liquor_inventory_log where app_id =" +
+            customerInv.appId.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var result;
+    if (checkisExit.length > 0) {
+      result = await db.update(
+          "customer_liquor_inventory_log", customerInv.toJson(),
+          where: "app_id =?", whereArgs: [customerInv.appId]);
+    } else {
+      result = await db.insert(
+          "customer_liquor_inventory_log", customerInv.toJson());
+    }
+    return result;
+  }
+
+  Future<List<ProductStoreInventory>> getProductStoreInventoryTable(
+      branchid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from product_store_inventory where branch_id = " +
+        branchid.toString();
+    var ordersList = await db.rawQuery(qry);
+    List<ProductStoreInventory> list = ordersList.length > 0
+        ? ordersList.map((c) => ProductStoreInventory.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "sync inventory",
+        "get product store inventory table",
+        "product_store_inventory",
+        branchid);
+    return list;
+  }
+
+  Future<List<ProductStoreInventoryLog>> getProductStoreInventoryLogTable(
+      inventoryid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry =
+        "SELECT * from product_store_inventory_log where IFNULL(server_id,'') = '' AND inventory_id = " +
+            inventoryid.toString();
+    var inList = await db.rawQuery(qry);
+    List<ProductStoreInventoryLog> list = inList.length > 0
+        ? inList.map((c) => ProductStoreInventoryLog.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "sync inventory log",
+        "get product store inventory log table",
+        "product_store_inventory_log",
+        inventoryid);
+    return list;
+  }
+
+  Future<int> saveSyncInvStoreTable(
+      ProductStoreInventory storeInventory) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry =
+        "SELECT *  FROM product_store_inventory where inventory_id =" +
+            storeInventory.inventoryId.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var inveID;
+    if (checkisExit.length > 0) {
+      inveID = await db.update(
+          "product_store_inventory", storeInventory.toJson(),
+          where: "inventory_id =?", whereArgs: [storeInventory.inventoryId]);
+    } else {
+      inveID =
+          await db.insert("product_store_inventory", storeInventory.toJson());
+    }
+    return inveID;
+  }
+
+  Future<int> saveSyncInvStoreLogTable(ProductStoreInventoryLog logData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry =
+        "SELECT *  FROM product_store_inventory_log where il_id =" +
+            logData.il_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var orderid;
+    if (checkisExit.length > 0) {
+      orderid = await db.update("product_store_inventory_log", logData.toJson(),
+          where: "il_id =?", whereArgs: [logData.il_id]);
+    } else {
+      orderid =
+          await db.insert("product_store_inventory_log", logData.toJson());
+    }
+    return orderid;
+  }
+
+  Future<int> saveSyncCancelTable(CancelOrder orderData) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM order_cancel where order_app_id =" +
+        orderData.order_app_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var inveID;
+    if (checkisExit.length > 0) {
+      inveID = await db.update("order_cancel", orderData.toJson(),
+          where: "order_app_id =? AND terminal_id =?",
+          whereArgs: [orderData.order_app_id, orderData.terminalId]);
+    } else {
+      inveID = await db.insert("order_cancel", orderData.toJson());
+    }
+    return inveID;
+  }
 
   Future saveSyncOrder(Orders orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
@@ -1412,595 +1751,133 @@ class LocalAPI {
     return list;
   }
 
-  // Future<List<PosPermission>> getUserPermissions(userid) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   var qry = " SELECT  group_concat(pos_permission.pos_permission_name) as pos_permission_name  from users" +
-  //       " Left join user_pos_permission on user_pos_permission.user_id = users.id  AND user_pos_permission.status = 1" +
-  //       " left join pos_permission on pos_permission.pos_permission_id = user_pos_permission.pos_permission_id" +
-  //       " WHERE user_id  =" +
-  //       userid.toString();
-
-  //   var permissionList = await db.rawQuery(qry);
-  //   List<PosPermission> list = permissionList.length > 0
-  //       ? permissionList.map((c) => PosPermission.fromJson(c)).toList()
-  //       : [];
-  //   await SyncAPICalls.logActivity("get PosPermission",
-  //       "get PosPermission list", "pos_permission", userid);
-  //   return list;
-  // }
-
-
-  // Sync APIs 
-  Future<List<ProductStoreInventory>> getProductStoreInventoryTable(
-      branchid) async {
+  Future<List<Orders>> getOrdersListTable(branchid, terminalId) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from product_store_inventory where branch_id = " +
-        branchid.toString();
+    var qry = "SELECT * from orders where branch_id = " +
+        branchid.toString() +
+        " AND order_source = 2 AND server_id = 0 AND terminal_id = " +
+        terminalId.toString();
     var ordersList = await db.rawQuery(qry);
-    List<ProductStoreInventory> list = ordersList.length > 0
-        ? ordersList.map((c) => ProductStoreInventory.fromJson(c)).toList()
+    List<Orders> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => Orders.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
-        "sync inventory",
-        "get product store inventory table",
-        "product_store_inventory",
-        branchid);
+        "Order sync", "get Orders list", "Orders", branchid);
     return list;
   }
 
-  Future<List<ProductStoreInventoryLog>> getProductStoreInventoryLogTable(
-      inventoryid) async {
+  Future<List<OrderDetail>> getOrderDetailTable(orderid, terminalId) async {
+    var qry = "SELECT * from order_detail where terminal_id = " +
+        terminalId.toString() +
+        " AND order_app_id = " +
+        orderid.toString();
+    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<OrderDetail> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Order sync", "get Orders detail list", "Orders", orderid);
+    return list;
+  }
+
+  Future<List<OrderAttributes>> getOrderAttributesTable(
+      detailid, terminalId) async {
+    var qry = "SELECT * from order_attributes where terminal_id = " +
+        terminalId.toString() +
+        " AND detail_app_id = " +
+        detailid.toString();
+
+    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<OrderAttributes> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => OrderAttributes.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Order sync", "get Orders_modifire list", "order_attribute", detailid);
+    return list;
+  }
+
+  Future<List<OrderModifire>> getOrderModifireTable(
+      detailid, terminalId) async {
+    var qry = "SELECT * from order_modifier where  terminal_id = " +
+        terminalId.toString() +
+        " AND detail_app_id = " +
+        detailid.toString();
+    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<OrderModifire> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => OrderModifire.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Order sync", "get Orders Modifire Table", "order_modifier", detailid);
+    return list;
+  }
+
+  Future<List<OrderPayment>> getOrderPaymentTable(orderid, terminalid) async {
+    var qry = "SELECT * from order_payment where  terminal_id = " +
+        terminalid.toString() +
+        " AND order_app_id = " +
+        orderid.toString();
+    var ordersList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<OrderPayment> list = ordersList.isNotEmpty
+        ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "Order sync", "get Orders payment Table", "order_payment", orderid);
+    return list;
+  }
+
+  Future updateWebCartdetails(MSTCartdetails details) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry =
-        "SELECT * from product_store_inventory_log where IFNULL(server_id,'') = '' AND inventory_id = " +
-            inventoryid.toString();
-    var inList = await db.rawQuery(qry);
-    List<ProductStoreInventoryLog> list = inList.length > 0
-        ? inList.map((c) => ProductStoreInventoryLog.fromJson(c)).toList()
-        : [];
-    await SyncAPICalls.logActivity(
-        "sync inventory log",
-        "get product store inventory log table",
-        "product_store_inventory_log",
-        inventoryid);
-    return list;
-  }
+        "SELECT id from mst_cart_detail where id = " + details.id.toString();
 
-  Future<int> saveSyncInvStoreTable(
-      ProductStoreInventory storeInventory) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry =
-        "SELECT *  FROM product_store_inventory where inventory_id =" +
-            storeInventory.inventoryId.toString();
-    var checkisExit = await db.rawQuery(checkisExitqry);
-    var inveID;
-    if (checkisExit.length > 0) {
-      inveID = await db.update(
-          "product_store_inventory", storeInventory.toJson(),
-          where: "inventory_id =?", whereArgs: [storeInventory.inventoryId]);
-    } else {
-      inveID =
-          await db.insert("product_store_inventory", storeInventory.toJson());
-    }
-    return inveID;
-  }
-
-  Future<int> saveSyncInvStoreLogTable(ProductStoreInventoryLog logData) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry =
-        "SELECT *  FROM product_store_inventory_log where il_id =" +
-            logData.il_id.toString();
-    var checkisExit = await db.rawQuery(checkisExitqry);
-    var orderid;
-    if (checkisExit.length > 0) {
-      orderid = await db.update("product_store_inventory_log", logData.toJson(),
-          where: "il_id =?", whereArgs: [logData.il_id]);
-    } else {
-      orderid =
-          await db.insert("product_store_inventory_log", logData.toJson());
-    }
-    return orderid;
-  }
-
-  Future<int> saveSyncCancelTable(CancelOrder orderData) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_cancel where order_app_id =" +
-        orderData.order_app_id.toString();
-    var checkisExit = await db.rawQuery(checkisExitqry);
-    var inveID;
-    if (checkisExit.length > 0) {
-      inveID = await db.update("order_cancel", orderData.toJson(),
-          where: "order_app_id =? AND terminal_id =?",
-          whereArgs: [orderData.order_app_id, orderData.terminalId]);
-    } else {
-      inveID = await db.insert("order_cancel", orderData.toJson());
-    }
-    return inveID;
-  }
-
-  // Future<List<Orders>> getShiftInvoiceData(branchid) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   var qry = "SELECT * from orders where branch_id = " + branchid.toString();
-  //   var ordersList = await db.rawQuery(qry);
-  //   List<Orders> list = ordersList.isNotEmpty
-  //       ? ordersList.map((c) => Orders.fromJson(c)).toList()
-  //       : [];
-  //   await SyncAPICalls.logActivity(
-  //       "Order sync", "get Orders list", "Orders", branchid);
-  //   return list;
-  // }
-
-  // Future<List<SetMeal>> getMealsData(branchid) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   var qry = "select setmeal.* , replace(asset.base64,'data:image/jpg;base64,','') as base64  from setmeal " +
-  //       " LEFT join setmeal_branch on setmeal_branch_id =" +
-  //       branchid +
-  //       " AND setmeal_branch.setmeal_id = setmeal.setmeal_id " +
-  //       " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
-  //       " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id  GROUP by setmeal.setmeal_id ";
-  //   var mealList = await db.rawQuery(qry);
-  //   List<SetMeal> list = mealList.isNotEmpty
-  //       ? mealList.map((c) => SetMeal.fromJson(c)).toList()
-  //       : [];
-  //   await SyncAPICalls.logActivity(
-  //       "Meals List", "get Meals List", "setmeal", branchid);
-  //   return list;
-  // }
-
-  // Future<List<SetMealProduct>> getMealsProductData(setmealid) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   var qry = "SELECT setmeal_product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name  FROM setmeal_product " +
-  //       " LEFT JOIN product ON product.product_id = setmeal_product.product_id " +
-  //       " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id " +
-  //       " WHERE setmeal_product.setmeal_id = " +
-  //       setmealid.toString() +
-  //       " GROUP by setmeal_product.setmeal_product_id";
-
-  //   var mealList = await db.rawQuery(qry);
-  //   List<SetMealProduct> list = mealList.isNotEmpty
-  //       ? mealList.map((c) => SetMealProduct.fromJson(c)).toList()
-  //       : [];
-  //   await SyncAPICalls.logActivity(
-  //       "Meals product List", "get Meals product List", "setmeal", setmealid);
-  //   return list;
-  // }
-
-  Future<int> insertTablePrinter(Printer table_printer) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from printer where printer_ip = 1"; //+
-    // table_printer.printerIp.toString();
     var res = await db.rawQuery(qry);
-    List<Printer> list =
-        res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
+    List<MSTCartdetails> list = res.isNotEmpty
+        ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
+        : [];
+    var result;
+    var newObj = details.toJson();
+    newObj.remove("attrName");
+    newObj.remove("modiName");
+    if (list.length > 0) {
+      result = await db.update("mst_cart_detail", newObj,
+          where: "id =?", whereArgs: [details.id]);
+    } else {
+      result = await db.insert("mst_cart_detail", newObj);
+    }
+    return result;
+  }
+
+  Future updateWebCartsubdetails(MSTSubCartdetails subdata) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT id from mst_cart_sub_detail where id = " +
+        subdata.id.toString();
+    var res = await db.rawQuery(qry);
+    List<MSTSubCartdetails> list = res.isNotEmpty
+        ? res.map((c) => MSTSubCartdetails.fromJson(c)).toList()
+        : [];
     var result;
     if (list.length > 0) {
-      result = await db.update("printer", table_printer.toJson(),
-          where: 'printerIp = ?', whereArgs: [table_printer.printerIp]);
+      result = await db.update("mst_cart_sub_detail", subdata.toJson(),
+          where: "id =?", whereArgs: [subdata.id]);
     } else {
-      result = await db.insert("printer", table_printer.toJson());
+      result = await db.insert("mst_cart_sub_detail", subdata.toJson());
     }
-    await SyncAPICalls.logActivity(
-        "Printer",
-        list.length > 0 ? "Update table printer" : "Insert table printer",
-        "printerId",
-        table_printer.printerId);
-
     return result;
   }
 
-  Future<List<Printer>> selectPrinterForPrint() async {
-    var qry =
-        "SELECT * from printer LEFT JOIN product_branch on product_branch.product_id = 1  AND printer.printer_id = product_branch.printer_id";
-    // table_printer.printerIp.toString();
-    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    List<Printer> list =
-        res.isNotEmpty ? res.map((c) => Printer.fromJson(c)).toList() : [];
-
-    await SyncAPICalls.logActivity("Printer",
-        list.length > 0 ? "Print KOT" : "Print KOT", "printerId", "1");
-    return list;
-  }
-
-  // Future<List<MSTSubCartdetails>> itemmodifireList(detailid) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   var qry = "SELECT  * from mst_cart_sub_detail WHERE cart_details_id  = " +
-  //       detailid.toString();
-  //   var res = await db.rawQuery(qry);
-  //   List<MSTSubCartdetails> list = res.isNotEmpty
-  //       ? res.map((c) => MSTSubCartdetails.fromJson(c)).toList()
-  //       : [];
-  //   await SyncAPICalls.logActivity(
-  //       "product", "get cart modifier list", "mst_cart_sub_detail", detailid);
-  //   return list;
-  // }
-
-  // Future<int> deleteCartItemFromSplitBill(
-  //     cartItem, cartID, mainCart, isLast) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   await db
-  //       .delete("mst_cart_Detail", where: 'id = ?', whereArgs: [cartItem.id]);
-  //   await SyncAPICalls.logActivity(
-  //       "cart",
-  //       "delete cart item from mst_cart_Detail",
-  //       "mst_cart_Detail",
-  //       cartItem.id);
-
-  //   await db.delete("mst_cart_sub_detail",
-  //       where: 'cart_details_id = ?', whereArgs: [cartItem.id]);
-  //   await SyncAPICalls.logActivity(
-  //       "cart",
-  //       "delete cart item from mst_cart_sub_detail",
-  //       "mst_cart_sub_detail",
-  //       cartItem.id);
-
-  //   if (isLast) {
-  //     await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartID]);
-  //     await SyncAPICalls.logActivity(
-  //         "cart", "delete cart all item", "mst_Cart", cartItem.id);
-  //     await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartID]);
-  //     await SyncAPICalls.logActivity("cart",
-  //         "delete cart all item from save_order", "save_order", cartItem.id);
-  //   } else {
-  //     //Update cart
-  //     await db.update("mst_cart", mainCart.toJson(),
-  //         where: 'id = ?', whereArgs: [cartID]);
-  //   }
-  //   return cartID;
-  // }
-
-  // Future<List<Drawerdata>> getPayinOutammount(shiftid) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   var qry = "SELECT * from drawer where shift_id = " + shiftid.toString();
-  //   var mealList = await db.rawQuery(qry);
-  //   List<Drawerdata> list = mealList.isNotEmpty
-  //       ? mealList.map((c) => Drawerdata.fromJson(c)).toList()
-  //       : [];
-  //   await SyncAPICalls.logActivity(
-  //       "Meals product List", "Meals product List", "drawer", shiftid);
-  //   return list;
-  // }
-
-  Future<int> saveInOutDrawerData(Drawerdata drawerData) async {
+  Future updateWebCart(MST_Cart cart) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var inveID = await db.insert("drawer", drawerData.toJson());
-    return inveID;
-  }
+    var qry = "SELECT id from mst_cart where id = " + cart.id.toString();
 
-  Future<List<SaveOrder>> gettableCartID(saveorderid) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "select save_order.cart_id from table_order " +
-        " LEFT join save_order on save_order.id = table_order.save_order_id " +
-        " WHERE table_order.save_order_id = " +
-        saveorderid.toString();
-    var result = await db.rawQuery(qry);
-    List<SaveOrder> list = result.length > 0
-        ? result.map((c) => SaveOrder.fromJson(c)).toList()
-        : [];
-    print(list);
-    return list;
-  }
-
-  // Future changeTable(tableID, totableid, cartid) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   var qry = "UPDATE table_order SET table_id= " +
-  //       totableid.toString() +
-  //       " where table_id = " +
-  //       tableID.toString();
-  //   var result = await db.rawQuery(qry);
-  //   print(result);
-  //   if (cartid != null) {
-  //     var qry1 = "UPDATE mst_cart SET table_id = " +
-  //         totableid.toString() +
-  //         " where  id = " +
-  //         cartid.toString();
-  //     var result1 = await db.rawQuery(qry1);
-  //     print(result1);
-  //   }
-  // }
-
-  // Future makeAsFocProduct(MSTCartdetails focProduct, isUpdate, MST_Cart cart,
-  //     MSTCartdetails cartitem) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   var newObj = focProduct.toJson();
-  //   newObj.remove("attrName");
-  //   newObj.remove("modiName");
-  //   if (isUpdate) {
-  //     var data = await db.update("mst_cart_detail", newObj,
-  //         where: "id =?", whereArgs: [focProduct.id]);
-  //   } else {
-  //     var data = await db.insert(
-  //       "mst_cart_detail",
-  //       focProduct.toJson(),
-  //     );
-  //     var res = await db.update("mst_cart_detail", newObj,
-  //         where: "id =?", whereArgs: [cartitem.id]);
-  //   }
-  //   var res = await db.update("mst_cart", cart.toJson(),
-  //       where: "id =?", whereArgs: [cart.id]);
-  //   await SyncAPICalls.logActivity(
-  //       "mst_cart_detail", "Added Foc Product", "mst_cart_detail", cart.id);
-  // }
-
-  // Future deleteOrderid(orderid) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   var res =
-  //       await db.delete("orders", where: "app_id =?", whereArgs: [orderid]);
-  //   print(res);
-  // }
-
-  Future<List<Customer>> getCustomersforSend(teminalID) async {
-    var query =
-        "SELECT * from customer WHERE IFNULL(server_id,'')='' AND terminal_id = " +
-            teminalID.toString();
-    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
-    List<Customer> list =
-        res.isNotEmpty ? res.map((c) => Customer.fromJson(c)).toList() : [];
-    await SyncAPICalls.logActivity(
-        "Customer", "geting customer list for sync", "customer", teminalID);
-    return list;
-  }
-
-  Future<List<Rac>> getRacList(branchID) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from rac where branch_id = " +
-        branchID.toString() +
-        " AND status = 1";
-    var result = await db.rawQuery(qry);
-    List<Rac> list =
-        result.length > 0 ? result.map((c) => Rac.fromJson(c)).toList() : [];
-    return list;
-  }
-
-  Future<List<Box>> getBoxList(branchID, racID) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from box where branch_id = " +
-        branchID.toString() +
-        " AND rac_id = " +
-        racID.toString() +
-        "  AND status = 1";
-    var result = await db.rawQuery(qry);
-    List<Box> list =
-        result.length > 0 ? result.map((c) => Box.fromJson(c)).toList() : [];
-    return list;
-  }
-
-  Future<int> getLastCustomerInventory() async {
-    var qey = "SELECT app_id from customer_liquor_inventory " +
-        " ORDER BY app_id DESC LIMIT 1";
-    var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
-    List<Customer_Liquor_Inventory> list = checkisExit.length > 0
-        ? checkisExit.map((c) => Customer_Liquor_Inventory.fromJson(c)).toList()
-        : [];
+    var res = await db.rawQuery(qry);
+    List<MST_Cart> list =
+        res.isNotEmpty ? res.map((c) => MST_Cart.fromJson(c)).toList() : [];
+    var result;
     if (list.length > 0) {
-      return list[0].appId;
+      result = await db.update("mst_cart", cart.toJson(),
+          where: "id =?", whereArgs: [cart.id]);
     } else {
-      return 0;
-    }
-  }
-
-  Future<int> getLastCustomerInventoryLog() async {
-    var qey = "SELECT app_id from customer_liquor_inventory_log " +
-        " ORDER BY app_id DESC LIMIT 1";
-    var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
-    List<Customer_Liquor_Inventory_Log> list = checkisExit.length > 0
-        ? checkisExit
-            .map((c) => Customer_Liquor_Inventory_Log.fromJson(c))
-            .toList()
-        : [];
-    if (list.length > 0) {
-      return list[0].appId;
-    } else {
-      return 0;
-    }
-  }
-
-  Future<int> insertWineInventory(
-      Customer_Liquor_Inventory data, isUpdate) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var invData = data.toJson();
-    await invData.remove("name");
-    var result;
-    if (isUpdate) {
-      result = await db.update("customer_liquor_inventory", invData,
-          where: "app_id =?", whereArgs: [data.appId]);
-    } else {
-      result = await db.insert("customer_liquor_inventory", invData);
-    }
-    await SyncAPICalls.logActivity("customer liquor inventory",
-        "insert Wine inventory", "customer_liquor_inventory", data.clBranchId);
-    return result;
-  }
-
-  Future<int> insertWineInventoryLog(Customer_Liquor_Inventory_Log data) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var result =
-        await db.insert("customer_liquor_inventory_log", data.toJson());
-    await SyncAPICalls.logActivity(
-        "customer liquor inventory log",
-        "insert Wine inventory log",
-        "customer_liquor_inventory_log",
-        data.branchId);
-    return result;
-  }
-
-  Future<List<Customer_Liquor_Inventory>> getCustomerRedeem(customerid) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry =
-        "SELECT customer_liquor_inventory.*,box.name from customer_liquor_inventory" +
-            " LEFT JOIN box on box.box_id = customer_liquor_inventory.cl_box_id " +
-            " WHERE cl_customer_id = " +
-            customerid.toString();
-    var result = await db.rawQuery(qry);
-    List<Customer_Liquor_Inventory> list = result.length > 0
-        ? result.map((c) => Customer_Liquor_Inventory.fromJson(c)).toList()
-        : [];
-    return list;
-  }
-
-  Future<List<Customer_Liquor_Inventory>> getCustomersWineInventory(
-      branchID) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var query =
-        "SELECT * from customer_liquor_inventory WHERE IFNULL(server_id,'')='' AND cl_branch_id = " +
-            branchID.toString();
-    var res = await db.rawQuery(query);
-    List<Customer_Liquor_Inventory> list = res.isNotEmpty
-        ? res.map((c) => Customer_Liquor_Inventory.fromJson(c)).toList()
-        : [];
-    await SyncAPICalls.logActivity(
-        "customer_liquor_inventory",
-        "geting customer Wine inventory list for sync",
-        "customer_liquor_inventory",
-        branchID);
-    return list;
-  }
-
-  Future<List<Customer_Liquor_Inventory_Log>> getCustomersWineInventoryLogs(
-      branchID, appid) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var query =
-        "SELECT * from customer_liquor_inventory_log WHERE IFNULL(server_id,'')='' AND cl_appId = " +
-            appid.toString();
-    var res = await db.rawQuery(query);
-    List<Customer_Liquor_Inventory_Log> list = res.isNotEmpty
-        ? res.map((c) => Customer_Liquor_Inventory_Log.fromJson(c)).toList()
-        : [];
-    await SyncAPICalls.logActivity(
-        "customer_liquor_inventory",
-        "geting customer Wine inventory Log list for sync",
-        "customer_liquor_inventory",
-        branchID);
-    return list;
-  }
-
-  Future<int> saveSuctomerWineInventory(
-      Customer_Liquor_Inventory customerInv) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry =
-        "SELECT *  FROM customer_liquor_inventory where app_id =" +
-            customerInv.appId.toString();
-    var checkisExit = await db.rawQuery(checkisExitqry);
-    var result;
-    if (checkisExit.length > 0) {
-      result = await db.update(
-          "customer_liquor_inventory", customerInv.toJson(),
-          where: "app_id =?", whereArgs: [customerInv.appId]);
-    } else {
-      result =
-          await db.insert("customer_liquor_inventory", customerInv.toJson());
-    }
-    return result;
-  }
-
-  Future<int> saveSuctomerWineInventoryLogs(
-      Customer_Liquor_Inventory_Log customerInv) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry =
-        "SELECT *  FROM customer_liquor_inventory_log where app_id =" +
-            customerInv.appId.toString();
-    var checkisExit = await db.rawQuery(checkisExitqry);
-    var result;
-    if (checkisExit.length > 0) {
-      result = await db.update(
-          "customer_liquor_inventory_log", customerInv.toJson(),
-          where: "app_id =?", whereArgs: [customerInv.appId]);
-    } else {
-      result = await db.insert(
-          "customer_liquor_inventory_log", customerInv.toJson());
-    }
-    return result;
-  }
-
-  Future<List<Box>> getBoxForProduct(productId) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from box where product_id = " +
-        productId.toString() +
-        " AND status = 1";
-    var result = await db.rawQuery(qry);
-    List<Box> list =
-        result.length > 0 ? result.map((c) => Box.fromJson(c)).toList() : [];
-    return list;
-  }
-
-  // Future<Terminal> getTerminalDetails(terminalkey) async {
-  //   var query = "SELECT * from terminal WHERE terminal_id  =$terminalkey";
-  //   var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
-  //   Terminal terminalDat;
-  //   List<Terminal> list =
-  //       res.length > 0 ? res.map((c) => Terminal.fromJson(c)).toList() : [];
-  //   print(list.length);
-  //   if (list.length > 0) {
-  //     terminalDat = list[0];
-  //   }
-  //   return terminalDat;
-  // }
-
-  // Future<int> deletesubcartDetail(cartdetailsId) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   var result = await db.delete("mst_cart_sub_detail",
-  //       where: "cart_details_id =?", whereArgs: [cartdetailsId]);
-  //   return result;
-  // }
-
-  // Future<dynamic> addVoucherInOrder(
-  //     MST_Cart details, ,Voucher voucherDetail) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   var data1 = await db.update("mst_cart", details.toJson(),
-  //       where: "id =?", whereArgs: [details.id]);
-  //   await SyncAPICalls.logActivity(
-  //       "voucher", "add voucher in cart", "voucher", voucherDetail.voucherId);
-  //   return data1;
-  // }
-
-  // Future<List<OrderAttributes>> getOrderAttributes(orderid) async {
-  //   var query = "SELECT order_attributes.*,attributes.name from order_attributes " +
-  //       " LEFT join attributes on attributes.attribute_id =  order_attributes.attribute_id WHERE order_attributes.order_app_id = " +
-  //       orderid.toString();
-  //   var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
-  //   List<OrderAttributes> list = res.isNotEmpty
-  //       ? res.map((c) => OrderAttributes.fromJson(c)).toList()
-  //       : [];
-  //   return list;
-  // }
-
-  // Future<List<OrderModifire>> getOrderModifire(orderid) async {
-  //   var query = "SELECT order_modifier.*,modifier.name  from order_modifier " +
-  //       " LEFT JOIN modifier on modifier.modifier_id = order_modifier.modifier_id" +
-  //       " WHERE order_modifier.order_app_id  = " +
-  //       orderid.toString();
-  //   var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
-  //   List<OrderModifire> list = res.isNotEmpty
-  //       ? res.map((c) => OrderModifire.fromJson(c)).toList()
-  //       : [];
-  //   return list;
-  // }
-
-  // Future<List<Payments>> getOrderpaymentmethod(orderid, terminalid) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   var qry = "SELECT * from payment " +
-  //       " LEFT JOIN order_payment on order_payment.op_method_id = payment.payment_id " +
-  //       " WHERE order_payment.terminal_id = " +
-  //       terminalid.toString() +
-  //       " AND order_payment.order_app_id = " +
-  //       orderid.toString();
-  //   var paymentMeth = await db.rawQuery(qry);
-  //   List<Payments> list = paymentMeth.isNotEmpty
-  //       ? paymentMeth.map((c) => Payments.fromJson(c)).toList()
-  //       : [];
-  //   return list;
-  // }
-
-  Future<int> saveCustomersFromServer(Customer customer) async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry =
-        "SELECT *  FROM customer where app_id =" + customer.appId.toString();
-    var checkisExit = await db.rawQuery(checkisExitqry);
-    var result;
-    if (checkisExit.length > 0) {
-      result = await db.update("customer", customer.toJson(),
-          where: "app_id =?", whereArgs: [customer.appId]);
-    } else {
-      result = await db.insert("customer", customer.toJson());
+      result = await db.insert("mst_cart", cart.toJson());
     }
     return result;
   }

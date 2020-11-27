@@ -99,7 +99,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   filterState() async {
     if (selectedCountry != null) {
       var list = states.where((x) => x.countryId == selectedCountry).toList();
-      print(list);
+    
       setState(() {
         filterstates = list;
         filtercitys = [];
@@ -115,7 +115,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   filterCity() {
     if (selectedState != null) {
       var list = citys.where((x) => x.stateId == selectedState).toList();
-      print(list);
+    
       setState(() {
         filtercitys = list;
         selectedCity = filtercitys.length > 0 ? filtercitys[0].cityId : null;

@@ -483,4 +483,29 @@ class Cartlist {
           "mst_cart_detail", "Added Foc Product", "mst_cart_detail", cart.id);
     }
   }
+
+  Future<List<MST_Cart>> getCartsList(branchid) async {
+    List<MST_Cart> list = new List<MST_Cart>();
+    var isjoin = await CommunFun.checkIsJoinServer();
+    if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.cart_list;
+      var stringParams = {
+        "brnach_id": branchid,
+      };
+      var res = await APICall.localapiCall(null, apiurl, stringParams);
+      if (res["status"] == Constant.STATUS200) {
+        List<dynamic> data = res["data"];
+        list = data.length > 0
+            ? data.map((c) => MST_Cart.fromJson(c)).toList()
+            : [];
+      }
+    } else {
+      var result = await db.rawQuery(
+          "SELECT * FROM mst_cart WHERE branch_id = " + branchid.toString());
+      list = result.length > 0
+          ? result.map((c) => MST_Cart.fromJson(c)).toList()
+          : [];
+    }
+    return list;
+  }
 }

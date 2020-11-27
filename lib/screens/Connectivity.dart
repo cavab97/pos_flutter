@@ -55,7 +55,7 @@ class _HomeState extends State<Home> {
   }
 
   void handlePOST(HttpRequest request) {
-    print(request);
+   
     CommonUtils.showAlertDialog(context, () {
       Navigator.of(context).pop();
     }, () {
@@ -64,7 +64,7 @@ class _HomeState extends State<Home> {
   }
 
   void handleGet(HttpRequest request) {
-    print(request);
+ 
     final guess = request.uri.queryParameters['q'];
     final response = request.response;
     response.statusCode = HttpStatus.ok;

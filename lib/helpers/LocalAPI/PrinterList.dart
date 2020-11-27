@@ -2,7 +2,6 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/helpers/config.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
-import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/helpers/ComunAPIcall.dart';

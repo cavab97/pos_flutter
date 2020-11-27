@@ -41,7 +41,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
           return OpeningAmmountPage(
               ammountext: Strings.pay_in_ammount,
               onEnter: (ammountext) {
-                print(ammountext);
+               
                 setamount(ammountext);
               });
         });

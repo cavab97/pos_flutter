@@ -137,7 +137,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 table_printe.printerIp = ip;
                 table_printe.printerIsCashier = selected;
                 //var result = await localAPI.insertTablePrinter(table_printe);
-                var result = await localAPI.insertTablePrinter(table_printe);
+                //var result = await localAPI.insertTablePrinter(table_printe);
               });
         });
   }
@@ -203,12 +203,12 @@ class _SettingsPageState extends State<SettingsPage> {
           // ),
           );
       var result = await BarcodeScanner.scan(options: options);
-      print(result);
+
       setState(() => scanResult = result);
-      print(result.type);
-      print(result.rawContent);
-      print(result.format);
-      print(result.formatNote);
+      // print(result.type);
+      // print(result.rawContent);
+      // print(result.format);
+      // print(result.formatNote);
       await checkIPisvalid(result.rawContent);
     } on PlatformException catch (e) {
       print(e);
@@ -238,7 +238,7 @@ class _SettingsPageState extends State<SettingsPage> {
     try {
       List<Category> categorys =
           await category.getCategories(context, branchid);
-      print(categorys);
+
       if (categorys != null) {
         await Preferences.setStringToSF(Constant.SERVER_IP, ipadd);
       }
@@ -267,6 +267,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   TableCell(
                     // Part 1 white
                     child: Container(
+                      padding: EdgeInsets.only(left: 15),
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
                       color: Colors.white,
@@ -389,6 +390,82 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
         ),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          decoration:
+              new BoxDecoration(border: new Border.all(color: Colors.white)),
+          child: ListTile(
+            title:
+                Text("This is Local Server", style: Styles.whiteSimpleSmall()),
+            trailing: Container(
+              width: 150,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  isLocalServer
+                      ? IconButton(
+                          icon: Icon(
+                            CustomeIcons.qrcode,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                          onPressed: () {
+                            opneqrcodePop();
+                          })
+                      : SizedBox(),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Transform.scale(
+                    scale: 1.2,
+                    child: CupertinoSwitch(
+                      activeColor: Colors.deepOrange,
+                      value: isLocalServer,
+                      onChanged: (bool value) {
+                        setState(() {
+                          isLocalServer = value;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        !isLocalServer
+            ? Container(
+                decoration: new BoxDecoration(
+                    border: new Border.all(color: Colors.white)),
+                child: ListTile(
+                  title: Text("Join Local server",
+                      style: Styles.whiteSimpleSmall()),
+                  trailing: Container(
+                    width: 150,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        Transform.scale(
+                          scale: 1.2,
+                          child: CupertinoSwitch(
+                            activeColor: Colors.deepOrange,
+                            value: isJoinLoaclServer,
+                            onChanged: (bool value) {
+                              joinLocalServer(value);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            : SizedBox(),
         SizedBox(
           height: 10,
         ),

@@ -91,7 +91,8 @@ class DrawerWidState extends State<DrawerWid> {
   }
 
   getAllPrinter() async {
-    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    List<Printer> printerDraft =
+        await printerList.getAllPrinterList(context, "1");
     setState(() {
       printerreceiptList = printerDraft;
     });
@@ -163,7 +164,7 @@ class DrawerWidState extends State<DrawerWid> {
     }
     shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     shift.updatedBy = userdata.id;
-    var result = await shiftList.insertShift(context,shift);
+    var result = await shiftList.insertShift(context, shift);
     if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
     } else {

@@ -505,7 +505,6 @@ class _DashboradPageState extends State<DashboradPage>
     if (tabsList[0].isSetmeal == 1) {
       getMeals();
     } else {
-      print("!!!!!!!!!!1");
       getProductList(tabsList[0].categoryId);
     }
   }
@@ -622,7 +621,6 @@ class _DashboradPageState extends State<DashboradPage>
       if (subCatList[_subtabController.index].isSetmeal == 1) {
         getMeals();
       } else {
-        print("!!!!!!!!!!4");
         getProductList(cat);
       }
     }
@@ -687,9 +685,7 @@ class _DashboradPageState extends State<DashboradPage>
       tempCart.clear();
       for (int j = 0; j < cartLists.length; j++) {
         MSTCartdetails temp = MSTCartdetails();
-        print(printerList[i].printerId.toString() +
-            "==" +
-            cartLists[j].printer_id.toString());
+
         if (printerList[i].printerId == cartLists[j].printer_id) {
           temp = cartLists[j];
           tempCart.add(temp);
@@ -721,7 +717,7 @@ class _DashboradPageState extends State<DashboradPage>
       }
       if (i == itemList.length - 1) {
         if (list.length > 0) {
-          dynamic send = await localAPI.sendToKitched(ids);
+          dynamic send = await cartapi.sendToKitched(ids);
           openPrinterPop(list, false);
           getCartItem(currentCart);
         }
@@ -992,7 +988,7 @@ class _DashboradPageState extends State<DashboradPage>
             ? json.decode(cartItem.cart_detail)
             : "";
         List<ProductStoreInventory> cartval =
-            await localAPI.checkItemAvailableinStore(cartItem.productId);
+            await orderApi.checkItemAvailableinStore(cartItem.productId);
         if (productdata["has_inventory"] == 1 && cartval.length > 0) {
           double storeqty = cartval[0].qty;
           if (storeqty < cartItem.productQty) {
@@ -1011,7 +1007,7 @@ class _DashboradPageState extends State<DashboradPage>
         } else {
           orderDetail.app_id = 1;
         }
-        print(productdata);
+
         orderDetail.uuid = uuid;
         orderDetail.branch_id = int.parse(branchid);
         orderDetail.terminal_id = int.parse(terminalId);
@@ -1087,45 +1083,11 @@ class _DashboradPageState extends State<DashboradPage>
             }
           }
         }
-        if (cartItem.issetMeal == 0 || cartItem.hasRacManagemant == 0) {
-          if (productdata["has_inventory"] == 1) {
-            List<ProductStoreInventory> inventory =
-                await localAPI.getStoreInventoryData(orderDetail.product_id);
-            if (inventory.length > 0) {
-              ProductStoreInventory invData = new ProductStoreInventory();
-              invData = inventory[0];
-              var prev = inventory[0];
-              var qty = (invData.qty - orderDetail.detail_qty);
-              invData.qty = qty;
-              invData.updatedAt =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              invData.updatedBy = userdata.id;
-              updatedInt.add(invData);
-              //Inventory log update
-              ProductStoreInventoryLog log = new ProductStoreInventoryLog();
-              log.uuid = uuid;
-              log.inventory_id = prev.inventoryId;
-              log.branch_id = int.parse(branchid);
-              log.product_id = cartItem.productId;
-              log.employe_id = userdata.id;
-              log.qty = prev.qty;
-              log.il_type = 2; //1 for add 2 for deduct
-              log.qty_before_change = prev.qty;
-              log.qty_after_change = qty;
-              log.updated_at =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              log.updated_by = userdata.id;
-              updatedLog.add(log);
-            }
-          }
-        }
-        if (cartItem.hasRacManagemant == 1) {
-          insertRacInv(userdata, cartItem, cartData.user_id);
-        }
 
-        var ulog = await localAPI.updateInvetory(updatedInt);
-        var inventoryLog =
-            await localAPI.updateStoreInvetoryLogTable(updatedLog);
+        // if (cartItem.hasRacManagemant == 1) {
+        //   insertRacInv(userdata, cartItem, cartData.user_id);
+        // }
+
       }
 
       if (payment.length > 0) {
@@ -1134,7 +1096,6 @@ class _DashboradPageState extends State<DashboradPage>
           if (isWebOrder) {
             payment[i].op_method_id = cartData.cart_payment_id;
           }
-
           if (lastappid.order_payment_id != null) {
             orderpayment.app_id = lastappid.order_payment_id + 1;
           } else {
@@ -1190,66 +1151,66 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
-  insertRacInv(user, cartItem, customer) async {
-    Customer_Liquor_Inventory inventory = new Customer_Liquor_Inventory();
-    var orderDateF;
+  // insertRacInv(user, cartItem, customer) async {
+  //   Customer_Liquor_Inventory inventory = new Customer_Liquor_Inventory();
+  //   var orderDateF;
 
-    var appid = await localAPI.getLastCustomerInventory();
-    if (appid != 0) {
-      inventory.appId = appid + 1;
-    } else {
-      inventory.appId = 1;
-    }
-    var branchid = await CommunFun.getbranchId();
-    var now = DateTime.now();
-    var newDate = new DateTime(now.year, now.month + 1, now.day);
-    orderDateF = DateFormat('yyyy-MM-dd HH:mm:ss').format(newDate);
-    List<Box> boxList = await localAPI.getBoxForProduct(cartItem.productId);
-    if (boxList.length > 0) {
-      inventory.uuid = await CommunFun.getLocalID();
-      inventory.clCustomerId = customer;
-      inventory.clProductId = cartItem.productId;
-      inventory.clBranchId = int.parse(branchid);
-      inventory.clRacId = boxList[0].racId;
-      inventory.clBoxId = boxList[0].boxId;
-      inventory.type = boxList[0].boxFor;
-      inventory.clTotalQuantity = boxList[0].wineQty;
-      inventory.clExpiredOn = orderDateF;
-      inventory.clLeftQuantity = boxList[0].wineQty != null
-          ? (boxList[0].wineQty - cartItem.productQty)
-          : 0;
-      inventory.status = 1;
-      inventory.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
-      inventory.updatedBy = user.id;
-      var clid = await localAPI.insertWineInventory(inventory, false);
-      Customer_Liquor_Inventory_Log log = new Customer_Liquor_Inventory_Log();
-      var lastappid = await localAPI.getLastCustomerInventoryLog();
-      if (lastappid != 0) {
-        log.appId = lastappid + 1;
-      } else {
-        log.appId = 1;
-      }
-      log.uuid = await CommunFun.getLocalID();
-      log.clAppId = inventory.appId;
-      log.branchId = int.parse(branchid);
-      log.productId = cartItem.productId;
-      log.customerId = customer;
-      log.liType = boxList[0].boxFor;
-      log.qty = cartItem.productQty;
-      log.qtyBeforeChange = boxList[0].wineQty;
-      log.qtyAfterChange = boxList[0].wineQty != null
-          ? (boxList[0].wineQty - cartItem.productQty)
-          : 0;
-      log.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
-      log.updatedBy = user.id;
-      var lid = await localAPI.insertWineInventoryLog(log);
-    }
-  }
+  //   var appid = await localAPI.getLastCustomerInventory();
+  //   if (appid != 0) {
+  //     inventory.appId = appid + 1;
+  //   } else {
+  //     inventory.appId = 1;
+  //   }
+  //   var branchid = await CommunFun.getbranchId();
+  //   var now = DateTime.now();
+  //   var newDate = new DateTime(now.year, now.month + 1, now.day);
+  //   orderDateF = DateFormat('yyyy-MM-dd HH:mm:ss').format(newDate);
+  //   List<Box> boxList = await localAPI.getBoxForProduct(cartItem.productId);
+  //   if (boxList.length > 0) {
+  //     inventory.uuid = await CommunFun.getLocalID();
+  //     inventory.clCustomerId = customer;
+  //     inventory.clProductId = cartItem.productId;
+  //     inventory.clBranchId = int.parse(branchid);
+  //     inventory.clRacId = boxList[0].racId;
+  //     inventory.clBoxId = boxList[0].boxId;
+  //     inventory.type = boxList[0].boxFor;
+  //     inventory.clTotalQuantity = boxList[0].wineQty;
+  //     inventory.clExpiredOn = orderDateF;
+  //     inventory.clLeftQuantity = boxList[0].wineQty != null
+  //         ? (boxList[0].wineQty - cartItem.productQty)
+  //         : 0;
+  //     inventory.status = 1;
+  //     inventory.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
+  //     inventory.updatedBy = user.id;
+  //     var clid = await localAPI.insertWineInventory(inventory, false);
+  //     Customer_Liquor_Inventory_Log log = new Customer_Liquor_Inventory_Log();
+  //     var lastappid = await localAPI.getLastCustomerInventoryLog();
+  //     if (lastappid != 0) {
+  //       log.appId = lastappid + 1;
+  //     } else {
+  //       log.appId = 1;
+  //     }
+  //     log.uuid = await CommunFun.getLocalID();
+  //     log.clAppId = inventory.appId;
+  //     log.branchId = int.parse(branchid);
+  //     log.productId = cartItem.productId;
+  //     log.customerId = customer;
+  //     log.liType = boxList[0].boxFor;
+  //     log.qty = cartItem.productQty;
+  //     log.qtyBeforeChange = boxList[0].wineQty;
+  //     log.qtyAfterChange = boxList[0].wineQty != null
+  //         ? (boxList[0].wineQty - cartItem.productQty)
+  //         : 0;
+  //     log.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
+  //     log.updatedBy = user.id;
+  //     var lid = await localAPI.insertWineInventoryLog(log);
+  //   }
+  // }
 
   printReceipt(int orderid) async {
     var terminalid = await CommunFun.getTeminalKey();
     dynamic data = await orderApi.getOrdersDetailsData(orderid, terminalid);
-    print(data);
+
     // List<OrderPayment> orderpaymentdata =
     //     await orderApi.getOrderpaymentData(orderid, terminalid);
     // List<Payments> paymentMethod =
@@ -1278,8 +1239,6 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   clearCartAfterSuccess(orderid) async {
-    Table_order tables = await getTableData();
-    var result = await OrdersList.removeCartItem(currentCart, tables.table_id);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     await Navigator.pushNamedAndRemoveUntil(
@@ -1458,18 +1417,20 @@ class _DashboradPageState extends State<DashboradPage>
 
   editCartItem(cart) async {
     var prod;
+
     if (cart.issetMeal == 0) {
       List<ProductDetails> productdt =
-          await localAPI.productdData(cart.productId);
+          await prodList.productdData(cart.productId);
       if (productdt.length > 0) {
         prod = productdt[0];
       }
     } else {
-      List<SetMeal> productdt = await localAPI.setmealData(cart.productId);
+      List<SetMeal> productdt = await prodList.setmealData(cart.productId);
       if (productdt.length > 0) {
         prod = productdt[0];
       }
     }
+
     await showDialog(
         context: context,
         barrierDismissible: false,

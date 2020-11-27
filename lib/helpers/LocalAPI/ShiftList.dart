@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/helpers/ComunAPIcall.dart';
@@ -47,7 +45,6 @@ class ShiftList {
         result = result["shift_id"];
       }
     } else {
-      print(shift.shiftId);
       if (shift.shiftId != null) {
         result = await db.update("shift", shift.toJson(),
             where: 'shift_id = ?', whereArgs: [shift.shiftId]);
@@ -57,7 +54,7 @@ class ShiftList {
       var dis = shift.shiftId != null ? "Update shift" : "Insert shift";
       await SyncAPICalls.logActivity("Product", dis, "shift", result);
     }
-    print(result);
+
     return result;
   }
 
@@ -84,5 +81,21 @@ class ShiftList {
           "Meals product List", "Meals product List", "drawer", shiftid);
     }
     return drawerList;
+  }
+
+  Future<int> saveInOutDrawerData(Drawerdata drawerData) async {
+    var inveID;
+    var isjoin = await CommunFun.checkIsJoinServer();
+    if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.add_drawer;
+      var stringParams = {"drawer": drawerData};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        inveID = 1;
+      }
+    } else {
+      inveID = await db.insert("drawer", drawerData.toJson());
+    }
+    return inveID;
   }
 }

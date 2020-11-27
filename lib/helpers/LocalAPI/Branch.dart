@@ -78,7 +78,7 @@ class BranchList {
       var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
       List<Terminal> list =
           res.length > 0 ? res.map((c) => Terminal.fromJson(c)).toList() : [];
-      print(list.length);
+    
       if (list.length > 0) {
         terminalDat = list[0];
       }

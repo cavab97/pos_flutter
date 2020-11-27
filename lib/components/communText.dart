@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:mcncashier/helpers/LocalAPI/Branch.dart';
 import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
 import 'package:mcncashier/helpers/LocalAPI/CheckinOutList.dart';
+import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
 import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
@@ -159,9 +160,6 @@ class CommunFun {
         fillColor: Colors.white,
       ),
       style: TextStyle(color: Colors.black, fontSize: 25.0),
-      onChanged: (e) {
-        print(e);
-      },
     );
   }
 
@@ -440,7 +438,7 @@ class CommunFun {
       await databaseHelper.accetsData(aceets["data"]);
       await Preferences.setStringToSF(
           Constant.OFFSET, aceets["data"]["next_offset"].toString());
-      print(aceets["data"]["product_image"]);
+
       if (offset == null) {
         if (aceets["data"]["next_offset"] != 0) {
           getAssetsData(context, isOpen);
@@ -573,7 +571,7 @@ class CommunFun {
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
     if (countrys != null) {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print(result);
+
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {
@@ -625,7 +623,7 @@ class CommunFun {
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
     if (countrys != null) {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print(result);
+
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {
@@ -670,7 +668,7 @@ class CommunFun {
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
     if (countrys != null) {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print(result);
+
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {
@@ -698,7 +696,7 @@ class CommunFun {
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
     if (countrys != null) {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print(result);
+
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {
@@ -773,13 +771,11 @@ class CommunFun {
     //converttoserver tiem
     var timeZone =
         await Preferences.getStringValuesSF(Constant.SERVER_TIME_ZONE);
-    print(timeZone);
+    ;
     if (timeZone != null) {
       final detroitTime =
           new tz.TZDateTime.from(dateTime, tz.getLocation(timeZone));
-      print('Local India Time: ' + dateTime.toString());
-      print('Detroit Time: ' + detroitTime.toString());
-      // DateTime serverDate = DateTime.parse(detroitTime.toString());
+
       String formattedDate =
           DateFormat('yyyy-MM-dd HH:mm:ss').format(detroitTime);
       print(formattedDate);
@@ -1026,7 +1022,6 @@ class CommunFun {
   static checkisAutoSync(context) async {
     var isSync = await Preferences.getStringValuesSF(Constant.IS_AUTO_SYNC);
     if (isSync != null) {
-      print(isSync);
       if (isSync == "true") {
         startAutosync(context);
       }
@@ -1039,8 +1034,7 @@ class CommunFun {
     if (isSynctimer != null && isSynctimer != "") {
       timertime = int.parse(isSynctimer);
     }
-    print("++++++++++++++++++++++++++++++++++++");
-    print(timertime);
+
     var _inactivityTimeout = Duration(minutes: timertime);
     timer =
         Timer(_inactivityTimeout, () => CommunFun.autosyncAllTables(context));
@@ -1143,6 +1137,7 @@ class CommunFun {
   static addItemToCart(productItem, List<MSTCartdetails> cartItems, allcartData,
       callback, context) async {
     taxvalues = 0;
+    OrdersList orderApi = new OrdersList();
     MST_Cart cart = new MST_Cart();
     var branchid = await CommunFun.getbranchId();
     Table_order table = await CommunFun.getTableData();
@@ -1168,7 +1163,7 @@ class CommunFun {
         qty = sameitem.productQty + qty;
       }
       List<ProductStoreInventory> cartval =
-          await localAPI.checkItemAvailableinStore(productItem.productId);
+          await orderApi.checkItemAvailableinStore(productItem.productId);
       if (cartval.length > 0) {
         double storeqty = cartval[0].qty;
         if (storeqty < qty) {
@@ -1246,7 +1241,7 @@ class CommunFun {
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = await CommunFun.getLocalID();
     var detailID = await cartlist.addintoCartDetails(context, cartdetails);
-    print(detailID);
+
     callback();
   }
 

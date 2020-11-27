@@ -140,6 +140,20 @@ class TablesList {
     return list;
   }
 
+  Future<List<SaveOrder>> gettableCartID(saveorderid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "select save_order.cart_id from table_order " +
+        " LEFT join save_order on save_order.id = table_order.save_order_id " +
+        " WHERE table_order.save_order_id = " +
+        saveorderid.toString();
+    var result = await db.rawQuery(qry);
+    List<SaveOrder> list = result.length > 0
+        ? result.map((c) => SaveOrder.fromJson(c)).toList()
+        : [];
+
+    return list;
+  }
+
   Future<int> mergeTableOrder(context, Table_order tableOrder) async {
     var isjoin = await CommunFun.checkIsJoinServer();
     var result;
@@ -163,8 +177,7 @@ class TablesList {
           : [];
       if (list.length > 0) {
         if (list[0].save_order_id != 0) {
-          List<SaveOrder> cartIDs =
-              await localAPI.gettableCartID(list[0].save_order_id);
+          List<SaveOrder> cartIDs = await gettableCartID(list[0].save_order_id);
           if (tableOrder.save_order_id == 0 && list[0].save_order_id != 0) {
             if (cartIDs.length > 0) {
               var qry1 = "UPDATE mst_cart SET table_id = " +
@@ -188,7 +201,7 @@ class TablesList {
           } else {
             if (tableOrder.save_order_id != 0 && cartIDs.length > 0) {
               List<SaveOrder> carts =
-                  await localAPI.gettableCartID(tableOrder.save_order_id);
+                  await gettableCartID(tableOrder.save_order_id);
               if (carts.length > 0) {
                 var detailqry = "UPDATE mst_cart_detail SET cart_id = " +
                     carts[0].cartId.toString() +
@@ -244,6 +257,14 @@ class TablesList {
           " where table_id = " +
           tableID.toString();
       var result = await db.rawQuery(qry);
+      if (cartid == null) {
+        List<SaveOrder> cartID = await gettableCart(tableID);
+        if (cartID.length > 0) {
+          cartid = cartID[0];
+        } else {
+          cartid = 0;
+        }
+      }
       if (cartid != null) {
         var qry1 = "UPDATE mst_cart SET table_id = " +
             totableid.toString() +
@@ -252,5 +273,18 @@ class TablesList {
         var result1 = await db.rawQuery(qry1);
       }
     }
+  }
+
+  Future<List<SaveOrder>> gettableCart(tableid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT save_order.cart_id  from table_order " +
+        " LEFT join save_order on save_order.id = table_order.save_order_id " +
+        " WHERE table_order.table_id  = " +
+        tableid.toString();
+    var result = await db.rawQuery(qry);
+    List<SaveOrder> list = result.length > 0
+        ? result.map((c) => SaveOrder.fromJson(c)).toList()
+        : [];
+    return list;
   }
 }

@@ -8,6 +8,7 @@ import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Citys.dart';
 import 'package:mcncashier/models/Countrys.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Customer_Liquor_Inventory.dart';
 import 'package:mcncashier/models/States.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 
@@ -108,5 +109,34 @@ class CustomersList {
       };
       return addressList;
     }
+  }
+
+  Future<List<Customer_Liquor_Inventory>> getCustomerRedeem(customerid) async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    List<Customer_Liquor_Inventory> list =
+        new List<Customer_Liquor_Inventory>();
+    if (isjoin == true) {
+      var apiurl =
+          await Configrations.ipAddress() + Configrations.customer_redeem;
+      var stringParams = {"customer_id": customerid};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => Customer_Liquor_Inventory.fromJson(c)).toList()
+            : [];
+      }
+    } else {
+      var qry =
+          "SELECT customer_liquor_inventory.*,box.name from customer_liquor_inventory" +
+              " LEFT JOIN box on box.box_id = customer_liquor_inventory.cl_box_id " +
+              " WHERE cl_customer_id = " +
+              customerid.toString();
+      var result = await db.rawQuery(qry);
+      list = result.length > 0
+          ? result.map((c) => Customer_Liquor_Inventory.fromJson(c)).toList()
+          : [];
+    }
+    return list;
   }
 }

@@ -6,12 +6,14 @@ import 'package:mcncashier/helpers/ComunAPIcall.dart';
 import 'package:mcncashier/helpers/config.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
+import 'package:mcncashier/models/Box.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/models/Rac.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
@@ -363,5 +365,115 @@ class ProductsList {
       };
       return productDetais;
     }
+  }
+
+  Future<List<ProductDetails>> productdData(productid) async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    List<ProductDetails> list = new List<ProductDetails>();
+    if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.productData;
+      var stringParams = {
+        "product_id": productid,
+      };
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => ProductDetails.fromJson(c)).toList()
+            : [];
+      }
+    } else {
+      var qry =
+          " SELECT product.*, price_type.name as price_type_Name , base64   from product " +
+              " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
+              " LEFT join asset on asset.asset_type_id = product.product_id " +
+              " where product_id = " +
+              productid.toString();
+      var res = await db.rawQuery(qry);
+      list = res.length > 0
+          ? res.map((c) => ProductDetails.fromJson(c)).toList()
+          : [];
+    }
+    return list;
+  }
+
+  Future<List<SetMeal>> setmealData(mealid) async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    List<SetMeal> list = new List<SetMeal>();
+    if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.setmealData;
+      var stringParams = {
+        "setmeal_id": mealid,
+      };
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => SetMeal.fromJson(c)).toList()
+            : [];
+      }
+    } else {
+      var qry = "select setmeal.* ,  base64  from setmeal " +
+          " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
+          " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id " +
+          " WHERE setmeal.setmeal_id = " +
+          mealid.toString() +
+          " AND setmeal.status = 1 GROUP by setmeal.setmeal_id ";
+      var mealList = await db.rawQuery(qry);
+      list = mealList.isNotEmpty
+          ? mealList.map((c) => SetMeal.fromJson(c)).toList()
+          : [];
+      await SyncAPICalls.logActivity(
+          "Meals List", "get Meals List", "setmeal", mealid);
+    }
+    return list;
+  }
+
+  Future<List<Rac>> getRacList(branchID) async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    List<Rac> list = new List<Rac>();
+    if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.rac_data;
+      var stringParams = {
+        "branch_id": branchID,
+      };
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        List<dynamic> data = result["data"];
+        list = data.length > 0 ? data.map((c) => Rac.fromJson(c)).toList() : [];
+      }
+    } else {
+      var qry = "SELECT * from rac where branch_id = " +
+          branchID.toString() +
+          " AND status = 1";
+      var result = await db.rawQuery(qry);
+      list =
+          result.length > 0 ? result.map((c) => Rac.fromJson(c)).toList() : [];
+    }
+    return list;
+  }
+
+  Future<List<Box>> getBoxList(branchID, racID) async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    List<Box> list = new List<Box>();
+    if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.box_list;
+      var stringParams = {"branch_id": branchID, "rac_id": racID};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        List<dynamic> data = result["data"];
+        list = data.length > 0 ? data.map((c) => Box.fromJson(c)).toList() : [];
+      }
+    } else {
+      var qry = "SELECT * from box where branch_id = " +
+          branchID.toString() +
+          " AND rac_id = " +
+          racID.toString() +
+          "  AND status = 1";
+      var result = await db.rawQuery(qry);
+      list =
+          result.length > 0 ? result.map((c) => Box.fromJson(c)).toList() : [];
+    }
+    return list;
   }
 }

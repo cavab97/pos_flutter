@@ -79,4 +79,27 @@ class CustomerReq {
         ..close();
     }
   }
+
+  static getCustomerRedeem(request) async {
+    CustomersList customer = new CustomersList();
+    try {
+      String content = await utf8.decoder.bind(request).join();
+      var data = await jsonDecode(content);
+      var res = await customer.getCustomerRedeem(data["customer_id"]);
+      await request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode(
+            {"status": 200, "message": "Customer redeem", "data": res}))
+        ..close();
+    } catch (e) {
+      request.response
+        ..statusCode = HttpStatus.internalServerError
+        ..headers.contentType =
+            new ContentType("json", "plain", charset: "utf-8")
+        ..write(jsonEncode({"status": 500, "message": "Something went wrong"}))
+        ..close();
+    }
+  }
 }

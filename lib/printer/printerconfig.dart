@@ -995,7 +995,7 @@ class PrintReceipt {
       /*Print attributes without price*/
       /*Print attributes without price*/
       if (cartList[i].attrName != null) {
-        print("=== String into List ===");
+      
         List<String> attributes = cartList[i].attrName.split(",");
         if (attributes.length > 0) {
           for (var a = 0; a < attributes.length; a++) {
@@ -1533,9 +1533,9 @@ class PrintReceipt {
       if (tempValue <= 2) {
         round = prefix + "." + postFilx.substring(0, 1) + "0";
       } else if (tempValue <= 7) {
-        print(postFilx.substring(0, 1));
+      
         round = prefix + "." + postFilx.substring(0, 1) + "5";
-        print(round);
+        
       } else {
         int values = 0;
         if (int.parse(postFilx.substring(1)) == 9) {

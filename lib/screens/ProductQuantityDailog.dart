@@ -7,6 +7,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
+import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
 import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
 import 'package:mcncashier/helpers/LocalAPI/ProductList.dart';
 import 'package:mcncashier/helpers/LocalAPI/TablesList.dart';
@@ -52,6 +53,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   TextEditingController productController = new TextEditingController();
   TextEditingController extraNotes = new TextEditingController();
   LocalAPI localAPI = LocalAPI();
+  OrdersList orderApi = new OrdersList();
   PrinterList printerAPI = new PrinterList();
   ProductsList prodList = new ProductsList();
   Cartlist cartlistApi = new Cartlist();
@@ -139,7 +141,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     dynamic productData = await prodList.getProductDetails(
         branchid, productid, setmealid, cartdetailid, widget.cartID);
-    print(productData);
+
     setAttrData(productData);
     setModifireData(productData);
     setMealProduct(productData);
@@ -436,7 +438,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     } else {
       if (productItem.hasInventory == 1) {
         List<ProductStoreInventory> cartval =
-            await localAPI.checkItemAvailableinStore(productItem.productId);
+            await orderApi.checkItemAvailableinStore(productItem.productId);
         if (cartval.length > 0) {
           double storeqty = cartval[0].qty;
           if (storeqty > product_qty) {
@@ -801,7 +803,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     if (cartModiData.length > 0) {
       var res = await cartlist.addsubCartData(context, cartModiData);
-      print(res);
     }
     if (isEditing) {
       if (!isSetMeal) {
@@ -1084,7 +1085,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       attrList = attrdata.isNotEmpty
           ? attrdata.map((c) => Attribute_Data.fromJson(c)).toList()
           : [];
-      print(attrList);
     }
 
     return Container(

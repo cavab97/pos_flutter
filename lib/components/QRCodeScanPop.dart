@@ -36,7 +36,7 @@ class QRCodescanPopState extends State<QRCodescanPop> {
       );
       var result = await BarcodeScanner.scan(options: options);
       setState(() => scanResult = result);
-      print(scanResult);
+     
     } on PlatformException catch (e) {
       var result = ScanResult(
         type: ResultType.Error,

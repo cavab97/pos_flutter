@@ -9,6 +9,7 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
 import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
+import 'package:mcncashier/helpers/LocalAPI/ProductList.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Customer.dart';
@@ -62,6 +63,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   BranchList branchAPI = new BranchList();
   OrdersList orderApi = new OrdersList();
   PaymentList paymentAPI = new PaymentList();
+  ProductsList productAPI = ProductsList();
   List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
   double subTotal = 00.00;
   double taxValues = 00.00;
@@ -636,12 +638,10 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       invoiceNo =
           branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
-
     order.uuid = uuid;
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
     order.table_id = tables.table_id;
-    //order.table_no = tables.table_id;
     order.invoice_no = invoiceNo;
     order.customer_id = cartData.user_id;
     order.sub_total = subTotal;
@@ -663,7 +663,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       for (var i = 0; i < tempCart.length; i++) {
         OrderDetail orderDetail = new OrderDetail();
         var cartItem = tempCart[i];
-        var productdata = await localAPI.productdData(cartItem.productId);
+        var productdata = await productAPI.productdData(cartItem.productId);
         ProductDetails pdata;
         if (productdata.length > 0) {
           productdata[0].qty = cartItem.productQty;
@@ -677,7 +677,6 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           orderDetail.app_id = 1;
         }
         orderDetail.uuid = uuid;
-
         orderDetail.branch_id = int.parse(branchid);
         orderDetail.terminal_id = int.parse(terminalId);
         orderDetail.product_id = cartItem.productId;
@@ -699,53 +698,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           orderDetail.setmeal_product_detail = cartItem.setmeal_product_detail;
         }
         detaislist.add(orderDetail);
-        if (cartItem.issetMeal == 0) {
-          List<ProductStoreInventory> updatedInt = [];
-          List<ProductStoreInventoryLog> updatedIntLog = [];
-
-          if (productdata[0].hasInventory == 1) {
-            //update invnotory
-            // List<ProductStoreInventory> inventory =
-            //     await localAPI.removeFromInventory(orderDetail);
-            List<ProductStoreInventory> inventory =
-                await localAPI.getStoreInventoryData(orderDetail.product_id);
-
-            if (inventory.length > 0) {
-              ProductStoreInventory invData = new ProductStoreInventory();
-              invData = inventory[0];
-              var prev = inventory[0];
-              var qty = (invData.qty - orderDetail.detail_qty);
-              invData.qty = qty;
-              invData.updatedAt =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              invData.updatedBy = userdata.id;
-              updatedInt.add(invData);
-              var ulog = await localAPI.updateInvetory(updatedInt);
-              print(ulog);
-
-              //Inventory log update
-              ProductStoreInventoryLog log = new ProductStoreInventoryLog();
-              log.uuid = uuid;
-              log.inventory_id = prev.inventoryId;
-              log.branch_id = int.parse(branchid);
-              log.product_id = cartItem.productId;
-              log.employe_id = userdata.id;
-              log.qty = prev.qty;
-              log.qty_before_change = prev.qty;
-              log.qty_after_change = qty;
-              log.updated_at =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              log.updated_by = userdata.id;
-              updatedIntLog.add(log);
-              var inventoryLog =
-                  await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
-              print(inventoryLog);
-            }
-          }
-        }
       }
     }
-
     List<MSTSubCartdetails> modifireList = await getmodifireList();
     if (modifireList.length > 0) {
       for (var i = 0; i < modifireList.length; i++) {
@@ -800,7 +754,6 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         }
       }
     }
-
     OrderPayment orderpayment = payment;
     if (lastappid.order_payment_id != null) {
       orderpayment.app_id = lastappid.order_payment_id + 1;
@@ -899,21 +852,20 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   Future<List<MSTCartdetails>> getcartDetails() async {
     List<MSTCartdetails> list =
         await CommunFun.getcartDetails(widget.currentCartID);
-    print(list);
+
     return list;
   }
 
   Future<List<MSTSubCartdetails>> getmodifireList() async {
     List<MSTSubCartdetails> list =
         await cartapi.getItemModifire(widget.currentCartID);
-    print(list);
+
     return list;
   }
 
   printReceipt(int orderid) async {
     var terminalid = await CommunFun.getTeminalKey();
     dynamic data = await orderApi.getOrdersDetailsData(orderid, terminalid);
-    print(data);
 
     // List<OrderPayment> orderpaymentdata =
     //     await orderApi.getOrderpaymentData(orderid, terminalid);
