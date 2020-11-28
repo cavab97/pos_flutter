@@ -14,8 +14,7 @@ class BranchReq {
         ..statusCode = HttpStatus.ok
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
-        ..write(jsonEncode(
-            {"status": 200, "message": "successfuly added cart", "data": res}))
+        ..write(jsonEncode({"status": 200, "message": "success", "data": res}))
         ..close();
     } catch (e) {
       request.response
@@ -84,7 +83,7 @@ class BranchReq {
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
         ..write(jsonEncode(
-            {"status": 200, "message": "terminal Data", "data": res}))
+            {"status": 200, "message": "Customer App id", "data": res}))
         ..close();
     } catch (e) {
       request.response
@@ -107,7 +106,7 @@ class BranchReq {
         ..headers.contentType =
             new ContentType("json", "plain", charset: "utf-8")
         ..write(jsonEncode(
-            {"status": 200, "message": "terminal Data", "data": res}))
+            {"status": 200, "message": "permissions list", "data": res}))
         ..close();
     } catch (e) {
       request.response

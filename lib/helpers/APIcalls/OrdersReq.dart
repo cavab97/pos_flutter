@@ -1,9 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:http/http.dart';
 import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
-import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';

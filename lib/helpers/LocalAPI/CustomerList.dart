@@ -40,7 +40,6 @@ class CustomersList {
   }
 
   Future<int> addCustomer(context, Customer customer) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
     var isjoin = await CommunFun.checkIsJoinServer();
     var result;
     if (isjoin == true) {
@@ -59,7 +58,6 @@ class CustomersList {
   }
 
   Future<List<Countrys>> getCountrysList() async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
     var contryList = await db.query("country");
     List<Countrys> list = contryList.isNotEmpty
         ? contryList.map((c) => Countrys.fromJson(c)).toList()
@@ -77,7 +75,6 @@ class CustomersList {
   }
 
   Future<List<Citys>> getCitysList() async {
-    var db = DatabaseHelper.dbHelper.getDatabse();
     var cityList = await db.query("city");
     List<Citys> list = cityList.isNotEmpty
         ? cityList.map((c) => Citys.fromJson(c)).toList()

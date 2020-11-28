@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:mcncashier/helpers/LocalAPI/ProductList.dart';
-import 'package:mcncashier/models/PorductDetails.dart';
 
 class ProductsReq {
   static getProductCall(request) async {

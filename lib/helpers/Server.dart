@@ -12,7 +12,6 @@ import 'package:mcncashier/helpers/APIcalls/PrinterReq.dart';
 import 'package:mcncashier/helpers/APIcalls/ProductsReq.dart';
 import 'package:mcncashier/helpers/APIcalls/ShiftReq.dart';
 import 'package:mcncashier/helpers/APIcalls/TablesReq.dart';
-
 import 'APIcalls/CartReq.dart';
 import 'APIcalls/OrdersReq.dart';
 import 'APIcalls/TablesReq.dart';

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:mcncashier/helpers/LocalAPI/CategoriesList.dart';
 import 'package:mcncashier/helpers/LocalAPI/CheckinOutList.dart';
 import 'package:mcncashier/models/CheckInout.dart';
 
