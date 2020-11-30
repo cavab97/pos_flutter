@@ -2,7 +2,7 @@ class ColorTable {
   int id;
   String uuid;
   double timeMinute;
-  double colorCode;
+  String colorCode;
   int status;
   String updatedAt;
   int updatedBy;
@@ -19,8 +19,8 @@ class ColorTable {
   ColorTable.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     uuid = json['uuid'];
-    timeMinute =  double.parse(json['time_minute']) is String
-        ? double.parse(json['time_minute'] as String)
+    timeMinute = json['time_minute'] is String
+        ? double.parse(json['time_minute'])
         : json['time_minute'];
     colorCode = json['color_code'];
     status = json['status'];

@@ -773,7 +773,7 @@ class PrintReceipt {
       String customerName,
       isper) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter("192.168.0.109", port: 9100);
+    printerManager.selectPrinter(printerIp, port: 9100);
     PosPrintResult res;
     res = await printerManager.printTicket(await Receipt(
         branchData,

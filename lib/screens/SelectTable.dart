@@ -933,6 +933,15 @@ class _SelectTablePageState extends State<SelectTablePage>
         ));
   }
 
+  Color colorConvert(String color) {
+    color = color.replaceAll("#", "");
+    if (color.length == 6) {
+      return Color(int.parse("0xFF" + color));
+    } else if (color.length == 8) {
+      return Color(int.parse("0x" + color));
+    }
+  }
+
   Widget tablesListwidget(type) {
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2.4;
@@ -975,9 +984,13 @@ class _SelectTablePageState extends State<SelectTablePage>
       children: newtableList.map((table) {
         var selected;
         if (tableColors.length > 0 && table.occupiedMinute != null) {
-          selected = tableColors
-              .firstWhere((item) => item.timeMinute >= table.occupiedMinute);
-          print(selected);
+          selected = tableColors.firstWhere(
+              (item) => item.timeMinute >= table.occupiedMinute, orElse: () {
+            if (table.occupiedMinute >=
+                tableColors[tableColors.length - 1].timeMinute) {
+              return tableColors[tableColors.length - 1];
+            }
+          });
         }
         return InkWell(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -1009,7 +1022,9 @@ class _SelectTablePageState extends State<SelectTablePage>
                   tag: table.tableId,
                   child: Container(
                     decoration: new BoxDecoration(
-                        color: selected != null ? Colors.red : Colors.white,
+                        color: selected != null
+                            ? colorConvert(selected.colorCode)
+                            : Colors.white,
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(8.0),
                             topRight: Radius.circular(8.0))),

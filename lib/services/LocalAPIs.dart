@@ -218,7 +218,8 @@ class LocalAPI {
 
   Future<List<ColorTable>> getTablesColor() async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var query = "SELECT * FROM table_color where status = 1";
+    var query =
+        "SELECT * FROM table_color where status = 1 ORDER by time_minute ASC ";
     var res = await db.rawQuery(query);
     List<ColorTable> list =
         res.isNotEmpty ? res.map((c) => ColorTable.fromJson(c)).toList() : [];
