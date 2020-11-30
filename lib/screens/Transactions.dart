@@ -783,7 +783,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           } else {
             CommonUtils.openPermissionPop(context, Constant.EDIT_ORDER, () {
               refundProcessStart();
-            });
+            }, () {});
           }
         }),
         SizedBox(width: 10),
@@ -817,7 +817,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     "No",
                     true);
               }
-            });
+            }, () {});
           }
         }),
       ],

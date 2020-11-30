@@ -12,6 +12,7 @@ import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Customer_Liquor_Inventory.dart';
 import 'package:mcncashier/models/Customer_Liquor_Inventory_Log.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
+import 'package:mcncashier/models/colorTable.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
 import 'package:mcncashier/models/Payment.dart';
@@ -194,21 +195,35 @@ class LocalAPI {
   }
 
   Future<List<TablesDetails>> getTables(branchid) async {
-    var query =
-        "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax ,table_order.is_merge_table as is_merge_table, table_order.merged_table_id as merged_table_id, " +
-            " (select tables.table_name from tables where table_order.merged_table_id = tables.table_id) as merge_table_name from tables " +
-            " LEFT JOIN table_order on table_order.table_id = tables.table_id " +
-            " WHERE tables.status = 1 AND branch_id = " +
-            branchid +
-            " GROUP by tables.table_id";
-
-    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    String ctime = await CommunFun.getCurrentDateTime(DateTime.now());
+    var query = "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax ,table_order.is_merge_table " +
+        " as is_merge_table,(JulianDay('" +
+        ctime +
+        "') - JulianDay(table_order.assing_time) " +
+        " ) * 24 * 60 as assignTime, table_order.merged_table_id as merged_table_id, " +
+        " (select tables.table_name from tables where table_order.merged_table_id = tables.table_id) as merge_table_name from tables " +
+        " LEFT JOIN table_order on table_order.table_id = tables.table_id " +
+        " WHERE tables.status = 1 AND branch_id = " +
+        branchid +
+        " GROUP by tables.table_id";
+    var res = await db.rawQuery(query);
     List<TablesDetails> list = res.isNotEmpty
         ? res.map((c) => TablesDetails.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
         "Tables", "Getting Tables list", "tables", branchid);
+    return list;
+  }
 
+  Future<List<ColorTable>> getTablesColor() async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var query = "SELECT * FROM table_color where status = 1";
+    var res = await db.rawQuery(query);
+    List<ColorTable> list =
+        res.isNotEmpty ? res.map((c) => ColorTable.fromJson(c)).toList() : [];
+    await SyncAPICalls.logActivity(
+        "Tables colors", "Getting Tables colors list", "tablescolor", 1);
     return list;
   }
 

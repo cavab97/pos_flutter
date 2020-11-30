@@ -18,27 +18,30 @@ class TablesDetails {
   String deletedAt;
   int deletedBy;
   double tableServiceCharge;
+  double occupiedMinute;
 
-  TablesDetails(
-      {this.tableId,
-      this.uuid,
-      this.branchId,
-      this.tableName,
-      this.tableType,
-      this.tableQr,
-      this.tableCapacity,
-      this.status,
-      this.is_merge_table,
-      this.merged_table_id,
-      this.updatedAt,
-      this.availableStatus,
-      this.updatedBy,
-      this.deletedAt,
-      this.deletedBy,
-      this.saveorderid,
-      this.tableServiceCharge,
-      this.numberofpax,
-      this.merge_table_name});
+  TablesDetails({
+    this.tableId,
+    this.uuid,
+    this.branchId,
+    this.tableName,
+    this.tableType,
+    this.tableQr,
+    this.tableCapacity,
+    this.status,
+    this.is_merge_table,
+    this.merged_table_id,
+    this.updatedAt,
+    this.availableStatus,
+    this.updatedBy,
+    this.deletedAt,
+    this.deletedBy,
+    this.saveorderid,
+    this.tableServiceCharge,
+    this.numberofpax,
+    this.merge_table_name,
+    this.occupiedMinute,
+  });
 
   TablesDetails.fromJson(Map<String, dynamic> json) {
     tableId = json['table_id'];
@@ -60,6 +63,9 @@ class TablesDetails {
     deletedAt = json['deleted_at'];
     deletedBy = json['deleted_by'];
     tableServiceCharge = json["table_service_charge"];
+    occupiedMinute = json["assignTime"] is int
+        ? (json['assignTime'] as int).toDouble()
+        : json['assignTime'];
   }
 
   Map<String, dynamic> toJson() {
@@ -83,6 +89,7 @@ class TablesDetails {
     // data['number_of_pax'] = this.numberofpax;
     data['save_order_id'] = this.saveorderid;
     data["table_service_charge"] = this.tableServiceCharge;
+    data["assignTime"] = this.occupiedMinute;
     return data;
   }
 }

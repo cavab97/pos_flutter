@@ -46,6 +46,9 @@ class Constant {
   static final String ADD_REPORT = "add_report";
   static final String EDIT_REPORT = "edit_report";
   static final String DELETE_REPORT = "delete_report";
+  static final String OPEN_DRAWER = "view_open_drawer";
+  static final String PRINT_RECIEPT = "view_printing";
+  static final String VIEW_SYNC = "view_sync";
   /*==============================================================================
                               Manage API status
   =================================================================================*/

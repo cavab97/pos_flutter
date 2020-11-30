@@ -73,7 +73,7 @@ class CommonUtils {
     );
   }
 
-  static openPermissionPop(context, permissionFor, callback) {
+  static openPermissionPop(context, permissionFor, callback, closeCallback) {
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -82,6 +82,9 @@ class CommonUtils {
               perFor: permissionFor,
               onEnter: () {
                 callback();
+              },
+              onClose: () {
+                closeCallback();
               });
         });
   }

@@ -14,6 +14,7 @@ import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/Terminal.dart';
+import 'package:mcncashier/models/colorTable.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
@@ -40,6 +41,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   PrintReceipt printKOT = PrintReceipt();
   List<Printer> printerList = new List<Printer>();
   List<Printer> printerreceiptList = new List<Printer>();
+  List<ColorTable> tableColors = new List<ColorTable>();
   var selectedTable;
   var number_of_pax;
   var orderid;
@@ -69,6 +71,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     checkshift();
     getAllPrinter();
     setPermissons();
+    getTablesColor();
   }
 
   setPermissons() async {
@@ -102,6 +105,14 @@ class _SelectTablePageState extends State<SelectTablePage>
     List<TablesDetails> tables = await localAPI.getTables(branchid);
     setState(() {
       tableList = tables;
+      isLoading = false;
+    });
+  }
+
+  getTablesColor() async {
+    List<ColorTable> tables = await localAPI.getTablesColor();
+    setState(() {
+      tableColors = tables;
       isLoading = false;
     });
   }
@@ -142,6 +153,7 @@ class _SelectTablePageState extends State<SelectTablePage>
         table1.saveorderid != 0 ? table1.saveorderid : 0;
     table_order.is_merge_table = "1";
     table_order.merged_table_id = table2.tableId;
+    table_order.assignTime = await CommunFun.getCurrentDateTime(DateTime.now());
     var result = await localAPI.mergeTableOrder(table_order);
     setState(() {
       isMergeing = false;
@@ -168,7 +180,8 @@ class _SelectTablePageState extends State<SelectTablePage>
       table_order.save_order_id = selectedTable.saveorderid;
       table_order.service_charge =
           CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
-
+      table_order.assignTime =
+          await CommunFun.getCurrentDateTime(DateTime.now());
       var result = await localAPI.insertTableOrder(table_order);
       await Preferences.setStringToSF(
           Constant.TABLE_DATA, json.encode(table_order));
@@ -200,6 +213,8 @@ class _SelectTablePageState extends State<SelectTablePage>
       tableorder.table_id = selectedTable.tableId;
       tableorder.number_of_pax = int.parse(paxController.text);
       tableorder.service_charge = selectedTable.tableServiceCharge;
+      tableorder.assignTime =
+          await CommunFun.getCurrentDateTime(DateTime.now());
       await localAPI.insertTableOrder(tableorder);
       await localAPI.insertSaveOrders(orderData, selectedTable.tableId);
       await localAPI.updateTableidintocart(orderid, selectedTable.tableId);
@@ -685,7 +700,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                   CommonUtils.openPermissionPop(context, Constant.DELETE_ORDER,
                       () {
                     cancleTableOrder();
-                  });
+                  }, () {});
                 }
               })
             : SizedBox(),
@@ -958,6 +973,12 @@ class _SelectTablePageState extends State<SelectTablePage>
       childAspectRatio: (itemWidth / itemHeight),
       crossAxisCount: isMenuOpne ? 4 : 6,
       children: newtableList.map((table) {
+        var selected;
+        if (tableColors.length > 0 && table.occupiedMinute != null) {
+          selected = tableColors
+              .firstWhere((item) => item.timeMinute >= table.occupiedMinute);
+          print(selected);
+        }
         return InkWell(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
           onTap: () {
@@ -965,8 +986,7 @@ class _SelectTablePageState extends State<SelectTablePage>
               if (table.merged_table_id == null) {
                 mergeTabledata(table);
               } else {
-                CommunFun.showToast(
-                    context,Strings.table_already_merged);
+                CommunFun.showToast(context, Strings.table_already_merged);
               }
             } else if (isChangingTable) {
               if (table.saveorderid == 0) {
@@ -989,7 +1009,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                   tag: table.tableId,
                   child: Container(
                     decoration: new BoxDecoration(
-                        color: Colors.white,
+                        color: selected != null ? Colors.red : Colors.white,
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(8.0),
                             topRight: Radius.circular(8.0))),

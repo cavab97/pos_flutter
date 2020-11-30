@@ -324,10 +324,55 @@ class _DashboradPageState extends State<DashboradPage>
                 printerreceiptList[0].printerIp.toString(),
                 context,
                 "",
-                "OpenDrawer");
+                Strings.openDrawer);
             openOpningAmmountPop(Strings.title_closing_amount);
           });
         });
+  }
+
+  draftreciptPrint() async {
+    if (cartList.length > 0) {
+      if (printerreceiptList.length > 0) {
+        if (permissions.contains(Constant.PRINT_RECIEPT)) {
+          printKOT.checkDraftPrint(
+              taxJson,
+              printerreceiptList[0].printerIp.toString(),
+              context,
+              cartList,
+              tableName,
+              subtotal,
+              serviceChargePer,
+              serviceCharge,
+              grandTotal,
+              tax,
+              branchData,
+              currency,
+              customer != null ? customer.name : Strings.walkin_customer);
+        } else {
+          await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+              () {
+            printKOT.checkDraftPrint(
+                taxJson,
+                printerreceiptList[0].printerIp.toString(),
+                context,
+                cartList,
+                tableName,
+                subtotal,
+                serviceChargePer,
+                serviceCharge,
+                grandTotal,
+                tax,
+                branchData,
+                currency,
+                customer != null ? customer.name : Strings.walkin_customer);
+          }, () {});
+        }
+      } else {
+        CommunFun.showToast(context, Strings.printer_not_available);
+      }
+    } else {
+      CommunFun.showToast(context, Strings.cart_empty);
+    }
   }
 
   deleteCurrentCart() async {
@@ -378,28 +423,7 @@ class _DashboradPageState extends State<DashboradPage>
         printCheckList();
         break;
       case 5:
-        if (cartList.length > 0) {
-          if (printerreceiptList.length > 0) {
-            printKOT.checkDraftPrint(
-                taxJson,
-                printerreceiptList[0].printerIp.toString(),
-                context,
-                cartList,
-                tableName,
-                subtotal,
-                serviceChargePer,
-                serviceCharge,
-                grandTotal,
-                tax,
-                branchData,
-                currency,
-                customer != null ? customer.name : Strings.walkin_customer);
-          } else {
-            CommunFun.showToast(context, Strings.printer_not_available);
-          }
-        } else {
-          CommunFun.showToast(context, Strings.cart_empty);
-        }
+        draftreciptPrint();
         break;
       case 6:
         deleteCurrentCart();
@@ -420,7 +444,14 @@ class _DashboradPageState extends State<DashboradPage>
               onClose: (resendList) {
                 if (resendList.length > 0 && printerreceiptList.length > 0) {
                   Navigator.of(context).pop();
-                  openPrinterPop(resendList, true);
+                  if (permissions.contains(Constant.PRINT_RECIEPT)) {
+                    openPrinterPop(resendList, true);
+                  } else {
+                    CommonUtils.openPermissionPop(
+                        context, Constant.PRINT_RECIEPT, () {
+                      openPrinterPop(resendList, true);
+                    }, () {});
+                  }
                 } else {
                   CommunFun.showToast(context, Strings.printer_not_available);
                 }
@@ -431,13 +462,26 @@ class _DashboradPageState extends State<DashboradPage>
   printCheckList() async {
     if (cartList.length > 0) {
       if (printerreceiptList.length > 0) {
-        printKOT.checkListReceiptPrint(
-            printerreceiptList[0].printerIp.toString(),
-            context,
-            cartList,
-            tableName,
-            branchData,
-            customer != null ? customer.name : Strings.walkin_customer);
+        if (permissions.contains(Constant.PRINT_RECIEPT)) {
+          printKOT.checkListReceiptPrint(
+              printerreceiptList[0].printerIp.toString(),
+              context,
+              cartList,
+              tableName,
+              branchData,
+              customer != null ? customer.name : Strings.walkin_customer);
+        } else {
+          await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+              () {
+            printKOT.checkListReceiptPrint(
+                printerreceiptList[0].printerIp.toString(),
+                context,
+                cartList,
+                tableName,
+                branchData,
+                customer != null ? customer.name : Strings.walkin_customer);
+          }, () {});
+        }
       } else {
         CommunFun.showToast(context, Strings.printer_not_available);
       }
@@ -690,8 +734,8 @@ class _DashboradPageState extends State<DashboradPage>
       }
       if (i == itemList.length - 1) {
         if (list.length > 0) {
-          dynamic send = await localAPI.sendToKitched(ids);
           openPrinterPop(list, false);
+          await localAPI.sendToKitched(ids);
           getCartItem(currentCart);
         }
         return false;
@@ -1165,7 +1209,6 @@ class _DashboradPageState extends State<DashboradPage>
       shiftinvoice.shift_terminal_id = int.parse(terminalId);
       var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
       await printReceipt(orderid);
-      await clearCartAfterSuccess(orderid);
     }
   }
 
@@ -1238,20 +1281,127 @@ class _DashboradPageState extends State<DashboradPage>
         await localAPI.getOrderAttributes(orderid);
     List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
 
-    printKOT.checkReceiptPrint(
-        printerreceiptList[0].printerIp,
-        context,
-        branchData,
-        taxJson,
-        orderitem,
-        attributes,
-        modifires,
-        order,
-        orderpaymentdata,
-        paymentMethod,
-        tableName,
-        currency,
-        customer != null ? customer.name : Strings.walkin_customer);
+    if (permissions.contains(Constant.PRINT_RECIEPT)) {
+      if (permissions.contains(Constant.OPEN_DRAWER)) {
+        printKOT.checkReceiptPrint(
+            printerreceiptList[0].printerIp,
+            context,
+            branchData,
+            taxJson,
+            orderitem,
+            attributes,
+            modifires,
+            order,
+            orderpaymentdata,
+            paymentMethod,
+            tableName,
+            currency,
+            customer != null ? customer.name : Strings.walkin_customer,
+            true);
+        await clearCartAfterSuccess(orderid);
+      } else {
+        await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
+            () async {
+          await printKOT.checkReceiptPrint(
+              printerreceiptList[0].printerIp,
+              context,
+              branchData,
+              taxJson,
+              orderitem,
+              attributes,
+              modifires,
+              order,
+              orderpaymentdata,
+              paymentMethod,
+              tableName,
+              currency,
+              customer != null ? customer.name : Strings.walkin_customer,
+              true);
+          await clearCartAfterSuccess(orderid);
+        }, () async {
+          await printKOT.checkReceiptPrint(
+              printerreceiptList[0].printerIp,
+              context,
+              branchData,
+              taxJson,
+              orderitem,
+              attributes,
+              modifires,
+              order,
+              orderpaymentdata,
+              paymentMethod,
+              tableName,
+              currency,
+              customer != null ? customer.name : Strings.walkin_customer,
+              false);
+          await clearCartAfterSuccess(orderid);
+        });
+      }
+    } else {
+      await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+          () async {
+        if (permissions.contains(Constant.OPEN_DRAWER)) {
+          await printKOT.checkReceiptPrint(
+              printerreceiptList[0].printerIp,
+              context,
+              branchData,
+              taxJson,
+              orderitem,
+              attributes,
+              modifires,
+              order,
+              orderpaymentdata,
+              paymentMethod,
+              tableName,
+              currency,
+              customer != null ? customer.name : Strings.walkin_customer,
+              true);
+          await clearCartAfterSuccess(orderid);
+        } else {
+          await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
+              () async {
+            await printKOT.checkReceiptPrint(
+                printerreceiptList[0].printerIp,
+                context,
+                branchData,
+                taxJson,
+                orderitem,
+                attributes,
+                modifires,
+                order,
+                orderpaymentdata,
+                paymentMethod,
+                tableName,
+                currency,
+                customer != null ? customer.name : Strings.walkin_customer,
+                true);
+            await clearCartAfterSuccess(orderid);
+          }, () async {
+            await printKOT.checkReceiptPrint(
+                printerreceiptList[0].printerIp,
+                context,
+                branchData,
+                taxJson,
+                orderitem,
+                attributes,
+                modifires,
+                order,
+                orderpaymentdata,
+                paymentMethod,
+                tableName,
+                currency,
+                customer != null ? customer.name : Strings.walkin_customer,
+                false);
+            await clearCartAfterSuccess(orderid);
+          });
+        }
+      }, () async {
+        await clearCartAfterSuccess(orderid);
+      });
+    }
+    // if (isredirect) {
+    //   await clearCartAfterSuccess(orderid);
+    // }
   }
 
   clearCartAfterSuccess(orderid) async {
@@ -1340,7 +1490,14 @@ class _DashboradPageState extends State<DashboradPage>
       if (cartitem.isSendKichen == 1) {
         var deletedlist = [];
         deletedlist.add(cartitem);
-        //openPrinterPop(deletedlist);
+        if (permissions.contains(Constant.PRINT_RECIEPT)) {
+          openPrinterPop(deletedlist, false);
+        } else {
+          await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+              () {
+            openPrinterPop(deletedlist, false);
+          }, () {});
+        }
       }
       if (cartList.length > 1) {
         await getCartItem(currentCart);
@@ -2301,7 +2458,7 @@ class _DashboradPageState extends State<DashboradPage>
                   CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
                       () {
                     checkshiftopne(product);
-                  });
+                  }, () {});
                 }
               } else {
                 CommunFun.showToast(context, Strings.out_of_stoke_msg);
@@ -2420,13 +2577,13 @@ class _DashboradPageState extends State<DashboradPage>
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () {
-                      if (permissions.contains(Constant.ADD_ORDER)) {
+                      if (permissions.contains(Constant.PRINT_RECIEPT)) {
                         sendTokitched(cartList);
                       } else {
                         CommonUtils.openPermissionPop(
-                            context, Constant.ADD_ORDER, () {
+                            context, Constant.PRINT_RECIEPT, () {
                           sendTokitched(cartList);
-                        });
+                        }, () {});
                       }
                     },
                     child: Text(
@@ -2460,7 +2617,7 @@ class _DashboradPageState extends State<DashboradPage>
                     CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
                         () {
                       sendPayment();
-                    });
+                    }, () {});
                   }
                 } else {
                   //weborder payment
@@ -2471,7 +2628,7 @@ class _DashboradPageState extends State<DashboradPage>
                     CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
                         () {
                       checkoutWebOrder();
-                    });
+                    }, () {});
                   }
                   checkoutWebOrder();
                 }
@@ -2684,7 +2841,7 @@ class _DashboradPageState extends State<DashboradPage>
                         CommonUtils.openPermissionPop(
                             context, Constant.EDIT_ITEM, () {
                           applyforFocProduct(cart);
-                        });
+                        }, () {});
                       }
                     },
                   )
@@ -2700,7 +2857,7 @@ class _DashboradPageState extends State<DashboradPage>
                     CommonUtils.openPermissionPop(context, Constant.EDIT_ORDER,
                         () {
                       editCartItem(cart);
-                    });
+                    }, () {});
                   }
                 } else {
                   if (cart.isFocProduct == 1) {
@@ -2720,7 +2877,7 @@ class _DashboradPageState extends State<DashboradPage>
                     CommonUtils.openPermissionPop(
                         context, Constant.DELETE_ORDER, () {
                       itememovefromCart(cart);
-                    });
+                    }, () {});
                   }
                 }
               },
@@ -2926,7 +3083,7 @@ class _DashboradPageState extends State<DashboradPage>
                           CommonUtils.openPermissionPop(
                               context, Constant.EDIT_ORDER, () {
                             openVoucherPop();
-                          });
+                          }, () {});
                         }
                       },
                       child: Text(

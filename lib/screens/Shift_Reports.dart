@@ -699,7 +699,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                             printerreceiptList[0].printerIp.toString(),
                             context,
                             "",
-                            "OpenDrawer");
+                           Strings.openDrawer);
                       } else {
                         CommunFun.showToast(
                             context, Strings.printer_not_available);

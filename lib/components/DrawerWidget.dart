@@ -15,6 +15,7 @@ import 'package:mcncashier/screens/CloseShiftPage.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/screens/WineStorage.dart';
+import 'package:mcncashier/components/commanutils.dart';
 
 class DrawerWid extends StatefulWidget {
   DrawerWid({Key key}) : super(key: key);
@@ -184,17 +185,36 @@ class DrawerWidState extends State<DrawerWid> {
   }
 
   syncOrdersTodatabase() async {
-    await CommunFun.opneSyncPop(context);
-    await CommunFun.syncOrdersANDStore(context, true);
+    if (permissions.contains(Constant.VIEW_SYNC)) {
+      await CommunFun.opneSyncPop(context);
+      await CommunFun.syncOrdersANDStore(context, true);
+    } else {
+      await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
+          () async {
+        await CommunFun.opneSyncPop(context);
+        await CommunFun.syncOrdersANDStore(context, true);
+      }, () {});
+    }
   }
 
   syncAllTables() async {
     //Navigator.of(context).pop();
-    await Preferences.removeSinglePref(Constant.LastSync_Table);
-    await Preferences.removeSinglePref(Constant.OFFSET);
-    await CommunFun.opneSyncPop(context);
-    await CommunFun.syncOrdersANDStore(context, false);
-    await CommunFun.syncAfterSuccess(context, false);
+    if (permissions.contains(Constant.VIEW_SYNC)) {
+      await Preferences.removeSinglePref(Constant.LastSync_Table);
+      await Preferences.removeSinglePref(Constant.OFFSET);
+      await CommunFun.opneSyncPop(context);
+      await CommunFun.syncOrdersANDStore(context, false);
+      await CommunFun.syncAfterSuccess(context, false);
+    } else {
+      await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
+          () async {
+        await Preferences.removeSinglePref(Constant.LastSync_Table);
+        await Preferences.removeSinglePref(Constant.OFFSET);
+        await CommunFun.opneSyncPop(context);
+        await CommunFun.syncOrdersANDStore(context, false);
+        await CommunFun.syncAfterSuccess(context, false);
+      }, () {});
+    }
   }
 
   @override

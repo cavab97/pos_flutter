@@ -668,7 +668,8 @@ class CreateTables {
         "save_order_id  INTEGER," +
         "merged_pax TEXT," +
         "table_locked_by  INTEGER," +
-        "is_order_merged  REAl" +
+        "is_order_merged  REAl," +
+        "assing_time TEXT" +
         ")");
 
     datatables = db.execute("CREATE TABLE mst_cart(" +
@@ -973,6 +974,15 @@ class CreateTables {
         "deleted_at INTEGER" +
         ")");
 
+    datatables = db.execute("CREATE TABLE table_color ( " +
+        "id INTEGER PRIMARY KEY," +
+        "uuid TEXT," +
+        "time_minute REAL," +
+        "color_code TEXT," +
+        "status NUMERIC," +
+        "updated_at TEXT," +
+        "updated_by INTEGER" +
+        ")");
     return datatables;
   }
 }
