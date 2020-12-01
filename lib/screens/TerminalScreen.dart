@@ -6,6 +6,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/TerminalKey.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/services/teminalkey.dart' as repo;
 
 class TerminalKeyPage extends StatefulWidget {

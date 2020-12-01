@@ -19,6 +19,7 @@ import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -1277,7 +1278,9 @@ class CommunFun {
     }
   }
 
-  static getShiftReportData() async {
+  static getShiftReportData(printerIP, context) async {
+    PrintReceipt printKOT = PrintReceipt();
+
     Shift shifittem = new Shift();
     var branchid = await CommunFun.getbranchId();
     var terminalID = await CommunFun.getbranchId();
@@ -1287,7 +1290,7 @@ class CommunFun {
     var discountval = 0.00;
     var refundval = 0.00;
     var taxval = 0.00;
-    var totaltend = 0.00;
+    var totalRend = 0.00;
     var textService = 0.00;
     double cashSale = 0.00;
     double statringAmount = 0.00;
@@ -1307,7 +1310,7 @@ class CommunFun {
         taxval += order.tax_amount;
         textService += order.serviceCharge;
         discountval += order.voucher_amount != null ? order.voucher_amount : 0;
-        totaltend += (netsale + taxval + textService) - discountval;
+        totalRend += (netsale + taxval + textService) - discountval;
       }
     }
 
@@ -1343,6 +1346,29 @@ class CommunFun {
     dynamic payments = await localAPI.getTotalPayment(terminalID, branchid);
     List<Payments> paymentMethods = payments["payment_method"];
     List<OrderPayment> orderPayments = payments["payments"];
-    
+
+    var branchID = await getbranchId();
+    Branch branchData = await localAPI.getBranchData(branchID);
+
+    printKOT.shiftReportPrint(
+        "192.168.0.109",
+        context,
+        // Branch data
+        branchData,
+        //Summery Sales data
+        grosssale,
+        refundval,
+        discountval,
+        netsale,
+        taxval,
+        totalRend,
+        // Drawer Data
+        statringAmount,
+        cashSale,
+        cashDeposit,
+        cashRefund,
+        cashRounding,
+        payInOutAmount,
+        expectedVal);
   }
 }
