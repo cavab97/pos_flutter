@@ -6,6 +6,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/TerminalKey.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/services/teminalkey.dart' as repo;
 
 class TerminalKeyPage extends StatefulWidget {
@@ -118,6 +119,9 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
                         child: CommunFun.roundedButton(
                             Strings.set_terminal_key.toUpperCase(), context,
                             () {
+                              PrintReceipt printKOT = PrintReceipt();
+
+                              printKOT.shiftReportPrint("192.168.0.109", context);
                           setTerminalkey();
                         }),
                       )
