@@ -8,6 +8,8 @@ import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/Printer.dart';
@@ -1278,6 +1280,7 @@ class CommunFun {
   static getShiftReportData() async {
     Shift shifittem = new Shift();
     var branchid = await CommunFun.getbranchId();
+    var terminalID = await CommunFun.getbranchId();
     List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
     var grosssale = 0.00;
     var netsale = 0.00;
@@ -1335,8 +1338,11 @@ class CommunFun {
       payInOutAmount = drawerAmm;
       expectedVal = drawerAmm;
     }
-  }
 
-  /// Payment summery
-   
+    /// Payment summery
+    dynamic payments = await localAPI.getTotalPayment(terminalID, branchid);
+    List<Payments> paymentMethods = payments["payment_method"];
+    List<OrderPayment> orderPayments = payments["payments"];
+    
+  }
 }

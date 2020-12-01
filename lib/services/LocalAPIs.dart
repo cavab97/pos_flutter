@@ -2152,4 +2152,32 @@ class LocalAPI {
         result.length > 0 ? result.map((c) => Box.fromJson(c)).toList() : [];
     return list;
   }
+
+  Future<dynamic> getTotalPayment(terminalid, branchid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from order_payment WHERE terminal_id = " +
+        terminalid +
+        " AND branch_id =" +
+        branchid +
+        " GROUP by op_method_id";
+    var result = await db.rawQuery(qry);
+    List<OrderPayment> list = result.length > 0
+        ? result.map((c) => OrderPayment.fromJson(c)).toList()
+        : [];
+    List<Payments> paymentMethods = [];
+    if (list.length > 0) {
+      for (var i = 0; i < list.length; i++) {
+        OrderPayment opayment = list[i];
+        var qry = "SELECT * FROM payment WHERE payment_id = " +
+            opayment.op_method_id.toString();
+        var result = await db.rawQuery(qry);
+        List<Payments> plist = result.length > 0
+            ? result.map((c) => Payments.fromJson(c)).toList()
+            : [];
+        paymentMethods.add(plist[0]);
+      }
+    }
+    var data = {"payment_method": paymentMethods, "payments": list};
+    return data;
+  }
 }
