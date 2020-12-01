@@ -19,8 +19,8 @@ class ColorTable {
   ColorTable.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     uuid = json['uuid'];
-    timeMinute = json['time_minute'] is String
-        ? double.parse(json['time_minute'])
+    timeMinute = json['time_minute'] is int
+        ? (json['time_minute'] as int).toDouble()
         : json['time_minute'];
     colorCode = json['color_code'];
     status = json['status'];

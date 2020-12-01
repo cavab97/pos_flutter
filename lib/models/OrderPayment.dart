@@ -20,6 +20,7 @@ class OrderPayment {
   String approval_code;
   String reference_number;
   double op_amount_change;
+  int isCash;
 
   OrderPayment(
       {this.op_id,
@@ -42,7 +43,8 @@ class OrderPayment {
       this.last_digits,
       this.approval_code,
       this.reference_number,
-      this.op_amount_change});
+      this.op_amount_change,
+      this.isCash});
 
   OrderPayment.fromJson(Map<String, dynamic> json) {
     op_id = json["op_id"];
@@ -70,6 +72,7 @@ class OrderPayment {
     op_amount_change = json["op_amount_change"] is int
         ? (json['op_amount_change'] as int).toDouble()
         : json['op_amount_change'];
+    isCash = json["is_cash"];
   }
 
   Map<String, dynamic> toJson() {
@@ -95,6 +98,7 @@ class OrderPayment {
     data["approval_code"] = this.approval_code;
     data["reference_number"] = this.reference_number;
     data["op_amount_change"] = this.op_amount_change;
+    data["is_cash"] = this.isCash;
     return data;
   }
 }

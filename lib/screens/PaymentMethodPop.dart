@@ -120,6 +120,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       orderpayment.reference_number = refInputController.text;
       orderpayment.is_split = isSpliting ? 1 : 0;
       orderpayment.op_amount = ammount;
+      orderpayment.isCash = payment.name.toLowerCase().contains("cash") ? 1 : 0;
       double change = 0.0;
       if (ammount > widget.grandTotal) {
         change = ammount - widget.grandTotal;
@@ -175,6 +176,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       orderpayment.last_digits = digitController.text;
       orderpayment.reference_number = refInputController.text;
       orderpayment.is_split = isSpliting ? 1 : 0;
+      orderpayment.isCash =
+          seletedPayment.name.toLowerCase().contains("cash") ? 1 : 0;
       lastamount = lastamount - orderpayment.op_amount;
       setState(() {
         splitedPayment = splitedPayment + ammount;

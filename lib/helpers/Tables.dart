@@ -503,6 +503,7 @@ class CreateTables {
         "service_charge REAL," +
         "sub_total_after_discount REAL," +
         "grand_total REAL," +
+        "rounding_amount REAL," +
         "order_source INTEGER," + // 1  web, 2  app
         "order_status INTEGER," + //1 New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
         "order_item_count INTEGER," +
@@ -593,6 +594,7 @@ class CreateTables {
         "is_split NUMERIC," +
         "remark TEXT," +
         "last_digits TEXT," +
+        "is_cash NUMERIC," +
         "approval_code TEXT," +
         "reference_number TEXT," +
         "op_method_id INTEGER," +

@@ -4,12 +4,15 @@ import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/CheckInout.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
+import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
@@ -1205,6 +1208,7 @@ class CommunFun {
       return customer;
     }
   }
+
 // sendTokitched(itemList) async {
 //   String ids = "";
 //   var list = [];
@@ -1225,5 +1229,114 @@ class CommunFun {
 //     }
 //   }
 // }
+  static checkRoundData(String total) {
+    var parts = total.split('.');
+    //First values
+    String prefix = parts[0].trim();
+    //Second values
+    String postFilx = parts[1].trim();
 
+    String round = total;
+
+    int tempValue = int.parse(postFilx.substring(1));
+    if (tempValue != 0 && tempValue != 5) {
+      if (tempValue <= 2) {
+        round = prefix + "." + postFilx.substring(0, 1) + "0";
+      } else if (tempValue <= 7) {
+        print(postFilx.substring(0, 1));
+        round = prefix + "." + postFilx.substring(0, 1) + "5";
+        print(round);
+      } else {
+        int values = 0;
+        if (int.parse(postFilx.substring(1)) == 9) {
+          values = 1;
+        } else {
+          values = 2;
+        }
+
+        String tempRound = (int.parse(postFilx) + values).toString();
+        double sum = 0.00;
+        if (tempRound == "100") {
+          sum = double.parse(prefix + ".00") + double.parse("1.00");
+        } else {
+          sum = double.parse(prefix + ".00") + double.parse("." + tempRound);
+        }
+        round = sum.toStringAsFixed(2);
+      }
+    }
+    return round;
+  }
+
+  static calRounded(double total, double oldTotal) {
+    if (total == oldTotal) {
+      return 0.00;
+    } else {
+      return (total - oldTotal);
+    }
+  }
+
+  static getShiftReportData() async {
+    Shift shifittem = new Shift();
+    var branchid = await CommunFun.getbranchId();
+    List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
+    var grosssale = 0.00;
+    var netsale = 0.00;
+    var discountval = 0.00;
+    var refundval = 0.00;
+    var taxval = 0.00;
+    var totaltend = 0.00;
+    var textService = 0.00;
+    double cashSale = 0.00;
+    double statringAmount = 0.00;
+    double cashDeposit = 0.00;
+    double cashRefund = 0.00;
+    double cashRounding = 0.00;
+    double payinOut = 0.00;
+    double expectedVal = 0.00;
+    double payInOutAmount = 0.00;
+    // Summery
+    if (ordersList.length > 0) {
+      for (var i = 0; i < ordersList.length; i++) {
+        Orders order = ordersList[i];
+        grosssale += order.sub_total;
+        refundval += 0;
+        netsale = grosssale - refundval;
+        taxval += order.tax_amount;
+        textService += order.serviceCharge;
+        discountval += order.voucher_amount != null ? order.voucher_amount : 0;
+        totaltend += (netsale + taxval + textService) - discountval;
+      }
+    }
+
+    // cash drawer summery
+
+    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+    if (shiftid != null) {
+      List<Shift> shift = await localAPI.getShiftData(shiftid);
+      if (shift.length > 0) {
+        shifittem = shift[0];
+        statringAmount = shifittem.startAmount.toDouble();
+      }
+    }
+
+    List<Drawerdata> result =
+        await localAPI.getPayinOutammount(shifittem.shiftId);
+    if (result.length > 0) {
+      var drawerAmm = 0.00;
+      for (var i = 0; i < result.length; i++) {
+        Drawerdata drawer = result[i];
+        if (drawer.amount != null) {
+          drawerAmm += drawer.amount;
+          cashDeposit = 0.00;
+          cashRefund += drawer.isAmountIn == 0 ? drawer.amount : 0.00;
+          cashRounding += drawerAmm;
+        }
+      }
+      payInOutAmount = drawerAmm;
+      expectedVal = drawerAmm;
+    }
+  }
+
+  /// Payment summery
+   
 }

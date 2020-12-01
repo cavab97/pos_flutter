@@ -3,7 +3,9 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
@@ -211,11 +213,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   cancleTransactionWithMethod(paymehtod, reason) {
-    cancleTransation(reason);
+    cancleTransation(reason, paymehtod);
     Navigator.of(context).pop();
   }
 
-  cancleTransation(reason) async {
+  cancleTransation(reason, paymehtod) async {
     //TODO :Cancle Transation Pop // 1 for  cancle
     var orderid = await localAPI.updateOrderStatus(
         selectedOrder.app_id, selectedOrder.terminal_id, 3);
@@ -237,6 +239,28 @@ class _TransactionsPageState extends State<TransactionsPage> {
     order.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     order.terminalId = int.parse(terID);
     var addTocancle = await localAPI.insertCancelOrder(order);
+
+    if (paymehtod.length > 0) {
+      for (var i = 0; i < paymehtod.length; i++) {
+        OrderPayment orderpayment = paymehtod[i];
+        if (orderpayment.isCash == 1) {
+          var shiftid =
+              await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+          Drawerdata drawer = new Drawerdata();
+          drawer.shiftId = shiftid;
+          drawer.amount = orderpayment.op_amount.toDouble();
+          drawer.isAmountIn = 2;
+          drawer.reason = "cancelORder";
+          drawer.status = 1;
+          drawer.createdBy = userdata.id;
+          drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+          drawer.localID = uuid;
+          drawer.terminalid = int.parse(terminalId);
+          var result = await localAPI.saveInOutDrawerData(drawer);
+        }
+      }
+    }
+
     List<OrderDetail> orderItem = orderItemList;
     if (orderItem.length > 0) {
       for (var i = 0; i < orderItem.length; i++) {
@@ -279,7 +303,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
         }
       }
     }
-
     getTansactionList();
   }
 
@@ -300,18 +323,81 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   returnPayment(paymentMehtod) async {
-    // TODO : update payment tables
-    var orderid = await localAPI.updateOrderStatus(
+    await localAPI.updateOrderStatus(
         selectedOrder.app_id, selectedOrder.terminal_id, 5);
-    var payment = await localAPI.updatePaymentStatus(
+    await localAPI.updatePaymentStatus(
         selectedOrder.app_id, selectedOrder.terminal_id, 5);
-    var terID = await CommunFun.getTeminalKey();
-    // TODO update store inventory
+
+    var terminalId = await CommunFun.getTeminalKey();
+    var uuid = await CommunFun.getLocalID();
+    User userdata = await CommunFun.getuserDetails();
+    if (paymentMehtod.length > 0) {
+      for (var i = 0; i < paymentMehtod.length; i++) {
+        OrderPayment orderpayment = paymentMehtod[i];
+        if (orderpayment.isCash == 1) {
+          var shiftid =
+              await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+          Drawerdata drawer = new Drawerdata();
+          drawer.shiftId = shiftid;
+          drawer.amount = orderpayment.op_amount.toDouble();
+          drawer.isAmountIn = 2;
+          drawer.reason = "refundOrder";
+          drawer.status = 1;
+          drawer.createdBy = userdata.id;
+          drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+          drawer.localID = uuid;
+          drawer.terminalid = int.parse(terminalId);
+          await localAPI.saveInOutDrawerData(drawer);
+        }
+      }
+    }
+    List<OrderDetail> orderItem = orderItemList;
+    var branchid = await CommunFun.getbranchId();
+    if (orderItem.length > 0) {
+      for (var i = 0; i < orderItem.length; i++) {
+        OrderDetail productDetail = orderItem[i];
+        var productData = productDetail.product_detail;
+        var jsonProduct = json.decode(productData);
+        List<ProductStoreInventory> updatedInt = [];
+        List<ProductStoreInventoryLog> updatedIntLog = [];
+        if (jsonProduct["has_inventory"] == 1) {
+          List<ProductStoreInventory> inventory =
+              await localAPI.getStoreInventoryData(productDetail.product_id);
+          if (inventory.length > 0) {
+            ProductStoreInventory invData;
+            invData = inventory[0];
+            invData.qty = invData.qty + productDetail.detail_qty;
+            invData.updatedAt =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            invData.updatedBy = userdata.id;
+            updatedInt.add(invData);
+            var ulog = await localAPI.updateInvetory(updatedInt);
+            ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+            if (inventory.length > 0) {
+              log.uuid = uuid;
+              log.inventory_id = inventory[0].inventoryId;
+              log.branch_id = int.parse(branchid);
+              log.product_id = productDetail.product_id;
+              log.employe_id = userdata.id;
+              // log.il_type = '';
+              log.qty = invData.qty;
+              log.qty_before_change = invData.qty;
+              log.qty_after_change = invData.qty + productDetail.detail_qty;
+              log.updated_at =
+                  await CommunFun.getCurrentDateTime(DateTime.now());
+              log.updated_by = userdata.id;
+              updatedIntLog.add(log);
+              var ulog =
+                  await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
+            }
+          }
+        }
+      }
+    }
     setState(() {
       isRefunding = false;
     });
     getTansactionList();
-    //CommunFun.showToast(context, "Refund table insert data.. work in progress");
   }
 
   deleteItemFormList(product) async {

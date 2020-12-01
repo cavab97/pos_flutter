@@ -19,6 +19,7 @@ import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Customer_Liquor_Inventory.dart';
 import 'package:mcncashier/models/Customer_Liquor_Inventory_Log.dart';
+import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
@@ -964,7 +965,10 @@ class _DashboradPageState extends State<DashboradPage>
       invoiceNo =
           branchData.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
-
+    double newg_total = double.parse(
+        CommunFun.checkRoundData(cartData.grand_total.toStringAsFixed(2)));
+    double rounding = double.parse(CommunFun.calRounded(
+        newg_total, cartData.grand_total.toStringAsFixed(2)));
     order.uuid = uuid;
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
@@ -976,7 +980,8 @@ class _DashboradPageState extends State<DashboradPage>
     order.serviceCharge = cartData.serviceCharge;
     order.serviceChargePercent = cartData.serviceChargePercent;
     order.sub_total_after_discount = cartData.sub_total;
-    order.grand_total = cartData.grand_total;
+    order.grand_total = newg_total;
+    order.rounding_amount = rounding;
     order.order_item_count = cartData.total_qty.toInt();
     order.tax_amount = cartData.tax;
     order.tax_json = cartData.tax_json;
@@ -1192,6 +1197,22 @@ class _DashboradPageState extends State<DashboradPage>
               await CommunFun.getCurrentDateTime(DateTime.now());
           orderpayment.updated_by = userdata.id;
           var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
+          if (payment[i].isCash == 1) {
+            var shiftid =
+                await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+            Drawerdata drawer = new Drawerdata();
+            drawer.shiftId = shiftid;
+            drawer.amount = payment[i].op_amount.toDouble();
+            drawer.isAmountIn = 1;
+            drawer.reason = "placeOrder";
+            drawer.status = 1;
+            drawer.createdBy = userdata.id;
+            drawer.createdAt =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            drawer.localID = uuid;
+            drawer.terminalid = int.parse(terminalId);
+            var result = await localAPI.saveInOutDrawerData(drawer);
+          }
         }
       }
 

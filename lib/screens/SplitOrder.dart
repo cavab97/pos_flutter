@@ -10,6 +10,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderAttributes.dart';
@@ -598,20 +599,14 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   sendPaymentByCash(List<OrderPayment> payment) async {
     var cartData = await getcartData();
     var branchdata = await getbranch();
-    /*if (isWebOrder) {
-      payment.paymentId = cartData.cart_payment_id;
-    }*/
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     Orders order = new Orders();
     Table_order tables = await getTableData();
     User userdata = await CommunFun.getuserDetails();
-    List<MSTCartdetails> cartList = await getcartDetails();
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
-    //var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
     List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
-
     int length = branchdata.invoiceStart.length;
     var invoiceNo;
     if (lastappid.length > 0) {
@@ -623,42 +618,32 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       invoiceNo =
           branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
-
+    double newg_total =
+        double.parse(CommunFun.checkRoundData(grandTotal.toStringAsFixed(2)));
+    double rounding =
+        double.parse(CommunFun.calRounded(newg_total, grandTotal));
     order.uuid = uuid;
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
     order.table_id = tables.table_id;
-    //order.table_no = tables.table_id;
     order.invoice_no = invoiceNo;
     order.customer_id = cartData.user_id;
     order.sub_total = subTotal;
     order.sub_total_after_discount = subTotal;
-    order.grand_total = grandTotal;
-    order.order_item_count = totalQty; //cartData.total_qty.toInt();
+    order.grand_total = newg_total;
+    order.rounding_amount = rounding;
+    order.order_item_count = totalQty;
     order.tax_amount = taxValues;
     order.tax_json = json.encode(taxJson);
     order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
     order.order_status = 1;
     order.server_id = 0;
-    order.order_source = 2; //cartData.source;
+    order.order_source = cartData.source;
     order.order_by = userdata.id;
-    //order.voucher_id = cartData.voucher_id;
-    // order.voucher_amount = cartData.discount;
     order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
     order.updated_by = userdata.id;
     var orderid = await localAPI.placeOrder(order);
     print(orderid);
-    /*if (cartData.voucher_id != 0 && cartData.voucher_id != null) {
-      VoucherHistory history = new VoucherHistory();
-      history.voucher_id = cartData.voucher_id;
-      history.amount = cartData.discount;
-      history.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
-      history.order_id = orderid;
-      history.uuid = uuid;
-      var hisID = await localAPI.saveVoucherHistory(history);
-      print(hisID);
-    }*/
-
     var orderDetailid;
     if (orderid > 0) {
       if (tempCart.length > 0) {
@@ -715,7 +700,6 @@ class _SplitBillDialog extends State<SplitBillDialog> {
               //     await localAPI.removeFromInventory(orderDetail);
               List<ProductStoreInventory> inventory =
                   await localAPI.getStoreInventoryData(orderDetail.product_id);
-
               if (inventory.length > 0) {
                 ProductStoreInventory invData = new ProductStoreInventory();
                 invData = inventory[0];
@@ -755,14 +739,11 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     List<MSTSubCartdetails> modifireList = await getmodifireList();
     if (modifireList.length > 0) {
       var orderId = orderid;
-
       for (var i = 0; i < modifireList.length; i++) {
         OrderModifire modifireData = new OrderModifire();
         var modifire = modifireList[i];
-
         var contain =
             tempCart.where((mainCart) => mainCart.id == modifire.cartdetailsId);
-
         if (contain.isNotEmpty) {
           if (modifire.caId == null) {
             List<OrderModifire> lapMpid =
@@ -844,6 +825,22 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             await CommunFun.getCurrentDateTime(DateTime.now());
         orderpayment.updated_by = userdata.id;
         var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
+
+        if (payment[i].isCash == 1) {
+          var shiftid =
+              await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+          Drawerdata drawer = new Drawerdata();
+          drawer.shiftId = shiftid;
+          drawer.amount = payment[i].op_amount.toDouble();
+          drawer.isAmountIn = 1;
+          drawer.reason = "placeOrder";
+          drawer.status = 1;
+          drawer.createdBy = userdata.id;
+          drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+          drawer.localID = uuid;
+          drawer.terminalid = int.parse(terminalId);
+          var result = await localAPI.saveInOutDrawerData(drawer);
+        }
       }
     }
 

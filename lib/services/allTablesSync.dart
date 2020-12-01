@@ -269,6 +269,7 @@ class SyncAPICalls {
             "service_charge_percent": order.serviceChargePercent,
             "service_charge": order.serviceCharge,
             "sub_total_after_discount": order.sub_total_after_discount,
+            "rounding_amount": order.rounding_amount,
             "grand_total": order.grand_total,
             "order_source": order.order_source,
             "order_status": order.order_status,
@@ -341,6 +342,9 @@ class SyncAPICalls {
           order.grand_total = orderdata["grand_total"] is int
               ? (orderdata['grand_total'] as int).toDouble()
               : orderdata['grand_total'];
+          order.rounding_amount = orderdata["rounding_amount"] is int
+              ? (orderdata['rounding_amount'] as int).toDouble()
+              : orderdata['rounding_amount'];
           order.server_id = orderdata["server_id"];
           order.order_source = orderdata["order_source"];
           order.order_status = orderdata["order_status"];

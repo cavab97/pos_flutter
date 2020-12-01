@@ -751,7 +751,7 @@ class PrintReceipt {
 
     /*Open Drawer only when select payment method cash*/
 
-    if (isper) {
+    if (isper && isCashPayment) {
       ticket.drawer();
     }
     return ticket;
