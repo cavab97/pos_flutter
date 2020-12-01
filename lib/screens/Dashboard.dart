@@ -773,7 +773,13 @@ class _DashboradPageState extends State<DashboradPage>
     var branchid = await CommunFun.getbranchId();
     User userdata = await CommunFun.getuserDetails();
     Shift shift = new Shift();
-    shift.appId = int.parse(terminalId);
+    int appid = await localAPI.getLastShiftAppID(terminalId);
+    if (appid != 0) {
+      shift.appId = appid + 1;
+    } else {
+      shift.appId = 1;
+    }
+    shift.serverId = 0;
     shift.terminalId = int.parse(terminalId);
     shift.branchId = int.parse(branchid);
     shift.userId = userdata.id;
@@ -781,13 +787,13 @@ class _DashboradPageState extends State<DashboradPage>
     shift.status = 1;
     if (shiftid == null) {
       shift.startAmount = int.parse(ammount);
+      shift.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     } else {
-      shift.shiftId = int.parse(shiftid);
       shift.endAmount = int.parse(ammount);
+      shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
-    shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     shift.updatedBy = userdata.id;
-    var result = await localAPI.insertShift(shift);
+    var result = await localAPI.insertShift(shift, shiftid);
     if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
     } else {
@@ -795,8 +801,10 @@ class _DashboradPageState extends State<DashboradPage>
       await Preferences.removeSinglePref(Constant.IS_SHIFT_OPEN);
       await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
       checkshift();
-      clearCart();
     }
+    Navigator.pushNamedAndRemoveUntil(
+        context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
+        arguments: {"isAssign": false});
   }
 
   openDrawer() {
@@ -965,10 +973,10 @@ class _DashboradPageState extends State<DashboradPage>
       invoiceNo =
           branchData.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
-    double newg_total = double.parse(
-        CommunFun.checkRoundData(cartData.grand_total.toStringAsFixed(2)));
-    double rounding = double.parse(CommunFun.calRounded(
-        newg_total, cartData.grand_total.toStringAsFixed(2)));
+    double newg_total = double.parse(await CommunFun.checkRoundData(
+        cartData.grand_total.toStringAsFixed(2)));
+    double rounding = double.parse(
+        await CommunFun.calRounded(newg_total, cartData.grand_total));
     order.uuid = uuid;
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
@@ -1186,6 +1194,11 @@ class _DashboradPageState extends State<DashboradPage>
           orderpayment.branch_id = int.parse(branchid);
           orderpayment.terminal_id = int.parse(terminalId);
           orderpayment.op_method_id = payment[i].op_method_id;
+          orderpayment.remark = payment[i].remark;
+          orderpayment.last_digits = payment[i].last_digits;
+          orderpayment.reference_number = payment[i].reference_number;
+          orderpayment.approval_code = payment[i].approval_code;
+          orderpayment.isCash = payment[i].isCash;
           orderpayment.op_amount = payment[i].op_amount.toDouble();
           orderpayment.op_amount_change = payment[i].op_amount_change;
           orderpayment.op_method_response = '';
@@ -1196,7 +1209,7 @@ class _DashboradPageState extends State<DashboradPage>
           orderpayment.updated_at =
               await CommunFun.getCurrentDateTime(DateTime.now());
           orderpayment.updated_by = userdata.id;
-          var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
+          await localAPI.sendtoOrderPayment(orderpayment);
           if (payment[i].isCash == 1) {
             var shiftid =
                 await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
@@ -1218,7 +1231,13 @@ class _DashboradPageState extends State<DashboradPage>
 
       // Shifr Invoice Table
       ShiftInvoice shiftinvoice = new ShiftInvoice();
-      shiftinvoice.shift_id = int.parse(shiftid);
+      int appid = await localAPI.getLastShiftInvoiceAppID(terminalId);
+      if (appid != 0) {
+        shiftinvoice.app_id = appid + 1;
+      } else {
+        shiftinvoice.app_id = 1;
+      }
+      shiftinvoice.shift_app_id = int.parse(shiftid);
       shiftinvoice.invoice_id = orderid;
       shiftinvoice.status = 1;
       shiftinvoice.created_by = userdata.id;

@@ -148,7 +148,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
       if (appid != 0) {
         customer.appId = appid + 1;
       } else {
-        customer.appId = int.parse(terminalkey);
+        customer.appId = 1;
       }
       customer.terminalId = int.parse(terminalkey);
       customer.name = firstname_controller.text;

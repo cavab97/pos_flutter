@@ -816,6 +816,11 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         orderpayment.op_method_id = payment[i].op_method_id;
         orderpayment.op_amount = payment[i].op_amount.toDouble();
         orderpayment.op_amount_change = payment[i].op_amount_change;
+        orderpayment.remark = payment[i].remark;
+        orderpayment.last_digits = payment[i].last_digits;
+        orderpayment.reference_number = payment[i].reference_number;
+        orderpayment.approval_code = payment[i].approval_code;
+        orderpayment.isCash = payment[i].isCash;
         orderpayment.op_method_response = '';
         orderpayment.op_status = 1;
         orderpayment.op_datetime =
@@ -846,7 +851,13 @@ class _SplitBillDialog extends State<SplitBillDialog> {
 
     // Shifr Invoice Table
     ShiftInvoice shiftinvoice = new ShiftInvoice();
-    shiftinvoice.shift_id = int.parse(shiftid);
+    int appid = await localAPI.getLastShiftInvoiceAppID(terminalId);
+    if (appid != 0) {
+      shiftinvoice.app_id = appid + 1;
+    } else {
+      shiftinvoice.app_id = 1;
+    }
+    shiftinvoice.shift_app_id = int.parse(shiftid);
     shiftinvoice.invoice_id = orderid;
     shiftinvoice.status = 1;
     shiftinvoice.created_by = userdata.id;

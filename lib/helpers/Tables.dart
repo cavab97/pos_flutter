@@ -750,8 +750,11 @@ class CreateTables {
         ')');
 
     datatables = db.execute("CREATE TABLE shift(" +
-        "shift_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "shift_id INTEGER," +
         "uuid TEXT," +
+        "app_id INTEGER," +
+        "server_id INTEGER," +
+        "terminal_id INTEGER," +
         "user_id INTEGER," +
         "branch_id INTEGER," +
         "start_amount INTEGER," +
@@ -759,8 +762,7 @@ class CreateTables {
         "status INTEGER," +
         "updated_by INTEGER," +
         "updated_at TEXT," +
-        "app_id INTEGER," +
-        "terminal_id INTEGER" +
+        "created_at TEXT" +
         ")");
 
     datatables = db.execute("CREATE TABLE category_attribute(" +
@@ -877,16 +879,17 @@ class CreateTables {
 
 // ShiftInvoice
     datatables = db.execute("CREATE TABLE shift_invoice ( " +
-        "id INTEGER PRIMARYKEY AUTOINCREAMENT," +
+        "id INTEGER," +
         "shift_id INTEGER," +
+        "shift_app_id INTEGER," +
+        "app_id INTEGER," +
+        "server_id INTEGER," +
         "invoice_id INTEGER," +
         "status INTEGER," +
         "created_by INTEGER," +
         "updated_by INTEGER," +
         "created_at TEXT," +
         "updated_at TEXT," +
-        "sync NUMERIC," +
-        "serverId INTEGER," +
         "localID TEXT," +
         "terminal_id INTEGER," +
         "shift_terminal_id INTEGER" +

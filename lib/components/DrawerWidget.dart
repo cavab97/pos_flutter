@@ -147,21 +147,27 @@ class DrawerWidState extends State<DrawerWid> {
     var branchid = await CommunFun.getbranchId();
     User userdata = await CommunFun.getuserDetails();
     Shift shift = new Shift();
-    shift.appId = int.parse(terminalId);
+    int appid = await localAPI.getLastShiftAppID(terminalId);
+    if (appid != 0) {
+      shift.appId = appid + 1;
+    } else {
+      shift.appId = 1;
+    }
     shift.terminalId = int.parse(terminalId);
     shift.branchId = int.parse(branchid);
     shift.userId = userdata.id;
     shift.uuid = await CommunFun.getLocalID();
     shift.status = 1;
+    shift.serverId = 0;
     if (shiftid == null) {
       shift.startAmount = int.parse(ammount);
+      shift.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     } else {
-      shift.shiftId = int.parse(shiftid);
       shift.endAmount = int.parse(ammount);
+      shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
-    shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     shift.updatedBy = userdata.id;
-    var result = await localAPI.insertShift(shift);
+    var result = await localAPI.insertShift(shift, shiftid);
     if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
     } else {

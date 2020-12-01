@@ -466,6 +466,11 @@ class SyncAPICalls {
               paymentdat.op_amount = paydat["op_amount"] is int
                   ? (paydat['op_amount'] as int).toDouble()
                   : paydat['op_amount'];
+              paymentdat.isCash = paydat["is_cash"];
+              paymentdat.last_digits = paydat["last_digits"];
+              paymentdat.approval_code = paydat["approval_code"];
+              paymentdat.reference_number = paydat["reference_number"];
+              paymentdat.remark = paydat["remark"];
               paymentdat.op_amount_change = paydat["op_amount_change"] is int
                   ? (paydat['op_amount_change'] as int).toDouble()
                   : paydat['op_amount_change'];
@@ -475,7 +480,6 @@ class SyncAPICalls {
               paymentdat.op_by = paydat["op_by"];
               paymentdat.updated_at = paydat["updated_at"];
               paymentdat.updated_by = paydat["updated_by"];
-              // paymentdat.serverId = paydat["serverId"];
               var paymentres = await localAPI.saveSyncOrderPaymet(paymentdat);
             }
           }
@@ -805,4 +809,52 @@ class SyncAPICalls {
       }
     }
   }
+
+  // static sendShiftTable(context) async {
+  //   try {
+  //     var apiurl = Configrations.createShiftdata;
+  //     var terminalId = await CommunFun.getTeminalKey();
+  //     var branchid = await CommunFun.getbranchId();
+  //     LocalAPI localAPI = LocalAPI();
+  //     List<ProductStoreInventory> storeData =
+  //         await localAPI.getProductStoreInventoryTable(branchid);
+  //     if (storeData.length > 0) {
+  //       var invData = [];
+  //       for (var i = 0; i < storeData.length; i++) {
+  //         var storeitem = storeData[i];
+  //         List<ProductStoreInventoryLog> logData = await localAPI
+  //             .getProductStoreInventoryLogTable(storeitem.inventoryId);
+  //         var invstoreItme = {
+  //           'inventory_id': storeitem.inventoryId,
+  //           'uuid': storeitem.uuid,
+  //           'product_id': storeitem.productId,
+  //           'branch_id': storeitem.branchId,
+  //           'qty': storeitem.qty,
+  //           'warningStockLevel': storeitem.warningStockLevel,
+  //           'status': storeitem.status,
+  //           'updated_at': storeitem.updatedAt,
+  //           'updated_by': storeitem.updatedBy,
+  //           'product_store_inventory_log': logData
+  //         };
+  //         invData.add(invstoreItme);
+  //       }
+  //       var stringParams = {
+  //         'branch_id': branchid,
+  //         'terminal_id': terminalId,
+  //         'store_inventory': json.encode(invData)
+  //       };
+  //       var res = await APICalls.apiCall(apiurl, context, stringParams);
+  //       if (res["status"] == Constant.STATUS200) {
+  //         //saveShiftToTable(context, res);
+  //       }
+  //     } else {
+  //       //  CommunFun.showToast(context, "all cancel tables up to dates.");
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //     CommunFun.showToast(context, e.message);
+  //   }
+  // }
+
+
 }

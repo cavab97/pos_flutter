@@ -23,4 +23,5 @@ class Configrations {
       "rac-box-liquor-inventory-datatable";
   static String update_customer_liquor_inventory_data =
       "update-customer-liquor-inventory-data";
+      static String createShiftdata = "create-shift-detail-data";
 }

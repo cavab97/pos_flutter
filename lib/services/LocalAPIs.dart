@@ -372,24 +372,24 @@ class LocalAPI {
     return list;
   }
 
-  Future<int> insertShift(Shift shift) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+  Future<int> insertShift(Shift shift, shiftId) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var result;
-    if (shift.shiftId != null) {
+    if (shiftId != null) {
       result = await db.update("shift", shift.toJson(),
-          where: 'shift_id = ?', whereArgs: [shift.shiftId]);
+          where: 'app_id = ?', whereArgs: [shift.appId]);
     } else {
       result = await db.insert("shift", shift.toJson());
     }
-    var dis = shift.shiftId != null ? "Update shift" : "Insert shift";
+    var dis = shiftId != null ? "Update shift" : "Insert shift";
     await SyncAPICalls.logActivity("Product", dis, "shift", result);
-    return result;
+    return shift.appId;
   }
 
   Future<List<Shift>> getShiftData(shiftId) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var result =
-        await db.query('shift', where: "shift_id = ?", whereArgs: [shiftId]);
+        await db.query('shift', where: "app_id = ?", whereArgs: [shiftId]);
     List<Shift> list =
         result.isNotEmpty ? result.map((c) => Shift.fromJson(c)).toList() : [];
     return list;
@@ -2179,5 +2179,37 @@ class LocalAPI {
     }
     var data = {"payment_method": paymentMethods, "payments": list};
     return data;
+  }
+
+  Future<int> getLastShiftAppID(terminalid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT shift.app_id from shift where terminal_id =" +
+        terminalid +
+        "  ORDER BY app_id DESC LIMIT 1";
+    var checkisExit = await db.rawQuery(qry);
+    List<Shift> list = checkisExit.length > 0
+        ? checkisExit.map((c) => Shift.fromJson(c)).toList()
+        : [];
+    if (list.length > 0) {
+      return list[0].appId;
+    } else {
+      return 0;
+    }
+  }
+
+  Future<int> getLastShiftInvoiceAppID(terminalid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT shift_invoice.app_id from shift where terminal_id =" +
+        terminalid +
+        "  ORDER BY app_id DESC LIMIT 1";
+    var checkisExit = await db.rawQuery(qry);
+    List<ShiftInvoice> list = checkisExit.length > 0
+        ? checkisExit.map((c) => ShiftInvoice.fromJson(c)).toList()
+        : [];
+    if (list.length > 0) {
+      return list[0].app_id;
+    } else {
+      return 0;
+    }
   }
 }
