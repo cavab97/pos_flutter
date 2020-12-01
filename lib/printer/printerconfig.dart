@@ -1483,7 +1483,21 @@ class PrintReceipt {
   ===========================Print Shift Report==================
   ========================================================================*/
 
-  Future<Ticket> shiftReportReceipt() async {
+  Future<Ticket> shiftReportReceipt(
+      Branch branchData,
+      var grosssale,
+      var refundval,
+      var discountval,
+      var netsale,
+      var taxval,
+      var totalRend,
+      var statringAmount,
+      var cashSale,
+      var cashDeposit,
+      var cashRefund,
+      var cashRounding,
+      var payInOutAmount,
+      var expectedVal) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
@@ -1505,25 +1519,6 @@ class PrintReceipt {
 
     ticket.row([
       PosColumn(
-          text: "User Name",
-          width: 4,
-          styles: PosStyles(
-            align: PosAlign.left,
-            fontType: PosFontType.fontA,
-            bold: true,
-          )),
-      PosColumn(
-          text: " : Test Receipt",
-          width: 8,
-          styles: PosStyles(
-            align: PosAlign.left,
-            fontType: PosFontType.fontA,
-            bold: true,
-          )),
-    ]);
-
-    ticket.row([
-      PosColumn(
           text: "Branch Name",
           width: 4,
           styles: PosStyles(
@@ -1532,7 +1527,7 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: " : " + "Branch 1",
+          text: " : " + branchData.name,
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -1542,7 +1537,7 @@ class PrintReceipt {
     ]);
     ticket.row([
       PosColumn(
-          text: "Terminal Name",
+          text: "Terminal",
           width: 4,
           styles: PosStyles(
             align: PosAlign.left,
@@ -1551,6 +1546,25 @@ class PrintReceipt {
           )),
       PosColumn(
           text: " : " + Strings.terminalName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    ticket.row([
+      PosColumn(
+          text: "Cashier",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + branchData.contactPerson,
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -1594,6 +1608,24 @@ class PrintReceipt {
             bold: false,
           )),
     ]);
+    ticket.row([
+      PosColumn(
+          text: "Pax Count",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + "30",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
 
     /*
     *For Print summery
@@ -1611,28 +1643,28 @@ class PrintReceipt {
     ticket.setStyles(PosStyles(align: PosAlign.left));
     /*For summery 48 char*/
     String grossSales = printColumnWitSpace(38, "Gross Sales", false);
-    String grossSalesAmt = printColumnWitSpace(10, "500.00", true);
+    String grossSalesAmt = printColumnWitSpace(10, grosssale.toString(), true);
     ticket.text("$grossSales$grossSalesAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
     /*For Refunds 48 char*/
     String refunds = printColumnWitSpace(38, "Refunds", false);
-    String refundsAmt = printColumnWitSpace(10, "50.00", true);
+    String refundsAmt = printColumnWitSpace(10, refundval.toString(), true);
     ticket.text("$refunds$refundsAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
     /*For Discount 48 char*/
     String discount = printColumnWitSpace(38, "Discount", false);
-    String discountAmt = printColumnWitSpace(10, "50.00", true);
+    String discountAmt = printColumnWitSpace(10, discountval.toString(), true);
     ticket.text("$discount$discountAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
     /*For Net Sales 48 char*/
     String netSales = printColumnWitSpace(38, "Net Sales", false);
-    String netSalesAmt = printColumnWitSpace(10, "50.00", true);
+    String netSalesAmt = printColumnWitSpace(10, netsale.toString(), true);
     ticket.text("$netSales$netSalesAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
@@ -1649,7 +1681,8 @@ class PrintReceipt {
     /*For Tax/Service Charge 48 char*/
     String taxServiceCharge =
         printColumnWitSpace(38, "Tax/Service Charge", false);
-    String taxServiceChargeAmt = printColumnWitSpace(10, "50.00/5.00", true);
+    String taxServiceChargeAmt =
+        printColumnWitSpace(10, taxval + "/5.00", true);
     ticket.text("$taxServiceCharge$taxServiceChargeAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
@@ -1657,7 +1690,8 @@ class PrintReceipt {
 
     /*For Total Rendered 48 char*/
     String totalRendered = printColumnWitSpace(38, "Total Rendered", false);
-    String totalRenderedAmt = printColumnWitSpace(10, "50.00", true);
+    String totalRenderedAmt =
+        printColumnWitSpace(10, totalRend.toString(), true);
     ticket.text("$totalRendered$totalRenderedAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
@@ -1679,42 +1713,43 @@ class PrintReceipt {
     /*For Opening Amount 48 char*/
     String openingAmountTitle =
         printColumnWitSpace(38, "Opening Amount", false);
-    String openingAmt = printColumnWitSpace(10, "500.00", true);
+    String openingAmt =
+        printColumnWitSpace(10, statringAmount.toString(), true);
     ticket.text("$openingAmountTitle$openingAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
     /*For Case Sales 48 char*/
-    String caseSales = printColumnWitSpace(38, "Case Sales", false);
-    String caseSalesAmt = printColumnWitSpace(10, "50.00", true);
-    ticket.text("$caseSales$caseSalesAmt",
+    String cashSaleTitle = printColumnWitSpace(38, "Cash Sales", false);
+    String cashSalesAmt = printColumnWitSpace(10, cashSale.toString(), true);
+    ticket.text("$cashSaleTitle$cashSalesAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
     /*For Case Deposit 48 char*/
-    String caseDeposit = printColumnWitSpace(38, "Case Deposit", false);
-    String caseDepositAmt = printColumnWitSpace(10, "50.00", true);
-    ticket.text("$caseDeposit$caseDepositAmt",
+    String cashDepositTitle = printColumnWitSpace(38, "Cash Deposit", false);
+    String cashDepositAmt = printColumnWitSpace(10, cashDeposit.toString(), true);
+    ticket.text("$cashDepositTitle$cashDepositAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
     /*For Case Refunds 48 char*/
-    String caseRefunds = printColumnWitSpace(38, "Case Refunds", false);
-    String caseRefundsAmt = printColumnWitSpace(10, "50.00", true);
-    ticket.text("$caseRefunds$caseRefundsAmt",
+    String cashRefundTitle = printColumnWitSpace(38, "Cash Refunds", false);
+    String cashRefundsAmt = printColumnWitSpace(10, cashRefund.toString(), true);
+    ticket.text("$cashRefundTitle$cashRefundsAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
     /*For Case Rounding 48 char*/
-    String caseRounding = printColumnWitSpace(38, "Case Rounding", false);
-    String caseRoundingAmt = printColumnWitSpace(10, "50.00", true);
-    ticket.text("$caseRounding$caseRoundingAmt",
+    String cashRoundingTitle = printColumnWitSpace(38, "Cash Rounding", false);
+    String cashRoundingAmt = printColumnWitSpace(10, cashRounding.toString(), true);
+    ticket.text("$cashRoundingTitle$cashRoundingAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
     /*For Pay In/Out 48 char*/
     String payInOut = printColumnWitSpace(38, "Pay In/Out", false);
-    String payInOutAmt = printColumnWitSpace(10, "50.00/5.00", true);
+    String payInOutAmt = printColumnWitSpace(10, payInOutAmount.toString()+"/5.00", true);
     ticket.text("$payInOut$payInOutAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
@@ -1722,7 +1757,7 @@ class PrintReceipt {
 
     /*For Expected Drawer 48 char*/
     String expDrawer = printColumnWitSpace(38, "Expected Drawer", false);
-    String expDrawerAmt = printColumnWitSpace(10, "500.00", true);
+    String expDrawerAmt = printColumnWitSpace(10, expectedVal.toString(), true);
     ticket.text("$expDrawer$expDrawerAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
@@ -1816,16 +1851,47 @@ class PrintReceipt {
     ]);
 
     ticket.emptyLines(1);
+    ticket.feed(2);
     ticket.cut();
     return ticket;
   }
 
-  void shiftReportPrint(String printerIp, BuildContext ctx) async {
+  void shiftReportPrint(
+      String printerIp,
+      BuildContext ctx,
+      Branch branchData,
+      var grosssale,
+      var refundval,
+      var discountval,
+      var netsale,
+      var taxval,
+      var totalRend,
+      var statringAmount,
+      var cashSale,
+      var cashDeposit,
+      var cashRefund,
+      var cashRounding,
+      var payInOutAmount,
+      var expectedVal) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
-    final PosPrintResult res =
-        await printerManager.printTicket(await shiftReportReceipt());
+    final PosPrintResult res = await printerManager.printTicket(
+        await shiftReportReceipt(
+            branchData,
+            grosssale,
+            refundval,
+            discountval,
+            netsale,
+            taxval,
+            totalRend,
+            statringAmount,
+            cashSale,
+            cashDeposit,
+            cashRefund,
+            cashRounding,
+            payInOutAmount,
+            expectedVal));
 
     CommunFun.showToast(ctx, res.msg);
   }

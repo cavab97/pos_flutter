@@ -119,9 +119,6 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
                         child: CommunFun.roundedButton(
                             Strings.set_terminal_key.toUpperCase(), context,
                             () {
-                              PrintReceipt printKOT = PrintReceipt();
-
-                              printKOT.shiftReportPrint("192.168.0.109", context);
                           setTerminalkey();
                         }),
                       )
