@@ -10,8 +10,10 @@ import 'package:mcncashier/theme/Sized_Config.dart';
 
 class OpenPermissionPop extends StatefulWidget {
   // Opning ammount popup
-  OpenPermissionPop({Key key, this.perFor, this.onEnter}) : super(key: key);
+  OpenPermissionPop({Key key, this.perFor, this.onEnter, this.onClose})
+      : super(key: key);
   Function onEnter;
+  Function onClose;
   final perFor;
   @override
   OpenPermissionPopState createState() => OpenPermissionPopState();
@@ -67,28 +69,35 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
-      title: Stack(
-        overflow: Overflow.visible,
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 3),
-            height: SizeConfig.safeBlockVertical * 9,
-            color: Colors.black,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(Strings.invalid_pin_msg, style: Styles.whiteBoldsmall()),
-              ],
-            ),
+    Future<bool> _willPopCallback() async {
+      widget.onClose();
+    }
+
+    return WillPopScope(
+        child: AlertDialog(
+          titlePadding: EdgeInsets.all(0),
+          title: Stack(
+            overflow: Overflow.visible,
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 3),
+                height: SizeConfig.safeBlockVertical * 9,
+                color: Colors.black,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(Strings.invalid_pin_msg,
+                        style: Styles.whiteBoldsmall()),
+                  ],
+                ),
+              ),
+              closeButton(context), //popup close btn
+            ],
           ),
-          closeButton(context), //popup close btn
-        ],
-      ),
-      content: mainContent(), // Popup body contents
-    );
+          content: mainContent(), // Popup body contents
+        ),
+        onWillPop: _willPopCallback);
   }
 
   Widget closeButton(context) {
@@ -97,6 +106,8 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
       right: -20,
       child: GestureDetector(
         onTap: () {
+          widget.onClose();
+
           Navigator.of(context).pop();
         },
         child: Container(
@@ -106,6 +117,7 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
               color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
+              widget.onClose();
               Navigator.of(context).pop();
             },
             icon: Icon(

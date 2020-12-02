@@ -25,6 +25,7 @@ class Strings {
   static String service_charge = "Service Charge";
   static String tax = "TAX";
   static String grand_total = "GRAND TOTAL";
+  static String rounding_ammount = "Rounding Amount";
   static String search_bar_text = "Search product here...";
   static String btn_Add_customer = "Add Customer";
   static String select_customer = "Select Customer";

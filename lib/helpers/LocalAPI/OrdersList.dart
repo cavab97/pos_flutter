@@ -70,10 +70,10 @@ class OrdersList {
       var qry = " SELECT " +
           " orders.app_id,order_detail.app_id as order_detail_id, order_attributes.app_id as order_attr_id," +
           " order_modifier.app_id as order_modifier_id,order_payment.app_id as order_payment_id from orders " +
-          " Left JOIN order_detail on order_detail.order_id = orders.app_id" +
-          " Left JOIN order_attributes on order_attributes.order_id = orders.app_id" +
-          " Left JOIN order_modifier on order_modifier.order_id = orders.app_id" +
-          " Left JOIN order_payment on order_payment.order_id = orders.app_id" +
+          " Left JOIN order_detail on order_detail.order_app_id = orders.app_id" +
+          " Left JOIN order_attributes on order_attributes.order_app_id = orders.app_id" +
+          " Left JOIN order_modifier on order_modifier.order_app_id = orders.app_id" +
+          " Left JOIN order_payment on order_payment.order_app_id = orders.app_id" +
           " where orders.terminal_id = " +
           terminalid +
           " ORDER BY order_date DESC LIMIT 1";

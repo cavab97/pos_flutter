@@ -52,7 +52,7 @@ class VoucherPopState extends State<VoucherPop> {
 
   checkMinMaxValue(vaocher) async {
     // Check in minimum  max value with cart value
-   bool isReturn = false;
+    bool isReturn = false;
     if (vaocher.voucherDiscount < cartData.sub_total) {
       if (vaocher.minimumAmount == 0.0 ||
           vaocher.minimumAmount <= cartData.sub_total) {
@@ -94,7 +94,6 @@ class VoucherPopState extends State<VoucherPop> {
     DateTime now = new DateTime.now();
     String nowDate = DateFormat('yyyy-MM-dd').format(now);
     String fromtonow = DateFormat('yyyy-MM-dd').format(toDate);
-
     if (now.isBefore(toDate) && now.isAfter(fromDate) || nowDate == fromtonow) {
       return true;
     } else {

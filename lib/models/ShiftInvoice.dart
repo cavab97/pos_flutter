@@ -1,13 +1,14 @@
 class ShiftInvoice {
   int id;
   int shift_id;
+  int shift_app_id;
+  int app_id;
   int invoice_id;
   int status;
   int created_by;
   int updated_by;
   String created_at;
   String updated_at;
-  int sync;
   int serverId;
   String localID;
   int terminal_id;
@@ -16,13 +17,14 @@ class ShiftInvoice {
   ShiftInvoice({
     this.id,
     this.shift_id,
+    this.shift_app_id,
+    this.app_id,
     this.invoice_id,
     this.status,
     this.created_by,
     this.updated_by,
     this.created_at,
     this.updated_at,
-    this.sync,
     this.serverId,
     this.localID,
     this.terminal_id,
@@ -32,14 +34,15 @@ class ShiftInvoice {
   ShiftInvoice.fromJson(Map<String, dynamic> json) {
     id = json["id"];
     shift_id = json["shift_id"];
+    shift_app_id = json["shift_app_id"];
+    app_id = json["app_id"];
     invoice_id = json["invoice_id"];
     status = json["status"];
     created_by = json["created_by"];
     updated_by = json["updated_by"];
     created_at = json["created_at"];
     updated_at = json["updated_at"];
-    sync = json["sync"];
-    serverId = json["serverId"];
+    serverId = json["server_id"];
     localID = json["localID"];
     terminal_id = json["terminal_id"];
     shift_terminal_id = json["shift_terminal_id"];
@@ -50,14 +53,15 @@ class ShiftInvoice {
 
     data["id"] = this.id;
     data["shift_id"] = this.shift_id;
+    data["shift_app_id"] = this.shift_app_id;
+    data["app_id"] = this.app_id;
     data["invoice_id"] = this.invoice_id;
     data["status"] = this.status;
     data["created_by"] = this.created_by;
     data["updated_by"] = this.updated_by;
     data["created_at"] = this.created_at;
     data["updated_at"] = this.updated_at;
-    data["sync"] = this.sync;
-    data["serverId"] = this.serverId;
+    data["server_id"] = this.serverId;
     data["localID"] = this.localID;
     data["terminal_id"] = this.terminal_id;
     data["shift_terminal_id"] = this.shift_terminal_id;

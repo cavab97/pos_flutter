@@ -77,10 +77,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
       if (tableorder.length > 0) {
         await Preferences.setStringToSF(
             Constant.TABLE_DATA, json.encode(tableorder[0]));
-
-        await Navigator.pushNamedAndRemoveUntil(context,
-            Constant.SelectTableScreen, (Route<dynamic> route) => false,
-            arguments: {"isAssign": false});
+        await Navigator.pushNamed(context, Constant.DashboardScreen);
       } else {
         assignTable(cart);
       }

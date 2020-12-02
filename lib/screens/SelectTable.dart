@@ -537,29 +537,40 @@ class _SelectTablePageState extends State<SelectTablePage>
     var branchid = await CommunFun.getbranchId();
     User userdata = await CommunFun.getuserDetails();
     Shift shift = new Shift();
-    shift.appId = int.parse(terminalId);
+    int appid = await shiftList.getLastShiftAppID(terminalId);
+    if (shiftid == null && appid != 0) {
+      shift.appId = appid + 1;
+    } else {
+      shift.appId = shiftid == null ? 1 : int.parse(shiftid);
+    }
     shift.terminalId = int.parse(terminalId);
     shift.branchId = int.parse(branchid);
     shift.userId = userdata.id;
     shift.uuid = await CommunFun.getLocalID();
     shift.status = 1;
+    shift.serverId = 0;
     if (shiftid == null) {
       shift.startAmount = int.parse(ammount);
+      shift.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     } else {
-      shift.shiftId = int.parse(shiftid);
       shift.endAmount = int.parse(ammount);
+      shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
-    shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     shift.updatedBy = userdata.id;
-    var result = await shiftList.insertShift(context, shift);
+    var result = await shiftList.insertShift(context, shift, shiftid);
     if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
     } else {
+      await CommunFun.printShiftReportData(
+          printerreceiptList[0].printerIp.toString(), context, shiftid);
       await Preferences.removeSinglePref(Constant.DASH_SHIFT);
       await Preferences.removeSinglePref(Constant.IS_SHIFT_OPEN);
       await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
       checkshift();
     }
+    Navigator.pushNamedAndRemoveUntil(
+        context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
+        arguments: {"isAssign": false});
   }
 
   openOpningAmmountPop(isopning) async {
@@ -717,7 +728,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                   CommonUtils.openPermissionPop(context, Constant.DELETE_ORDER,
                       () {
                     cancleTableOrder();
-                  });
+                  }, () {});
                 }
               })
             : SizedBox(),

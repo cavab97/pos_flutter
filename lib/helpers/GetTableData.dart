@@ -46,6 +46,7 @@ import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/models/category_branch.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:mcncashier/models/colorTable.dart';
 
 class TableData {
   Future<int> ifExists(Database db, dynamic data) async {
@@ -637,6 +638,7 @@ class TableData {
     var terminalData = tablesData["terminal"];
     var tableData = tablesData["table"];
     var paymentData = tablesData["payment"];
+    var colorData = tablesData["table_color"];
     try {
       if (customerData.length != 0) {
         for (var i = 0; i < customerData.length; i++) {
@@ -710,6 +712,24 @@ class TableData {
           } else {
             var result = await db.update("payment", payment,
                 where: "payment_id =?", whereArgs: [payments.paymentId]);
+          }
+        }
+      }
+      if (colorData.length != 0) {
+        for (var i = 0; i < colorData.length; i++) {
+          var colorDataitem = colorData[i];
+          ColorTable colortable = ColorTable.fromJson(colorDataitem);
+          var data = {
+            'table': "table_color",
+            'key': "id",
+            'value': colortable.id,
+          };
+          var count = await ifExists(db, data);
+          if (count == 0) {
+            var result = await db.insert("table_color", colortable.toJson());
+          } else {
+            var result = await db.update("table_color", colortable.toJson(),
+                where: "id =?", whereArgs: [colortable.id]);
           }
         }
       }

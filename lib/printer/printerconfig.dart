@@ -21,6 +21,8 @@ import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:image/image.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
+import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/Terminal.dart';
 
 class PrintReceipt {
   PaperSize paper = PaperSize.mm80;
@@ -1471,6 +1473,468 @@ class PrintReceipt {
 
     CommunFun.showToast(ctx, res.msg);
   }
+  
+/*========================================================================
+  ===========================Print Shift Report==================
+  ========================================================================*/
+
+  Future<Ticket> shiftReportReceipt(
+      Branch branchData,
+      Terminal terminalData,
+      var grosssale,
+      var refundval,
+      var discountval,
+      var netsale,
+      var taxval,
+      var serviceTax,
+      var totalRend,
+      Shift shift,
+      var cashSale,
+      var cashDeposit,
+      var cashRefund,
+      var cashRounding,
+      var payInAmount,
+      var payOutAmmount,
+      var expectedVal,
+      List<OrderPayment> orderPayments,
+      List<Payments> paymentMethods) async {
+    final profile = await CapabilityProfile.load();
+    final Ticket ticket = Ticket(paper, profile);
+
+    ticket.setStyles(
+        PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
+
+    ticket.text("Shift Report",
+        styles: PosStyles(
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size2,
+            align: PosAlign.center));
+
+    ticket.emptyLines(1);
+
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+    ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+
+    ticket.row([
+      PosColumn(
+          text: "Branch Name",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + branchData.name,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Terminal",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + terminalData.terminalName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    ticket.row([
+      PosColumn(
+          text: "Cashier",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + branchData.contactPerson,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Start Date",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + shift.createdAt,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "End Date",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + (shift.updatedAt != null ? shift.updatedAt : ""),
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Pax Count",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + "30",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    /*
+    *For Print summery
+    */
+    ticket.setStyles(PosStyles(align: PosAlign.center));
+    ticket.emptyLines(2);
+    ticket.text("Summery",
+        styles: PosStyles(
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size2,
+            align: PosAlign.center));
+    ticket.hr();
+
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+    /*For summery 48 char*/
+    String grossSales = printColumnWitSpace(38, "Gross Sales", false);
+    String grossSalesAmt =
+        printColumnWitSpace(10, grosssale.toStringAsFixed(2), true);
+    ticket.text("$grossSales$grossSalesAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+    /*For Refunds 48 char*/
+    String refunds = printColumnWitSpace(38, "Refunds", false);
+    String refundsAmt =
+        printColumnWitSpace(10, refundval.toStringAsFixed(2), true);
+    ticket.text("$refunds$refundsAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+    /*For Discount 48 char*/
+    String discount = printColumnWitSpace(38, "Discount", false);
+    String discountAmt =
+        printColumnWitSpace(10, discountval.toStringAsFixed(2), true);
+    ticket.text("$discount$discountAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+    /*For Net Sales 48 char*/
+    String netSales = printColumnWitSpace(38, "Net Sales", false);
+    String netSalesAmt =
+        printColumnWitSpace(10, netsale.toStringAsFixed(2), true);
+    ticket.text("$netSales$netSalesAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+    /*For Rounding/Amount Redeemed 48 char*/
+    String roundingAmountRedeem = printColumnWitSpace(38, "Rounding", false);
+    String roundingAmountRedeemAmt = printColumnWitSpace(10, "00.00", true);
+    ticket.text("$roundingAmountRedeem$roundingAmountRedeemAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+    /*For Tax/ 48 char*/
+    String tax = printColumnWitSpace(38, "Tax", false);
+    String taxAmt = printColumnWitSpace(10, taxval.toStringAsFixed(2), true);
+    ticket.text("$tax$taxAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+    /*For /Service Charge/ 48 char*/
+    String serviceCharge = printColumnWitSpace(38, "Service Charge", false);
+    String serviceChargeAmt =
+        printColumnWitSpace(10, serviceTax.toStringAsFixed(2), true);
+    ticket.text("$serviceCharge$serviceChargeAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+    ticket.hr();
+
+    /*For Total Rendered 48 char*/
+    String totalRendered = printColumnWitSpace(38, "Total Rendered", false);
+    String totalRenderedAmt =
+        printColumnWitSpace(10, totalRend.toStringAsFixed(2), true);
+    ticket.text("$totalRendered$totalRenderedAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
+
+    /*
+    *For Print cash drawer summery
+    */
+    ticket.setStyles(PosStyles(align: PosAlign.center));
+    ticket.emptyLines(2);
+    ticket.text("Case Drawer Summery",
+        styles: PosStyles(
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size2,
+            align: PosAlign.center));
+    ticket.hr();
+
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+    /*For Opening Amount 48 char*/
+    String openingAmountTitle =
+        printColumnWitSpace(38, "Opening Amount", false);
+    String openingAmt = printColumnWitSpace(
+        10,
+        shift.startAmount != null ? shift.startAmount.toStringAsFixed(2) : "",
+        true);
+    ticket.text("$openingAmountTitle$openingAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+    /*For Case Sales 48 char*/
+    String cashSaleTitle = printColumnWitSpace(38, "Cash Sales", false);
+    String cashSalesAmt =
+        printColumnWitSpace(10, cashSale.toStringAsFixed(2), true);
+    ticket.text("$cashSaleTitle$cashSalesAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+    /*For Case Deposit 48 char*/
+    String cashDepositTitle = printColumnWitSpace(38, "Cash Deposit", false);
+    String cashDepositAmt =
+        printColumnWitSpace(10, cashDeposit.toStringAsFixed(2), true);
+    ticket.text("$cashDepositTitle$cashDepositAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+    /*For Case Refunds 48 char*/
+    String cashRefundTitle = printColumnWitSpace(38, "Cash Refunds", false);
+    String cashRefundsAmt =
+        printColumnWitSpace(10, cashRefund.toStringAsFixed(2), true);
+    ticket.text("$cashRefundTitle$cashRefundsAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+    /*For Case Rounding 48 char*/
+    String cashRoundingTitle = printColumnWitSpace(38, "Cash Rounding", false);
+    String cashRoundingAmt =
+        printColumnWitSpace(10, cashRounding.toStringAsFixed(2), true);
+    ticket.text("$cashRoundingTitle$cashRoundingAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+    /*For Pay In 48 char*/
+    String payIn = printColumnWitSpace(38, "Pay In", false);
+    String payInAmt =
+        printColumnWitSpace(10, payInAmount.toStringAsFixed(2), true);
+    ticket.text("$payIn$payInAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+
+    /*For Pay Out 48 char*/
+    String payOut = printColumnWitSpace(38, "Pay Out", false);
+    String payOutAmt =
+        printColumnWitSpace(10, payOutAmmount.toStringAsFixed(2), true);
+    ticket.text("$payOut$payOutAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+    ticket.hr();
+
+    /*For Expected Drawer 48 char*/
+    String expDrawer = printColumnWitSpace(38, "Expected Drawer", false);
+    String expDrawerAmt =
+        printColumnWitSpace(10, expectedVal.toStringAsFixed(2), true);
+    ticket.text("$expDrawer$expDrawerAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
+
+    /*
+    *For Payment summery
+    */
+    ticket.setStyles(PosStyles(align: PosAlign.center));
+    ticket.emptyLines(2);
+    ticket.text("Payment Summery",
+        styles: PosStyles(
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size2,
+            align: PosAlign.center));
+    ticket.hr();
+
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+    /*For Case 48 char*/
+    var data = 0.0;
+    for (var i = 0; i < orderPayments.length; i++) {
+      String caseTitle = printColumnWitSpace(38, paymentMethods[i].name, false);
+      String caseTitleAmt = printColumnWitSpace(
+          10, orderPayments[i].op_amount.toStringAsFixed(2), true);
+      ticket.text("$caseTitle$caseTitleAmt",
+          styles: PosStyles(
+              align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
+      data += orderPayments[i].op_amount;
+    }
+
+    ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+    /*For Case 48 char*/
+    String totalTitle = printColumnWitSpace(38, "Total", false);
+    String totalAmt = printColumnWitSpace(10, data.toStringAsFixed(2), true);
+    ticket.text("$totalTitle$totalAmt",
+        styles: PosStyles(
+            align: PosAlign.left, fontType: PosFontType.fontA, bold: true));
+
+    ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.right));
+    ticket.row([
+      PosColumn(
+          text: "Total Net Sales : ",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: netsale.toStringAsFixed(2),
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Transactions : ",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: "10",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Avg Order value : ",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: (netsale / 10).toStringAsFixed(2),
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    ticket.emptyLines(1);
+    ticket.feed(2);
+    ticket.cut();
+    return ticket;
+  }
+
+  void shiftReportPrint(
+    String printerIp,
+    BuildContext ctx,
+    Branch branchData,
+    Terminal terminalData,
+    var grosssale,
+    var refundval,
+    var discountval,
+    var netsale,
+    var taxval,
+    var serviceTax,
+    var totalRend,
+    Shift shifittem,
+    var cashSale,
+    var cashDeposit,
+    var cashRefund,
+    var cashRounding,
+    var payInAmmount,
+    var payOutAmmount,
+    var expectedVal,
+    List<OrderPayment> orderPayments,
+    List<Payments> paymentMethods,
+  ) async {
+    final PrinterNetworkManager printerManager = PrinterNetworkManager();
+    printerManager.selectPrinter(printerIp, port: 9100);
+
+    final PosPrintResult res = await printerManager.printTicket(
+        await shiftReportReceipt(
+            branchData,
+            terminalData,
+            grosssale,
+            refundval,
+            discountval,
+            netsale,
+            taxval,
+            serviceTax,
+            totalRend,
+            shifittem,
+            cashSale,
+            cashDeposit,
+            cashRefund,
+            cashRounding,
+            payInAmmount,
+            payOutAmmount,
+            expectedVal,
+            orderPayments,
+            paymentMethods));
+
+    CommunFun.showToast(ctx, res.msg);
+  }
+
 
 /*========================================================================
   ===========================Test print=====================================

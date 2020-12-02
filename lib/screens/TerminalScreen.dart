@@ -53,8 +53,8 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
           isLoading = true;
         });
         terminal.terminalKey = terminalKey.text;
-        terminal.deviceid = "test"; //deviceinfo["deviceId"];
-        terminal.terDeviceToken = "test"; //deviceinfo["deviceToken"];
+        terminal.deviceid = deviceinfo["deviceId"];
+        terminal.terDeviceToken = deviceinfo["deviceToken"];
         await repo.sendTerminalKey(terminal).then((value) async {
           if (value != null && value["status"] == Constant.STATUS200) {
             Preferences.setStringToSF(

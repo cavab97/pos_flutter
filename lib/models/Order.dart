@@ -15,6 +15,7 @@ class Orders {
   double sub_total;
   double sub_total_after_discount;
   double grand_total;
+  double rounding_amount;
   double serviceCharge;
   double serviceChargePercent;
   int order_source;
@@ -45,6 +46,7 @@ class Orders {
       this.sub_total,
       this.sub_total_after_discount,
       this.grand_total,
+      this.rounding_amount,
       this.order_source,
       this.order_status,
       this.order_item_count,
@@ -85,7 +87,9 @@ class Orders {
     grand_total = json["grand_total"] is int
         ? (json['grand_total'] as int).toDouble()
         : json['grand_total'];
-
+    rounding_amount = json["rounding_amount"] is int
+        ? (json['rounding_amount'] as int).toDouble()
+        : json['rounding_amount'];
     order_source = json["order_source"];
     order_status = json["order_status"];
     order_item_count = json["order_item_count"];
@@ -99,7 +103,7 @@ class Orders {
     serviceCharge = json["service_charge"] is int
         ? (json['service_charge'] as int).toDouble()
         : json['service_charge'];
-    serviceChargePercent = json["service_charge_percent"]is int
+    serviceChargePercent = json["service_charge_percent"] is int
         ? (json['service_charge_percent'] as int).toDouble()
         : json['service_charge_percent'];
   }
@@ -122,6 +126,7 @@ class Orders {
     data["sub_total"] = this.sub_total;
     data["sub_total_after_discount"] = this.sub_total_after_discount;
     data["grand_total"] = this.grand_total;
+    data["rounding_amount"] = this.rounding_amount;
     data["order_source"] = this.order_source;
     data["order_status"] = this.order_status;
     data["order_item_count"] = this.order_item_count;

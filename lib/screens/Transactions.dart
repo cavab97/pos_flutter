@@ -683,7 +683,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           } else {
             CommonUtils.openPermissionPop(context, Constant.EDIT_ORDER, () {
               refundProcessStart();
-            });
+            }, () {});
           }
         }),
         SizedBox(width: 10),
@@ -717,7 +717,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     "No",
                     true);
               }
-            });
+            }, () {});
           }
         }),
       ],
@@ -895,6 +895,35 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         ]),
             ),
           ]),
+            TableRow(children: [
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  new Expanded(
+                    flex: 7,
+                    child: Text(
+                      Strings.rounding_ammount,
+                      textAlign: TextAlign.end,
+                      style: Styles.darkGray(),
+                    ),
+                  ),
+                  new Expanded(
+                      flex: 3,
+                      child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 5),
+                          child: Text(
+                            selectedOrder.rounding_amount != null
+                                ? selectedOrder.rounding_amount.toStringAsFixed(2)
+                                : "00:00",
+                            textAlign: TextAlign.end,
+                            style: Styles.darkGray(),
+                          ))),
+                ],
+              ),
+            ),
+          ]),
+       
           TableRow(children: [
             TableCell(
               child: Row(
@@ -980,9 +1009,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           children: orderItemList.map((product) {
         var index = orderItemList.indexOf(product);
         var item = orderItemList[index];
-
         var producrdata = json.decode(item.product_detail);
-
         return InkWell(
             onTap: () {},
             child: Container(

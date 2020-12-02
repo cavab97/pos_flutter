@@ -10,6 +10,8 @@ import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/Rac.dart';
+import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
@@ -1878,6 +1880,69 @@ class LocalAPI {
           where: "id =?", whereArgs: [cart.id]);
     } else {
       result = await db.insert("mst_cart", cart.toJson());
+    }
+    return result;
+  }
+
+  Future<List<Shift>> getShiftDatabaseTable(branchid, termianlId) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from shift WHERE branch_id = " +
+        branchid.toString() +
+        " AND terminal_id = " +
+        termianlId.toString() +
+        " AND server_id = 0";
+    var shiftList = await db.rawQuery(qry);
+    List<Shift> list = shiftList.length > 0
+        ? shiftList.map((c) => ProductStoreInventory.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "shift", "get shift table for sync", "shift", branchid);
+    return list;
+  }
+
+  Future<List<ShiftInvoice>> getShiftInvoiceTable(shiftid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry =
+        "SELECT * from shift_invoice WHERE server_id = 0 AND shift_app_id = " +
+            shiftid.toString();
+    var inList = await db.rawQuery(qry);
+    List<ShiftInvoice> list = inList.length > 0
+        ? inList.map((c) => ShiftInvoice.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity(
+        "sync inventory log",
+        "get product store inventory log table",
+        "product_store_inventory_log",
+        shiftid);
+    return list;
+  }
+
+  Future<int> saveShiftDatafromSync(Shift shift) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry =
+        "SELECT *  FROM shift where app_id =" + shift.appId.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var result;
+    if (checkisExit.length > 0) {
+      result = await db.update("shift", shift.toJson(),
+          where: "app_id =?", whereArgs: [shift.appId]);
+    } else {
+      result = await db.insert("shift", shift.toJson());
+    }
+    return result;
+  }
+
+  Future<int> saveShiftInvoiceDatafromSync(ShiftInvoice shiftInv) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry = "SELECT *  FROM shift_invoice where app_id =" +
+        shiftInv.app_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var result;
+    if (checkisExit.length > 0) {
+      result = await db.update("shift_invoice", shiftInv.toJson(),
+          where: "app_id =?", whereArgs: [shiftInv.app_id]);
+    } else {
+      result = await db.insert("shift_invoice", shiftInv.toJson());
     }
     return result;
   }

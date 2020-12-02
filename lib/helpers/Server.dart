@@ -253,6 +253,12 @@ class Server {
       case "/drawer_data":
         ShiftReq.addDrawer(request);
         break;
+      case "/shift_app_id":
+        ShiftReq.lastappid(request);
+        break;
+      case "/shift_Invoice_app_id":
+        ShiftReq.lastshiftInvoiceappid(request);
+        break;
       default:
     }
   }

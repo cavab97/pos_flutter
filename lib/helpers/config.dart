@@ -38,6 +38,8 @@ class Configrations {
   static String drawer_data = "drawer_data";
   static String add_drawer = "add_drawer";
   static String shift_datails = "Shift_datails";
+  static String shift_app_id = "shift_app_id";
+    static String shift_Invoice_app_id = "shift_Invoice_app_id";
   static String product_attributes = "Product_attributes";
   static String product_Modifeirs = "Product_modifires";
   static String cart_Details = "Cart_Details";
@@ -91,6 +93,7 @@ class Configrations {
       "rac-box-liquor-inventory-datatable";
   static String update_customer_liquor_inventory_data =
       "update-customer-liquor-inventory-data";
+  static String createShiftdata = "create-shift-detail-data";
   static String order_data = "order_data";
   static String product_details = "product_details";
   static String lastcustomer_id = "last_customer";

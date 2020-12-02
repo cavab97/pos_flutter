@@ -10,9 +10,11 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
 import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
 import 'package:mcncashier/helpers/LocalAPI/ProductList.dart';
+import 'package:mcncashier/helpers/LocalAPI/ShiftList.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderAttributes.dart';
@@ -60,6 +62,7 @@ class SplitBillDialog extends StatefulWidget {
 class _SplitBillDialog extends State<SplitBillDialog> {
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
+  ShiftList shiftAPI = new ShiftList();
   BranchList branchAPI = new BranchList();
   OrdersList orderApi = new OrdersList();
   PaymentList paymentAPI = new PaymentList();
@@ -75,6 +78,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   bool isLoading = false;
   Branch branchData;
   String selectedID = "";
+  var permissions;
   PrintReceipt _printReceipt = PrintReceipt();
   var currency = "RM";
 
@@ -84,7 +88,15 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     getTaxs();
     getCartItem();
     getbranch();
+    setPermissons();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
+  }
+
+  setPermissons() async {
+    var permission = await CommunFun.getPemission();
+    setState(() {
+      permissions = permission;
+    });
   }
 
   getCartItem() async {
@@ -606,7 +618,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     setTotalSubTotal();
   }
 
-  sendPaymentByCash(OrderPayment payment) async {
+  sendPaymentByCash(List<OrderPayment> payments) async {
     var cartData = await getcartData();
     var branchdata = await getbranch();
     /*if (isWebOrder) {
@@ -638,6 +650,12 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       invoiceNo =
           branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
+    var convertGrand =
+        await CommunFun.checkRoundData(cartData.grand_total.toStringAsFixed(2));
+    double newGtotal = double.parse(convertGrand);
+    var roundingVal =
+        await CommunFun.calRounded(newGtotal, cartData.grand_total);
+    double rounding = double.parse(roundingVal.toStringAsFixed(2));
     order.uuid = uuid;
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
@@ -646,7 +664,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     order.customer_id = cartData.user_id;
     order.sub_total = subTotal;
     order.sub_total_after_discount = subTotal;
-    order.grand_total = grandTotal;
+    order.grand_total = newGtotal;
+    order.rounding_amount = rounding;
     order.order_item_count = totalQty; //cartData.total_qty.toInt();
     order.tax_amount = taxValues;
     order.tax_json = json.encode(taxJson);
@@ -754,30 +773,56 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         }
       }
     }
-    OrderPayment orderpayment = payment;
-    if (lastappid.order_payment_id != null) {
-      orderpayment.app_id = lastappid.order_payment_id + 1;
-    } else {
-      orderpayment.app_id = 1;
+    if (payments.length > 0) {
+      for (var i = 0; i < payments.length; i++) {
+        OrderPayment payment = payments[i];
+        if (lastappid.order_payment_id != null) {
+          payment.app_id = lastappid.order_payment_id + 1;
+        } else {
+          payment.app_id = 1;
+        }
+        payment.uuid = uuid;
+        payment.branch_id = int.parse(branchid);
+        payment.terminal_id = int.parse(terminalId);
+        payment.op_method_id = payment.op_method_id;
+        payment.op_amount =
+            (cartData.grand_total - cartData.discount).toDouble();
+        payment.remark = payment.remark;
+        payment.last_digits = payment.last_digits;
+        payment.reference_number = payment.reference_number;
+        payment.approval_code = payment.approval_code;
+        payment.isCash = payment.isCash;
+        payment.op_method_response = '';
+        payment.op_status = 1;
+        payment.op_datetime =
+            await CommunFun.getCurrentDateTime(DateTime.now());
+        payment.op_by = userdata.id;
+        payment.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
+        payment.updated_by = userdata.id;
+        orderPaymentList.add(payment);
+        if (payment.isCash == 1) {
+          Drawerdata drawer = new Drawerdata();
+          drawer.shiftId = int.parse(shiftid);
+          drawer.amount = payment.op_amount;
+          drawer.isAmountIn = 1;
+          drawer.reason = "placeOrder";
+          drawer.status = 1;
+          drawer.createdBy = userdata.id;
+          drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+          drawer.localID = uuid;
+          drawer.terminalid = int.parse(terminalId);
+          var result = await shiftAPI.saveInOutDrawerData(drawer);
+        }
+      }
     }
-    orderpayment.uuid = uuid;
-    orderpayment.branch_id = int.parse(branchid);
-    orderpayment.terminal_id = int.parse(terminalId);
-    orderpayment.op_method_id = payment.op_method_id;
-    orderpayment.op_amount =
-        (cartData.grand_total - cartData.discount).toDouble();
-    orderpayment.op_method_response = '';
-    orderpayment.op_status = 1;
-    orderpayment.op_datetime =
-        await CommunFun.getCurrentDateTime(DateTime.now());
-    orderpayment.op_by = userdata.id;
-    orderpayment.updated_at =
-        await CommunFun.getCurrentDateTime(DateTime.now());
-    orderpayment.updated_by = userdata.id;
-
-    // Shifr Invoice Table
-
-    shiftinvoice.shift_id = int.parse(shiftid);
+    // Shifr Invoice TableShiftInvoice shiftinvoice = new ShiftInvoice();
+    int appid = await shiftAPI.getLastShiftInvoiceAppID(terminalId);
+    if (appid != 0) {
+      shiftinvoice.app_id = appid + 1;
+    } else {
+      shiftinvoice.app_id = 1;
+    }
+    shiftinvoice.shift_app_id = int.parse(shiftid);
     shiftinvoice.status = 1;
     shiftinvoice.created_by = userdata.id;
     shiftinvoice.created_at =
@@ -786,6 +831,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     shiftinvoice.localID = await CommunFun.getLocalID();
     shiftinvoice.terminal_id = int.parse(terminalId);
     shiftinvoice.shift_terminal_id = int.parse(terminalId);
+
     var orderid = await orderApi.placeOrder(
       order,
       detaislist,
@@ -867,32 +913,123 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     var terminalid = await CommunFun.getTeminalKey();
     dynamic data = await orderApi.getOrdersDetailsData(orderid, terminalid);
 
-    // List<OrderPayment> orderpaymentdata =
-    //     await orderApi.getOrderpaymentData(orderid, terminalid);
-    // List<Payments> paymentMethod =
-    //     await localAPI.getOrderpaymentmethod(orderid, terminalid);
-    // List<OrderDetail> orderitem =
-    //     await orderApi.getOrderDetailsList(orderid, terminalid);
-    // Orders order = await orderApi.getcurrentOrders(orderid, terminalid);
-    // List<OrderAttributes> attributes =
-    //     await localAPI.getOrderAttributes(orderid);
-    // List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
-
     if (widget.printerIP.isNotEmpty) {
-      _printReceipt.checkReceiptPrint(
-          widget.printerIP,
-          context,
-          branchData,
-          taxJson,
-          data["order_items"], // List<OrderDetail>
-          data["order_attributes"], // List<OrderAttributes>
-          data["order_modifires"], // List<OrderModifire>
-          data["order"], // Orders
-          data["order_payment"], // List<OrderPayment>
-          data["order_payment_method"], //// List<Payments>
-          "", // Add table name here
-          "", // Add Currency here
-          widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
+      if (permissions.contains(Constant.PRINT_RECIEPT)) {
+        if (permissions.contains(Constant.OPEN_DRAWER)) {
+          _printReceipt.checkReceiptPrint(
+              widget.printerIP,
+              context,
+              branchData,
+              taxJson,
+              data["order_items"], // List<OrderDetail>
+              data["order_attributes"], // List<OrderAttributes>
+              data["order_modifires"], // List<OrderModifire>
+              data["order"], // Orders
+              data["order_payment"], // List<OrderPayment>
+              data["order_payment_method"], //// List<Payments>
+              "", // Add table name here
+              "", // Add Currency here
+              widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
+          clearSelected();
+        } else {
+          await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
+              () async {
+            _printReceipt.checkReceiptPrint(
+                widget.printerIP,
+                context,
+                branchData,
+                taxJson,
+                data["order_items"], // List<OrderDetail>
+                data["order_attributes"], // List<OrderAttributes>
+                data["order_modifires"], // List<OrderModifire>
+                data["order"], // Orders
+                data["order_payment"], // List<OrderPayment>
+                data["order_payment_method"], //// List<Payments>
+                "", // Add table name here
+                "", // Add Currency here
+                widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
+            clearSelected();
+          }, () async {
+            _printReceipt.checkReceiptPrint(
+                widget.printerIP,
+                context,
+                branchData,
+                taxJson,
+                data["order_items"], // List<OrderDetail>
+                data["order_attributes"], // List<OrderAttributes>
+                data["order_modifires"], // List<OrderModifire>
+                data["order"], // Orders
+                data["order_payment"], // List<OrderPayment>
+                data["order_payment_method"], //// List<Payments>
+                "", // Add table name here
+                "", // Add Currency here
+                widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
+            clearSelected();
+          });
+        }
+      } else {
+        await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+            () async {
+          if (permissions.contains(Constant.OPEN_DRAWER)) {
+            _printReceipt.checkReceiptPrint(
+                widget.printerIP,
+                context,
+                branchData,
+                taxJson,
+                data["order_items"], // List<OrderDetail>
+                data["order_attributes"], // List<OrderAttributes>
+                data["order_modifires"], // List<OrderModifire>
+                data["order"], // Orders
+                data["order_payment"], // List<OrderPayment>
+                data["order_payment_method"], //// List<Payments>
+                "", // Add table name here
+                "", // Add Currency here
+                widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
+            clearSelected();
+          } else {
+            await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
+                () async {
+              _printReceipt.checkReceiptPrint(
+                  widget.printerIP,
+                  context,
+                  branchData,
+                  taxJson,
+                  data["order_items"], // List<OrderDetail>
+                  data["order_attributes"], // List<OrderAttributes>
+                  data["order_modifires"], // List<OrderModifire>
+                  data["order"], // Orders
+                  data["order_payment"], // List<OrderPayment>
+                  data["order_payment_method"], //// List<Payments>
+                  "", // Add table name here
+                  "", // Add Currency here
+                  widget.customer.isEmpty
+                      ? "Walk-in customer"
+                      : widget.customer);
+              clearSelected();
+            }, () async {
+              _printReceipt.checkReceiptPrint(
+                  widget.printerIP,
+                  context,
+                  branchData,
+                  taxJson,
+                  data["order_items"], // List<OrderDetail>
+                  data["order_attributes"], // List<OrderAttributes>
+                  data["order_modifires"], // List<OrderModifire>
+                  data["order"], // Orders
+                  data["order_payment"], // List<OrderPayment>
+                  data["order_payment_method"], //// List<Payments>
+                  "", // Add table name here
+                  "", // Add Currency here
+                  widget.customer.isEmpty
+                      ? "Walk-in customer"
+                      : widget.customer);
+              clearSelected();
+            });
+          }
+        }, () async {
+          clearSelected();
+        });
+      }
     } else {
       CommunFun.showToast(context, Strings.printer_not_available);
     }

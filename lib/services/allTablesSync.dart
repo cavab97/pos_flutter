@@ -1,5 +1,6 @@
 import 'dart:convert';
-
+import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -269,6 +270,7 @@ class SyncAPICalls {
             "service_charge_percent": order.serviceChargePercent,
             "service_charge": order.serviceCharge,
             "sub_total_after_discount": order.sub_total_after_discount,
+            "rounding_amount": order.rounding_amount,
             "grand_total": order.grand_total,
             "order_source": order.order_source,
             "order_status": order.order_status,
@@ -341,6 +343,9 @@ class SyncAPICalls {
           order.grand_total = orderdata["grand_total"] is int
               ? (orderdata['grand_total'] as int).toDouble()
               : orderdata['grand_total'];
+          order.rounding_amount = orderdata["rounding_amount"] is int
+              ? (orderdata['rounding_amount'] as int).toDouble()
+              : orderdata['rounding_amount'];
           order.server_id = orderdata["server_id"];
           order.order_source = orderdata["order_source"];
           order.order_status = orderdata["order_status"];
@@ -462,6 +467,11 @@ class SyncAPICalls {
               paymentdat.op_amount = paydat["op_amount"] is int
                   ? (paydat['op_amount'] as int).toDouble()
                   : paydat['op_amount'];
+              paymentdat.isCash = paydat["is_cash"];
+              paymentdat.last_digits = paydat["last_digits"];
+              paymentdat.approval_code = paydat["approval_code"];
+              paymentdat.reference_number = paydat["reference_number"];
+              paymentdat.remark = paydat["remark"];
               paymentdat.op_amount_change = paydat["op_amount_change"] is int
                   ? (paydat['op_amount_change'] as int).toDouble()
                   : paydat['op_amount_change'];
@@ -797,6 +807,102 @@ class SyncAPICalls {
             invLog.updatedBy: logint['updated_by'],
           };
           var result = await localAPI.saveSuctomerWineInventoryLogs(invLog);
+        }
+      }
+    }
+  }
+
+  static sendShiftTable(context) async {
+    try {
+      var apiurl = Configrations.createShiftdata;
+      var terminalId = await CommunFun.getTeminalKey();
+      var branchid = await CommunFun.getbranchId();
+      LocalAPI localAPI = LocalAPI();
+      List<Shift> storeData =
+          await localAPI.getShiftDatabaseTable(branchid, terminalId);
+      if (storeData.length > 0) {
+        var shiftData = [];
+        for (var i = 0; i < storeData.length; i++) {
+          var storeitem = storeData[i];
+          List<ShiftInvoice> invoiceData =
+              await localAPI.getShiftInvoiceTable(storeitem.shiftId);
+          var shifts = {
+            'shift_id': storeitem.shiftId,
+            'uuid': storeitem.uuid,
+            'terminal_id': storeitem.terminalId,
+            'app_id': storeitem.appId,
+            'user_id': storeitem.userId,
+            'branch_id': storeitem.branchId,
+            'start_amount': storeitem.startAmount,
+            'end_amount': storeitem.endAmount,
+            'status': storeitem.status,
+            'updated_at': storeitem.updatedAt,
+            'updated_by': storeitem.updatedBy,
+            'created_at': storeitem.createdAt,
+            'shift_invoice': invoiceData
+          };
+          shiftData.add(shifts);
+        }
+        var stringParams = {
+          'branch_id': branchid,
+          'terminal_id': terminalId,
+          'shift': json.encode(shiftData)
+        };
+        var res = await APICalls.apiCall(apiurl, context, stringParams);
+        if (res["status"] == Constant.STATUS200) {
+          saveShiftToTable(context, res);
+        }
+      } else {
+        //  CommunFun.showToast(context, "all cancel tables up to dates.");
+      }
+    } catch (e) {
+      print(e);
+      CommunFun.showToast(context, e.message);
+    }
+  }
+
+  static saveShiftToTable(context, data) async {
+    LocalAPI localAPI = LocalAPI();
+    var shiftsData = data["data"]["shift"];
+    if (shiftsData.length > 0) {
+      for (var i = 0; i < shiftsData.length; i++) {
+        var shiftitem = shiftsData[i];
+        Shift shift = new Shift();
+        shift.shiftId = shiftitem['shift_id'];
+        shift.uuid = shiftitem['uuid'];
+        shift.terminalId = shiftitem['terminal_id'];
+        shift.appId = shiftitem['app_id'];
+        shift.userId = shiftitem['user_id'];
+        shift.branchId = shiftitem['branch_id'];
+        shift.startAmount = shiftitem['start_amount'];
+        shift.endAmount = shiftitem['end_amount'];
+        shift.status = shiftitem['status'];
+        shift.updatedAt = shiftitem['updated_at'];
+        shift.updatedBy = shiftitem['updated_by'];
+        shift.createdAt = shiftitem['created_at'];
+        shift.serverId = shiftitem['server_id'];
+        var result = await localAPI.saveShiftDatafromSync(shift);
+
+        var invoiceData = shiftitem["shift_invoice"];
+        for (var j = 0; j < invoiceData.length; j++) {
+          var logint = invoiceData[j];
+          ShiftInvoice shiftInvoice = new ShiftInvoice();
+          shiftInvoice.id = logint["id"];
+          shiftInvoice.shift_id = logint["shift_id"];
+          shiftInvoice.shift_app_id = logint["shift_app_id"];
+          shiftInvoice.app_id = logint["app_id"];
+          shiftInvoice.invoice_id = logint["invoice_id"];
+          shiftInvoice.status = logint["status"];
+          shiftInvoice.created_by = logint["created_by"];
+          shiftInvoice.updated_by = logint["updated_by"];
+          shiftInvoice.created_at = logint["created_at"];
+          shiftInvoice.updated_at = logint["updated_at"];
+          shiftInvoice.serverId = logint["server_id"];
+          shiftInvoice.localID = logint["localID"];
+          shiftInvoice.terminal_id = logint["terminal_id"];
+          shiftInvoice.shift_terminal_id = logint["shift_terminal_id"];
+          var result =
+              await localAPI.saveShiftInvoiceDatafromSync(shiftInvoice);
         }
       }
     }

@@ -9,16 +9,20 @@ import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/CheckInout.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
+import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -1293,5 +1297,156 @@ class CommunFun {
 //     }
 //   }
 // }
+  static checkRoundData(String total) {
+    var parts = total.split('.');
+    //First values
+    String prefix = parts[0].trim();
+    //Second values
+    String postFilx = parts[1].trim();
 
+    String round = total;
+
+    int tempValue = int.parse(postFilx.substring(1));
+    if (tempValue != 0 && tempValue != 5) {
+      if (tempValue <= 2) {
+        round = prefix + "." + postFilx.substring(0, 1) + "0";
+      } else if (tempValue <= 7) {
+        print(postFilx.substring(0, 1));
+        round = prefix + "." + postFilx.substring(0, 1) + "5";
+        print(round);
+      } else {
+        int values = 0;
+        if (int.parse(postFilx.substring(1)) == 9) {
+          values = 1;
+        } else {
+          values = 2;
+        }
+
+        String tempRound = (int.parse(postFilx) + values).toString();
+        double sum = 0.00;
+        if (tempRound == "100") {
+          sum = double.parse(prefix + ".00") + double.parse("1.00");
+        } else {
+          sum = double.parse(prefix + ".00") + double.parse("." + tempRound);
+        }
+        round = sum.toStringAsFixed(2);
+      }
+    }
+    return round;
+  }
+
+  static calRounded(double total, double oldTotal) {
+    double calRound = 0.00;
+    if (total == oldTotal) {
+      return calRound;
+    } else {
+      return calRound = total - oldTotal;
+    }
+  }
+
+  static printShiftReportData(printerIP, context, shiftid) async {
+    PrintReceipt printKOT = PrintReceipt();
+
+    Shift shifittem = new Shift();
+    var branchid = await CommunFun.getbranchId();
+    var terminalID = await CommunFun.getTeminalKey();
+    //List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
+    var grosssale = 0.00;
+    var netsale = 0.00;
+    var discountval = 0.00;
+    var refundval = 0.00;
+    var taxval = 0.00;
+    var totalRend = 0.00;
+    var textService = 0.00;
+    double cashSale = 0.00;
+    double statringAmount = 0.00;
+    double cashDeposit = 0.00;
+    double cashRefund = 0.00;
+    double cashRounding = 0.00;
+    double payInAmmount = 0.00;
+    double payOutAmmount = 0.00;
+    double expectedVal = 0.00;
+
+    // Summery
+    // if (ordersList.length > 0) {
+    //   for (var i = 0; i < ordersList.length; i++) {
+    //     Orders order = ordersList[i];
+    //     grosssale += order.sub_total;
+    //     refundval += 0;
+    //     netsale = grosssale - refundval;
+    //     taxval += order.tax_amount;
+    //     textService += order.serviceCharge;
+    //     discountval += order.voucher_amount != null ? order.voucher_amount : 0;
+    //     totalRend = (netsale + taxval + textService) - discountval;
+    //   }
+    // }
+
+    // // cash drawer summery
+
+    // if (shiftid != null) {
+    //   List<Shift> shift = await localAPI.getShiftData(shiftid);
+    //   if (shift.length > 0) {
+    //     shifittem = shift[0];
+    //     //statringAmount = shifittem.startAmount !=nu shifittem.startAmount.toDouble();
+    //   }
+    // }
+    // List<Drawerdata> result =
+    //     await localAPI.getPayinOutammount(shifittem.appId);
+    // if (result.length > 0) {
+    //   var drawerAmm = 0.00;
+    //   for (var i = 0; i < result.length; i++) {
+    //     Drawerdata drawer = result[i];
+    //     if (drawer.amount != null) {
+    //       drawerAmm += drawer.amount;
+    //       cashSale += drawer.amount;
+    //       cashDeposit = 0.00;
+    //       cashRefund += drawer.isAmountIn == 0 ? drawer.amount : 0.00;
+    //       cashRounding += 0.00;
+    //       payInAmmount += drawer.isAmountIn == 1 ? drawer.amount : 0.00;
+    //       payOutAmmount += drawer.isAmountIn == 2 ? drawer.amount : 0.00;
+    //     }
+    //   }
+
+    //   expectedVal = drawerAmm;
+    // }
+
+    // /// Payment summery
+    // dynamic payments = await localAPI.getTotalPayment(terminalID, branchid);
+    // List<Payments> paymentMethods = payments["payment_method"];
+    // List<OrderPayment> orderPayments = payments["payments"];
+    // // branch Data
+    // var branchID = await getbranchId();
+    // Branch branchData = await localAPI.getBranchData(branchID);
+
+    // // terminal Data
+    // Terminal terminalData = await localAPI.getTerminalDetails(terminalID);
+
+    // printKOT.shiftReportPrint(
+    //     printerIP,
+    //     context,
+    //     // Branch data
+    //     branchData,
+    //     // terminal data
+    //     terminalData,
+    //     //Summery Sales data
+    //     grosssale,
+    //     refundval,
+    //     discountval,
+    //     netsale,
+    //     taxval,
+    //     textService,
+    //     totalRend,
+    //     // Drawer Data
+    //     shifittem,
+    //     cashSale,
+    //     cashDeposit,
+    //     cashRefund,
+    //     cashRounding,
+    //     payInAmmount,
+    //     payOutAmmount,
+    //     expectedVal,
+    //     // Paymemts Data
+    //     orderPayments,
+    //     paymentMethods);
+  }
 }

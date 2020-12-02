@@ -385,8 +385,9 @@ class Cartlist {
       var qry =
           "SELECT voucher.*,count(voucher_history.voucher_id) as total_used from voucher " +
               " LEFT JOIN voucher_history on voucher_history.voucher_id = voucher.voucher_id " +
-              " where voucher_code = " +
-              code.toString();
+              " where voucher_code = '" +
+              code.toString() +
+              "'";
       //var qry = "SELECT * from voucher where voucher_code = '" + code + "'";
       var vouchers = await db.rawQuery(qry);
       voucherList = vouchers.length > 0

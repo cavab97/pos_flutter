@@ -494,6 +494,7 @@ class CreateTables {
         "customer_id INTEGER," +
         "tax_percent INTEGER," +
         "tax_amount REAL," +
+        "rounding_amount REAL," +
         "tax_json TEXT," +
         "voucher_id INTEGER," +
         "voucher_detail TEXT," +
@@ -597,6 +598,7 @@ class CreateTables {
         "reference_number TEXT," +
         "op_method_id INTEGER," +
         "op_amount REAL," +
+        "is_cash NUMERIC," +
         "op_method_response TEXT," +
         "op_amount_change REAL," +
         "op_status INTEGER," + // 1 New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
@@ -624,7 +626,7 @@ class CreateTables {
     //Table customer
 
     datatables = db.execute("CREATE TABLE customer (" +
-        "customer_id	INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "customer_id	INTEGER," +
         "uuid	char TEXT," +
         "app_id	INTEGER," +
         "terminal_id	INTEGER," +
@@ -668,7 +670,8 @@ class CreateTables {
         "save_order_id  INTEGER," +
         "merged_pax TEXT," +
         "table_locked_by  INTEGER," +
-        "is_order_merged  REAl" +
+        "is_order_merged  REAl," +
+        "assing_time TEXT" +
         ")");
 
     datatables = db.execute("CREATE TABLE mst_cart(" +
@@ -747,16 +750,18 @@ class CreateTables {
         ')');
 
     datatables = db.execute("CREATE TABLE shift(" +
-        "shift_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "shift_id INTEGER," +
         "uuid TEXT," +
         "user_id INTEGER," +
+        "app_id INTEGER," +
         "branch_id INTEGER," +
         "start_amount INTEGER," +
         "end_amount INTEGER," +
         "status INTEGER," +
         "updated_by INTEGER," +
         "updated_at TEXT," +
-        "app_id INTEGER," +
+        "server_id INTEGER," +
+        "created_at TEXT," +
         "terminal_id INTEGER" +
         ")");
 
@@ -874,16 +879,18 @@ class CreateTables {
 
 // ShiftInvoice
     datatables = db.execute("CREATE TABLE shift_invoice ( " +
-        "id INTEGER PRIMARYKEY AUTOINCREAMENT," +
+        "id INTEGER," +
         "shift_id INTEGER," +
         "invoice_id INTEGER," +
         "status INTEGER," +
         "created_by INTEGER," +
+        "shift_app_id INTEGER," +
+        "app_id INTEGER," +
+        "server_id INTEGER," +
         "updated_by INTEGER," +
         "created_at TEXT," +
         "updated_at TEXT," +
         "sync NUMERIC," +
-        "serverId INTEGER," +
         "localID TEXT," +
         "terminal_id INTEGER," +
         "shift_terminal_id INTEGER" +
@@ -972,7 +979,16 @@ class CreateTables {
         "updated_at INTEGER," +
         "deleted_at INTEGER" +
         ")");
-
+        
+    datatables = db.execute("CREATE TABLE table_color ( " +
+        "id INTEGER PRIMARY KEY," +
+        "uuid TEXT," +
+        "time_minute REAL," +
+        "color_code TEXT," +
+        "status NUMERIC," +
+        "updated_at TEXT," +
+        "updated_by INTEGER" +
+        ")");
     return datatables;
   }
 }

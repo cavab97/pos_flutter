@@ -177,7 +177,7 @@ class _ShiftReportsState extends State<ShiftReports> {
     User user = await CommunFun.getuserDetails();
     var terminalid = await CommunFun.getTeminalKey();
     Drawerdata drawer = new Drawerdata();
-    drawer.shiftId = shifittem.shiftId;
+    drawer.shiftId = shifittem.appId;
     drawer.amount = amount;
     drawer.isAmountIn = isInAmmount == true ? 1 : 2;
     drawer.reason = reson;
