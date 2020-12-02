@@ -14,7 +14,8 @@ class Shift {
   String createdAt;
 
   Shift(
-      {this.shiftId,
+      {
+      this.shiftId,
       this.uuid,
       this.terminalId,
       this.appId,
@@ -26,7 +27,8 @@ class Shift {
       this.serverId,
       this.updatedAt,
       this.updatedBy,
-      this.createdAt});
+      this.createdAt
+      });
 
   Shift.fromJson(Map<String, dynamic> json) {
     shiftId = json['shift_id'];

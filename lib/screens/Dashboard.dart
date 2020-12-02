@@ -973,22 +973,23 @@ class _DashboradPageState extends State<DashboradPage>
       invoiceNo =
           branchData.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
-    double newg_total = double.parse(await CommunFun.checkRoundData(
-        cartData.grand_total.toStringAsFixed(2)));
-    double rounding = double.parse(
-        await CommunFun.calRounded(newg_total, cartData.grand_total));
+    var convertGrand =
+        await CommunFun.checkRoundData(cartData.grand_total.toStringAsFixed(2));
+    double newGtotal = double.parse(convertGrand);
+    var roundingVal =
+        await CommunFun.calRounded(newGtotal, cartData.grand_total);
+    double rounding = double.parse(roundingVal.toStringAsFixed(2));
     order.uuid = uuid;
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
     order.table_id = tables.table_id;
-    //order.table_no = tables.table_id;
     order.invoice_no = invoiceNo;
     order.customer_id = cartData.user_id;
     order.sub_total = cartData.sub_total;
     order.serviceCharge = cartData.serviceCharge;
     order.serviceChargePercent = cartData.serviceChargePercent;
     order.sub_total_after_discount = cartData.sub_total;
-    order.grand_total = newg_total;
+    order.grand_total = newGtotal;
     order.rounding_amount = rounding;
     order.order_item_count = cartData.total_qty.toInt();
     order.tax_amount = cartData.tax;
@@ -1214,8 +1215,8 @@ class _DashboradPageState extends State<DashboradPage>
             var shiftid =
                 await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
             Drawerdata drawer = new Drawerdata();
-            drawer.shiftId = shiftid;
-            drawer.amount = payment[i].op_amount.toDouble();
+            drawer.shiftId = int.parse(shiftid);
+            drawer.amount = payment[i].op_amount;
             drawer.isAmountIn = 1;
             drawer.reason = "placeOrder";
             drawer.status = 1;

@@ -6,7 +6,6 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/TerminalKey.dart';
-import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/services/teminalkey.dart' as repo;
 
 class TerminalKeyPage extends StatefulWidget {
@@ -18,7 +17,7 @@ class TerminalKeyPage extends StatefulWidget {
 }
 
 class _TerminalKeyPageState extends State<TerminalKeyPage> {
-  TextEditingController terminalKey = new TextEditingController(text: "test");
+  TextEditingController terminalKey = new TextEditingController(text: "");
   GlobalKey<ScaffoldState> scaffoldKey;
   var errormessage = "";
   bool isValidatekey = true;
@@ -54,7 +53,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
           isLoading = true;
         });
         terminal.terminalKey = terminalKey.text;
-        terminal.deviceid = "test"; //deviceinfo["deviceId"];
+        terminal.deviceid = deviceinfo["deviceId"];
         terminal.terDeviceToken = deviceinfo["deviceToken"];
         await repo.sendTerminalKey(terminal).then((value) async {
           if (value != null && value["status"] == Constant.STATUS200) {

@@ -34,6 +34,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/User.dart';
+import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:toast/toast.dart';
 import 'package:mcncashier/components/styles.dart';
@@ -1271,19 +1272,20 @@ class CommunFun {
   }
 
   static calRounded(double total, double oldTotal) {
+    double calRound = 0.00;
     if (total == oldTotal) {
-      return 0.00;
+      return calRound;
     } else {
-      return (total - oldTotal);
+      return calRound = total - oldTotal;
     }
   }
 
-  static getShiftReportData(printerIP, context) async {
+  static printShiftReportData(printerIP, context, shiftid) async {
     PrintReceipt printKOT = PrintReceipt();
 
     Shift shifittem = new Shift();
     var branchid = await CommunFun.getbranchId();
-    var terminalID = await CommunFun.getbranchId();
+    var terminalID = await CommunFun.getTeminalKey();
     List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
     var grosssale = 0.00;
     var netsale = 0.00;
@@ -1297,9 +1299,10 @@ class CommunFun {
     double cashDeposit = 0.00;
     double cashRefund = 0.00;
     double cashRounding = 0.00;
-    double payinOut = 0.00;
+    double payInAmmount = 0.00;
+    double payOutAmmount = 0.00;
     double expectedVal = 0.00;
-    double payInOutAmount = 0.00;
+
     // Summery
     if (ordersList.length > 0) {
       for (var i = 0; i < ordersList.length; i++) {
@@ -1310,35 +1313,36 @@ class CommunFun {
         taxval += order.tax_amount;
         textService += order.serviceCharge;
         discountval += order.voucher_amount != null ? order.voucher_amount : 0;
-        totalRend += (netsale + taxval + textService) - discountval;
+        totalRend = (netsale + taxval + textService) - discountval;
       }
     }
 
     // cash drawer summery
 
-    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     if (shiftid != null) {
       List<Shift> shift = await localAPI.getShiftData(shiftid);
       if (shift.length > 0) {
         shifittem = shift[0];
-        statringAmount = shifittem.startAmount.toDouble();
+        //statringAmount = shifittem.startAmount !=nu shifittem.startAmount.toDouble();
       }
     }
-
     List<Drawerdata> result =
-        await localAPI.getPayinOutammount(shifittem.shiftId);
+        await localAPI.getPayinOutammount(shifittem.appId);
     if (result.length > 0) {
       var drawerAmm = 0.00;
       for (var i = 0; i < result.length; i++) {
         Drawerdata drawer = result[i];
         if (drawer.amount != null) {
           drawerAmm += drawer.amount;
+          cashSale += drawer.amount;
           cashDeposit = 0.00;
           cashRefund += drawer.isAmountIn == 0 ? drawer.amount : 0.00;
-          cashRounding += drawerAmm;
+          cashRounding += 0.00;
+          payInAmmount += drawer.isAmountIn == 1 ? drawer.amount : 0.00;
+          payOutAmmount += drawer.isAmountIn == 2 ? drawer.amount : 0.00;
         }
       }
-      payInOutAmount = drawerAmm;
+
       expectedVal = drawerAmm;
     }
 
@@ -1346,29 +1350,39 @@ class CommunFun {
     dynamic payments = await localAPI.getTotalPayment(terminalID, branchid);
     List<Payments> paymentMethods = payments["payment_method"];
     List<OrderPayment> orderPayments = payments["payments"];
-
+    // branch Data
     var branchID = await getbranchId();
     Branch branchData = await localAPI.getBranchData(branchID);
 
+    // terminal Data
+    Terminal terminalData = await localAPI.getTerminalDetails(terminalID);
+
     printKOT.shiftReportPrint(
-        "192.168.0.109",
+        printerIP,
         context,
         // Branch data
         branchData,
+        // terminal data
+        terminalData,
         //Summery Sales data
         grosssale,
         refundval,
         discountval,
         netsale,
         taxval,
+        textService,
         totalRend,
         // Drawer Data
-        statringAmount,
+        shifittem,
         cashSale,
         cashDeposit,
         cashRefund,
         cashRounding,
-        payInOutAmount,
-        expectedVal);
+        payInAmmount,
+        payOutAmmount,
+        expectedVal,
+        // Paymemts Data
+        orderPayments,
+        paymentMethods);
   }
 }

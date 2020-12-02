@@ -147,11 +147,12 @@ class DrawerWidState extends State<DrawerWid> {
     var branchid = await CommunFun.getbranchId();
     User userdata = await CommunFun.getuserDetails();
     Shift shift = new Shift();
+
     int appid = await localAPI.getLastShiftAppID(terminalId);
-    if (appid != 0) {
+    if (shiftid == null && appid != 0) {
       shift.appId = appid + 1;
     } else {
-      shift.appId = 1;
+      shift.appId = shiftid == null ? 1 : int.parse(shiftid);
     }
     shift.terminalId = int.parse(terminalId);
     shift.branchId = int.parse(branchid);
@@ -171,6 +172,8 @@ class DrawerWidState extends State<DrawerWid> {
     if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
     } else {
+      await CommunFun.printShiftReportData(
+          printerreceiptList[0].printerIp.toString(), context, shiftid);
       await Preferences.removeSinglePref(Constant.DASH_SHIFT);
       await Preferences.removeSinglePref(Constant.IS_SHIFT_OPEN);
       await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
