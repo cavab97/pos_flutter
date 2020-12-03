@@ -1703,15 +1703,40 @@ class _DashboradPageState extends State<DashboradPage>
                 child: Table(
                   border: TableBorder.all(color: Colors.white, width: 0.6),
                   columnWidths: {
-                    0: FractionColumnWidth(.6),
-                    1: FractionColumnWidth(.3),
+                    0: FractionColumnWidth(.3),
+                    1: FractionColumnWidth(.6),
                   },
                   children: [
                     TableRow(children: [
-                      TableCell(child: tableHeader1()),
                       TableCell(child: tableHeader2()),
+                      TableCell(child: tableHeader1()), 
                     ]),
                     TableRow(children: [
+                      TableCell(
+                        child: Stack(
+                          children: <Widget>[
+                            Container(
+                              // color: Colors.white,
+                              child: SizedBox(
+                                  height: MediaQuery.of(context).size.height -
+                                      SizeConfig.safeBlockVertical * 10,
+                                  width: SizeConfig.safeBlockHorizontal * 50,
+                                  child: cartITems()),
+                            ),
+                            Positioned(
+                              bottom: 25,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                height: 80,
+                                color: StaticColor.backgroundColor,
+                                child: paybutton(context),
+                              ),
+                            ),
+                            !isShiftOpen ? openShiftButton(context) : SizedBox()
+                          ],
+                        ),
+                      ),
                       TableCell(
                         child: Container(
                           padding:
@@ -1782,31 +1807,6 @@ class _DashboradPageState extends State<DashboradPage>
                               )
                             ],
                           ),
-                        ),
-                      ),
-                      TableCell(
-                        child: Stack(
-                          children: <Widget>[
-                            Container(
-                              // color: Colors.white,
-                              child: SizedBox(
-                                  height: MediaQuery.of(context).size.height -
-                                      SizeConfig.safeBlockVertical * 10,
-                                  width: SizeConfig.safeBlockHorizontal * 50,
-                                  child: cartITems()),
-                            ),
-                            Positioned(
-                              bottom: 25,
-                              left: 0,
-                              right: 0,
-                              child: Container(
-                                height: 80,
-                                color: StaticColor.backgroundColor,
-                                child: paybutton(context),
-                              ),
-                            ),
-                            !isShiftOpen ? openShiftButton(context) : SizedBox()
-                          ],
                         ),
                       ),
                     ]),
