@@ -25,7 +25,6 @@ class Strings {
   static String service_charge = "Service Charge";
   static String tax = "TAX";
   static String grand_total = "GRAND TOTAL";
-  static String rounding_ammount = "Rounding Amount";
   static String search_bar_text = "Search product here...";
   static String btn_Add_customer = "Add Customer";
   static String select_customer = "Select Customer";
@@ -43,7 +42,7 @@ class Strings {
   static String fisrtname = "First Name";
   static String lastname = "Last Name";
   static String email = "Email";
-  static String phone = "Mobile";
+  static String phone = "Phone";
   static String password = "Password";
   static String birthdate = "Birth Date";
   static String addressline1 = "Address";
@@ -94,7 +93,9 @@ class Strings {
   static String delete_order = "Delete Order";
   static String reprint_Order = "Resend to Kitchen";
   static String out_of_stoke = "OUT OF STOCK";
+  static String out_of_box = "OUT OF BOX";
   static String out_of_stoke_msg = "Product Out of Stock";
+  static String out_of_box_msg = "Product not available in Box";
   static String apply_promocode = "Apply Promocode";
   static String item_not_available = "No item available";
   static String asset_headerLogo = "assets/headerlogo.png";
@@ -133,7 +134,6 @@ class Strings {
   static String procesing = "Processing";
   static String send = "SEND";
   static String open = "OPEN";
-  static String shift_close_msg = "Please close your shift and Sync data.";
   static String internet_connection_lost = "Internet Connection Lost";
   static String shift_opne_alert_msg =
       "Currently shift was closed,Please opne shift after you can see shift report.";

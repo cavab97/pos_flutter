@@ -15,8 +15,7 @@ import 'package:mcncashier/screens/CloseShiftPage.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/screens/WineStorage.dart';
-
-import '../helpers/LocalAPI/ShiftList.dart';
+import 'package:mcncashier/components/commanutils.dart';
 
 class DrawerWid extends StatefulWidget {
   DrawerWid({Key key}) : super(key: key);
@@ -26,7 +25,6 @@ class DrawerWid extends StatefulWidget {
 
 class DrawerWidState extends State<DrawerWid> {
   PrintReceipt printKOT = PrintReceipt();
-  ShiftList shiftlist = ShiftList();
   List<Printer> printerreceiptList = new List<Printer>();
   var permissions = "";
   bool isShiftOpen = true;
@@ -92,8 +90,7 @@ class DrawerWidState extends State<DrawerWid> {
   }
 
   getAllPrinter() async {
-    List<Printer> printerDraft =
-        await printerList.getAllPrinterList(context, "1");
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
     setState(() {
       printerreceiptList = printerDraft;
     });
@@ -150,7 +147,8 @@ class DrawerWidState extends State<DrawerWid> {
     var branchid = await CommunFun.getbranchId();
     User userdata = await CommunFun.getuserDetails();
     Shift shift = new Shift();
-    int appid = await shiftlist.getLastShiftAppID(terminalId);
+
+    int appid = await localAPI.getLastShiftAppID(terminalId);
     if (shiftid == null && appid != 0) {
       shift.appId = appid + 1;
     } else {
@@ -170,7 +168,7 @@ class DrawerWidState extends State<DrawerWid> {
       shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
     shift.updatedBy = userdata.id;
-    var result = await shiftlist.insertShift(context, shift, shiftid);
+    var result = await localAPI.insertShift(shift, shiftid);
     if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
     } else {
@@ -179,9 +177,9 @@ class DrawerWidState extends State<DrawerWid> {
       await Preferences.removeSinglePref(Constant.DASH_SHIFT);
       await Preferences.removeSinglePref(Constant.IS_SHIFT_OPEN);
       await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
-      checkshift();
     }
-    Navigator.pushNamedAndRemoveUntil(
+    checkshift();
+    await Navigator.pushNamedAndRemoveUntil(
         context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
         arguments: {"isAssign": false});
   }
@@ -196,17 +194,36 @@ class DrawerWidState extends State<DrawerWid> {
   }
 
   syncOrdersTodatabase() async {
-    await CommunFun.opneSyncPop(context);
-    await CommunFun.syncOrdersANDStore(context, true);
+    if (permissions.contains(Constant.VIEW_SYNC)) {
+      await CommunFun.opneSyncPop(context);
+      await CommunFun.syncOrdersANDStore(context, true);
+    } else {
+      await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
+          () async {
+        await CommunFun.opneSyncPop(context);
+        await CommunFun.syncOrdersANDStore(context, true);
+      }, () {});
+    }
   }
 
   syncAllTables() async {
     //Navigator.of(context).pop();
-    await Preferences.removeSinglePref(Constant.LastSync_Table);
-    await Preferences.removeSinglePref(Constant.OFFSET);
-    await CommunFun.opneSyncPop(context);
-    await CommunFun.syncOrdersANDStore(context, false);
-    await CommunFun.syncAfterSuccess(context, false);
+    if (permissions.contains(Constant.VIEW_SYNC)) {
+      await Preferences.removeSinglePref(Constant.LastSync_Table);
+      await Preferences.removeSinglePref(Constant.OFFSET);
+      await CommunFun.opneSyncPop(context);
+      await CommunFun.syncOrdersANDStore(context, false);
+      await CommunFun.syncAfterSuccess(context, false);
+    } else {
+      await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
+          () async {
+        await Preferences.removeSinglePref(Constant.LastSync_Table);
+        await Preferences.removeSinglePref(Constant.OFFSET);
+        await CommunFun.opneSyncPop(context);
+        await CommunFun.syncOrdersANDStore(context, false);
+        await CommunFun.syncAfterSuccess(context, false);
+      }, () {});
+    }
   }
 
   @override

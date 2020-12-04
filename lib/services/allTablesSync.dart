@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'package:mcncashier/models/Shift.dart';
-import 'package:mcncashier/models/ShiftInvoice.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -15,6 +14,8 @@ import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
+import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/TerminalLog.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Order.dart';
@@ -258,6 +259,7 @@ class SyncAPICalls {
             "terminal_id": order.terminal_id,
             "app_id": order.app_id,
             "table_id": order.table_id,
+            "pax": order.pax,
             "invoice_no": order.invoice_no,
             "customer_id": order.customer_id,
             "tax_json": order.tax_json,
@@ -291,7 +293,6 @@ class SyncAPICalls {
           'orders': json.encode(ordersList)
         };
         var res = await APICalls.apiCall(apiurl, context, stringParams);
-
         if (res["status"] == Constant.STATUS200) {
           await savesyncORderData(res["data"]);
           //await CommunFun.showToast(context, "All orders upto dates.");
@@ -321,6 +322,7 @@ class SyncAPICalls {
           order.terminal_id = orderdata["terminal_id"];
           order.app_id = orderdata["app_id"];
           order.table_id = orderdata["table_id"];
+          order.pax = orderdata["pax"];
           order.invoice_no = orderdata["invoice_no"];
           order.customer_id = orderdata["customer_id"];
           order.tax_json = orderdata["tax_json"];
@@ -354,7 +356,7 @@ class SyncAPICalls {
           order.order_by = orderdata["order_by"];
           order.updated_at = orderdata["updated_at"];
           order.updated_by = orderdata["updated_by"];
-          var result = await localAPI.saveSyncOrder(order);
+          await localAPI.saveSyncOrder(order);
 
           var orderdetail = orderdata["order_detail"];
           if (orderdetail.length > 0) {
@@ -394,7 +396,7 @@ class SyncAPICalls {
               o_details.detail_by = detail["detail_by"];
               o_details.updated_at = detail["updated_at"];
               o_details.updated_by = detail["updated_by"];
-              var result1 = await localAPI.saveSyncOrderDetails(o_details);
+              await localAPI.saveSyncOrderDetails(o_details);
 
               var modifire = detail["order_modifier"];
               if (modifire.length > 0) {
@@ -419,7 +421,7 @@ class SyncAPICalls {
                   m_data.om_by = modifiredata["om_by"];
                   m_data.updated_at = modifiredata["updated_at"];
                   m_data.updated_by = modifiredata["updated_by"];
-                  var datres = await localAPI.saveSyncOrderModifire(m_data);
+                  await localAPI.saveSyncOrderModifire(m_data);
                 }
               }
               var attribute = detail["order_attributes"];
@@ -481,8 +483,7 @@ class SyncAPICalls {
               paymentdat.op_by = paydat["op_by"];
               paymentdat.updated_at = paydat["updated_at"];
               paymentdat.updated_by = paydat["updated_by"];
-              // paymentdat.serverId = paydat["serverId"];
-              var paymentres = await localAPI.saveSyncOrderPaymet(paymentdat);
+              await localAPI.saveSyncOrderPaymet(paymentdat);
             }
           }
         }
@@ -712,13 +713,13 @@ class SyncAPICalls {
       var branchid = await CommunFun.getbranchId();
       LocalAPI localAPI = LocalAPI();
       List<Customer_Liquor_Inventory> custstoreData =
-          await localAPI.getCustomersWineInventoryTable(branchid);
+          await localAPI.getCustomersWineInventory(branchid);
       var custData = [];
       if (custstoreData.length > 0) {
         for (var i = 0; i < custstoreData.length; i++) {
           Customer_Liquor_Inventory custInv = custstoreData[i];
           List<Customer_Liquor_Inventory_Log> custLogData = await localAPI
-              .getCustomersWineInventoryLogsTable(branchid, custInv.appId);
+              .getCustomersWineInventoryLogs(branchid, custInv.appId);
           var data = {
             "cl_id": custInv.clId,
             "uuid": custInv.uuid,
@@ -898,9 +899,7 @@ class SyncAPICalls {
           shiftInvoice.created_at = logint["created_at"];
           shiftInvoice.updated_at = logint["updated_at"];
           shiftInvoice.serverId = logint["server_id"];
-          shiftInvoice.localID = logint["localID"];
           shiftInvoice.terminal_id = logint["terminal_id"];
-          shiftInvoice.shift_terminal_id = logint["shift_terminal_id"];
           var result =
               await localAPI.saveShiftInvoiceDatafromSync(shiftInvoice);
         }

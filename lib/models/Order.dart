@@ -11,6 +11,7 @@ class Orders {
   int tax_percent;
   double tax_amount;
   int voucher_id;
+  int pax;
   double voucher_amount;
   double sub_total;
   double sub_total_after_discount;
@@ -52,6 +53,7 @@ class Orders {
       this.order_item_count,
       this.order_date,
       this.order_by,
+      this.pax,
       this.voucher_detail,
       this.server_id,
       this.tax_json,
@@ -68,6 +70,7 @@ class Orders {
     app_id = json["app_id"];
     table_no = json["table_no"];
     table_id = json["table_id"];
+    pax = json["pax"];
     invoice_no = json["invoice_no"];
     customer_id = json["customer_id"];
     tax_percent = json["tax_percent"];
@@ -117,6 +120,7 @@ class Orders {
     data["app_id"] = this.app_id;
     data["table_no"] = this.table_no;
     data["table_id"] = this.table_id;
+    data["pax"] = this.pax;
     data["invoice_no"] = this.invoice_no;
     data["customer_id"] = this.customer_id;
     data["tax_percent"] = this.tax_percent;

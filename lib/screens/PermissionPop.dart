@@ -15,6 +15,7 @@ class OpenPermissionPop extends StatefulWidget {
   Function onEnter;
   Function onClose;
   final perFor;
+
   @override
   OpenPermissionPopState createState() => OpenPermissionPopState();
 }
@@ -48,7 +49,7 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
       List<User> checkUserExit = await localAPI.checkUserExit(pinNumber);
       if (checkUserExit.length != 0) {
         List<PosPermission> permissions =
-            await branchapi.getUserPermissions(checkUserExit[0].id);
+            await localAPI.getUserPermissions(checkUserExit[0].id);
         if (permissions.length > 0) {
           print(permissions[0].posPermissionName);
           if (permissions[0].posPermissionName != null &&
@@ -67,37 +68,37 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
     }
   }
 
+  Future<bool> _willPopCallback() async {
+    widget.onClose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    Future<bool> _willPopCallback() async {
-      widget.onClose();
-    }
-
     return WillPopScope(
-        child: AlertDialog(
-          titlePadding: EdgeInsets.all(0),
-          title: Stack(
-            overflow: Overflow.visible,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 3),
-                height: SizeConfig.safeBlockVertical * 9,
-                color: Colors.black,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(Strings.invalid_pin_msg,
-                        style: Styles.whiteBoldsmall()),
-                  ],
-                ),
+      child: AlertDialog(
+        titlePadding: EdgeInsets.all(0),
+        title: Stack(
+          overflow: Overflow.visible,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 3),
+              height: SizeConfig.safeBlockVertical * 9,
+              color: Colors.black,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(Strings.invalid_pin_msg, style: Styles.whiteBoldsmall()),
+                ],
               ),
-              closeButton(context), //popup close btn
-            ],
-          ),
-          content: mainContent(), // Popup body contents
+            ),
+            closeButton(context), //popup close btn
+          ],
         ),
-        onWillPop: _willPopCallback);
+        content: mainContent(), // Popup body contents
+      ),
+      onWillPop: _willPopCallback,
+    );
   }
 
   Widget closeButton(context) {
@@ -107,7 +108,6 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
       child: GestureDetector(
         onTap: () {
           widget.onClose();
-
           Navigator.of(context).pop();
         },
         child: Container(
@@ -117,7 +117,6 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
               color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
-              widget.onClose();
               Navigator.of(context).pop();
             },
             icon: Icon(

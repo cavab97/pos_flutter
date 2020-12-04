@@ -10,13 +10,11 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
-import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
-import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
-import 'package:mcncashier/helpers/LocalAPI/TablesList.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/Terminal.dart';
+import 'package:mcncashier/models/colorTable.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
@@ -25,10 +23,6 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
-
-import '../components/communText.dart';
-import '../helpers/LocalAPI/OrdersList.dart';
-import '../helpers/LocalAPI/ShiftList.dart';
 
 class SelectTablePage extends StatefulWidget {
   // PIN Enter PAGE
@@ -43,15 +37,11 @@ class _SelectTablePageState extends State<SelectTablePage>
   TextEditingController paxController = new TextEditingController();
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
-  TablesList tabList = new TablesList();
-  Cartlist cartlist = new Cartlist();
-  OrdersList ordersList = new OrdersList();
-  PrinterList printerAPI = new PrinterList();
-  ShiftList shiftList = new ShiftList();
   List<TablesDetails> tableList = new List<TablesDetails>();
   PrintReceipt printKOT = PrintReceipt();
   List<Printer> printerList = new List<Printer>();
   List<Printer> printerreceiptList = new List<Printer>();
+  List<ColorTable> tableColors = new List<ColorTable>();
   var selectedTable;
   var number_of_pax;
   var orderid;
@@ -61,7 +51,6 @@ class _SelectTablePageState extends State<SelectTablePage>
   bool isMergeing = false;
   bool isChangingTable = false;
   bool isAssigning = false;
-  String qrCodeString = "";
   bool isChanging = false;
   bool isShiftOpen = true;
   bool isMenuOpne = false;
@@ -72,31 +61,17 @@ class _SelectTablePageState extends State<SelectTablePage>
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
+    getTables();
     KeyboardVisibilityNotification().addNewListener(
       onHide: () {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
     _tabController = new TabController(length: 2, vsync: this);
-    checkisInit();
-    checkISlogin();
-  }
-
-  checkisInit() async {
-    var isInit = await CommunFun.checkDatabaseExit();
-    if (isInit == true) {
-      afterInit();
-    } else {
-      await databaseHelper.initializeDatabase();
-      afterInit();
-    }
-  }
-
-  afterInit() {
-    getTables();
     checkshift();
     getAllPrinter();
     setPermissons();
+    getTablesColor();
   }
 
   setPermissons() async {
@@ -106,18 +81,11 @@ class _SelectTablePageState extends State<SelectTablePage>
     });
   }
 
-  checkISlogin() async {
-    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
-    if (loginUser == null) {
-      Navigator.pushNamed(context, Constant.PINScreen);
-    }
-  }
-
   checkshift() async {
     /*Set terminal name for print receipt only */
     if (Strings.terminalName.isEmpty) {
       var terminalkey = await CommunFun.getTeminalKey();
-      Terminal terminalData = await branchapi.getTerminalDetails(terminalkey);
+      Terminal terminalData = await localAPI.getTerminalDetails(terminalkey);
       if (terminalData != null) {
         Strings.terminalName = terminalData.terminalName;
       }
@@ -134,9 +102,17 @@ class _SelectTablePageState extends State<SelectTablePage>
       isLoading = true;
     });
     var branchid = await CommunFun.getbranchId();
-    List<TablesDetails> tables = await tabList.getTables(context, branchid);
+    List<TablesDetails> tables = await localAPI.getTables(branchid);
     setState(() {
       tableList = tables;
+      isLoading = false;
+    });
+  }
+
+  getTablesColor() async {
+    List<ColorTable> tables = await localAPI.getTablesColor();
+    setState(() {
+      tableColors = tables;
       isLoading = false;
     });
   }
@@ -144,7 +120,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   viewOrder() async {
     // view order data if already order in table
     var tableid = selectedTable.tableId;
-    List<Table_order> order = await tabList.getTableOrders(tableid);
+    List<Table_order> order = await localAPI.getTableOrders(tableid);
     await Preferences.setStringToSF(Constant.TABLE_DATA, json.encode(order[0]));
     setState(() {
       isMenuOpne = false;
@@ -177,7 +153,8 @@ class _SelectTablePageState extends State<SelectTablePage>
         table1.saveorderid != 0 ? table1.saveorderid : 0;
     table_order.is_merge_table = "1";
     table_order.merged_table_id = table2.tableId;
-    var result = await tabList.mergeTableOrder(context, table_order);
+    table_order.assignTime = await CommunFun.getCurrentDateTime(DateTime.now());
+    var result = await localAPI.mergeTableOrder(table_order);
     setState(() {
       isMergeing = false;
       mergeInTable = null;
@@ -197,15 +174,17 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   selectTableForNewOrder() async {
     if (int.parse(paxController.text) <= selectedTable.tableCapacity) {
-      Table_order tableOrder = new Table_order();
-      tableOrder.table_id = selectedTable.tableId;
-      tableOrder.number_of_pax = int.parse(paxController.text);
-      tableOrder.save_order_id = selectedTable.saveorderid;
-      tableOrder.service_charge =
+      Table_order table_order = new Table_order();
+      table_order.table_id = selectedTable.tableId;
+      table_order.number_of_pax = int.parse(paxController.text);
+      table_order.save_order_id = selectedTable.saveorderid;
+      table_order.service_charge =
           CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
-      await tabList.insertTableOrder(context, tableOrder);
+      table_order.assignTime =
+          await CommunFun.getCurrentDateTime(DateTime.now());
+      var result = await localAPI.insertTableOrder(table_order);
       await Preferences.setStringToSF(
-          Constant.TABLE_DATA, json.encode(tableOrder));
+          Constant.TABLE_DATA, json.encode(table_order));
       paxController.text = "";
       Navigator.of(context).pop();
       if (!isChanging) {
@@ -234,11 +213,14 @@ class _SelectTablePageState extends State<SelectTablePage>
       tableorder.table_id = selectedTable.tableId;
       tableorder.number_of_pax = int.parse(paxController.text);
       tableorder.service_charge = selectedTable.tableServiceCharge;
-      var saveorderid =
-          await cartlist.addSaveOrder(orderData, selectedTable.tableId);
-      tableorder.save_order_id = saveorderid;
-      var tab = await tabList.insertTableOrder(context, tableorder);
-      Navigator.of(context).pop();
+      tableorder.assignTime =
+          await CommunFun.getCurrentDateTime(DateTime.now());
+      await localAPI.insertTableOrder(tableorder);
+      await localAPI.insertSaveOrders(orderData, selectedTable.tableId);
+      await localAPI.updateTableidintocart(orderid, selectedTable.tableId);
+      setState(() {
+        isLoading = false;
+      });
       Navigator.pushNamed(context, Constant.WebOrderPages);
     } else {
       CommunFun.showToast(context, Strings.table_pax_msg);
@@ -282,13 +264,13 @@ class _SelectTablePageState extends State<SelectTablePage>
       isLoading = true;
     });
     if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
-      // List<SaveOrder> cartID =
-      //     await localAPI.gettableCartID(selectedTable.saveorderid);
-      // if (cartID.length > 0) {
-      await ordersList.removeCart(null, selectedTable.tableId);
-      // }
+      List<SaveOrder> cartID =
+          await localAPI.gettableCartID(selectedTable.saveorderid);
+      if (cartID.length > 0) {
+        await localAPI.removeCartItem(cartID[0].cartId, selectedTable.tableId);
+      }
     } else {
-      await tabList.deleteTableOrder(selectedTable.tableId);
+      await localAPI.deleteTableOrder(selectedTable.tableId);
     }
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     setState(() {
@@ -313,14 +295,16 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   changeTableToOtherTable(table) async {
     var cartid;
-    // if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
-    //   List<SaveOrder> cartID =
-    //       await localAPI.gettableCartID(selectedTable.saveorderid);
-    //   if (cartID.length > 0) {
-    //     cartid = cartID[0].cartId;
-    //   }
-    // }
-    await tabList.changeTable(selectedTable.tableId, table.tableId, cartid);
+    if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
+      List<SaveOrder> cartID =
+          await localAPI.gettableCartID(selectedTable.saveorderid);
+      if (cartID.length > 0) {
+        cartid = cartID[0].cartId;
+      }
+    }
+    var tables = await localAPI.changeTable(
+        selectedTable.tableId, table.tableId, cartid);
+    print(tables);
     setState(() {
       changeInTable = null;
       isChangingTable = false;
@@ -537,11 +521,11 @@ class _SelectTablePageState extends State<SelectTablePage>
     var branchid = await CommunFun.getbranchId();
     User userdata = await CommunFun.getuserDetails();
     Shift shift = new Shift();
-    int appid = await shiftList.getLastShiftAppID(terminalId);
-    if (shiftid == null && appid != 0) {
+    int appid = await localAPI.getLastShiftAppID(terminalId);
+    if (appid != 0) {
       shift.appId = appid + 1;
     } else {
-      shift.appId = shiftid == null ? 1 : int.parse(shiftid);
+      shift.appId = 1;
     }
     shift.terminalId = int.parse(terminalId);
     shift.branchId = int.parse(branchid);
@@ -557,12 +541,10 @@ class _SelectTablePageState extends State<SelectTablePage>
       shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
     shift.updatedBy = userdata.id;
-    var result = await shiftList.insertShift(context, shift, shiftid);
+    var result = await localAPI.insertShift(shift, shiftid);
     if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
     } else {
-      await CommunFun.printShiftReportData(
-          printerreceiptList[0].printerIp.toString(), context, shiftid);
       await Preferences.removeSinglePref(Constant.DASH_SHIFT);
       await Preferences.removeSinglePref(Constant.IS_SHIFT_OPEN);
       await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
@@ -598,9 +580,8 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   getAllPrinter() async {
-    List<Printer> printer = await printerAPI.getAllPrinterList(context, "0");
-    List<Printer> printerDraft =
-        await printerAPI.getAllPrinterList(context, "1");
+    List<Printer> printer = await localAPI.getAllPrinterForKOT();
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
     setState(() {
       printerList = printer;
       printerreceiptList = printerDraft;
@@ -961,6 +942,15 @@ class _SelectTablePageState extends State<SelectTablePage>
         ));
   }
 
+  Color colorConvert(String color) {
+    color = color.replaceAll("#", "");
+    if (color.length == 6) {
+      return Color(int.parse("0xFF" + color));
+    } else if (color.length == 8) {
+      return Color(int.parse("0x" + color));
+    }
+  }
+
   Widget tablesListwidget(type) {
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2.4;
@@ -1001,6 +991,16 @@ class _SelectTablePageState extends State<SelectTablePage>
       childAspectRatio: (itemWidth / itemHeight),
       crossAxisCount: isMenuOpne ? 4 : 6,
       children: newtableList.map((table) {
+        var selected;
+        if (tableColors.length > 0 && table.occupiedMinute != null) {
+          selected = tableColors.firstWhere(
+              (item) => item.timeMinute >= table.occupiedMinute, orElse: () {
+            if (table.occupiedMinute >=
+                tableColors[tableColors.length - 1].timeMinute) {
+              return tableColors[tableColors.length - 1];
+            }
+          });
+        }
         return InkWell(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
           onTap: () {
@@ -1017,9 +1017,6 @@ class _SelectTablePageState extends State<SelectTablePage>
                 CommunFun.showToast(context, Strings.table_already_occupied);
               }
             } else {
-              setState(() {
-                qrCodeString = table.tableQr;
-              });
               ontableTap(table);
             }
           },
@@ -1034,7 +1031,9 @@ class _SelectTablePageState extends State<SelectTablePage>
                   tag: table.tableId,
                   child: Container(
                     decoration: new BoxDecoration(
-                        color: Colors.white,
+                        color: selected != null
+                            ? colorConvert(selected.colorCode)
+                            : Colors.white,
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(8.0),
                             topRight: Radius.circular(8.0))),
@@ -1042,7 +1041,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                     height: itemHeight / 2,
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
                           SizedBox(height: 30),
                           Text(
@@ -1053,6 +1052,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                                 : table.tableName,
                             style: Styles.blackMediumBold(),
                           ),
+                          Text(selected != null ? selected.timeMinute : "")
                         ]),
                   ),
                 ),

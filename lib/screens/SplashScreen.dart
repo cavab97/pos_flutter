@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/services/Config.dart' as repo;
 
 class SplashScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class SplashScreen extends StatefulWidget {
 class SplashScreenstate extends State<SplashScreen> {
   @override
   void initState() {
+// TODO: implement initState
     super.initState();
     getconfigdata();
     navigatePage();
