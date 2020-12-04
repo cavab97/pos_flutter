@@ -1975,12 +1975,64 @@ class _DashboradPageState extends State<DashboradPage>
                 child: Image.asset(Strings.asset_headerLogo,
                     fit: BoxFit.contain, gaplessPlayback: true),
               ),
+              SizedBox(width: SizeConfig.safeBlockVertical * 10),
+               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  !isWebOrder ? addCustomerBtn(context) : SizedBox(),
+                  menubutton(() {
+                    // opneMenuButton();
+                  })
+                ],
+              )
             ],
           ),
+         
+        ],
+      ),
+    );
+  }
+
+  Widget tableHeader2() {
+    // products Header part 2
+    return Container(
+      padding: EdgeInsets.only(left: 5, right: 5),
+      height: SizeConfig.safeBlockVertical * 11,
+      // color: Colors.blue,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          selectedTable != null
+              ? Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: SizeConfig.safeBlockVertical * 4,
+                    ),
+                    SizedBox(width: 5),
+                    Container(
+                      width: SizeConfig.safeBlockHorizontal * 12,
+                      child: Text(
+                        tableName +
+                            " (" +
+                            selectedTable.number_of_pax.toString() +
+                            ")",
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                        style: Styles.whiteBoldsmall(),
+                      ),
+                    ),
+                  ],
+                )
+              : SizedBox(),
           Container(
-            height: SizeConfig.safeBlockVertical * 7,
+            //height: SizeConfig.safeBlockVertical * 7,
             //margin: EdgeInsets.only(top: 15),
-            width: MediaQuery.of(context).size.width / 3.8,
+            padding: EdgeInsets.only(right: 5),
+            width: MediaQuery.of(context).size.width / 6,
             child: TypeAheadField(
               textFieldConfiguration: TextFieldConfiguration(
                 controller: _textController,
@@ -2072,59 +2124,10 @@ class _DashboradPageState extends State<DashboradPage>
     );
   }
 
-  Widget tableHeader2() {
-    // products Header part 2
-    return Container(
-      padding: EdgeInsets.only(left: 5, right: 5),
-      height: SizeConfig.safeBlockVertical * 11,
-      // color: Colors.blue,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          selectedTable != null
-              ? Row(
-                  children: <Widget>[
-                    Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: SizeConfig.safeBlockVertical * 4,
-                    ),
-                    SizedBox(width: 5),
-                    Container(
-                      width: SizeConfig.safeBlockHorizontal * 12,
-                      child: Text(
-                        tableName +
-                            " (" +
-                            selectedTable.number_of_pax.toString() +
-                            ")",
-                        overflow: TextOverflow.ellipsis,
-                        softWrap: false,
-                        style: Styles.whiteBoldsmall(),
-                      ),
-                    ),
-                  ],
-                )
-              : SizedBox(),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              !isWebOrder ? addCustomerBtn(context) : SizedBox(),
-              menubutton(() {
-                // opneMenuButton();
-              })
-            ],
-          )
-        ],
-      ),
-    );
-  }
-
   Widget addCustomerBtn(context) {
     return customer == null && permissions.contains(Constant.ADD_ORDER)
         ? RaisedButton(
-            padding: EdgeInsets.only(left: 5, right: 5, top: 0, bottom: 0),
+            padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
             onPressed: () {
               if (isShiftOpen) {
                 opneShowAddCustomerDailog();
