@@ -1970,11 +1970,6 @@ class _DashboradPageState extends State<DashboradPage>
                     size: SizeConfig.safeBlockVertical * 5,
                   )),
               SizedBox(width: SizeConfig.safeBlockVertical * 3),
-              SizedBox(
-                height: SizeConfig.safeBlockVertical * 7,
-                child: Image.asset(Strings.asset_headerLogo,
-                    fit: BoxFit.contain, gaplessPlayback: true),
-              ),
               SizedBox(width: SizeConfig.safeBlockVertical * 10),
                Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
