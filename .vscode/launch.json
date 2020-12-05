@@ -4,10 +4,52 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        {
+        /* {
             "name": "mcn_cashier",
             "request": "launch",
             "type": "dart"
-        }
+        } */
+        {
+            "name": "Run Local",
+            "program": "lib/app/flavors/main_local.dart",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--flavor",
+                "local"
+            ]
+        },
+        {
+            "name": "Run Development",
+            "flutterMode": "debug",
+            "program": "lib/app/flavors/main_development.dart",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--flavor",
+                "development"
+            ]
+        },
+        {
+            "name": "Run Staging",
+            "flutterMode": "debug",
+            "program": "lib/app/flavors/main_staging.dart",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--flavor",
+                "staging"
+            ]
+        },
+        {
+            "name": "Run Production",
+            "program": "lib/app/flavors/main_production.dart",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--flavor",
+                "production"
+            ]
+        },
     ]
 }

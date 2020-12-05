@@ -22,31 +22,32 @@ class OrderDetail {
   int updated_by;
   String updated_at;
   String detail_datetime;
+  String base64;
 
-  OrderDetail({
-    this.detailId,
-    this.uuid,
-    this.order_id,
-    this.branch_id,
-    this.terminal_id,
-    this.app_id,
-    this.product_id,
-    this.product_price,
-    this.product_old_price,
-    this.product_discount,
-    this.category_id,
-    this.detail_amount,
-    this.detail_qty,
-    this.product_detail,
-    this.setmeal_product_detail,
-    this.detail_status,
-    this.detail_by,
-    this.updated_by,
-    this.issetMeal,
-    this.hasRacManagemant,
-    this.updated_at,
-    this.detail_datetime,
-  });
+  OrderDetail(
+      {this.detailId,
+      this.uuid,
+      this.order_id,
+      this.branch_id,
+      this.terminal_id,
+      this.app_id,
+      this.product_id,
+      this.product_price,
+      this.product_old_price,
+      this.product_discount,
+      this.category_id,
+      this.detail_amount,
+      this.detail_qty,
+      this.product_detail,
+      this.setmeal_product_detail,
+      this.detail_status,
+      this.detail_by,
+      this.updated_by,
+      this.issetMeal,
+      this.hasRacManagemant,
+      this.updated_at,
+      this.detail_datetime,
+      this.base64});
 
   OrderDetail.fromJson(Map<String, dynamic> json) {
     detailId = json["detail_id"];
@@ -82,6 +83,7 @@ class OrderDetail {
     updated_by = json["updated_by"];
     updated_at = json["updated_at"];
     detail_datetime = json["detail_datetime"];
+    base64 = json["base64"];
   }
 
   Map<String, dynamic> toJson() {
@@ -110,6 +112,7 @@ class OrderDetail {
     data["updated_by"] = this.updated_by;
     data["updated_at"] = this.updated_at;
     data["detail_datetime"] = this.detail_datetime;
+    data["base64"] = this.base64;
     return data;
   }
 }

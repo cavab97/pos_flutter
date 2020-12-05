@@ -6,7 +6,6 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
-import 'package:mcncashier/helpers/LocalAPI/CustomerList.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/screens/AddCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -24,7 +23,6 @@ class SearchCustomerPage extends StatefulWidget {
 class _SearchCustomerPageState extends State<SearchCustomerPage> {
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
-  CustomersList custList = new CustomersList();
   List<Customer> customerList = new List<Customer>();
   List<Customer> filterList = [];
   bool isFiltring = false;
@@ -38,8 +36,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
 
   getcustomerList() async {
     var terminalkey = await CommunFun.getTeminalKey();
-    List<Customer> customers =
-        await custList.getCustomers(context, terminalkey);
+    List<Customer> customers = await localAPI.getCustomers(terminalkey);
     setState(() {
       customerList = customers;
     });

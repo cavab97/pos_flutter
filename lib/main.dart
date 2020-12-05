@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/routes.dart';
 import 'package:mcncashier/screens/SplashScreen.dart';
@@ -39,17 +41,17 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
     switch (state) {
       case AppLifecycleState.paused:
-        print("paused");
+        print("ppaused");
         break;
       case AppLifecycleState.resumed:
-        print("resumed");
+        print("rresumed");
         break;
       case AppLifecycleState.inactive:
-        print("Inactive");
+        print("Iinactive");
         timer?.cancel();
         break;
       case AppLifecycleState.detached:
-        print("Detached");
+        print("Ddetached");
         break;
     }
   }

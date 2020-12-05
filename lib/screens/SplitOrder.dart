@@ -7,10 +7,6 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
-import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
-import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
-import 'package:mcncashier/helpers/LocalAPI/ProductList.dart';
-import 'package:mcncashier/helpers/LocalAPI/ShiftList.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Customer.dart';
@@ -36,8 +32,6 @@ import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 
-import '../helpers/LocalAPI/Branch.dart';
-import '../models/Lastids.dart';
 import 'PaymentMethodPop.dart';
 
 class SplitBillDialog extends StatefulWidget {
@@ -62,11 +56,6 @@ class SplitBillDialog extends StatefulWidget {
 class _SplitBillDialog extends State<SplitBillDialog> {
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
-  ShiftList shiftAPI = new ShiftList();
-  BranchList branchAPI = new BranchList();
-  OrdersList orderApi = new OrdersList();
-  PaymentList paymentAPI = new PaymentList();
-  ProductsList productAPI = ProductsList();
   List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
   double subTotal = 00.00;
   double taxValues = 00.00;
@@ -76,18 +65,15 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   List taxJson = [];
   List<MSTCartdetails> cartList = new List<MSTCartdetails>();
   bool isLoading = false;
-  Branch branchData;
   String selectedID = "";
-  var permissions;
   PrintReceipt _printReceipt = PrintReceipt();
   var currency = "RM";
-
+  var permissions;
   @override
   void initState() {
     super.initState();
     getTaxs();
     getCartItem();
-    getbranch();
     setPermissons();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
   }
@@ -112,7 +98,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       isLoading = true;
     });
     List<MSTCartdetails> cartItem =
-        await CommunFun.getcartDetails(widget.currentCartID);
+        await localAPI.getCartItem(widget.currentCartID);
     if (cartItem.length > 0) {
       setState(() {
         cartList = cartItem;
@@ -236,7 +222,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   }
 
   paymentWithMethod(mehtod) async {
-    //sendPaymentByCash(mehtod);
+    sendPaymentByCash(mehtod);
   }
 
   openShowAddCustomerDailog() {
@@ -320,21 +306,13 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   }
 
   getTaxs() async {
-    List<BranchTax> taxlists = await CommunFun.getbranchTax();
+    var branchid = await CommunFun.getbranchId();
+    List<BranchTax> taxlists = await localAPI.getTaxList(branchid);
     if (taxlists.length > 0) {
       setState(() {
         taxlist = taxlists;
       });
     }
-  }
-
-  getbranch() async {
-    var branchid = await CommunFun.getbranchId();
-    var branch = await branchAPI.getbranchData(branchid);
-    setState(() {
-      branchData = branch;
-    });
-    return branch;
   }
 
   countTax(subT) async {
@@ -344,7 +322,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
-
+        List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
         var taxval = taxlistitem.rate != null
             ? subT * double.parse(taxlistitem.rate) / 100
             : 0.0;
@@ -362,7 +340,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           "updated_at": taxlistitem.updatedAt,
           "updated_by": taxlistitem.updatedBy,
           "taxAmount": taxval.toStringAsFixed(2),
-          "taxCode": taxlistitem.code //tax.code
+          "taxCode": tax.length > 0 ? tax[0].code : "" //tax.code
         };
         totalTax.add(taxmap);
       }
@@ -618,31 +596,21 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     setTotalSubTotal();
   }
 
-  sendPaymentByCash(List<OrderPayment> payments) async {
+  sendPaymentByCash(List<OrderPayment> payment) async {
     var cartData = await getcartData();
     var branchdata = await getbranch();
-    /*if (isWebOrder) {
-      payment.paymentId = cartData.cart_payment_id;
-    }*/
-    VoucherHistory history = new VoucherHistory();
-    List<OrderModifire> orderModifires = new List<OrderModifire>();
-    List<OrderAttributes> orderAttributes = new List<OrderAttributes>();
-    List<OrderPayment> orderPaymentList = new List<OrderPayment>();
-    ShiftInvoice shiftinvoice = new ShiftInvoice();
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     Orders order = new Orders();
     Table_order tables = await getTableData();
     User userdata = await CommunFun.getuserDetails();
-    List<MSTCartdetails> cartList = await getcartDetails();
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
-    //var datetime = await CommunFun.getCurrentDateTime(DateTime.now());
-    LastAppids lastappid = await orderApi.getLastids(terminalId);
+    List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
     int length = branchdata.invoiceStart.length;
     var invoiceNo;
-    if (lastappid.app_id != null) {
-      order.app_id = lastappid.app_id + 1;
+    if (lastappid.length > 0) {
+      order.app_id = lastappid[0].app_id + 1;
       invoiceNo =
           branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     } else {
@@ -650,77 +618,128 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       invoiceNo =
           branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
-    var convertGrand =
-        await CommunFun.checkRoundData(cartData.grand_total.toStringAsFixed(2));
-    double newGtotal = double.parse(convertGrand);
-    var roundingVal =
-        await CommunFun.calRounded(newGtotal, cartData.grand_total);
-    double rounding = double.parse(roundingVal.toStringAsFixed(2));
+    double newg_total =
+        double.parse(CommunFun.checkRoundData(grandTotal.toStringAsFixed(2)));
+    double rounding =
+        double.parse(CommunFun.calRounded(newg_total, grandTotal));
     order.uuid = uuid;
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
     order.table_id = tables.table_id;
+    order.pax = tables.number_of_pax;
     order.invoice_no = invoiceNo;
     order.customer_id = cartData.user_id;
     order.sub_total = subTotal;
     order.sub_total_after_discount = subTotal;
-    order.grand_total = newGtotal;
+    order.grand_total = newg_total;
     order.rounding_amount = rounding;
-    order.order_item_count = totalQty; //cartData.total_qty.toInt();
+    order.order_item_count = totalQty;
     order.tax_amount = taxValues;
     order.tax_json = json.encode(taxJson);
     order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
     order.order_status = 1;
     order.server_id = 0;
-    order.order_source = 2; //cartData.source;
+    order.order_source = cartData.source;
     order.order_by = userdata.id;
     order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
     order.updated_by = userdata.id;
+    var orderid = await localAPI.placeOrder(order);
+    print(orderid);
+    var orderDetailid;
+    if (orderid > 0) {
+      if (tempCart.length > 0) {
+        var orderId = orderid;
+        for (var i = 0; i < tempCart.length; i++) {
+          OrderDetail orderDetail = new OrderDetail();
+          var cartItem = tempCart[i];
+          var productdata = await localAPI.productdData(cartItem.productId);
+          ProductDetails pdata;
+          if (productdata.length > 0) {
+            productdata[0].qty = cartItem.productQty;
+            productdata[0].price = cartItem.productPrice;
+            pdata = productdata[0];
+          }
+          List<OrderDetail> lappid =
+              await localAPI.getLastOrdeDetailAppid(terminalId);
+          if (lappid.length > 0) {
+            orderDetail.app_id = lappid[0].app_id + 1;
+          } else {
+            orderDetail.app_id = 1;
+          }
+          orderDetail.uuid = uuid;
+          orderDetail.order_app_id = orderId;
+          orderDetail.branch_id = int.parse(branchid);
+          orderDetail.terminal_id = int.parse(terminalId);
+          orderDetail.product_id = cartItem.productId;
+          orderDetail.product_price = cartItem.productPrice;
+          orderDetail.product_old_price = cartItem.productNetPrice;
+          orderDetail.detail_qty = cartItem.productQty;
+          orderDetail.product_discount = cartItem.discount;
+          orderDetail.product_detail = json.encode(pdata);
+          orderDetail.updated_at =
+              await CommunFun.getCurrentDateTime(DateTime.now());
+          orderDetail.detail_amount =
+              (cartItem.productPrice * cartItem.productQty);
+          orderDetail.detail_datetime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
+          orderDetail.updated_by = userdata.id;
+          orderDetail.detail_status = 1;
+          orderDetail.detail_by = userdata.id;
+          if (cartItem.issetMeal == 1) {
+            orderDetail.setmeal_product_detail =
+                cartItem.setmeal_product_detail;
+          }
+          orderDetailid = await localAPI.sendOrderDetails(orderDetail);
+          print(orderDetailid);
+          if (cartItem.issetMeal == 0) {
+            List<ProductStoreInventory> updatedInt = [];
+            List<ProductStoreInventoryLog> updatedIntLog = [];
 
-    List<OrderDetail> detaislist = [];
-    if (tempCart.length > 0) {
-      for (var i = 0; i < tempCart.length; i++) {
-        OrderDetail orderDetail = new OrderDetail();
-        var cartItem = tempCart[i];
-        var productdata = await productAPI.productdData(cartItem.productId);
-        ProductDetails pdata;
-        if (productdata.length > 0) {
-          productdata[0].qty = cartItem.productQty;
-          productdata[0].price = cartItem.productPrice;
-          pdata = productdata[0];
-        }
+            if (productdata[0].hasInventory == 1) {
+              //update invnotory
+              // List<ProductStoreInventory> inventory =
+              //     await localAPI.removeFromInventory(orderDetail);
+              List<ProductStoreInventory> inventory =
+                  await localAPI.getStoreInventoryData(orderDetail.product_id);
+              if (inventory.length > 0) {
+                ProductStoreInventory invData = new ProductStoreInventory();
+                invData = inventory[0];
+                var prev = inventory[0];
+                var qty = (invData.qty - orderDetail.detail_qty);
+                invData.qty = qty;
+                invData.updatedAt =
+                    await CommunFun.getCurrentDateTime(DateTime.now());
+                invData.updatedBy = userdata.id;
+                updatedInt.add(invData);
+                var ulog = await localAPI.updateInvetory(updatedInt);
+                print(ulog);
 
-        if (lastappid.order_detail_id != null) {
-          orderDetail.app_id = lastappid.order_detail_id + 1;
-        } else {
-          orderDetail.app_id = 1;
+                //Inventory log update
+                ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+                log.uuid = uuid;
+                log.inventory_id = prev.inventoryId;
+                log.branch_id = int.parse(branchid);
+                log.product_id = cartItem.productId;
+                log.employe_id = userdata.id;
+                log.qty = prev.qty;
+                log.qty_before_change = prev.qty;
+                log.qty_after_change = qty;
+                log.updated_at =
+                    await CommunFun.getCurrentDateTime(DateTime.now());
+                log.updated_by = userdata.id;
+                updatedIntLog.add(log);
+                var inventoryLog =
+                    await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
+                print(inventoryLog);
+              }
+            }
+          }
         }
-        orderDetail.uuid = uuid;
-        orderDetail.branch_id = int.parse(branchid);
-        orderDetail.terminal_id = int.parse(terminalId);
-        orderDetail.product_id = cartItem.productId;
-        orderDetail.product_price = cartItem.productPrice;
-        orderDetail.product_old_price = cartItem.productNetPrice;
-        orderDetail.detail_qty = cartItem.productQty;
-        orderDetail.product_discount = cartItem.discount;
-        orderDetail.product_detail = json.encode(pdata);
-        orderDetail.updated_at =
-            await CommunFun.getCurrentDateTime(DateTime.now());
-        orderDetail.detail_amount =
-            (cartItem.productPrice * cartItem.productQty);
-        orderDetail.detail_datetime =
-            await CommunFun.getCurrentDateTime(DateTime.now());
-        orderDetail.updated_by = userdata.id;
-        orderDetail.detail_status = 1;
-        orderDetail.detail_by = userdata.id;
-        if (cartItem.issetMeal == 1) {
-          orderDetail.setmeal_product_detail = cartItem.setmeal_product_detail;
-        }
-        detaislist.add(orderDetail);
       }
     }
     List<MSTSubCartdetails> modifireList = await getmodifireList();
     if (modifireList.length > 0) {
+      var orderId = orderid;
       for (var i = 0; i < modifireList.length; i++) {
         OrderModifire modifireData = new OrderModifire();
         var modifire = modifireList[i];
@@ -728,12 +747,16 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             tempCart.where((mainCart) => mainCart.id == modifire.cartdetailsId);
         if (contain.isNotEmpty) {
           if (modifire.caId == null) {
-            if (lastappid.order_modifier_id != null) {
-              modifireData.app_id = lastappid.order_modifier_id + 1;
+            List<OrderModifire> lapMpid =
+                await localAPI.getLastOrderModifireAppid(terminalId);
+            if (lapMpid.length > 0) {
+              modifireData.app_id = lapMpid[0].app_id + 1;
             } else {
               modifireData.app_id = 1;
             }
             modifireData.uuid = uuid;
+            modifireData.order_app_id = orderId;
+            modifireData.detail_app_id = orderDetailid;
             modifireData.terminal_id = int.parse(terminalId);
             modifireData.product_id = modifire.productId;
             modifireData.modifier_id = modifire.modifierId;
@@ -745,17 +768,20 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             modifireData.updated_at =
                 await CommunFun.getCurrentDateTime(DateTime.now());
             modifireData.updated_by = userdata.id;
-            orderModifires.add(modifireData);
+            var ordermodifreid = await localAPI.sendModifireData(modifireData);
+            print(ordermodifreid);
           } else {
             OrderAttributes attributes = new OrderAttributes();
-
-            if (lastappid.order_attr_id != null) {
-              attributes.app_id = lastappid.order_attr_id + 1;
+            List<OrderAttributes> lapApid =
+                await localAPI.getLastOrderAttrAppid(terminalId);
+            if (lapApid.length > 0) {
+              attributes.app_id = lapApid[0].app_id + 1;
             } else {
               attributes.app_id = 1;
             }
             attributes.uuid = uuid;
-
+            attributes.order_app_id = orderId;
+            attributes.detail_app_id = orderDetailid;
             attributes.terminal_id = int.parse(terminalId);
             attributes.product_id = modifire.productId;
             attributes.attribute_id = modifire.attributeId;
@@ -768,42 +794,50 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             attributes.updated_at =
                 await CommunFun.getCurrentDateTime(DateTime.now());
             attributes.updated_by = userdata.id;
-            orderAttributes.add(attributes);
+            var orderAttri = await localAPI.sendAttrData(attributes);
+            print(orderAttri);
           }
         }
       }
     }
-    if (payments.length > 0) {
-      for (var i = 0; i < payments.length; i++) {
-        OrderPayment payment = payments[i];
-        if (lastappid.order_payment_id != null) {
-          payment.app_id = lastappid.order_payment_id + 1;
+    if (payment.length > 0) {
+      for (var i = 0; i < payment.length; i++) {
+        OrderPayment orderpayment = payment[i];
+        List<OrderPayment> lapPpid =
+            await localAPI.getLastOrderPaymentAppid(terminalId);
+        if (lapPpid.length > 0) {
+          orderpayment.app_id = lapPpid[0].app_id + 1;
         } else {
-          payment.app_id = 1;
+          orderpayment.app_id = 1;
         }
-        payment.uuid = uuid;
-        payment.branch_id = int.parse(branchid);
-        payment.terminal_id = int.parse(terminalId);
-        payment.op_method_id = payment.op_method_id;
-        payment.op_amount =
-            (cartData.grand_total - cartData.discount).toDouble();
-        payment.remark = payment.remark;
-        payment.last_digits = payment.last_digits;
-        payment.reference_number = payment.reference_number;
-        payment.approval_code = payment.approval_code;
-        payment.isCash = payment.isCash;
-        payment.op_method_response = '';
-        payment.op_status = 1;
-        payment.op_datetime =
+        orderpayment.uuid = uuid;
+        orderpayment.order_app_id = orderid;
+        orderpayment.branch_id = int.parse(branchid);
+        orderpayment.terminal_id = int.parse(terminalId);
+        orderpayment.op_method_id = payment[i].op_method_id;
+        orderpayment.op_amount = payment[i].op_amount.toDouble();
+        orderpayment.op_amount_change = payment[i].op_amount_change;
+        orderpayment.remark = payment[i].remark;
+        orderpayment.last_digits = payment[i].last_digits;
+        orderpayment.reference_number = payment[i].reference_number;
+        orderpayment.approval_code = payment[i].approval_code;
+        orderpayment.isCash = payment[i].isCash;
+        orderpayment.op_method_response = '';
+        orderpayment.op_status = 1;
+        orderpayment.op_datetime =
             await CommunFun.getCurrentDateTime(DateTime.now());
-        payment.op_by = userdata.id;
-        payment.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
-        payment.updated_by = userdata.id;
-        orderPaymentList.add(payment);
-        if (payment.isCash == 1) {
+        orderpayment.op_by = userdata.id;
+        orderpayment.updated_at =
+            await CommunFun.getCurrentDateTime(DateTime.now());
+        orderpayment.updated_by = userdata.id;
+        var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
+
+        if (payment[i].isCash == 1) {
+          var shiftid =
+              await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
           Drawerdata drawer = new Drawerdata();
-          drawer.shiftId = int.parse(shiftid);
-          drawer.amount = payment.op_amount;
+          drawer.shiftId = shiftid;
+          drawer.amount = payment[i].op_amount.toDouble();
           drawer.isAmountIn = 1;
           drawer.reason = "placeOrder";
           drawer.status = 1;
@@ -811,37 +845,30 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
           drawer.localID = uuid;
           drawer.terminalid = int.parse(terminalId);
-          var result = await shiftAPI.saveInOutDrawerData(drawer);
+          var result = await localAPI.saveInOutDrawerData(drawer);
         }
       }
     }
-    // Shifr Invoice TableShiftInvoice shiftinvoice = new ShiftInvoice();
-    int appid = await shiftAPI.getLastShiftInvoiceAppID(terminalId);
+
+    // Shifr Invoice Table
+    ShiftInvoice shiftinvoice = new ShiftInvoice();
+    int appid = await localAPI.getLastShiftInvoiceAppID(terminalId);
     if (appid != 0) {
       shiftinvoice.app_id = appid + 1;
     } else {
       shiftinvoice.app_id = 1;
     }
     shiftinvoice.shift_app_id = int.parse(shiftid);
+    shiftinvoice.invoice_id = orderid;
     shiftinvoice.status = 1;
     shiftinvoice.created_by = userdata.id;
     shiftinvoice.created_at =
         await CommunFun.getCurrentDateTime(DateTime.now());
     shiftinvoice.serverId = 0;
-    shiftinvoice.localID = await CommunFun.getLocalID();
     shiftinvoice.terminal_id = int.parse(terminalId);
-    shiftinvoice.shift_terminal_id = int.parse(terminalId);
+    var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
+    print(shift);
 
-    var orderid = await orderApi.placeOrder(
-      order,
-      detaislist,
-      orderModifires,
-      orderAttributes,
-      orderPaymentList,
-      history,
-      shiftinvoice,
-      widget.currentCartID,
-    );
     if (this.cartList.length == tempCart.length) {
       await clearCartAfterSuccess(orderid);
     } else {
@@ -856,10 +883,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         widget.onSelectedRemove(element);
       });
     }
-    clearSelected();
+
     await printReceipt(orderid);
-    Navigator.of(context).pop();
-    widget.onClose("yes");
   }
 
   clearSelected() {
@@ -868,18 +893,29 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       taxValues = 00.00;
       grandTotal = 00.00;
     });
+    Navigator.of(context).pop();
+    widget.onClose("yes");
   }
 
   clearCartAfterSuccess(orderid) async {
     Table_order tables = await getTableData();
+    var result =
+        await localAPI.removeCartItem(widget.currentCartID, tables.table_id);
+    print(result);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     Navigator.of(context).pop();
     widget.onClose("clear");
   }
 
+  getbranch() async {
+    var branchid = await CommunFun.getbranchId();
+    var branch = await localAPI.getbranchData(branchid);
+    return branch;
+  }
+
   getcartData() async {
-    var cartDatalist = await CommunFun.getCartData(widget.currentCartID);
+    var cartDatalist = await localAPI.getCartData(widget.currentCartID);
     return cartDatalist;
   }
 
@@ -897,21 +933,33 @@ class _SplitBillDialog extends State<SplitBillDialog> {
 
   Future<List<MSTCartdetails>> getcartDetails() async {
     List<MSTCartdetails> list =
-        await CommunFun.getcartDetails(widget.currentCartID);
-
+        await localAPI.getCartItem(widget.currentCartID);
+    print(list);
     return list;
   }
 
   Future<List<MSTSubCartdetails>> getmodifireList() async {
     List<MSTSubCartdetails> list =
-        await cartapi.getItemModifire(widget.currentCartID);
-
+        await localAPI.itemmodifireList(widget.currentCartID);
+    print(list);
     return list;
   }
 
   printReceipt(int orderid) async {
-    var terminalid = await CommunFun.getTeminalKey();
-    dynamic data = await orderApi.getOrdersDetailsData(orderid, terminalid);
+    var branchID = await CommunFun.getbranchId();
+    var treminalID = await CommunFun.getTeminalKey();
+    Branch branchAddress = await localAPI.getBranchData(branchID);
+    List<OrderPayment> orderpaymentdata =
+        await localAPI.getOrderpaymentData(orderid, treminalID);
+    List<Payments> paymentMethod =
+        await localAPI.getOrderpaymentmethod(orderid, treminalID);
+    User user = await localAPI.getPaymentUser(orderpaymentdata[0].op_by);
+    List<OrderDetail> orderitem =
+        await localAPI.getOrderDetailsList(orderid, treminalID);
+    Orders order = await localAPI.getcurrentOrders(orderid, treminalID);
+    List<OrderAttributes> attributes =
+        await localAPI.getOrderAttributes(orderid);
+    List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
 
     if (widget.printerIP.isNotEmpty) {
       if (permissions.contains(Constant.PRINT_RECIEPT)) {
@@ -919,17 +967,18 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           _printReceipt.checkReceiptPrint(
               widget.printerIP,
               context,
-              branchData,
+              branchAddress,
               taxJson,
-              data["order_items"], // List<OrderDetail>
-              data["order_attributes"], // List<OrderAttributes>
-              data["order_modifires"], // List<OrderModifire>
-              data["order"], // Orders
-              data["order_payment"], // List<OrderPayment>
-              data["order_payment_method"], //// List<Payments>
+              orderitem,
+              attributes,
+              modifires,
+              order,
+              orderpaymentdata,
+              paymentMethod,
               "", // Add table name here
               "", // Add Currency here
-              widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
+              widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
+              true);
           clearSelected();
         } else {
           await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
@@ -937,33 +986,35 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             _printReceipt.checkReceiptPrint(
                 widget.printerIP,
                 context,
-                branchData,
+                branchAddress,
                 taxJson,
-                data["order_items"], // List<OrderDetail>
-                data["order_attributes"], // List<OrderAttributes>
-                data["order_modifires"], // List<OrderModifire>
-                data["order"], // Orders
-                data["order_payment"], // List<OrderPayment>
-                data["order_payment_method"], //// List<Payments>
+                orderitem,
+                attributes,
+                modifires,
+                order,
+                orderpaymentdata,
+                paymentMethod,
                 "", // Add table name here
                 "", // Add Currency here
-                widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
+                widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
+                true);
             clearSelected();
           }, () async {
             _printReceipt.checkReceiptPrint(
                 widget.printerIP,
                 context,
-                branchData,
+                branchAddress,
                 taxJson,
-                data["order_items"], // List<OrderDetail>
-                data["order_attributes"], // List<OrderAttributes>
-                data["order_modifires"], // List<OrderModifire>
-                data["order"], // Orders
-                data["order_payment"], // List<OrderPayment>
-                data["order_payment_method"], //// List<Payments>
+                orderitem,
+                attributes,
+                modifires,
+                order,
+                orderpaymentdata,
+                paymentMethod,
                 "", // Add table name here
                 "", // Add Currency here
-                widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
+                widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
+                false);
             clearSelected();
           });
         }
@@ -974,55 +1025,58 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             _printReceipt.checkReceiptPrint(
                 widget.printerIP,
                 context,
-                branchData,
+                branchAddress,
                 taxJson,
-                data["order_items"], // List<OrderDetail>
-                data["order_attributes"], // List<OrderAttributes>
-                data["order_modifires"], // List<OrderModifire>
-                data["order"], // Orders
-                data["order_payment"], // List<OrderPayment>
-                data["order_payment_method"], //// List<Payments>
+                orderitem,
+                attributes,
+                modifires,
+                order,
+                orderpaymentdata,
+                paymentMethod,
                 "", // Add table name here
                 "", // Add Currency here
-                widget.customer.isEmpty ? "Walk-in customer" : widget.customer);
+                widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
+                true);
             clearSelected();
           } else {
             await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
                 () async {
-              _printReceipt.checkReceiptPrint(
+              await _printReceipt.checkReceiptPrint(
                   widget.printerIP,
                   context,
-                  branchData,
+                  branchAddress,
                   taxJson,
-                  data["order_items"], // List<OrderDetail>
-                  data["order_attributes"], // List<OrderAttributes>
-                  data["order_modifires"], // List<OrderModifire>
-                  data["order"], // Orders
-                  data["order_payment"], // List<OrderPayment>
-                  data["order_payment_method"], //// List<Payments>
+                  orderitem,
+                  attributes,
+                  modifires,
+                  order,
+                  orderpaymentdata,
+                  paymentMethod,
                   "", // Add table name here
                   "", // Add Currency here
                   widget.customer.isEmpty
                       ? "Walk-in customer"
-                      : widget.customer);
+                      : widget.customer,
+                  true);
               clearSelected();
             }, () async {
-              _printReceipt.checkReceiptPrint(
+              await _printReceipt.checkReceiptPrint(
                   widget.printerIP,
                   context,
-                  branchData,
+                  branchAddress,
                   taxJson,
-                  data["order_items"], // List<OrderDetail>
-                  data["order_attributes"], // List<OrderAttributes>
-                  data["order_modifires"], // List<OrderModifire>
-                  data["order"], // Orders
-                  data["order_payment"], // List<OrderPayment>
-                  data["order_payment_method"], //// List<Payments>
+                  orderitem,
+                  attributes,
+                  modifires,
+                  order,
+                  orderpaymentdata,
+                  paymentMethod,
                   "", // Add table name here
                   "", // Add Currency here
                   widget.customer.isEmpty
                       ? "Walk-in customer"
-                      : widget.customer);
+                      : widget.customer,
+                  false);
               clearSelected();
             });
           }

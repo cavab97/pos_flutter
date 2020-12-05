@@ -5,19 +5,15 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
-import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
-import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
-import 'package:mcncashier/helpers/LocalAPI/ShiftList.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-
-import '../models/Shift.dart';
 
 class ShiftReports extends StatefulWidget {
   // PIN Enter PAGE
@@ -29,11 +25,9 @@ class ShiftReports extends StatefulWidget {
 
 class _ShiftReportsState extends State<ShiftReports> {
   LocalAPI localAPI = LocalAPI();
-  ShiftList shiftList = new ShiftList();
-  PrinterList printerAPI = new PrinterList();
   PrintReceipt printKOT = PrintReceipt();
-  ShiftList shiftAPI = ShiftList();
   List<Printer> printerreceiptList = new List<Printer>();
+
   Shift shifittem = new Shift();
   var screenArea = 1.6;
   int _current = 0;
@@ -45,6 +39,7 @@ class _ShiftReportsState extends State<ShiftReports> {
   double discount = 0.00;
   double refund = 0.00;
   double tax = 0.00;
+  double serviceCharge = 0.00;
   double cashSale = 0.00;
   double cashDeposit = 0.00;
   double cashRefund = 0.00;
@@ -54,6 +49,8 @@ class _ShiftReportsState extends State<ShiftReports> {
   double overShort = 0.00;
   double payInOutAmount = 0.00;
   bool isInAmmount = false;
+  double payOutAmmount = 0.00;
+  double payInAmmount = 0.00;
   final List<String> imgList = [
     'Summary',
     'Cash Drawer Summary',
@@ -78,21 +75,18 @@ class _ShiftReportsState extends State<ShiftReports> {
   }
 
   getAllPrinter() async {
-    List<Printer> printerDraft =
-        await printerAPI.getAllPrinterList(context, "0");
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
     setState(() {
       printerreceiptList = printerDraft;
     });
   }
 
   getOrders() async {
-    OrdersList orderApi = new OrdersList();
-    var terminalid = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
-    List<Orders> orderList = await orderApi.getOrdersList(branchid, terminalid);
-    if (orderList.length > 0) {
+    List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
+    if (ordersList.length > 0) {
       setState(() {
-        orders = orderList;
+        orders = ordersList;
       });
       var grosssale = 0.00;
       var netsale = 0.00;
@@ -100,14 +94,16 @@ class _ShiftReportsState extends State<ShiftReports> {
       var refundval = 0.00;
       var taxval = 0.00;
       var totaltend = 0.00;
+      var servicecharge = 0.00;
       for (var i = 0; i < orders.length; i++) {
         Orders order = orders[i];
         grosssale += order.sub_total;
         refundval += 0;
         netsale = grosssale - refundval;
         taxval += order.tax_amount;
+        servicecharge += order.serviceCharge;
         discountval += order.voucher_amount != null ? order.voucher_amount : 0;
-        totaltend += (netsale + tax) - discountval;
+        totaltend = (netsale + taxval + servicecharge) - discountval;
       }
       setState(() {
         grossSale = grosssale;
@@ -115,6 +111,7 @@ class _ShiftReportsState extends State<ShiftReports> {
         discount = discountval;
         refund = refundval;
         tax = taxval;
+        serviceCharge = servicecharge;
         totalTender = totaltend;
       });
     }
@@ -123,16 +120,9 @@ class _ShiftReportsState extends State<ShiftReports> {
   getShiftData() async {
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     if (shiftid != null) {
-      List<Shift> shift = await shiftList.getShiftData(context, shiftid);
+      List<Shift> shift = await localAPI.getShiftData(shiftid);
       setState(() {
         shifittem = shift[0];
-        cashSale = 0.00;
-        cashDeposit = 0.00;
-        cashRefund = 0.00;
-        cashRounding = 0.00;
-        payinOut = 0.00;
-        expectedVal = 0.00;
-        overShort = 0.00;
       });
       getpayInOutAmmount();
     }
@@ -186,16 +176,23 @@ class _ShiftReportsState extends State<ShiftReports> {
     drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     drawer.localID = await CommunFun.getLocalID();
     drawer.terminalid = int.parse(terminalid);
-    var result = await shiftAPI.saveInOutDrawerData(drawer);
-
+    var result = await localAPI.saveInOutDrawerData(drawer);
+    print(result);
     getpayInOutAmmount();
+  }
+
+  printShiftReport() async {
+    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+    if (shiftid != null) {
+      await CommunFun.printShiftReportData("192.168.0.105", context, shiftid);
+    }
   }
 
   getpayInOutAmmount() async {
     if (shifittem.shiftId != null) {
       List<Drawerdata> result =
-          await shiftList.getPayinOutammount(shifittem.shiftId);
-
+          await localAPI.getPayinOutammount(shifittem.shiftId);
+      print(result);
       if (result.length > 0) {
         setState(() {
           drawerData = result;
@@ -204,14 +201,24 @@ class _ShiftReportsState extends State<ShiftReports> {
         for (var i = 0; i < drawerData.length; i++) {
           Drawerdata drawer = drawerData[i];
           if (drawer.amount != null) {
-            drawerAmm += drawer.amount;
+            setState(() {
+              drawerAmm += drawer.amount;
+              cashSale += drawer.amount;
+              cashDeposit = 0.00;
+              cashRefund += drawer.isAmountIn == 0 ? drawer.amount : 0.00;
+              cashRounding += 0.00;
+              payInAmmount += drawer.isAmountIn == 1 ? drawer.amount : 0.00;
+              payOutAmmount += drawer.isAmountIn == 2 ? drawer.amount : 0.00;
+              expectedVal = drawerAmm;
+              overShort = shifittem.startAmount +
+                  cashSale +
+                  cashDeposit +
+                  cashRefund +
+                  cashRounding +
+                  payInOutAmount;
+            });
           }
         }
-        setState(() {
-          payInOutAmount = drawerAmm;
-          expectedVal = drawerAmm;
-        });
-        countTotalDrawer();
       }
     }
   }
@@ -257,21 +264,25 @@ class _ShiftReportsState extends State<ShiftReports> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      "Shift Report",
+                      Strings.shift_Report,
                       style: Styles.whiteBold(),
                     ),
                     SizedBox(
                       width: 10,
                     ),
-                    shiftbtn()
+                    shiftbtn(),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    shiftprintbtn(),
                   ],
                 ),
                 Text(
-                  shifittem.updatedAt != null
+                  shifittem.createdAt != null
                       ? Strings.opened_at +
                           " " +
                           DateFormat('EEE, MMM d yyyy, hh:mm aaa')
-                              .format(DateTime.parse(shifittem.updatedAt)) +
+                              .format(DateTime.parse(shifittem.createdAt)) +
                           " by Admin "
                       : "",
                   textAlign: TextAlign.center,
@@ -708,7 +719,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                             printerreceiptList[0].printerIp.toString(),
                             context,
                             "",
-                            "OpenDrawer");
+                            Strings.openDrawer);
                       } else {
                         CommunFun.showToast(
                             context, Strings.printer_not_available);
@@ -736,6 +747,25 @@ class _ShiftReportsState extends State<ShiftReports> {
       onPressed: () {},
       child: Text(
         Strings.open,
+        style: TextStyle(color: Colors.deepOrange, fontSize: 15),
+      ),
+      color: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+            width: 1, style: BorderStyle.solid, color: Colors.deepOrange),
+        borderRadius: BorderRadius.circular(50.0),
+      ),
+    );
+  }
+
+  Widget shiftprintbtn() {
+    return RaisedButton(
+      padding: EdgeInsets.only(left: 10, right: 10),
+      onPressed: () {
+        printShiftReport();
+      },
+      child: Text(
+        Strings.print_reciept,
         style: TextStyle(color: Colors.deepOrange, fontSize: 15),
       ),
       color: Colors.transparent,

@@ -19,7 +19,6 @@ class Voucher {
   int updatedBy;
   String deletedAt;
   int deletedBy;
-  int totalUsed;
 
   Voucher(
       {this.voucherId,
@@ -41,8 +40,7 @@ class Voucher {
       this.updatedAt,
       this.updatedBy,
       this.deletedAt,
-      this.deletedBy,
-      this.totalUsed});
+      this.deletedBy});
 
   Voucher.fromJson(Map<String, dynamic> json) {
     voucherId = json['voucher_id'];
@@ -71,7 +69,6 @@ class Voucher {
     updatedBy = json['updated_by'];
     deletedAt = json['deleted_at'];
     deletedBy = json['deleted_by'];
-    totalUsed = json["total_used"];
   }
 
   Map<String, dynamic> toJson() {
@@ -96,7 +93,6 @@ class Voucher {
     data['updated_by'] = this.updatedBy;
     data['deleted_at'] = this.deletedAt;
     data['deleted_by'] = this.deletedBy;
-    data["total_used"] = this.totalUsed;
     return data;
   }
 }

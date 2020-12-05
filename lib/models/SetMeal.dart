@@ -9,7 +9,7 @@ class SetMeal {
   String updatedAt;
   int updatedBy;
   String base64;
-
+  
   SetMeal(
       {this.setmealId,
       this.uuid,

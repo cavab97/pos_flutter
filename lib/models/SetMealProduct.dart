@@ -47,7 +47,6 @@ class SetMealProduct {
     data['status'] = this.status;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
-    data['name'] = this.name;
     data['base64'] = this.base64;
     data['name'] = this.name;
     data["attributeDetails"] = this.attributeDetails;
