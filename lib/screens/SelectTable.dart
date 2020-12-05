@@ -53,7 +53,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   bool isAssigning = false;
   bool isChanging = false;
   bool isShiftOpen = true;
-  bool isMenuOpne = false;
+  bool isMenuOpne = true;
   var permissions = "";
   TabController _tabController;
 
@@ -106,6 +106,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     setState(() {
       tableList = tables;
       isLoading = false;
+      isMenuOpne = true;
     });
   }
 
@@ -123,15 +124,32 @@ class _SelectTablePageState extends State<SelectTablePage>
     List<Table_order> order = await localAPI.getTableOrders(tableid);
     await Preferences.setStringToSF(Constant.TABLE_DATA, json.encode(order[0]));
     setState(() {
-      isMenuOpne = false;
+      isMenuOpne = true;
     });
     Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
-  ontableTap(table) {
+  ontableTap(table) async {
     setState(() {
       selectedTable = table;
       isMenuOpne = true;
+    });
+    paxController.text =
+        table.numberofpax != null ? table.numberofpax.toString() : "";
+    var tableid = selectedTable.tableId;
+    List<Table_order> order = await localAPI.getTableOrders(tableid);
+    if (order.length > 0) {
+      viewOrder();
+    } else {
+      addNewOrder();
+      selectTableForNewOrder();
+    }
+  }
+
+  ontableLongTap(table) {
+    setState(() {
+      selectedTable = table;
+      //isMenuOpne = true;
     });
     paxController.text =
         table.numberofpax != null ? table.numberofpax.toString() : "";
@@ -144,17 +162,16 @@ class _SelectTablePageState extends State<SelectTablePage>
     // Merge table
     TablesDetails table1 = mergeInTable;
     TablesDetails table2 = table;
-    Table_order table_order = new Table_order();
+    Table_order tableOrder = new Table_order();
     var pax = table1.numberofpax != null ? table1.numberofpax : 0;
     pax += table2.numberofpax != null ? table2.numberofpax : 0;
-    table_order.number_of_pax = pax;
-    table_order.table_id = table1.tableId;
-    table_order.save_order_id =
-        table1.saveorderid != 0 ? table1.saveorderid : 0;
-    table_order.is_merge_table = "1";
-    table_order.merged_table_id = table2.tableId;
-    table_order.assignTime = await CommunFun.getCurrentDateTime(DateTime.now());
-    var result = await localAPI.mergeTableOrder(table_order);
+    tableOrder.number_of_pax = pax;
+    tableOrder.table_id = table1.tableId;
+    tableOrder.save_order_id = table1.saveorderid != 0 ? table1.saveorderid : 0;
+    tableOrder.is_merge_table = "1";
+    tableOrder.merged_table_id = table2.tableId;
+    tableOrder.assignTime = await CommunFun.getCurrentDateTime(DateTime.now());
+    var result = await localAPI.mergeTableOrder(tableOrder);
     setState(() {
       isMergeing = false;
       mergeInTable = null;
@@ -166,30 +183,31 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   mergeTable(table) {
     setState(() {
-      isMenuOpne = false;
+      isMenuOpne = true;
       isMergeing = true;
       mergeInTable = table;
     });
   }
 
   selectTableForNewOrder() async {
-    if (int.parse(paxController.text) <= selectedTable.tableCapacity) {
-      Table_order table_order = new Table_order();
-      table_order.table_id = selectedTable.tableId;
-      table_order.number_of_pax = int.parse(paxController.text);
-      table_order.save_order_id = selectedTable.saveorderid;
-      table_order.service_charge =
+    if ((int.tryParse(paxController.text) ?? 0) <=
+        selectedTable.tableCapacity) {
+      Table_order tableOrder = new Table_order();
+      tableOrder.table_id = selectedTable.tableId;
+      tableOrder.number_of_pax = int.tryParse(paxController.text) ?? 0;
+      tableOrder.save_order_id = selectedTable.saveorderid;
+      tableOrder.service_charge =
           CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
-      table_order.assignTime =
+      tableOrder.assignTime =
           await CommunFun.getCurrentDateTime(DateTime.now());
-      var result = await localAPI.insertTableOrder(table_order);
+      var result = await localAPI.insertTableOrder(tableOrder);
       await Preferences.setStringToSF(
-          Constant.TABLE_DATA, json.encode(table_order));
+          Constant.TABLE_DATA, json.encode(tableOrder));
       paxController.text = "";
       Navigator.of(context).pop();
       if (!isChanging) {
         setState(() {
-          isMenuOpne = false;
+          isMenuOpne = true;
         });
         Navigator.pushNamed(context, Constant.DashboardScreen);
       }
@@ -203,15 +221,16 @@ class _SelectTablePageState extends State<SelectTablePage>
     setState(() {
       isLoading = true;
     });
-    if (int.parse(paxController.text) <= selectedTable.tableCapacity) {
+    if ((int.tryParse(paxController.text) ?? 0) <=
+        selectedTable.tableCapacity) {
       SaveOrder orderData = new SaveOrder();
       orderData.orderName = selectedTable.tableName;
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-      orderData.numberofPax = int.parse(paxController.text);
+      orderData.numberofPax = (int.tryParse(paxController.text) ?? 0);
       orderData.cartId = orderid;
       Table_order tableorder = new Table_order();
       tableorder.table_id = selectedTable.tableId;
-      tableorder.number_of_pax = int.parse(paxController.text);
+      tableorder.number_of_pax = (int.tryParse(paxController.text) ?? 0);
       tableorder.service_charge = selectedTable.tableServiceCharge;
       tableorder.assignTime =
           await CommunFun.getCurrentDateTime(DateTime.now());
@@ -275,7 +294,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     setState(() {
       isLoading = false;
-      isMenuOpne = false;
+      isMenuOpne = true;
     });
     await getTables();
   }
@@ -286,7 +305,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     }, () {
       Navigator.of(context).pop();
       setState(() {
-        isMenuOpne = false;
+        isMenuOpne = true;
         isChangingTable = true;
       });
     }, Strings.warning, Strings.change_table_msg, Strings.yes, Strings.no,
@@ -335,7 +354,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     setState(() {
       isChanging = false;
     });
-    opnPaxDailog();
+    //opnPaxDailog();
   }
 
   void selectOption(choice) {
@@ -438,7 +457,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                                   height: MediaQuery.of(context).size.height,
                                   width: isMenuOpne
                                       ? MediaQuery.of(context).size.width / 1.5
-                                      : MediaQuery.of(context).size.width,
+                                      : MediaQuery.of(context).size.width / 0.9,
                                   child: tablesListwidget(1)),
                               menuItemDiv()
                             ],
@@ -677,31 +696,31 @@ class _SelectTablePageState extends State<SelectTablePage>
                 style: Styles.whiteMediumBold(),
               )
             : SizedBox(),
-        selectedTable.numberofpax == null
+        selectedTable != null && selectedTable.numberofpax == null
             ? neworder_button(
                 Icons.supervised_user_circle, Strings.new_order, context, () {
                 addNewOrder();
               })
             : SizedBox(),
-        selectedTable.numberofpax != null
+        selectedTable != null && selectedTable.numberofpax != null
             ? neworder_button(
                 Icons.supervised_user_circle, Strings.change_pax, context, () {
                 changePax();
               })
             : SizedBox(),
-        selectedTable.numberofpax != null
+        selectedTable != null && selectedTable.numberofpax != null
             ? neworder_button(Icons.remove_red_eye, Strings.view_order, context,
                 () {
                 viewOrder();
               })
             : SizedBox(),
-        selectedTable.numberofpax != null
+        selectedTable != null && selectedTable.numberofpax != null
             ? neworder_button(
                 Icons.change_history, Strings.change_table, context, () {
                 changeTablePop();
               })
             : SizedBox(),
-        selectedTable.numberofpax != null
+        selectedTable != null && selectedTable.numberofpax != null
             ? neworder_button(Icons.cancel, Strings.cancle_order, context, () {
                 if (permissions.contains(Constant.DELETE_ORDER)) {
                   cancleTableOrder();
@@ -716,7 +735,7 @@ class _SelectTablePageState extends State<SelectTablePage>
         neworder_button(Icons.call_merge, Strings.merge_order, context, () {
           mergeTable(selectedTable);
         }),
-        selectedTable.tableQr != null
+        selectedTable != null && selectedTable.tableQr != null
             ? neworder_button(Icons.cancel, Strings.scanQRcode, context, () {
                 opneQrcodePop();
               })
@@ -816,6 +835,7 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   Widget paxTextInput() {
     return TextField(
+      autofocus: true,
       controller: paxController,
       keyboardType: TextInputType.number,
       inputFormatters: <TextInputFormatter>[
@@ -927,8 +947,10 @@ class _SelectTablePageState extends State<SelectTablePage>
                       enterButton(() {
                         if (!isMergeing) {
                           if (isAssigning) {
+                            print('assignTabletoOrder');
                             assignTabletoOrder();
                           } else {
+                            print('selectTableForNewOrder');
                             selectTableForNewOrder();
                           }
                         }
@@ -1004,6 +1026,9 @@ class _SelectTablePageState extends State<SelectTablePage>
         return InkWell(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
           onTap: () {
+            ontableLongTap(table);
+          },
+          onDoubleTap: () {
             if (isMergeing) {
               if (table.merged_table_id == null) {
                 mergeTabledata(table);

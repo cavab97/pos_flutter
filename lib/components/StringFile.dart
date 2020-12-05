@@ -66,8 +66,8 @@ class Strings {
   static String scanQRcode = "Scan QRCode";
 
   static String open_shift = "Open Shift";
-  static String shiftTextLable = "Sorry,we're";
-  static String shiftTextLableOpen = "Yes,we're\nOpen";
+  static String shiftTextLable = "Sorry, we're";
+  static String shiftTextLableOpen = "Yes, we're\nOpen";
   static String opened_at = "Open at";
   static String closed = "CLOSED";
   static String syncText = "Syncing...";

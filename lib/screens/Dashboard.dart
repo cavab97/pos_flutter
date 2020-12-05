@@ -217,6 +217,10 @@ class _DashboradPageState extends State<DashboradPage>
         getCurrentCart();
       }
     } else {
+      if (Navigator.canPop(context)) {
+        Navigator.popAndPushNamed(context, Constant.SelectTableScreen,
+            arguments: {"isAssign": false});
+      }
       Navigator.pushNamedAndRemoveUntil(
           context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
           arguments: {"isAssign": false});
@@ -244,6 +248,7 @@ class _DashboradPageState extends State<DashboradPage>
     List<SaveOrder> currentOrder =
         await localAPI.getSaveOrder(selectedTable.save_order_id);
     if (currentOrder.length != 0) {
+      print("getCurrentCart" + currentOrder.toString());
       setState(() {
         currentCart = currentOrder[0].cartId;
       });
@@ -645,7 +650,7 @@ class _DashboradPageState extends State<DashboradPage>
   @override
   void dispose() {
     _tabController.dispose();
-    _subtabController.dispose();
+    if (_subtabController != null) _subtabController.dispose();
     super.dispose();
   }
 
@@ -1340,7 +1345,7 @@ class _DashboradPageState extends State<DashboradPage>
       } else {
         await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
             () async {
-          await printKOT.checkReceiptPrint(
+          printKOT.checkReceiptPrint(
               printerreceiptList[0].printerIp,
               context,
               branchData,
@@ -1357,7 +1362,7 @@ class _DashboradPageState extends State<DashboradPage>
               true);
           await clearCartAfterSuccess(orderid);
         }, () async {
-          await printKOT.checkReceiptPrint(
+          printKOT.checkReceiptPrint(
               printerreceiptList[0].printerIp,
               context,
               branchData,
