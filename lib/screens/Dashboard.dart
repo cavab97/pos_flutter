@@ -234,6 +234,10 @@ class _DashboradPageState extends State<DashboradPage>
         getCurrentCart();
       }
     } else {
+      if (Navigator.canPop(context)) {
+        Navigator.popAndPushNamed(context, Constant.SelectTableScreen,
+            arguments: {"isAssign": false});
+      }
       Navigator.pushNamedAndRemoveUntil(
           context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
           arguments: {"isAssign": false});
@@ -261,6 +265,7 @@ class _DashboradPageState extends State<DashboradPage>
     List<SaveOrder> currentOrder =
         await cartlistAPI.getSaveOrder(selectedTable.save_order_id);
     if (currentOrder.length != 0) {
+      print("getCurrentCart" + currentOrder.toString());
       setState(() {
         currentCart = currentOrder[0].cartId;
       });
@@ -278,6 +283,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getCartItem(cartId) async {
+    print('getCartItem' + cartId);
     List<MSTCartdetails> cartItem = await CommunFun.getcartDetails(cartId);
     if (cartItem.length > 0) {
       setState(() {
@@ -668,7 +674,7 @@ class _DashboradPageState extends State<DashboradPage>
   @override
   void dispose() {
     _tabController.dispose();
-    _subtabController.dispose();
+    if (_subtabController != null) _subtabController.dispose();
     super.dispose();
   }
 
@@ -1709,7 +1715,7 @@ class _DashboradPageState extends State<DashboradPage>
                   children: [
                     TableRow(children: [
                       TableCell(child: tableHeader2()),
-                      TableCell(child: tableHeader1()), 
+                      TableCell(child: tableHeader1()),
                     ]),
                     TableRow(children: [
                       TableCell(
