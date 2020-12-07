@@ -41,6 +41,7 @@ class Constant {
   static final String ADD_ITEM = "add_item";
   static final String EDIT_ITEM = "edit_item";
   static final String DELETE_ITEM = "delete_item";
+  static final String DISCOUNT_ITEM = "discount_item";
 
   static final String VIEW_REPORT = "view_report";
   static final String ADD_REPORT = "add_report";
@@ -70,6 +71,7 @@ class Constant {
   static final String WebOrderPages = "/WebOrders";
   static final String ShiftOrders = "/ShiftReport";
   static final String WineStorage = "/WineStorage";
+  static final String OutOfStock = "/OutOfStock";
 
   /************************Just for identify on navigation*********************************/
   static final String dashboard = "dashboard";

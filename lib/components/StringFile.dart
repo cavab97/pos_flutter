@@ -213,4 +213,5 @@ class Strings {
   static String sync = "Sync";
   static String settings = "Settings";
   static String please_select_customer = "Please select customer";
+  static String out_of_stock = "Out of stock";
 }

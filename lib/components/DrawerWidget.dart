@@ -351,16 +351,32 @@ class DrawerWidState extends State<DrawerWid> {
                 ),
                 title: Text(Strings.sync, style: Styles.drawerText())),
             ListTile(
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Navigator.pushNamed(context, Constant.SettingsScreen);
-                },
-                leading: Icon(
-                  Icons.settings,
-                  color: Colors.black,
-                  size: SizeConfig.safeBlockVertical * 5,
-                ),
-                title: Text(Strings.settings, style: Styles.drawerText())),
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.pushNamed(context, Constant.SettingsScreen);
+              },
+              leading: Icon(
+                Icons.settings,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 5,
+              ),
+              title: Text(Strings.settings, style: Styles.drawerText()),
+            ),
+            ListTile(
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.pushNamed(context, Constant.OutOfStock);
+              },
+              leading: Icon(
+                Icons.tune,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 5,
+              ),
+              title: Text(
+                Strings.out_of_stock,
+                style: Styles.drawerText(),
+              ),
+            ),
           ],
         ),
       ),
