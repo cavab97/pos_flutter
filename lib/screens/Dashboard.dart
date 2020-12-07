@@ -70,6 +70,7 @@ class DashboradPage extends StatefulWidget {
 class _DashboradPageState extends State<DashboradPage>
     with TickerProviderStateMixin {
   TabController _tabController;
+  TabController _secondTabController;
   TabController _subtabController;
   var _textController = TextEditingController();
   GlobalKey<ScaffoldState> scaffoldKey;
@@ -113,6 +114,10 @@ class _DashboradPageState extends State<DashboradPage>
   bool isScreenLoad = false;
   Timer timer;
   int itemSelectedIndex = -1;
+  List quantity = [2, 3, 4, 5, 6, 7, 8, 9];
+  List categoryFirstRow = [];
+  List categorySecondRow = [];
+
   @override
   void initState() {
     super.initState();
@@ -522,8 +527,21 @@ class _DashboradPageState extends State<DashboradPage>
       tabsList = catList;
       allCaterories = categorys;
     });
-    _tabController = TabController(vsync: this, length: tabsList.length);
+
+    for (var i = 0; i < tabsList.length; i++) {
+      if (i % 2 == 0) {
+        categoryFirstRow.add(tabsList[i]);
+      } else {
+        categorySecondRow.add(tabsList[i]);
+      }
+    }
+
+    _tabController =
+        TabController(vsync: this, length: categoryFirstRow.length);
+    _secondTabController =
+        TabController(vsync: this, length: categorySecondRow.length);
     _tabController.addListener(_handleTabSelection);
+    _secondTabController.addListener(_handleSecondTabSelection);
 
     if (tabsList[0].isSetmeal == 1) {
       getMeals();
@@ -617,7 +635,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   void _handleTabSelection() {
     if (_tabController.indexIsChanging) {
-      var cat = tabsList[_tabController.index].categoryId;
+      var cat = categoryFirstRow[_tabController.index].categoryId;
       List<Category> subList =
           allCaterories.where((i) => i.parentId == cat).toList();
       setState(() {
@@ -629,7 +647,30 @@ class _DashboradPageState extends State<DashboradPage>
       if (subCatList.length > 0) {
         cat = subCatList[_subtabController.index].categoryId;
       }
-      if (tabsList[_tabController.index].isSetmeal == 1) {
+      if (categoryFirstRow[_tabController.index].isSetmeal == 1) {
+        getMeals();
+      } else {
+        getProductList(cat);
+      }
+    }
+  }
+
+  void _handleSecondTabSelection() {
+    if (_secondTabController.indexIsChanging) {
+      var cat = categorySecondRow[_secondTabController.index].categoryId;
+      print(cat);
+      List<Category> subList =
+          allCaterories.where((i) => i.parentId == cat).toList();
+      setState(() {
+        subCatList = subList;
+      });
+      _subtabController =
+          new TabController(vsync: this, length: subCatList.length);
+      _subtabController.addListener(_handleSubTabSelection);
+      if (subCatList.length > 0) {
+        cat = subCatList[_subtabController.index].categoryId;
+      }
+      if (categorySecondRow[_secondTabController.index].isSetmeal == 1) {
         getMeals();
       } else {
         getProductList(cat);
@@ -652,6 +693,7 @@ class _DashboradPageState extends State<DashboradPage>
   void dispose() {
     _tabController.dispose();
     if (_subtabController != null) _subtabController.dispose();
+    _secondTabController.dispose();
     super.dispose();
   }
 
@@ -1688,7 +1730,7 @@ class _DashboradPageState extends State<DashboradPage>
         indicatorPadding: EdgeInsets.all(2),
         indicator: BoxDecoration(
             borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
-        tabs: List<Widget>.generate(tabsList.length, (int index) {
+        tabs: List<Widget>.generate(categoryFirstRow.length, (int index) {
           return new Tab(
             child: Container(
                 padding: EdgeInsets.symmetric(
@@ -1698,12 +1740,40 @@ class _DashboradPageState extends State<DashboradPage>
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Text(
-                  tabsList[index].name.toUpperCase(),
+                  categoryFirstRow[index].name.toUpperCase(),
                   style: Styles.whiteBoldsmall(),
                 )),
           );
         }));
-    final _subtabs = TabBar(
+
+    final _secondTabs = TabBar(
+        controller: _secondTabController,
+        indicatorSize: TabBarIndicatorSize.label,
+        unselectedLabelColor: Colors.white,
+        labelColor: Colors.white,
+        isScrollable: true,
+        labelPadding: EdgeInsets.all(2),
+        indicatorPadding: EdgeInsets.all(2),
+        indicator: BoxDecoration(
+            borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
+        tabs: List<Widget>.generate(categorySecondRow.length, (int index) {
+          //index = (tabsList.length/2).ceil() + index;
+
+          return new Tab(
+            child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.safeBlockHorizontal * 3,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  categorySecondRow[index].name.toUpperCase(),
+                  style: Styles.whiteBoldsmall(),
+                )),
+          );
+        }));
+    /* final _subtabs = TabBar(
       controller: _subtabController,
       indicatorSize: TabBarIndicatorSize.label,
       unselectedLabelColor: Colors.white,
@@ -1729,7 +1799,33 @@ class _DashboradPageState extends State<DashboradPage>
           ),
         );
       }),
-    );
+    ); */
+
+    final _quantityTabs = TabBar(
+        controller: _tabController,
+        indicatorSize: TabBarIndicatorSize.label,
+        unselectedLabelColor: Colors.white,
+        labelColor: Colors.white,
+        isScrollable: false,
+        labelPadding: EdgeInsets.all(2),
+        indicatorPadding: EdgeInsets.all(2),
+        indicator: BoxDecoration(
+            borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
+        tabs: List<Widget>.generate(quantity.length, (int index) {
+          return new Tab(
+            child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.safeBlockHorizontal * 2,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  'x ' + quantity[index].toString(),
+                  style: Styles.whiteBoldsmall(),
+                )),
+          );
+        }));
 
     return Scaffold(
       key: scaffoldKey,
@@ -1974,7 +2070,7 @@ class _DashboradPageState extends State<DashboradPage>
                                               DefaultTabController(
                                                   initialIndex: 0,
                                                   length: subCatList.length,
-                                                  child: _subtabs),
+                                                  child: _secondTabs),
                                             ],
                                           ),
                                     SingleChildScrollView(
@@ -2027,7 +2123,96 @@ class _DashboradPageState extends State<DashboradPage>
                           ],
                         ),
                       ),
+                      TableCell(
+                        child: Container(
+                          padding:
+                              EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
+                          child: Column(
+                            children: <Widget>[
+                              /* subCatList.length == 0
+                                  ?  */
+                              Container(
+                                //margin: EdgeInsets.only(left: 5, right: 5),
+                                width: MediaQuery.of(context).size.width,
+                                height: SizeConfig.safeBlockVertical * 8,
+                                color: Colors.black26,
+                                padding: EdgeInsets.all(
+                                    SizeConfig.safeBlockVertical * 1.2),
+                                child: DefaultTabController(
+                                    initialIndex: 0,
+                                    length: categoryFirstRow.length,
+                                    child: _tabs),
+                              ),
+                              Container(
+                                //margin: EdgeInsets.only(left: 5, right: 5),
+                                width: MediaQuery.of(context).size.width,
+                                height: SizeConfig.safeBlockVertical * 8,
+                                color: Colors.black26,
+                                padding: EdgeInsets.all(
+                                    SizeConfig.safeBlockVertical * 1.2),
+                                child: DefaultTabController(
+                                    initialIndex: 0,
+                                    length: categorySecondRow.length,
+                                    child: _secondTabs),
+                              ),
+                              /*  : Container(
+                                      //  margin: EdgeInsets.only(left: 5, right: 5),
+                                      width: MediaQuery.of(context).size.width,
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      color: Colors.black26,
+                                      padding: EdgeInsets.all(
+                                          SizeConfig.safeBlockVertical * 1.2),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          IconButton(
+                                              onPressed: _backtoMainCat,
+                                              icon: Icon(
+                                                Icons.arrow_back,
+                                                color: Colors.white,
+                                                size: SizeConfig
+                                                        .safeBlockVertical *
+                                                    4,
+                                              )),
+                                          DefaultTabController(
+                                              initialIndex: 0,
+                                              length: subCatList.length,
+                                              child: _subtabs),
+                                        ],
+                                      ),
+                                    ), */
+                              SingleChildScrollView(
+                                physics: BouncingScrollPhysics(),
+                                child: Container(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      mealsList.length > 0
+                                          ? setMealsList()
+                                          : SizedBox(),
+                                      isLoading
+                                          ? CommunFun.loader(context)
+                                          : productList.length > 0
+                                              ? porductsList()
+                                              : SizedBox(),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ]),
+                    TableRow(children: [
+                      TableCell(child: null),
+                      TableCell(child: null)
+                    ])
                   ],
                 ),
               ),
@@ -2188,11 +2373,17 @@ class _DashboradPageState extends State<DashboradPage>
                     size: SizeConfig.safeBlockVertical * 5,
                   )),
               SizedBox(width: SizeConfig.safeBlockVertical * 3),
-              SizedBox(
-                height: SizeConfig.safeBlockVertical * 7,
-                child: Image.asset(Strings.asset_headerLogo,
-                    fit: BoxFit.contain, gaplessPlayback: true),
-              ),
+              SizedBox(width: SizeConfig.safeBlockVertical * 10),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  !isWebOrder ? addCustomerBtn(context) : SizedBox(),
+                  menubutton(() {
+                    // opneMenuButton();
+                  })
+                ],
+              )
             ],
           ),
           Container(
