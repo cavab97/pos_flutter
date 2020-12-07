@@ -129,6 +129,7 @@ class _DashboradPageState extends State<DashboradPage>
   List quantity = [2,3,4,5,6,7,8,9];
   List categoryFirstRow = [];
   List categorySecondRow = [];
+  var selectedCategory;
 
   @override
   void initState() {
@@ -700,6 +701,21 @@ class _DashboradPageState extends State<DashboradPage>
       } else {
         getProductList(cat);
       }
+    }
+  }
+
+  void _selectedCategory(int index, String row) {
+
+    var selected = row == 'first' ? categoryFirstRow[index] : categorySecondRow[index];
+
+    setState((){
+      selectedCategory = selected;
+    });
+
+    if ((row == 'first' ? categoryFirstRow[index].isSetmeal : categorySecondRow[index].isSetmeal) == 1) {
+        getMeals();
+      } else {
+        getProductList(row == 'first' ? categoryFirstRow[index].categoryId : categorySecondRow[index].categoryId);
     }
   }
 
@@ -1836,8 +1852,8 @@ class _DashboradPageState extends State<DashboradPage>
                               EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
                           child: Column(
                             children: <Widget>[
-                              /* subCatList.length == 0
-                                  ?  */Container(
+                              /* subCatList.length == 0?  */
+                                    /* Container(
                                       //margin: EdgeInsets.only(left: 5, right: 5),
                                       width: MediaQuery.of(context).size.width,
                                       height: SizeConfig.safeBlockVertical * 8,
@@ -1860,6 +1876,73 @@ class _DashboradPageState extends State<DashboradPage>
                                           initialIndex: 0,
                                           length: categorySecondRow.length,
                                           child: _secondTabs),
+                                    ), */
+                                    //Category Row 1
+                                    Container( 
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      width: MediaQuery.of(context).size.width,
+                                      color: Colors.black26,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                          itemCount: categoryFirstRow.length, itemBuilder: (context, index) {
+                                            return Container(
+                                              padding: EdgeInsets.all(10.0),
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(30),
+                                              ),
+                                              child: FlatButton(
+                                                onPressed: () { _selectedCategory(index, 'first'); },
+                                                //color: Colors.black,  //Colors.grey.shade800,
+                                                color: categoryFirstRow[index].name == selectedCategory?.name ? Colors.deepOrange : Colors.black26,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(8.0),
+                                                  //side: BorderSide(color: Colors.black)
+                                                ),
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: SizeConfig.safeBlockHorizontal * 3,
+                                                ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      categoryFirstRow[index].name.toUpperCase(), 
+                                                      style: Styles.whiteBoldsmall(),
+                                                    )
+                                                  ),
+                                                ),
+                                            );
+                                      }),
+                                    ),
+                                    Container( 
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      width: MediaQuery.of(context).size.width,
+                                      color: Colors.black26,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                          itemCount: categorySecondRow.length, itemBuilder: (context, index) {
+                                            return Container(
+                                              padding: EdgeInsets.all(10.0),
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(30),
+                                              ),
+                                              child: FlatButton(
+                                                onPressed: () { _selectedCategory(index, 'second'); },
+                                                //color: Colors.black,  //Colors.grey.shade800,
+                                                color: categorySecondRow[index].name == selectedCategory?.name ? Colors.deepOrange : Colors.black26,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(8.0),
+                                                  //side: BorderSide(color: Colors.black)
+                                                ),
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: SizeConfig.safeBlockHorizontal * 3,
+                                                ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      categorySecondRow[index].name.toUpperCase(), 
+                                                      style: Styles.whiteBoldsmall(),
+                                                    )
+                                                  ),
+                                                ),
+                                            );
+                                      }),
                                     ),
                                  /*  : Container(
                                       //  margin: EdgeInsets.only(left: 5, right: 5),
@@ -1915,10 +1998,6 @@ class _DashboradPageState extends State<DashboradPage>
                         ),
                       ),
                     ]),
-                    TableRow(children: [
-                      TableCell(child: null),
-                      TableCell(child: null)
-                    ])
                   ],
                 ),
               ),
