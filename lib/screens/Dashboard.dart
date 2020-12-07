@@ -125,6 +125,7 @@ class _DashboradPageState extends State<DashboradPage>
   var currency = "RM";
   bool isScreenLoad = false;
   Timer timer;
+  List quantity = [2,3,4,5,6,7,8,9];
 
   @override
   void initState() {
@@ -1027,7 +1028,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.voucher_detail = cartData.voucher_detail;
     order.voucher_id = cartData.voucher_id;
     order.voucher_amount = cartData.discount;
-    order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now()); 
     order.updated_by = userdata.id;
     List<OrderDetail> detaislist = [];
     if (cartList.length > 0) {
@@ -1687,6 +1688,33 @@ class _DashboradPageState extends State<DashboradPage>
       }),
     );
 
+    final _quantityTabs = TabBar(
+      controller: _tabController,
+      indicatorSize: TabBarIndicatorSize.label,
+      unselectedLabelColor: Colors.white,
+      labelColor: Colors.white,
+      isScrollable: false,
+      labelPadding: EdgeInsets.all(2),
+      indicatorPadding: EdgeInsets.all(2),
+      indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
+      tabs: List<Widget>.generate(quantity.length, (int index) {
+        return new Tab(
+          child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: SizeConfig.safeBlockHorizontal * 2,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.deepOrange, width: 1),
+              ),
+              child: Text(
+                'x ' + quantity[index].toString(),
+                style: Styles.whiteBoldsmall(),
+              )),
+        );
+    }));
+
     return Scaffold(
       key: scaffoldKey,
       drawer: DrawerWid(),
@@ -1743,6 +1771,18 @@ class _DashboradPageState extends State<DashboradPage>
                               EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
                           child: Column(
                             children: <Widget>[
+                              Container(
+                                //margin: EdgeInsets.only(left: 5, right: 5),
+                                width: MediaQuery.of(context).size.width,
+                                height: SizeConfig.safeBlockVertical * 8,
+                                color: Colors.black26,
+                                padding: EdgeInsets.all(
+                                    SizeConfig.safeBlockVertical * 1.2),
+                                child: DefaultTabController(
+                                    initialIndex: 0,
+                                    length: quantity.length,
+                                    child: _quantityTabs),
+                              ),
                               subCatList.length == 0
                                   ? Container(
                                       //margin: EdgeInsets.only(left: 5, right: 5),
@@ -1804,7 +1844,7 @@ class _DashboradPageState extends State<DashboradPage>
                                     ],
                                   ),
                                 ),
-                              )
+                              ), 
                             ],
                           ),
                         ),
@@ -1818,6 +1858,11 @@ class _DashboradPageState extends State<DashboradPage>
           isLoading: isScreenLoad,
           color: Colors.black87,
           progressIndicator: CommunFun.overLayLoader()),
+        bottomNavigationBar: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height / 12,
+          color: Colors.red,
+        )
     );
   }
 
@@ -1969,7 +2014,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.white,
                     size: SizeConfig.safeBlockVertical * 5,
                   )),
-              SizedBox(width: SizeConfig.safeBlockVertical * 3),
+              SizedBox(width: SizeConfig.safeBlockVertical * 3),   
               SizedBox(width: SizeConfig.safeBlockVertical * 10),
                Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -2745,12 +2790,14 @@ class _DashboradPageState extends State<DashboradPage>
           0: FractionColumnWidth(.6),
           1: FractionColumnWidth(.2),
           2: FractionColumnWidth(.2),
+          3: FractionColumnWidth(.2)
         },
         children: [
           TableRow(children: [
             Text(Strings.header_name, style: Styles.darkBlue()),
             Text(Strings.qty, style: Styles.darkBlue()),
             Text(Strings.amount, style: Styles.darkBlue()),
+            Text(''),
           ])
         ]);
 
