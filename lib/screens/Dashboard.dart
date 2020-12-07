@@ -2006,6 +2006,24 @@ class _DashboradPageState extends State<DashboradPage>
           isLoading: isScreenLoad,
           color: Colors.black87,
           progressIndicator: CommunFun.overLayLoader()),
+          bottomNavigationBar: Container(
+            height: SizeConfig.safeBlockVertical * 7,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              border: Border.all(width: 1, color: Colors.grey),
+              color: Color(0xFF434449), //scaffold color
+            ),
+            child: Positioned(
+              bottom: 25,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 80,
+                color: StaticColor.backgroundColor,
+                child: paybutton(context),
+              ),
+            ),
+          ),
     );
   }
 
