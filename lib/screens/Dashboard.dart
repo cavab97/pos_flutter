@@ -117,6 +117,7 @@ class _DashboradPageState extends State<DashboradPage>
   List quantity = [2, 3, 4, 5, 6, 7, 8, 9];
   List categoryFirstRow = [];
   List categorySecondRow = [];
+  var selectedCategory;
 
   @override
   void initState() {
@@ -686,6 +687,21 @@ class _DashboradPageState extends State<DashboradPage>
       } else {
         getProductList(cat);
       }
+    }
+  }
+
+  void _selectedCategory(int index, String row) {
+
+    var selected = row == 'first' ? categoryFirstRow[index] : categorySecondRow[index];
+
+    setState((){
+      selectedCategory = selected;
+    });
+
+    if ((row == 'first' ? categoryFirstRow[index].isSetmeal : categorySecondRow[index].isSetmeal) == 1) {
+        getMeals();
+      } else {
+        getProductList(row == 'first' ? categoryFirstRow[index].categoryId : categorySecondRow[index].categoryId);
     }
   }
 
@@ -1801,68 +1817,7 @@ class _DashboradPageState extends State<DashboradPage>
         );
       }),
     ); */
-
-    final _quantityTabs = TabBar(
-        controller: _tabController,
-        indicatorSize: TabBarIndicatorSize.label,
-        unselectedLabelColor: Colors.white,
-        labelColor: Colors.white,
-        isScrollable: false,
-        labelPadding: EdgeInsets.all(2),
-        indicatorPadding: EdgeInsets.all(2),
-        indicator: BoxDecoration(
-            borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
-        tabs: List<Widget>.generate(quantity.length, (int index) {
-          return new Tab(
-            child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: SizeConfig.safeBlockHorizontal * 2,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Text(
-                  'x ' + quantity[index].toString(),
-                  style: Styles.whiteBoldsmall(),
-                )),
-          );
-        }));
-
-    return Scaffold(
-      key: scaffoldKey,
-      drawer: DrawerWid(),
-      body: LoadingOverlay(
-          child: SafeArea(
-            child: new GestureDetector(
-              onTap: () {
-                FocusScope.of(context).requestFocus(new FocusNode());
-                slidableController.activeState?.close();
-              },
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                child: Table(
-                  border: TableBorder.all(color: Colors.white, width: 0.6),
-                  columnWidths: {
-                    0: FractionColumnWidth(.6),
-                    1: FractionColumnWidth(.3),
-                  },
-                  children: [
-                    TableRow(children: [
-                      TableCell(child: tableHeader1()),
-                      TableCell(child: tableHeader2()),
-                    ]),
-                    TableRow(children: [
-                      TableCell(
-                        child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
-                          color: Colors.black12,
-                          padding: EdgeInsets.all(
-                              SizeConfig.safeBlockVertical * 1.2),
-                          child: itemSelectedIndex.productQty != null && itemSelectedIndex.productQty > 0
-                              ///using cart row id??
-                              ? GridView.count(
+    final itemEditScreen = GridView.count(
                                   crossAxisCount: 5,
                                   mainAxisSpacing: 10,
                                   crossAxisSpacing: 10,
@@ -2057,14 +2012,197 @@ class _DashboradPageState extends State<DashboradPage>
                                       ),
                                     )
                                   ],
-                                )
-                              : Column(
+                                );
+                              
+    final _quantityTabs = TabBar(
+        controller: _tabController,
+        indicatorSize: TabBarIndicatorSize.label,
+        unselectedLabelColor: Colors.white,
+        labelColor: Colors.white,
+        isScrollable: false,
+        labelPadding: EdgeInsets.all(2),
+        indicatorPadding: EdgeInsets.all(2),
+        indicator: BoxDecoration(
+            borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
+        tabs: List<Widget>.generate(quantity.length, (int index) {
+          return new Tab(
+            child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.safeBlockHorizontal * 2,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  'x ' + quantity[index].toString(),
+                  style: Styles.whiteBoldsmall(),
+                )),
+          );
+        }));
+
+    return Scaffold(
+      key: scaffoldKey,
+      drawer: DrawerWid(),
+      bottomNavigationBar: Row(
+        children: [
+Container(
+                height: 80,
+                color: StaticColor.backgroundColor,
+                child: paybutton(context),
+              ),
+        ],
+      ),
+      body: LoadingOverlay(
+          isLoading: isScreenLoad,
+          color: Colors.black87,
+          progressIndicator: CommunFun.overLayLoader(),
+          child: Container(
+            height: SizeConfig.safeBlockVertical * 7,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              border: Border.all(width: 1, color: Colors.grey),
+              color: Color(0xFF434449), //scaffold color
+            ),
+          child: SafeArea(
+            child: new GestureDetector(
+              onTap: () {
+                FocusScope.of(context).requestFocus(new FocusNode());
+                slidableController.activeState?.close();
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: double.infinity,
+                child: Table(
+                  border: TableBorder.all(color: Colors.white, width: 0.6),
+                  columnWidths: {
+                    0: FractionColumnWidth(.3),
+                    1: FractionColumnWidth(.6),
+                  },
+                  children: [
+                    TableRow(children: [
+                      TableCell(child: tableHeader1()),
+                      TableCell(child: tableHeader2()),
+                    ]),
+                    TableRow(children: [
+                      TableCell(
+                        child: SizedBox()
+                            ),
+                      TableCell(
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                          color: Colors.black12,
+                          padding: EdgeInsets.all(
+                              SizeConfig.safeBlockVertical * 1.2),
+                          child: itemSelectedIndex.productQty != null && itemSelectedIndex.productQty > 0
+                              ///using cart row id??
+                              ? itemEditScreen : Column(
                                   children: <Widget>[
                                     subCatList.length == 0
-                                        ? DefaultTabController(
+                                        ? 
+                                        Container(
+                          padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
+                          child: Column(
+                            children: <Widget>[
+                              /* subCatList.length == 0?  */
+                                    /* Container(
+                                      //margin: EdgeInsets.only(left: 5, right: 5),
+                                      width: MediaQuery.of(context).size.width,
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      color: Colors.black26,
+                                      padding: EdgeInsets.all(
+                                          SizeConfig.safeBlockVertical * 1.2),
+                                      child: DefaultTabController(
+                                          initialIndex: 0,
+                                          length: categoryFirstRow.length,
+                                          child: _tabs),
+                                    ),
+                                    Container(
+                                      //margin: EdgeInsets.only(left: 5, right: 5),
+                                      width: MediaQuery.of(context).size.width,
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      color: Colors.black26,
+                                      padding: EdgeInsets.all(
+                                          SizeConfig.safeBlockVertical * 1.2),
+                                      child: DefaultTabController(
+                                          initialIndex: 0,
+                                          length: categorySecondRow.length,
+                                          child: _secondTabs),
+                                    ), */
+                                    //Category Row 1
+                                    Container( 
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      width: MediaQuery.of(context).size.width,
+                                      color: Colors.black26,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                          itemCount: categoryFirstRow.length, itemBuilder: (context, index) {
+                                            return Container(
+                                              padding: EdgeInsets.all(10.0),
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(30),
+                                              ),
+                                              child: FlatButton(
+                                                onPressed: () { _selectedCategory(index, 'first'); },
+                                                //color: Colors.black,  //Colors.grey.shade800,
+                                                color: categoryFirstRow[index].name == selectedCategory?.name ? Colors.deepOrange : Colors.black26,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(8.0),
+                                                  //side: BorderSide(color: Colors.black)
+                                                ),
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: SizeConfig.safeBlockHorizontal * 3,
+                                                ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      categoryFirstRow[index].name.toUpperCase(), 
+                                                      style: Styles.whiteBoldsmall(),
+                                                    )
+                                                  ),
+                                                ),
+                                            );
+                                      }),
+                                    ),
+                                    Container( 
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      width: MediaQuery.of(context).size.width,
+                                      color: Colors.black26,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                          itemCount: categorySecondRow.length, itemBuilder: (context, index) {
+                                            return Container(
+                                              padding: EdgeInsets.all(10.0),
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(30),
+                                              ),
+                                              child: FlatButton(
+                                                onPressed: () { _selectedCategory(index, 'second'); },
+                                                //color: Colors.black,  //Colors.grey.shade800,
+                                                color: categorySecondRow[index].name == selectedCategory?.name ? Colors.deepOrange : Colors.black26,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(8.0),
+                                                  //side: BorderSide(color: Colors.black)
+                                                ),
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: SizeConfig.safeBlockHorizontal * 3,
+                                                ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      categorySecondRow[index].name.toUpperCase(), 
+                                                      style: Styles.whiteBoldsmall(),
+                                                    )
+                                                  ),
+                                                ),
+                                            );
+                                      }),
+                              ),
+                            ],
+                            ),
+                            )
+                                        /* DefaultTabController(
                                             initialIndex: 0,
                                             length: tabsList.length,
-                                            child: _tabs)
+                                            child: _tabs) */
                                         : Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.start,
@@ -2111,7 +2249,7 @@ class _DashboradPageState extends State<DashboradPage>
                                 ),
                         ),
                       ),
-                      TableCell(
+                      /* TableCell(
                         child: Stack(
                           children: <Widget>[
                             Container(
@@ -2135,17 +2273,14 @@ class _DashboradPageState extends State<DashboradPage>
                             !isShiftOpen ? openShiftButton(context) : SizedBox()
                           ],
                         ),
-                      ),
-                      ]),
-                  ],
-                ),
+                      ), */
+                      ],),
+                  ],),
               ),
             ),
           ),
-          isLoading: isScreenLoad,
-          color: Colors.black87,
-          progressIndicator: CommunFun.overLayLoader()),
-    );
+          ),
+    ),);
   }
 
   // Widget drawerWidget() {
