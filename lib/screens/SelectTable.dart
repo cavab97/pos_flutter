@@ -1077,7 +1077,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                                 : table.tableName,
                             style: Styles.blackMediumBold(),
                           ),
-                          Text(selected != null ? selected.timeMinute : "")
+                          Text(selected != null ? selected.timeMinute.toString() : "")
                         ]),
                   ),
                 ),

@@ -113,7 +113,7 @@ class _DashboradPageState extends State<DashboradPage>
   var currency = "RM";
   bool isScreenLoad = false;
   Timer timer;
-  int itemSelectedIndex = -1;
+  MSTCartdetails itemSelectedIndex = new MSTCartdetails();
   List quantity = [2, 3, 4, 5, 6, 7, 8, 9];
   List categoryFirstRow = [];
   List categorySecondRow = [];
@@ -1688,6 +1688,7 @@ class _DashboradPageState extends State<DashboradPage>
         prod = productdt[0];
       }
     }
+    print('prod');
     await showDialog(
         context: context,
         barrierDismissible: false,
@@ -1859,8 +1860,7 @@ class _DashboradPageState extends State<DashboradPage>
                           color: Colors.black12,
                           padding: EdgeInsets.all(
                               SizeConfig.safeBlockVertical * 1.2),
-                          child: itemSelectedIndex > 0
-
+                          child: itemSelectedIndex.productQty != null && itemSelectedIndex.productQty > 0
                               ///using cart row id??
                               ? GridView.count(
                                   crossAxisCount: 5,
@@ -1872,16 +1872,18 @@ class _DashboradPageState extends State<DashboradPage>
                                       onTap: () {
                                         if (permissions
                                             .contains(Constant.DISCOUNT_ITEM)) {
-                                          applyforFocProduct(
-                                              cartList[itemSelectedIndex]);
-                                          itemSelectedIndex = -1;
+                                          applyforFocProduct(itemSelectedIndex);
+                                          setState(() {
+                                           itemSelectedIndex = new MSTCartdetails();
+                                          });
                                         } else {
                                           CommonUtils.openPermissionPop(
                                               context, Constant.DISCOUNT_ITEM,
                                               () {
-                                            applyforFocProduct(
-                                                cartList[itemSelectedIndex]);
-                                            itemSelectedIndex = -1;
+                                            applyforFocProduct(itemSelectedIndex);
+                                          setState(() {
+                                           itemSelectedIndex = new MSTCartdetails();
+                                          });
                                           }, () {});
                                         }
                                       },
@@ -1903,15 +1905,17 @@ class _DashboradPageState extends State<DashboradPage>
                                       onTap: () {
                                         if (permissions
                                             .contains(Constant.EDIT_ITEM)) {
-                                          editCartItem(
-                                              cartList[itemSelectedIndex]);
-                                          itemSelectedIndex = -1;
+                                          editCartItem(itemSelectedIndex);
+                                          setState(() {
+                                           itemSelectedIndex = new MSTCartdetails();
+                                          });
                                         } else {
                                           CommonUtils.openPermissionPop(
                                               context, Constant.EDIT_ITEM, () {
-                                            editCartItem(
-                                                cartList[itemSelectedIndex]);
-                                            itemSelectedIndex = -1;
+                                            editCartItem(itemSelectedIndex);
+                                          setState(() {
+                                           itemSelectedIndex = new MSTCartdetails();
+                                          });
                                           }, () {});
                                         }
                                       },
@@ -1933,7 +1937,9 @@ class _DashboradPageState extends State<DashboradPage>
                                     GestureDetector(
                                       onTap: () {
                                         print(itemSelectedIndex);
-                                        itemSelectedIndex = -1;
+                                          setState(() {
+                                           itemSelectedIndex = new MSTCartdetails();
+                                          });
                                       },
                                       child: Column(
                                         crossAxisAlignment:
@@ -1953,7 +1959,9 @@ class _DashboradPageState extends State<DashboradPage>
                                     GestureDetector(
                                       onTap: () {
                                         print(itemSelectedIndex);
-                                        itemSelectedIndex = -1;
+                                          setState(() {
+                                           itemSelectedIndex = new MSTCartdetails();
+                                          });
                                       },
                                       child: Column(
                                         crossAxisAlignment:
@@ -1974,15 +1982,18 @@ class _DashboradPageState extends State<DashboradPage>
                                       onTap: () {
                                         if (permissions
                                             .contains(Constant.DELETE_ITEM)) {
-                                          itememovefromCart(
-                                              cartList[itemSelectedIndex]);
+                                          itememovefromCart(itemSelectedIndex);
+                                          setState(() {
+                                           itemSelectedIndex = new MSTCartdetails();
+                                          });
                                         } else {
                                           CommonUtils.openPermissionPop(
                                               context, Constant.DELETE_ITEM,
                                               () {
-                                            itememovefromCart(
-                                                cartList[itemSelectedIndex]);
-                                            itemSelectedIndex = -1;
+                                            itememovefromCart(itemSelectedIndex);
+                                          setState(() {
+                                           itemSelectedIndex = new MSTCartdetails();
+                                          });
                                           }, () {});
                                         }
                                       },
@@ -2004,7 +2015,9 @@ class _DashboradPageState extends State<DashboradPage>
                                     GestureDetector(
                                       onTap: () {
                                         print(itemSelectedIndex);
-                                        itemSelectedIndex = -1;
+                                          setState(() {
+                                           itemSelectedIndex = new MSTCartdetails();
+                                          });
                                       },
                                       child: Column(
                                         crossAxisAlignment:
@@ -2024,9 +2037,9 @@ class _DashboradPageState extends State<DashboradPage>
                                     GestureDetector(
                                       onTap: () {
                                         print(itemSelectedIndex);
-                                        setState(() {
-                                          itemSelectedIndex = 1;
-                                        });
+                                          setState(() {
+                                           itemSelectedIndex = new MSTCartdetails();
+                                          });
                                       },
                                       child: Column(
                                         crossAxisAlignment:
@@ -2123,96 +2136,7 @@ class _DashboradPageState extends State<DashboradPage>
                           ],
                         ),
                       ),
-                      TableCell(
-                        child: Container(
-                          padding:
-                              EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
-                          child: Column(
-                            children: <Widget>[
-                              /* subCatList.length == 0
-                                  ?  */
-                              Container(
-                                //margin: EdgeInsets.only(left: 5, right: 5),
-                                width: MediaQuery.of(context).size.width,
-                                height: SizeConfig.safeBlockVertical * 8,
-                                color: Colors.black26,
-                                padding: EdgeInsets.all(
-                                    SizeConfig.safeBlockVertical * 1.2),
-                                child: DefaultTabController(
-                                    initialIndex: 0,
-                                    length: categoryFirstRow.length,
-                                    child: _tabs),
-                              ),
-                              Container(
-                                //margin: EdgeInsets.only(left: 5, right: 5),
-                                width: MediaQuery.of(context).size.width,
-                                height: SizeConfig.safeBlockVertical * 8,
-                                color: Colors.black26,
-                                padding: EdgeInsets.all(
-                                    SizeConfig.safeBlockVertical * 1.2),
-                                child: DefaultTabController(
-                                    initialIndex: 0,
-                                    length: categorySecondRow.length,
-                                    child: _secondTabs),
-                              ),
-                              /*  : Container(
-                                      //  margin: EdgeInsets.only(left: 5, right: 5),
-                                      width: MediaQuery.of(context).size.width,
-                                      height: SizeConfig.safeBlockVertical * 8,
-                                      color: Colors.black26,
-                                      padding: EdgeInsets.all(
-                                          SizeConfig.safeBlockVertical * 1.2),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: <Widget>[
-                                          IconButton(
-                                              onPressed: _backtoMainCat,
-                                              icon: Icon(
-                                                Icons.arrow_back,
-                                                color: Colors.white,
-                                                size: SizeConfig
-                                                        .safeBlockVertical *
-                                                    4,
-                                              )),
-                                          DefaultTabController(
-                                              initialIndex: 0,
-                                              length: subCatList.length,
-                                              child: _subtabs),
-                                        ],
-                                      ),
-                                    ), */
-                              SingleChildScrollView(
-                                physics: BouncingScrollPhysics(),
-                                child: Container(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      mealsList.length > 0
-                                          ? setMealsList()
-                                          : SizedBox(),
-                                      isLoading
-                                          ? CommunFun.loader(context)
-                                          : productList.length > 0
-                                              ? porductsList()
-                                              : SizedBox(),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ]),
-                    TableRow(children: [
-                      TableCell(child: null),
-                      TableCell(child: null)
-                    ])
+                      ]),
                   ],
                 ),
               ),
@@ -3136,6 +3060,7 @@ class _DashboradPageState extends State<DashboradPage>
     );
   }
 
+    var expandableController;
   Widget cartITems() {
     // selected item list and total price calculations
     final customerdatawidget = Row(
@@ -3202,7 +3127,7 @@ class _DashboradPageState extends State<DashboradPage>
       //physics: BouncingScrollPhysics(),
       shrinkWrap: true,
       // itemExtent:60.0,
-      padding: EdgeInsets.only(bottom: 200),
+      padding: EdgeInsets.only(bottom: 200),//expandableController != null && expandableController.expanded ? 
       children: cartList.map((cart) {
         return Slidable(
           key: Key(cart.id.toString()),
@@ -3213,12 +3138,12 @@ class _DashboradPageState extends State<DashboradPage>
           child: GestureDetector(
             onTap: () => {
               setState(() {
-                itemSelectedIndex = cart.id;
+                itemSelectedIndex = cart;
               })
             },
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 5),
-              color: cart.id == itemSelectedIndex
+              color: cart.id == itemSelectedIndex.id
                   ? Colors.cyanAccent[100]
                   : Colors.transparent,
               child: Row(
@@ -3267,12 +3192,14 @@ class _DashboradPageState extends State<DashboradPage>
                     child: GestureDetector(
                       onTap: () {
                         if (permissions.contains(Constant.DELETE_ITEM)) {
-                          itememovefromCart(cartList[itemSelectedIndex]);
+                          itememovefromCart(itemSelectedIndex);
                         } else {
                           CommonUtils.openPermissionPop(
                               context, Constant.DELETE_ITEM, () {
-                            itememovefromCart(cartList[itemSelectedIndex]);
-                            itemSelectedIndex = -1;
+                            itememovefromCart(itemSelectedIndex);
+                                          setState(() {
+                                           itemSelectedIndex = new MSTCartdetails();
+                                          });
                           }, () {});
                         }
                       },
@@ -3326,6 +3253,7 @@ class _DashboradPageState extends State<DashboradPage>
                     onTap: () {
                       if (cart.isFocProduct != 1) {
                         if (permissions.contains(Constant.EDIT_ORDER)) {
+                          print('edit order tap');
                           editCartItem(cart);
                         } else {
                           CommonUtils.openPermissionPop(
@@ -3368,19 +3296,19 @@ class _DashboradPageState extends State<DashboradPage>
       child: ExpandablePanel(
         header: Builder(
           builder: (context) {
-            final controller = ExpandableController.of(context);
+            expandableController = ExpandableController.of(context);
             return Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 InkWell(
                   child: Icon(
-                    controller.expanded
+                    expandableController.expanded
                         ? Icons.keyboard_arrow_down
                         : Icons.keyboard_arrow_up,
                     size: 40,
                   ),
                   onTap: () {
-                    controller.toggle();
+                    expandableController.toggle();
                   },
                 ),
               ],
@@ -3442,9 +3370,7 @@ class _DashboradPageState extends State<DashboradPage>
                     ),
                     Text(
                       discount.toStringAsFixed(2),
-                      style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).accentColor),
+                      style:  Styles.orangeDis(),
                     ),
                   ],
                 ),
@@ -3653,7 +3579,7 @@ class _DashboradPageState extends State<DashboradPage>
                   : SizedBox(),
               Container(
                   //color: Colors.red,
-                  height: MediaQuery.of(context).size.height / 2,
+                  height:  MediaQuery.of(context).size.height / 2,
                   margin: EdgeInsets.only(top: customer != null ? 85 : 35),
                   child: cartTable),
               cartList.length != 0
