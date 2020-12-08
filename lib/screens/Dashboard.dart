@@ -2207,25 +2207,34 @@ class _DashboradPageState extends State<DashboradPage>
                                         ],
                                       ),
                                     ), */
-                              SingleChildScrollView(
-                                physics: BouncingScrollPhysics(),
-                                child: Container(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      mealsList.length > 0
-                                          ? setMealsList()
-                                          : SizedBox(),
-                                      isLoading
-                                          ? CommunFun.loader(context)
-                                          : productList.length > 0
-                                              ? porductsList()
+                              Container(
+                                child: SingleChildScrollView(
+                                    physics: BouncingScrollPhysics(),
+                                    child: SizedBox(
+                                      height: MediaQuery.of(context).size.height / 1.6,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          mealsList.length > 0
+                                              ? Expanded(
+                                                  flex: 1,
+                                                  child: setMealsList()
+                                                )
                                               : SizedBox(),
-                                    ],
+                                          isLoading
+                                              ? CommunFun.loader(context)
+                                              : productList.length > 0
+                                                  ? Expanded(
+                                                      flex: 1,
+                                                      child: porductsList()
+                                                    )
+                                                  : SizedBox()
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                ),
                               ),
                             ],
                           ),
