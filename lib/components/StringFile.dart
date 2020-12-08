@@ -164,7 +164,7 @@ class Strings {
   static String yes = "Yes";
   static String no = "No";
   static String foc_product_msg = "FOC Product is not editable.";
-  static String total = "Total :";
+  static String total = "TOTAL";
   static String amountPaid = "Amount Paid :";
   static String change = "Change :";
   static String enterMsg = "Press screen to Continue";

@@ -2462,7 +2462,7 @@ class _DashboradPageState extends State<DashboradPage>
                 style: Styles.communBlacksmall(),
                 decoration: InputDecoration(
                     contentPadding:
-                        EdgeInsets.only(left: 20, top: 0, bottom: 0),
+                        EdgeInsets.only(left: 20, top: 15, bottom: 15),
                     suffixIcon: Padding(
                       padding: EdgeInsets.only(
                           right: SizeConfig.safeBlockVertical * 3),
@@ -2998,7 +2998,7 @@ class _DashboradPageState extends State<DashboradPage>
           !isWebOrder
               ? Container(
                   //margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3),
-                  height: SizeConfig.safeBlockVertical * 5,
+                  height: SizeConfig.safeBlockVertical * 7,
                   width: MediaQuery.of(context).size.width / 6.5,
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
@@ -3039,7 +3039,7 @@ class _DashboradPageState extends State<DashboradPage>
           Container(
             /* margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height / 1.3 + 10),*/
-            height: SizeConfig.safeBlockVertical * 5,
+            height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 10,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
@@ -3091,7 +3091,7 @@ class _DashboradPageState extends State<DashboradPage>
             ),
           ),
           Container(
-            height: SizeConfig.safeBlockVertical * 5,
+            height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 8,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
@@ -3117,7 +3117,7 @@ class _DashboradPageState extends State<DashboradPage>
             ),
           ),
           Container(
-            height: SizeConfig.safeBlockVertical * 5,
+            height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 8,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
@@ -3143,7 +3143,7 @@ class _DashboradPageState extends State<DashboradPage>
             ),
           ),
           Container(
-            height: SizeConfig.safeBlockVertical * 5,
+            height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 6,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
@@ -3169,7 +3169,7 @@ class _DashboradPageState extends State<DashboradPage>
             ),
           ),
           Container(
-            height: SizeConfig.safeBlockVertical * 5,
+            height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 7,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
@@ -3394,7 +3394,7 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                   Expanded(
                     child: Text(
-                      cart.productQty.toString(),
+                      cart.productQty.toInt().toString(),
                       style: Styles.greysmall(),
                       textAlign: TextAlign.end,
                     ),
@@ -3689,7 +3689,7 @@ class _DashboradPageState extends State<DashboradPage>
       children: <Widget>[
         Container(
           height: MediaQuery.of(context).size.height * .8 -
-              SizeConfig.safeBlockVertical * 5,
+              SizeConfig.safeBlockVertical * 3,
           color: Colors.grey[300],
           padding: EdgeInsets.all(0),
           child: Stack(
@@ -3697,7 +3697,7 @@ class _DashboradPageState extends State<DashboradPage>
               customer != null
                   ? Container(
                       padding: EdgeInsets.only(left: 20, right: 20),
-                      height: 50,
+                      height: 80,
                       width: MediaQuery.of(context).size.width / 1.2,
                       child: customerdatawidget)
                   : SizedBox(),
