@@ -312,7 +312,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               children: paymenttyppeList.map((payment) {
-               
                 return ListTile(
                     contentPadding: EdgeInsets.all(5),
                     leading: Hero(

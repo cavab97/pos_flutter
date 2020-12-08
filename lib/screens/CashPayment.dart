@@ -4,6 +4,9 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
+import 'package:mcncashier/screens/PaymentMethodPop.dart';
+import 'package:mcncashier/components/commanutils.dart';
 
 class CashPaymentPage extends StatefulWidget {
   // Opning ammount popup
@@ -19,6 +22,78 @@ class CashPaymentPage extends StatefulWidget {
 
 class _CashPaymentState extends State<CashPaymentPage> {
   String currentNumber = "0";
+  bool isSubPayment = false;
+  List<Payments> mainPaymentList = [];
+  PaymentList paymentAPI = new PaymentList();
+  Payments seletedPayment = new Payments();
+  List<Widget> paymentListTile = [];
+  List<Payments> subPaymenttyppeList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {});
+    getPaymentMethods();
+  }
+
+  getPaymentMethods() async {
+    var result = await paymentAPI.getPaymentMethods();
+
+    if (result.length != 0) {
+      setState(() {
+        mainPaymentList = result.where((i) => i.isParent == 0).toList();
+      });
+    }
+  }
+
+  List<Widget> setPaymentListTile(List<Payments> listTilePaymentType) {
+    return listTilePaymentType.map((payment) {
+      return MaterialButton(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              side: BorderSide(color: Colors.grey)),
+          child: Text(payment.name, style: Styles.blackMediumBold()),
+          textColor: Colors.black,
+          color: Colors.grey[100],
+          onPressed: () {
+            seletedPayment = payment;
+            List<Payments> subList = mainPaymentList
+                .where((i) => i.isParent == payment.paymentId)
+                .toList();
+            if (subList.length > 0) {
+              subPaymenttyppeList = subList;
+            } else {
+              //insertPaymentOption(payment);
+              //select payment
+            }
+          });
+    }).toList();
+  }
+
+  List<Widget> subPaymentListTile(List<Payments> listTilePaymentType) {
+    return listTilePaymentType.map((payment) {
+      print(payment);
+      print(payment.toString());
+      return MaterialButton(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              side: BorderSide(color: Colors.grey)),
+          child: Text(payment.name, style: Styles.blackMediumBold()),
+          textColor: Colors.black,
+          color: Colors.grey[100],
+          onPressed: () {
+            seletedPayment = payment;
+            List<Payments> subList = mainPaymentList
+                .where((i) => i.isParent == payment.paymentId)
+                .toList();
+            if (subList.length > 0) {
+              subPaymenttyppeList = subList;
+            } else {
+              //select payment
+            }
+          });
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -207,43 +282,28 @@ class _CashPaymentState extends State<CashPaymentPage> {
   Widget getNumbers(context) {
     return Container(
       height: MediaQuery.of(context).size.height / 1.2,
-      width: MediaQuery.of(context).size.width / 1.6,
+      width: MediaQuery.of(context).size.width / 1.8,
       child: Center(
           child: Table(
         border: TableBorder.all(color: Colors.white, width: 0.6),
         columnWidths: {
+          //0: FractionColumnWidth(.2),
           0: FractionColumnWidth(.2),
-          1: FractionColumnWidth(.2),
-          2: FractionColumnWidth(.5),
+          1: FractionColumnWidth(.6),
         },
         children: [
           TableRow(children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Row(
-                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        splshsButton("Card", () {
-                          //numberClick('10');
-                        }), // using custom widget button
-                      ],
-                    ),
-                    Row(
-                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        splshsButton("E-Wallet", () {
-                          //numberClick('20');
-                        }),// using custom widget button
-                      ],
-                    ),
-                    SizedBox(
-                      height: 50,
-                    ),
-                  ]),
-            ),
+            /*  false
+                ? Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: Column(
+                      children: mainPaymentList.length > 0
+                          ? (isSubPayment
+                              ? subPaymentListTile(subPaymenttyppeList)
+                              : setPaymentListTile(mainPaymentList))
+                          : [],
+                    ))
+                : SizedBox(), */
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
               child: Column(
@@ -262,7 +322,7 @@ class _CashPaymentState extends State<CashPaymentPage> {
                       children: <Widget>[
                         splshsButton("20", () {
                           numberClick('20');
-                        }),// using custom widget button
+                        }), // using custom widget button
                       ],
                     ),
                     Row(
@@ -275,17 +335,16 @@ class _CashPaymentState extends State<CashPaymentPage> {
                       ],
                     ),
                     Row(
-                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        splshsButton("100", () {
-                          numberClick('100');
-                        }), //
-                      ]
-                    ),
+                        // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          splshsButton("100", () {
+                            numberClick('100');
+                          }), //
+                        ]),
                     Row(
                       // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                         // using custom widget button
+                        // using custom widget button
                         splshsButton("150", () {
                           numberClick('150');
                         }),

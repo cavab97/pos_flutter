@@ -853,6 +853,7 @@ class _DashboradPageState extends State<DashboradPage>
         return false;
       }
     }
+    selectTable();
   }
 
   sendPayment() {
@@ -1040,8 +1041,8 @@ class _DashboradPageState extends State<DashboradPage>
               paymentWithMethod(mehtod);
             },
           );
-        }); 
-}
+        });
+  }
 
   Future<Table_order> getTableData() async {
     Table_order tables = new Table_order();
@@ -3004,10 +3005,12 @@ class _DashboradPageState extends State<DashboradPage>
                     onPressed: () {
                       if (permissions.contains(Constant.ADD_ORDER)) {
                         sendTokitched(cartList);
+                        selectTable();
                       } else {
                         CommonUtils.openPermissionPop(
                             context, Constant.ADD_ORDER, () {
                           sendTokitched(cartList);
+                          selectTable();
                         }, () {});
                       }
                     },
