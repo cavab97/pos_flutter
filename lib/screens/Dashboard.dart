@@ -2661,7 +2661,7 @@ class _DashboradPageState extends State<DashboradPage>
                   child: Row(
                     children: <Widget>[
                       Icon(
-                        Icons.call_split,
+                        Icons.alarm_off,
                         color: Colors.black,
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
