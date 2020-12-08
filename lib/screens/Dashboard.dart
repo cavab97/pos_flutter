@@ -2976,7 +2976,7 @@ class _DashboradPageState extends State<DashboradPage>
           !isWebOrder
               ? Container(
                   //margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3),
-                  height: SizeConfig.safeBlockVertical * 5,
+                  height: SizeConfig.safeBlockVertical * 7,
                   width: MediaQuery.of(context).size.width / 6.5,
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
@@ -3015,7 +3015,7 @@ class _DashboradPageState extends State<DashboradPage>
           Container(
             /* margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height / 1.3 + 10),*/
-            height: SizeConfig.safeBlockVertical * 5,
+            height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 10,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
@@ -3067,7 +3067,7 @@ class _DashboradPageState extends State<DashboradPage>
             ),
           ),
           Container(
-            height: SizeConfig.safeBlockVertical * 5,
+            height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 8,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
@@ -3093,7 +3093,7 @@ class _DashboradPageState extends State<DashboradPage>
             ),
           ),
           Container(
-            height: SizeConfig.safeBlockVertical * 5,
+            height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 8,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
@@ -3119,7 +3119,7 @@ class _DashboradPageState extends State<DashboradPage>
             ),
           ),
           Container(
-            height: SizeConfig.safeBlockVertical * 5,
+            height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 6,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
@@ -3145,7 +3145,7 @@ class _DashboradPageState extends State<DashboradPage>
             ),
           ),
           Container(
-            height: SizeConfig.safeBlockVertical * 5,
+            height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 7,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
