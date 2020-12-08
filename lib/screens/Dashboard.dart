@@ -127,7 +127,7 @@ class _DashboradPageState extends State<DashboradPage>
   var currency = "RM";
   bool isScreenLoad = false;
   Timer timer;
-  List quantity = [2,3,4,5,6,7,8,9];
+  List quantity = [2, 3, 4, 5, 6, 7, 8, 9];
   List categoryFirstRow = [];
   List categorySecondRow = [];
   var selectedCategory;
@@ -548,7 +548,7 @@ class _DashboradPageState extends State<DashboradPage>
       allCaterories = categorys;
     });
 
-    for (var i=0; i<tabsList.length; i++) {
+    for (var i = 0; i < tabsList.length; i++) {
       if (i % 2 == 0) {
         categoryFirstRow.add(tabsList[i]);
       } else {
@@ -556,8 +556,10 @@ class _DashboradPageState extends State<DashboradPage>
       }
     }
 
-    _tabController = TabController(vsync: this, length: categoryFirstRow.length);
-    _secondTabController = TabController(vsync: this, length: categorySecondRow.length);
+    _tabController =
+        TabController(vsync: this, length: categoryFirstRow.length);
+    _secondTabController =
+        TabController(vsync: this, length: categorySecondRow.length);
     _tabController.addListener(_handleTabSelection);
     _secondTabController.addListener(_handleSecondTabSelection);
 
@@ -709,26 +711,29 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   void _selectedCategory(int index, String row) {
+    var selected =
+        row == 'first' ? categoryFirstRow[index] : categorySecondRow[index];
 
-    var selected = row == 'first' ? categoryFirstRow[index] : categorySecondRow[index];
-
-    setState((){
+    setState(() {
       selectedCategory = selected;
     });
 
-    if ((row == 'first' ? categoryFirstRow[index].isSetmeal : categorySecondRow[index].isSetmeal) == 1) {
-        getMeals();
-      } else {
-        getProductList(row == 'first' ? categoryFirstRow[index].categoryId : categorySecondRow[index].categoryId);
+    if ((row == 'first'
+            ? categoryFirstRow[index].isSetmeal
+            : categorySecondRow[index].isSetmeal) ==
+        1) {
+      getMeals();
+    } else {
+      getProductList(row == 'first'
+          ? categoryFirstRow[index].categoryId
+          : categorySecondRow[index].categoryId);
     }
   }
 
   void _selectedQuantity(int quantity) {
-
-    setState((){
+    setState(() {
       currentQuantity = quantity;
     });
-
   }
 
   @override
@@ -1094,7 +1099,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.voucher_detail = cartData.voucher_detail;
     order.voucher_id = cartData.voucher_id;
     order.voucher_amount = cartData.discount;
-    order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now()); 
+    order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
     order.updated_by = userdata.id;
     List<OrderDetail> detaislist = [];
     if (cartList.length > 0) {
@@ -1834,7 +1839,7 @@ class _DashboradPageState extends State<DashboradPage>
             ],
           ),
         ),
-        GestureDetector(
+        /* GestureDetector(
           onTap: () {
             print(itemSelectedIndex);
             setState(() {
@@ -1848,7 +1853,7 @@ class _DashboradPageState extends State<DashboradPage>
               Icon(Icons.ac_unit),
               SizedBox(height: 2),
               Text(
-                'Modifier',
+                'Global Modifier',
                 textAlign: TextAlign.center,
               )
             ],
@@ -1873,7 +1878,7 @@ class _DashboradPageState extends State<DashboradPage>
               )
             ],
           ),
-        )
+        ) */
       ],
     );
     // Categrory Tabs
@@ -1904,32 +1909,32 @@ class _DashboradPageState extends State<DashboradPage>
         }));
 
     final _secondTabs = TabBar(
-      controller: _secondTabController,
-      indicatorSize: TabBarIndicatorSize.label,
-      unselectedLabelColor: Colors.white,
-      labelColor: Colors.white,
-      isScrollable: true,
-      labelPadding: EdgeInsets.all(2),
-      indicatorPadding: EdgeInsets.all(2),
-      indicator: BoxDecoration(
-          borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
-      tabs: List<Widget>.generate(categorySecondRow.length, (int index) {
-        //index = (tabsList.length/2).ceil() + index;
-  
-        return new Tab(
-          child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: SizeConfig.safeBlockHorizontal * 3,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Text(
-                categorySecondRow[index].name.toUpperCase(),
-                style: Styles.whiteBoldsmall(),
-              )),
-        );
-      }));
+        controller: _secondTabController,
+        indicatorSize: TabBarIndicatorSize.label,
+        unselectedLabelColor: Colors.white,
+        labelColor: Colors.white,
+        isScrollable: true,
+        labelPadding: EdgeInsets.all(2),
+        indicatorPadding: EdgeInsets.all(2),
+        indicator: BoxDecoration(
+            borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
+        tabs: List<Widget>.generate(categorySecondRow.length, (int index) {
+          //index = (tabsList.length/2).ceil() + index;
+
+          return new Tab(
+            child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.safeBlockHorizontal * 3,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  categorySecondRow[index].name.toUpperCase(),
+                  style: Styles.whiteBoldsmall(),
+                )),
+          );
+        }));
     /* final _subtabs = TabBar(
       controller: _subtabController,
       indicatorSize: TabBarIndicatorSize.label,
@@ -1980,7 +1985,7 @@ class _DashboradPageState extends State<DashboradPage>
                   children: [
                     TableRow(children: [
                       TableCell(child: tableHeader2()),
-                      TableCell(child: tableHeader1()), 
+                      TableCell(child: tableHeader1()),
                     ]),
                     TableRow(children: [
                       TableCell(
@@ -2013,13 +2018,14 @@ class _DashboradPageState extends State<DashboradPage>
                           height: MediaQuery.of(context).size.height,
                           padding:
                               EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
-                          child: itemSelectedIndex.productQty != null &&
-                                  itemSelectedIndex.productQty > 0
-                              ? itemEditScreen
-                              : Column(
-                                  children: <Widget>[
-                                    /* subCatList.length == 0?  */
-                                    /* Container(
+                          child:
+/*                               itemSelectedIndex.productQty != null
+                              && itemSelectedIndex.productQty > 0
+                              ? itemEditScreen : */
+                              Column(
+                            children: <Widget>[
+                              /* subCatList.length == 0?  */
+                              /* Container(
                                       //margin: EdgeInsets.only(left: 5, right: 5),
                                       width: MediaQuery.of(context).size.width,
                                       height: SizeConfig.safeBlockVertical * 8,
@@ -2043,89 +2049,97 @@ class _DashboradPageState extends State<DashboradPage>
                                           length: categorySecondRow.length,
                                           child: _secondTabs),
                                     ), */
-                                    //Category Row 1
-                                    Container(
-                                      height: SizeConfig.safeBlockVertical * 8,
-                                      width: MediaQuery.of(context).size.width,
-                                      color: Colors.black26,
-                                      child: ListView.builder(
-                                          scrollDirection: Axis.horizontal,
-                                          itemCount: categoryFirstRow.length,
-                                          itemBuilder: (context, index) {
-                                            return Container(
-                                              padding: EdgeInsets.all(10.0),
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(30),
-                                              ),
-                                              child: FlatButton(
-                                                onPressed: () {
-                                                  _selectedCategory(
-                                                      index, 'first');
-                                                },
-                                                //color: Colors.black,  //Colors.grey.shade800,
-                                                color: categoryFirstRow[index]
-                                                            .name ==
-                                                        selectedCategory?.name
-                                                    ? Colors.deepOrange
-                                                    : Colors.black26,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                  //side: BorderSide(color: Colors.black)
-                                                ),
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: SizeConfig
-                                                          .safeBlockHorizontal *
-                                                      3,
-                                                ),
-                                                child: Center(
-                                                    child: Text(
-                                                  categoryFirstRow[index]
-                                                      .name
-                                                      .toUpperCase(),
-                                                  style:
-                                                      Styles.whiteBoldsmall(),
-                                                )),
-                                              ),
-                                            );
-                                          }),
-                                    ),
-                                    Container(
-                                      height: SizeConfig.safeBlockVertical * 8,
-                                      width: MediaQuery.of(context).size.width,
-                                      color: Colors.black26,
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.horizontal,
-                                          itemCount: categorySecondRow.length, itemBuilder: (context, index) {
-                                            return Container(
-                                              padding: EdgeInsets.all(10.0),
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(30),
-                                              ),
-                                              child: FlatButton(
-                                                onPressed: () { _selectedCategory(index, 'second'); },
-                                                //color: Colors.black,  //Colors.grey.shade800,
-                                                color: categorySecondRow[index].name == selectedCategory?.name ? Colors.deepOrange : Colors.black26,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(8.0),
-                                                  //side: BorderSide(color: Colors.black)
-                                                ),
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal: SizeConfig.safeBlockHorizontal * 3,
-                                                ),
-                                                  child: Center(
-                                                    child: Text(
-                                                      categorySecondRow[index].name.toUpperCase(), 
-                                                      style: Styles.whiteBoldsmall(),
-                                                    )
-                                                  ),
-                                                ),
-                                            );
-                                      }),
-                                    ),
-                                 /*  : Container(
+                              //Category Row 1
+                              Container(
+                                height: SizeConfig.safeBlockVertical * 8,
+                                width: MediaQuery.of(context).size.width,
+                                color: Colors.black26,
+                                child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: categoryFirstRow.length,
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        padding: EdgeInsets.all(10.0),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                        ),
+                                        child: FlatButton(
+                                          onPressed: () {
+                                            _selectedCategory(index, 'first');
+                                          },
+                                          //color: Colors.black,  //Colors.grey.shade800,
+                                          color: categoryFirstRow[index].name ==
+                                                  selectedCategory?.name
+                                              ? Colors.deepOrange
+                                              : Colors.black26,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                            //side: BorderSide(color: Colors.black)
+                                          ),
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal:
+                                                SizeConfig.safeBlockHorizontal *
+                                                    3,
+                                          ),
+                                          child: Center(
+                                              child: Text(
+                                            categoryFirstRow[index]
+                                                .name
+                                                .toUpperCase(),
+                                            style: Styles.whiteBoldsmall(),
+                                          )),
+                                        ),
+                                      );
+                                    }),
+                              ),
+                              Container(
+                                height: SizeConfig.safeBlockVertical * 8,
+                                width: MediaQuery.of(context).size.width,
+                                color: Colors.black26,
+                                child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: categorySecondRow.length,
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        padding: EdgeInsets.all(10.0),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                        ),
+                                        child: FlatButton(
+                                          onPressed: () {
+                                            _selectedCategory(index, 'second');
+                                          },
+                                          //color: Colors.black,  //Colors.grey.shade800,
+                                          color:
+                                              categorySecondRow[index].name ==
+                                                      selectedCategory?.name
+                                                  ? Colors.deepOrange
+                                                  : Colors.black26,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                            //side: BorderSide(color: Colors.black)
+                                          ),
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal:
+                                                SizeConfig.safeBlockHorizontal *
+                                                    3,
+                                          ),
+                                          child: Center(
+                                              child: Text(
+                                            categorySecondRow[index]
+                                                .name
+                                                .toUpperCase(),
+                                            style: Styles.whiteBoldsmall(),
+                                          )),
+                                        ),
+                                      );
+                                    }),
+                              ),
+                              /*  : Container(
                                       //  margin: EdgeInsets.only(left: 5, right: 5),
                                       width: MediaQuery.of(context).size.width,
                                       height: SizeConfig.safeBlockVertical * 8,
@@ -2154,29 +2168,28 @@ class _DashboradPageState extends State<DashboradPage>
                                         ],
                                       ),
                                     ), */
-                                    SingleChildScrollView(
-                                      physics: BouncingScrollPhysics(),
-                                      child: Container(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            mealsList.length > 0
-                                                ? setMealsList()
-                                                : SizedBox(),
-                                            isLoading
-                                                ? CommunFun.loader(context)
-                                                : productList.length > 0
-                                                    ? porductsList()
-                                                    : SizedBox(),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                              SingleChildScrollView(
+                                physics: BouncingScrollPhysics(),
+                                child: Container(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      mealsList.length > 0
+                                          ? setMealsList()
+                                          : SizedBox(),
+                                      isLoading
+                                          ? CommunFun.loader(context)
+                                          : productList.length > 0
+                                              ? porductsList()
+                                              : SizedBox(),
+                                    ],
+                                  ),
                                 ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ]),
@@ -2188,15 +2201,15 @@ class _DashboradPageState extends State<DashboradPage>
           isLoading: isScreenLoad,
           color: Colors.black87,
           progressIndicator: CommunFun.overLayLoader()),
-          bottomNavigationBar: Container(
-            height: SizeConfig.safeBlockVertical * 7,
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              border: Border.all(width: 1, color: Colors.grey),
-              color: Color(0xFF434449), //scaffold color
-            ),
-            child: paybutton(context),
-          ),
+      bottomNavigationBar: Container(
+        height: MediaQuery.of(context).size.height * .1,
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          border: Border.all(width: 1, color: Colors.grey),
+          color: Color(0xFF434449), //scaffold color
+        ),
+        child: paybutton(context),
+      ),
     );
   }
 
@@ -2334,31 +2347,35 @@ class _DashboradPageState extends State<DashboradPage>
       padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
       width: MediaQuery.of(context).size.width / 3,
       child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-          itemCount: quantity.length, itemBuilder: (context, index) {
+          scrollDirection: Axis.horizontal,
+          itemCount: quantity.length,
+          itemBuilder: (context, index) {
             return Container(
               padding: EdgeInsets.only(left: 6.0, right: 6.0, top: 2.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30),
               ),
               child: FlatButton(
-                onPressed: () { _selectedQuantity(quantity[index]); },
-                color: currentQuantity == quantity[index] ? Colors.deepOrange : Colors.grey.shade500,
+                onPressed: () {
+                  _selectedQuantity(quantity[index]);
+                },
+                color: currentQuantity == quantity[index]
+                    ? Colors.deepOrange
+                    : Colors.grey.shade500,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 padding: EdgeInsets.symmetric(
                   horizontal: SizeConfig.safeBlockHorizontal * 2,
                 ),
-                  child: Center(
+                child: Center(
                     child: Text(
-                      'x ' + quantity[index].toString(), 
-                      style: Styles.whiteBoldsmall(),
-                    )
-                  ),
-                ),
+                  'x ' + quantity[index].toString(),
+                  style: Styles.whiteBoldsmall(),
+                )),
+              ),
             );
-      }),
+          }),
     );
   }
 
@@ -2366,7 +2383,7 @@ class _DashboradPageState extends State<DashboradPage>
     // products Header part 2
     return Container(
       padding: EdgeInsets.only(left: 5, right: 5),
-      height: SizeConfig.safeBlockVertical * 11,
+      height: MediaQuery.of(context).size.height * .1,
       // color: Colors.blue,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -2374,7 +2391,7 @@ class _DashboradPageState extends State<DashboradPage>
         children: <Widget>[
           selectedTable != null
               ? Row(
-                children: <Widget>[
+                  children: <Widget>[
                     menubutton(() {}),
                     SizedBox(width: 10),
                     Icon(
@@ -2396,8 +2413,8 @@ class _DashboradPageState extends State<DashboradPage>
                         style: Styles.whiteBoldsmall(),
                       ),
                     ),
-                    ],
-                  )
+                  ],
+                )
               : SizedBox(),
           Expanded(
             child: TypeAheadField(
@@ -2510,7 +2527,8 @@ class _DashboradPageState extends State<DashboradPage>
                   size: SizeConfig.safeBlockVertical * 3,
                 ),
                 SizedBox(width: 5),
-                Text(Strings.btn_Add_customer.toUpperCase(), style: Styles.whiteBoldsmall()),
+                Text(Strings.btn_Add_customer.toUpperCase(),
+                    style: Styles.whiteBoldsmall()),
               ],
             ),
             color: Colors.deepOrange,
@@ -2954,21 +2972,21 @@ class _DashboradPageState extends State<DashboradPage>
                           sendTokitched(cartList);
                         }, () {});
                       }
-                    }, 
+                    },
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(
-                          Icons.check,
-                          color: Colors.white,
-                          size: SizeConfig.safeBlockVertical * 3,
-                        ),
-                        SizedBox(width: 5),
-                        Text(
-                          Strings.send.toUpperCase(),
-                          style: Styles.whiteBoldsmall(),
-                        ),
-                    ]),
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: SizeConfig.safeBlockVertical * 3,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            Strings.send.toUpperCase(),
+                            style: Styles.whiteBoldsmall(),
+                          ),
+                        ]),
                     color: Colors.deepOrange,
                     textColor: Colors.white,
                     shape: RoundedRectangleBorder(
@@ -3009,19 +3027,21 @@ class _DashboradPageState extends State<DashboradPage>
                 }
               },
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    Icons.payment,
-                    color: Colors.white,
-                    size: SizeConfig.safeBlockVertical * 3,
-                  ),
-                  SizedBox(width: 5),
-                  Text(
-                    !isWebOrder ? Strings.title_pay.toUpperCase() : Strings.checkout.toUpperCase(),
-                    style: Styles.whiteBoldsmall(),
-                  ),
-              ]),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(
+                      Icons.payment,
+                      color: Colors.white,
+                      size: SizeConfig.safeBlockVertical * 3,
+                    ),
+                    SizedBox(width: 5),
+                    Text(
+                      !isWebOrder
+                          ? Strings.title_pay.toUpperCase()
+                          : Strings.checkout.toUpperCase(),
+                      style: Styles.whiteBoldsmall(),
+                    ),
+                  ]),
               color: Colors.deepOrange,
               textColor: Colors.white,
               shape: RoundedRectangleBorder(
@@ -3046,7 +3066,8 @@ class _DashboradPageState extends State<DashboradPage>
                     size: SizeConfig.safeBlockVertical * 3,
                   ),
                   SizedBox(width: 5),
-                  Text(Strings.check_list.toUpperCase(), style: Styles.whiteBoldsmall()),
+                  Text(Strings.check_list.toUpperCase(),
+                      style: Styles.whiteBoldsmall()),
                 ],
               ),
               shape: RoundedRectangleBorder(
@@ -3071,7 +3092,8 @@ class _DashboradPageState extends State<DashboradPage>
                     size: SizeConfig.safeBlockVertical * 3,
                   ),
                   SizedBox(width: 5),
-                  Text(Strings.draft_report.toUpperCase(), style: Styles.whiteBoldsmall()),
+                  Text(Strings.draft_report.toUpperCase(),
+                      style: Styles.whiteBoldsmall()),
                 ],
               ),
               shape: RoundedRectangleBorder(
@@ -3096,7 +3118,8 @@ class _DashboradPageState extends State<DashboradPage>
                     size: SizeConfig.safeBlockVertical * 3,
                   ),
                   SizedBox(width: 5),
-                  Text(Strings.reprint_Order.toUpperCase(), style: Styles.whiteBoldsmall()),
+                  Text(Strings.reprint_Order.toUpperCase(),
+                      style: Styles.whiteBoldsmall()),
                 ],
               ),
               shape: RoundedRectangleBorder(
@@ -3121,7 +3144,8 @@ class _DashboradPageState extends State<DashboradPage>
                     size: SizeConfig.safeBlockVertical * 3,
                   ),
                   SizedBox(width: 5),
-                  Text(Strings.select_table.toUpperCase(), style: Styles.whiteBoldsmall()),
+                  Text(Strings.select_table.toUpperCase(),
+                      style: Styles.whiteBoldsmall()),
                 ],
               ),
               shape: RoundedRectangleBorder(
@@ -3129,7 +3153,6 @@ class _DashboradPageState extends State<DashboradPage>
               ),
             ),
           ),
-          
         ]);
   }
 
@@ -3223,7 +3246,38 @@ class _DashboradPageState extends State<DashboradPage>
       ],
     );
 
-    final carttitle = Table(
+    final carttitle = Row(
+      children: [
+        Expanded(
+          child: Text(
+            Strings.header_name,
+            style: Styles.darkBlue(),
+          ),
+          flex: 6,
+        ),
+        Expanded(
+          child: Text(
+            Strings.qty,
+            style: Styles.darkBlue(),
+            textAlign: TextAlign.end,
+          ),
+          flex: 1,
+        ),
+        Expanded(
+          child: Text(
+            Strings.amount,
+            style: Styles.darkBlue(),
+            textAlign: TextAlign.end,
+          ),
+          flex: 2,
+        ),
+        Expanded(
+          child: Icon(Icons.delete_forever),
+          flex: 1,
+        ),
+      ],
+    );
+    Table(
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         border: TableBorder(
             horizontalInside: BorderSide(
@@ -3257,7 +3311,10 @@ class _DashboradPageState extends State<DashboradPage>
           direction: Axis.horizontal,
           child: GestureDetector(
             onTap: () => setState(() {
-              if (cart.id == itemSelectedIndex.id) {
+              if (currentQuantity > 0) {
+                cart.productQty = currentQuantity.toDouble();
+                currentQuantity = 0;
+              } else if (cart.id == itemSelectedIndex.id) {
                 itemSelectedIndex = new MSTCartdetails();
               } else {
                 itemSelectedIndex = cart;
@@ -3265,16 +3322,16 @@ class _DashboradPageState extends State<DashboradPage>
             }),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 5),
-              color: cart.id == itemSelectedIndex.id
-                  ? Colors.deepOrange[400]
-                  : Colors.transparent,
+              color:
+                  // cart.id == itemSelectedIndex.id ? Colors.deepOrange[400] :
+                  Colors.transparent,
               child: Row(
                 children: <Widget>[
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text('  ' + cart.productName.toUpperCase(),
+                        Text(cart.productName.toUpperCase(),
                             maxLines: 2,
                             overflow: TextOverflow.clip,
                             style: Styles.greysmall()),
@@ -3314,11 +3371,11 @@ class _DashboradPageState extends State<DashboradPage>
                     child: GestureDetector(
                       onTap: () {
                         if (permissions.contains(Constant.DELETE_ITEM)) {
-                          itememovefromCart(itemSelectedIndex);
+                          itememovefromCart(cart);
                         } else {
                           CommonUtils.openPermissionPop(
                               context, Constant.DELETE_ITEM, () {
-                            itememovefromCart(itemSelectedIndex);
+                            itememovefromCart(cart);
                             setState(() {
                               itemSelectedIndex = new MSTCartdetails();
                             });
@@ -3507,7 +3564,8 @@ class _DashboradPageState extends State<DashboradPage>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      Strings.service_charge.toUpperCase() + "($serviceChargePer%)",
+                      Strings.service_charge.toUpperCase() +
+                          "($serviceChargePer%)",
                       style: Styles.darkBlue(),
                     ),
                     Text(
@@ -3586,12 +3644,11 @@ class _DashboradPageState extends State<DashboradPage>
       ),
     );
 
-
     return Column(
       children: <Widget>[
         Container(
-          height: MediaQuery.of(context).size.height -
-              SizeConfig.safeBlockVertical * 10,
+          height: MediaQuery.of(context).size.height * .8 -
+              SizeConfig.safeBlockVertical * 5,
           color: Colors.grey[300],
           padding: EdgeInsets.all(0),
           child: Stack(
@@ -3615,12 +3672,15 @@ class _DashboradPageState extends State<DashboradPage>
               Container(
                   //  color: Colors.amber,
                   //color: Colors.red,
-                  height: MediaQuery.of(context).size.height / 2,
+                  height: expandableController != null &&
+                          expandableController.expanded
+                      ? MediaQuery.of(context).size.height * .8 / 2
+                      : MediaQuery.of(context).size.height * .6,
                   margin: EdgeInsets.only(top: customer != null ? 85 : 35),
                   child: cartTable),
               cartList.length != 0
                   ? Positioned(
-                      bottom: 100,
+                      bottom: 5,
                       left: 0,
                       right: 0,
                       child: Container(
