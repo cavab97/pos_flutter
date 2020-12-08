@@ -2165,15 +2165,7 @@ class _DashboradPageState extends State<DashboradPage>
         children: <Widget>[
           Row(
             children: <Widget>[
-              IconButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  icon: Icon(
-                    Icons.arrow_back,
-                    color: Colors.white,
-                    size: SizeConfig.safeBlockVertical * 5,
-                  )),
+              
               SizedBox(width: SizeConfig.safeBlockVertical * 3),   
               SizedBox(width: SizeConfig.safeBlockVertical * 10),
                Row(
@@ -2181,9 +2173,7 @@ class _DashboradPageState extends State<DashboradPage>
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   //!isWebOrder ? addCustomerBtn(context) : SizedBox(),
-                  menubutton(() {
-                    // opneMenuButton();
-                  })
+                  
                 ],
               )
             ],
@@ -2207,6 +2197,8 @@ class _DashboradPageState extends State<DashboradPage>
           selectedTable != null
               ? Row(
                   children: <Widget>[
+                    menubutton(() {}),
+                    SizedBox(width: 10),
                     Icon(
                       Icons.person,
                       color: Colors.white,
@@ -2357,13 +2349,13 @@ class _DashboradPageState extends State<DashboradPage>
   Widget menubutton(Function _onPress) {
     return PopupMenuButton(
         padding: EdgeInsets.all(0),
-        icon: Icon(Icons.more_vert,
+        icon: Icon(Icons.arrow_drop_down,
             color: Colors.white, size: SizeConfig.safeBlockVertical * 5),
         offset: Offset(0, 100),
         // onSelected: 0,
         onSelected: selectOption,
         itemBuilder: (BuildContext context) => [
-              PopupMenuItem(
+              /* PopupMenuItem(
                 enabled: isShiftOpen ? true : false,
                 value: 0,
                 child: Padding(
@@ -2381,7 +2373,7 @@ class _DashboradPageState extends State<DashboradPage>
                     ],
                   ),
                 ),
-              ),
+              ), */
               PopupMenuItem(
                 enabled: isTableSelected ? true : false,
                 value: 1,
@@ -2439,7 +2431,7 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                 ),
               ),
-              PopupMenuItem(
+              /* PopupMenuItem(
                 enabled: (permissions.contains(Constant.ADD_ORDER) ||
                             permissions.contains(Constant.EDIT_ORDER)) &&
                         cartList.length > 0
@@ -2461,8 +2453,8 @@ class _DashboradPageState extends State<DashboradPage>
                     ],
                   ),
                 ),
-              ),
-              PopupMenuItem(
+              ), */
+              /* PopupMenuItem(
                 enabled: (permissions.contains(Constant.ADD_ORDER) ||
                             permissions.contains(Constant.EDIT_ORDER)) &&
                         cartList.length > 0
@@ -2484,7 +2476,7 @@ class _DashboradPageState extends State<DashboradPage>
                     ],
                   ),
                 ),
-              ),
+              ), */
               PopupMenuItem(
                 enabled: permissions.contains(Constant.DELETE_ORDER) &&
                         cartList.length > 0
@@ -2507,7 +2499,7 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                 ),
               ),
-              PopupMenuItem(
+              /* PopupMenuItem(
                 // enabled: permissions.contains(Constant.DELETE_ORDER) &&
                 //         cartList.length > 0
                 //     ? true
@@ -2528,7 +2520,7 @@ class _DashboradPageState extends State<DashboradPage>
                     ],
                   ),
                 ),
-              ),
+              ), */
             ]);
   }
 
@@ -2775,7 +2767,7 @@ class _DashboradPageState extends State<DashboradPage>
               ? Container(
                   //margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3),
                   height: SizeConfig.safeBlockVertical * 5,
-                  width: MediaQuery.of(context).size.width / 10,
+                  width: MediaQuery.of(context).size.width / 6.5,
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () {
@@ -2787,14 +2779,21 @@ class _DashboradPageState extends State<DashboradPage>
                           sendTokitched(cartList);
                         }, () {});
                       }
-                    },
-                    child: Text(
-                      Strings.send,
-                      style: TextStyle(
+                    }, 
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(
+                          Icons.check,
                           color: Colors.white,
-                          fontSize: SizeConfig.safeBlockVertical * 2.8,
-                          fontWeight: FontWeight.bold),
-                    ),
+                          size: SizeConfig.safeBlockVertical * 3,
+                        ),
+                        SizedBox(width: 5),
+                        Text(
+                          Strings.send.toUpperCase(),
+                          style: Styles.whiteBoldsmall(),
+                        ),
+                    ]),
                     color: Colors.deepOrange,
                     textColor: Colors.white,
                     shape: RoundedRectangleBorder(
@@ -2834,13 +2833,20 @@ class _DashboradPageState extends State<DashboradPage>
                   }
                 }
               },
-              child: Text(
-                !isWebOrder ? Strings.title_pay : Strings.checkout,
-                style: TextStyle(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.payment,
                     color: Colors.white,
-                    fontSize: SizeConfig.safeBlockVertical * 2.8,
-                    fontWeight: FontWeight.bold),
-              ),
+                    size: SizeConfig.safeBlockVertical * 3,
+                  ),
+                  SizedBox(width: 5),
+                  Text(
+                    !isWebOrder ? Strings.title_pay.toUpperCase() : Strings.checkout.toUpperCase(),
+                    style: Styles.whiteBoldsmall(),
+                  ),
+              ]),
               color: Colors.deepOrange,
               textColor: Colors.white,
               shape: RoundedRectangleBorder(
@@ -2848,50 +2854,107 @@ class _DashboradPageState extends State<DashboradPage>
               ),
             ),
           ),
-          addCustomerBtn(context),
           Container(
-            /* margin: EdgeInsets.only(
-                top: MediaQuery.of(context).size.height / 1.3 + 10),*/
             height: SizeConfig.safeBlockVertical * 5,
-            width: MediaQuery.of(context).size.width / 10,
+            width: MediaQuery.of(context).size.width / 8,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
-                
+                printCheckList();
               },
-              child: Text(
-                !isWebOrder ? Strings.title_pay : Strings.checkout,
-                style: TextStyle(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.check_circle_outline_outlined,
                     color: Colors.white,
-                    fontSize: SizeConfig.safeBlockVertical * 2.8,
-                    fontWeight: FontWeight.bold),
+                    size: SizeConfig.safeBlockVertical * 3,
+                  ),
+                  SizedBox(width: 5),
+                  Text(Strings.check_list.toUpperCase(), style: Styles.whiteBoldsmall()),
+                ],
               ),
-              color: Colors.deepOrange,
-              textColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50.0),
               ),
             ),
           ),
-          PopupMenuItem(
-                enabled: isShiftOpen ? true : false,
-                value: 0,
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Row(
-                    children: <Widget>[
-                      Icon(
-                        Icons.select_all,
-                        color: Colors.black,
-                        size: SizeConfig.safeBlockVertical * 5,
-                      ),
-                      SizedBox(width: 15),
-                      Text(Strings.select_table,
-                          style: Styles.communBlacksmall()),
-                    ],
+          Container(
+            height: SizeConfig.safeBlockVertical * 5,
+            width: MediaQuery.of(context).size.width / 8,
+            child: RaisedButton(
+              padding: EdgeInsets.only(top: 5, bottom: 5),
+              onPressed: () {
+                draftreciptPrint();
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.print,
+                    color: Colors.white,
+                    size: SizeConfig.safeBlockVertical * 3,
                   ),
-                ),
+                  SizedBox(width: 5),
+                  Text(Strings.draft_report.toUpperCase(), style: Styles.whiteBoldsmall()),
+                ],
               ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50.0),
+              ),
+            ),
+          ),
+          Container(
+            height: SizeConfig.safeBlockVertical * 5,
+            width: MediaQuery.of(context).size.width / 6,
+            child: RaisedButton(
+              padding: EdgeInsets.only(top: 5, bottom: 5),
+              onPressed: () {
+                resendToKitchen();
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.send,
+                    color: Colors.white,
+                    size: SizeConfig.safeBlockVertical * 3,
+                  ),
+                  SizedBox(width: 5),
+                  Text(Strings.reprint_Order.toUpperCase(), style: Styles.whiteBoldsmall()),
+                ],
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50.0),
+              ),
+            ),
+          ),
+          Container(
+            height: SizeConfig.safeBlockVertical * 5,
+            width: MediaQuery.of(context).size.width / 7,
+            child: RaisedButton(
+              padding: EdgeInsets.only(top: 5, bottom: 5),
+              onPressed: () {
+                selectTable();
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.select_all,
+                    color: Colors.white,
+                    size: SizeConfig.safeBlockVertical * 3,
+                  ),
+                  SizedBox(width: 5),
+                  Text(Strings.select_table.toUpperCase(), style: Styles.whiteBoldsmall()),
+                ],
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50.0),
+              ),
+            ),
+          ),
+          
         ]);
   }
 

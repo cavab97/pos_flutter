@@ -88,11 +88,11 @@ class Strings {
   static String split_order = "Split Order";
   static String close_shift = "Close Shift";
   static String opne_shift = "Open Shift";
-  static String draft_report = "Draft Report";
+  static String draft_report = "Print Bill";
   static String check_list = "Check list";
   static String no_image = "assets/no_image.png";
   static String delete_order = "Delete Order";
-  static String reprint_Order = "Resend to Kitchen";
+  static String reprint_Order = "Kitchen Reprint";
   static String out_of_stoke = "OUT OF STOCK";
   static String out_of_stoke_msg = "Product Out of Stock";
   static String apply_promocode = "Apply Promocode";
@@ -131,7 +131,7 @@ class Strings {
   static String voucher_expired = "Voucher already expired.";
   static String stock_not_valilable = "Product is Out of stock.";
   static String procesing = "Processing";
-  static String send = "SEND";
+  static String send = "Confirm Order";
   static String open = "OPEN";
   static String shift_close_msg = "Please close your shift and Sync data.";
   static String internet_connection_lost = "Internet Connection Lost";
