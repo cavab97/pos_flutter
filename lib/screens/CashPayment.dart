@@ -110,10 +110,7 @@ class _CashPaymentState extends State<CashPaymentPage> {
   }
 
   Widget mainContent() {
-    return SingleChildScrollView(
-      physics: BouncingScrollPhysics(),
-      child: getNumbers(context),
-    );
+    return getNumbers(context);
   }
 
   Widget _button(String number, Function() f) {
@@ -209,14 +206,15 @@ class _CashPaymentState extends State<CashPaymentPage> {
 
   Widget getNumbers(context) {
     return Container(
-      height: MediaQuery.of(context).size.height / 1.6,
-      width: MediaQuery.of(context).size.width / 1.5,
+      height: MediaQuery.of(context).size.height / 1.2,
+      width: MediaQuery.of(context).size.width / 1.6,
       child: Center(
           child: Table(
         border: TableBorder.all(color: Colors.white, width: 0.6),
         columnWidths: {
-          0: FractionColumnWidth(.4),
-          1: FractionColumnWidth(.5),
+          0: FractionColumnWidth(.2),
+          1: FractionColumnWidth(.2),
+          2: FractionColumnWidth(.5),
         },
         children: [
           TableRow(children: [
@@ -228,20 +226,49 @@ class _CashPaymentState extends State<CashPaymentPage> {
                     Row(
                       // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        splshsButton("10", () {
-                          numberClick('10');
+                        splshsButton("Card", () {
+                          //numberClick('10');
                         }), // using custom widget button
-                        splshsButton("20", () {
-                          numberClick('20');
-                        }),
                       ],
                     ),
                     Row(
                       // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        splshsButton("40", () {
-                          numberClick('40');
+                        splshsButton("E-Wallet", () {
+                          //numberClick('20');
+                        }),// using custom widget button
+                      ],
+                    ),
+                    SizedBox(
+                      height: 50,
+                    ),
+                  ]),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Row(
+                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        splshsButton("10", () {
+                          numberClick('10');
                         }), // using custom widget button
+                      ],
+                    ),
+                    Row(
+                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        splshsButton("20", () {
+                          numberClick('20');
+                        }),// using custom widget button
+                      ],
+                    ),
+                    Row(
+                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        // using custom widget button
                         splshsButton("50", () {
                           numberClick('50');
                         }),
@@ -252,7 +279,13 @@ class _CashPaymentState extends State<CashPaymentPage> {
                       children: <Widget>[
                         splshsButton("100", () {
                           numberClick('100');
-                        }), // using custom widget button
+                        }), //
+                      ]
+                    ),
+                    Row(
+                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                         // using custom widget button
                         splshsButton("150", () {
                           numberClick('150');
                         }),
@@ -261,25 +294,6 @@ class _CashPaymentState extends State<CashPaymentPage> {
                     SizedBox(
                       height: 50,
                     ),
-                    Row(
-                      children: <Widget>[
-                        Transform.scale(
-                          scale: 1,
-                          child: CupertinoSwitch(
-                            value: false,
-                            onChanged: (bool value) {
-                              // setState(() {
-                              //   _switchValue = value;
-                              // });
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Text(Strings.print_reciept)
-                      ],
-                    )
                   ]),
             ),
             Padding(
@@ -287,6 +301,13 @@ class _CashPaymentState extends State<CashPaymentPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      _totalbutton(widget.ammountext.toStringAsFixed(2), () {
+                        widget.onEnter(widget.ammountext.toString());
+                      }),
+                    ],
+                  ),
                   Row(
                     // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
@@ -357,13 +378,6 @@ class _CashPaymentState extends State<CashPaymentPage> {
                       widget.onEnter(currentNumber);
                     })
                   ]),
-                  Row(
-                    children: <Widget>[
-                      _totalbutton(widget.ammountext.toStringAsFixed(2), () {
-                        widget.onEnter(widget.ammountext.toString());
-                      }),
-                    ],
-                  ),
                 ],
               ),
             )

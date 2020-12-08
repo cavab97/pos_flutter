@@ -33,6 +33,7 @@ import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Lastids.dart';
+import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/SetMeal.dart';
@@ -55,6 +56,7 @@ import 'package:mcncashier/screens/ChangeQtyDailog.dart';
 import 'package:mcncashier/screens/SplitOrder.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/screens/ReprintPopup.dart';
+import 'package:mcncashier/screens/CashPayment.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
@@ -99,6 +101,7 @@ class _DashboradPageState extends State<DashboradPage>
   List<ProductDetails> SearchProductList = new List<ProductDetails>();
   List<MSTCartdetails> cartList = new List<MSTCartdetails>();
   List<SetMeal> mealsList = new List<SetMeal>();
+  List<Payments> paymentTypeList = [];
   SlidableController slidableController = SlidableController();
   List<BranchTax> taxlist = [];
   double taxvalues = 0.00;
@@ -190,6 +193,8 @@ class _DashboradPageState extends State<DashboradPage>
     await setPermissons();
     await getTaxs();
     await getbranch();
+    await getPaymentMethods();
+
     _textController.addListener(() {
       getSearchList(_textController.text.toString());
     });
@@ -204,6 +209,18 @@ class _DashboradPageState extends State<DashboradPage>
       onSlideAnimationChanged: handleSlideAnimationChanged,
       onSlideIsOpenChanged: handleSlideIsOpenChanged,
     );
+  }
+
+  getPaymentMethods() async {
+    var result = await paymentAPI.getPaymentMethods();
+    List<Payments> mainPaymentList =
+        result.where((i) => i.isParent == 0).toList();
+
+    if (result.length != 0) {
+      setState(() {
+        paymentTypeList = mainPaymentList;
+      });
+    }
   }
 
   void handleSlideAnimationChanged(Animation<double> slideAnimation) {}
@@ -1023,8 +1040,8 @@ class _DashboradPageState extends State<DashboradPage>
               paymentWithMethod(mehtod);
             },
           );
-        });
-  }
+        }); 
+}
 
   Future<Table_order> getTableData() async {
     Table_order tables = new Table_order();
