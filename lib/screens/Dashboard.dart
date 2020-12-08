@@ -1832,7 +1832,7 @@ class _DashboradPageState extends State<DashboradPage>
                                   width: SizeConfig.safeBlockHorizontal * 50,
                                   child: cartITems()),
                             ),
-                            Positioned(
+                            /* Positioned(
                               bottom: 25,
                               left: 0,
                               right: 0,
@@ -1841,7 +1841,7 @@ class _DashboradPageState extends State<DashboradPage>
                                 color: StaticColor.backgroundColor,
                                 child: paybutton(context),
                               ),
-                            ),
+                            ), */
                             !isShiftOpen ? openShiftButton(context) : SizedBox()
                           ],
                         ),
@@ -1978,8 +1978,7 @@ class _DashboradPageState extends State<DashboradPage>
                                 child: Container(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: <Widget>[
                                       mealsList.length > 0
                                           ? setMealsList()
@@ -2181,7 +2180,7 @@ class _DashboradPageState extends State<DashboradPage>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  !isWebOrder ? addCustomerBtn(context) : SizedBox(),
+                  //!isWebOrder ? addCustomerBtn(context) : SizedBox(),
                   menubutton(() {
                     // opneMenuButton();
                   })
@@ -2341,10 +2340,10 @@ class _DashboradPageState extends State<DashboradPage>
                 Icon(
                   Icons.add_circle_outline,
                   color: Colors.white,
-                  size: SizeConfig.safeBlockVertical * 4,
+                  size: SizeConfig.safeBlockVertical * 3,
                 ),
                 SizedBox(width: 5),
-                Text(Strings.btn_Add_customer, style: Styles.whiteBoldsmall()),
+                Text(Strings.btn_Add_customer.toUpperCase(), style: Styles.whiteBoldsmall()),
               ],
             ),
             color: Colors.deepOrange,
@@ -2775,8 +2774,8 @@ class _DashboradPageState extends State<DashboradPage>
           !isWebOrder
               ? Container(
                   //margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3),
-                  height: SizeConfig.safeBlockVertical * 7,
-                  width: MediaQuery.of(context).size.width / 7,
+                  height: SizeConfig.safeBlockVertical * 5,
+                  width: MediaQuery.of(context).size.width / 10,
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () {
@@ -2807,8 +2806,8 @@ class _DashboradPageState extends State<DashboradPage>
           Container(
             /* margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height / 1.3 + 10),*/
-            height: SizeConfig.safeBlockVertical * 7,
-            width: MediaQuery.of(context).size.width / 7,
+            height: SizeConfig.safeBlockVertical * 5,
+            width: MediaQuery.of(context).size.width / 10,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
@@ -2848,7 +2847,8 @@ class _DashboradPageState extends State<DashboradPage>
                 borderRadius: BorderRadius.circular(50.0),
               ),
             ),
-          )
+          ),
+          addCustomerBtn(context),
         ]);
   }
 
