@@ -2440,7 +2440,7 @@ class _DashboradPageState extends State<DashboradPage>
                 style: Styles.communBlacksmall(),
                 decoration: InputDecoration(
                     contentPadding:
-                        EdgeInsets.only(left: 20, top: 0, bottom: 0),
+                        EdgeInsets.only(left: 20, top: 15, bottom: 15),
                     suffixIcon: Padding(
                       padding: EdgeInsets.only(
                           right: SizeConfig.safeBlockVertical * 3),
@@ -3665,7 +3665,7 @@ class _DashboradPageState extends State<DashboradPage>
       children: <Widget>[
         Container(
           height: MediaQuery.of(context).size.height * .8 -
-              SizeConfig.safeBlockVertical * 5,
+              SizeConfig.safeBlockVertical * 3,
           color: Colors.grey[300],
           padding: EdgeInsets.all(0),
           child: Stack(
@@ -3673,7 +3673,7 @@ class _DashboradPageState extends State<DashboradPage>
               customer != null
                   ? Container(
                       padding: EdgeInsets.only(left: 20, right: 20),
-                      height: 50,
+                      height: 80,
                       width: MediaQuery.of(context).size.width / 1.2,
                       child: customerdatawidget)
                   : SizedBox(),
