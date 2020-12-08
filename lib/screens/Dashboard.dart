@@ -3370,7 +3370,7 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                   Expanded(
                     child: Text(
-                      cart.productQty.toString(),
+                      cart.productQty.toInt().toString(),
                       style: Styles.greysmall(),
                       textAlign: TextAlign.end,
                     ),

@@ -840,7 +840,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                     style: TextStyle(
                         fontSize: SizeConfig.safeBlockVertical * 3,
                         color: Colors.white)),
-                addbutton(context)
               ],
             ),
           ),
@@ -855,7 +854,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           children: <Widget>[
             Positioned(
               bottom: 10,
-              right: 30,
+              left: 30,
               child: Text(
                 isSetMeal
                     ? currency != null
@@ -879,6 +878,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                     ]),
               ]),
             ),
+            Positioned(
+              bottom: 10,
+              right: 30,
+              child: addbutton(context),
+            ),
           ],
         )
       ],
@@ -887,8 +891,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   Widget closeButton(context) {
     return Positioned(
-      top: -30,
-      right: -20,
+      top: 0,
+      right: 0,
       child: GestureDetector(
         onTap: () {
           Navigator.of(context).pop();
@@ -1367,7 +1371,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           BoxDecoration(border: Border.all(width: 1, color: Colors.grey)),
       child: Center(
         child: Text(
-            product_qty.toString() +
+            product_qty.toInt().toString() +
                 " " +
                 (!isSetMeal
                     ? productItem.priceTypeName != null
@@ -1399,7 +1403,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   Widget addbutton(context) {
-    return RaisedButton(
+    return Container(
+      height: SizeConfig.safeBlockVertical * 5,
+      width: MediaQuery.of(context).size.width / 12,
+      child: RaisedButton(
       onPressed: () {
         if (attributeList.length > 0) {
           if (selectedAttr.length > 0) {
@@ -1420,17 +1427,18 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         }
       },
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           !isEditing
               ? Icon(
                   Icons.add_circle_outline,
                   color: Colors.white,
-                  size: SizeConfig.safeBlockVertical * 3.5,
+                  size: SizeConfig.safeBlockVertical * 3,
                 )
               : Icon(
                   Icons.edit,
                   color: Colors.white,
-                  size: SizeConfig.safeBlockVertical * 3.5,
+                  size: SizeConfig.safeBlockVertical * 3,
                 ),
           SizedBox(width: 5),
           Text(isEditing ? Strings.update : Strings.add,
@@ -1445,6 +1453,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(50.0),
       ),
+    ),
     );
   }
 }
