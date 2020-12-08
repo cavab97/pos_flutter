@@ -2849,6 +2849,49 @@ class _DashboradPageState extends State<DashboradPage>
             ),
           ),
           addCustomerBtn(context),
+          Container(
+            /* margin: EdgeInsets.only(
+                top: MediaQuery.of(context).size.height / 1.3 + 10),*/
+            height: SizeConfig.safeBlockVertical * 5,
+            width: MediaQuery.of(context).size.width / 10,
+            child: RaisedButton(
+              padding: EdgeInsets.only(top: 5, bottom: 5),
+              onPressed: () {
+                
+              },
+              child: Text(
+                !isWebOrder ? Strings.title_pay : Strings.checkout,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: SizeConfig.safeBlockVertical * 2.8,
+                    fontWeight: FontWeight.bold),
+              ),
+              color: Colors.deepOrange,
+              textColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50.0),
+              ),
+            ),
+          ),
+          PopupMenuItem(
+                enabled: isShiftOpen ? true : false,
+                value: 0,
+                child: Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.select_all,
+                        color: Colors.black,
+                        size: SizeConfig.safeBlockVertical * 5,
+                      ),
+                      SizedBox(width: 15),
+                      Text(Strings.select_table,
+                          style: Styles.communBlacksmall()),
+                    ],
+                  ),
+                ),
+              ),
         ]);
   }
 
