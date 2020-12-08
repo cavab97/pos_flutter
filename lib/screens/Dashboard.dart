@@ -733,7 +733,7 @@ class _DashboradPageState extends State<DashboradPage>
   void dispose() {
     _tabController.dispose();
     _secondTabController.dispose();
-    _subtabController.dispose();
+    if (_subtabController != null) _subtabController.dispose();
     super.dispose();
   }
 
@@ -1725,6 +1725,7 @@ class _DashboradPageState extends State<DashboradPage>
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Icon(Icons.free_breakfast),
               SizedBox(height: 2),
               Text(
                 'Make FOC',
@@ -2033,12 +2034,16 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       TableCell(
                         child: Container(
+                          height: MediaQuery.of(context).size.height,
                           padding:
                               EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
-                          child: Column(
-                            children: <Widget>[
-                              /* subCatList.length == 0?  */
-                              /* Container(
+                          child: itemSelectedIndex.productQty != null &&
+                                  itemSelectedIndex.productQty > 0
+                              ? itemEditScreen
+                              : Column(
+                                  children: <Widget>[
+                                    /* subCatList.length == 0?  */
+                                    /* Container(
                                       //margin: EdgeInsets.only(left: 5, right: 5),
                                       width: MediaQuery.of(context).size.width,
                                       height: SizeConfig.safeBlockVertical * 8,
@@ -2062,97 +2067,104 @@ class _DashboradPageState extends State<DashboradPage>
                                           length: categorySecondRow.length,
                                           child: _secondTabs),
                                     ), */
-                              //Category Row 1
-                              Container(
-                                height: SizeConfig.safeBlockVertical * 8,
-                                width: MediaQuery.of(context).size.width,
-                                color: Colors.black26,
-                                child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: categoryFirstRow.length,
-                                    itemBuilder: (context, index) {
-                                      return Container(
-                                        padding: EdgeInsets.all(10.0),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                        ),
-                                        child: FlatButton(
-                                          onPressed: () {
-                                            _selectedCategory(index, 'first');
-                                          },
-                                          //color: Colors.black,  //Colors.grey.shade800,
-                                          color: categoryFirstRow[index].name ==
-                                                  selectedCategory?.name
-                                              ? Colors.deepOrange
-                                              : Colors.black26,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            //side: BorderSide(color: Colors.black)
-                                          ),
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal:
-                                                SizeConfig.safeBlockHorizontal *
-                                                    3,
-                                          ),
-                                          child: Center(
-                                              child: Text(
-                                            categoryFirstRow[index]
-                                                .name
-                                                .toUpperCase(),
-                                            style: Styles.whiteBoldsmall(),
-                                          )),
-                                        ),
-                                      );
-                                    }),
-                              ),
-                              Container(
-                                height: SizeConfig.safeBlockVertical * 8,
-                                width: MediaQuery.of(context).size.width,
-                                color: Colors.black26,
-                                child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: categorySecondRow.length,
-                                    itemBuilder: (context, index) {
-                                      return Container(
-                                        padding: EdgeInsets.all(10.0),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                        ),
-                                        child: FlatButton(
-                                          onPressed: () {
-                                            _selectedCategory(index, 'second');
-                                          },
-                                          //color: Colors.black,  //Colors.grey.shade800,
-                                          color:
-                                              categorySecondRow[index].name ==
-                                                      selectedCategory?.name
-                                                  ? Colors.deepOrange
-                                                  : Colors.black26,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            //side: BorderSide(color: Colors.black)
-                                          ),
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal:
-                                                SizeConfig.safeBlockHorizontal *
-                                                    3,
-                                          ),
-                                          child: Center(
-                                              child: Text(
-                                            categorySecondRow[index]
-                                                .name
-                                                .toUpperCase(),
-                                            style: Styles.whiteBoldsmall(),
-                                          )),
-                                        ),
-                                      );
-                                    }),
-                              ),
-                              /*  : Container(
+                                    //Category Row 1
+                                    Container(
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      width: MediaQuery.of(context).size.width,
+                                      color: Colors.black26,
+                                      child: ListView.builder(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: categoryFirstRow.length,
+                                          itemBuilder: (context, index) {
+                                            return Container(
+                                              padding: EdgeInsets.all(10.0),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(30),
+                                              ),
+                                              child: FlatButton(
+                                                onPressed: () {
+                                                  _selectedCategory(
+                                                      index, 'first');
+                                                },
+                                                //color: Colors.black,  //Colors.grey.shade800,
+                                                color: categoryFirstRow[index]
+                                                            .name ==
+                                                        selectedCategory?.name
+                                                    ? Colors.deepOrange
+                                                    : Colors.black26,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8.0),
+                                                  //side: BorderSide(color: Colors.black)
+                                                ),
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: SizeConfig
+                                                          .safeBlockHorizontal *
+                                                      3,
+                                                ),
+                                                child: Center(
+                                                    child: Text(
+                                                  categoryFirstRow[index]
+                                                      .name
+                                                      .toUpperCase(),
+                                                  style:
+                                                      Styles.whiteBoldsmall(),
+                                                )),
+                                              ),
+                                            );
+                                          }),
+                                    ),
+                                    Container(
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      width: MediaQuery.of(context).size.width,
+                                      color: Colors.black26,
+                                      child: ListView.builder(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: categorySecondRow.length,
+                                          itemBuilder: (context, index) {
+                                            return Container(
+                                              padding: EdgeInsets.all(10.0),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(30),
+                                              ),
+                                              child: FlatButton(
+                                                onPressed: () {
+                                                  _selectedCategory(
+                                                      index, 'second');
+                                                },
+                                                //color: Colors.black,  //Colors.grey.shade800,
+                                                color: categorySecondRow[index]
+                                                            .name ==
+                                                        selectedCategory?.name
+                                                    ? Colors.deepOrange
+                                                    : Colors.black26,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8.0),
+                                                  //side: BorderSide(color: Colors.black)
+                                                ),
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: SizeConfig
+                                                          .safeBlockHorizontal *
+                                                      3,
+                                                ),
+                                                child: Center(
+                                                    child: Text(
+                                                  categorySecondRow[index]
+                                                      .name
+                                                      .toUpperCase(),
+                                                  style:
+                                                      Styles.whiteBoldsmall(),
+                                                )),
+                                              ),
+                                            );
+                                          }),
+                                    ),
+                                    /*  : Container(
                                       //  margin: EdgeInsets.only(left: 5, right: 5),
                                       width: MediaQuery.of(context).size.width,
                                       height: SizeConfig.safeBlockVertical * 8,
@@ -2181,28 +2193,29 @@ class _DashboradPageState extends State<DashboradPage>
                                         ],
                                       ),
                                     ), */
-                              SingleChildScrollView(
-                                physics: BouncingScrollPhysics(),
-                                child: Container(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      mealsList.length > 0
-                                          ? setMealsList()
-                                          : SizedBox(),
-                                      isLoading
-                                          ? CommunFun.loader(context)
-                                          : productList.length > 0
-                                              ? porductsList()
-                                              : SizedBox(),
-                                    ],
-                                  ),
+                                    SingleChildScrollView(
+                                      physics: BouncingScrollPhysics(),
+                                      child: Container(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            mealsList.length > 0
+                                                ? setMealsList()
+                                                : SizedBox(),
+                                            isLoading
+                                                ? CommunFun.loader(context)
+                                                : productList.length > 0
+                                                    ? porductsList()
+                                                    : SizedBox(),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ]),
@@ -2221,20 +2234,7 @@ class _DashboradPageState extends State<DashboradPage>
           border: Border.all(width: 1, color: Colors.grey),
           color: Color(0xFF434449), //scaffold color
         ),
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              bottom: 25,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 80,
-                color: StaticColor.backgroundColor,
-                child: paybutton(context),
-              ),
-            ),
-          ],
-        ),
+        child: paybutton(context),
       ),
     );
   }
@@ -2417,34 +2417,32 @@ class _DashboradPageState extends State<DashboradPage>
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           selectedTable != null
-              ? Row(
-                  children: <Widget>[
-                    Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: SizeConfig.safeBlockVertical * 4,
-                    ),
-                    SizedBox(width: 5),
-                    Container(
-                      width: SizeConfig.safeBlockHorizontal * 12,
-                      child: Text(
+              ? Expanded(
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: SizeConfig.safeBlockVertical * 4,
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Text(
                         tableName +
                             " (" +
                             selectedTable.number_of_pax.toString() +
                             ")",
                         overflow: TextOverflow.ellipsis,
                         softWrap: false,
+                        textAlign: TextAlign.start,
                         style: Styles.whiteBoldsmall(),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 )
               : SizedBox(),
-          Container(
-            //height: SizeConfig.safeBlockVertical * 7,
-            //margin: EdgeInsets.only(top: 15),
-            padding: EdgeInsets.only(right: 5),
-            width: MediaQuery.of(context).size.width / 6,
+          Expanded(
             child: TypeAheadField(
               textFieldConfiguration: TextFieldConfiguration(
                 controller: _textController,
@@ -3238,12 +3236,16 @@ class _DashboradPageState extends State<DashboradPage>
           direction: Axis.horizontal,
           child: GestureDetector(
             onTap: () => setState(() {
-              itemSelectedIndex = cart;
+              if (cart.id == itemSelectedIndex.id) {
+                itemSelectedIndex = new MSTCartdetails();
+              } else {
+                itemSelectedIndex = cart;
+              }
             }),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 5),
               color: cart.id == itemSelectedIndex.id
-                  ? Colors.cyanAccent[100]
+                  ? Colors.deepOrange[400]
                   : Colors.transparent,
               child: Row(
                 children: <Widget>[
@@ -3302,7 +3304,11 @@ class _DashboradPageState extends State<DashboradPage>
                           }, () {});
                         }
                       },
-                      child: Icon(Icons.close, color: Colors.red),
+                      child: Icon(
+                        Icons.close,
+                        color: Colors.red,
+                        size: 30,
+                      ),
                     ),
                     flex: 1,
                   ),

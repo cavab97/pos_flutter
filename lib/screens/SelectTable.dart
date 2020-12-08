@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -147,7 +148,8 @@ class _SelectTablePageState extends State<SelectTablePage>
     List<Table_order> order = await tabList.getTableOrders(tableid);
     await Preferences.setStringToSF(Constant.TABLE_DATA, json.encode(order[0]));
     setState(() {
-      isMenuOpne = false;
+      isMenuOpne = true;
+      //isMenuOpne = false;
     });
     Navigator.pushNamed(context, Constant.DashboardScreen);
   }
@@ -206,7 +208,8 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   mergeTable(table) {
     setState(() {
-      isMenuOpne = false;
+      isMenuOpne = true;
+      //isMenuOpne = false;
       isMergeing = true;
       mergeInTable = table;
     });
@@ -227,7 +230,8 @@ class _SelectTablePageState extends State<SelectTablePage>
       Navigator.of(context).pop();
       if (!isChanging) {
         setState(() {
-          isMenuOpne = false;
+          isMenuOpne = true;
+          //isMenuOpne = false;
         });
         Navigator.pushNamed(context, Constant.DashboardScreen);
       }
@@ -310,7 +314,8 @@ class _SelectTablePageState extends State<SelectTablePage>
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     setState(() {
       isLoading = false;
-      isMenuOpne = false;
+      isMenuOpne = true;
+      //isMenuOpne = false;
     });
     await getTables();
   }
@@ -321,7 +326,8 @@ class _SelectTablePageState extends State<SelectTablePage>
     }, () {
       Navigator.of(context).pop();
       setState(() {
-        isMenuOpne = false;
+        isMenuOpne = true;
+        //isMenuOpne = false;
         isChangingTable = true;
       });
     }, Strings.warning, Strings.change_table_msg, Strings.yes, Strings.no,
@@ -702,6 +708,21 @@ class _SelectTablePageState extends State<SelectTablePage>
       physics: BouncingScrollPhysics(),
       shrinkWrap: true,
       children: [
+        selectedTable == null
+            ? Container(
+                height: MediaQuery.of(context).size.height * .6,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'Select a Table',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ],
+                ),
+              )
+            : SizedBox(),
         selectedTable != null
             ? Text(
                 selectedTable.numberofpax == null
@@ -749,9 +770,12 @@ class _SelectTablePageState extends State<SelectTablePage>
                 }
               })
             : SizedBox(),
-        neworder_button(Icons.call_merge, Strings.merge_order, context, () {
-          mergeTable(selectedTable);
-        }),
+        selectedTable != null
+            ? neworder_button(Icons.call_merge, Strings.merge_order, context,
+                () {
+                mergeTable(selectedTable);
+              })
+            : SizedBox(),
         selectedTable != null && selectedTable.tableQr != null
             ? neworder_button(Icons.cancel, Strings.scanQRcode, context, () {
                 opneQrcodePop();
