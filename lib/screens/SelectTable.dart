@@ -64,7 +64,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   String qrCodeString = "";
   bool isChanging = false;
   bool isShiftOpen = true;
-  bool isMenuOpne = false;
+  bool isMenuOpne = true;
   var permissions = "";
   TabController _tabController;
 
@@ -152,10 +152,27 @@ class _SelectTablePageState extends State<SelectTablePage>
     Navigator.pushNamed(context, Constant.DashboardScreen);
   }
 
-  ontableTap(table) {
+  ontableTap(table) async {
     setState(() {
       selectedTable = table;
       isMenuOpne = true;
+    });
+    paxController.text =
+        table.numberofpax != null ? table.numberofpax.toString() : "";
+    var tableid = selectedTable.tableId;
+    List<Table_order> order = await tabList.getTableOrders(tableid);
+    if (order.length > 0) {
+      viewOrder();
+    } else {
+      addNewOrder();
+      selectTableForNewOrder();
+    }
+  }
+
+  ontableLongTap(table) {
+    setState(() {
+      selectedTable = table;
+      //isMenuOpne = true;
     });
     paxController.text =
         table.numberofpax != null ? table.numberofpax.toString() : "";
@@ -171,7 +188,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     Table_order table_order = new Table_order();
     var pax = table1.numberofpax != null ? table1.numberofpax : 0;
     pax += table2.numberofpax != null ? table2.numberofpax : 0;
-    table_order.number_of_pax = pax;
+    table_order.number_of_pax = pax ?? 0;
     table_order.table_id = table1.tableId;
     table_order.save_order_id =
         table1.saveorderid != 0 ? table1.saveorderid : 0;
@@ -199,7 +216,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     if (int.parse(paxController.text) <= selectedTable.tableCapacity) {
       Table_order tableOrder = new Table_order();
       tableOrder.table_id = selectedTable.tableId;
-      tableOrder.number_of_pax = int.parse(paxController.text);
+      tableOrder.number_of_pax = (int.parse(paxController.text) ?? 0);
       tableOrder.save_order_id = selectedTable.saveorderid;
       tableOrder.service_charge =
           CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
@@ -232,7 +249,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       orderData.cartId = orderid;
       Table_order tableorder = new Table_order();
       tableorder.table_id = selectedTable.tableId;
-      tableorder.number_of_pax = int.parse(paxController.text);
+      tableorder.number_of_pax = (int.parse(paxController.text) ?? 0);
       tableorder.service_charge = selectedTable.tableServiceCharge;
       var saveorderid =
           await cartlist.addSaveOrder(orderData, selectedTable.tableId);
@@ -351,7 +368,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     setState(() {
       isChanging = false;
     });
-    opnPaxDailog();
+    //opnPaxDailog();
   }
 
   void selectOption(choice) {
@@ -696,31 +713,31 @@ class _SelectTablePageState extends State<SelectTablePage>
                 style: Styles.whiteMediumBold(),
               )
             : SizedBox(),
-        selectedTable.numberofpax == null
+        selectedTable != null && selectedTable.numberofpax == null
             ? neworder_button(
                 Icons.supervised_user_circle, Strings.new_order, context, () {
                 addNewOrder();
               })
             : SizedBox(),
-        selectedTable.numberofpax != null
+        selectedTable != null && selectedTable.numberofpax != null
             ? neworder_button(
                 Icons.supervised_user_circle, Strings.change_pax, context, () {
                 changePax();
               })
             : SizedBox(),
-        selectedTable.numberofpax != null
+        selectedTable != null && selectedTable.numberofpax != null
             ? neworder_button(Icons.remove_red_eye, Strings.view_order, context,
                 () {
                 viewOrder();
               })
             : SizedBox(),
-        selectedTable.numberofpax != null
+        selectedTable != null && selectedTable.numberofpax != null
             ? neworder_button(
                 Icons.change_history, Strings.change_table, context, () {
                 changeTablePop();
               })
             : SizedBox(),
-        selectedTable.numberofpax != null
+        selectedTable != null && selectedTable.numberofpax != null
             ? neworder_button(Icons.cancel, Strings.cancle_order, context, () {
                 if (permissions.contains(Constant.DELETE_ORDER)) {
                   cancleTableOrder();
@@ -735,7 +752,7 @@ class _SelectTablePageState extends State<SelectTablePage>
         neworder_button(Icons.call_merge, Strings.merge_order, context, () {
           mergeTable(selectedTable);
         }),
-        selectedTable.tableQr != null
+        selectedTable != null && selectedTable.tableQr != null
             ? neworder_button(Icons.cancel, Strings.scanQRcode, context, () {
                 opneQrcodePop();
               })
@@ -1004,6 +1021,9 @@ class _SelectTablePageState extends State<SelectTablePage>
         return InkWell(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
           onTap: () {
+            ontableLongTap(table);
+          },
+          onDoubleTap: () {
             if (isMergeing) {
               if (table.merged_table_id == null) {
                 mergeTabledata(table);
@@ -1017,9 +1037,6 @@ class _SelectTablePageState extends State<SelectTablePage>
                 CommunFun.showToast(context, Strings.table_already_occupied);
               }
             } else {
-              setState(() {
-                qrCodeString = table.tableQr;
-              });
               ontableTap(table);
             }
           },
