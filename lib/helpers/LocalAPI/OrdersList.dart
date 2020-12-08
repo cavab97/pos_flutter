@@ -445,9 +445,9 @@ class OrdersList {
     } else {
       var db = DatabaseHelper.dbHelper.getDatabse();
       if (cartid == null) {
-        List<SaveOrder> cartID = await gettableCartID(tableID);
-        if (cartID.length > 0) {
-          cartid = cartID[0];
+        List<SaveOrder> cart = await gettableCartID(tableID);
+        if (cart.length > 0) {
+          cartid = cart[0].cartId;
         } else {
           cartid = 0;
         }

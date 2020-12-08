@@ -233,6 +233,7 @@ class _DashboradPageState extends State<DashboradPage>
       List<TablesDetails> tabledata =
           await tableListAPI.getTableDetails(branchid, table.table_id);
       table.save_order_id = tabledata[0].saveorderid;
+
       setState(() {
         isTableSelected = true;
         selectedTable = table;
@@ -960,6 +961,12 @@ class _DashboradPageState extends State<DashboradPage>
 
   addTocartItem(selectedProduct) async {
     await CommunFun.addItemToCart(selectedProduct, cartList, allcartData, () {
+      Cartlist cart_list = new Cartlist();
+      var cartData = cart_list.addcart(context, allcartData); // Insert Cart
+      //int saveOid = insertTableData(selectedTable, cartData);
+      if (selectedTable.save_order_id == 0) {
+        //selectedTable.save_order_id = saveOid;
+      }
       if (selectedTable.save_order_id != null &&
           selectedTable.save_order_id != 0) {
         getCurrentCart();
@@ -970,6 +977,22 @@ class _DashboradPageState extends State<DashboradPage>
         isScreenLoad = false;
       });
     }, context);
+  }
+
+  insertTableData(tableData, cartid) async {
+    SaveOrder orderData = new SaveOrder();
+    Table_order tableorder = new Table_order();
+    Cartlist cartlist = new Cartlist();
+    TablesList tableList = new TablesList();
+    orderData.numberofPax = tableData != null ? tableData.number_of_pax : 0;
+    orderData.isTableOrder = tableData != null ? 1 : 0;
+    orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    orderData.cartId = cartid;
+    int saveOid = await cartlist.addSaveOrder(orderData, tableData.table_id);
+    tableorder = tableData;
+    tableorder.save_order_id = saveOid;
+    var tableid = await tableList.insertTableOrder(context, tableorder);
+    return saveOid;
   }
 
   opneShowAddCustomerDailog() {
@@ -1772,7 +1795,6 @@ class _DashboradPageState extends State<DashboradPage>
         ),
         GestureDetector(
           onTap: () {
-            print(itemSelectedIndex);
             setState(() {
               itemSelectedIndex = new MSTCartdetails();
             });
@@ -1792,7 +1814,6 @@ class _DashboradPageState extends State<DashboradPage>
         ),
         GestureDetector(
           onTap: () {
-            print(itemSelectedIndex);
             setState(() {
               itemSelectedIndex = new MSTCartdetails();
             });
