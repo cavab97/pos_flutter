@@ -26,6 +26,7 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/models/colorTable.dart';
 
 import '../components/communText.dart';
 import '../helpers/LocalAPI/OrdersList.dart';
@@ -71,6 +72,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   var permissions = "";
   TabController _tabController;
   MaterialColor tableSelectedColor = Colors.orange;
+  List<ColorTable> tableColors = new List<ColorTable>();
 
   @override
   void initState() {
@@ -397,6 +399,14 @@ changeColors() {
       isChanging = true;
     });
     opnPaxDailog();
+  }
+
+  getTablesColor() async {
+    List<ColorTable> tables = await localAPI.getTablesColor();
+    setState(() {
+      tableColors = tables;
+      isLoading = false;
+    });
   }
 
   addNewOrder() {
@@ -1078,6 +1088,16 @@ changeColors() {
             if(!isLoading) mergeTableList.add(table.merged_table_id);
           });
         };
+        var selected;
+        if (tableColors.length > 0 && table.occupiedMinute != null) {
+          selected = tableColors.firstWhere(
+              (item) => item.timeMinute >= table.occupiedMinute, orElse: () {
+            if (table.occupiedMinute >=
+                tableColors[tableColors.length - 1].timeMinute) {
+              return tableColors[tableColors.length - 1];
+            }
+          });
+        };
         return InkWell(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
           onTap: () {
@@ -1131,6 +1151,7 @@ changeColors() {
                                 : table.tableName,
                             style: Styles.blackMediumBold(),
                           ),
+                          Text(selected != null ? selected.timeMinute.toString()+' M' : "")
                         ]),
                   ),
                 ),
