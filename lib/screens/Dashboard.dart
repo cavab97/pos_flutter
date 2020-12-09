@@ -2861,7 +2861,8 @@ class _DashboradPageState extends State<DashboradPage>
     final double itemWidth = size.width / 4.2;
     return Container(
       //color: Colors.lightBlue,
-      height: MediaQuery.of(context).size.height / 1.3,
+      height: MediaQuery.of(context).size.height / 1.45 -
+          (SizeConfig.safeBlockVertical * 7),
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.only(top: 10, bottom: 20, left: 0, right: 0),
       child: GridView.count(
