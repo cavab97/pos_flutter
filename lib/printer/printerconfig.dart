@@ -106,7 +106,7 @@ class PrintReceipt {
       if (item.isSendKichen == null || isReprint) {
         ticket.row([
           PosColumn(
-              text: item.productQty.toString(),
+              text: item.productQty.toInt().toString(),
               width: 2,
               styles: PosStyles(
                 align: PosAlign.left,
