@@ -3372,7 +3372,7 @@ class _DashboradPageState extends State<DashboradPage>
               }
             }),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
               color:
                   // cart.id == itemSelectedIndex.id ? Colors.deepOrange[400] :
                   Colors.transparent,
