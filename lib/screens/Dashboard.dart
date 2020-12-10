@@ -133,11 +133,13 @@ class _DashboradPageState extends State<DashboradPage>
   List quantity = [2, 3, 4, 5, 6, 7, 8, 9];
   List categoryFirstRow = [];
   List categorySecondRow = [];
+  List temporaryCartList = [];
   var selectedCategory;
   var expandableController;
   var currentQuantity = 1;
   MSTCartdetails itemSelectedIndex = new MSTCartdetails();
 
+  var vaucher;
   @override
   void initState() {
     super.initState();
@@ -146,6 +148,11 @@ class _DashboradPageState extends State<DashboradPage>
     });
     checkisInit();
     checkISlogin();
+    vaucher = allcartData != null &&
+            allcartData.voucher_detail != null &&
+            allcartData.voucher_detail != ""
+        ? json.decode(allcartData.voucher_detail)
+        : null;
   }
 
   refreshAfterAction(bool isClearCart) {
@@ -435,6 +442,32 @@ class _DashboradPageState extends State<DashboradPage>
       case 7:
         resendToKitchen();
         break;
+      case 8:
+        changePromoCode();
+        break;
+    }
+  }
+
+  changePromoCode() async {
+    if (vaucher != null) {
+      CommonUtils.showAlertDialog(context, () {
+        Navigator.of(context).pop();
+      }, () {
+        Navigator.of(context).pop();
+        removePromoCode(vaucher);
+        setState(() {
+          vaucher = null;
+        });
+      }, "Alert", "Are you sure you want to remove this promocode?", "Yes",
+          "No", true);
+    } else {
+      if (permissions.contains(Constant.DISCOUNT_ORDER)) {
+        openVoucherPop();
+      } else {
+        CommonUtils.openPermissionPop(context, Constant.DISCOUNT_ORDER, () {
+          openVoucherPop();
+        }, () {});
+      }
     }
   }
 
@@ -853,7 +886,7 @@ class _DashboradPageState extends State<DashboradPage>
         if (list.length > 0) {
           dynamic send = await cartapi.sendToKitched(ids);
           openPrinterPop(list, false);
-          getCartItem(currentCart);
+          await getCartItem(currentCart);
         }
         return false;
       }
@@ -975,9 +1008,12 @@ class _DashboradPageState extends State<DashboradPage>
                 });
           });
     } else {
-      setState(() {
-        isScreenLoad = true;
-      });
+      // Remove item loading
+      /* setState(() {
+        isScreenLoad = false;
+      }); */
+      temporaryCartList.add(selectedProduct);
+      print(json.encode(temporaryCartList));
       await addTocartItem(selectedProduct);
     }
   }
@@ -2762,6 +2798,33 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                 ),
               ),
+              PopupMenuItem(
+                enabled: permissions.contains(Constant.DISCOUNT_ORDER) &&
+                    cartList.length > 0,
+                value: 8,
+                child: Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        selectedvoucher == null
+                            ? Icons.food_bank_outlined
+                            : Icons.remove_circle_outline,
+                        color: Colors.black,
+                        size: SizeConfig.safeBlockVertical * 5,
+                      ),
+                      SizedBox(width: 15),
+                      Text(
+                        selectedvoucher == null
+                            ? Strings.apply_promocode
+                            : Strings
+                                .removePromocode, //selectedvoucher.voucherName,
+                        style: Styles.communBlacksmall(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               /* PopupMenuItem(
                 // enabled: permissions.contains(Constant.DELETE_ORDER) &&
                 //         cartList.length > 0
@@ -3539,13 +3602,127 @@ class _DashboradPageState extends State<DashboradPage>
         );
       }).toList(),
     );
-    var vaucher = allcartData != null &&
-            allcartData.voucher_detail != null &&
-            allcartData.voucher_detail != ""
-        ? json.decode(allcartData.voucher_detail)
-        : null;
-
     final totalPriceTable = Padding(
+      padding: EdgeInsets.only(
+        bottom: 10,
+      ),
+      child: Column(
+        children: <Widget>[
+          Divider(
+            color: Colors.black,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 5, bottom: 5, right: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  Strings.sub_total.toUpperCase(),
+                  style: Styles.darkBlue(),
+                ),
+                Text(
+                  subtotal.toStringAsFixed(2),
+                  style: Styles.darkBlue(),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 5, bottom: 5, right: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  Strings.discount.toUpperCase() +
+                      (selectedvoucher == null
+                          ? ''
+                          : ' (' + selectedvoucher.voucherName + ')'),
+                  style: Styles.orangeDis(),
+                ),
+                Text(
+                  discount.toStringAsFixed(2),
+                  style: Styles.orangeDis(),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 5, bottom: 5, right: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  Strings.service_charge.toUpperCase() +
+                      " ($serviceChargePer%)",
+                  style: Styles.darkBlue(),
+                ),
+                Text(
+                  serviceCharge.toStringAsFixed(2),
+                  style: Styles.darkBlue(),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 5, bottom: 5, right: 10),
+            child: taxJson.length != 0
+                ? Column(
+                    children: taxJson.map((taxitem) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(
+                            Strings.tax.toUpperCase() +
+                                " " +
+                                taxitem["taxCode"] +
+                                " (" +
+                                taxitem["rate"] +
+                                "%)",
+                            style: Styles.darkBlue(),
+                          ),
+                          Text(
+                              double.tryParse(taxitem["taxAmount"])
+                                  .toStringAsFixed(2),
+                              style: Styles.darkBlue()),
+                        ],
+                      );
+                    }).toList(),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(
+                        Strings.tax.toUpperCase(),
+                        style: Styles.darkBlue(),
+                      ),
+                      Text(
+                        tax.toStringAsFixed(2),
+                        style: Styles.darkBlue(),
+                      ),
+                    ],
+                  ),
+          ),
+          Divider(
+            color: Colors.black,
+            thickness: 1,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 5, bottom: 5, right: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(Strings.grand_total, style: Styles.darkBlue()),
+                Text(
+                  grandTotal.toStringAsFixed(2),
+                  style: Styles.darkBlue(),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    final expandable_totalPriceTable = Padding(
       padding: EdgeInsets.only(
         bottom: 10,
       ),
@@ -3621,7 +3798,10 @@ class _DashboradPageState extends State<DashboradPage>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      Strings.discount.toUpperCase(),
+                      Strings.discount.toUpperCase() +
+                          (selectedvoucher == null
+                              ? ''
+                              : ' (' + selectedvoucher.voucherName + ')'),
                       style: Styles.orangeDis(),
                     ),
                     Text(
@@ -3638,7 +3818,7 @@ class _DashboradPageState extends State<DashboradPage>
                   children: <Widget>[
                     Text(
                       Strings.service_charge.toUpperCase() +
-                          "($serviceChargePer%)",
+                          " ($serviceChargePer%)",
                       style: Styles.darkBlue(),
                     ),
                     Text(
@@ -3660,7 +3840,7 @@ class _DashboradPageState extends State<DashboradPage>
                                 Strings.tax.toUpperCase() +
                                     " " +
                                     taxitem["taxCode"] +
-                                    "(" +
+                                    " (" +
                                     taxitem["rate"] +
                                     "%)",
                                 style: Styles.darkBlue(),
@@ -3745,10 +3925,12 @@ class _DashboradPageState extends State<DashboradPage>
               Container(
                   //  color: Colors.amber,
                   //color: Colors.red,
-                  height: expandableController != null &&
+                  height:
+                      /* expandableController != null &&
                           expandableController.expanded
                       ? MediaQuery.of(context).size.height * .8 / 2
-                      : MediaQuery.of(context).size.height * .6,
+                      :  */
+                      MediaQuery.of(context).size.height * .5,
                   margin: EdgeInsets.only(top: customer != null ? 85 : 35),
                   child: cartTable),
               cartList.length != 0

@@ -39,6 +39,7 @@ class Constant {
   static final String ADD_ORDER = "add_order";
   static final String EDIT_ORDER = "edit_order";
   static final String DELETE_ORDER = "delete_order";
+  static final String DISCOUNT_ORDER = "discount_order";
 
   static final String VIEW_ITEM = "view_item";
   static final String ADD_ITEM = "add_item";

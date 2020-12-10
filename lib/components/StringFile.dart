@@ -61,6 +61,7 @@ class Strings {
   static String view_order = "View Order";
   static String change_pax = "Change Pax";
   static String change_table = "Change Table";
+  static String cancelChangeTable = "Cancel Switch";
   static String cancle_order = "Cancel Order";
   static String merge_order = "Merge Order";
   static String cancelMergeOrder = "Cancel Merging";
@@ -97,6 +98,7 @@ class Strings {
   static String out_of_stoke = "OUT OF STOCK";
   static String out_of_stoke_msg = "Product Out of Stock";
   static String apply_promocode = "Apply Promocode";
+  static String removePromocode = "Remove Promocode";
   static String item_not_available = "No item available";
   static String asset_headerLogo = "assets/headerlogo.png";
   static String assetsBG = "assets/bg.jpg";
