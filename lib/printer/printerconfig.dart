@@ -29,8 +29,8 @@ class PrintReceipt {
   String receipt48CharHeader =
       "Description                  Qty   Price  Amount";
 
-  Future<Ticket> KOTReceipt(
-      String tableName, List<MSTCartdetails> cartList, String pax, bool isReprint) async {
+  Future<Ticket> KOTReceipt(String tableName, List<MSTCartdetails> cartList,
+      String pax, bool isReprint) async {
     final profile = await CapabilityProfile.load();
 
     final Ticket ticket = Ticket(paper, profile);
@@ -105,7 +105,7 @@ class PrintReceipt {
       if (item.isSendKichen == null || isReprint) {
         ticket.row([
           PosColumn(
-              text: item.productQty.toString(),
+              text: item.productQty.toStringAsFixed(0),
               width: 2,
               styles: PosStyles(
                 align: PosAlign.left,
@@ -229,7 +229,7 @@ class PrintReceipt {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
     final PosPrintResult res = await printerManager
-        .printTicket(await KOTReceipt(tableName, cartList, pax,isReprint));
+        .printTicket(await KOTReceipt(tableName, cartList, pax, isReprint));
 
     CommunFun.showToast(ctx, res.msg);
   }
@@ -239,6 +239,7 @@ class PrintReceipt {
   ========================================================================*/
 
   Future<Ticket> Receipt(
+      String pax,
       Branch branchData,
       List taxJson,
       List<OrderDetail> orderdetail,
@@ -287,7 +288,7 @@ class PrintReceipt {
 
     ticket.row([
       PosColumn(
-          text: "Document No.",
+          text: "Invoice No.",
           width: 4,
           styles: PosStyles(
             align: PosAlign.left,
@@ -354,6 +355,24 @@ class PrintReceipt {
           )),
       PosColumn(
           text: " : " + branchData.contactPerson,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Pax",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + pax,
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -754,6 +773,7 @@ class PrintReceipt {
   }
 
   void checkReceiptPrint(
+      String pax,
       String printerIp,
       BuildContext ctx,
       Branch branchData,
@@ -771,6 +791,7 @@ class PrintReceipt {
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(await Receipt(
+        pax,
         branchData,
         taxJson,
         orderdetail,
@@ -791,6 +812,7 @@ class PrintReceipt {
   ========================================================================*/
 
   Future<Ticket> DraftReceipt(
+      String pax,
       List taxJson,
       List<MSTCartdetails> cartList,
       String tableName,
@@ -881,6 +903,24 @@ class PrintReceipt {
           )),
       PosColumn(
           text: " : " + branchData.contactPerson,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Pax",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + pax,
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -997,7 +1037,6 @@ class PrintReceipt {
       /*Print attributes without price*/
       /*Print attributes without price*/
       if (cartList[i].attrName != null) {
-      
         List<String> attributes = cartList[i].attrName.split(",");
         if (attributes.length > 0) {
           for (var a = 0; a < attributes.length; a++) {
@@ -1155,6 +1194,7 @@ class PrintReceipt {
   }
 
   void checkDraftPrint(
+      String pax,
       List taxJson,
       String printerIp,
       BuildContext ctx,
@@ -1173,6 +1213,7 @@ class PrintReceipt {
 
     final PosPrintResult res = await printerManager.printTicket(
         await DraftReceipt(
+            pax,
             taxJson,
             cartList,
             tableName,
@@ -1192,7 +1233,7 @@ class PrintReceipt {
   ===========================Print Order check list print==================
   ========================================================================*/
 
-  Future<Ticket> CheckListReceipt(List<MSTCartdetails> cartList,
+  Future<Ticket> CheckListReceipt(String pax, List<MSTCartdetails> cartList,
       String tableName, Branch branchData, String custName) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
@@ -1288,6 +1329,24 @@ class PrintReceipt {
           )),
       PosColumn(
           text: " : " + Strings.terminalName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Pax",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + pax,
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -1432,19 +1491,19 @@ class PrintReceipt {
       }
     }
     ticket.hr();
-    ticket.setStyles(PosStyles(align: PosAlign.right));
+    // ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
           text: "Total QTY:",
-          width: 8,
+          width: 9,
           styles: PosStyles(
             align: PosAlign.right,
             fontType: PosFontType.fontA,
             bold: true,
           )),
       PosColumn(
-          text: totalQTY.toStringAsFixed(1),
-          width: 4,
+          text: totalQTY.toStringAsFixed(0) + " ",
+          width: 3,
           styles: PosStyles(
             align: PosAlign.right,
             fontType: PosFontType.fontA,
@@ -1459,6 +1518,7 @@ class PrintReceipt {
   }
 
   void checkListReceiptPrint(
+      String pax,
       String printerIp,
       BuildContext ctx,
       List<MSTCartdetails> cartList,
@@ -1469,11 +1529,11 @@ class PrintReceipt {
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
-        await CheckListReceipt(cartList, tableName, branchData, custName));
+        await CheckListReceipt(pax, cartList, tableName, branchData, custName));
 
     CommunFun.showToast(ctx, res.msg);
   }
-  
+
 /*========================================================================
   ===========================Print Shift Report==================
   ========================================================================*/
@@ -1762,7 +1822,7 @@ class PrintReceipt {
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
     /*For Pay In 48 char*/
-    String payIn = printColumnWitSpace(38, "Pay In", false);
+    String payIn = printColumnWitSpace(38, "Cash In", false);
     String payInAmt =
         printColumnWitSpace(10, payInAmount.toStringAsFixed(2), true);
     ticket.text("$payIn$payInAmt",
@@ -1770,7 +1830,7 @@ class PrintReceipt {
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
     /*For Pay Out 48 char*/
-    String payOut = printColumnWitSpace(38, "Pay Out", false);
+    String payOut = printColumnWitSpace(38, "Cash Out", false);
     String payOutAmt =
         printColumnWitSpace(10, payOutAmmount.toStringAsFixed(2), true);
     ticket.text("$payOut$payOutAmt",
@@ -1935,7 +1995,6 @@ class PrintReceipt {
     CommunFun.showToast(ctx, res.msg);
   }
 
-
 /*========================================================================
   ===========================Test print=====================================
   ========================================================================*/
@@ -1997,9 +2056,7 @@ class PrintReceipt {
       if (tempValue <= 2) {
         round = prefix + "." + postFilx.substring(0, 1) + "0";
       } else if (tempValue <= 7) {
-      
         round = prefix + "." + postFilx.substring(0, 1) + "5";
-        
       } else {
         int values = 0;
         if (int.parse(postFilx.substring(1)) == 9) {
