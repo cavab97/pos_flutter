@@ -23,7 +23,9 @@ import 'package:mcncashier/models/TerminalLog.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/models/colorTable.dart';
 import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/saveOrder.dart';
+import 'package:mcncashier/models/Printer.dart';
 
 class LocalAPI {
   Future<int> terminalLog(TerminalLog log) async {
@@ -1959,5 +1961,56 @@ class LocalAPI {
       result = await db.insert("shift_invoice", shiftInv.toJson());
     }
     return result;
+  }
+
+  Future<List<SaveOrder>> getSaveOrder(id) async {
+    var qry = "SELECT * from save_order WHERE id =" + id.toString();
+    List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<SaveOrder> list =
+        res.isNotEmpty ? res.map((c) => SaveOrder.fromJson(c)).toList() : [];
+    await SyncAPICalls.logActivity(
+        "product", "get save_order", "save_order", id);
+
+    return list;
+  }
+
+  Future<List<TablesDetails>> getTableData(branchid, tableID) async {
+    var query =
+        "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax from tables " +
+            " LEFT JOIN table_order on table_order.table_id = " +
+            tableID.toString() +
+            " WHERE tables.table_id= " +
+            tableID.toString() +
+            " AND tables.status = 1 AND branch_id = " +
+            branchid;
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
+    List<TablesDetails> list = res.isNotEmpty
+        ? res.map((c) => TablesDetails.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity("product", "get cart list", "mst_cart", 1);
+
+    return list;
+  }
+
+  Future<List<Printer>> getPrinter(productID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry =
+        "SELECT * from printer where printer.printer_id = (Select printer_id from product_branch WHERE product_branch.product_id = $productID)";
+    var result = await db.rawQuery(qry);
+    List<Printer> list = result.isNotEmpty
+        ? result.map((c) => Printer.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<List<ProductStoreInventory>> checkItemAvailableinStore(
+      productId) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var inventoryProd = await db.query("product_store_inventory",
+        where: 'product_id = ?', whereArgs: [productId]);
+    List<ProductStoreInventory> list = inventoryProd.length > 0
+        ? inventoryProd.map((c) => ProductStoreInventory.fromJson(c)).toList()
+        : [];
+    return list;
   }
 }

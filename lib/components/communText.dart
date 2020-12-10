@@ -44,6 +44,7 @@ import 'package:intl/intl.dart';
 import 'package:wifi_ip/wifi_ip.dart';
 import '../helpers/LocalAPI/PrinterList.dart';
 import '../helpers/LocalAPI/TablesList.dart';
+import '../models/MST_Cart.dart';
 
 DatabaseHelper databaseHelper = DatabaseHelper();
 Cartlist cartapi = new Cartlist();
@@ -1128,46 +1129,50 @@ class CommunFun {
         : 0.00;
   }
 
-  static getPrinter(context, productItem) async {
+  static getPrinter(productItem) async {
     Printer printer = new Printer();
-    List<Printer> printerlist = await printerList.getPrinterForAddCartProduct(
-        context, productItem.productId.toString());
+    /* List<Printer> printerlist = await printerList.getPrinterForAddCartProduct(
+        context, productItem.productId.toString()); */
+    List<Printer> printerlist =
+        await localAPI.getPrinter(productItem.productId.toString());
     if (printerlist.length > 0) {
       printer = printerlist[0];
     }
     return printer;
   }
 
-  static addItemToCart(productItem, List<MSTCartdetails> cartItems, allcartData,
+  static addItemToCart(productItem, List<MSTCartdetails> cartItems, MST_Cart allcartData,
       callback, context) async {
     taxvalues = 0;
-    OrdersList orderApi = new OrdersList();
+    //OrdersList orderApi = new OrdersList();
+    SaveOrder orderData = new SaveOrder();
     MST_Cart cart = new MST_Cart();
     var branchid = await CommunFun.getbranchId();
     Table_order table = await CommunFun.getTableData();
     User loginUser = await CommunFun.getuserDetails();
     Customer customerData = await CommunFun.getCustomerData();
-    Printer printer = await CommunFun.getPrinter(context, productItem);
+    Printer printer = await CommunFun.getPrinter(productItem);
     Cartlist cartlist = new Cartlist();
     bool isEditing = false;
     MSTCartdetails sameitem;
     var contain = cartItems
         .where((element) => element.productId == productItem.productId);
-    if (contain.isNotEmpty) {
+    // Update on the item
+    /* if (contain.isNotEmpty) {
       isEditing = true;
       var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
       List<MSTCartdetails> myModels = (json.decode(jsonString) as List)
           .map((i) => MSTCartdetails.fromJson(i))
           .toList();
       sameitem = myModels[0];
-    }
+    } */
     if (productItem.hasInventory == 1) {
       var qty = 1.0;
       if (isEditing) {
         qty = sameitem.productQty + qty;
       }
       List<ProductStoreInventory> cartval =
-          await orderApi.checkItemAvailableinStore(productItem.productId);
+          await localAPI.checkItemAvailableinStore(productItem.productId);
       if (cartval.length > 0) {
         double storeqty = cartval[0].qty;
         if (storeqty < qty) {
