@@ -133,6 +133,7 @@ class _DashboradPageState extends State<DashboradPage>
   List quantity = [2, 3, 4, 5, 6, 7, 8, 9];
   List categoryFirstRow = [];
   List categorySecondRow = [];
+  List temporaryCartList = [];
   var selectedCategory;
   var expandableController;
   var currentQuantity = 1;
