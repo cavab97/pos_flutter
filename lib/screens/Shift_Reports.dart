@@ -580,7 +580,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               color: Colors.white,
               child: ListTile(
                 title: Text(
-                  "Pay In/Out",
+                  "Cash In/Out",
                   style: Styles.blackMediumBold(),
                 ),
                 trailing: Text(
@@ -657,10 +657,10 @@ class _ShiftReportsState extends State<ShiftReports> {
                       setState(() {
                         isInAmmount = true;
                       });
-                      openpayInOUTPop("Pay In Amount", "5.00");
+                      openpayInOUTPop("Cash In Amount", "5.00");
                     },
                     child: Text(
-                      "Pay In",
+                      "Cash In",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -683,10 +683,10 @@ class _ShiftReportsState extends State<ShiftReports> {
                       setState(() {
                         isInAmmount = false;
                       });
-                      openpayInOUTPop("Pay Out Amount", "5.00");
+                      openpayInOUTPop("Cash Out Amount", "5.00");
                     },
                     child: Text(
-                      "Pay Out",
+                      "Cash Out",
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
                     color: Colors.transparent,

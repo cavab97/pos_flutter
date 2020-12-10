@@ -170,7 +170,7 @@ class Strings {
   static String amountPaid = "Amount Paid :";
   static String change = "Change :";
   static String enterMsg = "Press screen to Continue";
-  static String pay_in_ammount = "Pay In Amount";
+  static String pay_in_ammount = "Cash In Amount";
   static String please_select_reason = 'Please select reason';
   static String enter_last = "Enter last 4 digits : ";
   static String approval_code = "Approval Code: ";

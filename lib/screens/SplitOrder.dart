@@ -46,12 +46,14 @@ class SplitBillDialog extends StatefulWidget {
       this.onSelectedRemove,
       this.onClose,
       this.currentCartID,
+      this.pax,
       this.customer,
       this.printerIP})
       : super(key: key);
   Function onClose;
   Function onSelectedRemove;
   int currentCartID;
+  String pax;
   String customer;
   String printerIP;
 
@@ -917,6 +919,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       if (permissions.contains(Constant.PRINT_RECIEPT)) {
         if (permissions.contains(Constant.OPEN_DRAWER)) {
           _printReceipt.checkReceiptPrint(
+              widget.pax,
               widget.printerIP,
               context,
               branchData,
@@ -935,6 +938,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
               () async {
             _printReceipt.checkReceiptPrint(
+                widget.pax,
                 widget.printerIP,
                 context,
                 branchData,
@@ -951,6 +955,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             clearSelected();
           }, () async {
             _printReceipt.checkReceiptPrint(
+                widget.pax,
                 widget.printerIP,
                 context,
                 branchData,
@@ -972,6 +977,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             () async {
           if (permissions.contains(Constant.OPEN_DRAWER)) {
             _printReceipt.checkReceiptPrint(
+                widget.pax,
                 widget.printerIP,
                 context,
                 branchData,
@@ -990,6 +996,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
                 () async {
               _printReceipt.checkReceiptPrint(
+                  widget.pax,
                   widget.printerIP,
                   context,
                   branchData,
@@ -1008,6 +1015,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
               clearSelected();
             }, () async {
               _printReceipt.checkReceiptPrint(
+                  widget.pax,
                   widget.printerIP,
                   context,
                   branchData,
