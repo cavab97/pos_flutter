@@ -18,7 +18,8 @@ import 'package:mcncashier/screens/WineStorage.dart';
 import 'package:mcncashier/components/commanutils.dart';
 
 class DrawerWid extends StatefulWidget {
-  DrawerWid({Key key}) : super(key: key);
+  DrawerWid({Key key, this.onClose}) : super(key: key);
+  Function onClose;
   @override
   DrawerWidState createState() => DrawerWidState();
 }
@@ -58,14 +59,19 @@ class DrawerWidState extends State<DrawerWid> {
   gotoTansactionPage() {
     if (isShiftOpen) {
       Navigator.of(context).pop();
-      Navigator.pushNamed(context, Constant.TransactionScreen);
+      Navigator.pushNamed(context, Constant.TransactionScreen).then(backEvent);
     } else {
       CommunFun.showToast(context, Strings.shift_opne_alert_msg_transaction);
     }
   }
 
+  backEvent(val) {
+    widget.onClose();
+  }
+
   checkshift() async {
-    var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
+    var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN)
+        .then(backEvent);
     setState(() {
       isShiftOpen = isOpen != null && isOpen == "true" ? true : false;
     });
@@ -74,7 +80,7 @@ class DrawerWidState extends State<DrawerWid> {
   gotoWebCart() {
     if (isShiftOpen) {
       Navigator.of(context).pop();
-      Navigator.pushNamed(context, Constant.WebOrderPages);
+      Navigator.pushNamed(context, Constant.WebOrderPages).then(backEvent);
     } else {
       CommunFun.showToast(context, Strings.shift_opne_alert_msg_webOrder);
     }
@@ -83,7 +89,7 @@ class DrawerWidState extends State<DrawerWid> {
   gotoWineStorage() {
     if (isShiftOpen) {
       Navigator.of(context).pop();
-      Navigator.pushNamed(context, Constant.WineStorage);
+      Navigator.pushNamed(context, Constant.WineStorage).then(backEvent);
     } else {
       CommunFun.showToast(context, Strings.shift_opne_alert_wineStorage);
     }
@@ -353,7 +359,8 @@ class DrawerWidState extends State<DrawerWid> {
             ListTile(
                 onTap: () {
                   Navigator.of(context).pop();
-                  Navigator.pushNamed(context, Constant.SettingsScreen);
+                  Navigator.pushNamed(context, Constant.SettingsScreen)
+                      .then(backEvent);
                 },
                 leading: Icon(
                   Icons.settings,
@@ -372,7 +379,7 @@ class DrawerWidState extends State<DrawerWid> {
       child: RaisedButton(
         padding: EdgeInsets.all(10),
         onPressed: () {
-          Navigator.pushNamed(context, Constant.PINScreen);
+          Navigator.pushNamed(context, Constant.PINScreen).then(backEvent);
         },
         child: Text(Strings.checkout, style: Styles.whiteBoldsmall()),
         color: Colors.deepOrange,
@@ -389,7 +396,7 @@ class DrawerWidState extends State<DrawerWid> {
         child: RaisedButton(
       padding: EdgeInsets.all(10),
       onPressed: () {
-        Navigator.pushNamed(context, Constant.PINScreen);
+        Navigator.pushNamed(context, Constant.PINScreen).then(backEvent);
       },
       child: Text(
         userDetails != null ? userDetails["name"] : "",

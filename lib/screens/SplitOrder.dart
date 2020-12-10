@@ -566,7 +566,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                           SizedBox(
                             width: 8,
                           ),
-                          Text(product.productQty.toString(),
+                          Text(product.productQty.toStringAsFixed(0),
                               style: Styles.smallBlack()),
                           SizedBox(width: 90),
                           Text(product.productPrice.toStringAsFixed(2),
@@ -639,6 +639,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
     order.order_status = 1;
     order.server_id = 0;
+    order.isSync = 0;
     order.order_source = cartData.source;
     order.order_by = userdata.id;
     order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
@@ -671,9 +672,12 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           orderDetail.branch_id = int.parse(branchid);
           orderDetail.terminal_id = int.parse(terminalId);
           orderDetail.product_id = cartItem.productId;
+          orderDetail.detail_amount = cartItem.productDetailAmount;
           orderDetail.product_price = cartItem.productPrice;
           orderDetail.product_old_price = cartItem.productNetPrice;
           orderDetail.detail_qty = cartItem.productQty;
+          orderDetail.isSync = 0;
+          orderDetail.server_id = 0;
           orderDetail.product_discount = cartItem.discount;
           orderDetail.product_detail = json.encode(pdata);
           orderDetail.updated_at =
@@ -762,6 +766,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             modifireData.modifier_id = modifire.modifierId;
             modifireData.om_amount = modifire.modifirePrice;
             modifireData.om_by = userdata.id;
+            modifireData.isSync = 0;
+            modifireData.server_id = 0;
             modifireData.om_datetime =
                 await CommunFun.getCurrentDateTime(DateTime.now());
             modifireData.om_status = 1;
@@ -787,6 +793,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             attributes.attribute_id = modifire.attributeId;
             attributes.attr_price = modifire.attrPrice;
             attributes.ca_id = modifire.caId;
+            attributes.isSync = 0;
+            attributes.server_id = 0;
             attributes.oa_datetime =
                 await CommunFun.getCurrentDateTime(DateTime.now());
             attributes.oa_by = userdata.id;
@@ -824,6 +832,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         orderpayment.isCash = payment[i].isCash;
         orderpayment.op_method_response = '';
         orderpayment.op_status = 1;
+        orderpayment.isSync = 0;
+        orderpayment.server_id = 0;
         orderpayment.op_datetime =
             await CommunFun.getCurrentDateTime(DateTime.now());
         orderpayment.op_by = userdata.id;

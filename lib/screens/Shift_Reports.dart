@@ -14,6 +14,8 @@ import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/models/Payment.dart';
 
 class ShiftReports extends StatefulWidget {
   // PIN Enter PAGE
@@ -51,6 +53,9 @@ class _ShiftReportsState extends State<ShiftReports> {
   bool isInAmmount = false;
   double payOutAmmount = 0.00;
   double payInAmmount = 0.00;
+  List<OrderPayment> orderpaymentData = [];
+
+  List<Payments> orderPaymenttypes = [];
   final List<String> imgList = [
     'Summary',
     'Cash Drawer Summary',
@@ -83,7 +88,10 @@ class _ShiftReportsState extends State<ShiftReports> {
 
   getOrders() async {
     var branchid = await CommunFun.getbranchId();
+    var terminalid = await CommunFun.getTeminalKey();
     List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
+    dynamic payments =
+        await localAPI.getTotalPayment(terminalid.toString(), branchid);
     if (ordersList.length > 0) {
       setState(() {
         orders = ordersList;
@@ -101,20 +109,28 @@ class _ShiftReportsState extends State<ShiftReports> {
         refundval += 0;
         netsale = grosssale - refundval;
         taxval += order.tax_amount;
-        servicecharge += order.serviceCharge;
-        discountval += order.voucher_amount != null ? order.voucher_amount : 0;
+        servicecharge +=
+            order.serviceCharge != null ? order.serviceCharge : 0.0;
+        discountval +=
+            order.voucher_amount != null ? order.voucher_amount : 0.0;
         totaltend = (netsale + taxval + servicecharge) - discountval;
+        setState(() {
+          grossSale = grosssale;
+          netSale = netsale;
+          discount = discountval;
+          refund = refundval;
+          tax = taxval;
+          serviceCharge = servicecharge;
+          totalTender = totaltend;
+        });
       }
-      setState(() {
-        grossSale = grosssale;
-        netSale = netsale;
-        discount = discountval;
-        refund = refundval;
-        tax = taxval;
-        serviceCharge = servicecharge;
-        totalTender = totaltend;
-      });
     }
+    List<Payments> paymentMethods = payments["payment_method"];
+    List<OrderPayment> orderPayments = payments["payments"];
+    setState(() {
+      orderPaymenttypes = paymentMethods;
+      orderpaymentData = orderPayments;
+    });
   }
 
   getShiftData() async {
@@ -184,14 +200,15 @@ class _ShiftReportsState extends State<ShiftReports> {
   printShiftReport() async {
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     if (shiftid != null) {
-      await CommunFun.printShiftReportData("192.168.0.105", context, shiftid);
+      await CommunFun.printShiftReportData(
+          printerreceiptList[0].printerId.toString(), context, shiftid);
     }
   }
 
   getpayInOutAmmount() async {
-    if (shifittem.shiftId != null) {
+    if (shifittem.appId != null) {
       List<Drawerdata> result =
-          await localAPI.getPayinOutammount(shifittem.shiftId);
+          await localAPI.getPayinOutammount(shifittem.appId);
       print(result);
       if (result.length > 0) {
         setState(() {
@@ -458,19 +475,6 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
-              child: ListTile(
-                title: Text(
-                  "Discount",
-                  style: Styles.whiteMediumBold(),
-                ),
-                trailing: Text(
-                  discount.toStringAsFixed(2),
-                  style: Styles.whiteMediumBold(),
-                ),
-              ),
-            ),
-            Container(
               color: Colors.white,
               child: ListTile(
                 title: Text(
@@ -484,15 +488,15 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: Colors.grey,
               child: ListTile(
                 title: Text(
-                  "Tax/Service Charge",
-                  style: Styles.blackMediumBold(),
+                  "Tax",
+                  style: Styles.whiteMediumBold(),
                 ),
                 trailing: Text(
                   tax.toStringAsFixed(2),
-                  style: Styles.blackMediumBold(),
+                  style: Styles.whiteMediumBold(),
                 ),
               ),
             ),
@@ -500,12 +504,25 @@ class _ShiftReportsState extends State<ShiftReports> {
               color: Colors.white,
               child: ListTile(
                 title: Text(
-                  "Total Tenders :",
+                  "Service Charge",
                   style: Styles.blackMediumBold(),
                 ),
                 trailing: Text(
-                  totalTender.toStringAsFixed(2),
+                  serviceCharge.toStringAsFixed(2),
                   style: Styles.blackMediumBold(),
+                ),
+              ),
+            ),
+            Container(
+              color: Colors.grey,
+              child: ListTile(
+                title: Text(
+                  "Total Tenders :",
+                  style: Styles.whiteMediumBold(),
+                ),
+                trailing: Text(
+                  totalTender.toStringAsFixed(2),
+                  style: Styles.whiteMediumBold(),
                 ),
               ),
             ),
@@ -591,11 +608,11 @@ class _ShiftReportsState extends State<ShiftReports> {
               color: Colors.white,
               child: ListTile(
                 title: Text(
-                  "Pay In/Out",
+                  "Pay In",
                   style: Styles.blackMediumBold(),
                 ),
                 trailing: Text(
-                  payInOutAmount.toStringAsFixed(2),
+                  payInAmmount.toStringAsFixed(2),
                   style: Styles.blackMediumBold(),
                 ),
               ),
@@ -604,11 +621,11 @@ class _ShiftReportsState extends State<ShiftReports> {
               color: Colors.grey,
               child: ListTile(
                 title: Text(
-                  "Drawer Expected/Actual",
+                  "Pay Out",
                   style: Styles.whiteMediumBold(),
                 ),
                 trailing: Text(
-                  expectedVal.toStringAsFixed(2),
+                  payOutAmmount.toStringAsFixed(2),
                   style: Styles.whiteMediumBold(),
                 ),
               ),
@@ -617,12 +634,25 @@ class _ShiftReportsState extends State<ShiftReports> {
               color: Colors.white,
               child: ListTile(
                 title: Text(
-                  "Over/Short",
+                  "Drawer Expected/Actual",
                   style: Styles.blackMediumBold(),
                 ),
                 trailing: Text(
-                  overShort.toStringAsFixed(2),
+                  expectedVal.toStringAsFixed(2),
                   style: Styles.blackMediumBold(),
+                ),
+              ),
+            ),
+            Container(
+              color: Colors.grey,
+              child: ListTile(
+                title: Text(
+                  "Over/Short",
+                  style: Styles.whiteMediumBold(),
+                ),
+                trailing: Text(
+                  overShort.toStringAsFixed(2),
+                  style: Styles.whiteMediumBold(),
                 ),
               ),
             ),
@@ -634,24 +664,24 @@ class _ShiftReportsState extends State<ShiftReports> {
     return Container(
         height: MediaQuery.of(context).size.height / 1.8,
         child: ListView(
-          physics: BouncingScrollPhysics(),
-          shrinkWrap: true,
-          children: <Widget>[
-            Container(
-              color: Colors.grey,
-              child: ListTile(
-                title: Text(
-                  "Total",
-                  style: Styles.whiteMediumBold(),
+            physics: BouncingScrollPhysics(),
+            shrinkWrap: true,
+            children: orderPaymenttypes.map((pay) {
+              var index = orderPaymenttypes.indexOf(pay);
+              return Container(
+                color: Colors.grey,
+                child: ListTile(
+                  title: Text(
+                    pay.name,
+                    style: Styles.whiteMediumBold(),
+                  ),
+                  trailing: Text(
+                    orderpaymentData[index].op_amount.toStringAsFixed(2),
+                    style: Styles.whiteMediumBold(),
+                  ),
                 ),
-                trailing: Text(
-                  grossSale.toStringAsFixed(2),
-                  style: Styles.whiteMediumBold(),
-                ),
-              ),
-            ),
-          ],
-        ));
+              );
+            }).toList()));
   }
 
   Widget squareActionButton() {
@@ -792,7 +822,7 @@ class _ShiftReportsState extends State<ShiftReports> {
             ),
             SizedBox(height: 5),
             Text(
-              "0.00",
+              netSale.toStringAsFixed(2),
               style: Styles.orangeLarge(),
             )
           ],
@@ -806,7 +836,7 @@ class _ShiftReportsState extends State<ShiftReports> {
             ),
             SizedBox(height: 5),
             Text(
-              "0.00",
+              orders.length.toString(),
               style: Styles.orangeLarge(),
             )
           ],
@@ -820,7 +850,7 @@ class _ShiftReportsState extends State<ShiftReports> {
             ),
             SizedBox(height: 5),
             Text(
-              "0.00",
+              (netSale / orders.length).toStringAsFixed(2),
               style: Styles.orangeLarge(),
             )
           ],

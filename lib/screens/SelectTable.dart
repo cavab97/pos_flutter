@@ -126,7 +126,11 @@ class _SelectTablePageState extends State<SelectTablePage>
     setState(() {
       isMenuOpne = true;
     });
-    Navigator.pushNamed(context, Constant.DashboardScreen);
+    Navigator.pushNamed(context, Constant.DashboardScreen).then(backToRefresh);
+  }
+
+  backToRefresh(value) {
+    getTables();
   }
 
   ontableTap(table) async {
@@ -181,12 +185,16 @@ class _SelectTablePageState extends State<SelectTablePage>
     getTables();
   }
 
-  mergeTable(table) {
-    setState(() {
-      isMenuOpne = true;
-      isMergeing = true;
-      mergeInTable = table;
-    });
+  mergeTable(table) async {
+    if (table != null) {
+      setState(() {
+        isMenuOpne = true;
+        isMergeing = true;
+        mergeInTable = table;
+      });
+    } else {
+      await CommunFun.showToast(context, "Please select table first");
+    }
   }
 
   selectTableForNewOrder() async {
@@ -240,7 +248,9 @@ class _SelectTablePageState extends State<SelectTablePage>
       setState(() {
         isLoading = false;
       });
-      Navigator.pushNamed(context, Constant.WebOrderPages);
+      Navigator.of(context).pop();
+      getTables();
+      Navigator.pushNamed(context, Constant.WebOrderPages).then(backToRefresh);
     } else {
       CommunFun.showToast(context, Strings.table_pax_msg);
     }
@@ -380,7 +390,11 @@ class _SelectTablePageState extends State<SelectTablePage>
     return WillPopScope(
       child: Scaffold(
         key: scaffoldKey,
-        drawer: DrawerWid(),
+        drawer: DrawerWid(
+          onClose: () {
+            backToRefresh("drawer");
+          },
+        ),
         appBar: AppBar(
           centerTitle: false,
           leading: IconButton(
@@ -1023,6 +1037,13 @@ class _SelectTablePageState extends State<SelectTablePage>
             }
           });
         }
+        var time;
+        if (selected != null) {
+          var d = Duration(
+              minutes: int.parse(table.occupiedMinute.round().toString()));
+          List<String> parts = d.toString().split(':');
+          time = '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}';
+        }
         return InkWell(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
           onTap: () {
@@ -1077,7 +1098,23 @@ class _SelectTablePageState extends State<SelectTablePage>
                                 : table.tableName,
                             style: Styles.blackMediumBold(),
                           ),
-                          Text(selected != null ? selected.timeMinute : "")
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                time != null ? time.toString() : "",
+                                style: TextStyle(
+                                    // White text
+                                    color: Color(0xFF000000),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: Strings.fontFamily),
+                              ),
+                              SizedBox(
+                                width: 5,
+                              )
+                            ],
+                          )
                         ]),
                   ),
                 ),

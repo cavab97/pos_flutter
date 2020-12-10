@@ -29,6 +29,7 @@ class Orders {
   String voucher_detail;
   String updated_at;
   int updated_by;
+  int isSync;
 
   Orders(
       {this.order_id,
@@ -54,6 +55,7 @@ class Orders {
       this.order_date,
       this.order_by,
       this.pax,
+      this.isSync,
       this.voucher_detail,
       this.server_id,
       this.tax_json,
@@ -71,6 +73,7 @@ class Orders {
     table_no = json["table_no"];
     table_id = json["table_id"];
     pax = json["pax"];
+    isSync = json["isSync"];
     invoice_no = json["invoice_no"];
     customer_id = json["customer_id"];
     tax_percent = json["tax_percent"];
@@ -138,6 +141,7 @@ class Orders {
     data["server_id"] = this.server_id;
     data['voucher_detail'] = this.voucher_detail;
     data["tax_json"] = this.tax_json;
+    data["isSync"] = this.isSync;
     data["order_by"] = this.order_by;
     data["updated_at"] = this.updated_at;
     data["updated_by"] = this.updated_by;

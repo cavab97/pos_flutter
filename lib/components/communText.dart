@@ -881,6 +881,7 @@ class CommunFun {
           "printer_id": detailitem["printer_id"],
           "product_name": detailitem["product_name"],
           "product_price": detailitem["product_price"],
+          "product_detail_amount": detailitem["product_detail_amount"],
           "product_qty": detailitem["product_qty"],
           "product_net_price": detailitem["product_net_price"],
           "tax_id": detailitem["tax_id"],
@@ -905,14 +906,14 @@ class CommunFun {
         for (var p = 0; p < cartSubData.length; p++) {
           var subdetailitem = cartSubData[p];
           var subdata = {
-            "id": subdetailitem["cart_sub_detail_id"],
+            "id": subdetailitem["csd_id"],
             "cart_details_id": subdetailitem["cart_detail_id"],
             "localID": subdetailitem["localID"],
             "product_id": subdetailitem["product_id"],
             "modifier_id": subdetailitem["modifier_id"],
             "modifier_price": subdetailitem["modifier_price"],
             "ca_id": subdetailitem["ca_id"],
-            "attr_price": subdetailitem["attr_price"],
+            "attr_price": subdetailitem["attribute_price"],
           };
           var subjson = MSTSubCartdetails.fromJson(subdata);
           await localAPI.updateWebCartsubdetails(subjson);
@@ -1013,7 +1014,7 @@ class CommunFun {
       double selectedITemTotal = 0;
       for (var i = 0; i < cartItems.length; i++) {
         var item = cartItems[i];
-        selectedITemTotal += item.productPrice;
+        selectedITemTotal += item.productDetailAmount;
       }
       subT = selectedITemTotal + price;
     } else {
@@ -1179,12 +1180,13 @@ class CommunFun {
     cartdetails.productId = productItem.productId;
     cartdetails.productName = productItem.name;
     cartdetails.productSecondName = productItem.name_2;
-    cartdetails.productPrice = isEditing
+    cartdetails.productPrice = productItem.price;
+    cartdetails.productDetailAmount = isEditing
         ? double.parse(productItem.price.toStringAsFixed(2)) +
             sameitem.productPrice
         : double.parse(productItem.price.toStringAsFixed(2));
     cartdetails.productQty = isEditing ? sameitem.productQty + 1.0 : 1.0;
-    cartdetails.productNetPrice = productItem.price;
+    cartdetails.productNetPrice = productItem.oldPrice;
     cartdetails.createdBy = loginUser.id;
     cartdetails.cart_detail = jsonEncode(data);
     cartdetails.discount = isEditing ? sameitem.discount : 0;
@@ -1294,7 +1296,7 @@ class CommunFun {
     var totalRend = 0.00;
     var textService = 0.00;
     double cashSale = 0.00;
-    double statringAmount = 0.00;
+    double roundingAmount = 0.00;
     double cashDeposit = 0.00;
     double cashRefund = 0.00;
     double cashRounding = 0.00;
@@ -1312,6 +1314,7 @@ class CommunFun {
         netsale = grosssale - refundval;
         taxval += order.tax_amount;
         totalPax += order.pax;
+        roundingAmount += order.rounding_amount;
         textService += order.serviceCharge;
         discountval += order.voucher_amount != null ? order.voucher_amount : 0;
         totalRend = (netsale + taxval + textService) - discountval;
@@ -1362,7 +1365,7 @@ class CommunFun {
         context,
         // Branch data
         branchData,
-         totalPax,
+        totalPax,
         // terminal data
         terminalData,
         //Summery Sales data
@@ -1371,6 +1374,7 @@ class CommunFun {
         discountval,
         netsale,
         taxval,
+        roundingAmount,
         textService,
         totalRend,
         // Drawer Data
@@ -1384,6 +1388,7 @@ class CommunFun {
         expectedVal,
         // Paymemts Data
         orderPayments,
-        paymentMethods);
+        paymentMethods,
+        ordersList.length);
   }
 }

@@ -353,6 +353,7 @@ class _DashboradPageState extends State<DashboradPage>
               tax,
               branchData,
               currency,
+              selectedTable.number_of_pax.toString(),
               customer != null ? customer.name : Strings.walkin_customer);
         } else {
           await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
@@ -370,6 +371,7 @@ class _DashboradPageState extends State<DashboradPage>
                 tax,
                 branchData,
                 currency,
+                selectedTable.number_of_pax.toString(),
                 customer != null ? customer.name : Strings.walkin_customer);
           }, () {});
         }
@@ -475,6 +477,7 @@ class _DashboradPageState extends State<DashboradPage>
               cartList,
               tableName,
               branchData,
+              selectedTable.number_of_pax.toString(),
               customer != null ? customer.name : Strings.walkin_customer);
         } else {
           await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
@@ -485,6 +488,7 @@ class _DashboradPageState extends State<DashboradPage>
                 cartList,
                 tableName,
                 branchData,
+                selectedTable.number_of_pax.toString(),
                 customer != null ? customer.name : Strings.walkin_customer);
           }, () {});
         }
@@ -762,7 +766,6 @@ class _DashboradPageState extends State<DashboradPage>
       CommunFun.processingPopup(context);
       List<OrderPayment> payment = [];
       sendPaymentByCash(payment);
-      Navigator.of(context).pop();
     } else {
       CommunFun.showToast(context, Strings.cart_empty);
     }
@@ -1003,6 +1006,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
     order.order_status = 1;
     order.server_id = 0;
+    order.isSync = 0;
     order.order_source = cartData.source;
     order.order_by = userdata.id;
     order.voucher_detail = cartData.voucher_detail;
@@ -1012,12 +1016,20 @@ class _DashboradPageState extends State<DashboradPage>
     order.updated_by = userdata.id;
     var orderid = await localAPI.placeOrder(order);
     if (cartData.voucher_id != 0 && cartData.voucher_id != null) {
+      int lastappid = await localAPI.getLastVoucherHistoryid(terminalId);
       VoucherHistory history = new VoucherHistory();
+      if (lastappid != 0) {
+        history.app_id = lastappid + 1;
+      } else {
+        history.app_id = 1;
+      }
       history.voucher_id = cartData.voucher_id;
       history.amount = cartData.discount;
       history.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
       history.app_order_id = orderid;
       history.uuid = uuid;
+      history.server_id = 0;
+      history.terminal_id = int.parse(terminalId);
       var hisID = await localAPI.saveVoucherHistory(history);
     }
     var orderDetailid;
@@ -1062,17 +1074,18 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.product_id = cartItem.productId;
           orderDetail.product_price = cartItem.productPrice;
           orderDetail.product_old_price = cartItem.productNetPrice;
+          orderDetail.detail_amount = cartItem.productDetailAmount;
           orderDetail.detail_qty = cartItem.productQty;
           orderDetail.product_discount = cartItem.discount;
           orderDetail.product_detail = json.encode(productdata);
           orderDetail.updated_at =
               await CommunFun.getCurrentDateTime(DateTime.now());
-          orderDetail.detail_amount =
-              (cartItem.productPrice * cartItem.productQty);
           orderDetail.detail_datetime =
               await CommunFun.getCurrentDateTime(DateTime.now());
           orderDetail.updated_by = userdata.id;
           orderDetail.detail_status = 1;
+          orderDetail.isSync = 0;
+          orderDetail.server_id = 0;
           orderDetail.detail_by = userdata.id;
           orderDetail.issetMeal = cartItem.issetMeal;
           orderDetail.hasRacManagemant = cartItem.hasRacManagemant;
@@ -1105,6 +1118,8 @@ class _DashboradPageState extends State<DashboradPage>
                   modifireData.modifier_id = modifire.modifierId;
                   modifireData.om_amount = modifire.modifirePrice;
                   modifireData.om_by = userdata.id;
+                  modifireData.isSync = 0;
+                  modifireData.server_id = 0;
                   modifireData.om_datetime =
                       await CommunFun.getCurrentDateTime(DateTime.now());
                   modifireData.om_status = 1;
@@ -1130,6 +1145,8 @@ class _DashboradPageState extends State<DashboradPage>
                   attributes.attribute_id = modifire.attributeId;
                   attributes.attr_price = modifire.attrPrice;
                   attributes.ca_id = modifire.caId;
+                  attributes.isSync = 0;
+                  attributes.server_id = 0;
                   attributes.oa_datetime =
                       await CommunFun.getCurrentDateTime(DateTime.now());
                   attributes.oa_by = userdata.id;
@@ -1204,7 +1221,8 @@ class _DashboradPageState extends State<DashboradPage>
           orderpayment.last_digits = payment[i].last_digits;
           orderpayment.reference_number = payment[i].reference_number;
           orderpayment.approval_code = payment[i].approval_code;
-          orderpayment.isCash = payment[i].isCash;
+          orderpayment.isCash =
+              payment[i].isCash != null ? payment[i].isCash : 0;
           orderpayment.op_amount = payment[i].op_amount.toDouble();
           orderpayment.op_amount_change = payment[i].op_amount_change;
           orderpayment.op_method_response = '';
@@ -1212,6 +1230,8 @@ class _DashboradPageState extends State<DashboradPage>
           orderpayment.op_datetime =
               await CommunFun.getCurrentDateTime(DateTime.now());
           orderpayment.op_by = userdata.id;
+          orderpayment.isSync = 0;
+          orderpayment.server_id = 0;
           orderpayment.updated_at =
               await CommunFun.getCurrentDateTime(DateTime.now());
           orderpayment.updated_by = userdata.id;
@@ -1233,6 +1253,32 @@ class _DashboradPageState extends State<DashboradPage>
             var result = await localAPI.saveInOutDrawerData(drawer);
           }
         }
+      } else if (isWebOrder) {
+        OrderPayment orderpayment = new OrderPayment();
+        List<OrderPayment> lapPpid =
+            await localAPI.getLastOrderPaymentAppid(terminalId);
+        if (lapPpid.length > 0) {
+          orderpayment.app_id = lapPpid[0].app_id + 1;
+        } else {
+          orderpayment.app_id = 1;
+        }
+        orderpayment.uuid = uuid;
+        orderpayment.order_app_id = orderid;
+        orderpayment.branch_id = int.parse(branchid);
+        orderpayment.terminal_id = int.parse(terminalId);
+        orderpayment.op_method_id = cartData.cart_payment_id;
+        orderpayment.op_amount = cartData.grand_total;
+        orderpayment.isCash = 0;
+        orderpayment.op_status = 1;
+        orderpayment.isSync = 0;
+        orderpayment.server_id = 0;
+        orderpayment.op_datetime =
+            await CommunFun.getCurrentDateTime(DateTime.now());
+        orderpayment.op_by = userdata.id;
+        orderpayment.updated_at =
+            await CommunFun.getCurrentDateTime(DateTime.now());
+        orderpayment.updated_by = userdata.id;
+        await localAPI.sendtoOrderPayment(orderpayment);
       }
       // Shifr Invoice Table
       ShiftInvoice shiftinvoice = new ShiftInvoice();
@@ -2005,7 +2051,7 @@ class _DashboradPageState extends State<DashboradPage>
             children: <Widget>[
               IconButton(
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    Navigator.of(context).pop("Return String");
                   },
                   icon: Icon(
                     Icons.arrow_back,
@@ -2494,8 +2540,8 @@ class _DashboradPageState extends State<DashboradPage>
             onTap: () {
               if ((product.qty == null ||
                       product.hasInventory != 1 ||
-                      product.qty > 0.0) &&
-                  (product.hasRacManagemant != 1 && product.box_pId == null)) {
+                      product.qty > 0.0) ||
+                  (product.hasRacManagemant == 1 && product.box_pId != null)) {
                 if (permissions.contains(Constant.ADD_ORDER)) {
                   checkshiftopne(product);
                 } else {
@@ -2877,12 +2923,12 @@ class _DashboradPageState extends State<DashboradPage>
                         children: <Widget>[
                           Padding(
                               padding: EdgeInsets.symmetric(vertical: 0),
-                              child: Text(cart.productQty.toString(),
+                              child: Text(cart.productQty.toStringAsFixed(0),
                                   style: Styles.greysmall())),
                           Padding(
                             padding: EdgeInsets.symmetric(vertical: 0),
                             child: Text(
-                              cart.productPrice.toStringAsFixed(2),
+                              cart.productDetailAmount.toStringAsFixed(2),
                               style: Styles.greysmall(),
                             ),
                           ),
@@ -3178,7 +3224,10 @@ class _DashboradPageState extends State<DashboradPage>
                             ),
                           ),
                         )
-                      : SizedBox(),
+                      : Padding(
+                          padding: EdgeInsets.only(right: 10),
+                          child: Text(grandTotal.toStringAsFixed(2),
+                              style: Styles.darkBlue())),
                 ],
               ),
             ),

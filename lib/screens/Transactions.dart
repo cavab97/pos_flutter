@@ -219,27 +219,29 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   cancleTransation(reason, paymehtod) async {
     //TODO :Cancle Transation Pop // 1 for  cancle
-    var orderid = await localAPI.updateOrderStatus(
-        selectedOrder.app_id, selectedOrder.terminal_id, 3);
-    var payment = await localAPI.updatePaymentStatus(
-        selectedOrder.app_id, selectedOrder.terminal_id, 3);
+    Orders orderData = Orders();
+    User userdata = await CommunFun.getuserDetails();
+    orderData = selectedOrder;
+    orderData.order_status = 3;
+    orderData.isSync = 0;
+    orderData.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    orderData.updated_by = userdata.id;
+    await localAPI.updateOrderStatus(orderData);
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
-    var terID = await CommunFun.getTeminalKey();
-    User userdata = await CommunFun.getuserDetails();
     CancelOrder order = new CancelOrder();
-    order.id = order.orderId;
+    order.orderId = selectedOrder.order_id;
     order.order_app_id = selectedOrder.app_id;
     order.localID = await CommunFun.getLocalID();
     order.reason = reason;
     order.status = 3;
+    order.isSync = 0;
     order.serverId = 0;
     order.createdBy = userdata.id;
     order.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-    order.terminalId = int.parse(terID);
+    order.terminalId = int.parse(terminalId);
     var addTocancle = await localAPI.insertCancelOrder(order);
-
     if (paymehtod.length > 0) {
       for (var i = 0; i < paymehtod.length; i++) {
         OrderPayment orderpayment = paymehtod[i];
@@ -247,7 +249,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           var shiftid =
               await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
           Drawerdata drawer = new Drawerdata();
-          drawer.shiftId = shiftid;
+          drawer.shiftId = int.parse(shiftid);
           drawer.amount = orderpayment.op_amount.toDouble();
           drawer.isAmountIn = 2;
           drawer.reason = "cancelORder";
@@ -260,7 +262,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
         }
       }
     }
-
     List<OrderDetail> orderItem = orderItemList;
     if (orderItem.length > 0) {
       for (var i = 0; i < orderItem.length; i++) {
@@ -288,7 +289,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               log.branch_id = int.parse(branchid);
               log.product_id = productDetail.product_id;
               log.employe_id = userdata.id;
-              // log.il_type = '';
+              log.il_type = 1;
               log.qty = invData.qty;
               log.qty_before_change = invData.qty;
               log.qty_after_change = invData.qty + productDetail.detail_qty;
@@ -303,6 +304,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         }
       }
     }
+    Navigator.of(context).pop();
     getTansactionList();
   }
 
@@ -323,14 +325,19 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   returnPayment(paymentMehtod) async {
-    await localAPI.updateOrderStatus(
-        selectedOrder.app_id, selectedOrder.terminal_id, 5);
-    await localAPI.updatePaymentStatus(
-        selectedOrder.app_id, selectedOrder.terminal_id, 5);
-
+    Orders orderData = Orders();
+    User userdata = await CommunFun.getuserDetails();
+    orderData = selectedOrder;
+    orderData.order_status = 5;
+    orderData.isSync = 0;
+    orderData.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    orderData.updated_by = userdata.id;
+    await localAPI.updateOrderStatus(orderData);
+    var upDate = await CommunFun.getCurrentDateTime(DateTime.now());
+    await localAPI.updatePaymentStatus(selectedOrder.app_id,
+        selectedOrder.terminal_id, 5, upDate, userdata.id);
     var terminalId = await CommunFun.getTeminalKey();
     var uuid = await CommunFun.getLocalID();
-    User userdata = await CommunFun.getuserDetails();
     if (paymentMehtod.length > 0) {
       for (var i = 0; i < paymentMehtod.length; i++) {
         OrderPayment orderpayment = paymentMehtod[i];
@@ -338,7 +345,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           var shiftid =
               await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
           Drawerdata drawer = new Drawerdata();
-          drawer.shiftId = shiftid;
+          drawer.shiftId = int.parse(shiftid);
           drawer.amount = orderpayment.op_amount.toDouble();
           drawer.isAmountIn = 2;
           drawer.reason = "refundOrder";
@@ -379,7 +386,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               log.branch_id = int.parse(branchid);
               log.product_id = productDetail.product_id;
               log.employe_id = userdata.id;
-              // log.il_type = '';
+              log.il_type = 1;
               log.qty = invData.qty;
               log.qty_before_change = invData.qty;
               log.qty_after_change = invData.qty + productDetail.detail_qty;
@@ -397,6 +404,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     setState(() {
       isRefunding = false;
     });
+    Navigator.of(context).pop();
     getTansactionList();
   }
 
@@ -1109,6 +1117,35 @@ class _TransactionsPageState extends State<TransactionsPage> {
               ),
             ),
           ]),
+          TableRow(children: [
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  new Expanded(
+                    flex: 7,
+                    child: Text(
+                      Strings.rounding_ammount.toUpperCase(),
+                      textAlign: TextAlign.end,
+                      style: Styles.darkGray(),
+                    ),
+                  ),
+                  new Expanded(
+                      flex: 3,
+                      child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 5),
+                          child: Text(
+                            selectedOrder.rounding_amount != null
+                                ? selectedOrder.rounding_amount
+                                    .toStringAsFixed(2)
+                                : "00:00",
+                            textAlign: TextAlign.end,
+                            style: Styles.darkGray(),
+                          ))),
+                ],
+              ),
+            ),
+          ]),
         ]);
   }
 
@@ -1216,7 +1253,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         ),
                         Expanded(
                           flex: 2,
-                          child: Text(product.detail_qty.toString(),
+                          child: Text(product.detail_qty.toStringAsFixed(0),
                               style: TextStyle(
                                   fontSize: SizeConfig.safeBlockVertical * 2.8,
                                   color: Theme.of(context).primaryColor)),
@@ -1224,7 +1261,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         Expanded(
                             flex: 2,
                             child: Text(
-                                product.product_price.toStringAsFixed(2),
+                                product.detail_amount.toStringAsFixed(2),
                                 textAlign: TextAlign.end,
                                 style: TextStyle(
                                     fontSize:

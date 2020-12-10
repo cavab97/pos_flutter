@@ -172,12 +172,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                 var attribute = attributeList[i];
                 var attributType = attribute.attr_types.split(',');
                 var attrIDs = attribute.attributeId.split(',');
+                var isdef = attribute.is_default.split(',');
                 var attrtypesPrice = attribute.attr_types_price.split(',');
                 for (var a = 0; a < attributType.length; a++) {
                   var aattrid = int.parse(attrIDs[a]);
                   if (item.attributeId == aattrid) {
                     onSelectAttr(a, attribute.ca_id, attributType[a],
-                        attrIDs[a], attrtypesPrice[a], null);
+                        attrIDs[a], attrtypesPrice[a], null, isdef[a]);
                   }
                 }
               }
@@ -209,19 +210,20 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   getAttributes(productid) async {
     List<Attribute_Data> productAttr =
         await localAPI.getProductDetails(productid);
-    if (productAttr.length > 0) {
-      setState(() {
-        attributeList = productAttr;
-      });
-    }
+    // if (productAttr.length > 0) {
+    //   setState(() {
+    //
+    //   });
+    // }
 
     List<ModifireData> productModifeir =
         await localAPI.getProductModifeir(productid);
-    if (productModifeir.length > 0) {
-      setState(() {
-        modifireList = productModifeir;
-      });
-    }
+    //if (productModifeir.length > 0) {
+    setState(() {
+      modifireList = productModifeir;
+      attributeList = productAttr;
+    });
+    //}
     if (isEditing) {
       setProductEditingData();
     }
@@ -424,7 +426,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
-  onSelectAttr(i, id, attribute, attrTypeIDs, attrPrice, setmealid) {
+  onSelectAttr(i, id, attribute, attrTypeIDs, attrPrice, setmealid, isDefault) {
     var prvSeelected = selectedAttr;
     var isSelected = selectedAttr.any((item) => item['ca_id'] == id);
     if (isSelected) {
@@ -569,11 +571,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       double selectedITemTotal = 0;
       for (var i = 0; i < cartItems.length; i++) {
         var item = cartItems[i];
-        selectedITemTotal += item.productPrice;
+        selectedITemTotal += item.productDetailAmount;
       }
       if (isEditing) {
         if (!isSetMeal) {
-          selectedITemTotal = selectedITemTotal - cartitem.productPrice;
+          selectedITemTotal = selectedITemTotal - cartitem.productDetailAmount;
         } else {
           selectedITemTotal = selectedITemTotal - setmeal.price;
         }
@@ -734,10 +736,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         isSetMeal ? setmeal.setmealId : productItem.productId;
     cartdetails.productName = isSetMeal ? setmeal.name : productItem.name;
     cartdetails.productSecondName = isSetMeal ? "" : productItem.name_2;
-    cartdetails.productPrice = double.parse(price.toStringAsFixed(2));
+    cartdetails.productPrice = productItem.price;
+    cartdetails.productDetailAmount = double.parse(price.toStringAsFixed(2));
     cartdetails.productQty = product_qty.toDouble();
     cartdetails.productNetPrice =
-        double.parse(productnetprice.toStringAsFixed(2));
+        productItem.oldPrice != null ? productItem.oldPrice : 0.0;
     cartdetails.createdBy = loginData["id"];
     cartdetails.cart_detail = jsonEncode(data);
     cartdetails.discount = 0;
@@ -1161,6 +1164,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           var attributType = attribute.attr_types.split(',');
           var attrIDs = attribute.attributeId.split(',').asMap();
           var attrtypesPrice = attribute.attr_types_price.split(',').asMap();
+          var attributisDefault = attribute.is_default.split(',');
           /*Set attribute name for selection toast*/
           attributeTitle = attribute.attr_name;
           return Column(
@@ -1185,6 +1189,19 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                       children: attributType
                           .asMap()
                           .map((i, attr) {
+                            var isadded = selectedAttr.any((item) =>
+                                item['ca_id'] == attribute.ca_id &&
+                                item['attribute'] == attr);
+                            if (attributisDefault[i] == "1" && !isadded) {
+                              onSelectAttr(
+                                  i,
+                                  attribute.ca_id,
+                                  attr,
+                                  attrIDs[i],
+                                  attrtypesPrice[i],
+                                  null,
+                                  attributisDefault[i]);
+                            }
                             return MapEntry(
                                 i,
                                 Padding(
@@ -1214,7 +1231,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                             attr,
                                             attrIDs[i],
                                             attrtypesPrice[i],
-                                            null);
+                                            null,
+                                            attributisDefault[i]);
                                       },
                                     )));
                           })
@@ -1235,7 +1253,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             physics: BouncingScrollPhysics(),
             scrollDirection: Axis.horizontal,
             children: modifireList.map((modifier) {
-              if (modifier.isDefault == 1) {
+              var isadded =
+                  selectedModifier.any((item) => item.pmId == modifier.pmId);
+              if (modifier.isDefault == 1 && !isadded) {
                 setModifire(modifier);
               }
               return Padding(
@@ -1340,7 +1360,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           BoxDecoration(border: Border.all(width: 1, color: Colors.grey)),
       child: Center(
         child: Text(
-            product_qty.toString() +
+            product_qty.toStringAsFixed(0) +
                 " " +
                 (!isSetMeal
                     ? productItem.priceTypeName != null

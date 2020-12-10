@@ -75,21 +75,24 @@ class _WineStorageState extends State<WineStorage>
   }
 
   getBoxList(racID) async {
-    setState(() {
-      isLoading = true;
-    });
-    var branchId = await CommunFun.getbranchId();
-    List<Box> list = await localAPI.getBoxList(branchId, racID);
-    if (list.length > 0) {
+    if (customer != null) {
       setState(() {
-        boxsList = list;
-        isLoading = false;
+        isLoading = true;
       });
-    } else {
-      setState(() {
-        boxsList = [];
-        isLoading = false;
-      });
+      var branchId = await CommunFun.getbranchId();
+      List<Box> list =
+          await localAPI.getBoxList(branchId, racID, customer.customerId);
+      if (list.length > 0) {
+        setState(() {
+          boxsList = list;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          boxsList = [];
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -112,6 +115,8 @@ class _WineStorageState extends State<WineStorage>
     setState(() {
       customer = customerData;
     });
+    var racID = racList[_tabController.index].racId;
+    getBoxList(racID);
     getCustomerRedeem(customer);
   }
 
@@ -165,12 +170,16 @@ class _WineStorageState extends State<WineStorage>
                       addtoInventory(box, qty);
                     });
               });
+        } else {
+          await CommunFun.showToast(
+              context, "Item is not available for redeem.");
         }
       } else {
-        CommunFun.showToast(context, "Item is not available in you redeem.");
+        await CommunFun.showToast(
+            context, "Item is not available in you redeem.");
       }
     } else {
-      CommunFun.showToast(context, Strings.please_select_customer);
+      await CommunFun.showToast(context, Strings.please_select_customer);
     }
   }
 
@@ -353,6 +362,7 @@ class _WineStorageState extends State<WineStorage>
       var size = MediaQuery.of(context).size;
       final double itemHeight = size.height / 3.2;
       final double itemWidth = size.width / 3.2;
+
       return Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
