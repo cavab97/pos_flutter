@@ -980,6 +980,8 @@ class _DashboradPageState extends State<DashboradPage>
       /* setState(() {
         isScreenLoad = false;
       }); */
+      temporaryCartList.add(selectedProduct);
+      print(json.encode(temporaryCartList));
       await addTocartItem(selectedProduct);
     }
   }
