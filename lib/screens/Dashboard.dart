@@ -975,10 +975,9 @@ class _DashboradPageState extends State<DashboradPage>
                 });
           });
     } else {
-      // Remove item loading
-      /* setState(() {
-        isScreenLoad = false;
-      }); */
+      setState(() {
+        isScreenLoad = true;
+      });
       await addTocartItem(selectedProduct);
     }
   }
@@ -1543,23 +1542,30 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getTaxs() async {
-    List<BranchTax> taxlist = [];
+    // List<BranchTax> taxlist = [];
     List<BranchTax> taxlists = await CommunFun.getbranchTax();
+    print(taxlists);
     if (taxlists.length > 0) {
       setState(() {
         taxlist = taxlists;
       });
       taxlist = taxlists;
+      print(taxlist);
+    } else {
+      print("Error2");
     }
-    return taxlist;
+    // return taxlist;
   }
 
   countTax(subT) async {
-    var res = await getTaxs();
+    await getTaxs();
     var totalTax = [];
     double taxvalue = 0.00;
     if (taxlist.length > 0) {
+      print("hi");
       for (var i = 0; i < taxlist.length; i++) {
+        print("hi");
+        print(taxlist.length);
         var taxlistitem = taxlist[i];
         var taxval = taxlistitem.rate != null
             ? subT * double.parse(taxlistitem.rate) / 100
@@ -1582,16 +1588,21 @@ class _DashboradPageState extends State<DashboradPage>
         };
         totalTax.add(taxmap);
       }
+    } else {
+      print("error");
     }
+    print("hello");
     return totalTax;
   }
 
   itememovefromCart(cartitem) async {
+    print(cartList.length);
     try {
       MST_Cart cart = new MST_Cart();
       MSTCartdetails cartitemdata = cartitem;
       var subt = allcartData.sub_total - cartitemdata.productPrice;
       var taxjson = await countTax(subt);
+      // print(taxjson[0].taxmap.taxAmount);
       var disc = allcartData.discount != null
           ? allcartData.discount - cartitemdata.discount
           : 0;
@@ -1614,6 +1625,7 @@ class _DashboradPageState extends State<DashboradPage>
         cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
         cart.grand_total = (subt - disc) + taxvalues;
         cart.tax_json = json.encode(taxjson);
+        print(json.encode(taxjson));
       }
       await cartapi.deleteCartItem(
           cartitem, currentCart, cart, cartList.length == 1);
