@@ -22,6 +22,8 @@ import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/TerminalLog.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/models/colorTable.dart';
+import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/saveOrder.dart';
 
 class LocalAPI {
   Future<int> terminalLog(TerminalLog log) async {
@@ -89,79 +91,79 @@ class LocalAPI {
   //       "Product", "geting Product List", "product", "1");
   //   return list;
   // }
-  // Future<int> mergeTableOrder(Table_order table_order) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   var qry = "SELECT * from table_order where table_id =" +
-  //       table_order.merged_table_id.toString();
-  //   var res = await db.rawQuery(qry);
-  //   List<Table_order> list =
-  //       res.isNotEmpty ? res.map((c) => Table_order.fromJson(c)).toList() : [];
-  //   if (list.length > 0) {
-  //     if (list[0].save_order_id != 0) {
-  //       List<SaveOrder> cartIDs =
-  //           await localAPI.gettableCartID(list[0].save_order_id);
-  //       if (table_order.save_order_id == 0 && list[0].save_order_id != 0) {
-  //         if (cartIDs.length > 0) {
-  //           var qry1 = "UPDATE mst_cart SET table_id = " +
-  //               table_order.table_id.toString() +
-  //               " where id = " +
-  //               cartIDs[0].cartId.toString();
-  //           var result1 = await db.rawQuery(qry1);
-  //           list[0].table_id = table_order.table_id;
-  //           var qry2 = "UPDATE table_order SET table_id = " +
-  //               table_order.table_id.toString() +
-  //               " where table_id = " +
-  //               list[0].table_id.toString();
-  //           var res = await db.rawQuery(qry2);
-  //           var qrysabve = "UPDATE save_order SET cart_id = " +
-  //               cartIDs[0].cartId.toString() +
-  //               " where id = " +
-  //               list[0].save_order_id.toString();
-  //           var res1 = await db.rawQuery(qrysabve);
-  //           table_order.save_order_id = list[0].save_order_id;
-  //         }
-  //       } else {
-  //         if (table_order.save_order_id != 0 && cartIDs.length > 0) {
-  //           List<SaveOrder> carts =
-  //               await localAPI.gettableCartID(table_order.save_order_id);
-  //           if (carts.length > 0) {
-  //             var detailqry = "UPDATE mst_cart_detail SET cart_id = " +
-  //                 carts[0].cartId.toString() +
-  //                 " where cart_id = " +
-  //                 cartIDs[0].cartId.toString();
-  //             var res1 = await db.rawQuery(detailqry);
-  //           }
-  //         }
-  //         await deleteTableOrder(list[0].table_id);
-  //         await deleteSaveOrder(list[0].save_order_id);
-  //       }
-  //     } else {
-  //       await deleteTableOrder(list[0].table_id);
-  //       await deleteSaveOrder(list[0].save_order_id);
-  //     }
-  //   }
+  Future<int> mergeTableOrder(Table_order table_order) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from table_order where table_id =" +
+        table_order.merged_table_id.toString();
+    var res = await db.rawQuery(qry);
+    List<Table_order> list =
+        res.isNotEmpty ? res.map((c) => Table_order.fromJson(c)).toList() : [];
+    if (list.length > 0) {
+      if (list[0].save_order_id != 0) {
+        List<SaveOrder> cartIDs =
+            await gettableCartID(list[0].save_order_id);
+        if (table_order.save_order_id == 0 && list[0].save_order_id != 0) {
+          if (cartIDs.length > 0) {
+            var qry1 = "UPDATE mst_cart SET table_id = " +
+                table_order.table_id.toString() +
+                " where id = " +
+                cartIDs[0].cartId.toString();
+            var result1 = await db.rawQuery(qry1);
+            list[0].table_id = table_order.table_id;
+            var qry2 = "UPDATE table_order SET table_id = " +
+                table_order.table_id.toString() +
+                " where table_id = " +
+                list[0].table_id.toString();
+            var res = await db.rawQuery(qry2);
+            var qrysabve = "UPDATE save_order SET cart_id = " +
+                cartIDs[0].cartId.toString() +
+                " where id = " +
+                list[0].save_order_id.toString();
+            var res1 = await db.rawQuery(qrysabve);
+            table_order.save_order_id = list[0].save_order_id;
+          }
+        } else {
+          if (table_order.save_order_id != 0 && cartIDs.length > 0) {
+            List<SaveOrder> carts =
+                await gettableCartID(table_order.save_order_id);
+            if (carts.length > 0) {
+              var detailqry = "UPDATE mst_cart_detail SET cart_id = " +
+                  carts[0].cartId.toString() +
+                  " where cart_id = " +
+                  cartIDs[0].cartId.toString();
+              var res1 = await db.rawQuery(detailqry);
+            }
+          }
+          await deleteTableOrder(list[0].table_id);
+          await deleteSaveOrder(list[0].save_order_id);
+        }
+      } else {
+        await deleteTableOrder(list[0].table_id);
+        await deleteSaveOrder(list[0].save_order_id);
+      }
+    }
 
-  //   await insertTableOrder(table_order);
-  //   await SyncAPICalls.logActivity(
-  //       "Tables",
-  //       list.length > 0 ? "Update table Order" : "Insert table Order",
-  //       "table_order",
-  //       table_order.table_id);
+    await insertTableOrder(table_order);
+    await SyncAPICalls.logActivity(
+        "Tables",
+        list.length > 0 ? "Update table Order" : "Insert table Order",
+        "table_order",
+        table_order.table_id);
 
-  //   return 1;
-  // }
+    return 1;
+  }
 
-  // Future deleteTableOrder(tableID) async {
-  //   var db = DatabaseHelper.dbHelper.getDatabse();
-  //   await db.delete("table_order", where: 'table_id = ?', whereArgs: [tableID]);
-  // }
+  Future deleteTableOrder(tableID) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    await db.delete("table_order", where: 'table_id = ?', whereArgs: [tableID]);
+  }
 
-  // Future deleteSaveOrder(id) async {
-  //   if (id != 0) {
-  //     var db = DatabaseHelper.dbHelper.getDatabse();
-  //     await db.delete("save_order", where: 'id  =?', whereArgs: [id]);
-  //   }
-  // }
+  Future deleteSaveOrder(id) async {
+    if (id != 0) {
+      var db = DatabaseHelper.dbHelper.getDatabse();
+      await db.delete("save_order", where: 'id  =?', whereArgs: [id]);
+    }
+  }
 
   // Future updateTableIdInOrder(orderid, tableid) async {
   //   var db = DatabaseHelper.dbHelper.getDatabse();
@@ -226,28 +228,28 @@ class LocalAPI {
   //   return list;
   // }
 
-  // Future<int> insertTableOrder(Table_order table_order) async {
-  //   var db = await DatabaseHelper.dbHelper.getDatabse();
-  //   var qry = "SELECT * from table_order where table_id =" +
-  //       table_order.table_id.toString();
-  //   var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-  //   List<Table_order> list =
-  //       res.isNotEmpty ? res.map((c) => Table_order.fromJson(c)).toList() : [];
-  //   var result;
-  //   if (list.length > 0) {
-  //     result = await db.update("table_order", table_order.toJson(),
-  //         where: 'table_id = ?', whereArgs: [table_order.table_id]);
-  //   } else {
-  //     result = await db.insert("table_order", table_order.toJson());
-  //   }
-  //   await SyncAPICalls.logActivity(
-  //       "Tables",
-  //       list.length > 0 ? "Update table Order" : "Insert table Order",
-  //       "table_order",
-  //       table_order.table_id);
+  Future<int> insertTableOrder(Table_order table_order) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from table_order where table_id =" +
+        table_order.table_id.toString();
+    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+    List<Table_order> list =
+        res.isNotEmpty ? res.map((c) => Table_order.fromJson(c)).toList() : [];
+    var result;
+    if (list.length > 0) {
+      result = await db.update("table_order", table_order.toJson(),
+          where: 'table_id = ?', whereArgs: [table_order.table_id]);
+    } else {
+      result = await db.insert("table_order", table_order.toJson());
+    }
+    await SyncAPICalls.logActivity(
+        "Tables",
+        list.length > 0 ? "Update table Order" : "Insert table Order",
+        "table_order",
+        table_order.table_id);
 
-  //   return result;
-  // }
+    return result;
+  }
 
   // Future<int> insertShift(Shift shift) async {
   //   var db = DatabaseHelper.dbHelper.getDatabse();
@@ -1403,19 +1405,19 @@ class LocalAPI {
 
 //     return result;
 //   }
-//  Future<List<SaveOrder>> gettableCartID(saveorderid) async {
-//     var db = DatabaseHelper.dbHelper.getDatabse();
-//     var qry = "select save_order.cart_id from table_order " +
-//         " LEFT join save_order on save_order.id = table_order.save_order_id " +
-//         " WHERE table_order.save_order_id = " +
-//         saveorderid.toString();
-//     var result = await db.rawQuery(qry);
-//     List<SaveOrder> list = result.length > 0
-//         ? result.map((c) => SaveOrder.fromJson(c)).toList()
-//         : [];
+ Future<List<SaveOrder>> gettableCartID(saveorderid) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "select save_order.cart_id from table_order " +
+        " LEFT join save_order on save_order.id = table_order.save_order_id " +
+        " WHERE table_order.save_order_id = " +
+        saveorderid.toString();
+    var result = await db.rawQuery(qry);
+    List<SaveOrder> list = result.length > 0
+        ? result.map((c) => SaveOrder.fromJson(c)).toList()
+        : [];
 
-//     return list;
-//   }
+    return list;
+  }
 
 //  Future<List<Customer_Liquor_Inventory>> getCustomerRedeem(customerid) async {
 //     var db = DatabaseHelper.dbHelper.getDatabse();
