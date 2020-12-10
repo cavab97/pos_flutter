@@ -139,6 +139,7 @@ class _DashboradPageState extends State<DashboradPage>
   var currentQuantity = 1;
   MSTCartdetails itemSelectedIndex = new MSTCartdetails();
 
+  var vaucher;
   @override
   void initState() {
     super.initState();
@@ -147,6 +148,11 @@ class _DashboradPageState extends State<DashboradPage>
     });
     checkisInit();
     checkISlogin();
+    vaucher = allcartData != null &&
+            allcartData.voucher_detail != null &&
+            allcartData.voucher_detail != ""
+        ? json.decode(allcartData.voucher_detail)
+        : null;
   }
 
   refreshAfterAction(bool isClearCart) {
@@ -436,6 +442,32 @@ class _DashboradPageState extends State<DashboradPage>
       case 7:
         resendToKitchen();
         break;
+      case 8:
+        changePromoCode();
+        break;
+    }
+  }
+
+  changePromoCode() async {
+    if (vaucher != null) {
+      CommonUtils.showAlertDialog(context, () {
+        Navigator.of(context).pop();
+      }, () {
+        Navigator.of(context).pop();
+        removePromoCode(vaucher);
+        setState(() {
+          vaucher = null;
+        });
+      }, "Alert", "Are you sure you want to remove this promocode?", "Yes",
+          "No", true);
+    } else {
+      if (permissions.contains(Constant.DISCOUNT_ORDER)) {
+        openVoucherPop();
+      } else {
+        CommonUtils.openPermissionPop(context, Constant.DISCOUNT_ORDER, () {
+          openVoucherPop();
+        }, () {});
+      }
     }
   }
 
@@ -2753,6 +2785,33 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                 ),
               ),
+              PopupMenuItem(
+                enabled: permissions.contains(Constant.DISCOUNT_ORDER) &&
+                    cartList.length > 0,
+                value: 8,
+                child: Padding(
+                  padding: EdgeInsets.all(10),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        selectedvoucher == null
+                            ? Icons.food_bank_outlined
+                            : Icons.remove_circle_outline,
+                        color: Colors.black,
+                        size: SizeConfig.safeBlockVertical * 5,
+                      ),
+                      SizedBox(width: 15),
+                      Text(
+                        selectedvoucher == null
+                            ? Strings.apply_promocode
+                            : Strings
+                                .removePromocode, //selectedvoucher.voucherName,
+                        style: Styles.communBlacksmall(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               /* PopupMenuItem(
                 // enabled: permissions.contains(Constant.DELETE_ORDER) &&
                 //         cartList.length > 0
@@ -3530,11 +3589,6 @@ class _DashboradPageState extends State<DashboradPage>
         );
       }).toList(),
     );
-    var vaucher = allcartData != null &&
-            allcartData.voucher_detail != null &&
-            allcartData.voucher_detail != ""
-        ? json.decode(allcartData.voucher_detail)
-        : null;
 
     final totalPriceTable = Padding(
       padding: EdgeInsets.only(
@@ -3612,7 +3666,10 @@ class _DashboradPageState extends State<DashboradPage>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      Strings.discount.toUpperCase(),
+                      Strings.discount.toUpperCase() +
+                          (selectedvoucher == null
+                              ? ''
+                              : ' (' + selectedvoucher.voucherName + ')'),
                       style: Styles.orangeDis(),
                     ),
                     Text(
@@ -3629,7 +3686,7 @@ class _DashboradPageState extends State<DashboradPage>
                   children: <Widget>[
                     Text(
                       Strings.service_charge.toUpperCase() +
-                          "($serviceChargePer%)",
+                          " ($serviceChargePer%)",
                       style: Styles.darkBlue(),
                     ),
                     Text(
@@ -3651,7 +3708,7 @@ class _DashboradPageState extends State<DashboradPage>
                                 Strings.tax.toUpperCase() +
                                     " " +
                                     taxitem["taxCode"] +
-                                    "(" +
+                                    " (" +
                                     taxitem["rate"] +
                                     "%)",
                                 style: Styles.darkBlue(),

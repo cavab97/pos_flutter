@@ -97,6 +97,7 @@ class Strings {
   static String out_of_stoke = "OUT OF STOCK";
   static String out_of_stoke_msg = "Product Out of Stock";
   static String apply_promocode = "Apply Promocode";
+  static String removePromocode = "Remove Promocode";
   static String item_not_available = "No item available";
   static String asset_headerLogo = "assets/headerlogo.png";
   static String assetsBG = "assets/bg.jpg";
