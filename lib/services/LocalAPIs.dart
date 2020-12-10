@@ -21,6 +21,7 @@ import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/TerminalLog.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
+import 'package:mcncashier/models/colorTable.dart';
 
 class LocalAPI {
   Future<int> terminalLog(TerminalLog log) async {
@@ -195,6 +196,17 @@ class LocalAPI {
   //   return result;
   // }
 
+  Future<List<ColorTable>> getTablesColor() async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var query =
+        "SELECT * FROM table_color where status = 1 ORDER by time_minute ASC ";
+    var res = await db.rawQuery(query);
+    List<ColorTable> list =
+        res.isNotEmpty ? res.map((c) => ColorTable.fromJson(c)).toList() : [];
+    await SyncAPICalls.logActivity(
+        "Tables colors", "Getting Tables colors list", "tablescolor", 1);
+    return list;
+  }
   // Future<List<TablesDetails>> getTables(branchid) async {
   //   var query = "SELECT tables.*, table_order.save_order_id,table_order.number_of_pax ,table_order.is_merge_table as is_merge_table, table_order.merged_table_id as merged_table_id, " +
   //       " (select tables.table_name from tables where table_order.merged_table_id = tables.table_id) as merge_table_name from tables " +

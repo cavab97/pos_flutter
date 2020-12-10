@@ -63,6 +63,7 @@ class Strings {
   static String change_table = "Change Table";
   static String cancle_order = "Cancel Order";
   static String merge_order = "Merge Order";
+  static String cancelMergeOrder = "Cancel Merging";
   static String enterPax = "Enter Pax";
   static String scanQRcode = "Scan QRCode";
 

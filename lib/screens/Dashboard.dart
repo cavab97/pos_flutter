@@ -975,9 +975,10 @@ class _DashboradPageState extends State<DashboradPage>
                 });
           });
     } else {
-      setState(() {
-        isScreenLoad = true;
-      });
+      // Remove item loading
+      /* setState(() {
+        isScreenLoad = false;
+      }); */
       await addTocartItem(selectedProduct);
     }
   }
