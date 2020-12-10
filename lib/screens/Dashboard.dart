@@ -413,6 +413,7 @@ class _DashboradPageState extends State<DashboradPage>
                   }
                 },
                 currentCartID: currentCart,
+                pax: selectedTable.number_of_pax.toString(),
                 customer: customer != null ? customer.name : "",
                 printerIP: printerreceiptList.length > 0
                     ? printerreceiptList[0].printerIp
@@ -468,6 +469,7 @@ class _DashboradPageState extends State<DashboradPage>
       if (printerreceiptList.length > 0) {
         if (permissions.contains(Constant.PRINT_RECIEPT)) {
           printKOT.checkDraftPrint(
+              selectedTable.number_of_pax.toString(),
               taxJson,
               printerreceiptList[0].printerIp.toString(),
               context,
@@ -485,6 +487,7 @@ class _DashboradPageState extends State<DashboradPage>
           await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
               () {
             printKOT.checkDraftPrint(
+                selectedTable.number_of_pax.toString(),
                 taxJson,
                 printerreceiptList[0].printerIp.toString(),
                 context,
@@ -513,6 +516,7 @@ class _DashboradPageState extends State<DashboradPage>
       if (printerreceiptList.length > 0) {
         if (permissions.contains(Constant.PRINT_RECIEPT)) {
           printKOT.checkListReceiptPrint(
+              selectedTable.number_of_pax.toString(),
               printerreceiptList[0].printerIp.toString(),
               context,
               cartList,
@@ -523,6 +527,7 @@ class _DashboradPageState extends State<DashboradPage>
           await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
               () {
             printKOT.checkListReceiptPrint(
+                selectedTable.number_of_pax.toString(),
                 printerreceiptList[0].printerIp.toString(),
                 context,
                 cartList,
@@ -1413,6 +1418,7 @@ class _DashboradPageState extends State<DashboradPage>
     if (permissions.contains(Constant.PRINT_RECIEPT)) {
       if (permissions.contains(Constant.OPEN_DRAWER)) {
         printKOT.checkReceiptPrint(
+            selectedTable.number_of_pax.toString(),
             printerreceiptList[0].printerIp,
             context,
             branchData,
@@ -1431,6 +1437,7 @@ class _DashboradPageState extends State<DashboradPage>
         await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
             () async {
           printKOT.checkReceiptPrint(
+              selectedTable.number_of_pax.toString(),
               printerreceiptList[0].printerIp,
               context,
               branchData,
@@ -1447,6 +1454,7 @@ class _DashboradPageState extends State<DashboradPage>
           await clearCartAfterSuccess(orderid);
         }, () async {
           printKOT.checkReceiptPrint(
+              selectedTable.number_of_pax.toString(),
               printerreceiptList[0].printerIp,
               context,
               branchData,
@@ -1468,6 +1476,7 @@ class _DashboradPageState extends State<DashboradPage>
           () async {
         if (permissions.contains(Constant.OPEN_DRAWER)) {
           printKOT.checkReceiptPrint(
+              selectedTable.number_of_pax.toString(),
               printerreceiptList[0].printerIp,
               context,
               branchData,
@@ -1486,6 +1495,7 @@ class _DashboradPageState extends State<DashboradPage>
           await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
               () async {
             printKOT.checkReceiptPrint(
+                selectedTable.number_of_pax.toString(),
                 printerreceiptList[0].printerIp,
                 context,
                 branchData,
@@ -1502,6 +1512,7 @@ class _DashboradPageState extends State<DashboradPage>
             await clearCartAfterSuccess(orderid);
           }, () async {
             printKOT.checkReceiptPrint(
+                selectedTable.number_of_pax.toString(),
                 printerreceiptList[0].printerIp,
                 context,
                 branchData,
@@ -2211,32 +2222,30 @@ class _DashboradPageState extends State<DashboradPage>
                                     ), */
                               Container(
                                 child: SingleChildScrollView(
-                                    physics: BouncingScrollPhysics(),
-                                    child: SizedBox(
-                                      height: MediaQuery.of(context).size.height / 1.6,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          mealsList.length > 0
-                                              ? Expanded(
-                                                  flex: 1,
-                                                  child: setMealsList()
-                                                )
-                                              : SizedBox(),
-                                          isLoading
-                                              ? CommunFun.loader(context)
-                                              : productList.length > 0
-                                                  ? Expanded(
-                                                      flex: 1,
-                                                      child: porductsList()
-                                                    )
-                                                  : SizedBox()
-                                        ],
-                                      ),
+                                  physics: BouncingScrollPhysics(),
+                                  child: SizedBox(
+                                    height: MediaQuery.of(context).size.height /
+                                        1.6,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.max,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        mealsList.length > 0
+                                            ? Expanded(
+                                                flex: 1, child: setMealsList())
+                                            : SizedBox(),
+                                        isLoading
+                                            ? CommunFun.loader(context)
+                                            : productList.length > 0
+                                                ? Expanded(
+                                                    flex: 1,
+                                                    child: porductsList())
+                                                : SizedBox()
+                                      ],
                                     ),
                                   ),
+                                ),
                               ),
                             ],
                           ),
