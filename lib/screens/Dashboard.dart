@@ -885,7 +885,7 @@ class _DashboradPageState extends State<DashboradPage>
         if (list.length > 0) {
           dynamic send = await cartapi.sendToKitched(ids);
           openPrinterPop(list, false);
-          getCartItem(currentCart);
+          await getCartItem(currentCart);
         }
         return false;
       }
@@ -3586,8 +3586,125 @@ class _DashboradPageState extends State<DashboradPage>
         );
       }).toList(),
     );
-
     final totalPriceTable = Padding(
+      padding: EdgeInsets.only(
+        bottom: 10,
+      ),
+      child: Column(
+        children: <Widget>[
+          Divider(
+            color: Colors.black,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 5, bottom: 5, right: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  Strings.sub_total.toUpperCase(),
+                  style: Styles.darkBlue(),
+                ),
+                Text(
+                  subtotal.toStringAsFixed(2),
+                  style: Styles.darkBlue(),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 5, bottom: 5, right: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  Strings.discount.toUpperCase() +
+                      (selectedvoucher == null
+                          ? ''
+                          : ' (' + selectedvoucher.voucherName + ')'),
+                  style: Styles.orangeDis(),
+                ),
+                Text(
+                  discount.toStringAsFixed(2),
+                  style: Styles.orangeDis(),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 5, bottom: 5, right: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  Strings.service_charge.toUpperCase() +
+                      " ($serviceChargePer%)",
+                  style: Styles.darkBlue(),
+                ),
+                Text(
+                  serviceCharge.toStringAsFixed(2),
+                  style: Styles.darkBlue(),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 5, bottom: 5, right: 10),
+            child: taxJson.length != 0
+                ? Column(
+                    children: taxJson.map((taxitem) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(
+                            Strings.tax.toUpperCase() +
+                                " " +
+                                taxitem["taxCode"] +
+                                " (" +
+                                taxitem["rate"] +
+                                "%)",
+                            style: Styles.darkBlue(),
+                          ),
+                          Text(taxitem["taxAmount"].toString(),
+                              style: Styles.darkBlue()),
+                        ],
+                      );
+                    }).toList(),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(
+                        Strings.tax.toUpperCase(),
+                        style: Styles.darkBlue(),
+                      ),
+                      Text(
+                        tax.toStringAsFixed(2),
+                        style: Styles.darkBlue(),
+                      ),
+                    ],
+                  ),
+          ),
+          Divider(
+            color: Colors.black,
+            thickness: 1,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 5, bottom: 5, right: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(Strings.grand_total, style: Styles.darkBlue()),
+                Text(
+                  grandTotal.toStringAsFixed(2),
+                  style: Styles.darkBlue(),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+    final expandable_totalPriceTable = Padding(
       padding: EdgeInsets.only(
         bottom: 10,
       ),
@@ -3790,10 +3907,12 @@ class _DashboradPageState extends State<DashboradPage>
               Container(
                   //  color: Colors.amber,
                   //color: Colors.red,
-                  height: expandableController != null &&
+                  height:
+                      /* expandableController != null &&
                           expandableController.expanded
                       ? MediaQuery.of(context).size.height * .8 / 2
-                      : MediaQuery.of(context).size.height * .6,
+                      :  */
+                      MediaQuery.of(context).size.height * .5,
                   margin: EdgeInsets.only(top: customer != null ? 85 : 35),
                   child: cartTable),
               cartList.length != 0

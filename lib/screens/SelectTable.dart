@@ -84,7 +84,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       },
     );
     _tabController = new TabController(length: 2, vsync: this);
-    
+
     checkisInit();
     checkISlogin();
   }
@@ -185,17 +185,22 @@ class _SelectTablePageState extends State<SelectTablePage>
         table.numberofpax != null ? table.numberofpax.toString() : "";
   }
 
-changeColors() {
-  Future.delayed(Duration(seconds: 1), () {
-    setState(() {
-      tableSelectedColor = (tableSelectedColor == null || tableSelectedColor == Colors.orange) ? Colors.grey : Colors.orange;
-      if(isMergeing || isChangingTable) {
-        changeColors();
-        changingColors = true;
-      } else changingColors = false;
+  changeColors() {
+    Future.delayed(Duration(seconds: 1), () {
+      setState(() {
+        tableSelectedColor =
+            (tableSelectedColor == null || tableSelectedColor == Colors.orange)
+                ? Colors.grey
+                : Colors.orange;
+        if (isMergeing || isChangingTable) {
+          changeColors();
+          changingColors = true;
+        } else
+          changingColors = false;
+      });
     });
-  });
-}
+  }
+
   mergeTabledata(TablesDetails table) async {
     setState(() {
       isLoading = true;
@@ -229,12 +234,12 @@ changeColors() {
       if (isMergeing && mergeInTable == table) {
         isMergeing = false;
         mergeInTable = null;
+        selectedTable = null;
       } else {
         isMergeing = true;
         mergeInTable = table;
       }
-      selectedTable=null;
-      if(!changingColors) changeColors();
+      if (!changingColors) changeColors();
     });
   }
 
@@ -325,7 +330,7 @@ changeColors() {
   cancleTOrder() async {
     setState(() {
       isLoading = true;
-      if(selectedTable.merged_table_id != null) {
+      if (selectedTable.merged_table_id != null) {
         mergeTableList.remove(selectedTable.merged_table_id);
       }
     });
@@ -333,7 +338,8 @@ changeColors() {
       // List<SaveOrder> cartID =
       //     await localAPI.gettableCartID(selectedTable.saveorderid);
       // if (cartID.length > 0) {
-      await ordersList.removeCart(selectedTable.saveorderid, selectedTable.tableId);
+      await ordersList.removeCart(
+          selectedTable.saveorderid, selectedTable.tableId);
       // }
     } else {
       await tabList.deleteTableOrder(selectedTable.tableId);
@@ -349,18 +355,25 @@ changeColors() {
   }
 
   changeTablePop() {
-    CommonUtils.showAlertDialog(context, () {
-      Navigator.of(context).pop();
-    }, () {
-      Navigator.of(context).pop();
+    if (isChangingTable) {
       setState(() {
-        isMenuOpne = true;
-        //isMenuOpne = false;
-        isChangingTable = true;
-        if(!changingColors) changeColors();
+        isChangingTable = false;
+        changingColors = false;
       });
-    }, Strings.warning, Strings.change_table_msg, Strings.yes, Strings.no,
-        true);
+    } else {
+      CommonUtils.showAlertDialog(context, () {
+        Navigator.of(context).pop();
+      }, () {
+        Navigator.of(context).pop();
+        setState(() {
+          isMenuOpne = true;
+          //isMenuOpne = false;
+          isChangingTable = true;
+          if (!changingColors) changeColors();
+        });
+      }, Strings.warning, Strings.change_table_msg, Strings.yes, Strings.no,
+          true);
+    }
   }
 
   changeTableToOtherTable(table) async {
@@ -383,10 +396,9 @@ changeColors() {
 
         await Preferences.setStringToSF(
             Constant.TABLE_DATA, jsonEncode(tabledata));
-           
       }
     }
-    await getTables(); 
+    await getTables();
     setState(() {
       changeInTable = null;
       isChangingTable = false;
@@ -794,7 +806,11 @@ changeColors() {
             : SizedBox(),
         selectedTable != null && selectedTable.numberofpax != null
             ? neworder_button(
-                Icons.change_history, Strings.change_table, context, () {
+                Icons.change_history,
+                !isChangingTable
+                    ? Strings.change_table
+                    : Strings.cancelChangeTable,
+                context, () {
                 changeTablePop();
               })
             : SizedBox(),
@@ -802,7 +818,6 @@ changeColors() {
             ? neworder_button(Icons.cancel, Strings.cancle_order, context, () {
                 if (permissions.contains(Constant.DELETE_ORDER)) {
                   cancleTableOrder();
-
                 } else {
                   CommonUtils.openPermissionPop(context, Constant.DELETE_ORDER,
                       () {
@@ -812,8 +827,10 @@ changeColors() {
               })
             : SizedBox(),
         selectedTable != null
-            ? neworder_button(Icons.call_merge, isMergeing ? Strings.cancelMergeOrder : Strings.merge_order, context,
-                () {
+            ? neworder_button(
+                Icons.call_merge,
+                isMergeing ? Strings.cancelMergeOrder : Strings.merge_order,
+                context, () {
                 mergeTable(selectedTable);
               })
             : SizedBox(),
@@ -1083,11 +1100,13 @@ changeColors() {
       childAspectRatio: (itemWidth / itemHeight),
       crossAxisCount: isMenuOpne ? 4 : 6,
       children: newtableList.map((table) {
-        if (table.merged_table_id != null && !mergeTableList.contains(table.merged_table_id)) {
+        if (table.merged_table_id != null &&
+            !mergeTableList.contains(table.merged_table_id)) {
           setState(() {
-            if(!isLoading) mergeTableList.add(table.merged_table_id);
+            if (!isLoading) mergeTableList.add(table.merged_table_id);
           });
-        };
+        }
+        ;
         var selected;
         if (tableColors.length > 0 && table.occupiedMinute != null) {
           selected = tableColors.firstWhere(
@@ -1097,13 +1116,15 @@ changeColors() {
               return tableColors[tableColors.length - 1];
             }
           });
-        };
+        }
+        ;
         return InkWell(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
           onTap: () {
-            if (mergeTableList.contains(table.tableId)) {}
-            else if (selectedTable != null && selectedTable.tableId == table.tableId) { }
-            else if (isMergeing) {
+            if (mergeTableList.contains(table.tableId)) {
+            } else if (selectedTable != null &&
+                selectedTable.tableId == table.tableId) {
+            } else if (isMergeing) {
               if (table.merged_table_id == null) {
                 //mergeInTable.
                 mergeTabledata(table);
@@ -1120,7 +1141,9 @@ changeColors() {
               ontableLongTap(table);
             }
           },
-          onDoubleTap: () { ontableTap(table);},
+          onDoubleTap: () {
+            ontableTap(table);
+          },
           child: Container(
             width: itemHeight,
             height: itemWidth,
@@ -1151,7 +1174,9 @@ changeColors() {
                                 : table.tableName,
                             style: Styles.blackMediumBold(),
                           ),
-                          Text(selected != null ? selected.timeMinute.toString()+' M' : "")
+                          Text(selected != null
+                              ? selected.timeMinute.toString() + ' M'
+                              : "")
                         ]),
                   ),
                 ),
@@ -1160,44 +1185,45 @@ changeColors() {
                   width: MediaQuery.of(context).size.width,
                   //height: itemHeight / 5,
                   decoration: BoxDecoration(
-                      color:
-                      table.is_merge_table != null ? Colors.blue : 
-                      (
-                        (isMergeing || isChangingTable)
-                        && selectedTable != null
-                        && selectedTable.tableId == table.tableId
-                      ) 
-                      ? tableSelectedColor :
-                      (
-                        selectedTable != null
-                        && selectedTable.tableId == table.tableId
-                      )
-                      ? Colors.orange : table.numberofpax != null 
-                      ? Colors.deepOrange : Colors.grey[600],
+                      color: table.is_merge_table != null
+                          ? Colors.blue
+                          : ((isMergeing || isChangingTable) &&
+                                  selectedTable != null &&
+                                  selectedTable.tableId == table.tableId)
+                              ? tableSelectedColor
+                              : (selectedTable != null &&
+                                      selectedTable.tableId == table.tableId)
+                                  ? Colors.orange
+                                  : table.numberofpax != null
+                                      ? Colors.deepOrange
+                                      : Colors.grey[600],
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(8.0),
                           bottomRight: Radius.circular(8.0))),
                   child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        mergeTableList.contains(table.tableId) ? Text("-",
-                                style: Styles.whiteSimpleSmall(),) :
-                        table.numberofpax != null
-                            ? Text(
-                                Strings.occupied +
-                                    table.numberofpax.toString() +
-                                    "/" +
-                                    table.tableCapacity.toString(),
-                                style: Styles.whiteSimpleSmall())
-                            : Text(
-                                Strings.vacant +
-                                    "0" +
-                                    "/" +
-                                    table.tableCapacity.toString(),
-                                style: Styles.whiteSimpleSmall())
-                      ],
-                    ),
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      mergeTableList.contains(table.tableId)
+                          ? Text(
+                              "-",
+                              style: Styles.whiteSimpleSmall(),
+                            )
+                          : table.numberofpax != null
+                              ? Text(
+                                  Strings.occupied +
+                                      table.numberofpax.toString() +
+                                      "/" +
+                                      table.tableCapacity.toString(),
+                                  style: Styles.whiteSimpleSmall())
+                              : Text(
+                                  Strings.vacant +
+                                      "0" +
+                                      "/" +
+                                      table.tableCapacity.toString(),
+                                  style: Styles.whiteSimpleSmall())
+                    ],
+                  ),
                 ),
                 Positioned(
                     top: 10,

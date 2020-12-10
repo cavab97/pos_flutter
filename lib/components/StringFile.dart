@@ -61,6 +61,7 @@ class Strings {
   static String view_order = "View Order";
   static String change_pax = "Change Pax";
   static String change_table = "Change Table";
+  static String cancelChangeTable = "Cancel Switch";
   static String cancle_order = "Cancel Order";
   static String merge_order = "Merge Order";
   static String cancelMergeOrder = "Cancel Merging";
