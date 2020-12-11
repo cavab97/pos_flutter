@@ -1744,7 +1744,7 @@ class _DashboradPageState extends State<DashboradPage>
     cartitem.discount = (realprice * dis);
     MST_Cart cart = new MST_Cart();
     cart = allcartData;
-    
+
     //here price no correct, checkpoint
     var subt = allcartData.sub_total - (realprice * qty);
     var taxjson = await countTax(subt);
@@ -3439,7 +3439,7 @@ class _DashboradPageState extends State<DashboradPage>
       //physics: BouncingScrollPhysics(),
       shrinkWrap: true,
       // itemExtent:60.0,
-      padding: EdgeInsets.only(bottom: 200),
+      padding: EdgeInsets.only(bottom: 50),
       children: cartList.map((cart) {
         return Slidable(
           key: Key(cart.id.toString()),
@@ -3655,7 +3655,9 @@ class _DashboradPageState extends State<DashboradPage>
               children: <Widget>[
                 Text(
                   Strings.service_charge.toUpperCase() +
-                      " ($serviceChargePer%)",
+                      (serviceChargePer > 0
+                          ? " ($serviceChargePer%)"
+                          : " (0%)"),
                   style: Styles.darkBlue(),
                 ),
                 Text(
@@ -3932,7 +3934,7 @@ class _DashboradPageState extends State<DashboradPage>
                           expandableController.expanded
                       ? MediaQuery.of(context).size.height * .8 / 2
                       :  */
-                      MediaQuery.of(context).size.height * .5,
+                      MediaQuery.of(context).size.height * .45,
                   margin: EdgeInsets.only(top: customer != null ? 85 : 35),
                   child: cartTable),
               cartList.length != 0
