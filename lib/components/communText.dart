@@ -974,11 +974,14 @@ class CommunFun {
     return list;
   }
 
-  static getCartData(cartid) async {
+  static getCartData(cartid, [List<MSTCartdetails> cartList]) async {
     List<MST_Cart> cartval = await cartapi.getCurrCartTotals(cartid);
     MST_Cart cart = new MST_Cart();
     if (cartval.length != 0) {
       cart = cartval[0];
+      if (cartList.length > 0)
+        cart.sub_total = await CommunFun.countSubtotal(cartList, 0);
+      cart.tax = await CommunFun.countTax(cart.sub_total);
       return cart;
     } else {
       return cart;
@@ -1070,6 +1073,8 @@ class CommunFun {
     if (cartItems.length > 0) {
       double selectedITemTotal = 0;
       for (var i = 0; i < cartItems.length; i++) {
+        // print('line 1073');
+        // print(cartItems[i].productPrice);
         var item = cartItems[i];
         selectedITemTotal += item.productPrice;
       }

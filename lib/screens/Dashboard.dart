@@ -322,13 +322,14 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   countTotals(cartId) async {
-    MST_Cart cart = await CommunFun.getCartData(cartId);
-    Voucher vaocher;
+    MST_Cart cart = await CommunFun.getCartData(cartId, cartList);
 
+    Voucher vaocher;
     if (cart.voucher_id != null) {
       var voucherdetail = jsonDecode(cart.voucher_detail);
       vaocher = Voucher.fromJson(voucherdetail);
     }
+    taxJson = json.decode(cart.tax_json);
     setState(() {
       allcartData = cart;
       subtotal = cart.sub_total;
@@ -338,8 +339,8 @@ class _DashboradPageState extends State<DashboradPage>
       discount = cart.discount;
       tax = cart.tax;
       isWebOrder = cart.source == 1 ? true : false;
-      taxJson = json.decode(cart.tax_json);
-      grandTotal = cart.grand_total;
+      grandTotal =
+          (subtotal - discount) + tax + serviceCharge; //cart.grand_total;
       selectedvoucher = vaocher;
     });
   }
@@ -735,7 +736,6 @@ class _DashboradPageState extends State<DashboradPage>
   void _handleSecondTabSelection() {
     if (_secondTabController.indexIsChanging) {
       var cat = categorySecondRow[_secondTabController.index].categoryId;
-      print(cat);
       List<Category> subList =
           allCaterories.where((i) => i.parentId == cat).toList();
       setState(() {
