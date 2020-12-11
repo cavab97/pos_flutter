@@ -217,7 +217,8 @@ class _SelectTablePageState extends State<SelectTablePage>
         table1.saveorderid != 0 ? table1.saveorderid : 0;
     table_order.is_merge_table = "1";
     table_order.merged_table_id = table2.tableId;
-    var result = await tabList.mergeTableOrder(context, table_order);
+    table_order.assignTime = await CommunFun.getCurrentDateTime(DateTime.now());
+    var result = await localAPI.mergeTableOrder(table_order);
     setState(() {
       isMergeing = false;
       mergeInTable = null;
@@ -263,7 +264,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       });
       Navigator.pushNamed(context, Constant.DashboardScreen);
     }
-    getTables();
+    //getTables();
   }
   /*   else {
       CommunFun.showToast(context, Strings.table_pax_msg);

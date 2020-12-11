@@ -299,7 +299,7 @@ class _DashboradPageState extends State<DashboradPage>
         currentCart = currentOrder[0].cartId;
       });
       if (isShiftOpen) {
-        getCartItem(currentCart);
+        await getCartItem(currentCart);
       }
     }
   }
@@ -317,7 +317,7 @@ class _DashboradPageState extends State<DashboradPage>
       setState(() {
         cartList = cartItem;
       });
-      countTotals(cartId);
+      await countTotals(cartId);
     }
   }
 
@@ -1750,6 +1750,8 @@ class _DashboradPageState extends State<DashboradPage>
     cartitem.discount = (realprice * dis);
     MST_Cart cart = new MST_Cart();
     cart = allcartData;
+    
+    //here price no correct, checkpoint
     var subt = allcartData.sub_total - (realprice * qty);
     var taxjson = await countTax(subt);
     var disc =
@@ -3103,14 +3105,14 @@ class _DashboradPageState extends State<DashboradPage>
                   width: MediaQuery.of(context).size.width / 6.5,
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
-                    onPressed: () {
+                    onPressed: () async {
                       if (permissions.contains(Constant.ADD_ORDER)) {
-                        sendTokitched(cartList);
+                        await sendTokitched(cartList);
                         selectTable();
                       } else {
                         CommonUtils.openPermissionPop(
-                            context, Constant.ADD_ORDER, () {
-                          sendTokitched(cartList);
+                            context, Constant.ADD_ORDER, () async {
+                          await sendTokitched(cartList);
                           selectTable();
                         }, () {});
                       }
