@@ -1155,10 +1155,11 @@ class CommunFun {
     Cartlist cartlist = new Cartlist();
     bool isEditing = false;
     MSTCartdetails sameitem;
-    var contain = cartItems
-        .where((element) => element.productId == productItem.productId);
     // Update on the item
-    /* if (contain.isNotEmpty) {
+    /* var contain = cartItems
+        .where((element) => element.productId == productItem.productId);
+    
+    if (contain.isNotEmpty) {
       isEditing = true;
       var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
       List<MSTCartdetails> myModels = (json.decode(jsonString) as List)

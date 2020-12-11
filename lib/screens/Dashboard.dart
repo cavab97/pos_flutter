@@ -139,6 +139,7 @@ class _DashboradPageState extends State<DashboradPage>
   var currentQuantity = 1;
   double currentProductQuantity = 0.0;
   MSTCartdetails itemSelectedIndex = new MSTCartdetails();
+  bool confirmOrder = false;
 
   var vaucher;
   @override
@@ -872,6 +873,8 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   sendTokitched(itemList) async {
+    print(temporaryCartList);
+
     String ids = "";
     var list = [];
     for (var i = 0; i < itemList.length; i++) {
@@ -1013,9 +1016,6 @@ class _DashboradPageState extends State<DashboradPage>
       /* setState(() {
         isScreenLoad = false;
       }); */
-
-      temporaryCartList.add(selectedProduct);
-      print('here we are');
       await addTocartItem(selectedProduct);
     }
   }
@@ -1028,6 +1028,7 @@ class _DashboradPageState extends State<DashboradPage>
       if (selectedTable.save_order_id == 0) {
         //selectedTable.save_order_id = saveOid;
       } */
+      temporaryCartList.add(cartList[cartList.length - 1]);
 
       if (selectedTable.save_order_id != null &&
           selectedTable.save_order_id != 0) {
@@ -1794,6 +1795,13 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   selectTable() {
+
+    if (!confirmOrder) {
+      for (var index = 0; index < temporaryCartList.length; index++) {
+        itememovefromCart(temporaryCartList[index]);
+      }
+    }
+
     Navigator.pushNamedAndRemoveUntil(
         context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
         arguments: {"isAssign": false});
@@ -3099,11 +3107,13 @@ class _DashboradPageState extends State<DashboradPage>
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () async {
                       if (permissions.contains(Constant.ADD_ORDER)) {
+                        confirmOrder = true;
                         await sendTokitched(cartList);
                         selectTable();
                       } else {
                         CommonUtils.openPermissionPop(
                             context, Constant.ADD_ORDER, () async {
+                          confirmOrder = true;
                           await sendTokitched(cartList);
                           selectTable();
                         }, () {});
