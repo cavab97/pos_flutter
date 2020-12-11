@@ -977,11 +977,15 @@ class CommunFun {
     return list;
   }
 
-  static getCartData(cartid) async {
+  static getCartData(cartid, [List<MSTCartdetails> cartList]) async {
     List<MST_Cart> cartval = await cartapi.getCurrCartTotals(cartid);
     MST_Cart cart = new MST_Cart();
     if (cartval.length != 0) {
       cart = cartval[0];
+      if (cartList != null && cartList.length > 0) {
+        cart.sub_total = await CommunFun.countSubtotal(cartList, 0);
+        cart.tax = await CommunFun.calculateTax(cart.sub_total);
+      }
       return cart;
     } else {
       return cart;
@@ -1073,6 +1077,8 @@ class CommunFun {
     if (cartItems.length > 0) {
       double selectedITemTotal = 0;
       for (var i = 0; i < cartItems.length; i++) {
+        // print('line 1073');
+        // print(cartItems[i].productPrice);
         var item = cartItems[i];
         selectedITemTotal += item.productPrice;
       }
@@ -1093,6 +1099,22 @@ class CommunFun {
     var branchid = await CommunFun.getbranchId();
     List<BranchTax> taxlists = await branchapi.getTaxList(branchid);
     return taxlists;
+  }
+
+  static calculateTax(subTotal) async {
+    var taxlist = await CommunFun.getTaxs();
+    double taxvalue = 0.00;
+    if (taxlist.length > 0) {
+      for (var i = 0; i < taxlist.length; i++) {
+        var taxlistitem = taxlist[i];
+        var taxval = taxlistitem.rate != null
+            ? subTotal * double.parse(taxlistitem.rate) / 100
+            : 0.0;
+        taxval = double.parse(taxval.toStringAsFixed(2));
+        taxvalue += taxval;
+      }
+    }
+    return taxvalue;
   }
 
   static countTax(subT) async {
@@ -1122,6 +1144,7 @@ class CommunFun {
         totalTax.add(taxmap);
       }
     }
+    //return taxvalue;
     return totalTax;
   }
 

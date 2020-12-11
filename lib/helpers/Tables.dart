@@ -493,6 +493,7 @@ class CreateTables {
         "invoice_no TEXT," +
         "customer_id INTEGER," +
         "tax_percent INTEGER," +
+        "pax INTEGER," +
         "tax_amount REAL," +
         "rounding_amount REAL," +
         "tax_json TEXT," +
@@ -979,7 +980,7 @@ class CreateTables {
         "updated_at INTEGER," +
         "deleted_at INTEGER" +
         ")");
-        
+
     datatables = db.execute("CREATE TABLE table_color ( " +
         "id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
