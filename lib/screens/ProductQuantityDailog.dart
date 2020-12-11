@@ -817,7 +817,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         }
       }
     }
-    widget.onClose();
+    widget.onClose(cartitem);
     Navigator.of(context).pop();
   }
 

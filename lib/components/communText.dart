@@ -1166,9 +1166,10 @@ class CommunFun {
     return printer;
   }
 
-  static addItemToCart(productItem, List<MSTCartdetails> cartItems, MST_Cart allcartData,
-      callback, context) async {
+  static addItemToCart(productItem, List<MSTCartdetails> cartItems,
+      MST_Cart allcartData, callback, context) async {
     taxvalues = 0;
+    print('addItemToCart');
     MST_Cart cart = new MST_Cart();
     SaveOrder orderData = new SaveOrder();
     var branchid = await CommunFun.getbranchId();
@@ -1447,7 +1448,7 @@ class CommunFun {
         context,
         // Branch data
         branchData,
-         totalPax,
+        totalPax,
         // terminal data
         terminalData,
         //Summery Sales data

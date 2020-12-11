@@ -316,36 +316,42 @@ class _DashboradPageState extends State<DashboradPage>
   getCartItem(cartId) async {
     List<MSTCartdetails> cartItem = await CommunFun.getcartDetails(cartId);
     if (cartItem.length > 0) {
-      setState(() {
-        cartList = cartItem;
-        temporaryCartList.add(cartItem);
-      });
-      await countTotals(cartId);
+      if (this.mounted) {
+        setState(() {
+          cartList = cartItem;
+        });
+      }
     }
+
+    //for (var itemInCart in cartItem) {}
+    //temporaryCartList.add(cartItem);
+    await countTotals(cartId);
   }
 
   countTotals(cartId) async {
     MST_Cart cart = await CommunFun.getCartData(cartId, cartList);
 
     Voucher vaocher;
-    if (cart.voucher_id != null) {
+    if (cart.voucher_id != null && cart.voucher_detail != null) {
       var voucherdetail = jsonDecode(cart.voucher_detail);
       vaocher = Voucher.fromJson(voucherdetail);
     }
     taxJson = json.decode(cart.tax_json);
-    setState(() {
-      allcartData = cart;
-      subtotal = cart.sub_total;
-      serviceCharge = cart.serviceCharge == null ? 0.00 : cart.serviceCharge;
-      serviceChargePer =
-          cart.serviceChargePercent == null ? 0 : cart.serviceChargePercent;
-      discount = cart.discount;
-      tax = cart.tax;
-      isWebOrder = cart.source == 1 ? true : false;
-      grandTotal =
-          (subtotal - discount) + tax + serviceCharge; //cart.grand_total;
-      selectedvoucher = vaocher;
-    });
+    if (this.mounted) {
+      setState(() {
+        allcartData = cart;
+        subtotal = cart.sub_total;
+        serviceCharge = cart.serviceCharge == null ? 0.00 : cart.serviceCharge;
+        serviceChargePer =
+            cart.serviceChargePercent == null ? 0 : cart.serviceChargePercent;
+        discount = cart.discount;
+        tax = cart.tax;
+        isWebOrder = cart.source == 1 ? true : false;
+        grandTotal =
+            (subtotal - discount) + tax + serviceCharge; //cart.grand_total;
+        selectedvoucher = vaocher;
+      });
+    }
   }
 
   removeCutomer() async {
@@ -1006,8 +1012,9 @@ class _DashboradPageState extends State<DashboradPage>
                 selproduct: selectedProduct,
                 issetMeal: isSetMeal,
                 cartID: currentCart,
-                onClose: () {
+                onClose: (cartitem) {
                   refreshAfterAction(false);
+                  cartList.add(cartitem);
                 });
           });
     } else {
@@ -1027,7 +1034,8 @@ class _DashboradPageState extends State<DashboradPage>
       if (selectedTable.save_order_id == 0) {
         //selectedTable.save_order_id = saveOid;
       } */
-      print(jsonEncode(cartList));
+      print('addTocartItem');
+      print(cartList[cartList.length - 1].productName);
       if (cartList.length > 0) {
         temporaryCartList.add(cartList[cartList.length - 1]);
       }
@@ -1610,16 +1618,17 @@ class _DashboradPageState extends State<DashboradPage>
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
-        print("taxlistitem");
-        print(taxlist[i].rate);
         var taxval = taxlistitem.rate != null
             ? subtNServ * double.parse(taxlistitem.rate) / 100
             : 0.0;
         taxval = double.parse(taxval.toStringAsFixed(2));
         taxvalue += taxval;
-        setState(() {
-          taxvalues = taxvalue;
-        });
+
+        if (this.mounted) {
+          setState(() {
+            taxvalues = taxvalue;
+          });
+        }
         var taxmap = {
           "id": taxlistitem.id,
           "tax_id": taxlistitem.taxId,
@@ -1638,49 +1647,49 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   itememovefromCart(cartitem) async {
-    try {
-      MST_Cart cart = new MST_Cart();
-      MSTCartdetails cartitemdata = cartitem;
-      var subt = allcartData.sub_total - cartitemdata.productPrice;
-      var taxjson = await countTax(subt);
-      // print(taxjson[0].taxmap.taxAmount);
-      var disc = allcartData.discount != null
-          ? allcartData.discount - cartitemdata.discount
-          : 0;
-      if (cartList.length == 1) {
-        cart = allcartData;
-        cart.sub_total = 0.0;
-        cart.serviceCharge = 0.0;
-        cart.discount = 0.0;
-        cart.total_qty = 0.0;
-        cart.grand_total = 0.0;
-        cart.tax_json = "";
-        cart.voucher_id = 0;
-        cart.voucher_detail = "";
-      } else {
-        cart = allcartData;
-        cart.sub_total = subt;
-        cart.discount = disc;
-        cart.serviceCharge =
-            await CommunFun.countServiceCharge(cart.serviceChargePercent, subt);
-        cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
-        cart.grand_total = (subt - disc) +
-            taxvalues +
-            await CommunFun.countServiceCharge(cart.serviceChargePercent, subt);
+    //try {
+    MST_Cart cart = new MST_Cart();
+    MSTCartdetails cartitemdata = cartitem;
+    var subt = allcartData.sub_total - cartitemdata.productPrice;
+    var taxjson = await countTax(subt);
+    // print(taxjson[0].taxmap.taxAmount);
+    var disc = allcartData.discount != null
+        ? allcartData.discount - cartitemdata.discount
+        : 0;
+    if (cartList.length == 1) {
+      cart = allcartData;
+      cart.sub_total = 0.0;
+      cart.serviceCharge = 0.0;
+      cart.discount = 0.0;
+      cart.total_qty = 0.0;
+      cart.grand_total = 0.0;
+      cart.tax_json = "";
+      cart.voucher_id = 0;
+      cart.voucher_detail = "";
+    } else {
+      cart = allcartData;
+      cart.sub_total = subt;
+      cart.discount = disc;
+      cart.serviceCharge =
+          await CommunFun.countServiceCharge(cart.serviceChargePercent, subt);
+      cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
+      cart.grand_total = (subt - disc) +
+          taxvalues +
+          await CommunFun.countServiceCharge(cart.serviceChargePercent, subt);
 
-        cart.tax_json = json.encode(taxjson);
-        print(json.encode(taxjson));
-      }
-      await cartapi.deleteCartItem(
-          cartitem, currentCart, cart, cartList.length == 1);
-      if (cartitem.isSendKichen == 1) {
-        var deletedlist = [];
-        deletedlist.add(cartitem);
-        //openPrinterPop(deletedlist);
-      }
-      if (cartList.length > 1) {
-        await getCartItem(currentCart);
-      } else {
+      cart.tax_json = json.encode(taxjson);
+    }
+    await cartapi.deleteCartItem(
+        cartitem, currentCart, cart, cartList.length == 1);
+    if (cartitem.isSendKichen == 1) {
+      var deletedlist = [];
+      deletedlist.add(cartitem);
+      //openPrinterPop(deletedlist);
+    }
+    if (cartList.length > 1) {
+      await getCartItem(currentCart);
+    } else {
+      if (this.mounted) {
         setState(() {
           cartList = [];
           grandTotal = 0.0;
@@ -1691,9 +1700,10 @@ class _DashboradPageState extends State<DashboradPage>
           serviceChargePer = 0;
         });
       }
-    } catch (e) {
-      CommunFun.showToast(context, e.message.toString());
     }
+    /*  } catch (e) {
+      CommunFun.showToast(context, e.toString());
+    } */
   }
 
   applyforFocProduct(cartitem) {
@@ -1803,13 +1813,17 @@ class _DashboradPageState extends State<DashboradPage>
     // }
   }
 
-  selectTable() {
+  removeItem() async {
+    print('removeItem ' + DateTime.now().toString());
     for (var index = 0; index < temporaryCartList.length; index++) {
-      itememovefromCart(temporaryCartList[index]);
+      print(temporaryCartList[index].productName);
+      await itememovefromCart(temporaryCartList[index]);
     }
+    print('removeItem ' + DateTime.now().toString());
+  }
 
-    Navigator.pushNamedAndRemoveUntil(
-        context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
+  selectTable() {
+    Navigator.popAndPushNamed(context, Constant.SelectTableScreen,
         arguments: {"isAssign": false});
   }
 
@@ -3285,6 +3299,7 @@ class _DashboradPageState extends State<DashboradPage>
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
+                removeItem();
                 selectTable();
               },
               child: Row(
@@ -3455,154 +3470,160 @@ class _DashboradPageState extends State<DashboradPage>
       // itemExtent:60.0,
       padding: EdgeInsets.only(bottom: 50),
       children: cartList.map((cart) {
-        return Slidable(
-          key: Key(cart.id.toString()),
-          controller: slidableController,
-          actionPane: SlidableDrawerActionPane(),
-          actionExtentRatio: 0.15,
-          direction: Axis.horizontal,
-          child: GestureDetector(
-            onTap: () => setState(() {
-              if (currentQuantity > 0) {
-                currentProductQuantity = cart.productQty;
-                cart.productQty = currentQuantity.toDouble();
-                cart.productPrice = currentQuantity * cart.productNetPrice;
-                currentQuantity = 0;
-              } else if (cart.id == itemSelectedIndex.id) {
-                itemSelectedIndex = new MSTCartdetails();
-              } else {
-                itemSelectedIndex = cart;
-              }
-            }),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-              color:
-                  // cart.id == itemSelectedIndex.id ? Colors.deepOrange[400] :
-                  Colors.transparent,
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        return cart == null
+            ? SizedBox()
+            : Slidable(
+                key: Key(cart.id.toString()),
+                controller: slidableController,
+                actionPane: SlidableDrawerActionPane(),
+                actionExtentRatio: 0.15,
+                direction: Axis.horizontal,
+                child: GestureDetector(
+                  onTap: () => setState(() {
+                    if (currentQuantity > 0) {
+                      currentProductQuantity = cart.productQty;
+                      cart.productQty = currentQuantity.toDouble();
+                      cart.productPrice =
+                          currentQuantity * cart.productNetPrice;
+                      currentQuantity = 0;
+                    } else if (cart.id == itemSelectedIndex.id) {
+                      itemSelectedIndex = new MSTCartdetails();
+                    } else {
+                      itemSelectedIndex = cart;
+                    }
+                  }),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                    color:
+                        // cart.id == itemSelectedIndex.id ? Colors.deepOrange[400] :
+                        Colors.transparent,
+                    child: Row(
                       children: <Widget>[
-                        Text(cart.productName.toUpperCase(),
-                            maxLines: 2,
-                            overflow: TextOverflow.clip,
-                            style: Styles.greysmall()),
-                        cart.attrName != null
-                            ? Text(" (" + cart.attrName + ") ",
-                                maxLines: 2,
-                                overflow: TextOverflow.clip,
-                                style: Styles.greysmall())
-                            : SizedBox(),
-                        cart.modiName != null
-                            ? Text(" (" + cart.modiName + ") ",
-                                maxLines: 2,
-                                overflow: TextOverflow.clip,
-                                style: Styles.greysmall())
-                            : SizedBox(),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(cart.productName.toUpperCase(),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.clip,
+                                  style: Styles.greysmall()),
+                              cart.attrName != null
+                                  ? Text(" (" + cart.attrName + ") ",
+                                      maxLines: 2,
+                                      overflow: TextOverflow.clip,
+                                      style: Styles.greysmall())
+                                  : SizedBox(),
+                              cart.modiName != null
+                                  ? Text(" (" + cart.modiName + ") ",
+                                      maxLines: 2,
+                                      overflow: TextOverflow.clip,
+                                      style: Styles.greysmall())
+                                  : SizedBox(),
+                            ],
+                          ),
+                          flex: 6,
+                        ),
+                        Expanded(
+                          child: Text(
+                            cart.productQty.toInt().toString(),
+                            style: Styles.greysmall(),
+                            textAlign: TextAlign.end,
+                          ),
+                          flex: 1,
+                        ),
+                        Expanded(
+                          child: Text(
+                            cart.productPrice.toStringAsFixed(2),
+                            style: Styles.greysmall(),
+                            textAlign: TextAlign.end,
+                          ),
+                          flex: 2,
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              if (permissions.contains(Constant.DELETE_ITEM)) {
+                                itememovefromCart(cart);
+                              } else {
+                                CommonUtils.openPermissionPop(
+                                    context, Constant.DELETE_ITEM, () {
+                                  itememovefromCart(cart);
+                                  setState(() {
+                                    itemSelectedIndex = new MSTCartdetails();
+                                  });
+                                }, () {});
+                              }
+                            },
+                            child: Icon(
+                              Icons.close,
+                              color: Colors.red,
+                              size: 30,
+                            ),
+                          ),
+                          flex: 1,
+                        ),
                       ],
                     ),
-                    flex: 6,
                   ),
-                  Expanded(
-                    child: Text(
-                      cart.productQty.toInt().toString(),
-                      style: Styles.greysmall(),
-                      textAlign: TextAlign.end,
-                    ),
-                    flex: 1,
-                  ),
-                  Expanded(
-                    child: Text(
-                      cart.productPrice.toStringAsFixed(2),
-                      style: Styles.greysmall(),
-                      textAlign: TextAlign.end,
-                    ),
-                    flex: 2,
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        if (permissions.contains(Constant.DELETE_ITEM)) {
-                          itememovefromCart(cart);
-                        } else {
-                          CommonUtils.openPermissionPop(
-                              context, Constant.DELETE_ITEM, () {
-                            itememovefromCart(cart);
-                            setState(() {
-                              itemSelectedIndex = new MSTCartdetails();
-                            });
-                          }, () {});
-                        }
-                      },
-                      child: Icon(
-                        Icons.close,
-                        color: Colors.red,
-                        size: 30,
-                      ),
-                    ),
-                    flex: 1,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          secondaryActions: isWebOrder
-              ? <Widget>[
-                  cart.issetMeal == 0
-                      ? IconSlideAction(
-                          color: Colors.blueAccent,
-                          icon: Icons.free_breakfast,
+                ),
+                secondaryActions: isWebOrder
+                    ? <Widget>[
+                        cart.issetMeal == 0
+                            ? IconSlideAction(
+                                color: Colors.blueAccent,
+                                icon: Icons.free_breakfast,
+                                onTap: () {
+                                  if (permissions
+                                      .contains(Constant.EDIT_ITEM)) {
+                                    applyforFocProduct(cart);
+                                  } else {
+                                    CommonUtils.openPermissionPop(
+                                        context, Constant.EDIT_ITEM, () {
+                                      applyforFocProduct(cart);
+                                    }, () {});
+                                  }
+                                },
+                              )
+                            : SizedBox(),
+                      ]
+                    : <Widget>[
+                        cart.issetMeal == 0
+                            ? IconSlideAction(
+                                color: Colors.blueAccent,
+                                icon: Icons.free_breakfast,
+                                onTap: () {
+                                  if (permissions
+                                      .contains(Constant.EDIT_ITEM)) {
+                                    applyforFocProduct(cart);
+                                  } else {
+                                    CommonUtils.openPermissionPop(
+                                        context, Constant.EDIT_ITEM, () {
+                                      applyforFocProduct(cart);
+                                    }, () {});
+                                  }
+                                },
+                              )
+                            : SizedBox(),
+                        IconSlideAction(
+                          color: Colors.black45,
+                          icon: Icons.edit,
                           onTap: () {
-                            if (permissions.contains(Constant.EDIT_ITEM)) {
-                              applyforFocProduct(cart);
+                            if (cart.isFocProduct != 1) {
+                              if (permissions.contains(Constant.EDIT_ORDER)) {
+                                editCartItem(cart);
+                              } else {
+                                CommonUtils.openPermissionPop(
+                                    context, Constant.EDIT_ORDER, () {
+                                  editCartItem(cart);
+                                }, () {});
+                              }
                             } else {
-                              CommonUtils.openPermissionPop(
-                                  context, Constant.EDIT_ITEM, () {
-                                applyforFocProduct(cart);
-                              }, () {});
+                              CommunFun.showToast(
+                                  context, Strings.foc_product_msg);
                             }
                           },
-                        )
-                      : SizedBox(),
-                ]
-              : <Widget>[
-                  cart.issetMeal == 0
-                      ? IconSlideAction(
-                          color: Colors.blueAccent,
-                          icon: Icons.free_breakfast,
-                          onTap: () {
-                            if (permissions.contains(Constant.EDIT_ITEM)) {
-                              applyforFocProduct(cart);
-                            } else {
-                              CommonUtils.openPermissionPop(
-                                  context, Constant.EDIT_ITEM, () {
-                                applyforFocProduct(cart);
-                              }, () {});
-                            }
-                          },
-                        )
-                      : SizedBox(),
-                  IconSlideAction(
-                    color: Colors.black45,
-                    icon: Icons.edit,
-                    onTap: () {
-                      if (cart.isFocProduct != 1) {
-                        if (permissions.contains(Constant.EDIT_ORDER)) {
-                          editCartItem(cart);
-                        } else {
-                          CommonUtils.openPermissionPop(
-                              context, Constant.EDIT_ORDER, () {
-                            editCartItem(cart);
-                          }, () {});
-                        }
-                      } else {
-                        CommunFun.showToast(context, Strings.foc_product_msg);
-                      }
-                    },
-                  ),
-                  /*  IconSlideAction(
+                        ),
+                        /*  IconSlideAction(
                     color: Colors.red,
                     icon: Icons.delete_outline,
                     onTap: () {
@@ -3616,8 +3637,8 @@ class _DashboradPageState extends State<DashboradPage>
                       }
                     },
                   ) */
-                ],
-        );
+                      ],
+              );
       }).toList(),
     );
     final totalPriceTable = Padding(
