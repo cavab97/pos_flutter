@@ -1595,16 +1595,19 @@ class _DashboradPageState extends State<DashboradPage>
 
   countTax(subT) async {
     await getTaxs();
+    MST_Cart cart = new MST_Cart();
+    var subtNServ = subT +
+        await CommunFun.countServiceCharge(cart.serviceChargePercent, subT);
+    print(subtNServ);
     var totalTax = [];
     double taxvalue = 0.00;
     if (taxlist.length > 0) {
-      print("hi");
       for (var i = 0; i < taxlist.length; i++) {
-        print("hi");
-        print(taxlist.length);
         var taxlistitem = taxlist[i];
+        print("taxlistitem");
+        print(taxlist[i].rate);
         var taxval = taxlistitem.rate != null
-            ? subT * double.parse(taxlistitem.rate) / 100
+            ? subtNServ * double.parse(taxlistitem.rate) / 100
             : 0.0;
         taxval = double.parse(taxval.toStringAsFixed(2));
         taxvalue += taxval;
@@ -1659,7 +1662,10 @@ class _DashboradPageState extends State<DashboradPage>
         cart.serviceCharge =
             await CommunFun.countServiceCharge(cart.serviceChargePercent, subt);
         cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
-        cart.grand_total = (subt - disc) + taxvalues;
+        cart.grand_total = (subt - disc) +
+            taxvalues +
+            await CommunFun.countServiceCharge(cart.serviceChargePercent, subt);
+
         cart.tax_json = json.encode(taxjson);
         print(json.encode(taxjson));
       }

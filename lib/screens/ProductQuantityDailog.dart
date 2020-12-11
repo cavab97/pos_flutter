@@ -625,6 +625,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   countTax(subT) async {
+    Table_order tableData = await CommunFun.getTableData();
+    var subtNServ = subT +
+        await CommunFun.countServiceCharge(tableData.service_charge, subT);
+    print(subtNServ);
     var totalTax = [];
     double taxvalue = taxvalues;
     if (taxlist.length > 0) {
@@ -632,7 +636,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         var taxlistitem = taxlist[i];
         // List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
         var taxval = taxlistitem.rate != null
-            ? subT * double.parse(taxlistitem.rate) / 100
+            ? subtNServ * double.parse(taxlistitem.rate) / 100
             : 0.0;
         taxval = double.parse(taxval.toStringAsFixed(2));
         taxvalue += taxval;
@@ -1407,53 +1411,53 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       height: SizeConfig.safeBlockVertical * 5,
       width: MediaQuery.of(context).size.width / 12,
       child: RaisedButton(
-      onPressed: () {
-        if (attributeList.length > 0) {
-          if (selectedAttr.length > 0) {
+        onPressed: () {
+          if (attributeList.length > 0) {
+            if (selectedAttr.length > 0) {
+              if (isEditing) {
+                updateCartItem();
+              } else {
+                produtAddTocart();
+              }
+            } else {
+              CommunFun.showToast(context, "Please select " + attributeTitle);
+            }
+          } else {
             if (isEditing) {
               updateCartItem();
             } else {
               produtAddTocart();
             }
-          } else {
-            CommunFun.showToast(context, "Please select " + attributeTitle);
           }
-        } else {
-          if (isEditing) {
-            updateCartItem();
-          } else {
-            produtAddTocart();
-          }
-        }
-      },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          !isEditing
-              ? Icon(
-                  Icons.add_circle_outline,
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            !isEditing
+                ? Icon(
+                    Icons.add_circle_outline,
+                    color: Colors.white,
+                    size: SizeConfig.safeBlockVertical * 3,
+                  )
+                : Icon(
+                    Icons.edit,
+                    color: Colors.white,
+                    size: SizeConfig.safeBlockVertical * 3,
+                  ),
+            SizedBox(width: 5),
+            Text(isEditing ? Strings.update : Strings.add,
+                style: TextStyle(
                   color: Colors.white,
-                  size: SizeConfig.safeBlockVertical * 3,
-                )
-              : Icon(
-                  Icons.edit,
-                  color: Colors.white,
-                  size: SizeConfig.safeBlockVertical * 3,
-                ),
-          SizedBox(width: 5),
-          Text(isEditing ? Strings.update : Strings.add,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: SizeConfig.safeBlockVertical * 3,
-              )),
-        ],
+                  fontSize: SizeConfig.safeBlockVertical * 3,
+                )),
+          ],
+        ),
+        color: Colors.deepOrange,
+        textColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50.0),
+        ),
       ),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50.0),
-      ),
-    ),
     );
   }
 }

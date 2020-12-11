@@ -53,7 +53,7 @@ class BranchList {
       var tax = await db.rawQuery(
           "SELECT branch_tax.*,tax.code From branch_tax " +
               " Left join  tax on tax.tax_id = branch_tax.tax_id " +
-              " WHERE branch_id =" +
+              " WHERE branch_tax.status = 1 AND branch_id =" +
               branchid.toString());
       list =
           tax.isNotEmpty ? tax.map((c) => BranchTax.fromJson(c)).toList() : [];
@@ -78,7 +78,7 @@ class BranchList {
       var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
       List<Terminal> list =
           res.length > 0 ? res.map((c) => Terminal.fromJson(c)).toList() : [];
-    
+
       if (list.length > 0) {
         terminalDat = list[0];
       }
