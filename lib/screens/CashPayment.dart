@@ -361,13 +361,6 @@ class _CashPaymentState extends State<CashPaymentPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Row(
-                    children: <Widget>[
-                      _totalbutton(widget.ammountext.toStringAsFixed(2), () {
-                        widget.onEnter(widget.ammountext.toString());
-                      }),
-                    ],
-                  ),
-                  Row(
                     // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
                       _button("1", () {
@@ -437,6 +430,13 @@ class _CashPaymentState extends State<CashPaymentPage> {
                       widget.onEnter(currentNumber);
                     })
                   ]),
+                  Row(
+                    children: <Widget>[
+                      _totalbutton(widget.ammountext.toStringAsFixed(2), () {
+                        widget.onEnter(widget.ammountext.toString());
+                      }),
+                    ],
+                  ),
                 ],
               ),
             )
