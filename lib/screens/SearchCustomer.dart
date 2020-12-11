@@ -101,6 +101,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           ),
           Positioned(
             left: 15,
+            top: 10,
             //  top: 0,
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -138,8 +139,8 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
 
   Widget closeButton(context) {
     return Positioned(
-        top: -30,
-        right: -20,
+        top: 0,
+        right: 0,
         child: GestureDetector(
           onTap: () {
             Navigator.of(context).pop();

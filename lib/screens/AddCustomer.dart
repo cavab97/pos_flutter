@@ -222,14 +222,14 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
           ),
           Positioned(
               left: 15,
-              top: 0,
+              top: 10,
               child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     RaisedButton(
                       padding:
-                          EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 0),
+                          EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
                       onPressed: () {
                         addCustomer();
                       },
@@ -250,8 +250,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
 
   Widget closeButton(context) {
     return Positioned(
-      top: -30,
-      right: -20,
+      top: 0,
+      right: 0,
       child: GestureDetector(
         onTap: () {
           Navigator.of(context).pop();
