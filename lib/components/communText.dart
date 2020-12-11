@@ -13,11 +13,13 @@ import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
+import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
@@ -44,6 +46,7 @@ import 'package:intl/intl.dart';
 import 'package:wifi_ip/wifi_ip.dart';
 import '../helpers/LocalAPI/PrinterList.dart';
 import '../helpers/LocalAPI/TablesList.dart';
+import '../models/MST_Cart.dart';
 
 DatabaseHelper databaseHelper = DatabaseHelper();
 Cartlist cartapi = new Cartlist();
@@ -1151,30 +1154,31 @@ class CommunFun {
         : 0.00;
   }
 
-  static getPrinter(context, productItem) async {
+  static getPrinter(productItem) async {
     Printer printer = new Printer();
-    List<Printer> printerlist = await printerList.getPrinterForAddCartProduct(
-        context, productItem.productId.toString());
+    /* List<Printer> printerlist = await printerList.getPrinterForAddCartProduct(
+        context, productItem.productId.toString()); */
+    List<Printer> printerlist =
+        await localAPI.getPrinter(productItem.productId.toString());
     if (printerlist.length > 0) {
       printer = printerlist[0];
     }
     return printer;
   }
 
-  static addItemToCart(productItem, List<MSTCartdetails> cartItems, allcartData,
+  static addItemToCart(productItem, List<MSTCartdetails> cartItems, MST_Cart allcartData,
       callback, context) async {
     taxvalues = 0;
-    OrdersList orderApi = new OrdersList();
     MST_Cart cart = new MST_Cart();
+    SaveOrder orderData = new SaveOrder();
     var branchid = await CommunFun.getbranchId();
     Table_order table = await CommunFun.getTableData();
     User loginUser = await CommunFun.getuserDetails();
     Customer customerData = await CommunFun.getCustomerData();
-    Printer printer = await CommunFun.getPrinter(context, productItem);
-    Cartlist cartlist = new Cartlist();
+    Printer printer = await CommunFun.getPrinter(productItem);
     bool isEditing = false;
     MSTCartdetails sameitem;
-    var contain = cartItems
+    /* var contain = cartItems
         .where((element) => element.productId == productItem.productId);
     if (contain.isNotEmpty) {
       isEditing = true;
@@ -1183,14 +1187,14 @@ class CommunFun {
           .map((i) => MSTCartdetails.fromJson(i))
           .toList();
       sameitem = myModels[0];
-    }
+    } */
     if (productItem.hasInventory == 1) {
       var qty = 1.0;
       if (isEditing) {
         qty = sameitem.productQty + qty;
       }
       List<ProductStoreInventory> cartval =
-          await orderApi.checkItemAvailableinStore(productItem.productId);
+          await localAPI.checkItemAvailableinStore(productItem.productId);
       if (cartval.length > 0) {
         double storeqty = cartval[0].qty;
         if (storeqty < qty) {
@@ -1211,12 +1215,6 @@ class CommunFun {
     var totalTax = await CommunFun.countTax(subtotal);
     var grandTotal = await CommunFun.countGrandtotal(
         subtotal, serviceCharge, taxvalues, disc);
-    if (allcartData != null) {
-      cart.id = allcartData.id;
-      cart.discount_type = allcartData.discount_type;
-      cart.voucher_detail = allcartData.voucher_detail;
-      cart.voucher_id = cart.voucher_id;
-    }
     cart.user_id = customerData.customerId;
     cart.branch_id = int.parse(branchid);
     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
@@ -1224,19 +1222,33 @@ class CommunFun {
     cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
     cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
     cart.table_id = table.table_id;
+    cart.discount_type = allcartData != null ? allcartData.discount_type : 0;
     cart.total_qty = qty;
     cart.tax = double.parse(taxvalues.toStringAsFixed(2));
     cart.source = 2;
     cart.tax_json = json.encode(totalTax);
     cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
     cart.customer_terminal = customerData != null ? customerData.terminalId : 0;
-    cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    if (!isEditing) {
+      cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    }
     cart.created_by = loginUser.id;
     cart.localID = await CommunFun.getLocalID();
-    var cartid = await cartlist.addcart(context, cart);
-    if (allcartData == null) {
-      await insertTableData(table, cartid, context);
+    if (allcartData != null) {
+      cart.voucher_detail = allcartData.voucher_detail;
+      cart.voucher_id = allcartData.voucher_id;
     }
+    if (!isEditing) {
+      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    }
+    orderData.numberofPax = table != null ? table.number_of_pax : 0;
+    orderData.isTableOrder = table != null ? 1 : 0;
+    var cartid = await localAPI.insertItemTocart(
+        allcartData != null ? allcartData.id : null,
+        cart,
+        productItem,
+        orderData,
+        table.table_id);
     ProductDetails cartItemproduct = new ProductDetails();
     cartItemproduct = productItem;
 
@@ -1267,24 +1279,9 @@ class CommunFun {
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = await CommunFun.getLocalID();
-    var detailID = await cartlist.addintoCartDetails(context, cartdetails);
-
+    var detailID = await localAPI.addintoCartDetails(cartdetails);
+    //print(detailID);
     callback();
-  }
-
-  static insertTableData(tableData, cartid, context) async {
-    SaveOrder orderData = new SaveOrder();
-    Table_order tableorder = new Table_order();
-    Cartlist cartlist = new Cartlist();
-    TablesList tableList = new TablesList();
-    orderData.numberofPax = tableData != null ? tableData.number_of_pax : 0;
-    orderData.isTableOrder = tableData != null ? 1 : 0;
-    orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-    orderData.cartId = cartid;
-    var saveOid = await cartlist.addSaveOrder(orderData, tableData.table_id);
-    tableorder = tableData;
-    tableorder.save_order_id = saveOid;
-    var tableid = await tableList.insertTableOrder(context, tableorder);
   }
 
   static getCustomer() async {
@@ -1373,7 +1370,7 @@ class CommunFun {
     Shift shifittem = new Shift();
     var branchid = await CommunFun.getbranchId();
     var terminalID = await CommunFun.getTeminalKey();
-    //List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
+    List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
     var grosssale = 0.00;
     var netsale = 0.00;
     var discountval = 0.00;
@@ -1389,87 +1386,89 @@ class CommunFun {
     double payInAmmount = 0.00;
     double payOutAmmount = 0.00;
     double expectedVal = 0.00;
+    int totalPax = 0;
 
     // Summery
-    // if (ordersList.length > 0) {
-    //   for (var i = 0; i < ordersList.length; i++) {
-    //     Orders order = ordersList[i];
-    //     grosssale += order.sub_total;
-    //     refundval += 0;
-    //     netsale = grosssale - refundval;
-    //     taxval += order.tax_amount;
-    //     textService += order.serviceCharge;
-    //     discountval += order.voucher_amount != null ? order.voucher_amount : 0;
-    //     totalRend = (netsale + taxval + textService) - discountval;
-    //   }
-    // }
+    if (ordersList.length > 0) {
+      for (var i = 0; i < ordersList.length; i++) {
+        Orders order = ordersList[i];
+        grosssale += order.sub_total;
+        refundval += 0;
+        netsale = grosssale - refundval;
+        taxval += order.tax_amount;
+        totalPax += order.pax;
+        textService += order.serviceCharge;
+        discountval += order.voucher_amount != null ? order.voucher_amount : 0;
+        totalRend = (netsale + taxval + textService) - discountval;
+      }
+    }
 
-    // // cash drawer summery
+    // cash drawer summery
 
-    // if (shiftid != null) {
-    //   List<Shift> shift = await localAPI.getShiftData(shiftid);
-    //   if (shift.length > 0) {
-    //     shifittem = shift[0];
-    //     //statringAmount = shifittem.startAmount !=nu shifittem.startAmount.toDouble();
-    //   }
-    // }
-    // List<Drawerdata> result =
-    //     await localAPI.getPayinOutammount(shifittem.appId);
-    // if (result.length > 0) {
-    //   var drawerAmm = 0.00;
-    //   for (var i = 0; i < result.length; i++) {
-    //     Drawerdata drawer = result[i];
-    //     if (drawer.amount != null) {
-    //       drawerAmm += drawer.amount;
-    //       cashSale += drawer.amount;
-    //       cashDeposit = 0.00;
-    //       cashRefund += drawer.isAmountIn == 0 ? drawer.amount : 0.00;
-    //       cashRounding += 0.00;
-    //       payInAmmount += drawer.isAmountIn == 1 ? drawer.amount : 0.00;
-    //       payOutAmmount += drawer.isAmountIn == 2 ? drawer.amount : 0.00;
-    //     }
-    //   }
+    if (shiftid != null) {
+      List<Shift> shift = await localAPI.getShiftData(shiftid);
+      if (shift.length > 0) {
+        shifittem = shift[0];
+        //statringAmount = shifittem.startAmount !=nu shifittem.startAmount.toDouble();
+      }
+    }
+    List<Drawerdata> result =
+        await localAPI.getPayinOutammount(shifittem.appId);
+    if (result.length > 0) {
+      var drawerAmm = 0.00;
+      for (var i = 0; i < result.length; i++) {
+        Drawerdata drawer = result[i];
+        if (drawer.amount != null) {
+          drawerAmm += drawer.amount;
+          cashSale += drawer.amount;
+          cashDeposit = 0.00;
+          cashRefund += drawer.isAmountIn == 0 ? drawer.amount : 0.00;
+          cashRounding += 0.00;
+          payInAmmount += drawer.isAmountIn == 1 ? drawer.amount : 0.00;
+          payOutAmmount += drawer.isAmountIn == 2 ? drawer.amount : 0.00;
+        }
+      }
+      expectedVal = drawerAmm;
+    }
 
-    //   expectedVal = drawerAmm;
-    // }
+    /// Payment summery
+    dynamic payments = await localAPI.getTotalPayment(terminalID, branchid);
+    List<Payments> paymentMethods = payments["payment_method"];
+    List<OrderPayment> orderPayments = payments["payments"];
+    // branch Data
+    var branchID = await getbranchId();
+    Branch branchData = await localAPI.getBranchData(branchID);
 
-    // /// Payment summery
-    // dynamic payments = await localAPI.getTotalPayment(terminalID, branchid);
-    // List<Payments> paymentMethods = payments["payment_method"];
-    // List<OrderPayment> orderPayments = payments["payments"];
-    // // branch Data
-    // var branchID = await getbranchId();
-    // Branch branchData = await localAPI.getBranchData(branchID);
+    // terminal Data
+    Terminal terminalData = await localAPI.getTerminalDetails(terminalID);
 
-    // // terminal Data
-    // Terminal terminalData = await localAPI.getTerminalDetails(terminalID);
-
-    // printKOT.shiftReportPrint(
-    //     printerIP,
-    //     context,
-    //     // Branch data
-    //     branchData,
-    //     // terminal data
-    //     terminalData,
-    //     //Summery Sales data
-    //     grosssale,
-    //     refundval,
-    //     discountval,
-    //     netsale,
-    //     taxval,
-    //     textService,
-    //     totalRend,
-    //     // Drawer Data
-    //     shifittem,
-    //     cashSale,
-    //     cashDeposit,
-    //     cashRefund,
-    //     cashRounding,
-    //     payInAmmount,
-    //     payOutAmmount,
-    //     expectedVal,
-    //     // Paymemts Data
-    //     orderPayments,
-    //     paymentMethods);
+    printKOT.shiftReportPrint(
+        printerIP,
+        context,
+        // Branch data
+        branchData,
+         totalPax,
+        // terminal data
+        terminalData,
+        //Summery Sales data
+        grosssale,
+        refundval,
+        discountval,
+        netsale,
+        taxval,
+        textService,
+        totalRend,
+        // Drawer Data
+        shifittem,
+        cashSale,
+        cashDeposit,
+        cashRefund,
+        cashRounding,
+        payInAmmount,
+        payOutAmmount,
+        expectedVal,
+        // Paymemts Data
+        orderPayments,
+        paymentMethods);
   }
 }
