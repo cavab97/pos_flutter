@@ -3723,7 +3723,7 @@ class _DashboradPageState extends State<DashboradPage>
               children: <Widget>[
                 Text(Strings.grand_total, style: Styles.darkBlue()),
                 Text(
-                  grandTotal.toStringAsFixed(2),
+                  CommunFun.checkRoundData(grandTotal.toStringAsFixed(2)),
                   style: Styles.darkBlue(),
                 ),
               ],
