@@ -979,9 +979,10 @@ class CommunFun {
     MST_Cart cart = new MST_Cart();
     if (cartval.length != 0) {
       cart = cartval[0];
-      if (cartList.length > 0)
+      if (cartList != null && cartList.length > 0) {
         cart.sub_total = await CommunFun.countSubtotal(cartList, 0);
-      cart.tax = await CommunFun.countTax(cart.sub_total);
+        cart.tax = await CommunFun.calculateTax(cart.sub_total);
+      }
       return cart;
     } else {
       return cart;
@@ -1097,6 +1098,22 @@ class CommunFun {
     return taxlists;
   }
 
+  static calculateTax(subTotal) async {
+    var taxlist = await CommunFun.getTaxs();
+    double taxvalue = 0.00;
+    if (taxlist.length > 0) {
+      for (var i = 0; i < taxlist.length; i++) {
+        var taxlistitem = taxlist[i];
+        var taxval = taxlistitem.rate != null
+            ? subTotal * double.parse(taxlistitem.rate) / 100
+            : 0.0;
+        taxval = double.parse(taxval.toStringAsFixed(2));
+        taxvalue += taxval;
+      }
+    }
+    return taxvalue;
+  }
+
   static countTax(subT) async {
     var taxlist = await CommunFun.getTaxs();
     var totalTax = [];
@@ -1124,6 +1141,7 @@ class CommunFun {
         totalTax.add(taxmap);
       }
     }
+    //return taxvalue;
     return totalTax;
   }
 
