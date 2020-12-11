@@ -407,7 +407,8 @@ class _DashboradPageState extends State<DashboradPage>
 
     switch (choice) {
       case 0:
-        selectTable();
+        //selectTable();
+        opneShowAddCustomerDailog();
         break;
       case 1:
         closeTable();
@@ -2678,29 +2679,29 @@ class _DashboradPageState extends State<DashboradPage>
         padding: EdgeInsets.all(0),
         icon: Icon(Icons.arrow_drop_down,
             color: Colors.white, size: SizeConfig.safeBlockVertical * 5),
-        offset: Offset(0, 100),
+        offset: Offset(0, 30), //100
         // onSelected: 0,
         onSelected: selectOption,
         itemBuilder: (BuildContext context) => [
-              /* PopupMenuItem(
-                enabled: isShiftOpen ? true : false,
+              PopupMenuItem(
+                enabled: true,
                 value: 0,
                 child: Padding(
                   padding: EdgeInsets.all(10),
                   child: Row(
                     children: <Widget>[
                       Icon(
-                        Icons.select_all,
+                        Icons.person_add,
                         color: Colors.black,
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                       SizedBox(width: 15),
-                      Text(Strings.select_table,
+                      Text(Strings.btn_Add_customer,
                           style: Styles.communBlacksmall()),
                     ],
                   ),
                 ),
-              ), */
+              ), 
               PopupMenuItem(
                 enabled: isTableSelected ? true : false,
                 value: 1,

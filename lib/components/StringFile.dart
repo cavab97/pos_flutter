@@ -27,7 +27,7 @@ class Strings {
   static String grand_total = "GRAND TOTAL";
   static String rounding_ammount = "Rounding Amount";
   static String search_bar_text = "Search product here...";
-  static String btn_Add_customer = "Customer";
+  static String btn_Add_customer = "Add Customer";
   static String select_customer = "Select Customer";
   static String pin_Number = "PIN Number";
   static String pin_validation_message = "Please enter your PIN number";
