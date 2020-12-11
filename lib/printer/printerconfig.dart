@@ -1540,6 +1540,7 @@ class PrintReceipt {
 
   Future<Ticket> shiftReportReceipt(
       Branch branchData,
+      int totalPax,
       Terminal terminalData,
       var grosssale,
       var refundval,
@@ -1678,7 +1679,7 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: " : " + "30",
+          text: " : " + totalPax.toString(),
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -1822,7 +1823,7 @@ class PrintReceipt {
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
     /*For Pay In 48 char*/
-    String payIn = printColumnWitSpace(38, "Cash In", false);
+    String payIn = printColumnWitSpace(38, "Pay In", false);
     String payInAmt =
         printColumnWitSpace(10, payInAmount.toStringAsFixed(2), true);
     ticket.text("$payIn$payInAmt",
@@ -1830,7 +1831,7 @@ class PrintReceipt {
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
     /*For Pay Out 48 char*/
-    String payOut = printColumnWitSpace(38, "Cash Out", false);
+    String payOut = printColumnWitSpace(38, "Pay Out", false);
     String payOutAmt =
         printColumnWitSpace(10, payOutAmmount.toStringAsFixed(2), true);
     ticket.text("$payOut$payOutAmt",
@@ -1937,6 +1938,24 @@ class PrintReceipt {
             bold: false,
           )),
     ]);
+    ticket.row([
+      PosColumn(
+          text: "Avg Per Pax : ",
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: (netsale / totalPax).toStringAsFixed(2),
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
 
     ticket.emptyLines(1);
     ticket.feed(2);
@@ -1948,6 +1967,7 @@ class PrintReceipt {
     String printerIp,
     BuildContext ctx,
     Branch branchData,
+    int totalPax,
     Terminal terminalData,
     var grosssale,
     var refundval,
@@ -1973,6 +1993,7 @@ class PrintReceipt {
     final PosPrintResult res = await printerManager.printTicket(
         await shiftReportReceipt(
             branchData,
+            totalPax,
             terminalData,
             grosssale,
             refundval,

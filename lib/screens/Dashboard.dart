@@ -133,11 +133,13 @@ class _DashboradPageState extends State<DashboradPage>
   List quantity = [2, 3, 4, 5, 6, 7, 8, 9];
   List categoryFirstRow = [];
   List categorySecondRow = [];
-  List temporaryCartList = [];
+  List temporaryCartList = [];  
   var selectedCategory;
   var expandableController;
   var currentQuantity = 1;
+  double currentProductQuantity = 0.0;
   MSTCartdetails itemSelectedIndex = new MSTCartdetails();
+  bool confirmOrder = false;
 
   var vaucher;
   @override
@@ -180,12 +182,12 @@ class _DashboradPageState extends State<DashboradPage>
     var isInit = await CommunFun.checkDatabaseExit();
     if (isInit == true) {
       await getCategoryList();
-      await checkidTableSelected();
+      //await checkidTableSelected();
       await getAllPrinter();
     } else {
       await databaseHelper.initializeDatabase();
       await getCategoryList();
-      await checkidTableSelected();
+      //await checkidTableSelected();
     }
     var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
     setState(() {
@@ -255,7 +257,7 @@ class _DashboradPageState extends State<DashboradPage>
       var tableddata = json.decode(tableid);
       Table_order table = Table_order.fromJson(tableddata);
       List<TablesDetails> tabledata =
-          await tableListAPI.getTableDetails(branchid, table.table_id);
+          await localAPI.getTableData(branchid, table.table_id);
       table.save_order_id = tabledata[0].saveorderid;
 
       setState(() {
@@ -293,7 +295,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   getCurrentCart() async {
     List<SaveOrder> currentOrder =
-        await cartlistAPI.getSaveOrder(selectedTable.save_order_id);
+        await localAPI.getSaveOrder(selectedTable.save_order_id);
     if (currentOrder.length != 0) {
       setState(() {
         currentCart = currentOrder[0].cartId;
@@ -871,6 +873,8 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   sendTokitched(itemList) async {
+    print(temporaryCartList);
+
     String ids = "";
     var list = [];
     for (var i = 0; i < itemList.length; i++) {
@@ -1012,20 +1016,20 @@ class _DashboradPageState extends State<DashboradPage>
       /* setState(() {
         isScreenLoad = false;
       }); */
-      temporaryCartList.add(selectedProduct);
-      print(json.encode(temporaryCartList));
       await addTocartItem(selectedProduct);
     }
   }
 
   addTocartItem(selectedProduct) async {
     await CommunFun.addItemToCart(selectedProduct, cartList, allcartData, () {
-      Cartlist cart_list = new Cartlist();
+      /* Cartlist cart_list = new Cartlist();
       var cartData = cart_list.addcart(context, allcartData); // Insert Cart
       //int saveOid = insertTableData(selectedTable, cartData);
       if (selectedTable.save_order_id == 0) {
         //selectedTable.save_order_id = saveOid;
-      }
+      } */
+      temporaryCartList.add(cartList[cartList.length - 1]);
+
       if (selectedTable.save_order_id != null &&
           selectedTable.save_order_id != 0) {
         getCurrentCart();
@@ -1580,16 +1584,14 @@ class _DashboradPageState extends State<DashboradPage>
   getTaxs() async {
     // List<BranchTax> taxlist = [];
     List<BranchTax> taxlists = await CommunFun.getbranchTax();
-    print(taxlists);
+  
     if (taxlists.length > 0) {
       setState(() {
         taxlist = taxlists;
       });
       taxlist = taxlists;
-      print(taxlist);
-    } else {
-      print("Error2");
-    }
+      //print(taxlist);
+    } 
     // return taxlist;
   }
 
@@ -1627,15 +1629,12 @@ class _DashboradPageState extends State<DashboradPage>
         };
         totalTax.add(taxmap);
       }
-    } else {
-      print("error");
-    }
-    print("hello");
+    } 
     return totalTax;
   }
 
   itememovefromCart(cartitem) async {
-    print(cartList.length);
+
     try {
       MST_Cart cart = new MST_Cart();
       MSTCartdetails cartitemdata = cartitem;
@@ -1802,6 +1801,12 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   selectTable() {
+
+      for (var index = 0; index < temporaryCartList.length; index++) {
+        itememovefromCart(temporaryCartList[index]);
+      }
+
+
     Navigator.pushNamedAndRemoveUntil(
         context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
         arguments: {"isAssign": false});
@@ -3107,11 +3112,13 @@ class _DashboradPageState extends State<DashboradPage>
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () async {
                       if (permissions.contains(Constant.ADD_ORDER)) {
+                        confirmOrder = true;
                         await sendTokitched(cartList);
                         selectTable();
                       } else {
                         CommonUtils.openPermissionPop(
                             context, Constant.ADD_ORDER, () async {
+                          confirmOrder = true;
                           await sendTokitched(cartList);
                           selectTable();
                         }, () {});
@@ -3456,7 +3463,9 @@ class _DashboradPageState extends State<DashboradPage>
           child: GestureDetector(
             onTap: () => setState(() {
               if (currentQuantity > 0) {
+                currentProductQuantity = cart.productQty;
                 cart.productQty = currentQuantity.toDouble();
+                cart.productPrice = currentQuantity * cart.productNetPrice;
                 currentQuantity = 0;
               } else if (cart.id == itemSelectedIndex.id) {
                 itemSelectedIndex = new MSTCartdetails();
@@ -3592,7 +3601,7 @@ class _DashboradPageState extends State<DashboradPage>
                       }
                     },
                   ),
-                  IconSlideAction(
+                 /*  IconSlideAction(
                     color: Colors.red,
                     icon: Icons.delete_outline,
                     onTap: () {
@@ -3605,7 +3614,7 @@ class _DashboradPageState extends State<DashboradPage>
                         }, () {});
                       }
                     },
-                  )
+                  ) */
                 ],
         );
       }).toList(),
