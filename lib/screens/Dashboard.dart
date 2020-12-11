@@ -133,7 +133,7 @@ class _DashboradPageState extends State<DashboradPage>
   List quantity = [2, 3, 4, 5, 6, 7, 8, 9];
   List categoryFirstRow = [];
   List categorySecondRow = [];
-  List temporaryCartList = [];  
+  List temporaryCartList = [];
   var selectedCategory;
   var expandableController;
   var currentQuantity = 1;
@@ -874,7 +874,6 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   sendTokitched(itemList) async {
-
     String ids = "";
     var list = [];
     for (var i = 0; i < itemList.length; i++) {
@@ -1029,9 +1028,9 @@ class _DashboradPageState extends State<DashboradPage>
         //selectedTable.save_order_id = saveOid;
       } */
       print(jsonEncode(cartList));
-      if(cartList.length > 0) {
+      if (cartList.length > 0) {
         temporaryCartList.add(cartList[cartList.length - 1]);
-      } 
+      }
 
       if (selectedTable.save_order_id != null &&
           selectedTable.save_order_id != 0) {
@@ -1076,14 +1075,16 @@ class _DashboradPageState extends State<DashboradPage>
         });
   }
 
-  opnePaymentMethod() {
+  opnePaymentMethod() async {
+    var roundingTotal =
+        await CommunFun.checkRoundData(grandTotal.toStringAsFixed(2));
     showDialog(
         // Opning Ammount Popup
         context: context,
         builder: (BuildContext context) {
           return PaymentMethodPop(
             subTotal: subtotal,
-            grandTotal: grandTotal,
+            grandTotal: double.tryParse(roundingTotal),
             onClose: (mehtod) {
               CommunFun.processingPopup(context);
               paymentWithMethod(mehtod);
@@ -1587,14 +1588,14 @@ class _DashboradPageState extends State<DashboradPage>
   getTaxs() async {
     // List<BranchTax> taxlist = [];
     List<BranchTax> taxlists = await CommunFun.getbranchTax();
-  
+
     if (taxlists.length > 0) {
       setState(() {
         taxlist = taxlists;
       });
       taxlist = taxlists;
       //print(taxlist);
-    } 
+    }
     // return taxlist;
   }
 
@@ -1632,12 +1633,11 @@ class _DashboradPageState extends State<DashboradPage>
         };
         totalTax.add(taxmap);
       }
-    } 
+    }
     return totalTax;
   }
 
   itememovefromCart(cartitem) async {
-
     try {
       MST_Cart cart = new MST_Cart();
       MSTCartdetails cartitemdata = cartitem;
@@ -1805,7 +1805,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   selectTable() {
     for (var index = 0; index < temporaryCartList.length; index++) {
-     itememovefromCart(temporaryCartList[index]);
+      itememovefromCart(temporaryCartList[index]);
     }
 
     Navigator.pushNamedAndRemoveUntil(
@@ -3602,7 +3602,7 @@ class _DashboradPageState extends State<DashboradPage>
                       }
                     },
                   ),
-                 /*  IconSlideAction(
+                  /*  IconSlideAction(
                     color: Colors.red,
                     icon: Icons.delete_outline,
                     onTap: () {
