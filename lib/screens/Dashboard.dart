@@ -1035,8 +1035,6 @@ class _DashboradPageState extends State<DashboradPage>
       if (selectedTable.save_order_id == 0) {
         //selectedTable.save_order_id = saveOid;
       } */
-      print('addTocartItem');
-      print(cartList[cartList.length - 1].productName);
       if (cartList.length > 0) {
         temporaryCartList.add(cartList[cartList.length - 1]);
       }
@@ -2701,7 +2699,7 @@ class _DashboradPageState extends State<DashboradPage>
                     ],
                   ),
                 ),
-              ), 
+              ),
               PopupMenuItem(
                 enabled: isTableSelected ? true : false,
                 value: 1,
