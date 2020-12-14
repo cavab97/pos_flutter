@@ -100,8 +100,7 @@ class LocalAPI {
         res.isNotEmpty ? res.map((c) => Table_order.fromJson(c)).toList() : [];
     if (list.length > 0) {
       if (list[0].save_order_id != 0) {
-        List<SaveOrder> cartIDs =
-            await gettableCartID(list[0].save_order_id);
+        List<SaveOrder> cartIDs = await gettableCartID(list[0].save_order_id);
         if (table_order.save_order_id == 0 && list[0].save_order_id != 0) {
           if (cartIDs.length > 0) {
             var qry1 = "UPDATE mst_cart SET table_id = " +
@@ -713,17 +712,17 @@ class LocalAPI {
   //   return cartID;
   // }
 
-  // Future<List<MSTSubCartdetails>> getItemModifire(id) async {
-  //   var db = await DatabaseHelper.dbHelper.getDatabse();
-  //   var cartDetail = await db.query("mst_cart_sub_detail",
-  //       where: 'cart_details_id = ?', whereArgs: [id]);
-  //   List<MSTSubCartdetails> list = cartDetail.isNotEmpty
-  //       ? cartDetail.map((c) => MSTSubCartdetails.fromJson(c)).toList()
-  //       : [];
-  //   await SyncAPICalls.logActivity("edit cart item",
-  //       "get modifire list mst_cart_sub_detail", "mst_cart_sub_detail", id);
-  //   return list;
-  // }
+  Future<List<MSTSubCartdetails>> getItemModifire(id) async {
+    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var cartDetail = await db.query("mst_cart_sub_detail",
+        where: 'cart_details_id = ?', whereArgs: [id]);
+    List<MSTSubCartdetails> list = cartDetail.isNotEmpty
+        ? cartDetail.map((c) => MSTSubCartdetails.fromJson(c)).toList()
+        : [];
+    await SyncAPICalls.logActivity("edit cart item",
+        "get modifire list mst_cart_sub_detail", "mst_cart_sub_detail", id);
+    return list;
+  }
 
   // Future<List<ProductDetails>> getOrderDetails(orderid) async {
   //   var qry =
@@ -1405,7 +1404,7 @@ class LocalAPI {
 
 //     return result;
 //   }
- Future<List<SaveOrder>> gettableCartID(saveorderid) async {
+  Future<List<SaveOrder>> gettableCartID(saveorderid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "select save_order.cart_id from table_order " +
         " LEFT join save_order on save_order.id = table_order.save_order_id " +

@@ -4,7 +4,8 @@ import 'package:mcncashier/app/environment_config.dart';
 
 class Configrations {
   //static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
-  static String base_URL = "https://mcnpos.com.my/api/v1/en/";//Config.SERVER_URL
+  static String base_URL =
+      "http://staging.mcnpos.com.my/api/v1/en/"; //Config.SERVER_URL
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String config = "configs";
@@ -40,7 +41,7 @@ class Configrations {
   static String add_drawer = "add_drawer";
   static String shift_datails = "Shift_datails";
   static String shift_app_id = "shift_app_id";
-    static String shift_Invoice_app_id = "shift_Invoice_app_id";
+  static String shift_Invoice_app_id = "shift_Invoice_app_id";
   static String product_attributes = "Product_attributes";
   static String product_Modifeirs = "Product_modifires";
   static String cart_Details = "Cart_Details";
