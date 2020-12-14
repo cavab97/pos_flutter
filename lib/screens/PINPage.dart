@@ -65,6 +65,7 @@ class _PINPageState extends State<PINPage> {
     if (!isCheckIn) {
       if (pinNumber.length >= 6) {
         List<User> checkUserExit = await localAPI.checkUserExit(pinNumber);
+        print(checkUserExit.length);
         if (checkUserExit.length != 0) {
           setState(() {
             isLoading = true;

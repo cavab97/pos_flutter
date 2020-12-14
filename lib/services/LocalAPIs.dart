@@ -1460,10 +1460,14 @@ class LocalAPI {
   // after sync
   Future<List<User>> checkUserExit(userpin) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry1 = "SELECT * from users ";
+
     var qry = "SELECT * from users where user_pin =" +
         userpin.toString() +
         " AND status = 1";
+
     var user = await db.rawQuery(qry);
+    print(user);
     List<User> list =
         user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
     return list;

@@ -87,6 +87,7 @@ class _LoginPageState extends State<LoginPage> {
         user.deviceId = deviceinfo["deviceId"];
         user.terminalId = terkey != null ? terkey : '1'; //widget.terminalId;
         await repo.login(user).then((value) async {
+          print(value);
           if (value != null && value["status"] == Constant.STATUS200) {
             await Preferences.setStringToSF(Constant.IS_LOGIN, "true");
             user = User.fromJson(value["data"]);
