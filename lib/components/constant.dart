@@ -53,7 +53,7 @@ class Constant {
   static final String DELETE_REPORT = "delete_report";
   static final String OPEN_DRAWER = "view_open_drawer";
   static final String PRINT_RECIEPT = "view_printing";
-  static final String VIEW_SYNC = "view_sync";
+  static final String VIEW_SYNC = "opening";
   /*==============================================================================
                               Manage API status
   =================================================================================*/

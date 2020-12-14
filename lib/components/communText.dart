@@ -214,7 +214,6 @@ class CommunFun {
 
   static deviceInfo() async {
     // Device Info
-    print('device info');
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     var deviceData;
     try {
@@ -308,19 +307,12 @@ class CommunFun {
   }
 
   static syncOrdersANDStore(context, isClose) async {
-    print('line 311');
     await CommunFun.getsetWebOrders(context);
-    print('line 313');
     await SyncAPICalls.sendCustomerTable(context);
-    print('line 315');
     await SyncAPICalls.syncOrderstoDatabase(context);
-    print('line 317');
     await SyncAPICalls.sendInvenotryTable(context);
-    print('line 319');
     await SyncAPICalls.sendCustomerWineInventory(context);
-    print('line 321');
     await SyncAPICalls.sendCancledOrderTable(context);
-    print('line 323');
     if (isClose) {
       Navigator.of(context).pop();
     }
@@ -331,7 +323,6 @@ class CommunFun {
       opneSyncPop(context);
     }
     var lastSync = await Preferences.getStringValuesSF(Constant.LastSync_Table);
-    print(lastSync);
     if (lastSync == null) {
       CommunFun.getDataTables1(context, isOpen);
     } else if (lastSync == "1") {
@@ -343,7 +334,6 @@ class CommunFun {
     } else if (lastSync == "4") {
       CommunFun.getDataTables5(context, isOpen);
     } else {
-      print('enter 6');
       Navigator.of(context).pop();
       //Navigator.pushNamed(context, Constant.PINScreen);
     }
@@ -460,13 +450,10 @@ class CommunFun {
         if (aceets["data"]["next_offset"] != 0) {
           getAssetsData(context, isOpen);
         }
-        if (isOpen) {
-          Navigator.of(context).pop();
-        }
         var serverTime =
             await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
         if (serverTime == null) {
-          Navigator.pushNamed(context, Constant.PINScreen);
+          //Navigator.pushNamed(context, Constant.PINScreen);
         } else {
           await checkUserDeleted(context);
           await checkpermission();
@@ -479,6 +466,9 @@ class CommunFun {
         } else {
           getAssetsData(context, isOpen);
         }
+      }
+      if (isOpen) {
+        Navigator.of(context).pop();
       }
     } else {
       // handle Exaption
@@ -668,8 +658,8 @@ class CommunFun {
     //start from tables 4 API calls
     var data4_1 =
         await SyncAPICalls.getDataServerBulk4_1(context); //api call 4_1
-        print('enter here');
-        print(jsonEncode(data4_1));
+    print('enter here');
+    print(jsonEncode(data4_1));
     if (data4_1 != null) {
       databaseHelper.insertData4_1(data4_1["data"]);
     } else {
