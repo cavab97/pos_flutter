@@ -69,11 +69,11 @@ class _LoginPageState extends State<LoginPage> {
 
   sendlogin() async {
     // Login click fun
-
     var isValid = await validateFields(); // check validation
     var deviceinfo = await CommunFun.deviceInfo();
     print('check connect');
     var connected = await CommunFun.checkConnectivity();
+
     if (connected) {
       if (isValid) {
         setState(() {

@@ -36,7 +36,7 @@ class TablesList {
               " WHERE tables.status = 1 AND branch_id = " +
               branchid.toString() +
               " GROUP by tables.table_id";
-
+      
       var res = await db.rawQuery(query);
       list = res.isNotEmpty
           ? res.map((c) => TablesDetails.fromJson(c)).toList()

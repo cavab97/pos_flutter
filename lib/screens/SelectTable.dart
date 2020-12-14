@@ -142,6 +142,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     });
     var branchid = await CommunFun.getbranchId();
     List<TablesDetails> tables = await tabList.getTables(context, branchid);
+    print(jsonEncode(tables));
     setState(() {
       tableList = tables;
       isLoading = false;

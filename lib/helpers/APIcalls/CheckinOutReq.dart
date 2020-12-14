@@ -5,6 +5,7 @@ import 'package:mcncashier/models/CheckInout.dart';
 
 class CheckInOutReq {
   static userCheckInOut(request) async {
+      print('here');
     try {
       CheckinOutList catCall = new CheckinOutList();
       String content = await utf8.decoder.bind(request).join();

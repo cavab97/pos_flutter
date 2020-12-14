@@ -214,6 +214,7 @@ class CommunFun {
 
   static deviceInfo() async {
     // Device Info
+    print('device info');
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     var deviceData;
     try {
@@ -307,12 +308,19 @@ class CommunFun {
   }
 
   static syncOrdersANDStore(context, isClose) async {
+    print('line 311');
     await CommunFun.getsetWebOrders(context);
+    print('line 313');
     await SyncAPICalls.sendCustomerTable(context);
+    print('line 315');
     await SyncAPICalls.syncOrderstoDatabase(context);
+    print('line 317');
     await SyncAPICalls.sendInvenotryTable(context);
+    print('line 319');
     await SyncAPICalls.sendCustomerWineInventory(context);
+    print('line 321');
     await SyncAPICalls.sendCancledOrderTable(context);
+    print('line 323');
     if (isClose) {
       Navigator.of(context).pop();
     }
@@ -660,6 +668,8 @@ class CommunFun {
     //start from tables 4 API calls
     var data4_1 =
         await SyncAPICalls.getDataServerBulk4_1(context); //api call 4_1
+        print('enter here');
+        print(jsonEncode(data4_1));
     if (data4_1 != null) {
       databaseHelper.insertData4_1(data4_1["data"]);
     } else {
