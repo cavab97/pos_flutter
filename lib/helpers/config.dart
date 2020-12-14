@@ -1,6 +1,7 @@
+import 'package:mcncashier/app/environment_config.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
-import 'package:mcncashier/app/environment_config.dart';
+import 'package:mcncashier/app/app_config.dart';
 
 class Configrations {
   //static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";

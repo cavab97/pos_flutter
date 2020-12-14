@@ -513,18 +513,13 @@ class SyncAPICalls {
 
   static sendCancledOrderTable(context) async {
     try {
-      print('cancel');
       var apiurl = Configrations.cancle_order;
       var terminalId = await CommunFun.getTeminalKey();
       var branchid = await CommunFun.getbranchId();
-      print('here');
       LocalAPI localAPI = LocalAPI();
       List<CancelOrder> orderdata = await localAPI.getCancleOrder(terminalId);
-      print('terminal id');
       if (orderdata.length > 0) {
-        print('first if');
         if (orderdata.length > 0) {
-          print('second if');
           var stringParams = {
             'branch_id': branchid,
             'terminal_id': terminalId,
@@ -533,16 +528,13 @@ class SyncAPICalls {
           var res = await APICalls.apiCall(apiurl, context, stringParams);
 
           if (res["status"] == Constant.STATUS200) {
-            print('third if');
             saveCancleORderTable(res);
           }
-          print('out');
           CommunFun.showToast(context, "Sync sucessfully done.");
         }
       } else {
-        print('enter else');
         Navigator.of(context).pop();
-        CommunFun.showToast(context, "all cancel tables up to dates.");
+        //CommunFun.showToast(context, "all cancel tables up to dates.");
       }
     } catch (e) {
       print(e);

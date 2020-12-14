@@ -634,6 +634,9 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable3(Database db, dynamic tablesData) async {
+    if (tablesData == null || tablesData == []) {
+      return 1;
+    }
     var customerData = tablesData["customer"];
     var terminalData = tablesData["terminal"];
     var tableData = tablesData["table"];
