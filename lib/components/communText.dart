@@ -323,6 +323,7 @@ class CommunFun {
       opneSyncPop(context);
     }
     var lastSync = await Preferences.getStringValuesSF(Constant.LastSync_Table);
+    print(lastSync);
     if (lastSync == null) {
       CommunFun.getDataTables1(context, isOpen);
     } else if (lastSync == "1") {
@@ -334,8 +335,9 @@ class CommunFun {
     } else if (lastSync == "4") {
       CommunFun.getDataTables5(context, isOpen);
     } else {
+      print('enter 6');
       Navigator.of(context).pop();
-      Navigator.pushNamed(context, Constant.PINScreen);
+      //Navigator.pushNamed(context, Constant.PINScreen);
     }
   }
 
