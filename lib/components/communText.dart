@@ -666,8 +666,8 @@ class CommunFun {
     //start from tables 4 API calls
     var data4_1 =
         await SyncAPICalls.getDataServerBulk4_1(context); //api call 4_1
-        print('enter here');
-        print(jsonEncode(data4_1));
+    print('enter here');
+    print(jsonEncode(data4_1));
     if (data4_1 != null) {
       databaseHelper.insertData4_1(data4_1["data"]);
     } else {
@@ -958,6 +958,7 @@ class CommunFun {
     if (permission != null) {
       return permission;
     } else {
+      print("error");
       return "";
     }
   }

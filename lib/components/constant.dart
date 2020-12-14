@@ -36,8 +36,8 @@ class Constant {
   =================================================================================*/
 
   static final String VIEW_ORDER = "view_order";
-  static final String ADD_ORDER = "add_order";
-  static final String EDIT_ORDER = "edit_order";
+  static final String ADD_ORDER = "cash_in"; //add_order
+  static final String EDIT_ORDER = "cash_in"; //edit_order
   static final String DELETE_ORDER = "delete_order";
   static final String DISCOUNT_ORDER = "discount_order";
 
@@ -52,7 +52,7 @@ class Constant {
   static final String EDIT_REPORT = "edit_report";
   static final String DELETE_REPORT = "delete_report";
   static final String OPEN_DRAWER = "view_open_drawer";
-  static final String PRINT_RECIEPT = "view_printing";
+  static final String PRINT_RECIEPT = "delete_item"; //"view_printing";
   static final String VIEW_SYNC = "view_sync";
   /*==============================================================================
                               Manage API status

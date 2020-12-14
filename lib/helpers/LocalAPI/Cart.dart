@@ -147,34 +147,34 @@ class Cartlist {
     return result;
   }
 
-  Future<int> updateSubCartData(context, List<MSTSubCartdetails> data) async {
-    var result;
-    var isjoin = await CommunFun.checkIsJoinServer();
-    if (isjoin == true) {
-      var apiurl =
-          await Configrations.ipAddress() + Configrations.cart_Sub_Details;
-      var stringParams = {"cart_sub_details": data};
-      print(data);
-      var result = await APICall.localapiCall(null, apiurl, stringParams);
-      if (result["status"] == Constant.STATUS200) {
-        result = result;
-      } else {
-        CommunFun.showToast(context, result["message"]);
-      }
-    } else {
-      for (var i = 0; i < data.length; i++) {
-        print("hello");
-        var obj = data[i].toJson();
-        print(obj);
+  // Future<int> updateSubCartData(context, List<MSTSubCartdetails> data) async {
+  //   var result;
+  //   var isjoin = await CommunFun.checkIsJoinServer();
+  //   if (isjoin == true) {
+  //     var apiurl =
+  //         await Configrations.ipAddress() + Configrations.cart_Sub_Details;
+  //     var stringParams = {"cart_sub_details": data};
+  //     print(data);
+  //     var result = await APICall.localapiCall(null, apiurl, stringParams);
+  //     if (result["status"] == Constant.STATUS200) {
+  //       result = result;
+  //     } else {
+  //       CommunFun.showToast(context, result["message"]);
+  //     }
+  //   } else {
+  //     for (var i = 0; i < data.length; i++) {
+  //       print("hello");
+  //       var obj = data[i].toJson();
+  //       print(obj);
 
-        result = await db.update("mst_cart_sub_detail", obj,
-            where: "cart_details_id=?", whereArgs: [data[i].cartdetailsId]);
-      }
-      await SyncAPICalls.logActivity(
-          "product", "update sub cart details", "mst_cart_sub_detail", 1);
-    }
-    return result;
-  }
+  //       result = await db.update("mst_cart_sub_detail", obj,
+  //           where: "cart_details_id=2", whereArgs: [data[i].cartdetailsId]);
+  //     }
+  //     await SyncAPICalls.logActivity(
+  //         "product", "update sub cart details", "mst_cart_sub_detail", 1);
+  //   }
+  //   return result;
+  // }
 
   Future<List<MSTCartdetails>> getCartItem(cartId) async {
     var isjoin = await CommunFun.checkIsJoinServer();

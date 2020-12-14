@@ -311,6 +311,7 @@ class SyncAPICalls {
     LocalAPI localAPI = LocalAPI();
     try {
       var orders = data["orders"];
+      print(orders.length);
       if (orders.length > 0) {
         for (var i = 0; i < orders.length; i++) {
           var orderdata = orders[i];

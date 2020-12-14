@@ -106,7 +106,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         price = productItem.price;
         productnetprice = productItem.price;
       });
-      getAttributes(productItem.productId);
+      // getAttributes(productItem.productId);
     }
     getProductdata();
     // getTaxs();
@@ -165,6 +165,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         modifireList.addAll(productData["Modifire"]);
       });
     }
+    if (isEditing) {
+      setProductEditingData(productData);
+    }
   }
 
   setMealProduct(productData) async {
@@ -216,18 +219,15 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
-  setProductEditingData() async {
+  setProductEditingData(productData) async {
     if (!isSetMeal) {
-      // dynamic data = productData["CartSubItems"];
-      // List<MSTSubCartdetails> details = data.length > 0
-      //     ? data.map((c) => MSTSubCartdetails.fromJson(c)).toList()
-      //     : [];
-      List<MSTSubCartdetails> details =
-          await localAPI.getItemModifire(cartitem.id);
+      dynamic data = productData["CartSubItems"];
+      List<MSTSubCartdetails> details = data.length > 0
+          ? data.map((c) => MSTSubCartdetails.fromJson(c)).toList()
+          : [];
       if (details.length > 0) {
         for (var i = 0; i < details.length; i++) {
           var item = details[i];
-          print(details.length);
           if (item.caId != null) {
             //Attr
             if (attributeList.length > 0) {
@@ -269,25 +269,25 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
-  getAttributes(productid) async {
-    List<Attribute_Data> productAttr =
-        await prodList.getProductAttributes(productid);
-    if (productAttr.length > 0) {
-      setState(() {
-        attributeList = productAttr;
-      });
-    }
-    List<ModifireData> productModifeir =
-        await prodList.getProductModifiers(productItem.productId);
-    if (productModifeir.length > 0) {
-      setState(() {
-        modifireList = productModifeir;
-      });
-    }
-    if (isEditing) {
-      setProductEditingData();
-    }
-  }
+  // getAttributes() async {
+  //   List<Attribute_Data> productAttr =
+  //       await prodList.getProductAttributes(productItem.productId);
+  //   if (productAttr.length > 0) {
+  //     setState(() {
+  //       attributeList = productAttr;
+  //     });
+  //   }
+  //   List<ModifireData> productModifeir =
+  //       await prodList.getProductModifiers(productItem.productId);
+  //   if (productModifeir.length > 0) {
+  //     setState(() {
+  //       modifireList = productModifeir;
+  //     });
+  //   }
+  //   if (isEditing) {
+  //     // setProductEditingData();
+  //   }
+  // }
 
   getcartItemsDetails(productData) async {
     if (productData["CartItems"].length != 0) {
@@ -550,137 +550,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     setPrice();
   }
 
-  updateCartItem() async {
-    //get current information
-    MST_Cart cart = new MST_Cart();
-    MSTSubCartdetails subCartData = new MSTSubCartdetails();
-    Cartlist cartlist = new Cartlist();
-
-    var branchid = await CommunFun.getbranchId();
-    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
-    var customerData =
-        await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
-    var customer =
-        customerData != null ? json.decode(customerData) : customerData;
-    var customerid = customer != null ? customer["customer_id"] : 0;
-    Table_order tableData = await CommunFun.getTableData(); // table data
-    var loginData = await json.decode(loginUser);
-    var qty = await countTotalQty();
-    var disc = await countDiscount();
-    var subtotal = await countSubtotal();
-    var serviceCharge =
-        await CommunFun.countServiceCharge(tableData.service_charge, subtotal);
-    var serviceChargePer = tableData.service_charge == null
-        ? await CommunFun.getServiceChargePer()
-        : tableData.service_charge;
-
-    var totalTax = await countTax(subtotal);
-    var grandTotal =
-        await countGrandtotal(subtotal, serviceCharge, taxvalues, disc);
-
-//cart data
-
-    if (currentCart != null) {
-      cart.id = currentCart.id;
-      cart.discount_type = currentCart.discount_type;
-      cart.voucher_detail = currentCart.voucher_detail;
-      cart.voucher_id = cart.voucher_id;
-    }
-    cart.user_id = customerid;
-    cart.branch_id = int.parse(branchid);
-    cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
-    cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
-    cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
-    cart.discount = disc;
-    cart.table_id = tableData.table_id;
-    cart.total_qty = qty;
-    cart.tax = double.parse(taxvalues.toStringAsFixed(2));
-    cart.source = 2;
-    cart.tax_json = json.encode(totalTax);
-    cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
-    cart.customer_terminal = customer != null ? customer["terminal_id"] : 0;
-    cart.created_by = loginData["id"];
-    cart.localID = await CommunFun.getLocalID();
-    cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
-    var cartid = await cartlist.addcart(context, cart); // Insert Cart
-
-    if (widget.cartID == null) {
-      await insertTableData(tableData, cartid);
-    }
-    ProductDetails cartItemproduct = new ProductDetails();
-    if (!isSetMeal) {
-      cartItemproduct = productItem;
-    } else {
-      cartItemproduct.qty = product_qty;
-      cartItemproduct.status = setmeal.status;
-      cartItemproduct.productId = setmeal.setmealId;
-      cartItemproduct.base64 = setmeal.base64;
-      cartItemproduct.name = setmeal.name;
-      cartItemproduct.uuid = setmeal.uuid;
-    }
-    cartItemproduct
-        .toJson()
-        .removeWhere((String key, dynamic value) => value == null);
-    var data = cartItemproduct;
-    MSTCartdetails cartdetails = new MSTCartdetails();
-    if (isEditing) {
-      cartdetails.id = cartitem.id;
-    }
-    cartdetails.cartId = cartid;
-    cartdetails.productId =
-        isSetMeal ? setmeal.setmealId : productItem.productId;
-    cartdetails.productName = isSetMeal ? setmeal.name : productItem.name;
-    cartdetails.productSecondName = isSetMeal ? "" : productItem.name_2;
-    cartdetails.productPrice = double.parse(price.toStringAsFixed(2));
-    cartdetails.productQty = product_qty.toDouble();
-    cartdetails.productNetPrice =
-        double.parse(productnetprice.toStringAsFixed(2));
-    cartdetails.createdBy = loginData["id"];
-    cartdetails.cart_detail = jsonEncode(data);
-    cartdetails.discount = 0;
-    cartdetails.localID = await CommunFun.getLocalID();
-    cartdetails.remark =
-        extraNotes.text.trim().isNotEmpty ? extraNotes.text.trim() : "";
-    cartdetails.issetMeal = isSetMeal ? 1 : 0;
-    cartdetails.taxValue = taxvalues;
-    cartdetails.printer_id = printer != null ? printer.printerId : 0;
-    cartdetails.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-
-    if (isSetMeal) {
-      cartdetails.setmeal_product_detail = json.encode(tempCart);
-    }
-    var detailID = await cartlist.addintoCartDetails(context, cartdetails);
-    List<MSTSubCartdetails> cartModiData = [];
-    if (selectedModifier.length > 0) {
-      for (var i = 0; i < selectedModifier.length; i++) {
-        MSTSubCartdetails subCartData = new MSTSubCartdetails();
-        var modifire = selectedModifier[i];
-        subCartData.cartdetailsId = detailID;
-        subCartData.localID = cart.localID;
-        subCartData.productId = productItem.productId;
-        subCartData.modifierId = modifire.modifierId;
-        subCartData.modifirePrice = modifire.price;
-
-        cartModiData.add(subCartData);
-        print(cartModiData);
-      }
-    }
-    for (var i = 0; i < selectedAttr.length; i++) {
-      var attr = selectedAttr[i];
-      MSTSubCartdetails subCartData = new MSTSubCartdetails();
-      subCartData.cartdetailsId = detailID;
-      subCartData.localID = cart.localID;
-      subCartData.productId = productItem.productId;
-      subCartData.caId = attr["ca_id"];
-      subCartData.attributeId = int.parse(attr["attrType_ID"]);
-      subCartData.attrPrice = int.parse(attr["attr_price"]).toDouble();
-      cartModiData.add(subCartData);
-    }
-    if (cartModiData.length > 0) {
-      await cartlist.updateSubCartData(context, cartModiData);
-    }
-    widget.onClose();
-    Navigator.of(context).pop();
+  updateCartItem() {
+    produtAddTocart();
   }
 
   countTotalQty() {
@@ -920,7 +791,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         subCartData.productId = productItem.productId;
         subCartData.modifierId = modifire.modifierId;
         subCartData.modifirePrice = modifire.price;
-
         cartModiData.add(subCartData);
       }
     }
@@ -936,7 +806,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       cartModiData.add(subCartData);
     }
     if (cartModiData.length > 0) {
-      await cartlist.addsubCartData(context, cartModiData);
+      var res = await cartlist.addsubCartData(context, cartModiData);
     }
     if (isEditing) {
       if (!isSetMeal) {
@@ -947,7 +817,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         }
       }
     }
-    widget.onClose(cartitem);
+    widget.onClose();
     Navigator.of(context).pop();
   }
 
@@ -1539,7 +1409,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   Widget addbutton(context) {
     return Container(
       height: SizeConfig.safeBlockVertical * 5,
-      width: MediaQuery.of(context).size.width / 12,
+      width: MediaQuery.of(context).size.width / 10,
       child: RaisedButton(
         onPressed: () {
           if (attributeList.length > 0) {
