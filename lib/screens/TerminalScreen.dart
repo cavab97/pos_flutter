@@ -148,7 +148,6 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
     return TextField(
       controller: terminalKey,
       keyboardType: TextInputType.text,
-      textInputAction: TextInputAction.newline,
       decoration: InputDecoration(
         prefixIcon: Padding(
           padding: EdgeInsets.only(left: 25, right: 25),
@@ -171,9 +170,6 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
       ),
       style: Styles.normalBlack(),
       onChanged: onChange,
-      onSubmitted: (input) {
-        setTerminalkey();
-      },
     );
   }
 }

@@ -836,10 +836,9 @@ class CreateTables {
         "id INTEGER PRIMARY KEY AUTOINCREMENT," +
         "uuid INTEGER," +
         "terminal_id INTEGER," +
-        "isSync NUMERIC," +
         "branch_id INTEGER," +
         "module_name TEXT," +
-        "description TEXT," +
+        "discription TEXT," +
         "activity_date TEXT," +
         "activity_time TEXT," +
         "table_name TEXT," +
@@ -893,7 +892,6 @@ class CreateTables {
         "updated_by INTEGER" +
         ")");
 
-// ShiftInvoice
     datatables = db.execute("CREATE TABLE shift_invoice ( " +
         "id INTEGER," +
         "shift_id INTEGER," +

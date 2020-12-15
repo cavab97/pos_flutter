@@ -27,13 +27,9 @@ class MSTSubCartdetails {
     localID = json["localID"];
     productId = json["product_id"];
     modifierId = json["modifier_id"];
-    modifirePrice = json["modifier_price"] is int
-        ? (json['modifier_price'] as int).toDouble()
-        : json['modifier_price'];
+    modifirePrice = json["modifier_price"];
     caId = json["ca_id"];
-    attrPrice = json["attr_price"] is int
-        ? (json['attr_price'] as int).toDouble()
-        : json['attr_price'];
+    attrPrice = json["attr_price"];
     attributeId = json["attribute_id"];
   }
   Map<String, dynamic> toJson() {

@@ -1,5 +1,6 @@
 import 'dart:convert';
-
+import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -14,12 +15,10 @@ import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
-import 'package:mcncashier/models/Shift.dart';
-import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/TerminalLog.dart';
 import 'package:mcncashier/models/User.dart';
-import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/services/CommunAPICall.dart';
 import 'package:intl/intl.dart';
@@ -190,9 +189,8 @@ class SyncAPICalls {
     log.uuid = uuid;
     log.terminal_id = int.parse(terminalId);
     log.branch_id = int.parse(branchid);
-    log.isSync = 0;
     log.module_name = moduleName;
-    log.description = disc;
+    log.discription = disc;
     log.activity_date = date;
     log.activity_time = time;
     log.table_name = tablename;
@@ -232,7 +230,6 @@ class SyncAPICalls {
               "branch_id": details.branch_id,
               "terminal_id": details.terminal_id,
               "app_id": details.app_id,
-              "server_id": details.server_id,
               "product_id": details.product_id,
               "product_price": details.product_price,
               "product_old_price": details.product_old_price,
@@ -264,10 +261,10 @@ class SyncAPICalls {
             "terminal_id": order.terminal_id,
             "app_id": order.app_id,
             "table_id": order.table_id,
-            "pax": order.pax,
             "invoice_no": order.invoice_no,
             "customer_id": order.customer_id,
             "tax_json": order.tax_json,
+            "pax": order.pax,
             "tax_percent": order.tax_percent,
             "tax_amount": order.tax_amount,
             "voucher_detail": order.voucher_detail,
@@ -299,6 +296,7 @@ class SyncAPICalls {
           'orders': json.encode(ordersList)
         };
         var res = await APICalls.apiCall(apiurl, context, stringParams);
+
         if (res["status"] == Constant.STATUS200) {
           await savesyncORderData(res["data"]);
           //await CommunFun.showToast(context, "All orders upto dates.");
@@ -328,7 +326,6 @@ class SyncAPICalls {
           order.terminal_id = orderdata["terminal_id"];
           order.app_id = orderdata["app_id"];
           order.table_id = orderdata["table_id"];
-          order.pax = orderdata["pax"];
           order.invoice_no = orderdata["invoice_no"];
           order.customer_id = orderdata["customer_id"];
           order.tax_json = orderdata["tax_json"];
@@ -344,6 +341,7 @@ class SyncAPICalls {
           order.sub_total = orderdata["sub_total"] is int
               ? (orderdata['sub_total'] as int).toDouble()
               : orderdata['sub_total'];
+          order.pax = orderdata["pax"];
           order.sub_total_after_discount =
               orderdata["sub_total_after_discount"] is int
                   ? (orderdata['sub_total_after_discount'] as int).toDouble()
@@ -363,7 +361,7 @@ class SyncAPICalls {
           order.updated_at = orderdata["updated_at"];
           order.updated_by = orderdata["updated_by"];
           order.isSync = 1;
-          await localAPI.saveSyncOrder(order);
+          var result = await localAPI.saveSyncOrder(order);
 
           var orderdetail = orderdata["order_detail"];
           if (orderdetail.length > 0) {
@@ -405,7 +403,7 @@ class SyncAPICalls {
               o_details.updated_by = detail["updated_by"];
               o_details.isSync = 1;
               o_details.server_id = detail["server_id"];
-              await localAPI.saveSyncOrderDetails(o_details);
+              var result1 = await localAPI.saveSyncOrderDetails(o_details);
 
               var modifire = detail["order_modifier"];
               if (modifire.length > 0) {
@@ -432,7 +430,7 @@ class SyncAPICalls {
                   m_data.updated_by = modifiredata["updated_by"];
                   m_data.isSync = 1;
                   m_data.server_id = modifiredata["server_id"];
-                  await localAPI.saveSyncOrderModifire(m_data);
+                  var datres = await localAPI.saveSyncOrderModifire(m_data);
                 }
               }
               var attribute = detail["order_attributes"];
@@ -496,12 +494,12 @@ class SyncAPICalls {
               paymentdat.op_by = paydat["op_by"];
               paymentdat.updated_at = paydat["updated_at"];
               paymentdat.updated_by = paydat["updated_by"];
+              // paymentdat.serverId = paydat["serverId"];
               paymentdat.isSync = 1;
               paymentdat.server_id = paydat["server_id"];
-              await localAPI.saveSyncOrderPaymet(paymentdat);
+              var paymentres = await localAPI.saveSyncOrderPaymet(paymentdat);
             }
           }
-
           var voucherHistory = orderdata["voucher_history"];
           if (voucherHistory.length > 0) {
             for (var v = 0; v < voucherHistory.length; v++) {
@@ -699,7 +697,6 @@ class SyncAPICalls {
         cancle_order.updatedAt = order['updated_at'];
         cancle_order.serverId = order['server_id'];
         cancle_order.terminalId = order['terminal_id'];
-        cancle_order.isSync = 1;
         var result2 = await localAPI.saveSyncCancelTable(cancle_order);
       }
     }
@@ -749,13 +746,13 @@ class SyncAPICalls {
       var branchid = await CommunFun.getbranchId();
       LocalAPI localAPI = LocalAPI();
       List<Customer_Liquor_Inventory> custstoreData =
-          await localAPI.getCustomersWineInventory(branchid);
+          await localAPI.getCustomersWineInventoryTable(branchid);
       var custData = [];
       if (custstoreData.length > 0) {
         for (var i = 0; i < custstoreData.length; i++) {
           Customer_Liquor_Inventory custInv = custstoreData[i];
           List<Customer_Liquor_Inventory_Log> custLogData = await localAPI
-              .getCustomersWineInventoryLogs(branchid, custInv.appId);
+              .getCustomersWineInventoryLogsTable(branchid, custInv.appId);
           var data = {
             "cl_id": custInv.clId,
             "uuid": custInv.uuid,
@@ -858,10 +855,32 @@ class SyncAPICalls {
       List<Shift> storeData =
           await localAPI.getShiftDatabaseTable(branchid, terminalId);
       if (storeData.length > 0) {
+        var shiftData = [];
+        for (var i = 0; i < storeData.length; i++) {
+          var storeitem = storeData[i];
+          List<ShiftInvoice> invoiceData =
+              await localAPI.getShiftInvoiceTable(storeitem.shiftId);
+          var shifts = {
+            'shift_id': storeitem.shiftId,
+            'uuid': storeitem.uuid,
+            'terminal_id': storeitem.terminalId,
+            'app_id': storeitem.appId,
+            'user_id': storeitem.userId,
+            'branch_id': storeitem.branchId,
+            'start_amount': storeitem.startAmount,
+            'end_amount': storeitem.endAmount,
+            'status': storeitem.status,
+            'updated_at': storeitem.updatedAt,
+            'updated_by': storeitem.updatedBy,
+            'created_at': storeitem.createdAt,
+            'shift_invoice': invoiceData
+          };
+          shiftData.add(shifts);
+        }
         var stringParams = {
           'branch_id': branchid,
           'terminal_id': terminalId,
-          'shift': json.encode(storeData)
+          'shift': json.encode(shiftData)
         };
         var res = await APICalls.apiCall(apiurl, context, stringParams);
         if (res["status"] == Constant.STATUS200) {
@@ -869,29 +888,6 @@ class SyncAPICalls {
         }
       } else {
         //  CommunFun.showToast(context, "all cancel tables up to dates.");
-      }
-    } catch (e) {
-      print(e);
-      CommunFun.showToast(context, e.message);
-    }
-  }
-
-  static sendShiftdetails(context) async {
-    try {
-      var apiurl = Configrations.createShiftdetaildata;
-      var terminalId = await CommunFun.getTeminalKey();
-      var branchid = await CommunFun.getbranchId();
-      LocalAPI localAPI = LocalAPI();
-      List<ShiftInvoice> invoiceData =
-          await localAPI.getShiftInvoiceTable(terminalId);
-      var stringParams = {
-        'branch_id': branchid,
-        'terminal_id': terminalId,
-        'shift_detail': json.encode(invoiceData)
-      };
-      var res = await APICalls.apiCall(apiurl, context, stringParams);
-      if (res["status"] == Constant.STATUS200) {
-        saveShiftDetailToTable(context, res);
       }
     } catch (e) {
       print(e);
@@ -920,80 +916,26 @@ class SyncAPICalls {
         shift.createdAt = shiftitem['created_at'];
         shift.serverId = shiftitem['server_id'];
         var result = await localAPI.saveShiftDatafromSync(shift);
-      }
-    }
-  }
 
-  static saveShiftDetailToTable(context, data) async {
-    var invoiceData = data["data"]["shift_detail"];
-    if (invoiceData.length > 0) {
-      for (var j = 0; j < invoiceData.length; j++) {
-        var logint = invoiceData[j];
-        ShiftInvoice shiftInvoice = new ShiftInvoice();
-        shiftInvoice.id = logint["id"];
-        shiftInvoice.shift_id = logint["shift_id"];
-        shiftInvoice.shift_app_id = logint["shift_app_id"];
-        shiftInvoice.app_id = logint["app_id"];
-        shiftInvoice.invoice_id = logint["invoice_id"];
-        shiftInvoice.status = logint["status"];
-        shiftInvoice.created_by = logint["created_by"];
-        shiftInvoice.updated_by = logint["updated_by"];
-        shiftInvoice.created_at = logint["created_at"];
-        shiftInvoice.updated_at = logint["updated_at"];
-        shiftInvoice.serverId = logint["server_id"];
-        shiftInvoice.terminal_id = logint["terminal_id"];
-        var result = await localAPI.saveShiftInvoiceDatafromSync(shiftInvoice);
-      }
-    }
-  }
-
-  static sendTerminalLogTable(context) async {
-    try {
-      var apiurl = Configrations.create_terminal_log_data;
-      var terminalId = await CommunFun.getTeminalKey();
-      var branchid = await CommunFun.getbranchId();
-      LocalAPI localAPI = LocalAPI();
-      List<TerminalLog> storeData =
-          await localAPI.getTerminalLogTables(branchid, terminalId);
-      if (storeData.length > 0) {
-        var stringParams = {
-          'branch_id': branchid,
-          'terminal_id': terminalId,
-          'terminal_log': json.encode(storeData)
-        };
-        var res = await APICalls.apiCall(apiurl, context, stringParams);
-        if (res["status"] == Constant.STATUS200) {
-          saveTerminalLogTable(context, storeData);
+        var invoiceData = shiftitem["shift_invoice"];
+        for (var j = 0; j < invoiceData.length; j++) {
+          var logint = invoiceData[j];
+          ShiftInvoice shiftInvoice = new ShiftInvoice();
+          shiftInvoice.id = logint["id"];
+          shiftInvoice.shift_id = logint["shift_id"];
+          shiftInvoice.shift_app_id = logint["shift_app_id"];
+          shiftInvoice.app_id = logint["app_id"];
+          shiftInvoice.invoice_id = logint["invoice_id"];
+          shiftInvoice.status = logint["status"];
+          shiftInvoice.created_by = logint["created_by"];
+          shiftInvoice.updated_by = logint["updated_by"];
+          shiftInvoice.created_at = logint["created_at"];
+          shiftInvoice.updated_at = logint["updated_at"];
+          shiftInvoice.serverId = logint["server_id"];
+          shiftInvoice.terminal_id = logint["terminal_id"];
+          var result =
+              await localAPI.saveShiftInvoiceDatafromSync(shiftInvoice);
         }
-      } else {
-        //  CommunFun.showToast(context, "all cancel tables up to dates.");
-      }
-    } catch (e) {
-      print(e);
-      CommunFun.showToast(context, e.message);
-    }
-  }
-
-  static saveTerminalLogTable(context, terminalData) async {
-    if (terminalData.length > 0) {
-      for (var j = 0; j < terminalData.length; j++) {
-        TerminalLog logint = terminalData[j];
-        TerminalLog terminalLog = new TerminalLog();
-        terminalLog.id = logint.id;
-        terminalLog.uuid = logint.uuid;
-        terminalLog.terminal_id = logint.terminal_id;
-        terminalLog.isSync = 1;
-        terminalLog.branch_id = logint.branch_id;
-        terminalLog.module_name = logint.module_name;
-        terminalLog.description = logint.description;
-        terminalLog.activity_date = logint.activity_date;
-        terminalLog.activity_time = logint.activity_time;
-        terminalLog.table_name = logint.table_name;
-        terminalLog.entity_id = logint.entity_id;
-        terminalLog.status = logint.status;
-        terminalLog.updated_at = logint.updated_at;
-        terminalLog.updated_by = logint.updated_by;
-        var result = await localAPI.saveTerminalLogFromSync(terminalLog);
       }
     }
   }

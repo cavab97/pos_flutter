@@ -43,7 +43,7 @@ class Strings {
   static String fisrtname = "First Name";
   static String lastname = "Last Name";
   static String email = "Email";
-  static String phone = "Phone";
+  static String phone = "Mobile";
   static String password = "Password";
   static String birthdate = "Birth Date";
   static String addressline1 = "Address";
@@ -67,8 +67,8 @@ class Strings {
   static String scanQRcode = "Scan QRCode";
 
   static String open_shift = "Open Shift";
-  static String shiftTextLable = "Sorry, we're";
-  static String shiftTextLableOpen = "Yes, we're\nOpen";
+  static String shiftTextLable = "Sorry,we're";
+  static String shiftTextLableOpen = "Yes,we're\nOpen";
   static String opened_at = "Open at";
   static String closed = "CLOSED";
   static String syncText = "Syncing...";
@@ -94,9 +94,7 @@ class Strings {
   static String delete_order = "Delete Order";
   static String reprint_Order = "Resend to Kitchen";
   static String out_of_stoke = "OUT OF STOCK";
-  static String out_of_box = "OUT OF BOX";
   static String out_of_stoke_msg = "Product Out of Stock";
-  static String out_of_box_msg = "Product not available in Box";
   static String apply_promocode = "Apply Promocode";
   static String item_not_available = "No item available";
   static String asset_headerLogo = "assets/headerlogo.png";
@@ -135,6 +133,7 @@ class Strings {
   static String procesing = "Processing";
   static String send = "SEND";
   static String open = "OPEN";
+  static String shift_close_msg = "Please close your shift and Sync data.";
   static String internet_connection_lost = "Internet Connection Lost";
   static String shift_opne_alert_msg =
       "Currently shift was closed,Please opne shift after you can see shift report.";
@@ -193,8 +192,8 @@ class Strings {
   static String scan = "Scan";
   static String list = "List";
   static String table_pax_msg = "Please enter pax minimum table capcity.";
-  static String cancle_order_msg = "Are you want to sure cancel this table order?";
-  static String change_table_msg = "Are you want to sure change your table?";
+  static String cancle_order_msg = "Are you want sure cancel this table order?";
+  static String change_table_msg = "Are you want sure to change your table?";
   static String table_not_avalilable = "Table not available for merge.";
   static String table_already_merged = "Table already merged with other table.";
   static String table_already_occupied = "Table already occupied";

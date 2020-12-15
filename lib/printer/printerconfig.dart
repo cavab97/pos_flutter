@@ -10,9 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/components/StringFile.dart';
-import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
-import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
@@ -21,9 +19,10 @@ import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Payment.dart';
+import 'package:image/image.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
-import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/Terminal.dart';
 
 class PrintReceipt {
   PaperSize paper = PaperSize.mm80;
@@ -418,7 +417,6 @@ class PrintReceipt {
             bold: false,
           )),
     ]);
-
     /*For font - A size 1 = 4 Character print */
     ticket.hr();
     ticket.text("$receipt48CharHeader",
@@ -452,7 +450,6 @@ class PrintReceipt {
           printColumnWitSpace(8, item.product_price.toStringAsFixed(2), true);
 
       ticket.text("$nameOfProduct$qtyOfProduct$priceOfProduct$amountOfProduct",
-          containsChinese: true,
           styles: PosStyles(
               align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
@@ -776,7 +773,6 @@ class PrintReceipt {
     ticket.cut();
 
     /*Open Drawer only when select payment method cash*/
-
     if (isper && isCashPayment) {
       ticket.drawer();
     }
@@ -815,6 +811,7 @@ class PrintReceipt {
         customerName,
         ctx,
         isper));
+
     await CommunFun.showToast(ctx, res.msg);
   }
 
@@ -1047,7 +1044,6 @@ class PrintReceipt {
       /*Print attributes without price*/
       /*Print attributes without price*/
       if (cartList[i].attrName != null) {
-        print("=== String into List ===");
         List<String> attributes = cartList[i].attrName.split(",");
         if (attributes.length > 0) {
           for (var a = 0; a < attributes.length; a++) {
@@ -1522,6 +1518,7 @@ class PrintReceipt {
           )),
     ]);
     ticket.hr();
+
     ticket.feed(1);
     ticket.cut();
     return ticket;
@@ -1544,9 +1541,9 @@ class PrintReceipt {
     CommunFun.showToast(ctx, res.msg);
   }
 
-/* ========================================================================
+/*========================================================================
   ===========================Print Shift Report==================
-  ======================================================================== */
+  ========================================================================*/
 
   Future<Ticket> shiftReportReceipt(
       Branch branchData,
@@ -2040,30 +2037,14 @@ class PrintReceipt {
       String isFor) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
-    bool isper = await checkPermission(Constant.OPEN_DRAWER);
-    PosPrintResult res;
-    if (isper) {
-      res = await printerManager.printTicket(
-          await testPrintReceipt(printerName, printerIp, isFor, ctx, isper));
-    } else {
-      await CommonUtils.openPermissionPop(ctx, Constant.OPEN_DRAWER, () async {
-        res = await printerManager.printTicket(
-            await testPrintReceipt(printerName, printerIp, isFor, ctx, true));
-      }, () async {
-        res = await printerManager.printTicket(
-            await testPrintReceipt(printerName, printerIp, isFor, ctx, false));
-      });
-    }
 
-    // final PosPrintResult res = await printerManager.printTicket(
-    //     await testPrintReceipt(printerName, printerIp, isFor, ctx, isper));
-    if (res != null) {
-      await CommunFun.showToast(ctx, res.msg);
-    }
+    final PosPrintResult res = await printerManager
+        .printTicket(await testPrintReceipt(printerName, printerIp, isFor));
+    CommunFun.showToast(ctx, res.msg);
   }
 
-  Future<Ticket> testPrintReceipt(String printerName, String printerIp,
-      String isFor, ctx, bool isper) async {
+  Future<Ticket> testPrintReceipt(
+      String printerName, String printerIp, String isFor) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
@@ -2091,21 +2072,8 @@ class PrintReceipt {
       ticket.feed(2);
       ticket.cut();
     }
-    //Constant.VIEW_ORDER//
-
-    if (isper) {
-      ticket.drawer();
-    }
+    ticket.drawer();
     return ticket;
-  }
-
-  Future<bool> checkPermission(isfor) async {
-    var permission = await CommunFun.getPemission();
-    if (permission.contains(isfor)) {
-      return true;
-    } else {
-      return false;
-    }
   }
 
   String checkRoundData(String total) {
@@ -2122,9 +2090,7 @@ class PrintReceipt {
       if (tempValue <= 2) {
         round = prefix + "." + postFilx.substring(0, 1) + "0";
       } else if (tempValue <= 7) {
-        print(postFilx.substring(0, 1));
         round = prefix + "." + postFilx.substring(0, 1) + "5";
-        print(round);
       } else {
         int values = 0;
         if (int.parse(postFilx.substring(1)) == 9) {

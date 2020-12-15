@@ -5,17 +5,21 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
+import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
+import 'package:mcncashier/helpers/LocalAPI/ShiftList.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Printer.dart';
-import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+
+import '../models/Shift.dart';
 
 class ShiftReports extends StatefulWidget {
   // PIN Enter PAGE
@@ -27,9 +31,11 @@ class ShiftReports extends StatefulWidget {
 
 class _ShiftReportsState extends State<ShiftReports> {
   LocalAPI localAPI = LocalAPI();
+  ShiftList shiftList = new ShiftList();
+  PrinterList printerAPI = new PrinterList();
   PrintReceipt printKOT = PrintReceipt();
+  ShiftList shiftAPI = ShiftList();
   List<Printer> printerreceiptList = new List<Printer>();
-
   Shift shifittem = new Shift();
   var screenArea = 1.6;
   int _current = 0;
@@ -79,21 +85,23 @@ class _ShiftReportsState extends State<ShiftReports> {
   }
 
   getAllPrinter() async {
-    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    List<Printer> printerDraft =
+        await printerAPI.getAllPrinterList(context, "0");
     setState(() {
       printerreceiptList = printerDraft;
     });
   }
 
   getOrders() async {
-    var branchid = await CommunFun.getbranchId();
+    OrdersList orderApi = new OrdersList();
     var terminalid = await CommunFun.getTeminalKey();
-    List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
+    var branchid = await CommunFun.getbranchId();
+    List<Orders> orderList = await orderApi.getOrdersList(branchid, terminalid);
     dynamic payments =
         await localAPI.getTotalPayment(terminalid.toString(), branchid);
-    if (ordersList.length > 0) {
+    if (orderList.length > 0) {
       setState(() {
-        orders = ordersList;
+        orders = orderList;
       });
       var grosssale = 0.00;
       var netsale = 0.00;
@@ -110,7 +118,7 @@ class _ShiftReportsState extends State<ShiftReports> {
         taxval += order.tax_amount;
         servicecharge += order.serviceCharge != null ? order.serviceCharge : 0;
         discountval += order.voucher_amount != null ? order.voucher_amount : 0;
-        totaltend = (netsale + taxval + servicecharge) - discountval;
+        totaltend += (netsale + taxval + servicecharge) - discountval;
         setState(() {
           grossSale = grosssale;
           netSale = netsale;
@@ -131,11 +139,18 @@ class _ShiftReportsState extends State<ShiftReports> {
   }
 
   getShiftData() async {
-    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+    var shiftid = await CommunFun.getShiftId();
     if (shiftid != null) {
-      List<Shift> shift = await localAPI.getShiftData(shiftid);
+      List<Shift> shift = await shiftList.getShiftData(context, shiftid);
       setState(() {
-        shifittem = shift[0];
+        shifittem = shift.length > 0 ? shift[0] : shifittem;
+        cashSale = 0.00;
+        cashDeposit = 0.00;
+        cashRefund = 0.00;
+        cashRounding = 0.00;
+        payinOut = 0.00;
+        expectedVal = 0.00;
+        overShort = 0.00;
       });
       getpayInOutAmmount();
     }
@@ -149,7 +164,6 @@ class _ShiftReportsState extends State<ShiftReports> {
           return PayInOutDailog(
             title: title,
             ammount: amount,
-            isIn: isInAmmount,
             onClose: (amount, reson) {
               if (reson == "Other") {
                 Navigator.of(context).pop();
@@ -161,6 +175,14 @@ class _ShiftReportsState extends State<ShiftReports> {
             },
           );
         });
+  }
+
+  printShiftReport() async {
+    var shiftid = await CommunFun.getShiftId();
+    if (shiftid != null) {
+      await CommunFun.printShiftReportData(
+          printerreceiptList[0].printerId.toString(), context, shiftid);
+    }
   }
 
   otherReasonPop(amount) {
@@ -190,24 +212,16 @@ class _ShiftReportsState extends State<ShiftReports> {
     drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     drawer.localID = await CommunFun.getLocalID();
     drawer.terminalid = int.parse(terminalid);
-    var result = await localAPI.saveInOutDrawerData(drawer);
-    print(result);
+    var result = await shiftAPI.saveInOutDrawerData(drawer);
+
     getpayInOutAmmount();
   }
 
-  printShiftReport() async {
-    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
-    if (shiftid != null) {
-      await CommunFun.printShiftReportData(
-          printerreceiptList[0].printerId.toString(), context, shiftid);
-    }
-  }
-
   getpayInOutAmmount() async {
-    if (shifittem.appId != null) {
+    if (shifittem.shiftId != null) {
       List<Drawerdata> result =
-          await localAPI.getPayinOutammount(shifittem.appId);
-      print(result);
+          await shiftList.getPayinOutammount(shifittem.shiftId);
+
       if (result.length > 0) {
         setState(() {
           drawerData = result;
@@ -293,11 +307,11 @@ class _ShiftReportsState extends State<ShiftReports> {
                   ],
                 ),
                 Text(
-                  shifittem.createdAt != null
+                  shifittem.updatedAt != null
                       ? Strings.opened_at +
                           " " +
                           DateFormat('EEE, MMM d yyyy, hh:mm aaa')
-                              .format(DateTime.parse(shifittem.createdAt)) +
+                              .format(DateTime.parse(shifittem.updatedAt)) +
                           " by Admin "
                       : "",
                   textAlign: TextAlign.center,
@@ -319,10 +333,9 @@ class _ShiftReportsState extends State<ShiftReports> {
               shiftTitles(),
               crousalWidget(),
               scrollIndicator(),
-              // permissions.contains(Constant.EDIT_REPORT)
-              //?
-              squareActionButton()
-              // : SizedBox()
+              permissions.contains(Constant.EDIT_REPORT)
+                  ? squareActionButton()
+                  : SizedBox()
             ],
           ),
         ),
@@ -761,7 +774,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                             printerreceiptList[0].printerIp.toString(),
                             context,
                             "",
-                            Strings.openDrawer);
+                            "OpenDrawer");
                       } else {
                         CommunFun.showToast(
                             context, Strings.printer_not_available);
@@ -783,12 +796,14 @@ class _ShiftReportsState extends State<ShiftReports> {
         ));
   }
 
-  Widget shiftbtn() {
+  Widget shiftprintbtn() {
     return RaisedButton(
-      padding: EdgeInsets.all(0),
-      onPressed: () {},
+      padding: EdgeInsets.only(left: 10, right: 10),
+      onPressed: () {
+        printShiftReport();
+      },
       child: Text(
-        Strings.open,
+        Strings.print_reciept,
         style: TextStyle(color: Colors.deepOrange, fontSize: 15),
       ),
       color: Colors.transparent,
@@ -800,14 +815,12 @@ class _ShiftReportsState extends State<ShiftReports> {
     );
   }
 
-  Widget shiftprintbtn() {
+  Widget shiftbtn() {
     return RaisedButton(
-      padding: EdgeInsets.only(left: 10, right: 10),
-      onPressed: () {
-        printShiftReport();
-      },
+      padding: EdgeInsets.all(0),
+      onPressed: () {},
       child: Text(
-        Strings.print_reciept,
+        Strings.open,
         style: TextStyle(color: Colors.deepOrange, fontSize: 15),
       ),
       color: Colors.transparent,

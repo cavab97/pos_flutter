@@ -12,6 +12,8 @@ import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import '../components/communText.dart';
+import '../components/communText.dart';
 
 class VoucherPop extends StatefulWidget {
   // Opning ammount popup
@@ -63,6 +65,7 @@ class VoucherPopState extends State<VoucherPop> {
                 vaocher.minimumAmount.toString() +
                 " for this voucher.");
       }
+
       if (vaocher.maximumAmount == 0.0 ||
           vaocher.maximumAmount >= cartData.sub_total) {
         isReturn = true;
@@ -91,7 +94,6 @@ class VoucherPopState extends State<VoucherPop> {
     DateTime now = new DateTime.now();
     String nowDate = DateFormat('yyyy-MM-dd').format(now);
     String fromtonow = DateFormat('yyyy-MM-dd').format(toDate);
-
     if (now.isBefore(toDate) && now.isAfter(fromDate) || nowDate == fromtonow) {
       return true;
     } else {
@@ -99,10 +101,10 @@ class VoucherPopState extends State<VoucherPop> {
     }
   }
 
-  checkitsUsableorNot(vaocher) async {
-    var count = await localAPI.getVoucherusecount(vaocher.voucherId);
-    return count;
-  }
+  // checkitsUsableorNot(vaocher) async {
+  //   var count = await localAPI.getVoucherusecount(vaocher.voucherId);
+  //   return count;
+  // }
 
   checkValidVoucher(vaocher) async {
     Voucher selectedvoucher;
@@ -110,11 +112,12 @@ class VoucherPopState extends State<VoucherPop> {
     if (chheckIsExpired == true) {
       var isminmaxValid = await checkMinMaxValue(vaocher);
       if (isminmaxValid == true) {
-        var count = await checkitsUsableorNot(vaocher);
-        if (vaocher.usesTotal == 0 || count < vaocher.usesTotal) {
+        //var count = await checkitsUsableorNot(vaocher);
+        if (vaocher.usesTotal == 0 || vaocher.totalUsed < vaocher.usesTotal) {
           //check product
           bool isadded = false;
           double totaldiscount = 0;
+          List<MSTCartdetails> cartitemList = [];
           for (int i = 0; i < widget.cartList.length; i++) {
             var cartitem = widget.cartList[i];
             // product
@@ -135,7 +138,7 @@ class VoucherPopState extends State<VoucherPop> {
             // categorys
             if (vaocher.voucherCategories != "") {
               List<ProductCategory> produtCategory =
-                  await localAPI.getProductCategory(cartitem.productId);
+                  await cartapi.getProductCategory(cartitem.productId);
               vaocher.voucherCategories.split(',').forEach((tag) {
                 for (int j = 0; j < produtCategory.length; j++) {
                   ProductCategory cat = produtCategory[j];
@@ -148,10 +151,11 @@ class VoucherPopState extends State<VoucherPop> {
             }
             if (cartitem.discount != null && cartitem.discount != 0.0) {
               totaldiscount += cartitem.discount;
-              var result = await localAPI.addVoucherIndetail(
-                cartitem,
-                vaocher.voucherId,
-              );
+              // var result = await cartapi.addVoucherIndetail(
+              //   cartitem,
+              //   vaocher.voucherId,
+              // );
+              cartitemList.add(cartitem);
             } else {
               totaldiscount = vaocher.voucherDiscount;
             }
@@ -163,7 +167,7 @@ class VoucherPopState extends State<VoucherPop> {
               cartData.grand_total = cartData.grand_total - cartData.discount;
           cartData.voucher_detail = json.encode(vaocher);
           cartData.voucher_id = vaocher.voucherId;
-          var result1 = await localAPI.addVoucherInOrder(cartData, vaocher);
+          var result1 = await cartapi.addVoucherInOrder(cartData, cartitemList);
           selectedvoucher = vaocher;
           isadded = true;
           selectedvoucher = vaocher;
@@ -185,7 +189,7 @@ class VoucherPopState extends State<VoucherPop> {
   validateCode() async {
     if (codeConteroller.text.length != 0) {
       List<Voucher> vaocher =
-          await localAPI.checkVoucherIsExit(codeConteroller.text);
+          await cartapi.checkVoucherIsExit(codeConteroller.text);
       if (vaocher.length > 0) {
         checkValidVoucher(vaocher[0]);
       } else {

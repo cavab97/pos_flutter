@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
@@ -35,6 +36,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   final _formKey = GlobalKey<FormState>();
   final _formKey1 = GlobalKey<FormState>();
   LocalAPI localAPI = LocalAPI();
+  PaymentList paymentAPI = new PaymentList();
   bool isLoading = false;
   var errorMSG = "";
   var newAmmount;
@@ -60,7 +62,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   }
 
   getPaymentMethods() async {
-    var result = await localAPI.getPaymentMethods();
+    var result = await paymentAPI.getPaymentMethods();
     List<Payments> mainPaymentList =
         result.where((i) => i.isParent == 0).toList();
 
@@ -120,7 +122,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       orderpayment.reference_number = refInputController.text;
       orderpayment.is_split = isSpliting ? 1 : 0;
       orderpayment.op_amount = ammount;
-      orderpayment.isCash = payment.name.toLowerCase().contains("cash") ? 1 : 0;
       double change = 0.0;
       if (ammount > widget.grandTotal) {
         change = ammount - widget.grandTotal;
@@ -176,8 +177,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       orderpayment.last_digits = digitController.text;
       orderpayment.reference_number = refInputController.text;
       orderpayment.is_split = isSpliting ? 1 : 0;
-      orderpayment.isCash =
-          seletedPayment.name.toLowerCase().contains("cash") ? 1 : 0;
       lastamount = lastamount - orderpayment.op_amount;
       setState(() {
         splitedPayment = splitedPayment + ammount;
@@ -242,34 +241,34 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     });
   }
 
-  // splitPayment() {
-  //   setState(() {
-  //     isSpliting = true;
-  //     ispaymented = false;
-  //   });
+  splitPayment() {
+    setState(() {
+      isSpliting = true;
+      ispaymented = false;
+    });
 
-  //   showDialog(
-  //       // Opning Ammount Popup
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return OpeningAmmountPage(
-  //             ammountext: newAmmount.toString(),
-  //             onEnter: (ammount) {
-  //               double newap = splitedPayment + double.parse(ammount);
-  //               setState(() {
-  //                 splitedPayment = newap;
-  //                 updatedAmmount = double.parse(ammount);
-  //               });
-  //               OrderPayment payment = new OrderPayment();
-  //               payment.op_amount =
-  //                   ammount != null ? double.parse(ammount) : newAmmount;
-  //               splitpaymentList.add(payment);
-  //               setState(() {
-  //                 splitpaymentList = splitpaymentList;
-  //               });
-  //             });
-  //       });
-  // }
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return OpeningAmmountPage(
+              ammountext: newAmmount.toString(),
+              onEnter: (ammount) {
+                double newap = splitedPayment + double.parse(ammount);
+                setState(() {
+                  splitedPayment = newap;
+                  updatedAmmount = double.parse(ammount);
+                });
+                OrderPayment payment = new OrderPayment();
+                payment.op_amount =
+                    ammount != null ? double.parse(ammount) : newAmmount;
+                splitpaymentList.add(payment);
+                setState(() {
+                  splitpaymentList = splitpaymentList;
+                });
+              });
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -313,7 +312,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               children: paymenttyppeList.map((payment) {
-                print(payment);
+               
                 return ListTile(
                     contentPadding: EdgeInsets.all(5),
                     leading: Hero(

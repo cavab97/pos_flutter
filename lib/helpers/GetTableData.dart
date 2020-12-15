@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:mcncashier/models/Voucher_History.dart';
+
 import 'package:mcncashier/models/Asset.dart';
 import 'package:mcncashier/models/Attributes.dart';
 import 'package:mcncashier/models/Box.dart';
@@ -8,7 +8,6 @@ import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Category_Attributes.dart';
 import 'package:mcncashier/models/Citys.dart';
-import 'package:mcncashier/models/colorTable.dart';
 import 'package:mcncashier/models/Countrys.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Customer_Liquor_Inventory.dart';
@@ -47,6 +46,8 @@ import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/models/category_branch.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:mcncashier/models/colorTable.dart';
+import 'package:mcncashier/models/Voucher_History.dart';
 
 class TableData {
   Future<int> ifExists(Database db, dynamic data) async {
@@ -139,10 +140,12 @@ class TableData {
             'value': branchTax.id,
           };
           var count = await ifExists(db, data);
+          var branchtax = branchTax.toJson();
+          await branchtax.remove("code");
           if (count == 0) {
-            var result = await db.insert("branch_tax", branchTax.toJson());
+            var result = await db.insert("branch_tax", branchtax);
           } else {
-            var result = await db.update("branch_tax", branchTax.toJson(),
+            var result = await db.update("branch_tax", branchtax,
                 where: "id =?", whereArgs: [branchTax.id]);
           }
         }
@@ -226,7 +229,6 @@ class TableData {
           }
         }
       }
-
       return 1;
     } catch (e) {
       print(e);
@@ -658,6 +660,7 @@ class TableData {
           }
         }
       }
+
       if (terminalData != null) {
         var terminalDataitem = terminalData;
         Terminal terminal = Terminal.fromJson(terminalDataitem);
@@ -758,10 +761,12 @@ class TableData {
             'value': vouchers.voucherId,
           };
           var count = await ifExists(db, data);
+          var vaoucher = vouchers.toJson();
+          await vaoucher.remove("total_used");
           if (count == 0) {
-            var result = await db.insert("voucher", vouchers.toJson());
+            var result = await db.insert("voucher", vaoucher);
           } else {
-            var result = await db.update("voucher", vouchers.toJson(),
+            var result = await db.update("voucher", vaoucher,
                 where: "voucher_id =?", whereArgs: [vouchers.voucherId]);
           }
         }
@@ -801,7 +806,6 @@ class TableData {
           orderdetails.server_id = orderdetails.detailId;
           var detail = orderdetails.toJson();
           await detail.remove("base64");
-
           if (count == 0) {
             if (orderdetails.detailId != null) {
               await db.insert("order_detail", detail);
@@ -867,7 +871,6 @@ class TableData {
             'key': "op_id",
             'value': paymentData.op_id,
           };
-
           var count = await ifExists(db, data);
           paymentData.isSync = 1;
           paymentData.server_id = paymentData.op_id;
@@ -921,6 +924,7 @@ class TableData {
           }
         }
       }
+
       return 1;
     } catch (e) {
       print(e);

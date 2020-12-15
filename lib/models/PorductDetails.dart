@@ -22,7 +22,6 @@ class ProductDetails {
   String deletedBy;
   String base64;
   String attrCat;
-  int box_pId;
   String modifireName;
 
   ProductDetails(
@@ -48,7 +47,6 @@ class ProductDetails {
       this.deletedBy,
       this.base64,
       this.attrCat,
-      this.box_pId,
       this.modifireName});
 
   ProductDetails.fromJson(Map<String, dynamic> json) {
@@ -81,7 +79,6 @@ class ProductDetails {
     base64 = json['base64'] != null ? json['base64'] : "";
     attrCat = json["attr_cat"];
     modifireName = json["modifire_Name"];
-    box_pId = json["box_pId"];
   }
 
   Map<String, dynamic> toJson() {
@@ -109,7 +106,6 @@ class ProductDetails {
     data['deleted_by'] = this.deletedBy;
     data['base64'] = this.base64;
     data['attr_cat'] = this.attrCat;
-    data['box_pId'] = this.box_pId;
     data["modifire_Name"] = this.modifireName;
     return data;
   }

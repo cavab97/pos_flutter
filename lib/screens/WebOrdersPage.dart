@@ -4,6 +4,8 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
+import 'package:mcncashier/helpers/LocalAPI/TablesList.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -21,6 +23,8 @@ class WebOrderPages extends StatefulWidget {
 class _WebOrderPagesState extends State<WebOrderPages>
     with SingleTickerProviderStateMixin {
   LocalAPI localAPI = LocalAPI();
+  Cartlist cartapi = new Cartlist();
+  TablesList tableapi = TablesList();
   List<MST_Cart> onlineList = [];
   List<MST_Cart> offlineList = [];
   TabController _tabController;
@@ -47,7 +51,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
 
   getCartList() async {
     var branchid = await CommunFun.getbranchId();
-    List<MST_Cart> cart = await localAPI.getCartList(branchid);
+    List<MST_Cart> cart = await cartapi.getCartsList(branchid);
     if (cart.length > 0) {
       var offlineListitem = cart.where((x) => x.source != 1).toList();
       var onlineListitem = cart.where((x) => x.source == 1).toList();
@@ -69,11 +73,11 @@ class _WebOrderPagesState extends State<WebOrderPages>
       assignTable(cart);
     } else {
       List<Table_order> tableorder =
-          await localAPI.getTableOrders(cart.table_id);
+          await tableapi.getTableOrders(cart.table_id);
       if (tableorder.length > 0) {
         await Preferences.setStringToSF(
             Constant.TABLE_DATA, json.encode(tableorder[0]));
-        Navigator.pushNamed(context, Constant.DashboardScreen);
+        await Navigator.pushNamed(context, Constant.DashboardScreen);
       } else {
         assignTable(cart);
       }
@@ -282,7 +286,8 @@ class _WebOrderPagesState extends State<WebOrderPages>
                         ]),
                   ),
                 ),
-                cart.table_id == null
+                permissions.contains(Constant.EDIT_ORDER) &&
+                        cart.table_id == null
                     ? GestureDetector(
                         onTap: () {
                           checkTableAssigned(cart);

@@ -3,12 +3,17 @@
 class Constant {
   static final String NO_PREF_FOUND = "pref_not_found";
   static final String TERMINAL_KEY = "TerminalKey";
+  static final String IS_JOIN_SERVER = "isJoinSever";
+  static final String SERVER_SHIFT_ID = "serverShiftid";
+  static final String SERVER_BRANCH_ID = "serverBranchid";
+  static final String SERVER_IP = "serverIp";
   static final String BRANCH_ID = "branchId";
   static final String LOIGN_USER = "Login_user";
   static final String IS_USER_LOGIN = "isUserLogin";
   static final String LAGUAGE_CODE = 'languageCode';
   static final String LastSync_Table = "LastSync_Table";
   static final String IS_SHIFT_OPEN = "IS_SHIFT_OPENE";
+  static final String IS_FIRST_TIME_SYNC = "firsttimeSync";
   static final String SERVER_DATE_TIME = "ServertDateTime";
   static final String ORDER_SERVER_DATE_TIME = "orderServerTime";
   static final String SERVER_TIME_ZONE = "ServertTimeZone";
@@ -32,44 +37,23 @@ class Constant {
                               Manage Permission  status
   =================================================================================*/
 
-  //static final String VIEW_ORDER = "view_order";
-  //static final String ADD_ORDER = "add_order";
-  //static final String EDIT_ORDER = "edit_order";
-  //static final String DELETE_ORDER = "delete_order";
-
-  // static final String VIEW_ITEM = "view_item";
-  // static final String ADD_ITEM = "add_item";
-  // static final String EDIT_ITEM = "edit_item";
-  // static final String DELETE_ITEM = "delete_item";
-
-  // static final String VIEW_REPORT = "view_report";
-  // static final String ADD_REPORT = "add_report";
-  // static final String EDIT_REPORT = "edit_report";
-  // static final String DELETE_REPORT = "delete_report";
-  // static final String OPEN_DRAWER = "view_open_drawer";
-  static final String PRINT_RECIEPT = "print_receipt";
-
-  static final String VIEW_SYNC = "sync";
-  static final String DELETE_ITEM = "delete_item";
+  static final String VIEW_ORDER = "view_order";
+  static final String ADD_ORDER = "add_order";
+  static final String EDIT_ORDER = "edit_order";
   static final String DELETE_ORDER = "delete_order";
-  static final String OPEN_DRAWER = "open_drawer";
-  static final String CASH_IN = "cash_in";
-  static final String CASH_OUT = "cash_out";
-  static final String PAYMENT = "payment";
-  static final String DISCOUNT_ITEM = "discount_item";
-  static final String DISCOUNT_ORDER = "discount_order";
-  static final String ENTERTAINMENT_BILL = "entertainment_bill";
-  static final String CHANGE_TABLE = "change_table";
-  static final String JOIN_TABLE = "join_table";
-  static final String CANCEL_ORDER = "cancel_table";
-  static final String CHANG_PAX = "change_pax";
-  static final String SPLIT_TABLE = "split_table";
-  static final String PRINT_QR = "print_qr";
-  static final String OPENING = "opening";
-  static final String CLOSING = "closing";
-  static final String REFUND = "refund";
-  static final String CANCLE_TRANSACTION = "cancel_transaction";
 
+  static final String VIEW_ITEM = "view_item";
+  static final String ADD_ITEM = "add_item";
+  static final String EDIT_ITEM = "edit_item";
+  static final String DELETE_ITEM = "delete_item";
+
+  static final String VIEW_REPORT = "view_report";
+  static final String ADD_REPORT = "add_report";
+  static final String EDIT_REPORT = "edit_report";
+  static final String DELETE_REPORT = "delete_report";
+  static final String OPEN_DRAWER = "view_open_drawer";
+  static final String PRINT_RECIEPT = "view_printing";
+  static final String VIEW_SYNC = "view_sync";
   /*==============================================================================
                               Manage API status
   =================================================================================*/

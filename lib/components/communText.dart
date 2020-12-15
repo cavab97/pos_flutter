@@ -1,22 +1,23 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:mcncashier/helpers/LocalAPI/Branch.dart';
+import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
+import 'package:mcncashier/helpers/LocalAPI/CheckinOutList.dart';
+import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
+import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
+import 'package:mcncashier/helpers/LocalAPI/ShiftList.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/CheckInout.dart';
 import 'package:mcncashier/models/Customer.dart';
-import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
-import 'package:mcncashier/models/Order.dart';
-import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
-import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
-import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
@@ -34,14 +35,21 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/User.dart';
-import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:toast/toast.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:intl/intl.dart';
+import 'package:wifi_ip/wifi_ip.dart';
+import '../helpers/LocalAPI/PrinterList.dart';
+import '../helpers/LocalAPI/TablesList.dart';
 
 DatabaseHelper databaseHelper = DatabaseHelper();
+Cartlist cartapi = new Cartlist();
+BranchList branchapi = new BranchList();
+PaymentList paymentAPI = new PaymentList();
 LocalAPI localAPI = LocalAPI();
+ShiftList shiftAPI = new ShiftList();
+PrinterList printerList = new PrinterList();
 Timer timer;
 double taxvalues = 0;
 
@@ -155,9 +163,6 @@ class CommunFun {
         fillColor: Colors.white,
       ),
       style: TextStyle(color: Colors.black, fontSize: 25.0),
-      onChanged: (e) {
-        print(e);
-      },
     );
   }
 
@@ -165,7 +170,7 @@ class CommunFun {
   static countServiceCharge(serviceCharge, subtotal) async {
     if (serviceCharge == null) {
       var branchid = await getbranchId();
-      Branch branchData = await localAPI.getBranchData(branchid);
+      Branch branchData = await branchapi.getbranchData(branchid);
       serviceCharge = branchData.serviceCharge;
     }
     // else if (service_charge < 0) {
@@ -184,7 +189,7 @@ class CommunFun {
   /*get Service Percentage*/
   static getServiceChargePer() async {
     var branchID = await getbranchId();
-    Branch branchData = await localAPI.getBranchData(branchID);
+    Branch branchData = await branchapi.getbranchData(branchID);
     var serviceCharge = branchData.serviceCharge;
     if (serviceCharge != null) {
       return serviceCharge;
@@ -304,9 +309,6 @@ class CommunFun {
     await SyncAPICalls.sendInvenotryTable(context);
     await SyncAPICalls.sendCustomerWineInventory(context);
     await SyncAPICalls.sendCancledOrderTable(context);
-    await SyncAPICalls.sendTerminalLogTable(context);
-    await SyncAPICalls.sendShiftTable(context);
-    await SyncAPICalls.sendShiftdetails(context);
     if (isClose) {
       Navigator.of(context).pop();
     }
@@ -350,7 +352,7 @@ class CommunFun {
       databaseHelper.insertData1(data1["data"]);
       CommunFun.setServerTime(null, "1");
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
 
     var data2_1 =
@@ -359,7 +361,7 @@ class CommunFun {
       databaseHelper.insertData2_1(data2_1["data"]);
       CommunFun.setServerTime(null, "1");
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
 
     var data2_2 =
@@ -368,7 +370,7 @@ class CommunFun {
       databaseHelper.insertData2_2(data2_2["data"]);
       CommunFun.setServerTime(null, "1");
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
     var data2_3 =
         await SyncAPICalls.getDataServerBulk2_3(context); //api call 2_3
@@ -376,7 +378,7 @@ class CommunFun {
       databaseHelper.insertData2_3(data2_3["data"]);
       CommunFun.setServerTime(null, "2");
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
 
     var data3 = await SyncAPICalls.getDataServerBulk3(context); // call 3
@@ -384,14 +386,14 @@ class CommunFun {
       databaseHelper.insertData3(data3["data"]);
       CommunFun.setServerTime(null, "3");
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
     var data4_1 = await SyncAPICalls.getDataServerBulk4_1(context);
     if (data4_1 != null) {
       databaseHelper.insertData4_1(data4_1["data"]);
       CommunFun.setServerTime(null, "4");
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
     var data4_2 = await SyncAPICalls.getDataServerBulk4_2(context);
     if (data4_2 != null) {
@@ -402,7 +404,7 @@ class CommunFun {
         print("Error when getting data4_3");
       }
     } else {
-      CommunFun.showToast(context, "something want wrong!");
+      CommunFun.showToast(context, "Something went wrong!");
     }
 
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
@@ -439,7 +441,7 @@ class CommunFun {
       await databaseHelper.accetsData(aceets["data"]);
       await Preferences.setStringToSF(
           Constant.OFFSET, aceets["data"]["next_offset"].toString());
-      print(aceets["data"]["product_image"]);
+
       if (offset == null) {
         if (aceets["data"]["next_offset"] != 0) {
           getAssetsData(context, isOpen);
@@ -459,7 +461,7 @@ class CommunFun {
         }
       } else {
         if (aceets["data"]["next_offset"] == 0) {
-          await CommunFun.setServerTime(aceets, "5");
+          await CommunFun.setServerTime(aceets, "4");
         } else {
           getAssetsData(context, isOpen);
         }
@@ -487,8 +489,17 @@ class CommunFun {
     }
   }
 
+  static clearAfterCheckout(context) async {
+    await Preferences.removeSinglePref(Constant.IS_CHECKIN);
+    await Preferences.removeSinglePref(Constant.SHIFT_ID);
+    await Preferences.removeSinglePref(Constant.LOIGN_USER);
+    await Preferences.removeSinglePref(Constant.USER_PERMISSION);
+    await Navigator.pushNamed(context, Constant.PINScreen);
+  }
+
   static checkoutMenualy(context, id) async {
     CheckinOut checkIn = new CheckinOut();
+    CheckinOutList check = new CheckinOutList();
     var shiftid = await Preferences.getStringValuesSF(Constant.SHIFT_ID);
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
@@ -501,17 +512,9 @@ class CommunFun {
     checkIn.status = "OUT";
     checkIn.timeInOut = date.toString();
     checkIn.sync = 0;
-    await localAPI.userCheckInOut(checkIn);
+    var result = await check.userCheckInOut(checkIn);
     clearAfterCheckout(context);
     CommunFun.showToast(context, "User deleted from database.");
-  }
-
-  static clearAfterCheckout(context) async {
-    await Preferences.removeSinglePref(Constant.IS_CHECKIN);
-    await Preferences.removeSinglePref(Constant.SHIFT_ID);
-    await Preferences.removeSinglePref(Constant.LOIGN_USER);
-    await Preferences.removeSinglePref(Constant.USER_PERMISSION);
-    await Navigator.pushNamed(context, Constant.PINScreen);
   }
 
   static getDataTables2(context, isOpen) async {
@@ -571,7 +574,7 @@ class CommunFun {
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
     if (countrys != null) {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print(result);
+
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {
@@ -623,7 +626,7 @@ class CommunFun {
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
     if (countrys != null) {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print(result);
+
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {
@@ -668,7 +671,7 @@ class CommunFun {
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
     if (countrys != null) {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print(result);
+
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {
@@ -696,7 +699,7 @@ class CommunFun {
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
     if (countrys != null) {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print(result);
+
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {
@@ -734,8 +737,45 @@ class CommunFun {
     return terminalId;
   }
 
+  static getShiftId() async {
+    var isjoin = await CommunFun.checkIsJoinServer();
+    var shiftid;
+    if (isjoin == false) {
+      shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+    } else {
+      shiftid = await Preferences.getStringValuesSF(Constant.SERVER_SHIFT_ID);
+    }
+    return shiftid;
+  }
+
+  static setserverSettings() async {
+    var branchid = await branchapi.getBranchid();
+    var shiftid = await shiftAPI.getshiftID();
+    await Preferences.setStringToSF(
+        Constant.SERVER_BRANCH_ID, branchid.toString());
+    await Preferences.setStringToSF(
+        Constant.SERVER_SHIFT_ID, shiftid.toString());
+  }
+
+  static checkShift() async {
+    // var isjoin = await CommunFun.checkIsJoinServer();
+    // var isOpen;
+    // if (isjoin == false) {
+    var  isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
+    // } else {
+    //   isOpen = await shiftAPI.getshifisOpen();
+    // }
+    return isOpen;
+  }
+
   static getbranchId() async {
-    var branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    var isjoin = await CommunFun.checkIsJoinServer();
+    var branchid;
+    if (isjoin == false) {
+      branchid = await Preferences.getStringValuesSF(Constant.BRANCH_ID);
+    } else {
+      branchid = await Preferences.getStringValuesSF(Constant.SERVER_BRANCH_ID);
+    }
     return branchid;
   }
 
@@ -771,13 +811,11 @@ class CommunFun {
     //converttoserver tiem
     var timeZone =
         await Preferences.getStringValuesSF(Constant.SERVER_TIME_ZONE);
-    print(timeZone);
+    ;
     if (timeZone != null) {
       final detroitTime =
           new tz.TZDateTime.from(dateTime, tz.getLocation(timeZone));
-      print('Local India Time: ' + dateTime.toString());
-      print('Detroit Time: ' + detroitTime.toString());
-      // DateTime serverDate = DateTime.parse(detroitTime.toString());
+
       String formattedDate =
           DateFormat('yyyy-MM-dd HH:mm:ss').format(detroitTime);
       print(formattedDate);
@@ -884,9 +922,8 @@ class CommunFun {
           "printer_id": detailitem["printer_id"],
           "product_name": detailitem["product_name"],
           "product_price": detailitem["product_price"],
-          "product_detail_amount":
-              (detailitem["product_price"] * detailitem["product_qty"]),
           "product_qty": detailitem["product_qty"],
+          "product_detail_amount": detailitem["product_detail_amount"],
           "product_net_price": detailitem["product_net_price"],
           "tax_id": detailitem["tax_id"],
           "tax_value": detailitem["tax_value"],
@@ -910,16 +947,17 @@ class CommunFun {
         for (var p = 0; p < cartSubData.length; p++) {
           var subdetailitem = cartSubData[p];
           var subdata = {
-            "id": subdetailitem["csd_id"],
+            "id": subdetailitem["cart_sub_detail_id"],
             "cart_details_id": subdetailitem["cart_detail_id"],
             "localID": subdetailitem["localID"],
             "product_id": subdetailitem["product_id"],
             "modifier_id": subdetailitem["modifier_id"],
             "modifier_price": subdetailitem["modifier_price"],
             "ca_id": subdetailitem["ca_id"],
-            "attr_price": subdetailitem["attribute_price"],
+            "attr_price": subdetailitem["attr_price"],
           };
           var subjson = MSTSubCartdetails.fromJson(subdata);
+
           await localAPI.updateWebCartsubdetails(subjson);
         }
       }
@@ -930,8 +968,8 @@ class CommunFun {
   }
 
   static checkUserPermission(userid) async {
-    LocalAPI localAPI = LocalAPI();
-    List<PosPermission> permissions = await localAPI.getUserPermissions(userid);
+    List<PosPermission> permissions =
+        await branchapi.getUserPermissions(userid);
     if (permissions.length > 0) {
       await Preferences.setStringToSF(
           Constant.USER_PERMISSION, permissions[0].posPermissionName);
@@ -948,12 +986,66 @@ class CommunFun {
     }
   }
 
+  static wifiDetails() async {
+    WifiIpInfo info;
+    try {
+      info = await WifiIp.getWifiIp;
+    } on PlatformException {
+      print('Failed to get broadcast IP.');
+      info = null;
+    }
+    return info;
+  }
+
+  static checkIsJoinServer() async {
+    var isjoin = await Preferences.getStringValuesSF(Constant.IS_JOIN_SERVER);
+    if (isjoin != null) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  static getcartDetails(cartid) async {
+    List<MSTCartdetails> list = await cartapi.getCartItem(cartid);
+    return list;
+  }
+
+  static getCartData(cartid) async {
+    List<MST_Cart> cartval = await cartapi.getCurrCartTotals(cartid);
+    MST_Cart cart = new MST_Cart();
+    if (cartval.length != 0) {
+      cart = cartval[0];
+      return cart;
+    } else {
+      return cart;
+    }
+  }
+
+  static getbranch() async {
+    var branchid = await CommunFun.getbranchId();
+    var branch = await branchapi.getbranchData(branchid);
+    return branch;
+  }
+
+  static getbranchTax() async {
+    var branchid = await CommunFun.getbranchId();
+    List<BranchTax> taxlists = await branchapi.getTaxList(branchid);
+    return taxlists;
+  }
+
+  static getOrderPaymentMethod(opmethodId) async {
+    Payments paument_method =
+        await paymentAPI.getOrderpaymentmethod(opmethodId);
+    return paument_method;
+  }
+
   static autosyncAllTables(context) async {
     await getsetWebOrders(context);
     await SyncAPICalls.syncOrderstoDatabase(context);
-    await SyncAPICalls.sendCancledOrderTable(context);
     await SyncAPICalls.sendInvenotryTable(context);
     await SyncAPICalls.sendCustomerWineInventory(context);
+    await SyncAPICalls.sendCancledOrderTable(context);
     await Preferences.removeSinglePref(Constant.LastSync_Table);
     await Preferences.removeSinglePref(Constant.OFFSET);
     await CommunFun.syncAfterSuccess(context, false);
@@ -971,7 +1063,6 @@ class CommunFun {
   static checkisAutoSync(context) async {
     var isSync = await Preferences.getStringValuesSF(Constant.IS_AUTO_SYNC);
     if (isSync != null) {
-      print(isSync);
       if (isSync == "true") {
         startAutosync(context);
       }
@@ -984,8 +1075,7 @@ class CommunFun {
     if (isSynctimer != null && isSynctimer != "") {
       timertime = int.parse(isSynctimer);
     }
-    print("++++++++++++++++++++++++++++++++++++");
-    print(timertime);
+
     var _inactivityTimeout = Duration(minutes: timertime);
     timer =
         Timer(_inactivityTimeout, () => CommunFun.autosyncAllTables(context));
@@ -1035,7 +1125,7 @@ class CommunFun {
 
   static getTaxs() async {
     var branchid = await CommunFun.getbranchId();
-    List<BranchTax> taxlists = await localAPI.getTaxList(branchid);
+    List<BranchTax> taxlists = await branchapi.getTaxList(branchid);
     return taxlists;
   }
 
@@ -1046,7 +1136,6 @@ class CommunFun {
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
-        List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
         var taxval = taxlistitem.rate != null
             ? subT * double.parse(taxlistitem.rate) / 100
             : 0.0;
@@ -1062,7 +1151,7 @@ class CommunFun {
           "updated_at": taxlistitem.updatedAt,
           "updated_by": taxlistitem.updatedBy,
           "taxAmount": taxval.toStringAsFixed(2),
-          "taxCode": tax.length > 0 ? tax[0].code : "" //tax.code
+          "taxCode": taxlistitem.code
         };
         totalTax.add(taxmap);
       }
@@ -1076,26 +1165,27 @@ class CommunFun {
         : 0.00;
   }
 
-  static getPrinter(productItem) async {
+  static getPrinter(context, productItem) async {
     Printer printer = new Printer();
-    List<Printer> printerlist =
-        await localAPI.getPrinter(productItem.productId.toString());
+    List<Printer> printerlist = await printerList.getPrinterForAddCartProduct(
+        context, productItem.productId.toString());
     if (printerlist.length > 0) {
       printer = printerlist[0];
     }
     return printer;
   }
 
-  static addItemToCart(productItem, List<MSTCartdetails> cartItems,
-      MST_Cart allcartData, callback, context) async {
+  static addItemToCart(productItem, List<MSTCartdetails> cartItems, allcartData,
+      callback, context) async {
     taxvalues = 0;
+    OrdersList orderApi = new OrdersList();
     MST_Cart cart = new MST_Cart();
-    SaveOrder orderData = new SaveOrder();
     var branchid = await CommunFun.getbranchId();
     Table_order table = await CommunFun.getTableData();
     User loginUser = await CommunFun.getuserDetails();
     Customer customerData = await CommunFun.getCustomerData();
-    Printer printer = await CommunFun.getPrinter(productItem);
+    Printer printer = await CommunFun.getPrinter(context, productItem);
+    Cartlist cartlist = new Cartlist();
     bool isEditing = false;
     MSTCartdetails sameitem;
     var contain = cartItems
@@ -1114,7 +1204,7 @@ class CommunFun {
         qty = sameitem.productQty + qty;
       }
       List<ProductStoreInventory> cartval =
-          await localAPI.checkItemAvailableinStore(productItem.productId);
+          await orderApi.checkItemAvailableinStore(productItem.productId);
       if (cartval.length > 0) {
         double storeqty = cartval[0].qty;
         if (storeqty < qty) {
@@ -1135,6 +1225,12 @@ class CommunFun {
     var totalTax = await CommunFun.countTax(subtotal);
     var grandTotal = await CommunFun.countGrandtotal(
         subtotal, serviceCharge, taxvalues, disc);
+    if (allcartData != null) {
+      cart.id = allcartData.id;
+      cart.discount_type = allcartData.discount_type;
+      cart.voucher_detail = allcartData.voucher_detail;
+      cart.voucher_id = cart.voucher_id;
+    }
     cart.user_id = customerData.customerId;
     cart.branch_id = int.parse(branchid);
     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
@@ -1142,33 +1238,19 @@ class CommunFun {
     cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
     cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
     cart.table_id = table.table_id;
-    cart.discount_type = allcartData != null ? allcartData.discount_type : 0;
     cart.total_qty = qty;
     cart.tax = double.parse(taxvalues.toStringAsFixed(2));
     cart.source = 2;
     cart.tax_json = json.encode(totalTax);
     cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
     cart.customer_terminal = customerData != null ? customerData.terminalId : 0;
-    if (!isEditing) {
-      cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
-    }
+    cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
     cart.created_by = loginUser.id;
     cart.localID = await CommunFun.getLocalID();
-    if (allcartData != null) {
-      cart.voucher_detail = allcartData.voucher_detail;
-      cart.voucher_id = allcartData.voucher_id;
+    var cartid = await cartlist.addcart(context, cart);
+    if (allcartData.id == null) {
+      await insertTableData(table, cartid, context);
     }
-    if (!isEditing) {
-      orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-    }
-    orderData.numberofPax = table != null ? table.number_of_pax : 0;
-    orderData.isTableOrder = table != null ? 1 : 0;
-    var cartid = await localAPI.insertItemTocart(
-        allcartData != null ? allcartData.id : null,
-        cart,
-        productItem,
-        orderData,
-        table.table_id);
     ProductDetails cartItemproduct = new ProductDetails();
     cartItemproduct = productItem;
     cartItemproduct
@@ -1189,7 +1271,7 @@ class CommunFun {
             sameitem.productPrice
         : double.parse(productItem.price.toStringAsFixed(2));
     cartdetails.productQty = isEditing ? sameitem.productQty + 1.0 : 1.0;
-    cartdetails.productNetPrice = productItem.oldPrice;
+    cartdetails.productNetPrice = productItem.price;
     cartdetails.createdBy = loginUser.id;
     cartdetails.cart_detail = jsonEncode(data);
     cartdetails.discount = isEditing ? sameitem.discount : 0;
@@ -1199,9 +1281,23 @@ class CommunFun {
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = await CommunFun.getLocalID();
-    var detailID = await localAPI.addintoCartDetails(cartdetails);
-    print(detailID);
+    var detailID = await cartlist.addintoCartDetails(context, cartdetails);
     callback();
+  }
+
+  static insertTableData(tableData, cartid, context) async {
+    SaveOrder orderData = new SaveOrder();
+    Table_order tableorder = new Table_order();
+    Cartlist cartlist = new Cartlist();
+    TablesList tableList = new TablesList();
+    orderData.numberofPax = tableData != null ? tableData.number_of_pax : 0;
+    orderData.isTableOrder = tableData != null ? 1 : 0;
+    orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    orderData.cartId = cartid;
+    var saveOid = await cartlist.addSaveOrder(orderData, tableData.table_id);
+    tableorder = tableData;
+    tableorder.save_order_id = saveOid;
+    var tableid = await tableList.insertTableOrder(context, tableorder);
   }
 
   static getCustomer() async {
@@ -1287,111 +1383,112 @@ class CommunFun {
   static printShiftReportData(printerIP, context, shiftid) async {
     PrintReceipt printKOT = PrintReceipt();
 
-    Shift shifittem = new Shift();
-    var branchid = await CommunFun.getbranchId();
-    var terminalID = await CommunFun.getTeminalKey();
-    List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
-    var grosssale = 0.00;
-    var netsale = 0.00;
-    var discountval = 0.00;
-    var refundval = 0.00;
-    var taxval = 0.00;
-    var totalRend = 0.00;
-    var textService = 0.00;
-    double cashSale = 0.00;
-    double roundingAmount = 0.00;
-    double cashDeposit = 0.00;
-    double cashRefund = 0.00;
-    double cashRounding = 0.00;
-    double payInAmmount = 0.00;
-    double payOutAmmount = 0.00;
-    double expectedVal = 0.00;
-    int totalPax = 0;
+    //   Shift shifittem = new Shift();
+    //   var branchid = await CommunFun.getbranchId();
+    //   var terminalID = await CommunFun.getTeminalKey();
+    //   List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
+    //   var grosssale = 0.00;
+    //   var netsale = 0.00;
+    //   var discountval = 0.00;
+    //   var refundval = 0.00;
+    //   var taxval = 0.00;
+    //   var totalRend = 0.00;
+    //   var textService = 0.00;
+    //   double cashSale = 0.00;
+    //   double roundingAmount = 0.00;
+    //   double cashDeposit = 0.00;
+    //   double cashRefund = 0.00;
+    //   double cashRounding = 0.00;
+    //   double payInAmmount = 0.00;
+    //   double payOutAmmount = 0.00;
+    //   double expectedVal = 0.00;
+    //   int totalPax = 0;
 
-    // Summery
-    if (ordersList.length > 0) {
-      for (var i = 0; i < ordersList.length; i++) {
-        Orders order = ordersList[i];
-        grosssale += order.sub_total;
-        refundval += 0;
-        netsale = grosssale - refundval;
-        taxval += order.tax_amount;
-        totalPax += order.pax;
-        roundingAmount += order.rounding_amount;
-        textService += order.serviceCharge;
-        discountval += order.voucher_amount != null ? order.voucher_amount : 0;
-        totalRend = (netsale + taxval + textService) - discountval;
-      }
-    }
+    //   // Summery
+    //   if (ordersList.length > 0) {
+    //     for (var i = 0; i < ordersList.length; i++) {
+    //       Orders order = ordersList[i];
+    //       grosssale += order.sub_total;
+    //       refundval += 0;
+    //       netsale = grosssale - refundval;
+    //       taxval += order.tax_amount;
+    //       totalPax += order.pax;
+    //       roundingAmount += order.rounding_amount;
+    //       textService += order.serviceCharge;
+    //       discountval += order.voucher_amount != null ? order.voucher_amount : 0;
+    //       totalRend = (netsale + taxval + textService) - discountval;
+    //     }
+    //   }
 
-    // cash drawer summery
+    //   // cash drawer summery
 
-    if (shiftid != null) {
-      List<Shift> shift = await localAPI.getShiftData(shiftid);
-      if (shift.length > 0) {
-        shifittem = shift[0];
-        //statringAmount = shifittem.startAmount !=nu shifittem.startAmount.toDouble();
-      }
-    }
-    List<Drawerdata> result =
-        await localAPI.getPayinOutammount(shifittem.appId);
-    if (result.length > 0) {
-      var drawerAmm = 0.00;
-      for (var i = 0; i < result.length; i++) {
-        Drawerdata drawer = result[i];
-        if (drawer.amount != null) {
-          drawerAmm += drawer.amount;
-          cashSale += drawer.amount;
-          cashDeposit = 0.00;
-          cashRefund += drawer.isAmountIn == 0 ? drawer.amount : 0.00;
-          cashRounding += 0.00;
-          payInAmmount += drawer.isAmountIn == 1 ? drawer.amount : 0.00;
-          payOutAmmount += drawer.isAmountIn == 2 ? drawer.amount : 0.00;
-        }
-      }
-      expectedVal = drawerAmm;
-    }
+    //   if (shiftid != null) {
+    //     List<Shift> shift = await localAPI.getShiftData(shiftid);
+    //     if (shift.length > 0) {
+    //       shifittem = shift[0];
+    //       //statringAmount = shifittem.startAmount !=nu shifittem.startAmount.toDouble();
+    //     }
+    //   }
+    //   List<Drawerdata> result =
+    //       await localAPI.getPayinOutammount(shifittem.appId);
+    //   if (result.length > 0) {
+    //     var drawerAmm = 0.00;
+    //     for (var i = 0; i < result.length; i++) {
+    //       Drawerdata drawer = result[i];
+    //       if (drawer.amount != null) {
+    //         drawerAmm += drawer.amount;
+    //         cashSale += drawer.amount;
+    //         cashDeposit = 0.00;
+    //         cashRefund += drawer.isAmountIn == 0 ? drawer.amount : 0.00;
+    //         cashRounding += 0.00;
+    //         payInAmmount += drawer.isAmountIn == 1 ? drawer.amount : 0.00;
+    //         payOutAmmount += drawer.isAmountIn == 2 ? drawer.amount : 0.00;
+    //       }
+    //     }
+    //     expectedVal = drawerAmm;
+    //   }
 
-    /// Payment summery
-    dynamic payments = await localAPI.getTotalPayment(terminalID, branchid);
-    List<Payments> paymentMethods = payments["payment_method"];
-    List<OrderPayment> orderPayments = payments["payments"];
-    // branch Data
-    var branchID = await getbranchId();
-    Branch branchData = await localAPI.getBranchData(branchID);
+    //   /// Payment summery
+    //   dynamic payments = await localAPI.getTotalPayment(terminalID, branchid);
+    //   List<Payments> paymentMethods = payments["payment_method"];
+    //   List<OrderPayment> orderPayments = payments["payments"];
+    //   // branch Data
+    //   var branchID = await getbranchId();
+    //   Branch branchData = await localAPI.getBranchData(branchID);
 
-    // terminal Data
-    Terminal terminalData = await localAPI.getTerminalDetails(terminalID);
+    //   // terminal Data
+    //   Terminal terminalData = await localAPI.getTerminalDetails(terminalID);
 
-    printKOT.shiftReportPrint(
-        printerIP,
-        context,
-        // Branch data
-        branchData,
-        totalPax,
-        // terminal data
-        terminalData,
-        //Summery Sales data
-        grosssale,
-        refundval,
-        discountval,
-        netsale,
-        taxval,
-        textService,
-        roundingAmount,
-        totalRend,
-        // Drawer Data
-        shifittem,
-        cashSale,
-        cashDeposit,
-        cashRefund,
-        cashRounding,
-        payInAmmount,
-        payOutAmmount,
-        expectedVal,
-        // Paymemts Data
-        orderPayments,
-        paymentMethods,
-        ordersList.length);
+    //   printKOT.shiftReportPrint(
+    //       printerIP,
+    //       context,
+    //       // Branch data
+    //       branchData,
+    //       totalPax,
+    //       // terminal data
+    //       terminalData,
+    //       //Summery Sales data
+    //       grosssale,
+    //       refundval,
+    //       discountval,
+    //       netsale,
+    //       taxval,
+    //       textService,
+    //       roundingAmount,
+    //       totalRend,
+    //       // Drawer Data
+    //       shifittem,
+    //       cashSale,
+    //       cashDeposit,
+    //       cashRefund,
+    //       cashRounding,
+    //       payInAmmount,
+    //       payOutAmmount,
+    //       expectedVal,
+    //       // Paymemts Data
+    //       orderPayments,
+    //       paymentMethods,
+    //       ordersList.length);
+    // }
   }
 }

@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
-import 'package:mcncashier/components/commanutils.dart';
-import 'package:mcncashier/components/communText.dart';
-import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class PayInOutDailog extends StatefulWidget {
-  PayInOutDailog({Key key, this.title, this.ammount, this.isIn, this.onClose})
+  PayInOutDailog({Key key, this.title, this.ammount, this.onClose})
       : super(key: key);
   Function onClose;
   final title;
   final ammount;
-  final isIn;
   @override
   PayInOutDailogstate createState() => PayInOutDailogstate();
 }
@@ -24,7 +20,6 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
   LocalAPI localAPI = LocalAPI();
   double ammount = 0.00;
   var selectedreason;
-  var permissions = "";
   List<String> reasonList = [
     "Add Change",
     "Deposit",
@@ -36,14 +31,6 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
     // setState(() {
     //   ammount = widget.ammount;
     // });
-    setPermissons();
-  }
-
-  setPermissons() async {
-    var permission = await CommunFun.getPemission();
-    setState(() {
-      permissions = permission;
-    });
   }
 
   openAmmountPop() {
@@ -54,7 +41,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
           return OpeningAmmountPage(
               ammountext: Strings.pay_in_ammount,
               onEnter: (ammountext) {
-                print(ammountext);
+               
                 setamount(ammountext);
               });
         });
@@ -154,16 +141,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
           Text(widget.title, style: Styles.drawerText()),
           GestureDetector(
               onTap: () {
-                if (widget.isIn && permissions.contains(Constant.CASH_IN) ||
-                    !widget.isIn && permissions.contains(Constant.CASH_OUT)) {
-                  openAmmountPop();
-                } else {
-                  CommonUtils.openPermissionPop(context,
-                      widget.isIn ? Constant.CASH_IN : Constant.CASH_OUT,
-                      () async {
-                    openAmmountPop();
-                  }, () {});
-                }
+                openAmmountPop();
               },
               child: Text(ammount.toStringAsFixed(2),
                   style: Styles.blackBoldLarge())),

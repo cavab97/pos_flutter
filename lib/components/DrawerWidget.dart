@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
@@ -14,7 +15,9 @@ import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/CloseShiftPage.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
-import 'package:mcncashier/components/commanutils.dart';
+import 'package:mcncashier/screens/WineStorage.dart';
+
+import '../helpers/LocalAPI/ShiftList.dart';
 
 class DrawerWid extends StatefulWidget {
   DrawerWid({Key key, this.onClose}) : super(key: key);
@@ -25,6 +28,7 @@ class DrawerWid extends StatefulWidget {
 
 class DrawerWidState extends State<DrawerWid> {
   PrintReceipt printKOT = PrintReceipt();
+  ShiftList shiftlist = ShiftList();
   List<Printer> printerreceiptList = new List<Printer>();
   var permissions = "";
   bool isShiftOpen = true;
@@ -69,7 +73,7 @@ class DrawerWidState extends State<DrawerWid> {
   }
 
   checkshift() async {
-    var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
+    var isOpen = await CommunFun.checkShift();
     setState(() {
       isShiftOpen = isOpen != null && isOpen == "true" ? true : false;
     });
@@ -94,7 +98,8 @@ class DrawerWidState extends State<DrawerWid> {
   }
 
   getAllPrinter() async {
-    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    List<Printer> printerDraft =
+        await printerList.getAllPrinterList(context, "1");
     setState(() {
       printerreceiptList = printerDraft;
     });
@@ -142,17 +147,12 @@ class DrawerWidState extends State<DrawerWid> {
   }
 
   sendOpenShft(ammount) async {
-    setState(() {
-      isShiftOpen = true;
-    });
-    Preferences.setStringToSF(Constant.IS_SHIFT_OPEN, isShiftOpen.toString());
-    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+    var shiftid = await CommunFun.getShiftId();
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     User userdata = await CommunFun.getuserDetails();
     Shift shift = new Shift();
-
-    int appid = await localAPI.getLastShiftAppID(terminalId);
+    int appid = await shiftlist.getLastShiftAppID(terminalId);
     if (shiftid == null && appid != 0) {
       shift.appId = appid + 1;
     } else {
@@ -172,18 +172,18 @@ class DrawerWidState extends State<DrawerWid> {
       shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
     shift.updatedBy = userdata.id;
-    var result = await localAPI.insertShift(shift, shiftid);
+    var result = await shiftlist.insertShift(context, shift, shiftid);
     if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
     } else {
+      await CommunFun.printShiftReportData(
+          printerreceiptList[0].printerIp.toString(), context, shiftid);
       await Preferences.removeSinglePref(Constant.DASH_SHIFT);
       await Preferences.removeSinglePref(Constant.IS_SHIFT_OPEN);
       await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
-      await CommunFun.printShiftReportData(
-          printerreceiptList[0].printerIp.toString(), context, shiftid);
+      checkshift();
     }
-    checkshift();
-    await Navigator.pushNamedAndRemoveUntil(
+    Navigator.pushNamedAndRemoveUntil(
         context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
         arguments: {"isAssign": false});
   }
@@ -212,22 +212,22 @@ class DrawerWidState extends State<DrawerWid> {
 
   syncAllTables() async {
     //Navigator.of(context).pop();
-    // if (permissions.contains(Constant.VIEW_SYNC)) {
-    await Preferences.removeSinglePref(Constant.LastSync_Table);
-    await Preferences.removeSinglePref(Constant.OFFSET);
-    await CommunFun.opneSyncPop(context);
-    await CommunFun.syncOrdersANDStore(context, false);
-    await CommunFun.syncAfterSuccess(context, false);
-    // } else {
-    //   await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
-    //       () async {
-    //     await Preferences.removeSinglePref(Constant.LastSync_Table);
-    //     await Preferences.removeSinglePref(Constant.OFFSET);
-    //     await CommunFun.opneSyncPop(context);
-    //     await CommunFun.syncOrdersANDStore(context, false);
-    //     await CommunFun.syncAfterSuccess(context, false);
-    //   }, () {});
-    // }
+    if (permissions.contains(Constant.VIEW_SYNC)) {
+      await Preferences.removeSinglePref(Constant.LastSync_Table);
+      await Preferences.removeSinglePref(Constant.OFFSET);
+      await CommunFun.opneSyncPop(context);
+      await CommunFun.syncOrdersANDStore(context, false);
+      await CommunFun.syncAfterSuccess(context, false);
+    } else {
+      await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
+          () async {
+        await Preferences.removeSinglePref(Constant.LastSync_Table);
+        await Preferences.removeSinglePref(Constant.OFFSET);
+        await CommunFun.opneSyncPop(context);
+        await CommunFun.syncOrdersANDStore(context, false);
+        await CommunFun.syncAfterSuccess(context, false);
+      }, () {});
+    }
   }
 
   @override
@@ -269,20 +269,22 @@ class DrawerWidState extends State<DrawerWid> {
                 style: Styles.drawerText(),
               ),
             ),
-            ListTile(
-              onTap: () {
-                gotoWebCart();
-              },
-              leading: Icon(
-                Icons.shopping_cart,
-                color: Colors.black,
-                size: SizeConfig.safeBlockVertical * 5,
-              ),
-              title: Text(
-                Strings.web_orders,
-                style: Styles.drawerText(),
-              ),
-            ),
+            permissions.contains(Constant.VIEW_ORDER)
+                ? ListTile(
+                    onTap: () {
+                      gotoWebCart();
+                    },
+                    leading: Icon(
+                      Icons.shopping_cart,
+                      color: Colors.black,
+                      size: SizeConfig.safeBlockVertical * 5,
+                    ),
+                    title: Text(
+                      Strings.web_orders,
+                      style: Styles.drawerText(),
+                    ),
+                  )
+                : SizedBox(),
             ListTile(
               onTap: () {
                 gotoWineStorage();
@@ -300,25 +302,9 @@ class DrawerWidState extends State<DrawerWid> {
             ListTile(
                 onTap: () {
                   if (isShiftOpen) {
-                    if (permissions.contains(Constant.CLOSING)) {
-                      closeShift(context);
-                    } else {
-                      CommonUtils.openPermissionPop(context, Constant.CLOSING,
-                          () async {
-                        closeShift(context);
-                      }, () {});
-                    }
+                    closeShift(context);
                   } else {
-                    if (permissions.contains(Constant.OPENING)) {
-                      openOpningAmmountPop(
-                          context, Strings.title_opening_amount);
-                    } else {
-                      CommonUtils.openPermissionPop(context, Constant.OPENING,
-                          () async {
-                        openOpningAmmountPop(
-                            context, Strings.title_opening_amount);
-                      }, () {});
-                    }
+                    openOpningAmmountPop(context, Strings.title_opening_amount);
                   }
                 },
                 leading: Icon(
@@ -329,23 +315,22 @@ class DrawerWidState extends State<DrawerWid> {
                 title: Text(
                     isShiftOpen ? Strings.close_shift : Strings.opne_shift,
                     style: Styles.drawerText())),
-            // permissions.contains(Constant.VIEW_REPORT)
-            //     ?
-            ListTile(
-              onTap: () {
-                gotoShiftReport();
-              },
-              leading: Icon(
-                Icons.filter_tilt_shift,
-                color: Colors.black,
-                size: SizeConfig.safeBlockVertical * 5,
-              ),
-              title: Text(
-                Strings.shift_Report,
-                style: Styles.drawerText(),
-              ),
-            ),
-            //: SizedBox(),,
+            permissions.contains(Constant.VIEW_REPORT)
+                ? ListTile(
+                    onTap: () {
+                      gotoShiftReport();
+                    },
+                    leading: Icon(
+                      Icons.filter_tilt_shift,
+                      color: Colors.black,
+                      size: SizeConfig.safeBlockVertical * 5,
+                    ),
+                    title: Text(
+                      Strings.shift_Report,
+                      style: Styles.drawerText(),
+                    ),
+                  )
+                : SizedBox(),
             // permissions.contains(Constant.VIEW_ORDER)
             ListTile(
                 onTap: () {
@@ -392,7 +377,7 @@ class DrawerWidState extends State<DrawerWid> {
       child: RaisedButton(
         padding: EdgeInsets.all(10),
         onPressed: () {
-          Navigator.pushNamed(context, Constant.PINScreen).then(backEvent);
+          Navigator.pushNamed(context, Constant.PINScreen);
         },
         child: Text(Strings.checkout, style: Styles.whiteBoldsmall()),
         color: Colors.deepOrange,
@@ -409,7 +394,7 @@ class DrawerWidState extends State<DrawerWid> {
         child: RaisedButton(
       padding: EdgeInsets.all(10),
       onPressed: () {
-        //Navigator.pushNamed(context, Constant.PINScreen).then(backEvent);
+        Navigator.pushNamed(context, Constant.PINScreen).then(backEvent);
       },
       child: Text(
         userDetails != null ? userDetails["name"] : "",
