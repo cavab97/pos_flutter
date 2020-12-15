@@ -26,6 +26,7 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
   @override
   void initState() {
     super.initState();
+    print("perFor" + widget.perFor.toString());
   }
 
   addINPin(val) {

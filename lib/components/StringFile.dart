@@ -21,10 +21,11 @@ class Strings {
   static String qty = "QTY";
   static String amount = "Amount";
   static String discount = "Discount";
-static String rounding_ammount = "Rounding Amount";
+
   static String service_charge = "Service Charge";
   static String tax = "TAX";
   static String grand_total = "GRAND TOTAL";
+  static String rounding_ammount = "Rounding Amount";
   static String search_bar_text = "Search product here...";
   static String btn_Add_customer = "Add Customer";
   static String select_customer = "Select Customer";
@@ -192,8 +193,8 @@ static String rounding_ammount = "Rounding Amount";
   static String scan = "Scan";
   static String list = "List";
   static String table_pax_msg = "Please enter pax minimum table capcity.";
-  static String cancle_order_msg = "Are you want sure cancel this table order?";
-  static String change_table_msg = "Are you want sure to change your table?";
+  static String cancle_order_msg = "Are you want to sure cancel this table order?";
+  static String change_table_msg = "Are you want to sure change your table?";
   static String table_not_avalilable = "Table not available for merge.";
   static String table_already_merged = "Table already merged with other table.";
   static String table_already_occupied = "Table already occupied";

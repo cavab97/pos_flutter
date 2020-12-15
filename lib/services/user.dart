@@ -5,11 +5,9 @@ import 'package:http/http.dart' as http;
 import 'package:mcncashier/services/allTablesSync.dart';
 
 Future<dynamic> login(dynamic user) async {
- 
   try {
     Uri url = Uri.parse(Configrations.base_URL + Configrations.login);
-    
-    
+
     final client = new http.Client();
     Map<String, dynamic> params = {
       'username': user.name,

@@ -14,7 +14,6 @@ import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/CloseShiftPage.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
-import 'package:mcncashier/screens/WineStorage.dart';
 import 'package:mcncashier/components/commanutils.dart';
 
 class DrawerWid extends StatefulWidget {
@@ -70,8 +69,7 @@ class DrawerWidState extends State<DrawerWid> {
   }
 
   checkshift() async {
-    var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN)
-        .then(backEvent);
+    var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
     setState(() {
       isShiftOpen = isOpen != null && isOpen == "true" ? true : false;
     });
@@ -178,11 +176,11 @@ class DrawerWidState extends State<DrawerWid> {
     if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
     } else {
-      await CommunFun.printShiftReportData(
-          printerreceiptList[0].printerIp.toString(), context, shiftid);
       await Preferences.removeSinglePref(Constant.DASH_SHIFT);
       await Preferences.removeSinglePref(Constant.IS_SHIFT_OPEN);
       await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
+      await CommunFun.printShiftReportData(
+          printerreceiptList[0].printerIp.toString(), context, shiftid);
     }
     checkshift();
     await Navigator.pushNamedAndRemoveUntil(
@@ -193,7 +191,7 @@ class DrawerWidState extends State<DrawerWid> {
   gotoShiftReport() {
     if (isShiftOpen) {
       Navigator.of(context).pop();
-      Navigator.pushNamed(context, Constant.ShiftOrders);
+      Navigator.pushNamed(context, Constant.ShiftOrders).then(backEvent);
     } else {
       CommunFun.showToast(context, Strings.shift_opne_alert_msg);
     }
@@ -214,22 +212,22 @@ class DrawerWidState extends State<DrawerWid> {
 
   syncAllTables() async {
     //Navigator.of(context).pop();
-    if (permissions.contains(Constant.VIEW_SYNC)) {
-      await Preferences.removeSinglePref(Constant.LastSync_Table);
-      await Preferences.removeSinglePref(Constant.OFFSET);
-      await CommunFun.opneSyncPop(context);
-      await CommunFun.syncOrdersANDStore(context, false);
-      await CommunFun.syncAfterSuccess(context, false);
-    } else {
-      await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
-          () async {
-        await Preferences.removeSinglePref(Constant.LastSync_Table);
-        await Preferences.removeSinglePref(Constant.OFFSET);
-        await CommunFun.opneSyncPop(context);
-        await CommunFun.syncOrdersANDStore(context, false);
-        await CommunFun.syncAfterSuccess(context, false);
-      }, () {});
-    }
+    // if (permissions.contains(Constant.VIEW_SYNC)) {
+    await Preferences.removeSinglePref(Constant.LastSync_Table);
+    await Preferences.removeSinglePref(Constant.OFFSET);
+    await CommunFun.opneSyncPop(context);
+    await CommunFun.syncOrdersANDStore(context, false);
+    await CommunFun.syncAfterSuccess(context, false);
+    // } else {
+    //   await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
+    //       () async {
+    //     await Preferences.removeSinglePref(Constant.LastSync_Table);
+    //     await Preferences.removeSinglePref(Constant.OFFSET);
+    //     await CommunFun.opneSyncPop(context);
+    //     await CommunFun.syncOrdersANDStore(context, false);
+    //     await CommunFun.syncAfterSuccess(context, false);
+    //   }, () {});
+    // }
   }
 
   @override
@@ -271,22 +269,20 @@ class DrawerWidState extends State<DrawerWid> {
                 style: Styles.drawerText(),
               ),
             ),
-            permissions.contains(Constant.VIEW_ORDER)
-                ? ListTile(
-                    onTap: () {
-                      gotoWebCart();
-                    },
-                    leading: Icon(
-                      Icons.shopping_cart,
-                      color: Colors.black,
-                      size: SizeConfig.safeBlockVertical * 5,
-                    ),
-                    title: Text(
-                      Strings.web_orders,
-                      style: Styles.drawerText(),
-                    ),
-                  )
-                : SizedBox(),
+            ListTile(
+              onTap: () {
+                gotoWebCart();
+              },
+              leading: Icon(
+                Icons.shopping_cart,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 5,
+              ),
+              title: Text(
+                Strings.web_orders,
+                style: Styles.drawerText(),
+              ),
+            ),
             ListTile(
               onTap: () {
                 gotoWineStorage();
@@ -304,9 +300,25 @@ class DrawerWidState extends State<DrawerWid> {
             ListTile(
                 onTap: () {
                   if (isShiftOpen) {
-                    closeShift(context);
+                    if (permissions.contains(Constant.CLOSING)) {
+                      closeShift(context);
+                    } else {
+                      CommonUtils.openPermissionPop(context, Constant.CLOSING,
+                          () async {
+                        closeShift(context);
+                      }, () {});
+                    }
                   } else {
-                    openOpningAmmountPop(context, Strings.title_opening_amount);
+                    if (permissions.contains(Constant.OPENING)) {
+                      openOpningAmmountPop(
+                          context, Strings.title_opening_amount);
+                    } else {
+                      CommonUtils.openPermissionPop(context, Constant.OPENING,
+                          () async {
+                        openOpningAmmountPop(
+                            context, Strings.title_opening_amount);
+                      }, () {});
+                    }
                   }
                 },
                 leading: Icon(
@@ -317,22 +329,23 @@ class DrawerWidState extends State<DrawerWid> {
                 title: Text(
                     isShiftOpen ? Strings.close_shift : Strings.opne_shift,
                     style: Styles.drawerText())),
-            permissions.contains(Constant.VIEW_REPORT)
-                ? ListTile(
-                    onTap: () {
-                      gotoShiftReport();
-                    },
-                    leading: Icon(
-                      Icons.filter_tilt_shift,
-                      color: Colors.black,
-                      size: SizeConfig.safeBlockVertical * 5,
-                    ),
-                    title: Text(
-                      Strings.shift_Report,
-                      style: Styles.drawerText(),
-                    ),
-                  )
-                : SizedBox(),
+            // permissions.contains(Constant.VIEW_REPORT)
+            //     ?
+            ListTile(
+              onTap: () {
+                gotoShiftReport();
+              },
+              leading: Icon(
+                Icons.filter_tilt_shift,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 5,
+              ),
+              title: Text(
+                Strings.shift_Report,
+                style: Styles.drawerText(),
+              ),
+            ),
+            //: SizedBox(),,
             // permissions.contains(Constant.VIEW_ORDER)
             ListTile(
                 onTap: () {
@@ -396,7 +409,7 @@ class DrawerWidState extends State<DrawerWid> {
         child: RaisedButton(
       padding: EdgeInsets.all(10),
       onPressed: () {
-        Navigator.pushNamed(context, Constant.PINScreen).then(backEvent);
+        //Navigator.pushNamed(context, Constant.PINScreen).then(backEvent);
       },
       child: Text(
         userDetails != null ? userDetails["name"] : "",

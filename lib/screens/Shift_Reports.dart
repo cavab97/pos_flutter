@@ -6,6 +6,8 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Order.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Drawer.dart';
@@ -14,8 +16,6 @@ import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:mcncashier/models/OrderPayment.dart';
-import 'package:mcncashier/models/Payment.dart';
 
 class ShiftReports extends StatefulWidget {
   // PIN Enter PAGE
@@ -54,7 +54,6 @@ class _ShiftReportsState extends State<ShiftReports> {
   double payOutAmmount = 0.00;
   double payInAmmount = 0.00;
   List<OrderPayment> orderpaymentData = [];
-
   List<Payments> orderPaymenttypes = [];
   final List<String> imgList = [
     'Summary',
@@ -109,10 +108,8 @@ class _ShiftReportsState extends State<ShiftReports> {
         refundval += 0;
         netsale = grosssale - refundval;
         taxval += order.tax_amount;
-        servicecharge +=
-            order.serviceCharge != null ? order.serviceCharge : 0.0;
-        discountval +=
-            order.voucher_amount != null ? order.voucher_amount : 0.0;
+        servicecharge += order.serviceCharge != null ? order.serviceCharge : 0;
+        discountval += order.voucher_amount != null ? order.voucher_amount : 0;
         totaltend = (netsale + taxval + servicecharge) - discountval;
         setState(() {
           grossSale = grosssale;
@@ -152,6 +149,7 @@ class _ShiftReportsState extends State<ShiftReports> {
           return PayInOutDailog(
             title: title,
             ammount: amount,
+            isIn: isInAmmount,
             onClose: (amount, reson) {
               if (reson == "Other") {
                 Navigator.of(context).pop();
@@ -321,9 +319,10 @@ class _ShiftReportsState extends State<ShiftReports> {
               shiftTitles(),
               crousalWidget(),
               scrollIndicator(),
-              permissions.contains(Constant.EDIT_REPORT)
-                  ? squareActionButton()
-                  : SizedBox()
+              // permissions.contains(Constant.EDIT_REPORT)
+              //?
+              squareActionButton()
+              // : SizedBox()
             ],
           ),
         ),
@@ -471,6 +470,19 @@ class _ShiftReportsState extends State<ShiftReports> {
                 trailing: Text(
                   refund.toStringAsFixed(2),
                   style: Styles.blackMediumBold(),
+                ),
+              ),
+            ),
+            Container(
+              color: Colors.grey,
+              child: ListTile(
+                title: Text(
+                  "Discount",
+                  style: Styles.whiteMediumBold(),
+                ),
+                trailing: Text(
+                  discount.toStringAsFixed(2),
+                  style: Styles.whiteMediumBold(),
                 ),
               ),
             ),

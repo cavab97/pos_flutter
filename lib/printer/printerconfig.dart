@@ -418,6 +418,7 @@ class PrintReceipt {
             bold: false,
           )),
     ]);
+
     /*For font - A size 1 = 4 Character print */
     ticket.hr();
     ticket.text("$receipt48CharHeader",
@@ -451,6 +452,7 @@ class PrintReceipt {
           printColumnWitSpace(8, item.product_price.toStringAsFixed(2), true);
 
       ticket.text("$nameOfProduct$qtyOfProduct$priceOfProduct$amountOfProduct",
+          containsChinese: true,
           styles: PosStyles(
               align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 

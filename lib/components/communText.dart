@@ -304,6 +304,9 @@ class CommunFun {
     await SyncAPICalls.sendInvenotryTable(context);
     await SyncAPICalls.sendCustomerWineInventory(context);
     await SyncAPICalls.sendCancledOrderTable(context);
+    await SyncAPICalls.sendTerminalLogTable(context);
+    await SyncAPICalls.sendShiftTable(context);
+    await SyncAPICalls.sendShiftdetails(context);
     if (isClose) {
       Navigator.of(context).pop();
     }
@@ -456,7 +459,7 @@ class CommunFun {
         }
       } else {
         if (aceets["data"]["next_offset"] == 0) {
-          await CommunFun.setServerTime(aceets, "4");
+          await CommunFun.setServerTime(aceets, "5");
         } else {
           getAssetsData(context, isOpen);
         }
@@ -881,7 +884,8 @@ class CommunFun {
           "printer_id": detailitem["printer_id"],
           "product_name": detailitem["product_name"],
           "product_price": detailitem["product_price"],
-          "product_detail_amount": detailitem["product_detail_amount"],
+          "product_detail_amount":
+              (detailitem["product_price"] * detailitem["product_qty"]),
           "product_qty": detailitem["product_qty"],
           "product_net_price": detailitem["product_net_price"],
           "tax_id": detailitem["tax_id"],
@@ -947,9 +951,9 @@ class CommunFun {
   static autosyncAllTables(context) async {
     await getsetWebOrders(context);
     await SyncAPICalls.syncOrderstoDatabase(context);
+    await SyncAPICalls.sendCancledOrderTable(context);
     await SyncAPICalls.sendInvenotryTable(context);
     await SyncAPICalls.sendCustomerWineInventory(context);
-    await SyncAPICalls.sendCancledOrderTable(context);
     await Preferences.removeSinglePref(Constant.LastSync_Table);
     await Preferences.removeSinglePref(Constant.OFFSET);
     await CommunFun.syncAfterSuccess(context, false);
@@ -1167,7 +1171,6 @@ class CommunFun {
         table.table_id);
     ProductDetails cartItemproduct = new ProductDetails();
     cartItemproduct = productItem;
-
     cartItemproduct
         .toJson()
         .removeWhere((String key, dynamic value) => value == null);
@@ -1374,8 +1377,8 @@ class CommunFun {
         discountval,
         netsale,
         taxval,
-        roundingAmount,
         textService,
+        roundingAmount,
         totalRend,
         // Drawer Data
         shifittem,

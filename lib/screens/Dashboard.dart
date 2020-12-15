@@ -221,9 +221,6 @@ class _DashboradPageState extends State<DashboradPage>
         Navigator.popAndPushNamed(context, Constant.SelectTableScreen,
             arguments: {"isAssign": false});
       }
-      Navigator.pushNamedAndRemoveUntil(
-          context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
-          arguments: {"isAssign": false});
     }
   }
 
@@ -425,7 +422,13 @@ class _DashboradPageState extends State<DashboradPage>
             });
         break;
       case 3:
-        closeShift();
+        if (permissions.contains(Constant.CLOSING)) {
+          CommonUtils.openPermissionPop(context, Constant.CLOSING, () async {
+            closeShift();
+          }, () {});
+        } else {
+          closeShift();
+        }
         break;
       case 4:
         printCheckList();
@@ -753,9 +756,16 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
-  sendPayment() {
+  sendPayment() async {
     if (cartList.length != 0) {
-      opnePaymentMethod();
+      if (permissions.contains(Constant.PAYMENT)) {
+        opnePaymentMethod();
+      } else {
+        await CommonUtils.openPermissionPop(context, Constant.PAYMENT,
+            () async {
+          opnePaymentMethod();
+        }, () {});
+      }
     } else {
       CommunFun.showToast(context, Strings.cart_empty);
     }
@@ -2131,25 +2141,25 @@ class _DashboradPageState extends State<DashboradPage>
                         : SizedBox());
               },
               onSuggestionSelected: (suggestion) {
-                if (permissions.contains(Constant.ADD_ORDER)) {
-                  if (suggestion.qty == null ||
-                      suggestion.hasInventory != 1 ||
-                      suggestion.qty > 0.0) {
-                    if (isShiftOpen) {
-                      if (isTableSelected && !isWebOrder) {
-                        showQuantityDailog(suggestion, false);
-                      } else {
-                        if (!isWebOrder) {
-                          selectTable();
-                        }
-                      }
+                //  if (permissions.contains(Constant.ADD_ORDER)) {
+                if (suggestion.qty == null ||
+                    suggestion.hasInventory != 1 ||
+                    suggestion.qty > 0.0) {
+                  if (isShiftOpen) {
+                    if (isTableSelected && !isWebOrder) {
+                      showQuantityDailog(suggestion, false);
                     } else {
-                      CommunFun.showToast(context, Strings.shift_open_message);
+                      if (!isWebOrder) {
+                        selectTable();
+                      }
                     }
                   } else {
-                    CommunFun.showToast(context, Strings.out_of_stoke_msg);
+                    CommunFun.showToast(context, Strings.shift_open_message);
                   }
+                } else {
+                  CommunFun.showToast(context, Strings.out_of_stoke_msg);
                 }
+                // }
                 // Navigator.of(context).push(MaterialPageRoute(
                 //     //builder: (context) => ProductPage(product: suggestion)
                 //     ));
@@ -2211,7 +2221,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   Widget addCustomerBtn(context) {
-    return customer == null && permissions.contains(Constant.ADD_ORDER)
+    return customer == null
         ? RaisedButton(
             padding: EdgeInsets.only(left: 5, right: 5, top: 0, bottom: 0),
             onPressed: () {
@@ -2326,11 +2336,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: (permissions.contains(Constant.ADD_ORDER) ||
-                            permissions.contains(Constant.EDIT_ORDER)) &&
-                        cartList.length > 0
-                    ? true
-                    : false,
+                enabled: cartList.length > 0 ? true : false,
                 value: 4,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2349,11 +2355,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: (permissions.contains(Constant.ADD_ORDER) ||
-                            permissions.contains(Constant.EDIT_ORDER)) &&
-                        cartList.length > 0
-                    ? true
-                    : false,
+                enabled: cartList.length > 0 ? true : false,
                 value: 5,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2437,19 +2439,19 @@ class _DashboradPageState extends State<DashboradPage>
               meal.price != null ? meal.price.toStringAsFixed(2) : "";
           return InkWell(
             onTap: () {
-              if (permissions.contains(Constant.EDIT_ORDER)) {
-                if (isShiftOpen) {
-                  if (isTableSelected && !isWebOrder) {
-                    showQuantityDailog(meal, true);
-                  } else {
-                    if (!isWebOrder) {
-                      selectTable();
-                    }
-                  }
+              // if (permissions.contains(Constant.EDIT_ORDER)) {
+              if (isShiftOpen) {
+                if (isTableSelected && !isWebOrder) {
+                  showQuantityDailog(meal, true);
                 } else {
-                  CommunFun.showToast(context, Strings.shift_open_message);
+                  if (!isWebOrder) {
+                    selectTable();
+                  }
                 }
+              } else {
+                CommunFun.showToast(context, Strings.shift_open_message);
               }
+              // }
             },
             child: Container(
               height: itemHeight,
@@ -2542,14 +2544,14 @@ class _DashboradPageState extends State<DashboradPage>
                       product.hasInventory != 1 ||
                       product.qty > 0.0) ||
                   (product.hasRacManagemant == 1 && product.box_pId != null)) {
-                if (permissions.contains(Constant.ADD_ORDER)) {
-                  checkshiftopne(product);
-                } else {
-                  CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
-                      () {
-                    checkshiftopne(product);
-                  }, () {});
-                }
+                //  if (permissions.contains(Constant.ADD_ORDER)) {
+                checkshiftopne(product);
+                // } else {
+                //   CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
+                //       () {
+                //     checkshiftopne(product);
+                //   }, () {});
+                // }
               } else {
                 CommunFun.showToast(
                     context,
@@ -2720,26 +2722,26 @@ class _DashboradPageState extends State<DashboradPage>
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
                 if (!isWebOrder) {
-                  if (permissions.contains(Constant.ADD_ORDER) ||
-                      permissions.contains(Constant.EDIT_ORDER)) {
-                    sendPayment();
-                  } else {
-                    CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
-                        () {
-                      sendPayment();
-                    }, () {});
-                  }
+                  // if (permissions.contains(Constant.ADD_ORDER) ||
+                  //     permissions.contains(Constant.EDIT_ORDER)) {
+                  sendPayment();
+                  // } else {
+                  //   CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
+                  //       () {
+                  //     sendPayment();
+                  //   }, () {});
+                  // }
                 } else {
                   //weborder payment
-                  if (permissions.contains(Constant.ADD_ORDER) ||
-                      permissions.contains(Constant.EDIT_ORDER)) {
-                    checkoutWebOrder();
-                  } else {
-                    CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
-                        () {
-                      checkoutWebOrder();
-                    }, () {});
-                  }
+                  // if (permissions.contains(Constant.ADD_ORDER) ||
+                  //     permissions.contains(Constant.EDIT_ORDER)) {
+                  checkoutWebOrder();
+                  // } else {
+                  //   CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
+                  //       () {
+                  //     checkoutWebOrder();
+                  //   }, () {});
+                  // }
                 }
               },
               child: Text(
@@ -2788,7 +2790,10 @@ class _DashboradPageState extends State<DashboradPage>
               ),
               SizedBox(height: 30),
               shiftbtn(() {
-                openOpningAmmountPop(Strings.title_opening_amount);
+                CommonUtils.openPermissionPop(context, Constant.OPENING,
+                    () async {
+                  openOpningAmmountPop(Strings.title_opening_amount);
+                }, () {});
               })
             ],
           ),
@@ -2945,14 +2950,14 @@ class _DashboradPageState extends State<DashboradPage>
                           color: Colors.blueAccent,
                           icon: Icons.free_breakfast,
                           onTap: () {
-                            if (permissions.contains(Constant.EDIT_ITEM)) {
-                              applyforFocProduct(cart);
-                            } else {
-                              CommonUtils.openPermissionPop(
-                                  context, Constant.EDIT_ITEM, () {
-                                applyforFocProduct(cart);
-                              }, () {});
-                            }
+                            // if (permissions.contains(Constant.EDIT_ITEM)) {
+                            applyforFocProduct(cart);
+                            // } else {
+                            //   CommonUtils.openPermissionPop(
+                            //       context, Constant.EDIT_ITEM, () {
+                            //     applyforFocProduct(cart);
+                            //   }, () {});
+                            // }
                           },
                         )
                       : SizedBox(),
@@ -2963,14 +2968,14 @@ class _DashboradPageState extends State<DashboradPage>
                           color: Colors.blueAccent,
                           icon: Icons.free_breakfast,
                           onTap: () {
-                            if (permissions.contains(Constant.EDIT_ITEM)) {
-                              applyforFocProduct(cart);
-                            } else {
-                              CommonUtils.openPermissionPop(
-                                  context, Constant.EDIT_ITEM, () {
-                                applyforFocProduct(cart);
-                              }, () {});
-                            }
+                            // if (permissions.contains(Constant.EDIT_ITEM)) {
+                            applyforFocProduct(cart);
+                            // } else {
+                            //   CommonUtils.openPermissionPop(
+                            //       context, Constant.EDIT_ITEM, () {
+                            //     applyforFocProduct(cart);
+                            //   }, () {});
+                            // }
                           },
                         )
                       : SizedBox(),
@@ -2979,14 +2984,14 @@ class _DashboradPageState extends State<DashboradPage>
                     icon: Icons.edit,
                     onTap: () {
                       if (cart.isFocProduct != 1) {
-                        if (permissions.contains(Constant.EDIT_ORDER)) {
-                          editCartItem(cart);
-                        } else {
-                          CommonUtils.openPermissionPop(
-                              context, Constant.EDIT_ORDER, () {
-                            editCartItem(cart);
-                          }, () {});
-                        }
+                        // if (permissions.contains(Constant.EDIT_ORDER)) {
+                        editCartItem(cart);
+                        // } else {
+                        //   CommonUtils.openPermissionPop(
+                        //       context, Constant.EDIT_ORDER, () {
+                        //     editCartItem(cart);
+                        //   }, () {});
+                        // }
                       } else {
                         CommunFun.showToast(context, Strings.foc_product_msg);
                       }
@@ -2996,11 +3001,11 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.red,
                     icon: Icons.delete_outline,
                     onTap: () {
-                      if (permissions.contains(Constant.DELETE_ORDER)) {
+                      if (permissions.contains(Constant.DELETE_ITEM)) {
                         itememovefromCart(cart);
                       } else {
                         CommonUtils.openPermissionPop(
-                            context, Constant.DELETE_ORDER, () {
+                            context, Constant.DELETE_ITEM, () {
                           itememovefromCart(cart);
                         }, () {});
                       }
@@ -3201,11 +3206,12 @@ class _DashboradPageState extends State<DashboradPage>
                           padding: EdgeInsets.all(3),
                           child: RaisedButton(
                             onPressed: () {
-                              if (permissions.contains(Constant.EDIT_ORDER)) {
+                              if (permissions
+                                  .contains(Constant.DISCOUNT_ORDER)) {
                                 openVoucherPop();
                               } else {
                                 CommonUtils.openPermissionPop(
-                                    context, Constant.EDIT_ORDER, () {
+                                    context, Constant.DISCOUNT_ORDER, () {
                                   openVoucherPop();
                                 }, () {});
                               }

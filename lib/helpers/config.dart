@@ -1,6 +1,7 @@
 class Configrations {
-  //static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
-  static String base_URL = "https://mcnpos.com.my/api/v1/en/";
+  //static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/"; // local
+  //static String base_URL = "https://mcnpos.com.my/api/v1/en/"; // live
+  static String base_URL = "http://staging.mcnpos.com.my/api/v1/en/"; // staging
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String config = "configs";
@@ -23,5 +24,7 @@ class Configrations {
       "rac-box-liquor-inventory-datatable";
   static String update_customer_liquor_inventory_data =
       "update-customer-liquor-inventory-data";
-      static String createShiftdata = "create-shift-detail-data";
+  static String createShiftdata = "create-shift-data";
+  static String createShiftdetaildata = "create-shift-detail-data";
+  static String create_terminal_log_data = "create-terminal-log-data";
 }
