@@ -104,7 +104,7 @@ class Strings {
   static String assetsBG = "assets/bg.jpg";
   static String no_imageAsset = 'assets/no_image.png';
   static String enter = "E\nn\nt\ne\nr";
-  static String invalid_pin_msg = "Invalid PIN.";
+  static String invalid_pin_msg = "Authorization Required";
   static String clear = "Clear";
   static String store_Validation_message =
       "selected qty is not available in store";
