@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/Asset.dart';
 import 'package:mcncashier/models/Attributes.dart';
 import 'package:mcncashier/models/Box.dart';
@@ -751,6 +751,7 @@ class TableData {
     var orderModifiers = tablesData["order_modifier"];
     var orderPayments = tablesData["order_payment"];
     var cancleOrders = tablesData["order_cancel"];
+    var voucherHistoryData = tablesData["voucher_history"];
     try {
       if (voucherData.length != 0) {
         for (var i = 0; i < voucherData.length; i++) {
@@ -783,6 +784,7 @@ class TableData {
           };
           var count = await ifExists(db, data);
           order.server_id = order.order_id;
+          order.isSync = 1;
           if (count == 0) {
             await db.insert("orders", order.toJson());
           } else {
@@ -802,6 +804,11 @@ class TableData {
           };
 
           var count = await ifExists(db, data);
+          orderdetails.isSync = 1;
+          orderdetails.server_id = orderdetails.detailId;
+          var detail = orderdetails.toJson();
+          await detail.remove("base64");
+
           if (count == 0) {
             if (orderdetails.detailId != null) {
               await db.insert("order_detail", orderdetails.toJson());
@@ -817,6 +824,8 @@ class TableData {
           var orderAttributesitem = orderAttributes[i];
           OrderAttributes attrData =
               OrderAttributes.fromJson(orderAttributesitem);
+          attrData.isSync = 1;
+          attrData.server_id = attrData.oa_id;
           var attrr = attrData.toJson();
           await attrr.remove("name");
           var data = {
@@ -843,6 +852,8 @@ class TableData {
             'key': "om_id",
             'value': modiData.om_id,
           };
+          modiData.isSync = 1;
+          modiData.server_id = modiData.om_id;
           var mod = modiData.toJson();
           await mod.remove("name");
           var count = await ifExists(db, data);
@@ -863,7 +874,10 @@ class TableData {
             'key': "op_id",
             'value': paymentData.op_id,
           };
+
           var count = await ifExists(db, data);
+          paymentData.isSync = 1;
+          paymentData.server_id = paymentData.op_id;
           if (count == 0) {
             await db.insert("order_payment", paymentData.toJson());
           } else {
@@ -882,11 +896,35 @@ class TableData {
             'value': cancleOrder.id,
           };
           var count = await ifExists(db, data);
+          cancleOrder.isSync = 1;
+          cancleOrder.serverId = cancleOrder.id;
           if (count == 0) {
             await db.insert("order_cancel", cancleOrder.toJson());
           } else {
             await db.update("order_cancel", cancleOrder.toJson(),
                 where: "id =?", whereArgs: [cancleOrder.id]);
+          }
+        }
+      }
+      if (voucherHistoryData.length != 0) {
+        for (var i = 0; i < voucherHistoryData.length; i++) {
+          var voucherHistoryDataItem = voucherHistoryData[i];
+          VoucherHistory voucherHis =
+              VoucherHistory.fromJson(voucherHistoryDataItem);
+          var data = {
+            'table': "voucher_history",
+            'key': "voucher_history_id",
+            'value': voucherHis.voucher_history_id,
+          };
+          var count = await ifExists(db, data);
+          voucherHis.server_id = voucherHis.voucher_history_id;
+          if (count == 0) {
+            var result =
+                await db.insert("voucher_history", voucherHis.toJson());
+          } else {
+            var result = await db.update("voucher_history", voucherHis.toJson(),
+                where: "voucher_history_id =?",
+                whereArgs: [voucherHis.voucher_history_id]);
           }
         }
       }

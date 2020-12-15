@@ -5,7 +5,6 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
-import 'package:mcncashier/helpers/LocalAPI/ShiftList.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
@@ -19,7 +18,6 @@ class CloseShiftPage extends StatefulWidget {
 class CloseShiftPageState extends State<CloseShiftPage> {
   LocalAPI localAPI = LocalAPI();
   Shift shifittem = new Shift();
-  ShiftList shiftlist = new ShiftList();
   @override
   void initState() {
     super.initState();
@@ -29,7 +27,7 @@ class CloseShiftPageState extends State<CloseShiftPage> {
   getshiftData() async {
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     if (shiftid != null) {
-      List<Shift> shift = await shiftlist.getShiftData(context, shiftid);
+      List<Shift> shift = await localAPI.getShiftData(shiftid);
       setState(() {
         shifittem = shift[0];
       });

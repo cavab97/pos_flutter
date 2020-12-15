@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
@@ -11,19 +12,13 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
-import 'package:mcncashier/helpers/LocalAPI/Branch.dart';
-import 'package:mcncashier/helpers/LocalAPI/Cart.dart';
-import 'package:mcncashier/helpers/LocalAPI/CategoriesList.dart';
-import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
-import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
-import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
-import 'package:mcncashier/helpers/LocalAPI/ProductList.dart';
-import 'package:mcncashier/helpers/LocalAPI/ShiftList.dart';
-import 'package:mcncashier/helpers/LocalAPI/TablesList.dart';
+import 'package:mcncashier/models/Box.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Customer_Liquor_Inventory.dart';
+import 'package:mcncashier/models/Customer_Liquor_Inventory_Log.dart';
 import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
@@ -32,15 +27,17 @@ import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
-import 'package:mcncashier/models/Lastids.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
+import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
@@ -83,14 +80,6 @@ class _DashboradPageState extends State<DashboradPage>
   var _textController = TextEditingController();
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
-  ShiftList shiftAPI = new ShiftList();
-  Cartlist cartlistAPI = new Cartlist();
-  PrinterList printerAPI = new PrinterList();
-  OrdersList orderApi = new OrdersList();
-  TablesList tableListAPI = new TablesList();
-  PaymentList paymentAPI = new PaymentList();
-  BranchList branchAPI = new BranchList();
-  ProductsList prodList = new ProductsList();
   PrintReceipt printKOT = PrintReceipt();
   List<Category> allCaterories = new List<Category>();
   List<Category> tabsList = new List<Category>();
@@ -221,7 +210,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getPaymentMethods() async {
-    var result = await paymentAPI.getPaymentMethods();
+    var result = await localAPI.getPaymentMethods();
     List<Payments> mainPaymentList =
         result.where((i) => i.isParent == 0).toList();
 
@@ -314,7 +303,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getCartItem(cartId) async {
-    List<MSTCartdetails> cartItem = await CommunFun.getcartDetails(cartId);
+    List<MSTCartdetails> cartItem = await localAPI.getCartItem(cartId);
     if (cartItem.length > 0) {
       if (this.mounted) {
         setState(() {
@@ -329,7 +318,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   countTotals(cartId) async {
-    MST_Cart cart = await CommunFun.getCartData(cartId, cartList);
+    MST_Cart cart = await localAPI.getCartData(cartId);
 
     Voucher vaocher;
     if (cart.voucher_id != null && cart.voucher_detail != null) {
@@ -394,10 +383,57 @@ class _DashboradPageState extends State<DashboradPage>
         });
   }
 
+  draftreciptPrint() async {
+    if (cartList.length > 0) {
+      if (printerreceiptList.length > 0) {
+        if (permissions.contains(Constant.PRINT_RECIEPT)) {
+          printKOT.checkDraftPrint(
+              taxJson,
+              printerreceiptList[0].printerIp.toString(),
+              context,
+              cartList,
+              tableName,
+              subtotal,
+              serviceChargePer,
+              serviceCharge,
+              grandTotal,
+              tax,
+              branchData,
+              currency,
+              selectedTable.number_of_pax.toString(),
+              customer != null ? customer.name : Strings.walkin_customer);
+        } else {
+          await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+              () {
+            printKOT.checkDraftPrint(
+                taxJson,
+                printerreceiptList[0].printerIp.toString(),
+                context,
+                cartList,
+                tableName,
+                subtotal,
+                serviceChargePer,
+                serviceCharge,
+                grandTotal,
+                tax,
+                branchData,
+                currency,
+                selectedTable.number_of_pax.toString(),
+                customer != null ? customer.name : Strings.walkin_customer);
+          }, () {});
+        }
+      } else {
+        CommunFun.showToast(context, Strings.printer_not_available);
+      }
+    } else {
+      CommunFun.showToast(context, Strings.cart_empty);
+    }
+  }
+
   deleteCurrentCart() async {
     // Delete current order
     Table_order tables = await getTableData();
-    await cartapi.clearCartItem(currentCart, tables.table_id);
+    await localAPI.clearCartItem(currentCart, tables.table_id);
 
     await refreshAfterAction(true);
   }
@@ -507,75 +543,28 @@ class _DashboradPageState extends State<DashboradPage>
         });
   }
 
-  draftreciptPrint() async {
-    if (cartList.length > 0) {
-      if (printerreceiptList.length > 0) {
-        if (permissions.contains(Constant.PRINT_RECIEPT)) {
-          printKOT.checkDraftPrint(
-              selectedTable.number_of_pax.toString(),
-              taxJson,
-              printerreceiptList[0].printerIp.toString(),
-              context,
-              cartList,
-              tableName,
-              subtotal,
-              serviceChargePer,
-              serviceCharge,
-              grandTotal,
-              tax,
-              branchData,
-              currency,
-              customer != null ? customer.name : Strings.walkin_customer);
-        } else {
-          await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
-              () {
-            printKOT.checkDraftPrint(
-                selectedTable.number_of_pax.toString(),
-                taxJson,
-                printerreceiptList[0].printerIp.toString(),
-                context,
-                cartList,
-                tableName,
-                subtotal,
-                serviceChargePer,
-                serviceCharge,
-                grandTotal,
-                tax,
-                branchData,
-                currency,
-                customer != null ? customer.name : Strings.walkin_customer);
-          }, () {});
-        }
-      } else {
-        CommunFun.showToast(context, Strings.printer_not_available);
-      }
-    } else {
-      CommunFun.showToast(context, Strings.cart_empty);
-    }
-  }
-
   printCheckList() async {
     if (cartList.length > 0) {
       if (printerreceiptList.length > 0) {
         if (permissions.contains(Constant.PRINT_RECIEPT)) {
           printKOT.checkListReceiptPrint(
-              selectedTable.number_of_pax.toString(),
               printerreceiptList[0].printerIp.toString(),
               context,
               cartList,
               tableName,
               branchData,
+              selectedTable.number_of_pax.toString(),
               customer != null ? customer.name : Strings.walkin_customer);
         } else {
           await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
               () {
             printKOT.checkListReceiptPrint(
-                selectedTable.number_of_pax.toString(),
                 printerreceiptList[0].printerIp.toString(),
                 context,
                 cartList,
                 tableName,
                 branchData,
+                selectedTable.number_of_pax.toString(),
                 customer != null ? customer.name : Strings.walkin_customer);
           }, () {});
         }
@@ -590,25 +579,24 @@ class _DashboradPageState extends State<DashboradPage>
 /*this function used for remove promocode from cart*/
   removePromoCode(voucherdata) async {
     List<MSTCartdetails> cartListUpdate = [];
+    Voucher voucher = Voucher.fromJson(voucherdata);
     for (int i = 0; i < cartList.length; i++) {
       var cartitem = cartList[i];
       cartitem.discount = 0.0;
       cartitem.discountType = 0;
-      cartListUpdate.add(cartitem);
+      await localAPI.addVoucherIndetail(cartitem, voucher.voucherId);
     }
     allcartData.grand_total = allcartData.grand_total + allcartData.discount;
     allcartData.voucher_detail = "";
     allcartData.discount = 0.0;
     allcartData.discount_type = 0;
     allcartData.voucher_id = null;
-    await cartapi.addVoucherInOrder(allcartData, cartListUpdate);
+    await localAPI.addVoucherInOrder(allcartData, voucher);
     await countTotals(currentCart);
   }
 
   getCategoryList() async {
-    var branchid = await CommunFun.getbranchId();
-    CategoriesList category = new CategoriesList();
-    List<Category> categorys = await category.getCategories(context, branchid);
+    List<Category> categorys = await localAPI.getAllCategory();
     List<Category> catList = categorys.where((i) => i.parentId == 0).toList();
     setState(() {
       tabsList = catList;
@@ -639,7 +627,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   getMeals() async {
     var branchid = await CommunFun.getbranchId();
-    List<SetMeal> setmeals = await prodList.getMealsData(branchid);
+    List<SetMeal> setmeals = await localAPI.getMealsData(branchid);
     setState(() {
       mealsList = setmeals;
       productList = [];
@@ -647,9 +635,8 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getAllPrinter() async {
-    List<Printer> printer = await printerAPI.getAllPrinterList(context, "0");
-    List<Printer> printerDraft =
-        await printerAPI.getAllPrinterList(context, "1");
+    List<Printer> printer = await localAPI.getAllPrinterForKOT();
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
     setState(() {
       printerList = printer;
       printerreceiptList = printerDraft;
@@ -675,7 +662,7 @@ class _DashboradPageState extends State<DashboradPage>
     });
     var branchid = await CommunFun.getbranchId();
     List<ProductDetails> product =
-        await prodList.getProduct(context, categoryId, branchid);
+        await localAPI.getProduct(categoryId.toString(), branchid);
     if (product.length > 0) {
       setState(() {
         // productList = [];
@@ -696,9 +683,9 @@ class _DashboradPageState extends State<DashboradPage>
     if (seachText != "") {
       var branchid = await CommunFun.getbranchId();
       List<ProductDetails> product =
-          await prodList.getSeachProduct(context, seachText);
+          await localAPI.getSeachProduct(seachText.toString(), branchid);
       List<SetMeal> setMeal =
-          await prodList.getSearchSetMealsData(seachText.toString(), branchid);
+          await localAPI.getSearchSetMealsData(seachText.toString(), branchid);
 
       setMeal.forEach((element) {
         ProductDetails cartItemproduct = new ProductDetails();
@@ -894,8 +881,8 @@ class _DashboradPageState extends State<DashboradPage>
       }
       if (i == itemList.length - 1) {
         if (list.length > 0) {
-          dynamic send = await cartapi.sendToKitched(ids);
           openPrinterPop(list, false);
+          await localAPI.sendToKitched(ids);
           await getCartItem(currentCart);
         }
         return false;
@@ -932,7 +919,7 @@ class _DashboradPageState extends State<DashboradPage>
     var branchid = await CommunFun.getbranchId();
     User userdata = await CommunFun.getuserDetails();
     Shift shift = new Shift();
-    int appid = await shiftAPI.getLastShiftAppID(terminalId);
+    int appid = await localAPI.getLastShiftAppID(terminalId);
     if (shiftid == null && appid != 0) {
       shift.appId = appid + 1;
     } else {
@@ -952,7 +939,7 @@ class _DashboradPageState extends State<DashboradPage>
       shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
     shift.updatedBy = userdata.id;
-    var result = await shiftAPI.insertShift(context, shift, shiftid);
+    var result = await localAPI.insertShift(shift, shiftid);
     if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
     } else {
@@ -1013,9 +1000,9 @@ class _DashboradPageState extends State<DashboradPage>
                 selproduct: selectedProduct,
                 issetMeal: isSetMeal,
                 cartID: currentCart,
-                onClose: (cartitem) {
+                onClose: () {
                   refreshAfterAction(false);
-                  cartList.add(cartitem);
+                  //cartList.add(cartitem);
                 });
           });
     } else {
@@ -1029,16 +1016,6 @@ class _DashboradPageState extends State<DashboradPage>
 
   addTocartItem(selectedProduct) async {
     await CommunFun.addItemToCart(selectedProduct, cartList, allcartData, () {
-      /* Cartlist cart_list = new Cartlist();
-      var cartData = cart_list.addcart(context, allcartData); // Insert Cart
-      //int saveOid = insertTableData(selectedTable, cartData);
-      if (selectedTable.save_order_id == 0) {
-        //selectedTable.save_order_id = saveOid;
-      } */
-      if (cartList.length > 0) {
-        temporaryCartList.add(cartList[cartList.length - 1]);
-      }
-
       if (selectedTable.save_order_id != null &&
           selectedTable.save_order_id != 0) {
         getCurrentCart();
@@ -1049,22 +1026,6 @@ class _DashboradPageState extends State<DashboradPage>
         isScreenLoad = false;
       });
     }, context);
-  }
-
-  insertTableData(tableData, cartid) async {
-    SaveOrder orderData = new SaveOrder();
-    Table_order tableorder = new Table_order();
-    Cartlist cartlist = new Cartlist();
-    TablesList tableList = new TablesList();
-    orderData.numberofPax = tableData != null ? tableData.number_of_pax : 0;
-    orderData.isTableOrder = tableData != null ? 1 : 0;
-    orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-    orderData.cartId = cartid;
-    int saveOid = await cartlist.addSaveOrder(orderData, tableData.table_id);
-    tableorder = tableData;
-    tableorder.save_order_id = saveOid;
-    var tableid = await tableList.insertTableOrder(context, tableorder);
-    return saveOid;
   }
 
   opneShowAddCustomerDailog() {
@@ -1113,18 +1074,18 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   Future<List<MSTSubCartdetails>> getmodifireList(detailid) async {
-    List<MSTSubCartdetails> list = await cartapi.getItemModifire(detailid);
+    List<MSTSubCartdetails> list = await localAPI.getItemModifire(detailid);
     return list;
   }
 
   Future<List<MSTCartdetails>> getcartDetails(cartid) async {
-    List<MSTCartdetails> list = await CommunFun.getcartDetails(cartid);
+    List<MSTCartdetails> list = await localAPI.getCartItem(currentCart);
     return list;
   }
 
   getbranch() async {
     var branchid = await CommunFun.getbranchId();
-    var branch = await branchAPI.getbranchData(branchid);
+    var branch = await localAPI.getbranchData(branchid);
     setState(() {
       branchData = branch;
     });
@@ -1132,7 +1093,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   getcartData() async {
-    var cartDatalist = await CommunFun.getCartData(currentCart);
+    var cartDatalist = await localAPI.getCartData(currentCart);
     return cartDatalist;
   }
 
@@ -1155,11 +1116,11 @@ class _DashboradPageState extends State<DashboradPage>
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
-    LastAppids lastappid = await orderApi.getLastids(terminalId);
+    List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
     int length = branchData.invoiceStart.length;
     var invoiceNo;
-    if (lastappid.app_id != null) {
-      order.app_id = lastappid.app_id + 1;
+    if (lastappid.length > 0) {
+      order.app_id = lastappid[0].app_id + 1;
       invoiceNo =
           branchData.orderPrefix + order.app_id.toString().padLeft(length, "0");
     } else {
@@ -1191,6 +1152,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
     order.order_status = 1;
     order.server_id = 0;
+    order.isSync = 0;
     order.order_source = cartData.source;
     order.order_by = userdata.id;
     order.voucher_detail = cartData.voucher_detail;
@@ -1198,271 +1160,396 @@ class _DashboradPageState extends State<DashboradPage>
     order.voucher_amount = cartData.discount;
     order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
     order.updated_by = userdata.id;
+    int orderId = await localAPI.placeOrder(order);
     List<OrderDetail> detaislist = [];
-    if (cartList.length > 0) {
-      var lstappid =
-          lastappid.order_detail_id != null ? lastappid.order_detail_id + 1 : 1;
-      for (var i = 0; i < cartList.length; i++) {
-        OrderDetail orderDetail = new OrderDetail();
-        var cartItem = cartList[i];
-        var productdata = cartItem.cart_detail != null
-            ? json.decode(cartItem.cart_detail)
-            : "";
-        List<ProductStoreInventory> cartval =
-            await orderApi.checkItemAvailableinStore(cartItem.productId);
-        if (productdata["has_inventory"] == 1 && cartval.length > 0) {
-          double storeqty = cartval[0].qty;
-          if (storeqty < cartItem.productQty) {
-            CommunFun.showToast(
-                context,
-                productdata["name"] +
-                    " Product is out of stock.Please check store.");
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
-            return false;
+    if (cartData.voucher_id != 0 && cartData.voucher_id != null) {
+      int lastappid = await localAPI.getLastVoucherHistoryid(terminalId);
+      VoucherHistory history = new VoucherHistory();
+      if (lastappid != 0) {
+        history.app_id = lastappid + 1;
+      } else {
+        history.app_id = 1;
+      }
+      history.voucher_id = cartData.voucher_id;
+      history.amount = cartData.discount;
+      history.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+      history.app_order_id = orderId;
+      history.uuid = uuid;
+      history.server_id = 0;
+      history.terminal_id = int.parse(terminalId);
+      var hisID = await localAPI.saveVoucherHistory(history);
+    }
+    var orderDetailid;
+    if (orderId > 0) {
+      if (cartList.length > 0) {
+        List<ProductStoreInventory> updatedInt = [];
+        List<ProductStoreInventoryLog> updatedLog = [];
+        for (var i = 0; i < cartList.length; i++) {
+          OrderDetail orderDetail = new OrderDetail();
+          var cartItem = cartList[i];
+          var productdata = cartItem.cart_detail != null
+              ? json.decode(cartItem.cart_detail)
+              : "";
+          List<ProductStoreInventory> cartval =
+              await localAPI.checkItemAvailableinStore(cartItem.productId);
+          if (productdata["has_inventory"] == 1 && cartval.length > 0) {
+            double storeqty = cartval[0].qty;
+            if (storeqty < cartItem.productQty) {
+              CommunFun.showToast(
+                  context,
+                  productdata["name"] +
+                      " Product is out of stock.Please check store.");
+              await localAPI.deleteOrderid(orderId);
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+              return false;
+            }
           }
-        }
-        orderDetail.app_id = lstappid;
-        orderDetail.uuid = uuid;
-        orderDetail.branch_id = int.parse(branchid);
-        orderDetail.terminal_id = int.parse(terminalId);
-        orderDetail.product_id = cartItem.productId;
-        orderDetail.product_price = cartItem.productPrice;
-        orderDetail.product_old_price = cartItem.productNetPrice;
-        orderDetail.detail_qty = cartItem.productQty;
-        orderDetail.product_discount = cartItem.discount;
-        orderDetail.product_detail = json.encode(productdata);
-        orderDetail.updated_at =
-            await CommunFun.getCurrentDateTime(DateTime.now());
-        orderDetail.detail_amount =
-            (cartItem.productPrice * cartItem.productQty);
-        orderDetail.detail_datetime =
-            await CommunFun.getCurrentDateTime(DateTime.now());
-        orderDetail.updated_by = userdata.id;
-        orderDetail.detail_status = 1;
-        orderDetail.detail_by = userdata.id;
-        orderDetail.issetMeal = cartItem.issetMeal;
-        orderDetail.hasRacManagemant = cartItem.hasRacManagemant;
-        if (cartItem.issetMeal == 1) {
-          orderDetail.setmeal_product_detail = cartItem.setmeal_product_detail;
-        }
-        detaislist.add(orderDetail);
-        lstappid += 1;
-        List<MSTSubCartdetails> modifireList =
-            await getmodifireList(cartItem.id);
-        if (modifireList.length > 0) {
-          var modiApp = lastappid.order_modifier_id != null
-              ? lastappid.order_modifier_id + 1
-              : 1;
-          var attApp =
-              lastappid.order_attr_id != null ? lastappid.order_attr_id + 1 : 1;
-          for (var i = 0; i < modifireList.length; i++) {
-            OrderModifire modifireData = new OrderModifire();
-            var modifire = modifireList[i];
-            if (modifire.caId == null) {
-              modifireData.app_id = modiApp;
-              modifireData.uuid = uuid;
-              modifireData.terminal_id = int.parse(terminalId);
-              modifireData.product_id = modifire.productId;
-              modifireData.modifier_id = modifire.modifierId;
-              modifireData.om_amount = modifire.modifirePrice;
-              modifireData.om_by = userdata.id;
-              modifireData.om_datetime =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              modifireData.om_status = 1;
-              modifireData.updated_at =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              modifireData.updated_by = userdata.id;
-              orderModifires.add(modifireData);
-              modiApp += 1;
-            } else {
-              OrderAttributes attributes = new OrderAttributes();
-              attributes.app_id = attApp;
-              attributes.uuid = uuid;
-              attributes.terminal_id = int.parse(terminalId);
-              attributes.product_id = modifire.productId;
-              attributes.attribute_id = modifire.attributeId;
-              attributes.attr_price = modifire.attrPrice;
-              attributes.ca_id = modifire.caId;
-              attributes.oa_datetime =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              attributes.oa_by = userdata.id;
-              attributes.oa_status = 1;
-              attributes.updated_at =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
-              attributes.updated_by = userdata.id;
-              orderAttributes.add(attributes);
-              attApp += 1;
+          List<OrderDetail> lappid =
+              await localAPI.getLastOrdeDetailAppid(terminalId);
+          if (lappid.length > 0) {
+            orderDetail.app_id = lappid[0].app_id + 1;
+          } else {
+            orderDetail.app_id = 1;
+          }
+          print(productdata);
+          orderDetail.uuid = uuid;
+          orderDetail.order_app_id = orderId;
+          orderDetail.branch_id = int.parse(branchid);
+          orderDetail.terminal_id = int.parse(terminalId);
+          orderDetail.product_id = cartItem.productId;
+          orderDetail.product_price = cartItem.productPrice;
+          orderDetail.product_old_price = cartItem.productNetPrice;
+          orderDetail.detail_amount = cartItem.productDetailAmount;
+          orderDetail.detail_qty = cartItem.productQty;
+          orderDetail.product_discount = cartItem.discount;
+          orderDetail.product_detail = json.encode(productdata);
+          orderDetail.updated_at =
+              await CommunFun.getCurrentDateTime(DateTime.now());
+          orderDetail.detail_datetime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
+          orderDetail.updated_by = userdata.id;
+          orderDetail.detail_status = 1;
+          orderDetail.isSync = 0;
+          orderDetail.server_id = 0;
+          orderDetail.detail_by = userdata.id;
+          orderDetail.issetMeal = cartItem.issetMeal;
+          orderDetail.hasRacManagemant = cartItem.hasRacManagemant;
+          if (cartItem.issetMeal == 1) {
+            orderDetail.setmeal_product_detail =
+                cartItem.setmeal_product_detail;
+          }
+          orderDetailid = await localAPI.sendOrderDetails(orderDetail);
+          if (orderDetailid != null) {
+            detaislist.add(orderDetail);
+            List<MSTSubCartdetails> modifireList =
+                await getmodifireList(cartItem.id);
+            if (modifireList.length > 0) {
+              for (var i = 0; i < modifireList.length; i++) {
+                OrderModifire modifireData = new OrderModifire();
+                var modifire = modifireList[i];
+                if (modifire.caId == null) {
+                  List<OrderModifire> lapMpid =
+                      await localAPI.getLastOrderModifireAppid(terminalId);
+                  if (lapMpid.length > 0) {
+                    modifireData.app_id = lapMpid[0].app_id + 1;
+                  } else {
+                    modifireData.app_id = 1;
+                  }
+                  modifireData.uuid = uuid;
+                  modifireData.order_app_id = orderId;
+                  modifireData.detail_app_id = orderDetailid;
+                  modifireData.terminal_id = int.parse(terminalId);
+                  modifireData.product_id = modifire.productId;
+                  modifireData.modifier_id = modifire.modifierId;
+                  modifireData.om_amount = modifire.modifirePrice;
+                  modifireData.om_by = userdata.id;
+                  modifireData.isSync = 0;
+                  modifireData.server_id = 0;
+                  modifireData.om_datetime =
+                      await CommunFun.getCurrentDateTime(DateTime.now());
+                  modifireData.om_status = 1;
+                  modifireData.updated_at =
+                      await CommunFun.getCurrentDateTime(DateTime.now());
+                  modifireData.updated_by = userdata.id;
+                  var ordermodifreid =
+                      await localAPI.sendModifireData(modifireData);
+                } else {
+                  OrderAttributes attributes = new OrderAttributes();
+                  List<OrderAttributes> lapApid =
+                      await localAPI.getLastOrderAttrAppid(terminalId);
+                  if (lapApid.length > 0) {
+                    attributes.app_id = lapApid[0].app_id + 1;
+                  } else {
+                    attributes.app_id = int.parse(terminalId);
+                  }
+                  attributes.uuid = uuid;
+                  attributes.order_app_id = orderId;
+                  attributes.detail_app_id = orderDetailid;
+                  attributes.terminal_id = int.parse(terminalId);
+                  attributes.product_id = modifire.productId;
+                  attributes.attribute_id = modifire.attributeId;
+                  attributes.attr_price = modifire.attrPrice;
+                  attributes.ca_id = modifire.caId;
+                  attributes.isSync = 0;
+                  attributes.server_id = 0;
+                  attributes.oa_datetime =
+                      await CommunFun.getCurrentDateTime(DateTime.now());
+                  attributes.oa_by = userdata.id;
+                  attributes.oa_status = 1;
+                  attributes.updated_at =
+                      await CommunFun.getCurrentDateTime(DateTime.now());
+                  attributes.updated_by = userdata.id;
+                  orderAttributes.add(attributes);
+                  var orderAttri = await localAPI.sendAttrData(attributes);
+                }
+              }
+            }
+            if (cartItem.issetMeal == 0 || cartItem.hasRacManagemant == 0) {
+              if (productdata["has_inventory"] == 1) {
+                List<ProductStoreInventory> inventory = await localAPI
+                    .getStoreInventoryData(orderDetail.product_id);
+                if (inventory.length > 0) {
+                  ProductStoreInventory invData = new ProductStoreInventory();
+                  invData = inventory[0];
+                  var prev = inventory[0];
+                  var qty = (invData.qty - orderDetail.detail_qty);
+                  invData.qty = qty;
+                  invData.updatedAt =
+                      await CommunFun.getCurrentDateTime(DateTime.now());
+                  invData.updatedBy = userdata.id;
+                  updatedInt.add(invData);
+                  //Inventory log update
+                  ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+                  log.uuid = uuid;
+                  log.inventory_id = prev.inventoryId;
+                  log.branch_id = int.parse(branchid);
+                  log.product_id = cartItem.productId;
+                  log.employe_id = userdata.id;
+                  log.qty = prev.qty;
+                  log.il_type = 2; //1 for add 2 for deduct
+                  log.qty_before_change = prev.qty;
+                  log.qty_after_change = qty;
+                  log.updated_at =
+                      await CommunFun.getCurrentDateTime(DateTime.now());
+                  log.updated_by = userdata.id;
+                  updatedLog.add(log);
+                }
+              }
+            }
+            if (cartItem.hasRacManagemant == 1) {
+              insertRacInv(userdata, cartItem, cartData.user_id);
             }
           }
         }
       }
-    }
-    var laPaID =
-        lastappid.order_payment_id != null ? lastappid.order_payment_id + 1 : 1;
-    if (payment.length > 0) {
-      for (var i = 0; i < payment.length; i++) {
-        OrderPayment orderpayment = payment[i];
-        orderpayment.app_id = laPaID;
+
+      if (payment.length > 0) {
+        for (var i = 0; i < payment.length; i++) {
+          OrderPayment orderpayment = payment[i];
+          if (isWebOrder) {
+            payment[i].op_method_id = cartData.cart_payment_id;
+          }
+          List<OrderPayment> lapPpid =
+              await localAPI.getLastOrderPaymentAppid(terminalId);
+          if (lapPpid.length > 0) {
+            orderpayment.app_id = lapPpid[0].app_id + 1;
+          } else {
+            orderpayment.app_id = 1;
+          }
+          orderpayment.uuid = uuid;
+          orderpayment.order_app_id = orderId;
+          orderpayment.branch_id = int.parse(branchid);
+          orderpayment.terminal_id = int.parse(terminalId);
+          orderpayment.op_method_id = payment[i].op_method_id;
+          orderpayment.remark = payment[i].remark;
+          orderpayment.last_digits = payment[i].last_digits;
+          orderpayment.reference_number = payment[i].reference_number;
+          orderpayment.approval_code = payment[i].approval_code;
+          orderpayment.isCash =
+              payment[i].isCash != null ? payment[i].isCash : 0;
+          orderpayment.op_amount = payment[i].op_amount.toDouble();
+          orderpayment.op_amount_change = payment[i].op_amount_change;
+          orderpayment.op_method_response = '';
+          orderpayment.op_status = 1;
+          orderpayment.op_datetime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
+          orderpayment.op_by = userdata.id;
+          orderpayment.isSync = 0;
+          orderpayment.server_id = 0;
+          orderpayment.updated_at =
+              await CommunFun.getCurrentDateTime(DateTime.now());
+          orderpayment.updated_by = userdata.id;
+          await localAPI.sendtoOrderPayment(orderpayment);
+          if (payment[i].isCash == 1) {
+            var shiftid =
+                await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+            Drawerdata drawer = new Drawerdata();
+            drawer.shiftId = int.parse(shiftid);
+            drawer.amount = payment[i].op_amount;
+            drawer.isAmountIn = 1;
+            drawer.reason = "placeOrder";
+            drawer.status = 1;
+            drawer.createdBy = userdata.id;
+            drawer.createdAt =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            drawer.localID = uuid;
+            drawer.terminalid = int.parse(terminalId);
+            var result = await localAPI.saveInOutDrawerData(drawer);
+          }
+        }
+      } else if (isWebOrder) {
+        OrderPayment orderpayment = new OrderPayment();
+        List<OrderPayment> lapPpid =
+            await localAPI.getLastOrderPaymentAppid(terminalId);
+        if (lapPpid.length > 0) {
+          orderpayment.app_id = lapPpid[0].app_id + 1;
+        } else {
+          orderpayment.app_id = 1;
+        }
         orderpayment.uuid = uuid;
+        orderpayment.order_app_id = orderId;
         orderpayment.branch_id = int.parse(branchid);
         orderpayment.terminal_id = int.parse(terminalId);
-        orderpayment.op_method_id = payment[i].op_method_id;
-        orderpayment.op_amount = payment[i].op_amount.toDouble();
-        orderpayment.op_amount_change = payment[i].op_amount_change;
-        orderpayment.remark = payment[i].remark;
-        orderpayment.last_digits = payment[i].last_digits;
-        orderpayment.reference_number = payment[i].reference_number;
-        orderpayment.approval_code = payment[i].approval_code;
-        orderpayment.isCash = payment[i].isCash;
-        orderpayment.op_method_response = '';
+        orderpayment.op_method_id = cartData.cart_payment_id;
+        orderpayment.op_amount = cartData.grand_total;
+        orderpayment.isCash = 0;
         orderpayment.op_status = 1;
+        orderpayment.isSync = 0;
+        orderpayment.server_id = 0;
         orderpayment.op_datetime =
             await CommunFun.getCurrentDateTime(DateTime.now());
         orderpayment.op_by = userdata.id;
         orderpayment.updated_at =
             await CommunFun.getCurrentDateTime(DateTime.now());
         orderpayment.updated_by = userdata.id;
-        orderPaymentList.add(orderpayment);
-        laPaID += 1;
-        if (payment[i].isCash == 1) {
-          Drawerdata drawer = new Drawerdata();
-          drawer.shiftId = int.parse(shiftid);
-          drawer.amount = payment[i].op_amount;
-          drawer.isAmountIn = 1;
-          drawer.reason = "placeOrder";
-          drawer.status = 1;
-          drawer.createdBy = userdata.id;
-          drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-          drawer.localID = uuid;
-          drawer.terminalid = int.parse(terminalId);
-          var result = await shiftAPI.saveInOutDrawerData(drawer);
-        }
+        await localAPI.sendtoOrderPayment(orderpayment);
       }
-    } else if (isWebOrder) {
-      OrderPayment orderpayment = new OrderPayment();
-      orderpayment.app_id = laPaID;
-      orderpayment.uuid = uuid;
-      orderpayment.branch_id = int.parse(branchid);
-      orderpayment.terminal_id = int.parse(terminalId);
-      orderpayment.op_method_id = cartData.cart_payment_id;
-      orderpayment.op_amount = cartData.grand_total;
-      orderpayment.isCash = 1;
-      orderpayment.op_status = 1;
-      orderpayment.op_datetime =
+      // Shifr Invoice Table
+      ShiftInvoice shiftinvoice = new ShiftInvoice();
+      int appid = await localAPI.getLastShiftInvoiceAppID(terminalId);
+      if (appid != 0) {
+        shiftinvoice.app_id = appid + 1;
+      } else {
+        shiftinvoice.app_id = 1;
+      }
+      shiftinvoice.shift_app_id = int.parse(shiftid);
+      shiftinvoice.invoice_id = orderId;
+      shiftinvoice.status = 1;
+      shiftinvoice.created_by = userdata.id;
+      shiftinvoice.created_at =
           await CommunFun.getCurrentDateTime(DateTime.now());
-      orderpayment.op_by = userdata.id;
-      orderpayment.updated_at =
-          await CommunFun.getCurrentDateTime(DateTime.now());
-      orderpayment.updated_by = userdata.id;
-      orderPaymentList.add(orderpayment);
+      shiftinvoice.serverId = 0;
+      shiftinvoice.terminal_id = int.parse(terminalId);
+      var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
+      await printReceipt(orderId);
+      print('clearCartAfterSuccess');
+      print(orderId);
+      await clearCartAfterSuccess(orderId);
     }
-    if (cartData.voucher_id != 0 && cartData.voucher_id != null) {
-      history.voucher_id = cartData.voucher_id;
-      history.amount = cartData.discount;
-      history.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
-      history.uuid = uuid;
-    }
-    // Shifr Invoice Table
-    int appid = await shiftAPI.getLastShiftInvoiceAppID(terminalId);
-    if (appid != 0) {
-      shiftinvoice.app_id = appid + 1;
-    } else {
-      shiftinvoice.app_id = 1;
-    }
-    shiftinvoice.shift_app_id = int.parse(shiftid);
-    shiftinvoice.status = 1;
-    shiftinvoice.created_by = userdata.id;
-    shiftinvoice.created_at =
-        await CommunFun.getCurrentDateTime(DateTime.now());
-    shiftinvoice.serverId = 0;
-    shiftinvoice.localID = await CommunFun.getLocalID();
-    shiftinvoice.terminal_id = int.parse(terminalId);
-    shiftinvoice.shift_terminal_id = int.parse(terminalId);
-    var orderid = await orderApi.placeOrder(
-      order,
-      detaislist,
-      orderModifires,
-      orderAttributes,
-      orderPaymentList,
-      history,
-      shiftinvoice,
-      currentCart,
-    );
-    await printReceipt(orderid);
-    await clearCartAfterSuccess(orderid);
   }
 
-  // insertRacInv(user, cartItem, customer) async {
-  //   Customer_Liquor_Inventory inventory = new Customer_Liquor_Inventory();
-  //   var orderDateF;
+  insertRacInv(user, cartItem, customer) async {
+    Customer_Liquor_Inventory inventory = new Customer_Liquor_Inventory();
+    var orderDateF;
 
-  //   var appid = await localAPI.getLastCustomerInventory();
-  //   if (appid != 0) {
-  //     inventory.appId = appid + 1;
-  //   } else {
-  //     inventory.appId = 1;
-  //   }
-  //   var branchid = await CommunFun.getbranchId();
-  //   var now = DateTime.now();
-  //   var newDate = new DateTime(now.year, now.month + 1, now.day);
-  //   orderDateF = DateFormat('yyyy-MM-dd HH:mm:ss').format(newDate);
-  //   List<Box> boxList = await localAPI.getBoxForProduct(cartItem.productId);
-  //   if (boxList.length > 0) {
-  //     inventory.uuid = await CommunFun.getLocalID();
-  //     inventory.clCustomerId = customer;
-  //     inventory.clProductId = cartItem.productId;
-  //     inventory.clBranchId = int.parse(branchid);
-  //     inventory.clRacId = boxList[0].racId;
-  //     inventory.clBoxId = boxList[0].boxId;
-  //     inventory.type = boxList[0].boxFor;
-  //     inventory.clTotalQuantity = boxList[0].wineQty;
-  //     inventory.clExpiredOn = orderDateF;
-  //     inventory.clLeftQuantity = boxList[0].wineQty != null
-  //         ? (boxList[0].wineQty - cartItem.productQty)
-  //         : 0;
-  //     inventory.status = 1;
-  //     inventory.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
-  //     inventory.updatedBy = user.id;
-  //     var clid = await localAPI.insertWineInventory(inventory, false);
-  //     Customer_Liquor_Inventory_Log log = new Customer_Liquor_Inventory_Log();
-  //     var lastappid = await localAPI.getLastCustomerInventoryLog();
-  //     if (lastappid != 0) {
-  //       log.appId = lastappid + 1;
-  //     } else {
-  //       log.appId = 1;
-  //     }
-  //     log.uuid = await CommunFun.getLocalID();
-  //     log.clAppId = inventory.appId;
-  //     log.branchId = int.parse(branchid);
-  //     log.productId = cartItem.productId;
-  //     log.customerId = customer;
-  //     log.liType = boxList[0].boxFor;
-  //     log.qty = cartItem.productQty;
-  //     log.qtyBeforeChange = boxList[0].wineQty;
-  //     log.qtyAfterChange = boxList[0].wineQty != null
-  //         ? (boxList[0].wineQty - cartItem.productQty)
-  //         : 0;
-  //     log.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
-  //     log.updatedBy = user.id;
-  //     var lid = await localAPI.insertWineInventoryLog(log);
-  //   }
-  // }
+    var appid = await localAPI.getLastCustomerInventory();
+    if (appid != 0) {
+      inventory.appId = appid + 1;
+    } else {
+      inventory.appId = 1;
+    }
+    var branchid = await CommunFun.getbranchId();
+    var now = DateTime.now();
+    var newDate = new DateTime(now.year, now.month + 1, now.day);
+    orderDateF = DateFormat('yyyy-MM-dd HH:mm:ss').format(newDate);
+    List<Box> boxList = await localAPI.getBoxForProduct(cartItem.productId);
+    if (boxList.length > 0) {
+      inventory.uuid = await CommunFun.getLocalID();
+      inventory.clCustomerId = customer;
+      inventory.clProductId = cartItem.productId;
+      inventory.clBranchId = int.parse(branchid);
+      inventory.clRacId = boxList[0].racId;
+      inventory.clBoxId = boxList[0].boxId;
+      inventory.type = boxList[0].boxFor;
+      inventory.clTotalQuantity = boxList[0].wineQty;
+      inventory.clExpiredOn = orderDateF;
+      inventory.clLeftQuantity = boxList[0].wineQty != null
+          ? (boxList[0].wineQty - cartItem.productQty)
+          : 0;
+      inventory.status = 1;
+      inventory.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
+      inventory.updatedBy = user.id;
+      var clid = await localAPI.insertWineInventory(inventory, false);
+      Customer_Liquor_Inventory_Log log = new Customer_Liquor_Inventory_Log();
+      var lastappid = await localAPI.getLastCustomerInventoryLog();
+      if (lastappid != 0) {
+        log.appId = lastappid + 1;
+      } else {
+        log.appId = 1;
+      }
+      log.uuid = await CommunFun.getLocalID();
+      log.clAppId = inventory.appId;
+      log.branchId = int.parse(branchid);
+      log.productId = cartItem.productId;
+      log.customerId = customer;
+      log.liType = boxList[0].boxFor;
+      log.qty = cartItem.productQty;
+      log.qtyBeforeChange = boxList[0].wineQty;
+      log.qtyAfterChange = boxList[0].wineQty != null
+          ? (boxList[0].wineQty - cartItem.productQty)
+          : 0;
+      log.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
+      log.updatedBy = user.id;
+      var lid = await localAPI.insertWineInventoryLog(log);
+    }
+  }
 
   printReceipt(int orderid) async {
     var terminalid = await CommunFun.getTeminalKey();
-    dynamic data = await orderApi.getOrdersDetailsData(orderid, terminalid);
-
-    // List<OrderPayment> orderpaymentdata =
-    //     await orderApi.getOrderpaymentData(orderid, terminalid);
-    // List<Payments> paymentMethod =
-    //     await localAPI.getOrderpaymentmethod(orderid, terminalid);
-    // List<OrderDetail> orderitem =
-    //     await orderApi.getOrderDetailsList(orderid, terminalid);
-    // Orders order = await orderApi.getcurrentOrders(orderid, terminalid);
-    // List<OrderAttributes> attributes =
-    //     await localAPI.getOrderAttributes(orderid);
-    // List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
+    List<OrderPayment> orderpaymentdata =
+        await localAPI.getOrderpaymentData(orderid, terminalid);
+    List<Payments> paymentMethod =
+        await localAPI.getOrderpaymentmethod(orderid, terminalid);
+    List<OrderDetail> orderitem =
+        await localAPI.getOrderDetailsList(orderid, terminalid);
+    Orders order = await localAPI.getcurrentOrders(orderid, terminalid);
+    List<OrderAttributes> attributes =
+        await localAPI.getOrderAttributes(orderid);
+    List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
+    bool print_reciept = permissions.contains(Constant.PRINT_RECIEPT);
+    bool open_drawer = permissions.contains(Constant.OPEN_DRAWER);
+    Future<void> asyncFunc() async => () async {
+          printKOT.checkReceiptPrint(
+              selectedTable.number_of_pax.toString(),
+              printerreceiptList[0].printerIp,
+              context,
+              branchData,
+              taxJson,
+              orderitem,
+              attributes,
+              modifires,
+              order,
+              orderpaymentdata,
+              paymentMethod,
+              tableName,
+              currency,
+              customer != null ? customer.name : Strings.walkin_customer,
+              true); //"  ? :"
+          await clearCartAfterSuccess(orderid);
+        };
+    // if (!print_reciept) {
+    //   await CommonUtils.openPermissionPop(
+    //       context, Constant.PRINT_RECIEPT, asyncFunc(), asyncFunc());
+    // }
+    // if (!open_drawer) {
+    //   await CommonUtils.openPermissionPop(
+    //       context, Constant.OPEN_DRAWER, asyncFunc(), asyncFunc());
+    // }
+    // if (open_drawer && print_reciept) {
+    //   await asyncFunc();
+    // }
+    // await clearCartAfterSuccess(orderid);
 
     if (permissions.contains(Constant.PRINT_RECIEPT)) {
       if (permissions.contains(Constant.OPEN_DRAWER)) {
@@ -1472,15 +1559,16 @@ class _DashboradPageState extends State<DashboradPage>
             context,
             branchData,
             taxJson,
-            data["order_items"], // List<OrderDetail>
-            data["order_attributes"], // List<OrderAttributes>
-            data["order_modifires"], // List<OrderModifire>
-            data["order"], // Orders
-            data["order_payment"], // List<OrderPayment>
-            data["order_payment_method"], // List<Payments>
+            orderitem,
+            attributes,
+            modifires,
+            order,
+            orderpaymentdata,
+            paymentMethod,
             tableName,
             currency,
-            customer != null ? customer.name : Strings.walkin_customer);
+            customer != null ? customer.name : Strings.walkin_customer,
+            true);
         await clearCartAfterSuccess(orderid);
       } else {
         await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
@@ -1491,15 +1579,16 @@ class _DashboradPageState extends State<DashboradPage>
               context,
               branchData,
               taxJson,
-              data["order_items"], // List<OrderDetail>
-              data["order_attributes"], // List<OrderAttributes>
-              data["order_modifires"], // List<OrderModifire>
-              data["order"], // Orders
-              data["order_payment"], // List<OrderPayment>
-              data["order_payment_method"], // List<Payments>
+              orderitem,
+              attributes,
+              modifires,
+              order,
+              orderpaymentdata,
+              paymentMethod,
               tableName,
               currency,
-              customer != null ? customer.name : Strings.walkin_customer);
+              customer != null ? customer.name : Strings.walkin_customer,
+              true);
           await clearCartAfterSuccess(orderid);
         }, () async {
           printKOT.checkReceiptPrint(
@@ -1508,15 +1597,16 @@ class _DashboradPageState extends State<DashboradPage>
               context,
               branchData,
               taxJson,
-              data["order_items"], // List<OrderDetail>
-              data["order_attributes"], // List<OrderAttributes>
-              data["order_modifires"], // List<OrderModifire>
-              data["order"], // Orders
-              data["order_payment"], // List<OrderPayment>
-              data["order_payment_method"], // List<Payments>
+              orderitem,
+              attributes,
+              modifires,
+              order,
+              orderpaymentdata,
+              paymentMethod,
               tableName,
               currency,
-              customer != null ? customer.name : Strings.walkin_customer);
+              customer != null ? customer.name : Strings.walkin_customer,
+              false);
           await clearCartAfterSuccess(orderid);
         });
       }
@@ -1530,15 +1620,16 @@ class _DashboradPageState extends State<DashboradPage>
               context,
               branchData,
               taxJson,
-              data["order_items"], // List<OrderDetail>
-              data["order_attributes"], // List<OrderAttributes>
-              data["order_modifires"], // List<OrderModifire>
-              data["order"], // Orders
-              data["order_payment"], // List<OrderPayment>
-              data["order_payment_method"], // List<Payments>
+              orderitem,
+              attributes,
+              modifires,
+              order,
+              orderpaymentdata,
+              paymentMethod,
               tableName,
               currency,
-              customer != null ? customer.name : Strings.walkin_customer);
+              customer != null ? customer.name : Strings.walkin_customer,
+              true);
           await clearCartAfterSuccess(orderid);
         } else {
           await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
@@ -1549,15 +1640,16 @@ class _DashboradPageState extends State<DashboradPage>
                 context,
                 branchData,
                 taxJson,
-                data["order_items"], // List<OrderDetail>
-                data["order_attributes"], // List<OrderAttributes>
-                data["order_modifires"], // List<OrderModifire>
-                data["order"], // Orders
-                data["order_payment"], // List<OrderPayment>
-                data["order_payment_method"], // List<Payments>
+                orderitem,
+                attributes,
+                modifires,
+                order,
+                orderpaymentdata,
+                paymentMethod,
                 tableName,
                 currency,
-                customer != null ? customer.name : Strings.walkin_customer);
+                customer != null ? customer.name : Strings.walkin_customer,
+                true);
             await clearCartAfterSuccess(orderid);
           }, () async {
             printKOT.checkReceiptPrint(
@@ -1566,15 +1658,16 @@ class _DashboradPageState extends State<DashboradPage>
                 context,
                 branchData,
                 taxJson,
-                data["order_items"], // List<OrderDetail>
-                data["order_attributes"], // List<OrderAttributes>
-                data["order_modifires"], // List<OrderModifire>
-                data["order"], // Orders
-                data["order_payment"], // List<OrderPayment>
-                data["order_payment_method"], // List<Payments>
+                orderitem,
+                attributes,
+                modifires,
+                order,
+                orderpaymentdata,
+                paymentMethod,
                 tableName,
                 currency,
-                customer != null ? customer.name : Strings.walkin_customer);
+                customer != null ? customer.name : Strings.walkin_customer,
+                false);
             await clearCartAfterSuccess(orderid);
           });
         }
@@ -1585,6 +1678,8 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   clearCartAfterSuccess(orderid) async {
+    Table_order tables = await getTableData();
+    await localAPI.removeCartItem(currentCart, tables.table_id);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     await Navigator.pushNamedAndRemoveUntil(
@@ -1594,7 +1689,8 @@ class _DashboradPageState extends State<DashboradPage>
 
   getTaxs() async {
     // List<BranchTax> taxlist = [];
-    List<BranchTax> taxlists = await CommunFun.getbranchTax();
+    var branchid = await CommunFun.getbranchId();
+    List<BranchTax> taxlists = await localAPI.getTaxList(branchid);
 
     if (taxlists.length > 0) {
       setState(() {
@@ -1678,7 +1774,7 @@ class _DashboradPageState extends State<DashboradPage>
 
       cart.tax_json = json.encode(taxjson);
     }
-    await cartapi.deleteCartItem(
+    await localAPI.deleteCartItem(
         cartitem, currentCart, cart, cartList.length == 1);
     if (cartitem.isSendKichen == 1) {
       var deletedlist = [];
@@ -1773,7 +1869,7 @@ class _DashboradPageState extends State<DashboradPage>
     cart.grand_total = (cart.sub_total - disc) + taxvalues;
     cart.tax_json = json.encode(taxjson);
     var result =
-        await cartapi.makeAsFocProduct(focProduct, isupdate, cart, cartitem);
+        await localAPI.makeAsFocProduct(focProduct, isupdate, cart, cartitem);
 
     getCartItem(currentCart);
   }
@@ -1783,12 +1879,12 @@ class _DashboradPageState extends State<DashboradPage>
 
     if (cart.issetMeal == 0) {
       List<ProductDetails> productdt =
-          await prodList.productdData(cart.productId);
+          await localAPI.productdData(cart.productId);
       if (productdt.length > 0) {
         prod = productdt[0];
       }
     } else {
-      List<SetMeal> productdt = await prodList.setmealData(cart.productId);
+      List<SetMeal> productdt = await localAPI.setmealData(cart.productId);
       if (productdt.length > 0) {
         prod = productdt[0];
       }
@@ -2144,14 +2240,13 @@ class _DashboradPageState extends State<DashboradPage>
                           height: MediaQuery.of(context).size.height,
                           padding:
                               EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
-                          child:
-/*                               itemSelectedIndex.productQty != null
-                              && itemSelectedIndex.productQty > 0
-                              ? itemEditScreen : */
-                              Column(
-                            children: <Widget>[
-                              /* subCatList.length == 0?  */
-                              /* Container(
+                          child: itemSelectedIndex.productQty != null &&
+                                  itemSelectedIndex.productQty > 0
+                              ? itemEditScreen
+                              : Column(
+                                  children: <Widget>[
+                                    /* subCatList.length == 0?  */
+                                    /* Container(
                                       //margin: EdgeInsets.only(left: 5, right: 5),
                                       width: MediaQuery.of(context).size.width,
                                       height: SizeConfig.safeBlockVertical * 8,
@@ -2175,97 +2270,104 @@ class _DashboradPageState extends State<DashboradPage>
                                           length: categorySecondRow.length,
                                           child: _secondTabs),
                                     ), */
-                              //Category Row 1
-                              Container(
-                                height: SizeConfig.safeBlockVertical * 8,
-                                width: MediaQuery.of(context).size.width,
-                                color: Colors.black26,
-                                child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: categoryFirstRow.length,
-                                    itemBuilder: (context, index) {
-                                      return Container(
-                                        padding: EdgeInsets.all(10.0),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                        ),
-                                        child: FlatButton(
-                                          onPressed: () {
-                                            _selectedCategory(index, 'first');
-                                          },
-                                          //color: Colors.black,  //Colors.grey.shade800,
-                                          color: categoryFirstRow[index].name ==
-                                                  selectedCategory?.name
-                                              ? Colors.deepOrange
-                                              : Colors.black26,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            //side: BorderSide(color: Colors.black)
-                                          ),
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal:
-                                                SizeConfig.safeBlockHorizontal *
-                                                    3,
-                                          ),
-                                          child: Center(
-                                              child: Text(
-                                            categoryFirstRow[index]
-                                                .name
-                                                .toUpperCase(),
-                                            style: Styles.whiteBoldsmall(),
-                                          )),
-                                        ),
-                                      );
-                                    }),
-                              ),
-                              Container(
-                                height: SizeConfig.safeBlockVertical * 8,
-                                width: MediaQuery.of(context).size.width,
-                                color: Colors.black26,
-                                child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: categorySecondRow.length,
-                                    itemBuilder: (context, index) {
-                                      return Container(
-                                        padding: EdgeInsets.all(10.0),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                        ),
-                                        child: FlatButton(
-                                          onPressed: () {
-                                            _selectedCategory(index, 'second');
-                                          },
-                                          //color: Colors.black,  //Colors.grey.shade800,
-                                          color:
-                                              categorySecondRow[index].name ==
-                                                      selectedCategory?.name
-                                                  ? Colors.deepOrange
-                                                  : Colors.black26,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(8.0),
-                                            //side: BorderSide(color: Colors.black)
-                                          ),
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal:
-                                                SizeConfig.safeBlockHorizontal *
-                                                    3,
-                                          ),
-                                          child: Center(
-                                              child: Text(
-                                            categorySecondRow[index]
-                                                .name
-                                                .toUpperCase(),
-                                            style: Styles.whiteBoldsmall(),
-                                          )),
-                                        ),
-                                      );
-                                    }),
-                              ),
-                              /*  : Container(
+                                    //Category Row 1
+                                    Container(
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      width: MediaQuery.of(context).size.width,
+                                      color: Colors.black26,
+                                      child: ListView.builder(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: categoryFirstRow.length,
+                                          itemBuilder: (context, index) {
+                                            return Container(
+                                              padding: EdgeInsets.all(10.0),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(30),
+                                              ),
+                                              child: FlatButton(
+                                                onPressed: () {
+                                                  _selectedCategory(
+                                                      index, 'first');
+                                                },
+                                                //color: Colors.black,  //Colors.grey.shade800,
+                                                color: categoryFirstRow[index]
+                                                            .name ==
+                                                        selectedCategory?.name
+                                                    ? Colors.deepOrange
+                                                    : Colors.black26,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8.0),
+                                                  //side: BorderSide(color: Colors.black)
+                                                ),
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: SizeConfig
+                                                          .safeBlockHorizontal *
+                                                      3,
+                                                ),
+                                                child: Center(
+                                                    child: Text(
+                                                  categoryFirstRow[index]
+                                                      .name
+                                                      .toUpperCase(),
+                                                  style:
+                                                      Styles.whiteBoldsmall(),
+                                                )),
+                                              ),
+                                            );
+                                          }),
+                                    ),
+                                    Container(
+                                      height: SizeConfig.safeBlockVertical * 8,
+                                      width: MediaQuery.of(context).size.width,
+                                      color: Colors.black26,
+                                      child: ListView.builder(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: categorySecondRow.length,
+                                          itemBuilder: (context, index) {
+                                            return Container(
+                                              padding: EdgeInsets.all(10.0),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(30),
+                                              ),
+                                              child: FlatButton(
+                                                onPressed: () {
+                                                  _selectedCategory(
+                                                      index, 'second');
+                                                },
+                                                //color: Colors.black,  //Colors.grey.shade800,
+                                                color: categorySecondRow[index]
+                                                            .name ==
+                                                        selectedCategory?.name
+                                                    ? Colors.deepOrange
+                                                    : Colors.black26,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          8.0),
+                                                  //side: BorderSide(color: Colors.black)
+                                                ),
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: SizeConfig
+                                                          .safeBlockHorizontal *
+                                                      3,
+                                                ),
+                                                child: Center(
+                                                    child: Text(
+                                                  categorySecondRow[index]
+                                                      .name
+                                                      .toUpperCase(),
+                                                  style:
+                                                      Styles.whiteBoldsmall(),
+                                                )),
+                                              ),
+                                            );
+                                          }),
+                                    ),
+                                    /*  : Container(
                                       //  margin: EdgeInsets.only(left: 5, right: 5),
                                       width: MediaQuery.of(context).size.width,
                                       height: SizeConfig.safeBlockVertical * 8,
@@ -2294,35 +2396,38 @@ class _DashboradPageState extends State<DashboradPage>
                                         ],
                                       ),
                                     ), */
-                              Container(
-                                child: SingleChildScrollView(
-                                  physics: BouncingScrollPhysics(),
-                                  child: SizedBox(
-                                    height: MediaQuery.of(context).size.height /
-                                        1.6,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        mealsList.length > 0
-                                            ? Expanded(
-                                                flex: 1, child: setMealsList())
-                                            : SizedBox(),
-                                        isLoading
-                                            ? CommunFun.loader(context)
-                                            : productList.length > 0
-                                                ? Expanded(
-                                                    flex: 1,
-                                                    child: porductsList())
-                                                : SizedBox()
-                                      ],
+                                    Container(
+                                      child: SingleChildScrollView(
+                                        physics: BouncingScrollPhysics(),
+                                        child: SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height /
+                                              1.6,
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.max,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              mealsList.length > 0
+                                                  ? Expanded(
+                                                      flex: 1,
+                                                      child: setMealsList())
+                                                  : SizedBox(),
+                                              isLoading
+                                                  ? CommunFun.loader(context)
+                                                  : productList.length > 0
+                                                      ? Expanded(
+                                                          flex: 1,
+                                                          child: porductsList())
+                                                      : SizedBox()
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ]),
@@ -2997,9 +3102,10 @@ class _DashboradPageState extends State<DashboradPage>
           final prodprice = product.price.toStringAsFixed(2);
           return InkWell(
             onTap: () {
-              if (product.qty == null ||
-                  product.hasInventory != 1 ||
-                  product.qty > 0.0) {
+              if ((product.qty == null ||
+                      product.hasInventory != 1 ||
+                      product.qty > 0.0) ||
+                  (product.hasRacManagemant == 1 && product.box_pId != null)) {
                 if (permissions.contains(Constant.ADD_ORDER)) {
                   checkshiftopne(product);
                 } else {
@@ -3299,6 +3405,7 @@ class _DashboradPageState extends State<DashboradPage>
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
                 removeItem();
+                print('enter here');
                 selectTable();
               },
               child: Row(
@@ -3490,12 +3597,20 @@ class _DashboradPageState extends State<DashboradPage>
                     } else {
                       itemSelectedIndex = cart;
                     }
+                    // become function to call and update quantity
+                    // Table_order tableData =
+                    //     await CommunFun.getTableData(); // table data
+                    // MST_Cart carted = new MST_Cart();
+                    // SaveOrder orderData = new SaveOrder();
+                    // ProductDetails productItem = new ProductDetails();
+                    // await localAPI.insertItemTocart(cart.id, carted,
+                    //     productItem, orderData, tableData.table_id);
                   }),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                    color:
-                        // cart.id == itemSelectedIndex.id ? Colors.deepOrange[400] :
-                        Colors.transparent,
+                    padding: EdgeInsets.all(5),
+                    color: cart.id == itemSelectedIndex.id
+                        ? Colors.deepOrange[400]
+                        : Colors.transparent,
                     child: Row(
                       children: <Widget>[
                         Expanded(

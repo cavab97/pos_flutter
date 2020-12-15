@@ -3,16 +3,20 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
-import 'package:mcncashier/helpers/LocalAPI/OrdersList.dart';
+import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Customer.dart';
+import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
+import 'package:mcncashier/models/Product_Store_Inventory.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
+import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:intl/intl.dart';
@@ -30,7 +34,7 @@ class TransactionsPage extends StatefulWidget {
 }
 
 class _TransactionsPageState extends State<TransactionsPage> {
-  OrdersList orderApi = new OrdersList();
+  LocalAPI localAPI = LocalAPI();
   List<Orders> orderLists = [];
   List<Orders> filterList = [];
   Orders selectedOrder = new Orders();
@@ -74,7 +78,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
     var terminalid = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
-    List<Orders> orderList = await orderApi.getOrdersList(branchid, terminalid);
+    List<Orders> orderList = await localAPI.getOrdersList(branchid, terminalid);
     if (orderList.length > 0) {
       setState(() {
         orderLists = orderList;
@@ -102,21 +106,40 @@ class _TransactionsPageState extends State<TransactionsPage> {
       isWeborder = order.order_source == 1 ? true : false;
       taxJson = json.decode(selectedOrder.tax_json);
     });
-    dynamic data =
-        await orderApi.getOrdersDetailsData(order.app_id, order.terminal_id);
 
+    List<OrderDetail> orderItem =
+        await localAPI.getOrderDetailsList(order.app_id, order.terminal_id);
+    // List<ProductDetails> details =
+    //     await localAPI.getOrderDetails(order.app_id, order.terminal_id);
+    if (orderItem.length > 0) {
+      setState(() {
+        orderItemList = orderItem;
+      });
+    }
+
+    //  if (order.order_source == 2) {
+    List<OrderPayment> orderpaymentdata =
+        await localAPI.getOrderpaymentData(order.app_id, order.terminal_id);
     setState(() {
-      detailsList =
-          data["order_products"].length > 0 ? data["order_products"] : [];
-      orderItemList = data["order_items"].length > 0 ? data["order_items"] : [];
-      orderpayment =
-          data["order_payment"].length > 0 ? data["order_payment"] : [];
-      paymentMethod = data["order_payment_method"].length > 0
-          ? data["order_payment_method"]
-          : [];
-      paymemtUser = data["paymentBy"] != null ? data["paymentBy"] : paymemtUser;
+      orderpayment = orderpaymentdata;
+    });
+    if (orderpayment.length > 0) {
+      List<Payments> payMethod =
+          await localAPI.getOrderpaymentmethod(order.app_id, order.terminal_id);
+      setState(() {
+        paymentMethod = payMethod;
+      });
+      User user = await localAPI.getPaymentUser(orderpayment[0].op_by);
+      if (user != null) {
+        setState(() {
+          paymemtUser = user;
+        });
+      }
+    }
+    setState(() {
       isScreenLoad = false;
     });
+    //}
   }
 
   startFilter() {
@@ -190,26 +213,98 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   cancleTransactionWithMethod(paymehtod, reason) {
-    cancleTransation(reason);
+    cancleTransation(reason, paymehtod);
     Navigator.of(context).pop();
   }
 
-  cancleTransation(reason) async {
-    var res = await orderApi.updateOrderStatus(
-        selectedOrder.app_id, selectedOrder.terminal_id, 3);
-    var terID = await CommunFun.getTeminalKey();
+  cancleTransation(reason, paymehtod) async {
+    //TODO :Cancle Transation Pop // 1 for  cancle
+    Orders orderData = Orders();
     User userdata = await CommunFun.getuserDetails();
+    orderData = selectedOrder;
+    orderData.order_status = 3;
+    orderData.isSync = 0;
+    orderData.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    orderData.updated_by = userdata.id;
+    await localAPI.updateOrderStatus(orderData);
+    var terminalId = await CommunFun.getTeminalKey();
+    var branchid = await CommunFun.getbranchId();
+    var uuid = await CommunFun.getLocalID();
     CancelOrder order = new CancelOrder();
-    order.id = order.orderId;
+    order.orderId = selectedOrder.order_id;
     order.order_app_id = selectedOrder.app_id;
     order.localID = await CommunFun.getLocalID();
     order.reason = reason;
     order.status = 3;
+    order.isSync = 0;
     order.serverId = 0;
     order.createdBy = userdata.id;
     order.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-    order.terminalId = int.parse(terID);
-    await orderApi.insertCancelOrder(order, orderItemList);
+    order.terminalId = int.parse(terminalId);
+    var addTocancle = await localAPI.insertCancelOrder(order);
+    if (paymehtod.length > 0) {
+      for (var i = 0; i < paymehtod.length; i++) {
+        OrderPayment orderpayment = paymehtod[i];
+        if (orderpayment.isCash == 1) {
+          var shiftid =
+              await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+          Drawerdata drawer = new Drawerdata();
+          drawer.shiftId = int.parse(shiftid);
+          drawer.amount = orderpayment.op_amount.toDouble();
+          drawer.isAmountIn = 2;
+          drawer.reason = "cancelORder";
+          drawer.status = 1;
+          drawer.createdBy = userdata.id;
+          drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+          drawer.localID = uuid;
+          drawer.terminalid = int.parse(terminalId);
+          var result = await localAPI.saveInOutDrawerData(drawer);
+        }
+      }
+    }
+    List<OrderDetail> orderItem = orderItemList;
+    if (orderItem.length > 0) {
+      for (var i = 0; i < orderItem.length; i++) {
+        OrderDetail productDetail = orderItem[i];
+        var productData = productDetail.product_detail;
+        var jsonProduct = json.decode(productData);
+        List<ProductStoreInventory> updatedInt = [];
+        List<ProductStoreInventoryLog> updatedIntLog = [];
+        if (jsonProduct["has_inventory"] == 1) {
+          List<ProductStoreInventory> inventory =
+              await localAPI.getStoreInventoryData(productDetail.product_id);
+          if (inventory.length > 0) {
+            ProductStoreInventory invData;
+            invData = inventory[0];
+            invData.qty = invData.qty + productDetail.detail_qty;
+            invData.updatedAt =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            invData.updatedBy = userdata.id;
+            updatedInt.add(invData);
+            var ulog = await localAPI.updateInvetory(updatedInt);
+            ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+            if (inventory.length > 0) {
+              log.uuid = uuid;
+              log.inventory_id = inventory[0].inventoryId;
+              log.branch_id = int.parse(branchid);
+              log.product_id = productDetail.product_id;
+              log.employe_id = userdata.id;
+              log.il_type = 1;
+              log.qty = invData.qty;
+              log.qty_before_change = invData.qty;
+              log.qty_after_change = invData.qty + productDetail.detail_qty;
+              log.updated_at =
+                  await CommunFun.getCurrentDateTime(DateTime.now());
+              log.updated_by = userdata.id;
+              updatedIntLog.add(log);
+              var ulog =
+                  await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
+            }
+          }
+        }
+      }
+    }
+    Navigator.of(context).pop();
     getTansactionList();
   }
 
@@ -230,14 +325,113 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   returnPayment(paymentMehtod) async {
-    // TODO : update payment tables
-    var orderid = await orderApi.updateOrderStatus(
-        selectedOrder.app_id, selectedOrder.terminal_id, 5);
-    // TODO update store inventory
+    Orders orderData = Orders();
+    User userdata = await CommunFun.getuserDetails();
+    orderData = selectedOrder;
+    orderData.order_status = 5;
+    orderData.isSync = 0;
+    orderData.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    orderData.updated_by = userdata.id;
+    await localAPI.updateOrderStatus(orderData);
+    var upDate = await CommunFun.getCurrentDateTime(DateTime.now());
+    await localAPI.updatePaymentStatus(selectedOrder.app_id,
+        selectedOrder.terminal_id, 5, upDate, userdata.id);
+    var terminalId = await CommunFun.getTeminalKey();
+    var uuid = await CommunFun.getLocalID();
+    if (paymentMehtod.length > 0) {
+      for (var i = 0; i < paymentMehtod.length; i++) {
+        OrderPayment orderpayment = paymentMehtod[i];
+        if (orderpayment.isCash == 1) {
+          var shiftid =
+              await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+          Drawerdata drawer = new Drawerdata();
+          drawer.shiftId = int.parse(shiftid);
+          drawer.amount = orderpayment.op_amount.toDouble();
+          drawer.isAmountIn = 2;
+          drawer.reason = "refundOrder";
+          drawer.status = 1;
+          drawer.createdBy = userdata.id;
+          drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+          drawer.localID = uuid;
+          drawer.terminalid = int.parse(terminalId);
+          await localAPI.saveInOutDrawerData(drawer);
+        }
+      }
+    }
+    List<OrderDetail> orderItem = orderItemList;
+    var branchid = await CommunFun.getbranchId();
+    if (orderItem.length > 0) {
+      for (var i = 0; i < orderItem.length; i++) {
+        OrderDetail productDetail = orderItem[i];
+        var productData = productDetail.product_detail;
+        var jsonProduct = json.decode(productData);
+        List<ProductStoreInventory> updatedInt = [];
+        List<ProductStoreInventoryLog> updatedIntLog = [];
+        if (jsonProduct["has_inventory"] == 1) {
+          List<ProductStoreInventory> inventory =
+              await localAPI.getStoreInventoryData(productDetail.product_id);
+          if (inventory.length > 0) {
+            ProductStoreInventory invData;
+            invData = inventory[0];
+            invData.qty = invData.qty + productDetail.detail_qty;
+            invData.updatedAt =
+                await CommunFun.getCurrentDateTime(DateTime.now());
+            invData.updatedBy = userdata.id;
+            updatedInt.add(invData);
+            var ulog = await localAPI.updateInvetory(updatedInt);
+            ProductStoreInventoryLog log = new ProductStoreInventoryLog();
+            if (inventory.length > 0) {
+              log.uuid = uuid;
+              log.inventory_id = inventory[0].inventoryId;
+              log.branch_id = int.parse(branchid);
+              log.product_id = productDetail.product_id;
+              log.employe_id = userdata.id;
+              log.il_type = 1;
+              log.qty = invData.qty;
+              log.qty_before_change = invData.qty;
+              log.qty_after_change = invData.qty + productDetail.detail_qty;
+              log.updated_at =
+                  await CommunFun.getCurrentDateTime(DateTime.now());
+              log.updated_by = userdata.id;
+              updatedIntLog.add(log);
+              var ulog =
+                  await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
+            }
+          }
+        }
+      }
+    }
     setState(() {
       isRefunding = false;
     });
+    Navigator.of(context).pop();
     getTansactionList();
+  }
+
+  deleteItemFormList(product) async {
+    Orders order = selectedOrder;
+    if (order.order_item_count > 1) {
+      OrderDetail details = product;
+      var subtotal = order.sub_total - details.product_price;
+      var qty = order.order_item_count - details.detail_qty;
+      var grandtotal = subtotal;
+      order.sub_total = subtotal;
+      order.order_item_count = qty.toInt();
+      order.grand_total = grandtotal;
+      var result = await localAPI.deleteOrderItem(product.app_id);
+      var result1 = await localAPI.updateInvoice(order);
+      setState(() {
+        isRefunding = false;
+      });
+      getTansactionList();
+      // Updated ORder table data
+      // CommunFun.showToast(
+      //     context, "Refund table insert data.. work in progress");
+    } else {
+      setState(() {
+        isRefunding = false;
+      });
+    }
   }
 
   @override
@@ -895,35 +1089,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         ]),
             ),
           ]),
-            TableRow(children: [
-            TableCell(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  new Expanded(
-                    flex: 7,
-                    child: Text(
-                      Strings.rounding_ammount,
-                      textAlign: TextAlign.end,
-                      style: Styles.darkGray(),
-                    ),
-                  ),
-                  new Expanded(
-                      flex: 3,
-                      child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 5),
-                          child: Text(
-                            selectedOrder.rounding_amount != null
-                                ? selectedOrder.rounding_amount.toStringAsFixed(2)
-                                : "00:00",
-                            textAlign: TextAlign.end,
-                            style: Styles.darkGray(),
-                          ))),
-                ],
-              ),
-            ),
-          ]),
-       
           TableRow(children: [
             TableCell(
               child: Row(
@@ -944,6 +1109,35 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           child: Text(
                             selectedOrder.grand_total != null
                                 ? selectedOrder.grand_total.toStringAsFixed(2)
+                                : "00:00",
+                            textAlign: TextAlign.end,
+                            style: Styles.darkGray(),
+                          ))),
+                ],
+              ),
+            ),
+          ]),
+          TableRow(children: [
+            TableCell(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  new Expanded(
+                    flex: 7,
+                    child: Text(
+                      Strings.rounding_ammount.toUpperCase(),
+                      textAlign: TextAlign.end,
+                      style: Styles.darkGray(),
+                    ),
+                  ),
+                  new Expanded(
+                      flex: 3,
+                      child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 5),
+                          child: Text(
+                            selectedOrder.rounding_amount != null
+                                ? selectedOrder.rounding_amount
+                                    .toStringAsFixed(2)
                                 : "00:00",
                             textAlign: TextAlign.end,
                             style: Styles.darkGray(),
@@ -1010,6 +1204,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         var index = orderItemList.indexOf(product);
         var item = orderItemList[index];
         var producrdata = json.decode(item.product_detail);
+        // print(producrdata);
         return InkWell(
             onTap: () {},
             child: Container(
@@ -1025,9 +1220,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       decoration: new BoxDecoration(
                         color: Colors.greenAccent,
                       ),
-                      child: producrdata["base64"] != ""
-                          ? CommonUtils.imageFromBase64String(
-                              producrdata["base64"])
+                      child: product.base64 != ""
+                          ? CommonUtils.imageFromBase64String(product.base64)
                           : new Image.asset(
                               Strings.no_imageAsset,
                               fit: BoxFit.cover,
@@ -1058,7 +1252,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         ),
                         Expanded(
                           flex: 2,
-                          child: Text(product.detail_qty.toString(),
+                          child: Text(product.detail_qty.toStringAsFixed(0),
                               style: TextStyle(
                                   fontSize: SizeConfig.safeBlockVertical * 2.8,
                                   color: Theme.of(context).primaryColor)),
@@ -1066,7 +1260,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         Expanded(
                             flex: 2,
                             child: Text(
-                                product.product_price.toStringAsFixed(2),
+                                product.detail_amount.toStringAsFixed(2),
                                 textAlign: TextAlign.end,
                                 style: TextStyle(
                                     fontSize:

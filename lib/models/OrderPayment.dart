@@ -21,30 +21,35 @@ class OrderPayment {
   String reference_number;
   double op_amount_change;
   int isCash;
+  int isSync;
+  int server_id;
 
-  OrderPayment(
-      {this.op_id,
-      this.uuid,
-      this.order_id,
-      this.order_app_id,
-      this.branch_id,
-      this.terminal_id,
-      this.app_id,
-      this.op_method_id,
-      this.op_amount,
-      this.op_method_response,
-      this.op_status,
-      this.op_datetime,
-      this.op_by,
-      this.updated_at,
-      this.updated_by,
-      this.is_split,
-      this.remark,
-      this.last_digits,
-      this.approval_code,
-      this.reference_number,
-      this.op_amount_change,
-      this.isCash});
+  OrderPayment({
+    this.op_id,
+    this.uuid,
+    this.order_id,
+    this.order_app_id,
+    this.branch_id,
+    this.terminal_id,
+    this.app_id,
+    this.op_method_id,
+    this.op_amount,
+    this.op_method_response,
+    this.op_status,
+    this.op_datetime,
+    this.op_by,
+    this.updated_at,
+    this.updated_by,
+    this.is_split,
+    this.remark,
+    this.last_digits,
+    this.approval_code,
+    this.reference_number,
+    this.op_amount_change,
+    this.isCash,
+    this.isSync,
+    this.server_id,
+  });
 
   OrderPayment.fromJson(Map<String, dynamic> json) {
     op_id = json["op_id"];
@@ -73,6 +78,8 @@ class OrderPayment {
         ? (json['op_amount_change'] as int).toDouble()
         : json['op_amount_change'];
     isCash = json["is_cash"];
+    isSync = json["isSync"];
+    server_id = json['server_id'];
   }
 
   Map<String, dynamic> toJson() {
@@ -99,6 +106,8 @@ class OrderPayment {
     data["reference_number"] = this.reference_number;
     data["op_amount_change"] = this.op_amount_change;
     data["is_cash"] = this.isCash;
+    data["isSync"] = this.isSync;
+    data["server_id"] = this.server_id;
     return data;
   }
 }

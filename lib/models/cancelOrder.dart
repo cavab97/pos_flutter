@@ -10,6 +10,7 @@ class CancelOrder {
   String createdAt;
   String updatedAt;
   int serverId;
+  int isSync;
   int terminalId;
 
   CancelOrder({
@@ -25,6 +26,7 @@ class CancelOrder {
     this.updatedAt,
     this.serverId,
     this.terminalId,
+    this.isSync,
   });
 
   CancelOrder.fromJson(Map<String, dynamic> json) {
@@ -40,6 +42,7 @@ class CancelOrder {
     updatedAt = json['updated_at'];
     serverId = json['server_id'];
     terminalId = json['terminal_id'];
+    isSync = json["isSync"];
   }
 
   Map<String, dynamic> toJson() {
@@ -56,6 +59,7 @@ class CancelOrder {
     data['updated_at'] = this.updatedAt;
     data['server_id'] = this.serverId;
     data['terminal_id'] = this.terminalId;
+    data["isSync"] = this.isSync;
     return data;
   }
 }

@@ -1,12 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
-import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
-import 'package:mcncashier/screens/PaymentMethodPop.dart';
-import 'package:mcncashier/components/commanutils.dart';
 
 class CashPaymentPage extends StatefulWidget {
   // Opning ammount popup
@@ -24,7 +22,6 @@ class _CashPaymentState extends State<CashPaymentPage> {
   String currentNumber = "0";
   bool isSubPayment = false;
   List<Payments> mainPaymentList = [];
-  PaymentList paymentAPI = new PaymentList();
   Payments seletedPayment = new Payments();
   List<Widget> paymentListTile = [];
   List<Payments> subPaymenttyppeList = [];
@@ -32,12 +29,11 @@ class _CashPaymentState extends State<CashPaymentPage> {
   @override
   void initState() {
     super.initState();
-    setState(() {});
     getPaymentMethods();
   }
 
   getPaymentMethods() async {
-    var result = await paymentAPI.getPaymentMethods();
+    var result = await localAPI.getPaymentMethods();
 
     if (result.length != 0) {
       setState(() {
@@ -72,8 +68,6 @@ class _CashPaymentState extends State<CashPaymentPage> {
 
   List<Widget> subPaymentListTile(List<Payments> listTilePaymentType) {
     return listTilePaymentType.map((payment) {
-      print(payment);
-      print(payment.toString());
       return MaterialButton(
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10.0),

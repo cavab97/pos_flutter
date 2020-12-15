@@ -712,13 +712,13 @@ class SyncAPICalls {
       var branchid = await CommunFun.getbranchId();
       LocalAPI localAPI = LocalAPI();
       List<Customer_Liquor_Inventory> custstoreData =
-          await localAPI.getCustomersWineInventoryTable(branchid);
+          await localAPI.getCustomersWineInventory(branchid);
       var custData = [];
       if (custstoreData.length > 0) {
         for (var i = 0; i < custstoreData.length; i++) {
           Customer_Liquor_Inventory custInv = custstoreData[i];
           List<Customer_Liquor_Inventory_Log> custLogData = await localAPI
-              .getCustomersWineInventoryLogsTable(branchid, custInv.appId);
+              .getCustomersWineInventoryLogs(branchid, custInv.appId);
           var data = {
             "cl_id": custInv.clId,
             "uuid": custInv.uuid,

@@ -48,7 +48,7 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
       List<User> checkUserExit = await localAPI.checkUserExit(pinNumber);
       if (checkUserExit.length != 0) {
         List<PosPermission> permissions =
-            await branchapi.getUserPermissions(checkUserExit[0].id);
+            await localAPI.getUserPermissions(checkUserExit[0].id);
         if (permissions.length > 0) {
           print(permissions[0].posPermissionName);
           if (permissions[0].posPermissionName != null &&

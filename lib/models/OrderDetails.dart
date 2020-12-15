@@ -22,6 +22,9 @@ class OrderDetail {
   int updated_by;
   String updated_at;
   String detail_datetime;
+  String base64;
+  int isSync;
+  int server_id;
 
   OrderDetail({
     this.detailId,
@@ -46,6 +49,9 @@ class OrderDetail {
     this.hasRacManagemant,
     this.updated_at,
     this.detail_datetime,
+    this.base64,
+    this.isSync,
+    this.server_id,
   });
 
   OrderDetail.fromJson(Map<String, dynamic> json) {
@@ -82,6 +88,9 @@ class OrderDetail {
     updated_by = json["updated_by"];
     updated_at = json["updated_at"];
     detail_datetime = json["detail_datetime"];
+    base64 = json["base64"];
+    isSync = json["isSync"];
+    server_id = json['server_id'];
   }
 
   Map<String, dynamic> toJson() {
@@ -110,6 +119,9 @@ class OrderDetail {
     data["updated_by"] = this.updated_by;
     data["updated_at"] = this.updated_at;
     data["detail_datetime"] = this.detail_datetime;
+    data["base64"] = this.base64;
+    data["isSync"] = this.isSync;
+    data["server_id"] = this.server_id;
     return data;
   }
 }
