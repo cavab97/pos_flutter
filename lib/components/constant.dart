@@ -48,7 +48,6 @@ class Constant {
   // static final String DELETE_REPORT = "delete_report";
   // static final String OPEN_DRAWER = "view_open_drawer";
   static final String PRINT_RECIEPT = "print_receipt";
-
   static final String VIEW_SYNC = "sync";
   static final String DELETE_ITEM = "delete_item";
   static final String DELETE_ORDER = "delete_order";
@@ -69,6 +68,24 @@ class Constant {
   static final String CLOSING = "closing";
   static final String REFUND = "refund";
   static final String CANCLE_TRANSACTION = "cancel_transaction";
+  static final String SEND_KITCHEN = "send_kitchen";
+  static final String REPRINT_KITECHEN = "reprint_kitchen";
+  static final String PRINT_CHECKLIST = "print_checklist";
+  static final String PRINT_BILL = "print_bill";
+  static final String FREE_ITEM = "free_item";
+  static final String OPEN_SHIFT = "open_shift";
+  static final String CLOSE_SHIFT = "close_shift";
+  static final String REPRINT_PREVIOS_RECIEPT = "reprint_previous_receipt";
+  static final String REDEEM_WINE = "redeem_wine";
+  static final String APPLY_VOUCHER = "apply_voucher";
+  static final String NEW_ORDER = "new_order";
+  static final String CHANGE_QUANTITY = "change_quantity";
+  static final String ADD_CUSTOMER = "add_customer";
+  static final String CLOSE_TABLE = "close_table";
+  static final String SYNC_ORDER = "sync_order";
+  static final String VIEW_SHIFT = "view_shift";
+  static final String RETURN_PREVIOS_TRANSACTION =
+      "return_previous_transaction";
 
   /*==============================================================================
                               Manage API status

@@ -977,7 +977,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
 
     if (widget.printerIP.isNotEmpty) {
-      if (permissions.contains(Constant.PRINT_RECIEPT)) {
+      if (permissions.contains(Constant.PRINT_BILL)) {
         if (permissions.contains(Constant.OPEN_DRAWER)) {
           _printReceipt.checkReceiptPrint(
               widget.printerIP,
@@ -1034,7 +1034,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           });
         }
       } else {
-        await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+        await CommonUtils.openPermissionPop(context, Constant.PRINT_BILL,
             () async {
           if (permissions.contains(Constant.OPEN_DRAWER)) {
             _printReceipt.checkReceiptPrint(

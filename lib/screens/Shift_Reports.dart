@@ -199,7 +199,10 @@ class _ShiftReportsState extends State<ShiftReports> {
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     if (shiftid != null) {
       await CommunFun.printShiftReportData(
-          printerreceiptList[0].printerId.toString(), context, shiftid);
+          printerreceiptList[0].printerId.toString(),
+          context,
+          shiftid,
+          permissions);
     }
   }
 

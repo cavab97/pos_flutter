@@ -1001,6 +1001,7 @@ class PrintReceipt {
           printColumnWitSpace(8, total.toStringAsFixed(2), true);
 
       ticket.text("$nameOfProduct$qtyOfProduct$priceOfProduct$amountOfProduct",
+          containsChinese: true,
           styles: PosStyles(
               align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
@@ -1421,6 +1422,7 @@ class PrintReceipt {
         PosColumn(
             text: cartList[i].productName,
             width: 7,
+            containsChinese: true,
             styles: PosStyles(
                 align: PosAlign.left,
                 fontType: PosFontType.fontA,

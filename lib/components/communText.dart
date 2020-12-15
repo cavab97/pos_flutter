@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/CheckInout.dart';
@@ -1284,7 +1285,7 @@ class CommunFun {
     }
   }
 
-  static printShiftReportData(printerIP, context, shiftid) async {
+  static printShiftReportData(printerIP, context, shiftid, permissions) async {
     PrintReceipt printKOT = PrintReceipt();
 
     Shift shifittem = new Shift();
@@ -1362,36 +1363,71 @@ class CommunFun {
 
     // terminal Data
     Terminal terminalData = await localAPI.getTerminalDetails(terminalID);
-
-    printKOT.shiftReportPrint(
-        printerIP,
-        context,
-        // Branch data
-        branchData,
-        totalPax,
-        // terminal data
-        terminalData,
-        //Summery Sales data
-        grosssale,
-        refundval,
-        discountval,
-        netsale,
-        taxval,
-        textService,
-        roundingAmount,
-        totalRend,
-        // Drawer Data
-        shifittem,
-        cashSale,
-        cashDeposit,
-        cashRefund,
-        cashRounding,
-        payInAmmount,
-        payOutAmmount,
-        expectedVal,
-        // Paymemts Data
-        orderPayments,
-        paymentMethods,
-        ordersList.length);
+    if (permissions.contains(Constant.PRINT_RECIEPT)) {
+      printKOT.shiftReportPrint(
+          printerIP,
+          context,
+          // Branch data
+          branchData,
+          totalPax,
+          // terminal data
+          terminalData,
+          //Summery Sales data
+          grosssale,
+          refundval,
+          discountval,
+          netsale,
+          taxval,
+          textService,
+          roundingAmount,
+          totalRend,
+          // Drawer Data
+          shifittem,
+          cashSale,
+          cashDeposit,
+          cashRefund,
+          cashRounding,
+          payInAmmount,
+          payOutAmmount,
+          expectedVal,
+          // Paymemts Data
+          orderPayments,
+          paymentMethods,
+          ordersList.length);
+    } else {
+      await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+          () async {
+        printKOT.shiftReportPrint(
+            printerIP,
+            context,
+            // Branch data
+            branchData,
+            totalPax,
+            // terminal data
+            terminalData,
+            //Summery Sales data
+            grosssale,
+            refundval,
+            discountval,
+            netsale,
+            taxval,
+            textService,
+            roundingAmount,
+            totalRend,
+            // Drawer Data
+            shifittem,
+            cashSale,
+            cashDeposit,
+            cashRefund,
+            cashRounding,
+            payInAmmount,
+            payOutAmmount,
+            expectedVal,
+            // Paymemts Data
+            orderPayments,
+            paymentMethods,
+            ordersList.length);
+      }, () {});
+    }
   }
 }

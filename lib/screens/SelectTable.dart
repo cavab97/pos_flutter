@@ -177,29 +177,35 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   mergeTabledata(TablesDetails table) async {
-    setState(() {
-      isLoading = true;
-    });
-    // Merge table
-    TablesDetails table1 = mergeInTable;
-    TablesDetails table2 = table;
-    Table_order tableOrder = new Table_order();
-    var pax = table1.numberofpax != null ? table1.numberofpax : 0;
-    pax += table2.numberofpax != null ? table2.numberofpax : 0;
-    tableOrder.number_of_pax = pax;
-    tableOrder.table_id = table1.tableId;
-    tableOrder.save_order_id = table1.saveorderid != 0 ? table1.saveorderid : 0;
-    tableOrder.is_merge_table = "1";
-    tableOrder.merged_table_id = table2.tableId;
-    tableOrder.assignTime = await CommunFun.getCurrentDateTime(DateTime.now());
-    var result = await localAPI.mergeTableOrder(tableOrder);
-    setState(() {
-      isMergeing = false;
-      mergeInTable = null;
-      isLoading = false;
-    });
-    CommunFun.showToast(context, Strings.table_mearged_msg);
-    getTables();
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      // Merge table
+      TablesDetails table1 = mergeInTable;
+      TablesDetails table2 = table;
+      Table_order tableOrder = new Table_order();
+      var pax = table1.numberofpax != null ? table1.numberofpax : 0;
+      pax += table2.numberofpax != null ? table2.numberofpax : 0;
+      tableOrder.number_of_pax = pax;
+      tableOrder.table_id = table1.tableId;
+      tableOrder.save_order_id =
+          table1.saveorderid != 0 ? table1.saveorderid : 0;
+      tableOrder.is_merge_table = "1";
+      tableOrder.merged_table_id = table2.tableId;
+      tableOrder.assignTime =
+          await CommunFun.getCurrentDateTime(DateTime.now());
+      await localAPI.mergeTableOrder(tableOrder);
+      setState(() {
+        isMergeing = false;
+        mergeInTable = null;
+        isLoading = false;
+      });
+      getTables();
+      CommunFun.showToast(context, Strings.table_mearged_msg);
+    } catch (e) {
+      print(e);
+    }
   }
 
   mergeTable(table) {
@@ -403,13 +409,13 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   changePax() {
-    if (permissions.contains(Constant.PAYMENT)) {
+    if (permissions.contains(Constant.CHANG_PAX)) {
       setState(() {
         isChanging = true;
       });
       opnPaxDailog();
     } else {
-      CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER, () async {
+      CommonUtils.openPermissionPop(context, Constant.CHANG_PAX, () async {
         setState(() {
           isChanging = true;
         });
@@ -428,10 +434,19 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   addNewOrder() {
-    setState(() {
-      isChanging = false;
-    });
-    opnPaxDailog();
+    if (permissions.contains(Constant.NEW_ORDER)) {
+      setState(() {
+        isChanging = false;
+      });
+      opnPaxDailog();
+    } else {
+      CommonUtils.openPermissionPop(context, Constant.NEW_ORDER, () async {
+        setState(() {
+          isChanging = false;
+        });
+        opnPaxDailog();
+      }, () {});
+    }
   }
 
   void selectOption(choice) {
@@ -595,12 +610,12 @@ class _SelectTablePageState extends State<SelectTablePage>
                             ),
                             SizedBox(height: 30),
                             shiftbtn(() {
-                              if (permissions.contains(Constant.OPENING)) {
+                              if (permissions.contains(Constant.OPEN_SHIFT)) {
                                 openOpningAmmountPop(
                                     Strings.title_opening_amount);
                               } else {
                                 CommonUtils.openPermissionPop(
-                                    context, Constant.OPENING, () async {
+                                    context, Constant.OPEN_SHIFT, () async {
                                   openOpningAmmountPop(
                                       Strings.title_opening_amount);
                                 }, () {});
@@ -694,54 +709,6 @@ class _SelectTablePageState extends State<SelectTablePage>
       printerList = printer;
       printerreceiptList = printerDraft;
     });
-  }
-
-  Widget openShiftButton(context) {
-    // Payment button
-    return Positioned(
-      left: 0,
-      right: 0,
-      top: 0,
-      bottom: 0,
-      child: Center(
-        child: Container(
-          color: Colors.black87,
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                Strings.shiftTextLable,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: SizeConfig.safeBlockVertical * 4),
-              ),
-              SizedBox(height: 25),
-              Text(
-                Strings.closed,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: SizeConfig.safeBlockVertical * 6,
-                    fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 40),
-              shiftbtn(() {
-                if (permissions.contains(Constant.OPENING)) {
-                  openOpningAmmountPop(Strings.title_opening_amount);
-                } else {
-                  CommonUtils.openPermissionPop(context, Constant.OPENING,
-                      () async {
-                    openOpningAmmountPop(Strings.title_opening_amount);
-                  }, () {});
-                }
-              })
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Widget shiftbtn(Function onPress) {
@@ -1128,7 +1095,21 @@ class _SelectTablePageState extends State<SelectTablePage>
         return InkWell(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
           onTap: () {
-            ontableLongTap(table);
+            if (isMergeing) {
+              if (table.merged_table_id == null) {
+                mergeTabledata(table);
+              } else {
+                CommunFun.showToast(context, Strings.table_already_merged);
+              }
+            } else if (isChangingTable) {
+              if (table.saveorderid == 0) {
+                changeTableToOtherTable(table);
+              } else {
+                CommunFun.showToast(context, Strings.table_already_occupied);
+              }
+            } else {
+              ontableLongTap(table);
+            }
           },
           onDoubleTap: () {
             if (isMergeing) {

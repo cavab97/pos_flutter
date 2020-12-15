@@ -38,11 +38,20 @@ class _WineStorageState extends State<WineStorage>
   TabController _tabController;
   bool isLoading = false;
   bool isEditing = false;
+  var permissions = "";
   @override
   void initState() {
     super.initState();
-
+    setPermissons();
     getRacList();
+  }
+
+  setPermissons() async {
+    var permission = await CommunFun.getPemission();
+    setState(() {
+      permissions = permission;
+    });
+    print("permissions :-- " + permissions);
   }
 
   void _handleTabSelection() {
@@ -167,7 +176,14 @@ class _WineStorageState extends State<WineStorage>
                     qty: bqty,
                     onClose: (qty, remark) {
                       Navigator.of(context).pop();
-                      addtoInventory(box, qty);
+                      if (permissions.contains(Constant.REDEEM_WINE)) {
+                        addtoInventory(box, qty);
+                      } else {
+                        CommonUtils.openPermissionPop(
+                            context, Constant.REDEEM_WINE, () async {
+                          addtoInventory(box, qty);
+                        }, () {});
+                      }
                     });
               });
         } else {

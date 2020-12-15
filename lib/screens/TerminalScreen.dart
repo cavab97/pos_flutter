@@ -17,7 +17,7 @@ class TerminalKeyPage extends StatefulWidget {
 }
 
 class _TerminalKeyPageState extends State<TerminalKeyPage> {
-  TextEditingController terminalKey = new TextEditingController(text: "");
+  TextEditingController terminalKey = new TextEditingController(text: "2FFc");
   GlobalKey<ScaffoldState> scaffoldKey;
   var errormessage = "";
   bool isValidatekey = true;
@@ -53,8 +53,9 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
           isLoading = true;
         });
         terminal.terminalKey = terminalKey.text;
-        terminal.deviceid = deviceinfo["deviceId"];
-        terminal.terDeviceToken = deviceinfo["deviceToken"];
+        terminal.deviceid = "gto"; //deviceinfo["deviceId"];
+        terminal.terDeviceToken =
+            "ac3928f14a767e7a"; //deviceinfo["deviceToken"];
         await repo.sendTerminalKey(terminal).then((value) async {
           if (value != null && value["status"] == Constant.STATUS200) {
             Preferences.setStringToSF(

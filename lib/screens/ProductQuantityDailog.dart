@@ -7,7 +7,6 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
-import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
@@ -71,7 +70,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   var productnetprice = 0.00;
   var currency;
   String attributeTitle = "";
-
+  var permissions = "";
   @override
   void initState() {
     super.initState();
@@ -81,6 +80,15 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       cartitem = widget.cartItem;
     });
     setInitstate();
+    setPermissons();
+  }
+
+  setPermissons() async {
+    var permission = await CommunFun.getPemission();
+    setState(() {
+      permissions = permission;
+    });
+    print("permissions :-- " + permissions);
   }
 
   setInitstate() async {
@@ -893,11 +901,25 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       child: Row(
         children: <Widget>[
           _button("-", () {
-            decreaseQty();
+            if (permissions.contains(Constant.CHANGE_QUANTITY)) {
+              decreaseQty();
+            } else {
+              CommonUtils.openPermissionPop(context, Constant.CHANGE_QUANTITY,
+                  () async {
+                increaseQty();
+              }, () {});
+            }
           }),
           _quantityTextInput(),
           _button("+", () {
-            increaseQty();
+            if (permissions.contains(Constant.CHANGE_QUANTITY)) {
+              increaseQty();
+            } else {
+              CommonUtils.openPermissionPop(context, Constant.CHANGE_QUANTITY,
+                  () async {
+                increaseQty();
+              }, () {});
+            }
           }),
         ],
       ),

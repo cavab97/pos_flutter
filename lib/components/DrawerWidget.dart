@@ -180,7 +180,10 @@ class DrawerWidState extends State<DrawerWid> {
       await Preferences.removeSinglePref(Constant.IS_SHIFT_OPEN);
       await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
       await CommunFun.printShiftReportData(
-          printerreceiptList[0].printerIp.toString(), context, shiftid);
+          printerreceiptList[0].printerIp.toString(),
+          context,
+          shiftid,
+          permissions);
     }
     checkshift();
     await Navigator.pushNamedAndRemoveUntil(
@@ -190,19 +193,26 @@ class DrawerWidState extends State<DrawerWid> {
 
   gotoShiftReport() {
     if (isShiftOpen) {
-      Navigator.of(context).pop();
-      Navigator.pushNamed(context, Constant.ShiftOrders).then(backEvent);
+      if (permissions.contains(Constant.VIEW_SHIFT)) {
+        Navigator.of(context).pop();
+        Navigator.pushNamed(context, Constant.ShiftOrders).then(backEvent);
+      } else {
+        CommonUtils.openPermissionPop(context, Constant.VIEW_SHIFT, () async {
+          Navigator.of(context).pop();
+          Navigator.pushNamed(context, Constant.ShiftOrders).then(backEvent);
+        }, () {});
+      }
     } else {
       CommunFun.showToast(context, Strings.shift_opne_alert_msg);
     }
   }
 
   syncOrdersTodatabase() async {
-    if (permissions.contains(Constant.VIEW_SYNC)) {
+    if (permissions.contains(Constant.SYNC_ORDER)) {
       await CommunFun.opneSyncPop(context);
       await CommunFun.syncOrdersANDStore(context, true);
     } else {
-      await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
+      await CommonUtils.openPermissionPop(context, Constant.SYNC_ORDER,
           () async {
         await CommunFun.opneSyncPop(context);
         await CommunFun.syncOrdersANDStore(context, true);
@@ -212,22 +222,22 @@ class DrawerWidState extends State<DrawerWid> {
 
   syncAllTables() async {
     //Navigator.of(context).pop();
-    // if (permissions.contains(Constant.VIEW_SYNC)) {
-    await Preferences.removeSinglePref(Constant.LastSync_Table);
-    await Preferences.removeSinglePref(Constant.OFFSET);
-    await CommunFun.opneSyncPop(context);
-    await CommunFun.syncOrdersANDStore(context, false);
-    await CommunFun.syncAfterSuccess(context, false);
-    // } else {
-    //   await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
-    //       () async {
-    //     await Preferences.removeSinglePref(Constant.LastSync_Table);
-    //     await Preferences.removeSinglePref(Constant.OFFSET);
-    //     await CommunFun.opneSyncPop(context);
-    //     await CommunFun.syncOrdersANDStore(context, false);
-    //     await CommunFun.syncAfterSuccess(context, false);
-    //   }, () {});
-    // }
+    if (permissions.contains(Constant.VIEW_SYNC)) {
+      await Preferences.removeSinglePref(Constant.LastSync_Table);
+      await Preferences.removeSinglePref(Constant.OFFSET);
+      await CommunFun.opneSyncPop(context);
+      await CommunFun.syncOrdersANDStore(context, false);
+      await CommunFun.syncAfterSuccess(context, false);
+    } else {
+      await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
+          () async {
+        await Preferences.removeSinglePref(Constant.LastSync_Table);
+        await Preferences.removeSinglePref(Constant.OFFSET);
+        await CommunFun.opneSyncPop(context);
+        await CommunFun.syncOrdersANDStore(context, false);
+        await CommunFun.syncAfterSuccess(context, false);
+      }, () {});
+    }
   }
 
   @override
@@ -300,21 +310,21 @@ class DrawerWidState extends State<DrawerWid> {
             ListTile(
                 onTap: () {
                   if (isShiftOpen) {
-                    if (permissions.contains(Constant.CLOSING)) {
+                    if (permissions.contains(Constant.CLOSE_SHIFT)) {
                       closeShift(context);
                     } else {
-                      CommonUtils.openPermissionPop(context, Constant.CLOSING,
-                          () async {
+                      CommonUtils.openPermissionPop(
+                          context, Constant.CLOSE_SHIFT, () async {
                         closeShift(context);
                       }, () {});
                     }
                   } else {
-                    if (permissions.contains(Constant.OPENING)) {
+                    if (permissions.contains(Constant.OPEN_SHIFT)) {
                       openOpningAmmountPop(
                           context, Strings.title_opening_amount);
                     } else {
-                      CommonUtils.openPermissionPop(context, Constant.OPENING,
-                          () async {
+                      CommonUtils.openPermissionPop(
+                          context, Constant.OPEN_SHIFT, () async {
                         openOpningAmmountPop(
                             context, Strings.title_opening_amount);
                       }, () {});

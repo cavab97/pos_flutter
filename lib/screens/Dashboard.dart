@@ -189,6 +189,7 @@ class _DashboradPageState extends State<DashboradPage>
     setState(() {
       permissions = permission;
     });
+    print("permissions :-- " + permissions);
   }
 
   checkCustomerSelected() async {
@@ -395,7 +396,15 @@ class _DashboradPageState extends State<DashboradPage>
         selectTable();
         break;
       case 1:
-        closeTable();
+        if (permissions.contains(Constant.CLOSE_TABLE)) {
+          closeTable();
+        } else {
+          CommonUtils.openPermissionPop(context, Constant.CLOSE_TABLE,
+              () async {
+            closeTable();
+          }, () {});
+        }
+
         break;
       case 2:
         showDialog(
@@ -422,12 +431,13 @@ class _DashboradPageState extends State<DashboradPage>
             });
         break;
       case 3:
-        if (permissions.contains(Constant.CLOSING)) {
-          CommonUtils.openPermissionPop(context, Constant.CLOSING, () async {
+        if (permissions.contains(Constant.CLOSE_SHIFT)) {
+          closeShift();
+        } else {
+          CommonUtils.openPermissionPop(context, Constant.CLOSE_SHIFT,
+              () async {
             closeShift();
           }, () {});
-        } else {
-          closeShift();
         }
         break;
       case 4:
@@ -437,7 +447,15 @@ class _DashboradPageState extends State<DashboradPage>
         draftreciptPrint();
         break;
       case 6:
-        deleteCurrentCart();
+        if (permissions.contains(Constant.DELETE_ORDER)) {
+          deleteCurrentCart();
+        } else {
+          CommonUtils.openPermissionPop(context, Constant.DELETE_ORDER,
+              () async {
+            deleteCurrentCart();
+          }, () {});
+        }
+
         break;
       case 7:
         resendToKitchen();
@@ -455,11 +473,11 @@ class _DashboradPageState extends State<DashboradPage>
               onClose: (resendList) {
                 if (resendList.length > 0 && printerreceiptList.length > 0) {
                   Navigator.of(context).pop();
-                  if (permissions.contains(Constant.PRINT_RECIEPT)) {
+                  if (permissions.contains(Constant.REPRINT_KITECHEN)) {
                     openPrinterPop(resendList, true);
                   } else {
                     CommonUtils.openPermissionPop(
-                        context, Constant.PRINT_RECIEPT, () {
+                        context, Constant.REPRINT_KITECHEN, () {
                       openPrinterPop(resendList, true);
                     }, () {});
                   }
@@ -473,7 +491,7 @@ class _DashboradPageState extends State<DashboradPage>
   printCheckList() async {
     if (cartList.length > 0) {
       if (printerreceiptList.length > 0) {
-        if (permissions.contains(Constant.PRINT_RECIEPT)) {
+        if (permissions.contains(Constant.PRINT_CHECKLIST)) {
           printKOT.checkListReceiptPrint(
               printerreceiptList[0].printerIp.toString(),
               context,
@@ -483,7 +501,7 @@ class _DashboradPageState extends State<DashboradPage>
               selectedTable.number_of_pax.toString(),
               customer != null ? customer.name : Strings.walkin_customer);
         } else {
-          await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+          await CommonUtils.openPermissionPop(context, Constant.PRINT_CHECKLIST,
               () {
             printKOT.checkListReceiptPrint(
                 printerreceiptList[0].printerIp.toString(),
@@ -747,9 +765,9 @@ class _DashboradPageState extends State<DashboradPage>
       }
       if (i == itemList.length - 1) {
         if (list.length > 0) {
-          openPrinterPop(list, false);
+          await openPrinterPop(list, false);
           await localAPI.sendToKitched(ids);
-          getCartItem(currentCart);
+          await getCartItem(currentCart);
         }
         return false;
       }
@@ -1380,7 +1398,7 @@ class _DashboradPageState extends State<DashboradPage>
         await localAPI.getOrderAttributes(orderid);
     List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
 
-    if (permissions.contains(Constant.PRINT_RECIEPT)) {
+    if (permissions.contains(Constant.PRINT_BILL)) {
       if (permissions.contains(Constant.OPEN_DRAWER)) {
         printKOT.checkReceiptPrint(
             printerreceiptList[0].printerIp,
@@ -1437,7 +1455,7 @@ class _DashboradPageState extends State<DashboradPage>
         });
       }
     } else {
-      await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+      await CommonUtils.openPermissionPop(context, Constant.PRINT_BILL,
           () async {
         if (permissions.contains(Constant.OPEN_DRAWER)) {
           await printKOT.checkReceiptPrint(
@@ -1589,11 +1607,10 @@ class _DashboradPageState extends State<DashboradPage>
       if (cartitem.isSendKichen == 1) {
         var deletedlist = [];
         deletedlist.add(cartitem);
-        if (permissions.contains(Constant.PRINT_RECIEPT)) {
+        if (permissions.contains(Constant.SEND_KITCHEN)) {
           openPrinterPop(deletedlist, false);
         } else {
-          await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
-              () {
+          CommonUtils.openPermissionPop(context, Constant.SEND_KITCHEN, () {
             openPrinterPop(deletedlist, false);
           }, () {});
         }
@@ -1653,7 +1670,8 @@ class _DashboradPageState extends State<DashboradPage>
     focProduct.productId = cartitem.productId;
     focProduct.productName = cartitem.productName;
     focProduct.productSecondName = cartitem.productSecondName;
-    focProduct.productPrice = 0.0;
+    focProduct.productPrice = cartitem.productPrice;
+    focProduct.productDetailAmount = 0.0;
     focProduct.productQty = qty;
     focProduct.productNetPrice = cartitem.productNetPrice;
     focProduct.createdBy = userdata.id;
@@ -1665,10 +1683,10 @@ class _DashboradPageState extends State<DashboradPage>
     focProduct.printer_id = cartitem.printer_id;
     focProduct.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     focProduct.setmeal_product_detail = cartitem.setmeal_product_detail;
-    var realprice = (cartitem.productPrice / cartitem.productQty);
+    var realprice = (cartitem.productDetailAmount / cartitem.productQty);
     var dis = (cartitem.discount / cartitem.productQty);
     cartitem.productQty = cartitem.productQty - qty;
-    cartitem.productPrice = (realprice * cartitem.productQty);
+    cartitem.productDetailAmount = (realprice * cartitem.productQty);
     cartitem.discount = (realprice * dis);
     MST_Cart cart = new MST_Cart();
     cart = allcartData;
@@ -1683,7 +1701,7 @@ class _DashboradPageState extends State<DashboradPage>
     cart.tax_json = json.encode(taxjson);
     var result =
         await localAPI.makeAsFocProduct(focProduct, isupdate, cart, cartitem);
-    Navigator.of(context).pop();
+    // Navigator.of(context).pop();
     getCartItem(currentCart);
   }
 
@@ -2226,7 +2244,14 @@ class _DashboradPageState extends State<DashboradPage>
             padding: EdgeInsets.only(left: 5, right: 5, top: 0, bottom: 0),
             onPressed: () {
               if (isShiftOpen) {
-                opneShowAddCustomerDailog();
+                if (permissions.contains(Constant.ADD_CUSTOMER)) {
+                  opneShowAddCustomerDailog();
+                } else {
+                  CommonUtils.openPermissionPop(context, Constant.ADD_CUSTOMER,
+                      () async {
+                    opneShowAddCustomerDailog();
+                  }, () {});
+                }
               } else {
                 CommunFun.showToast(context, Strings.shift_open_message);
               }
@@ -2374,10 +2399,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ),
               PopupMenuItem(
-                enabled: permissions.contains(Constant.DELETE_ORDER) &&
-                        cartList.length > 0
-                    ? true
-                    : false,
+                enabled: cartList.length > 0 ? true : false,
                 value: 6,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2540,25 +2562,23 @@ class _DashboradPageState extends State<DashboradPage>
           final prodprice = product.price.toStringAsFixed(2);
           return InkWell(
             onTap: () {
-              if ((product.qty == null ||
-                      product.hasInventory != 1 ||
-                      product.qty > 0.0) ||
-                  (product.hasRacManagemant == 1 && product.box_pId != null)) {
-                //  if (permissions.contains(Constant.ADD_ORDER)) {
-                checkshiftopne(product);
-                // } else {
-                //   CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
-                //       () {
-                //     checkshiftopne(product);
-                //   }, () {});
-                // }
-              } else {
+              if (product.hasInventory == 1 && product.qty < 0.0 ||
+                  product.hasRacManagemant == 1 && product.box_pId == null) {
                 CommunFun.showToast(
                     context,
                     product.hasRacManagemant != 1
                         ? Strings.out_of_stoke_msg
                         : Strings.out_of_box_msg);
+              } else {
+                checkshiftopne(product);
               }
+
+              // if ((product.qty == null ||
+              //         product.hasInventory != 1 ||
+              //         product.qty > 0.0) ||
+              //     (product.hasRacManagemant == 1 && product.box_pId != null)) {
+              //   checkshiftopne(product);
+              // } else {}
             },
             child: Container(
               height: itemHeight,
@@ -2689,11 +2709,11 @@ class _DashboradPageState extends State<DashboradPage>
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () {
-                      if (permissions.contains(Constant.PRINT_RECIEPT)) {
+                      if (permissions.contains(Constant.SEND_KITCHEN)) {
                         sendTokitched(cartList);
                       } else {
                         CommonUtils.openPermissionPop(
-                            context, Constant.PRINT_RECIEPT, () {
+                            context, Constant.SEND_KITCHEN, () {
                           sendTokitched(cartList);
                         }, () {});
                       }
@@ -2722,26 +2742,9 @@ class _DashboradPageState extends State<DashboradPage>
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
                 if (!isWebOrder) {
-                  // if (permissions.contains(Constant.ADD_ORDER) ||
-                  //     permissions.contains(Constant.EDIT_ORDER)) {
                   sendPayment();
-                  // } else {
-                  //   CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
-                  //       () {
-                  //     sendPayment();
-                  //   }, () {});
-                  // }
                 } else {
-                  //weborder payment
-                  // if (permissions.contains(Constant.ADD_ORDER) ||
-                  //     permissions.contains(Constant.EDIT_ORDER)) {
                   checkoutWebOrder();
-                  // } else {
-                  //   CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
-                  //       () {
-                  //     checkoutWebOrder();
-                  //   }, () {});
-                  // }
                 }
               },
               child: Text(
@@ -2790,10 +2793,14 @@ class _DashboradPageState extends State<DashboradPage>
               ),
               SizedBox(height: 30),
               shiftbtn(() {
-                CommonUtils.openPermissionPop(context, Constant.OPENING,
-                    () async {
+                if (permissions.contains(Constant.OPEN_SHIFT)) {
                   openOpningAmmountPop(Strings.title_opening_amount);
-                }, () {});
+                } else {
+                  CommonUtils.openPermissionPop(context, Constant.OPEN_SHIFT,
+                      () async {
+                    openOpningAmmountPop(Strings.title_opening_amount);
+                  }, () {});
+                }
               })
             ],
           ),
@@ -2933,7 +2940,9 @@ class _DashboradPageState extends State<DashboradPage>
                           Padding(
                             padding: EdgeInsets.symmetric(vertical: 0),
                             child: Text(
-                              cart.productDetailAmount.toStringAsFixed(2),
+                              cart.productDetailAmount != null
+                                  ? cart.productDetailAmount.toStringAsFixed(2)
+                                  : "0.0",
                               style: Styles.greysmall(),
                             ),
                           ),
@@ -2950,14 +2959,14 @@ class _DashboradPageState extends State<DashboradPage>
                           color: Colors.blueAccent,
                           icon: Icons.free_breakfast,
                           onTap: () {
-                            // if (permissions.contains(Constant.EDIT_ITEM)) {
-                            applyforFocProduct(cart);
-                            // } else {
-                            //   CommonUtils.openPermissionPop(
-                            //       context, Constant.EDIT_ITEM, () {
-                            //     applyforFocProduct(cart);
-                            //   }, () {});
-                            // }
+                            if (permissions.contains(Constant.FREE_ITEM)) {
+                              applyforFocProduct(cart);
+                            } else {
+                              CommonUtils.openPermissionPop(
+                                  context, Constant.FREE_ITEM, () {
+                                applyforFocProduct(cart);
+                              }, () {});
+                            }
                           },
                         )
                       : SizedBox(),
@@ -2968,14 +2977,14 @@ class _DashboradPageState extends State<DashboradPage>
                           color: Colors.blueAccent,
                           icon: Icons.free_breakfast,
                           onTap: () {
-                            // if (permissions.contains(Constant.EDIT_ITEM)) {
-                            applyforFocProduct(cart);
-                            // } else {
-                            //   CommonUtils.openPermissionPop(
-                            //       context, Constant.EDIT_ITEM, () {
-                            //     applyforFocProduct(cart);
-                            //   }, () {});
-                            // }
+                            if (permissions.contains(Constant.FREE_ITEM)) {
+                              applyforFocProduct(cart);
+                            } else {
+                              CommonUtils.openPermissionPop(
+                                  context, Constant.FREE_ITEM, () {
+                                applyforFocProduct(cart);
+                              }, () {});
+                            }
                           },
                         )
                       : SizedBox(),
@@ -2984,14 +2993,7 @@ class _DashboradPageState extends State<DashboradPage>
                     icon: Icons.edit,
                     onTap: () {
                       if (cart.isFocProduct != 1) {
-                        // if (permissions.contains(Constant.EDIT_ORDER)) {
                         editCartItem(cart);
-                        // } else {
-                        //   CommonUtils.openPermissionPop(
-                        //       context, Constant.EDIT_ORDER, () {
-                        //     editCartItem(cart);
-                        //   }, () {});
-                        // }
                       } else {
                         CommunFun.showToast(context, Strings.foc_product_msg);
                       }
@@ -3207,11 +3209,11 @@ class _DashboradPageState extends State<DashboradPage>
                           child: RaisedButton(
                             onPressed: () {
                               if (permissions
-                                  .contains(Constant.DISCOUNT_ORDER)) {
+                                  .contains(Constant.APPLY_VOUCHER)) {
                                 openVoucherPop();
                               } else {
                                 CommonUtils.openPermissionPop(
-                                    context, Constant.DISCOUNT_ORDER, () {
+                                    context, Constant.APPLY_VOUCHER, () {
                                   openVoucherPop();
                                 }, () {});
                               }
