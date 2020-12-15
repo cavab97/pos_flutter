@@ -305,42 +305,36 @@ class _DashboradPageState extends State<DashboradPage>
   getCartItem(cartId) async {
     List<MSTCartdetails> cartItem = await localAPI.getCartItem(cartId);
     if (cartItem.length > 0) {
-      if (this.mounted) {
-        setState(() {
-          cartList = cartItem;
-        });
-      }
+      setState(() {
+        cartList = cartItem;
+        temporaryCartList.add(cartItem);
+      });
+      await countTotals(cartId);
     }
-
-    //for (var itemInCart in cartItem) {}
-    //temporaryCartList.add(cartItem);
-    await countTotals(cartId);
   }
 
   countTotals(cartId) async {
     MST_Cart cart = await localAPI.getCartData(cartId);
 
     Voucher vaocher;
-    if (cart.voucher_id != null && cart.voucher_detail != null) {
+    if (cart.voucher_id != null) {
       var voucherdetail = jsonDecode(cart.voucher_detail);
       vaocher = Voucher.fromJson(voucherdetail);
     }
     taxJson = json.decode(cart.tax_json);
-    if (this.mounted) {
-      setState(() {
-        allcartData = cart;
-        subtotal = cart.sub_total;
-        serviceCharge = cart.serviceCharge == null ? 0.00 : cart.serviceCharge;
-        serviceChargePer =
-            cart.serviceChargePercent == null ? 0 : cart.serviceChargePercent;
-        discount = cart.discount;
-        tax = cart.tax;
-        isWebOrder = cart.source == 1 ? true : false;
-        grandTotal =
-            (subtotal - discount) + tax + serviceCharge; //cart.grand_total;
-        selectedvoucher = vaocher;
-      });
-    }
+    setState(() {
+      allcartData = cart;
+      subtotal = cart.sub_total;
+      serviceCharge = cart.serviceCharge == null ? 0.00 : cart.serviceCharge;
+      serviceChargePer =
+          cart.serviceChargePercent == null ? 0 : cart.serviceChargePercent;
+      discount = cart.discount;
+      tax = cart.tax;
+      isWebOrder = cart.source == 1 ? true : false;
+      grandTotal =
+          (subtotal - discount) + tax + serviceCharge; //cart.grand_total;
+      selectedvoucher = vaocher;
+    });
   }
 
   removeCutomer() async {
@@ -1016,6 +1010,9 @@ class _DashboradPageState extends State<DashboradPage>
 
   addTocartItem(selectedProduct) async {
     await CommunFun.addItemToCart(selectedProduct, cartList, allcartData, () {
+      if (cartList.length > 0) {
+        temporaryCartList.add(cartList[cartList.length - 1]);
+      }
       if (selectedTable.save_order_id != null &&
           selectedTable.save_order_id != 0) {
         getCurrentCart();
@@ -1713,17 +1710,16 @@ class _DashboradPageState extends State<DashboradPage>
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
+        print("taxlistitem");
+        print(taxlist[i].rate);
         var taxval = taxlistitem.rate != null
             ? subtNServ * double.parse(taxlistitem.rate) / 100
             : 0.0;
         taxval = double.parse(taxval.toStringAsFixed(2));
         taxvalue += taxval;
-
-        if (this.mounted) {
-          setState(() {
-            taxvalues = taxvalue;
-          });
-        }
+        setState(() {
+          taxvalues = taxvalue;
+        });
         var taxmap = {
           "id": taxlistitem.id,
           "tax_id": taxlistitem.taxId,
@@ -1796,9 +1792,6 @@ class _DashboradPageState extends State<DashboradPage>
         });
       }
     }
-    /*  } catch (e) {
-      CommunFun.showToast(context, e.toString());
-    } */
   }
 
   applyforFocProduct(cartitem) {
@@ -1908,17 +1901,13 @@ class _DashboradPageState extends State<DashboradPage>
     // }
   }
 
-  removeItem() async {
-    print('removeItem ' + DateTime.now().toString());
-    for (var index = 0; index < temporaryCartList.length; index++) {
-      print(temporaryCartList[index].productName);
-      await itememovefromCart(temporaryCartList[index]);
-    }
-    print('removeItem ' + DateTime.now().toString());
-  }
-
   selectTable() {
-    Navigator.popAndPushNamed(context, Constant.SelectTableScreen,
+    for (var index = 0; index < temporaryCartList.length; index++) {
+      itememovefromCart(temporaryCartList[index]);
+    }
+
+    Navigator.pushNamedAndRemoveUntil(
+        context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
         arguments: {"isAssign": false});
   }
 
@@ -2450,133 +2439,6 @@ class _DashboradPageState extends State<DashboradPage>
       ),
     );
   }
-
-  // Widget drawerWidget() {
-  //   return Container(
-  //     width: MediaQuery.of(context).size.width / 3.2,
-  //     height: MediaQuery.of(context).size.height,
-  //     padding: EdgeInsets.only(
-  //       top: 20,
-  //     ),
-  //     color: Colors.white,
-  //     child: Drawer(
-  //       child: ListView(
-  //         padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-  //         physics: BouncingScrollPhysics(),
-  //         children: <Widget>[
-  //           Row(
-  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //             crossAxisAlignment: CrossAxisAlignment.center,
-  //             children: <Widget>[
-  //               checkoutbtn(),
-  //               SizedBox(width: SizeConfig.safeBlockVertical * 3),
-  //               nameBtn()
-  //             ],
-  //           ),
-  //           CommunFun.divider(),
-  //           permissions.contains(Constant.VIEW_ORDER)
-  //               ? ListTile(
-  //                   onTap: () {
-  //                     gotoTansactionPage();
-  //                   },
-  //                   leading: Icon(
-  //                     Icons.art_track,
-  //                     color: Colors.black,
-  //                     size: SizeConfig.safeBlockVertical * 5,
-  //                   ),
-  //                   title: Text(
-  //                     "Transaction",
-  //                     style: Styles.drawerText(),
-  //                   ),
-  //                 )
-  //               : SizedBox(),
-  //           permissions.contains(Constant.VIEW_ORDER)
-  //               ? ListTile(
-  //                   onTap: () {
-  //                     gotoWebCart();
-  //                   },
-  //                   leading: Icon(
-  //                     Icons.shopping_cart,
-  //                     color: Colors.black,
-  //                     size: SizeConfig.safeBlockVertical * 5,
-  //                   ),
-  //                   title: Text(
-  //                     "Web Orders",
-  //                     style: Styles.drawerText(),
-  //                   ),
-  //                 )
-  //               : SizedBox(),
-  //           ListTile(
-  //               onTap: () {
-  //                 Navigator.of(context).pop();
-  //                 if (isShiftOpen) {
-  //                   closeShift();
-  //                 } else {
-  //                   openOpningAmmountPop(Strings.title_opening_amount);
-  //                 }
-  //               },
-  //               leading: Icon(
-  //                 Icons.open_in_new,
-  //                 color: Colors.black,
-  //                 size: SizeConfig.safeBlockVertical * 5,
-  //               ),
-  //               title: Text(isShiftOpen ? "Close Shift" : "Open Shift",
-  //                   style: Styles.drawerText())),
-  //           permissions.contains(Constant.VIEW_REPORT)
-  //               ? ListTile(
-  //                   onTap: () {
-  //                     gotoShiftReport();
-  //                   },
-  //                   leading: Icon(
-  //                     Icons.filter_tilt_shift,
-  //                     color: Colors.black,
-  //                     size: SizeConfig.safeBlockVertical * 5,
-  //                   ),
-  //                   title: Text(
-  //                     "Shift Report",
-  //                     style: Styles.drawerText(),
-  //                   ),
-  //                 )
-  //               : SizedBox(),
-  //           // permissions.contains(Constant.VIEW_ORDER)
-  //           ListTile(
-  //               onTap: () {
-  //                 Navigator.of(context).pop();
-  //                 syncOrdersTodatabase();
-  //               },
-  //               leading: Icon(
-  //                 Icons.transform,
-  //                 color: Colors.black,
-  //                 size: SizeConfig.safeBlockVertical * 5,
-  //               ),
-  //               title: Text("Sync Orders", style: Styles.drawerText())),
-  //           // : SizedBox(),
-  //           ListTile(
-  //               onTap: () async {
-  //                 syncAllTables();
-  //               },
-  //               leading: Icon(
-  //                 Icons.sync,
-  //                 color: Colors.black,
-  //                 size: SizeConfig.safeBlockVertical * 5,
-  //               ),
-  //               title: Text("Sync", style: Styles.drawerText())),
-  //           ListTile(
-  //               onTap: () {
-  //                 Navigator.of(context).pop();
-  //                 Navigator.pushNamed(context, Constant.SettingsScreen);
-  //               },
-  //               leading: Icon(
-  //                 Icons.settings,
-  //                 color: Colors.black,
-  //                 size: SizeConfig.safeBlockVertical * 5,
-  //               ),
-  //               title: Text("Settings", style: Styles.drawerText())),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget tableHeader1() {
     // products Header part 1
@@ -3404,7 +3266,7 @@ class _DashboradPageState extends State<DashboradPage>
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
-                removeItem();
+                //removeItem();
                 print('enter here');
                 selectTable();
               },
@@ -3576,168 +3438,154 @@ class _DashboradPageState extends State<DashboradPage>
       // itemExtent:60.0,
       padding: EdgeInsets.only(bottom: 50),
       children: cartList.map((cart) {
-        return cart == null
-            ? SizedBox()
-            : Slidable(
-                key: Key(cart.id.toString()),
-                controller: slidableController,
-                actionPane: SlidableDrawerActionPane(),
-                actionExtentRatio: 0.15,
-                direction: Axis.horizontal,
-                child: GestureDetector(
-                  onTap: () => setState(() {
-                    if (currentQuantity > 0) {
-                      currentProductQuantity = cart.productQty;
-                      cart.productQty = currentQuantity.toDouble();
-                      cart.productPrice =
-                          currentQuantity * cart.productNetPrice;
-                      currentQuantity = 0;
-                    } else if (cart.id == itemSelectedIndex.id) {
-                      itemSelectedIndex = new MSTCartdetails();
-                    } else {
-                      itemSelectedIndex = cart;
-                    }
-                    // become function to call and update quantity
-                    // Table_order tableData =
-                    //     await CommunFun.getTableData(); // table data
-                    // MST_Cart carted = new MST_Cart();
-                    // SaveOrder orderData = new SaveOrder();
-                    // ProductDetails productItem = new ProductDetails();
-                    // await localAPI.insertItemTocart(cart.id, carted,
-                    //     productItem, orderData, tableData.table_id);
-                  }),
-                  child: Container(
-                    padding: EdgeInsets.all(5),
-                    color: cart.id == itemSelectedIndex.id
-                        ? Colors.deepOrange[400]
-                        : Colors.transparent,
-                    child: Row(
+        return Slidable(
+          key: Key(cart.id.toString()),
+          controller: slidableController,
+          actionPane: SlidableDrawerActionPane(),
+          actionExtentRatio: 0.15,
+          direction: Axis.horizontal,
+          child: GestureDetector(
+            onTap: () => setState(() {
+              if (currentQuantity > 0) {
+                currentProductQuantity = cart.productQty;
+                cart.productQty = currentQuantity.toDouble();
+                cart.productPrice = currentQuantity * cart.productNetPrice;
+                currentQuantity = 0;
+              } else if (cart.id == itemSelectedIndex.id) {
+                itemSelectedIndex = new MSTCartdetails();
+              } else {
+                itemSelectedIndex = cart;
+              }
+            }),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+              color:
+                  // cart.id == itemSelectedIndex.id ? Colors.deepOrange[400] :
+                  Colors.transparent,
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(cart.productName.toUpperCase(),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.clip,
-                                  style: Styles.greysmall()),
-                              cart.attrName != null
-                                  ? Text(" (" + cart.attrName + ") ",
-                                      maxLines: 2,
-                                      overflow: TextOverflow.clip,
-                                      style: Styles.greysmall())
-                                  : SizedBox(),
-                              cart.modiName != null
-                                  ? Text(" (" + cart.modiName + ") ",
-                                      maxLines: 2,
-                                      overflow: TextOverflow.clip,
-                                      style: Styles.greysmall())
-                                  : SizedBox(),
-                            ],
-                          ),
-                          flex: 6,
-                        ),
-                        Expanded(
-                          child: Text(
-                            cart.productQty.toInt().toString(),
-                            style: Styles.greysmall(),
-                            textAlign: TextAlign.end,
-                          ),
-                          flex: 1,
-                        ),
-                        Expanded(
-                          child: Text(
-                            cart.productPrice.toStringAsFixed(2),
-                            style: Styles.greysmall(),
-                            textAlign: TextAlign.end,
-                          ),
-                          flex: 2,
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              if (permissions.contains(Constant.DELETE_ITEM)) {
-                                itememovefromCart(cart);
-                              } else {
-                                CommonUtils.openPermissionPop(
-                                    context, Constant.DELETE_ITEM, () {
-                                  itememovefromCart(cart);
-                                  setState(() {
-                                    itemSelectedIndex = new MSTCartdetails();
-                                  });
-                                }, () {});
-                              }
-                            },
-                            child: Icon(
-                              Icons.close,
-                              color: Colors.red,
-                              size: 30,
-                            ),
-                          ),
-                          flex: 1,
-                        ),
+                        Text(cart.productName.toUpperCase(),
+                            maxLines: 2,
+                            overflow: TextOverflow.clip,
+                            style: Styles.greysmall()),
+                        cart.attrName != null
+                            ? Text(" (" + cart.attrName + ") ",
+                                maxLines: 2,
+                                overflow: TextOverflow.clip,
+                                style: Styles.greysmall())
+                            : SizedBox(),
+                        cart.modiName != null
+                            ? Text(" (" + cart.modiName + ") ",
+                                maxLines: 2,
+                                overflow: TextOverflow.clip,
+                                style: Styles.greysmall())
+                            : SizedBox(),
                       ],
                     ),
+                    flex: 6,
                   ),
-                ),
-                secondaryActions: isWebOrder
-                    ? <Widget>[
-                        cart.issetMeal == 0
-                            ? IconSlideAction(
-                                color: Colors.blueAccent,
-                                icon: Icons.free_breakfast,
-                                onTap: () {
-                                  if (permissions
-                                      .contains(Constant.EDIT_ITEM)) {
-                                    applyforFocProduct(cart);
-                                  } else {
-                                    CommonUtils.openPermissionPop(
-                                        context, Constant.EDIT_ITEM, () {
-                                      applyforFocProduct(cart);
-                                    }, () {});
-                                  }
-                                },
-                              )
-                            : SizedBox(),
-                      ]
-                    : <Widget>[
-                        cart.issetMeal == 0
-                            ? IconSlideAction(
-                                color: Colors.blueAccent,
-                                icon: Icons.free_breakfast,
-                                onTap: () {
-                                  if (permissions
-                                      .contains(Constant.EDIT_ITEM)) {
-                                    applyforFocProduct(cart);
-                                  } else {
-                                    CommonUtils.openPermissionPop(
-                                        context, Constant.EDIT_ITEM, () {
-                                      applyforFocProduct(cart);
-                                    }, () {});
-                                  }
-                                },
-                              )
-                            : SizedBox(),
-                        IconSlideAction(
-                          color: Colors.black45,
-                          icon: Icons.edit,
+                  Expanded(
+                    child: Text(
+                      cart.productQty.toInt().toString(),
+                      style: Styles.greysmall(),
+                      textAlign: TextAlign.end,
+                    ),
+                    flex: 1,
+                  ),
+                  Expanded(
+                    child: Text(
+                      cart.productPrice.toStringAsFixed(2),
+                      style: Styles.greysmall(),
+                      textAlign: TextAlign.end,
+                    ),
+                    flex: 2,
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        if (permissions.contains(Constant.DELETE_ITEM)) {
+                          itememovefromCart(cart);
+                        } else {
+                          CommonUtils.openPermissionPop(
+                              context, Constant.DELETE_ITEM, () {
+                            itememovefromCart(cart);
+                            setState(() {
+                              itemSelectedIndex = new MSTCartdetails();
+                            });
+                          }, () {});
+                        }
+                      },
+                      child: Icon(
+                        Icons.close,
+                        color: Colors.red,
+                        size: 30,
+                      ),
+                    ),
+                    flex: 1,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          secondaryActions: isWebOrder
+              ? <Widget>[
+                  cart.issetMeal == 0
+                      ? IconSlideAction(
+                          color: Colors.blueAccent,
+                          icon: Icons.free_breakfast,
                           onTap: () {
-                            if (cart.isFocProduct != 1) {
-                              if (permissions.contains(Constant.EDIT_ORDER)) {
-                                editCartItem(cart);
-                              } else {
-                                CommonUtils.openPermissionPop(
-                                    context, Constant.EDIT_ORDER, () {
-                                  editCartItem(cart);
-                                }, () {});
-                              }
+                            if (permissions.contains(Constant.EDIT_ITEM)) {
+                              applyforFocProduct(cart);
                             } else {
-                              CommunFun.showToast(
-                                  context, Strings.foc_product_msg);
+                              CommonUtils.openPermissionPop(
+                                  context, Constant.EDIT_ITEM, () {
+                                applyforFocProduct(cart);
+                              }, () {});
                             }
                           },
-                        ),
-                        /*  IconSlideAction(
+                        )
+                      : SizedBox(),
+                ]
+              : <Widget>[
+                  cart.issetMeal == 0
+                      ? IconSlideAction(
+                          color: Colors.blueAccent,
+                          icon: Icons.free_breakfast,
+                          onTap: () {
+                            if (permissions.contains(Constant.EDIT_ITEM)) {
+                              applyforFocProduct(cart);
+                            } else {
+                              CommonUtils.openPermissionPop(
+                                  context, Constant.EDIT_ITEM, () {
+                                applyforFocProduct(cart);
+                              }, () {});
+                            }
+                          },
+                        )
+                      : SizedBox(),
+                  IconSlideAction(
+                    color: Colors.black45,
+                    icon: Icons.edit,
+                    onTap: () {
+                      if (cart.isFocProduct != 1) {
+                        if (permissions.contains(Constant.EDIT_ORDER)) {
+                          editCartItem(cart);
+                        } else {
+                          CommonUtils.openPermissionPop(
+                              context, Constant.EDIT_ORDER, () {
+                            editCartItem(cart);
+                          }, () {});
+                        }
+                      } else {
+                        CommunFun.showToast(context, Strings.foc_product_msg);
+                      }
+                    },
+                  ),
+                  /*  IconSlideAction(
                     color: Colors.red,
                     icon: Icons.delete_outline,
                     onTap: () {
@@ -3751,10 +3599,11 @@ class _DashboradPageState extends State<DashboradPage>
                       }
                     },
                   ) */
-                      ],
-              );
+                ],
+        );
       }).toList(),
     );
+
     final totalPriceTable = Padding(
       padding: EdgeInsets.only(
         bottom: 10,

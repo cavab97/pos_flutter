@@ -939,6 +939,7 @@ class CommunFun {
     if (permission != null) {
       return permission;
     } else {
+      print("error");
       return "";
     }
   }
