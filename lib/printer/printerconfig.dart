@@ -23,7 +23,6 @@ import 'package:image/image.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Terminal.dart';
-import 'package:mcncashier/components/string_extension.dart';
 
 class PrintReceipt {
   PaperSize paper = PaperSize.mm80;
@@ -1348,7 +1347,7 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: type.capitalize(),
+          text: type[0].toUpperCase() + type.substring(1),
           width: 9,
           styles: PosStyles(
             align: PosAlign.left,
@@ -1368,7 +1367,9 @@ class PrintReceipt {
                   bold: false,
                 )),
             PosColumn(
-                text: CommunFun.getTextAndSplit(reason.capitalize()).toString(),
+                text: CommunFun.getTextAndSplit(
+                        reason[0].toUpperCase() + reason.substring(1))
+                    .toString(),
                 width: 9,
                 styles: PosStyles(
                   align: PosAlign.left,
