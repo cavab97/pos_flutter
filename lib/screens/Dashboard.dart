@@ -3480,8 +3480,12 @@ class _DashboradPageState extends State<DashboradPage>
               if (currentQuantity > 0) {
                 currentProductQuantity = cart.productQty;
                 cart.productQty = currentQuantity.toDouble();
-                cart.productPrice = currentQuantity * cart.productNetPrice;
+                cart.productPrice = currentQuantity *
+                    (cart.productNetPrice == null
+                        ? cart.productPrice
+                        : cart.productNetPrice);
                 currentQuantity = 0;
+                //_selectedQuantity(0);
               } else if (cart.id == itemSelectedIndex.id) {
                 itemSelectedIndex = new MSTCartdetails();
               } else {
