@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
@@ -10,6 +9,7 @@ import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/screens/AddCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class SearchCustomerPage extends StatefulWidget {
   SearchCustomerPage({Key key, this.onClose, this.isFor}) : super(key: key);
@@ -87,7 +87,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: SizeConfig.safeBlockVertical * 9,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -111,7 +111,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
                     },
                     child:
                         Text(Strings.add_new, style: Styles.whiteBoldsmall()),
-                    color: Colors.deepOrange,
+                    color: StaticColor.deepOrange,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(50.0),
                     ),
@@ -145,10 +145,10 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
             width: 50.0,
             height: 50.0,
             decoration: BoxDecoration(
-                color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+                color: StaticColor.colorRed, borderRadius: BorderRadius.circular(30.0)),
             child: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -185,7 +185,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
     return Container(
       height: SizeConfig.safeBlockVertical * 10,
       padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
-      color: Colors.grey[400],
+      color: StaticColor.colorGrey400,
       child: TextField(
         keyboardType: TextInputType.text,
         decoration: InputDecoration(
@@ -193,7 +193,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
             padding: EdgeInsets.only(left: 15),
             child: Icon(
               Icons.search,
-              color: Colors.grey[400],
+              color:StaticColor.colorGrey400,
               size: SizeConfig.safeBlockVertical * 5,
             ),
           ),
@@ -201,7 +201,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           hintStyle: TextStyle(
               fontSize: SizeConfig.safeBlockVertical * 2.5,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[400]),
+              color: StaticColor.colorGrey400),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(50),
             borderSide: BorderSide(
@@ -211,9 +211,9 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           ),
           filled: true,
           contentPadding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
-          fillColor: Colors.white,
+          fillColor: StaticColor.colorWhite,
         ),
-        style: TextStyle(color: Colors.black, fontSize: 18.0),
+        style: TextStyle(color: StaticColor.colorBlack, fontSize: 18.0),
         onTap: () {
           setState(() {
             isFiltring = true;

@@ -31,7 +31,7 @@ import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
-
+import 'package:mcncashier/components/colors.dart';
 import 'PaymentMethodPop.dart';
 
 class SplitBillDialog extends StatefulWidget {
@@ -122,7 +122,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: SizeConfig.safeBlockVertical * 9,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -143,7 +143,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                         },
                         icon: Icon(
                           Icons.add_circle_outline,
-                          color: Colors.white,
+                          color: StaticColor.colorWhite,
                           size: 30,
                         ))
                     : IconButton(
@@ -163,7 +163,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                         },
                         icon: Icon(
                           Icons.remove_circle_outline,
-                          color: Colors.white,
+                          color: StaticColor.colorWhite,
                           size: 30,
                         )),
               ],
@@ -286,10 +286,11 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             width: 50.0,
             height: 50.0,
             decoration: BoxDecoration(
-                color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+                color: StaticColor.colorRed,
+                borderRadius: BorderRadius.circular(30.0)),
             child: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -363,7 +364,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         padding: EdgeInsets.all(0),
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        color: Colors.white,
+        color: StaticColor.colorWhite,
         child: Stack(children: <Widget>[
           isLoading ? CommunFun.loader(context) : productList(),
           Positioned(
@@ -371,7 +372,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             left: 0,
             right: 0,
             child: Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               padding: EdgeInsets.only(right: 0),
               child: Column(children: <Widget>[
                 Divider(),
@@ -487,7 +488,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
 
   Widget productList() {
     return Container(
-      color: Colors.white,
+      color: StaticColor.colorWhite,
       child: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         padding: EdgeInsets.only(bottom: 200),
@@ -502,8 +503,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 color: tempCart
                         .where((element) => element.id == product.id)
                         .isNotEmpty
-                    ? Colors.grey[100]
-                    : Colors.white,
+                    ? StaticColor.lightGrey100
+                    : StaticColor.colorWhite,
                 padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -544,7 +545,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                                           },
                                           icon: Icon(
                                             Icons.check_circle,
-                                            color: Colors.white,
+                                            color: StaticColor.colorWhite,
                                             size: 30,
                                           ),
                                         ),

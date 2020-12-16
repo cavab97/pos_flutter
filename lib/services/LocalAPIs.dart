@@ -1752,7 +1752,7 @@ class LocalAPI {
     var qry = " SELECT  group_concat(pos_permission.pos_permission_name) as pos_permission_name  from users" +
         " Left join user_pos_permission on user_pos_permission.user_id = users.id  AND user_pos_permission.status = 1" +
         " left join pos_permission on pos_permission.pos_permission_id = user_pos_permission.pos_permission_id" +
-        " WHERE user_id  =" +
+       " WHERE user_id  =" +
         userid.toString();
 
     var permissionList = await db.rawQuery(qry);

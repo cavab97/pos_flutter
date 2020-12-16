@@ -18,6 +18,7 @@ import 'package:mcncashier/screens/ChangeQtyDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class WineStorage extends StatefulWidget {
   // PIN Enter PAGE
@@ -291,7 +292,7 @@ class _WineStorageState extends State<WineStorage>
                   },
                   icon: Icon(
                     Icons.arrow_back,
-                    color: Colors.white,
+                    color: StaticColor.colorWhite,
                     size: SizeConfig.safeBlockVertical * 5,
                   ),
                 ),
@@ -312,7 +313,7 @@ class _WineStorageState extends State<WineStorage>
                         children: <Widget>[
                           Icon(
                             Icons.add_circle_outline,
-                            color: Colors.white,
+                            color: StaticColor.colorWhite,
                             size: SizeConfig.safeBlockVertical * 4,
                           ),
                           SizedBox(width: 5),
@@ -320,7 +321,7 @@ class _WineStorageState extends State<WineStorage>
                               style: Styles.whiteBoldsmall()),
                         ],
                       ),
-                      color: Colors.deepOrange,
+                      color: StaticColor.deepOrange,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(50.0),
                       ),
@@ -331,10 +332,10 @@ class _WineStorageState extends State<WineStorage>
                       removeCustomer();
                     },
                     child: Chip(
-                      backgroundColor: Colors.deepOrange,
+                      backgroundColor: StaticColor.deepOrange,
                       avatar: Icon(
                         Icons.close,
-                        color: Colors.white,
+                        color: StaticColor.colorWhite,
                         size: 20,
                       ),
                       label: Text(
@@ -351,13 +352,13 @@ class _WineStorageState extends State<WineStorage>
     final _tabs = TabBar(
       controller: _tabController,
       indicatorSize: TabBarIndicatorSize.label,
-      unselectedLabelColor: Colors.white,
-      labelColor: Colors.white,
+      unselectedLabelColor: StaticColor.colorWhite,
+      labelColor: StaticColor.colorWhite,
       isScrollable: true,
       labelPadding: EdgeInsets.all(2),
       indicatorPadding: EdgeInsets.all(2),
       indicator: BoxDecoration(
-          borderRadius: BorderRadius.circular(5), color: Colors.deepOrange),
+          borderRadius: BorderRadius.circular(5), color: StaticColor.deepOrange),
       tabs: List<Widget>.generate(racList.length, (int index) {
         return new Tab(
           child: Container(
@@ -401,7 +402,7 @@ class _WineStorageState extends State<WineStorage>
                 height: itemHeight,
                 margin: EdgeInsets.all(2),
                 decoration: new BoxDecoration(
-                  color: Colors.white,
+                  color: StaticColor.colorWhite,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(8.0),
                     bottomLeft: Radius.circular(8.0),
@@ -441,7 +442,8 @@ class _WineStorageState extends State<WineStorage>
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               child: Table(
-                border: TableBorder.all(color: Colors.white, width: 0.6),
+                border:
+                    TableBorder.all(color: StaticColor.colorWhite, width: 0.6),
                 columnWidths: {
                   0: FractionColumnWidth(.6),
                   1: FractionColumnWidth(.3),
@@ -520,7 +522,7 @@ class _WineStorageState extends State<WineStorage>
             padding: EdgeInsets.all(10),
             width: MediaQuery.of(context).size.width / 3.5,
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
+              border: Border.all(color: StaticColor.colorGrey),
             ),
             child: ListView(
               shrinkWrap: true,

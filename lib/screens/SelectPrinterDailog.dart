@@ -4,6 +4,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class SelectPrinterDailog extends StatefulWidget {
   SelectPrinterDailog({Key key, this.onClose}) : super(key: key);
@@ -46,7 +47,7 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: 70,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -80,14 +81,14 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed, borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),

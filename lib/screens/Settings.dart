@@ -155,7 +155,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: Container(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
-                      color: Colors.white,
+                      color: StaticColor.colorWhite,
                       child: ListView(
                         physics: BouncingScrollPhysics(),
                         shrinkWrap: true,
@@ -169,7 +169,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               },
                               icon: Icon(
                                 Icons.arrow_back,
-                                color: Colors.black,
+                                color: StaticColor.colorBlack,
                                 size: 30,
                               ),
                             ),
@@ -259,14 +259,14 @@ class _SettingsPageState extends State<SettingsPage> {
           height: 20,
         ),
         Container(
-          decoration:
-              new BoxDecoration(border: new Border.all(color: Colors.white)),
+          decoration: new BoxDecoration(
+              border: new Border.all(color: StaticColor.colorWhite)),
           child: ListTile(
               title: Text(Strings.auto_sync, style: Styles.whiteSimpleSmall()),
               trailing: Transform.scale(
                 scale: 1,
                 child: CupertinoSwitch(
-                  activeColor: Colors.deepOrange,
+                  activeColor: StaticColor.deepOrange,
                   value: isAutoSync,
                   onChanged: (bool value) {
                     setAutosync(value);
@@ -302,7 +302,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               Container(
                 decoration: new BoxDecoration(
-                    border: new Border.all(color: Colors.white)),
+                    border: new Border.all(color: StaticColor.colorWhite)),
                 child: ListTile(
                     title: Text(Strings.always_print_msg,
                         style: Styles.whiteSimpleSmall()),
@@ -319,7 +319,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     )),
               ),
               Container(
-                color: Colors.white,
+                color: StaticColor.colorWhite,
                 margin: EdgeInsets.only(top: 10),
                 // height: MediaQuery.of(context).size.height / 2.2,
                 child: ListView.builder(
@@ -356,8 +356,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                       ),
                                       Text(
                                         Strings.click_to_print_test,
-                                        style:
-                                            TextStyle(color: Colors.grey[700]),
+                                        style: TextStyle(
+                                            color: StaticColor.colorGrey600),
                                       ),
                                     ],
                                   ),
@@ -406,10 +406,12 @@ class _SettingsPageState extends State<SettingsPage> {
             style: Styles.whiteSimpleSmall(),
           ),
           color: StaticColor.backgroundColor,
-          textColor: Colors.white,
+          textColor: StaticColor.colorWhite,
           shape: RoundedRectangleBorder(
             side: BorderSide(
-                width: 1, style: BorderStyle.solid, color: Colors.white),
+                width: 1,
+                style: BorderStyle.solid,
+                color: StaticColor.colorWhite),
           ),
         ));
   }
@@ -425,10 +427,12 @@ class _SettingsPageState extends State<SettingsPage> {
             style: Styles.whiteSimpleSmall(),
           ),
           color: StaticColor.backgroundColor,
-          textColor: Colors.white,
+          textColor: StaticColor.colorWhite,
           shape: RoundedRectangleBorder(
             side: BorderSide(
-                width: 1, style: BorderStyle.solid, color: Colors.white),
+                width: 1,
+                style: BorderStyle.solid,
+                color: StaticColor.colorWhite),
           ),
         ));
   }

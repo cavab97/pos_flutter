@@ -117,7 +117,7 @@ class PrintReceipt {
           PosColumn(
               text: item.productName,
               width: 10,
-              containsChinese: false,
+              containsChinese: true,
               styles: PosStyles(
                 align: PosAlign.left,
                 fontType: PosFontType.fontA,

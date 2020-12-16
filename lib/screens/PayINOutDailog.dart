@@ -7,7 +7,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
-
+import 'package:mcncashier/components/colors.dart';
 class PayInOutDailog extends StatefulWidget {
   PayInOutDailog({Key key, this.title, this.ammount, this.isIn, this.onClose})
       : super(key: key);
@@ -78,7 +78,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
           Container(
             padding: EdgeInsets.only(left: 50, right: 30, top: 10, bottom: 10),
             height: 70,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -105,8 +105,8 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         "Confirm",
         style: Styles.whiteSimpleSmall(),
       ),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
+      color: StaticColor.deepOrange,
+      textColor: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(50.0),
       ),
@@ -125,14 +125,14 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed, borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -173,7 +173,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
               padding: EdgeInsets.all(12),
               margin: EdgeInsets.only(top: 5),
               height: 50,
-              color: Colors.grey[300],
+              color: StaticColor.colorGrey400,
               child: Center(
                 child: DropdownButton<String>(
                   underline: Container(

@@ -16,7 +16,7 @@ import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-
+import 'package:mcncashier/components/colors.dart';
 class ShiftReports extends StatefulWidget {
   // PIN Enter PAGE
   ShiftReports({Key key}) : super(key: key);
@@ -396,12 +396,12 @@ class _ShiftReportsState extends State<ShiftReports> {
       onPressed: () {},
       child: Text(
         name,
-        style: TextStyle(color: Colors.deepOrange, fontSize: 20),
+        style: TextStyle(color: StaticColor.deepOrange, fontSize: 20),
       ),
-      color: Colors.white,
+      color: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         side:
-            BorderSide(width: 1, style: BorderStyle.solid, color: Colors.white),
+            BorderSide(width: 1, style: BorderStyle.solid, color: StaticColor.colorWhite),
         borderRadius: BorderRadius.circular(5.0),
       ),
     );
@@ -418,7 +418,7 @@ class _ShiftReportsState extends State<ShiftReports> {
           margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: _current == index ? Colors.deepOrange : Colors.white,
+            color: _current == index ? StaticColor.deepOrange : StaticColor.colorWhite,
           ),
         );
       }).toList(),
@@ -451,7 +451,7 @@ class _ShiftReportsState extends State<ShiftReports> {
           shrinkWrap: true,
           children: <Widget>[
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Gross Sales",
@@ -464,7 +464,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Refunds",
@@ -477,7 +477,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Discount",
@@ -490,7 +490,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Net Sales",
@@ -503,7 +503,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Tax",
@@ -516,7 +516,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Service Charge",
@@ -529,7 +529,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Total Tenders :",
@@ -553,7 +553,7 @@ class _ShiftReportsState extends State<ShiftReports> {
           shrinkWrap: true,
           children: <Widget>[
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Opnening Amount",
@@ -568,7 +568,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Cash Sales",
@@ -581,7 +581,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Cash Deposit",
@@ -594,7 +594,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Cash Refunds",
@@ -607,7 +607,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Cash Rounding",
@@ -620,7 +620,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Pay In",
@@ -633,7 +633,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Pay Out",
@@ -646,7 +646,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Drawer Expected/Actual",
@@ -659,7 +659,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Over/Short",
@@ -684,7 +684,7 @@ class _ShiftReportsState extends State<ShiftReports> {
             children: orderPaymenttypes.map((pay) {
               var index = orderPaymenttypes.indexOf(pay);
               return Container(
-                color: Colors.grey,
+                color: StaticColor.colorGrey,
                 child: ListTile(
                   title: Text(
                     pay.name,
@@ -718,14 +718,14 @@ class _ShiftReportsState extends State<ShiftReports> {
                     child: Text(
                       "Pay In",
                       style: TextStyle(
-                        color: Colors.white,
+                        color: StaticColor.colorWhite,
                         fontSize: 20,
                       ),
                     ),
                     color: Colors.transparent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(color: Colors.white, width: 2),
+                      side: BorderSide(color: StaticColor.colorWhite, width: 2),
                     ),
                   ),
                 ),
@@ -743,12 +743,12 @@ class _ShiftReportsState extends State<ShiftReports> {
                     },
                     child: Text(
                       "Pay Out",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
+                      style: TextStyle(color: StaticColor.colorWhite, fontSize: 20),
                     ),
                     color: Colors.transparent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(color: Colors.white, width: 2),
+                      side: BorderSide(color: StaticColor.colorWhite, width: 2),
                     ),
                   ),
                 ),
@@ -773,12 +773,12 @@ class _ShiftReportsState extends State<ShiftReports> {
                     child: Text(
                       "Open Cash Drawer",
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.white, fontSize: 20),
+                      style: TextStyle(color: StaticColor.colorWhite, fontSize: 20),
                     ),
                     color: Colors.transparent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(color: Colors.white, width: 2),
+                      side: BorderSide(color: StaticColor.colorWhite, width: 2),
                     ),
                   ),
                 ),
@@ -792,12 +792,12 @@ class _ShiftReportsState extends State<ShiftReports> {
       onPressed: () {},
       child: Text(
         Strings.open,
-        style: TextStyle(color: Colors.deepOrange, fontSize: 15),
+        style: TextStyle(color: StaticColor.deepOrange, fontSize: 15),
       ),
       color: Colors.transparent,
       shape: RoundedRectangleBorder(
         side: BorderSide(
-            width: 1, style: BorderStyle.solid, color: Colors.deepOrange),
+            width: 1, style: BorderStyle.solid, color: StaticColor.deepOrange),
         borderRadius: BorderRadius.circular(50.0),
       ),
     );
@@ -811,12 +811,12 @@ class _ShiftReportsState extends State<ShiftReports> {
       },
       child: Text(
         Strings.print_reciept,
-        style: TextStyle(color: Colors.deepOrange, fontSize: 15),
+        style: TextStyle(color: StaticColor.deepOrange, fontSize: 15),
       ),
       color: Colors.transparent,
       shape: RoundedRectangleBorder(
         side: BorderSide(
-            width: 1, style: BorderStyle.solid, color: Colors.deepOrange),
+            width: 1, style: BorderStyle.solid, color: StaticColor.deepOrange),
         borderRadius: BorderRadius.circular(50.0),
       ),
     );
@@ -915,11 +915,11 @@ class AddOtherReasonState extends State<AddOtherReason> {
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(width: 1, color: Colors.grey),
+                      borderSide: BorderSide(width: 1, color: StaticColor.colorGrey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(width: 1, color: Colors.grey),
+                      borderSide: BorderSide(width: 1, color: StaticColor.colorGrey),
                     ),
                   ),
                 ),
@@ -937,7 +937,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
         widget.onClose(reasonController.text);
       },
       child: Text("Confirm", style: Styles.orangeSmall()),
-      textColor: Colors.white,
+      textColor: StaticColor.colorWhite,
     );
   }
 
@@ -947,7 +947,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
         Navigator.of(context).pop();
       },
       child: Text("Cancel", style: Styles.orangeSmall()),
-      textColor: Colors.white,
+      textColor: StaticColor.colorWhite,
     );
   }
 }

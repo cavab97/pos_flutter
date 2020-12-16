@@ -7,7 +7,7 @@ import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
-
+import 'package:mcncashier/components/colors.dart';
 class SubPaymentMethodPop extends StatefulWidget {
   // Opning ammount popup
   SubPaymentMethodPop(
@@ -67,7 +67,7 @@ class _SubPaymentMethodPop extends State<SubPaymentMethodPop> {
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: SizeConfig.safeBlockVertical * 9,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -102,7 +102,7 @@ class _SubPaymentMethodPop extends State<SubPaymentMethodPop> {
                       payment.name.contains("Wallet")
                           ? Icons.account_balance_wallet
                           : Icons.credit_card,
-                      color: Colors.black,
+                      color: StaticColor.colorBlack,
                       size: SizeConfig.safeBlockVertical * 7,
                     ),
                     // Container(
@@ -116,7 +116,7 @@ class _SubPaymentMethodPop extends State<SubPaymentMethodPop> {
                     title: Text(payment.name, style: Styles.blackMediumBold()),
                     trailing: Icon(
                       Icons.arrow_forward_ios,
-                      color: Colors.black,
+                      color: StaticColor.colorBlack,
                       size: SizeConfig.safeBlockVertical * 4,
                     ));
               }).toList(),
@@ -139,14 +139,14 @@ class _SubPaymentMethodPop extends State<SubPaymentMethodPop> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed, borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),

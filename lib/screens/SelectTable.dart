@@ -23,8 +23,8 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class SelectTablePage extends StatefulWidget {
   // PIN Enter PAGE
@@ -103,6 +103,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     setState(() {
       permissions = permission;
     });
+    print(permissions);
   }
 
   checkshift() async {
@@ -485,7 +486,7 @@ class _SelectTablePageState extends State<SelectTablePage>
               },
               icon: Icon(
                 Icons.dehaze,
-                color: Colors.white,
+                color: StaticColor.colorWhite,
                 size: SizeConfig.safeBlockVertical * 5,
               )),
           iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
@@ -498,10 +499,10 @@ class _SelectTablePageState extends State<SelectTablePage>
           bottom: TabBar(
             controller: _tabController,
             indicatorSize: TabBarIndicatorSize.tab,
-            unselectedLabelColor: Colors.white,
+            unselectedLabelColor: StaticColor.colorWhite,
             unselectedLabelStyle: Styles.whiteBoldsmall(),
-            indicator: BoxDecoration(color: Colors.deepOrange),
-            labelColor: Colors.white,
+            indicator: BoxDecoration(color: StaticColor.deepOrange),
+            labelColor: StaticColor.colorWhite,
             labelStyle: Styles.whiteBoldsmall(),
             tabs: [
               Tab(
@@ -718,13 +719,13 @@ class _SelectTablePageState extends State<SelectTablePage>
       child: Text(
         Strings.open_shift,
         style: TextStyle(
-            color: Colors.deepOrange,
+            color: StaticColor.deepOrange,
             fontSize: SizeConfig.safeBlockVertical * 4),
       ),
-      color: Colors.white,
+      color: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         side: BorderSide(
-            width: 1, style: BorderStyle.solid, color: Colors.deepOrange),
+            width: 1, style: BorderStyle.solid, color: StaticColor.deepOrange),
         borderRadius: BorderRadius.circular(10.0),
       ),
     );
@@ -737,7 +738,7 @@ class _SelectTablePageState extends State<SelectTablePage>
             padding: EdgeInsets.all(10),
             width: MediaQuery.of(context).size.width / 3.5,
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
+              border: Border.all(color: StaticColor.colorGrey),
             ),
             child: optionsList(context))
         : SizedBox();
@@ -819,14 +820,15 @@ class _SelectTablePageState extends State<SelectTablePage>
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -851,18 +853,20 @@ class _SelectTablePageState extends State<SelectTablePage>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Icon(icon, color: Colors.white),
+            Icon(icon, color: StaticColor.colorWhite),
             SizedBox(width: 20),
             Text(name,
                 textAlign: TextAlign.center, style: Styles.whiteSimpleSmall())
           ],
         ),
-        borderSide:
-            BorderSide(color: Colors.black, width: 1, style: BorderStyle.solid),
+        borderSide: BorderSide(
+            color: StaticColor.colorBlack, width: 1, style: BorderStyle.solid),
         onPressed: onclick,
         shape: new RoundedRectangleBorder(
             side: BorderSide(
-                color: Colors.black, width: 1, style: BorderStyle.solid),
+                color: StaticColor.colorBlack,
+                width: 1,
+                style: BorderStyle.solid),
             borderRadius: new BorderRadius.circular(0.0)));
   }
 
@@ -906,21 +910,21 @@ class _SelectTablePageState extends State<SelectTablePage>
       ],
       decoration: InputDecoration(
         enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
+          borderSide: BorderSide(color: StaticColor.colorGrey),
         ),
         focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
+          borderSide: BorderSide(color: StaticColor.colorGrey),
         ),
         prefixIcon: Icon(
           Icons.person,
-          color: Colors.grey[400],
+          color: StaticColor.colorGrey400,
           size: SizeConfig.safeBlockVertical * 5,
         ),
         hintText: Strings.enter_pax,
         hintStyle: TextStyle(
             fontSize: SizeConfig.safeBlockVertical * 3,
             fontWeight: FontWeight.bold,
-            color: Colors.grey[400]),
+            color: StaticColor.colorGrey400),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50),
           borderSide: BorderSide(
@@ -930,10 +934,11 @@ class _SelectTablePageState extends State<SelectTablePage>
         ),
         filled: true,
         contentPadding: EdgeInsets.only(left: 10, top: 10, bottom: 10),
-        fillColor: Colors.white,
+        fillColor: StaticColor.colorWhite,
       ),
       style: TextStyle(
-          color: Colors.black, fontSize: SizeConfig.safeBlockVertical * 4),
+          color: StaticColor.colorBlack,
+          fontSize: SizeConfig.safeBlockVertical * 4),
       onChanged: (e) {},
     );
   }
@@ -945,10 +950,11 @@ class _SelectTablePageState extends State<SelectTablePage>
       child: Text(
         isChanging ? Strings.change_pax : Strings.enterPax,
         style: TextStyle(
-            color: Colors.white, fontSize: SizeConfig.safeBlockVertical * 4),
+            color: StaticColor.colorWhite,
+            fontSize: SizeConfig.safeBlockVertical * 4),
       ),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
+      color: StaticColor.deepOrange,
+      textColor: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
       ),
@@ -966,7 +972,7 @@ class _SelectTablePageState extends State<SelectTablePage>
           children: <Widget>[
             Container(
               decoration: BoxDecoration(
-                color: Colors.black,
+                color: StaticColor.colorBlack,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(10.0),
                   topRight: Radius.circular(10.0),
@@ -981,7 +987,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                   Text(isChanging ? Strings.change_pax : Strings.enterPax,
                       style: TextStyle(
                           fontSize: SizeConfig.safeBlockVertical * 3,
-                          color: Colors.white)),
+                          color: StaticColor.colorWhite)),
                 ],
               ),
             ),
@@ -1141,7 +1147,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                     decoration: new BoxDecoration(
                         color: selected != null
                             ? colorConvert(selected.colorCode)
-                            : Colors.white,
+                            : StaticColor.colorWhite,
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(8.0),
                             topRight: Radius.circular(8.0))),
@@ -1186,8 +1192,8 @@ class _SelectTablePageState extends State<SelectTablePage>
                   //height: itemHeight / 5,
                   decoration: BoxDecoration(
                       color: table.numberofpax != null
-                          ? Colors.deepOrange
-                          : Colors.grey[600],
+                          ? StaticColor.deepOrange
+                          : StaticColor.colorGrey600,
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(8.0),
                           bottomRight: Radius.circular(8.0))),

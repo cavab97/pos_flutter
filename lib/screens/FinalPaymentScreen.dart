@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class FinalEndScreen extends StatefulWidget {
   FinalEndScreen(
@@ -56,7 +57,7 @@ class FinalEndScreentate extends State<FinalEndScreen> {
                         Container(
                           width: MediaQuery.of(context).size.width,
                           padding: EdgeInsets.all(10),
-                          color: Colors.grey,
+                          color: StaticColor.colorGrey,
                           child: SizedBox(
                             height: SizeConfig.safeBlockVertical * 15,
                             child: Image.asset(Strings.asset_headerLogo,
@@ -71,7 +72,7 @@ class FinalEndScreentate extends State<FinalEndScreen> {
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height -
                           SizeConfig.safeBlockVertical * 15,
-                      color: Colors.white,
+                      color: StaticColor.colorWhite,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         //  crossAxisAlignment: CrossAxisAlignment.center,
@@ -158,7 +159,7 @@ class FinalEndScreentate extends State<FinalEndScreen> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: <Widget>[
                               Text(
-                               Strings.enterMsg,
+                                Strings.enterMsg,
                                 textAlign: TextAlign.end,
                                 style: Styles.communBlack(),
                               )
@@ -189,14 +190,15 @@ class FinalEndScreentate extends State<FinalEndScreen> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(0.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(0.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),

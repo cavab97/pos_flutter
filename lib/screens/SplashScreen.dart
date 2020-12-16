@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
-import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/services/Config.dart' as repo;
-
+import 'package:mcncashier/components/colors.dart';
 class SplashScreen extends StatefulWidget {
 // PIN Enter PAGE
   SplashScreen({Key key}) : super(key: key);
@@ -59,7 +58,7 @@ class SplashScreenstate extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: StaticColor.colorWhite,
       body: Center(
         child: Container(
           child: Image.asset("assets/splash_screen.png",

@@ -1760,13 +1760,14 @@ class _DashboradPageState extends State<DashboradPage>
     final _tabs = TabBar(
         controller: _tabController,
         indicatorSize: TabBarIndicatorSize.label,
-        unselectedLabelColor: Colors.white,
-        labelColor: Colors.white,
+        unselectedLabelColor: StaticColor.colorWhite,
+        labelColor: StaticColor.colorWhite,
         isScrollable: true,
         labelPadding: EdgeInsets.all(2),
         indicatorPadding: EdgeInsets.all(2),
         indicator: BoxDecoration(
-            borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
+            borderRadius: BorderRadius.circular(8),
+            color: StaticColor.deepOrange),
         tabs: List<Widget>.generate(tabsList.length, (int index) {
           return new Tab(
             child: Container(
@@ -1785,13 +1786,14 @@ class _DashboradPageState extends State<DashboradPage>
     final _subtabs = TabBar(
       controller: _subtabController,
       indicatorSize: TabBarIndicatorSize.label,
-      unselectedLabelColor: Colors.white,
-      labelColor: Colors.white,
+      unselectedLabelColor: StaticColor.colorWhite,
+      labelColor: StaticColor.colorWhite,
       labelPadding: EdgeInsets.all(1),
       indicatorPadding: EdgeInsets.all(0),
       isScrollable: true,
       indicator: BoxDecoration(
-          borderRadius: BorderRadius.circular(30), color: Colors.deepOrange),
+          borderRadius: BorderRadius.circular(30),
+          color: StaticColor.deepOrange),
       tabs: List<Widget>.generate(subCatList.length, (int index) {
         return new Tab(
           child: Container(
@@ -1824,7 +1826,8 @@ class _DashboradPageState extends State<DashboradPage>
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 child: Table(
-                  border: TableBorder.all(color: Colors.white, width: 0.6),
+                  border: TableBorder.all(
+                      color: StaticColor.colorWhite, width: 0.6),
                   columnWidths: {
                     0: FractionColumnWidth(.6),
                     1: FractionColumnWidth(.3),
@@ -1871,7 +1874,7 @@ class _DashboradPageState extends State<DashboradPage>
                                               onPressed: _backtoMainCat,
                                               icon: Icon(
                                                 Icons.arrow_back,
-                                                color: Colors.white,
+                                                color: StaticColor.colorWhite,
                                                 size: SizeConfig
                                                         .safeBlockVertical *
                                                     4,
@@ -1911,7 +1914,7 @@ class _DashboradPageState extends State<DashboradPage>
                         child: Stack(
                           children: <Widget>[
                             Container(
-                              // color: Colors.white,
+                              // color: StaticColor.colorWhite,
                               child: SizedBox(
                                   height: MediaQuery.of(context).size.height -
                                       SizeConfig.safeBlockVertical * 10,
@@ -1951,7 +1954,7 @@ class _DashboradPageState extends State<DashboradPage>
   //     padding: EdgeInsets.only(
   //       top: 20,
   //     ),
-  //     color: Colors.white,
+  //     color: StaticColor.colorWhite,
   //     child: Drawer(
   //       child: ListView(
   //         padding: EdgeInsets.only(top: 10, left: 10, right: 10),
@@ -2089,7 +2092,7 @@ class _DashboradPageState extends State<DashboradPage>
                   },
                   icon: Icon(
                     Icons.arrow_back,
-                    color: Colors.white,
+                    color: StaticColor.colorWhite,
                     size: SizeConfig.safeBlockVertical * 5,
                   )),
               SizedBox(width: SizeConfig.safeBlockVertical * 3),
@@ -2116,7 +2119,7 @@ class _DashboradPageState extends State<DashboradPage>
                           right: SizeConfig.safeBlockVertical * 3),
                       child: Icon(
                         Icons.search,
-                        color: Colors.deepOrange,
+                        color: StaticColor.deepOrange,
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                     ),
@@ -2130,7 +2133,7 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                     ),
                     filled: true,
-                    fillColor: Colors.white),
+                    fillColor: StaticColor.colorWhite),
               ),
               suggestionsCallback: (pattern) async {
                 return SearchProductList;
@@ -2140,7 +2143,7 @@ class _DashboradPageState extends State<DashboradPage>
                 //     .replaceAll("data:image/jpg;base64,", '');
                 return ListTile(
                     leading: Container(
-                      color: Colors.grey,
+                      color: StaticColor.colorGrey,
                       width: 40,
                       height: 40,
                       child: SearchProductList.base64 != ""
@@ -2210,7 +2213,7 @@ class _DashboradPageState extends State<DashboradPage>
                   children: <Widget>[
                     Icon(
                       Icons.person,
-                      color: Colors.white,
+                      color: StaticColor.colorWhite,
                       size: SizeConfig.safeBlockVertical * 4,
                     ),
                     SizedBox(width: 5),
@@ -2266,14 +2269,14 @@ class _DashboradPageState extends State<DashboradPage>
               children: <Widget>[
                 Icon(
                   Icons.add_circle_outline,
-                  color: Colors.white,
+                  color: StaticColor.colorWhite,
                   size: SizeConfig.safeBlockVertical * 4,
                 ),
                 SizedBox(width: 5),
                 Text(Strings.btn_Add_customer, style: Styles.whiteBoldsmall()),
               ],
             ),
-            color: Colors.deepOrange,
+            color: StaticColor.deepOrange,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(50.0),
             ),
@@ -2285,7 +2288,8 @@ class _DashboradPageState extends State<DashboradPage>
     return PopupMenuButton(
         padding: EdgeInsets.all(0),
         icon: Icon(Icons.more_vert,
-            color: Colors.white, size: SizeConfig.safeBlockVertical * 5),
+            color: StaticColor.colorWhite,
+            size: SizeConfig.safeBlockVertical * 5),
         offset: Offset(0, 100),
         // onSelected: 0,
         onSelected: selectOption,
@@ -2491,7 +2495,7 @@ class _DashboradPageState extends State<DashboradPage>
                   Hero(
                       tag: meal.setmealId != null ? meal.setmealId : 0,
                       child: Container(
-                        color: Colors.grey,
+                        color: StaticColor.colorGrey,
                         width: MediaQuery.of(context).size.width,
                         height: itemHeight / 2.2,
                         child: meal.base64 != ""
@@ -2507,7 +2511,7 @@ class _DashboradPageState extends State<DashboradPage>
                     margin: EdgeInsets.only(top: itemHeight / 2.2),
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
-                      color: Colors.grey[600],
+                      color: StaticColor.colorGrey600,
                     ),
                     child: Center(
                       child: Text(
@@ -2526,7 +2530,7 @@ class _DashboradPageState extends State<DashboradPage>
                       height: SizeConfig.safeBlockVertical * 5,
                       // width: 50,
                       padding: EdgeInsets.all(5),
-                      color: Colors.deepOrange,
+                      color: StaticColor.deepOrange,
                       child: Center(
                         child: Text(
                             currency != null
@@ -2589,7 +2593,7 @@ class _DashboradPageState extends State<DashboradPage>
             child: Container(
               height: itemHeight,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: StaticColor.colorWhite,
                 borderRadius: BorderRadius.circular(8),
               ),
               margin: EdgeInsets.all(0),
@@ -2601,7 +2605,7 @@ class _DashboradPageState extends State<DashboradPage>
                       child: Container(
                           width: MediaQuery.of(context).size.width,
                           decoration: BoxDecoration(
-                            color: Colors.grey,
+                            color: StaticColor.colorGrey,
                             borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(8),
                                 topRight: Radius.circular(8)),
@@ -2625,7 +2629,7 @@ class _DashboradPageState extends State<DashboradPage>
                     margin: EdgeInsets.only(top: itemHeight / 2.2),
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
-                      color: Colors.grey[600],
+                      color: StaticColor.colorGrey600,
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(8),
                           bottomRight: Radius.circular(8)),
@@ -2647,7 +2651,7 @@ class _DashboradPageState extends State<DashboradPage>
                       height: SizeConfig.safeBlockVertical * 5,
                       // width: 50,
                       padding: EdgeInsets.all(5),
-                      color: Colors.deepOrange,
+                      color: StaticColor.deepOrange,
                       child: Center(
                         child: Text(
                             currency != null
@@ -2667,7 +2671,7 @@ class _DashboradPageState extends State<DashboradPage>
                             height: SizeConfig.safeBlockVertical * 4,
                             // width: 50,
                             padding: EdgeInsets.all(2),
-                            color: Colors.deepOrange,
+                            color: StaticColor.deepOrange,
                             child: Center(
                               child: Text(Strings.out_of_stoke,
                                   style: Styles.whiteSimpleSmall()),
@@ -2683,7 +2687,7 @@ class _DashboradPageState extends State<DashboradPage>
                             height: SizeConfig.safeBlockVertical * 4,
                             // width: 50,
                             padding: EdgeInsets.all(2),
-                            color: Colors.deepOrange,
+                            color: StaticColor.deepOrange,
                             child: Center(
                               child: Text(Strings.out_of_box,
                                   style: Styles.whiteSimpleSmall()),
@@ -2727,12 +2731,12 @@ class _DashboradPageState extends State<DashboradPage>
                     child: Text(
                       Strings.send,
                       style: TextStyle(
-                          color: Colors.white,
+                          color: StaticColor.colorWhite,
                           fontSize: SizeConfig.safeBlockVertical * 2.8,
                           fontWeight: FontWeight.bold),
                     ),
-                    color: Colors.deepOrange,
-                    textColor: Colors.white,
+                    color: StaticColor.deepOrange,
+                    textColor: StaticColor.colorWhite,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(50.0),
                     ),
@@ -2756,12 +2760,12 @@ class _DashboradPageState extends State<DashboradPage>
               child: Text(
                 !isWebOrder ? Strings.title_pay : Strings.checkout,
                 style: TextStyle(
-                    color: Colors.white,
+                    color: StaticColor.colorWhite,
                     fontSize: SizeConfig.safeBlockVertical * 2.8,
                     fontWeight: FontWeight.bold),
               ),
-              color: Colors.deepOrange,
-              textColor: Colors.white,
+              color: StaticColor.deepOrange,
+              textColor: StaticColor.colorWhite,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50.0),
               ),
@@ -2822,13 +2826,13 @@ class _DashboradPageState extends State<DashboradPage>
       child: Text(
         Strings.open_shift,
         style: TextStyle(
-            color: Colors.deepOrange,
+            color: StaticColor.deepOrange,
             fontSize: SizeConfig.safeBlockVertical * 4),
       ),
-      color: Colors.white,
+      color: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         side: BorderSide(
-            width: 1, style: BorderStyle.solid, color: Colors.deepOrange),
+            width: 1, style: BorderStyle.solid, color: StaticColor.deepOrange),
         borderRadius: BorderRadius.circular(10.0),
       ),
     );
@@ -2842,7 +2846,7 @@ class _DashboradPageState extends State<DashboradPage>
       children: <Widget>[
         Icon(
           Icons.account_circle,
-          color: Colors.grey,
+          color: StaticColor.colorGrey,
           size: SizeConfig.safeBlockVertical * 4,
         ),
         Column(
@@ -2871,7 +2875,9 @@ class _DashboradPageState extends State<DashboradPage>
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         border: TableBorder(
             horizontalInside: BorderSide(
-                width: 1, color: Colors.grey, style: BorderStyle.solid)),
+                width: 1,
+                color: StaticColor.colorGrey,
+                style: BorderStyle.solid)),
         columnWidths: {
           0: FractionColumnWidth(.6),
           1: FractionColumnWidth(.2),
@@ -3032,7 +3038,9 @@ class _DashboradPageState extends State<DashboradPage>
     final totalPriceTable = Table(
         border: TableBorder(
             top: BorderSide(
-                width: 1, color: Colors.grey[400], style: BorderStyle.solid),
+                width: 1,
+                color: StaticColor.colorGrey400,
+                style: BorderStyle.solid),
             horizontalInside: BorderSide(
                 width: 1, color: Colors.grey[400], style: BorderStyle.solid)),
         children: [
@@ -3192,12 +3200,12 @@ class _DashboradPageState extends State<DashboradPage>
                                   true);
                             },
                             child: Chip(
-                              backgroundColor: Colors.grey,
+                              backgroundColor: StaticColor.colorGrey,
                               avatar: CircleAvatar(
-                                backgroundColor: Colors.grey.shade800,
+                                backgroundColor: StaticColor.colorGrey600,
                                 child: Icon(
                                   Icons.close,
-                                  color: Colors.white,
+                                  color: StaticColor.colorWhite,
                                   size: 20,
                                 ),
                               ),
@@ -3227,12 +3235,12 @@ class _DashboradPageState extends State<DashboradPage>
                             child: Text(
                               Strings.apply_promocode,
                               style: TextStyle(
-                                color: Colors.white,
+                                color: StaticColor.colorWhite,
                                 fontSize: SizeConfig.safeBlockVertical * 2.5,
                               ),
                             ),
-                            color: Colors.deepOrange,
-                            textColor: Colors.white,
+                            color: StaticColor.deepOrange,
+                            textColor: StaticColor.colorWhite,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(50.0),
                             ),
@@ -3253,7 +3261,7 @@ class _DashboradPageState extends State<DashboradPage>
         Container(
           height: MediaQuery.of(context).size.height -
               SizeConfig.safeBlockVertical * 10,
-          color: Colors.grey[300],
+          color: StaticColor.colorGrey400,
           padding: EdgeInsets.all(0),
           child: Stack(
             children: <Widget>[
@@ -3268,7 +3276,7 @@ class _DashboradPageState extends State<DashboradPage>
                   ? Container(
                       width: MediaQuery.of(context).size.width / 1.2,
                       margin: EdgeInsets.only(top: customer != null ? 50 : 0),
-                      color: Colors.white,
+                      color: StaticColor.colorWhite,
                       padding: EdgeInsets.all(5),
                       child: carttitle,
                     )
@@ -3284,7 +3292,8 @@ class _DashboradPageState extends State<DashboradPage>
                       left: 0,
                       right: 0,
                       child: Container(
-                          color: Colors.grey[300], child: totalPriceTable),
+                          color: StaticColor.colorGrey400,
+                          child: totalPriceTable),
                     )
                   : Center(
                       child: Text(

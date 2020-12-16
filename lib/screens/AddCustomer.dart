@@ -11,6 +11,7 @@ import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class AddCustomerPage extends StatefulWidget {
   AddCustomerPage({Key key}) : super(key: key);
@@ -196,7 +197,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: SizeConfig.safeBlockVertical * 9,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -204,7 +205,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                 Text(Strings.btn_Add_customer,
                     style: TextStyle(
                         fontSize: SizeConfig.safeBlockVertical * 3,
-                        color: Colors.white)),
+                        color: StaticColor.colorWhite)),
               ],
             ),
           ),
@@ -223,7 +224,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                       },
                       child: Text(Strings.btn_Add_customer,
                           style: Styles.whiteBoldsmall()),
-                      color: Colors.deepOrange,
+                      color: StaticColor.deepOrange,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(50.0),
                       ),
@@ -248,14 +249,15 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -274,12 +276,12 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             Text(
               Strings.countrys,
               style: TextStyle(
-                  color: Colors.grey,
+                  color: StaticColor.colorGrey,
                   fontSize: SizeConfig.safeBlockVertical * 2.5),
             ),
             Container(
               decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: StaticColor.colorGrey),
                   borderRadius: BorderRadius.circular(5)),
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
               height: SizeConfig.safeBlockVertical * 10,
@@ -295,7 +297,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     return Text(
                       item.name,
                       style: TextStyle(
-                          color: Colors.black,
+                          color: StaticColor.colorBlack,
                           fontSize: SizeConfig.safeBlockVertical * 3),
                     );
                   }).toList();
@@ -306,7 +308,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     child: new Text(
                       value.name,
                       style: TextStyle(
-                          color: Colors.black,
+                          color: StaticColor.colorBlack,
                           fontSize: SizeConfig.safeBlockVertical * 3),
                     ),
                   );
@@ -340,13 +342,13 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             Text(
               Strings.city,
               style: TextStyle(
-                  color: Colors.grey,
+                  color: StaticColor.colorGrey,
                   fontSize: SizeConfig.safeBlockVertical * 2.5),
             ),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
               decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: StaticColor.colorGrey),
                   borderRadius: BorderRadius.circular(5)),
               height: SizeConfig.safeBlockVertical * 10,
               width: MediaQuery.of(context).size.width,
@@ -361,7 +363,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     return Text(
                       item.name,
                       style: TextStyle(
-                          color: Colors.black,
+                          color: StaticColor.colorBlack,
                           fontSize: SizeConfig.safeBlockVertical * 3),
                     );
                   }).toList();
@@ -372,7 +374,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     child: new Text(
                       value.name,
                       style: TextStyle(
-                          color: Colors.black,
+                          color: StaticColor.colorBlack,
                           fontSize: SizeConfig.safeBlockVertical * 3),
                     ),
                   );
@@ -405,12 +407,12 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             Text(
               Strings.state,
               style: TextStyle(
-                  color: Colors.grey,
+                  color: StaticColor.colorGrey,
                   fontSize: SizeConfig.safeBlockVertical * 2.5),
             ),
             Container(
               decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: StaticColor.colorGrey),
                   borderRadius: BorderRadius.circular(5)),
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
               height: SizeConfig.safeBlockVertical * 10,
@@ -426,7 +428,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     return Text(
                       item.name,
                       style: TextStyle(
-                          color: Colors.black,
+                          color: StaticColor.colorBlack,
                           fontSize: SizeConfig.safeBlockVertical * 3),
                     );
                   }).toList();
@@ -437,7 +439,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     child: new Text(
                       value.name,
                       style: TextStyle(
-                          color: Colors.black,
+                          color: StaticColor.colorBlack,
                           fontSize: SizeConfig.safeBlockVertical * 3),
                     ),
                   );
@@ -481,20 +483,21 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
           border: OutlineInputBorder(),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey),
+            borderSide: BorderSide(color: StaticColor.colorGrey),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.grey),
+            borderSide: BorderSide(color: StaticColor.colorGrey),
           ),
           labelText: isCompal ? lable + "*" : lable,
           labelStyle: TextStyle(
             fontSize: SizeConfig.safeBlockVertical * 2.5,
-            color: Colors.grey,
+            color: StaticColor.colorGrey,
           ),
         ),
         style: TextStyle(
-            color: Colors.black, fontSize: SizeConfig.safeBlockVertical * 3),
+            color: StaticColor.colorBlack,
+            fontSize: SizeConfig.safeBlockVertical * 3),
         onChanged: _onchnage,
       ),
     );

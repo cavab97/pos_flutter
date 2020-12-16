@@ -28,6 +28,7 @@ import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/models/Branch.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class TransactionsPage extends StatefulWidget {
   // Transactions list
@@ -534,7 +535,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           physics: BouncingScrollPhysics(),
                           child: Container(
                             height: MediaQuery.of(context).size.height,
-                            color: Colors.white,
+                            color: StaticColor.colorWhite,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -761,8 +762,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
       padding: EdgeInsets.all(10),
       onPressed: onPress,
       child: Text("Assign Table", style: Styles.whiteSimpleSmall()),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
+      color: StaticColor.deepOrange,
+      textColor: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
       ),
@@ -772,7 +773,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Widget transationsSearchBox() {
     return Container(
       padding: EdgeInsets.all(10),
-      color: Colors.grey[400],
+      color: StaticColor.colorGrey400,
       child: TextField(
         keyboardType: TextInputType.text,
         decoration: InputDecoration(
@@ -780,7 +781,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             padding: EdgeInsets.only(left: 15),
             child: Icon(
               Icons.search,
-              color: Colors.grey[400],
+              color: StaticColor.colorGrey400,
               size: SizeConfig.safeBlockVertical * 5,
             ),
           ),
@@ -788,7 +789,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           hintStyle: TextStyle(
               fontSize: SizeConfig.safeBlockVertical * 3,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[400]),
+              color: StaticColor.colorGrey400),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(50),
             borderSide: BorderSide(
@@ -798,7 +799,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           ),
           filled: true,
           contentPadding: EdgeInsets.only(left: 20),
-          fillColor: Colors.white,
+          fillColor: StaticColor.colorWhite,
         ),
         style: Styles.blackMediumBold(),
         onTap: () {
@@ -845,12 +846,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
           "Cancel",
           style: TextStyle(
               color: orderpayment[0].op_status == 1
-                  ? Colors.white
-                  : Colors.white38,
+                  ? StaticColor.colorWhite
+                  : StaticColor.colorwhite38,
               fontSize: 20),
         ),
-        color: Colors.deepOrange,
-        textColor: Colors.white,
+        color: StaticColor.deepOrange,
+        textColor: StaticColor.colorWhite,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
@@ -867,12 +868,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
           "Next",
           style: TextStyle(
               color: orderpayment[0].op_status == 1
-                  ? Colors.white
-                  : Colors.white38,
+                  ? StaticColor.colorWhite
+                  : StaticColor.colorwhite38,
               fontSize: 20),
         ),
-        color: Colors.deepOrange,
-        textColor: Colors.white,
+        color: StaticColor.deepOrange,
+        textColor: StaticColor.colorWhite,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
@@ -1174,12 +1175,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
           "Refund",
           style: TextStyle(
               color: orderpayment.length > 0 && orderpayment[0].op_status == 1
-                  ? Colors.white
-                  : Colors.white38,
+                  ? StaticColor.colorWhite
+                  : StaticColor.colorwhite38,
               fontSize: 20),
         ),
-        color: Colors.deepOrange,
-        textColor: Colors.white,
+        color: StaticColor.deepOrange,
+        textColor: StaticColor.colorWhite,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
@@ -1197,12 +1198,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
               color: orderpayment.length > 0 && orderpayment[0].op_status == 1
-                  ? Colors.white
-                  : Colors.white38,
+                  ? StaticColor.colorWhite
+                  : StaticColor.colorwhite38,
               fontSize: 20),
         ),
-        color: Colors.deepOrange,
-        textColor: Colors.white,
+        color: StaticColor.deepOrange,
+        textColor: StaticColor.colorWhite,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
@@ -1212,7 +1213,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget productList() {
     return Container(
-      //color: Colors.white,
+      //color: StaticColor.colorWhite,
       padding: EdgeInsets.only(left: 20, right: 20, bottom: 0),
       // height: MediaQuery.of(context).size.height / 2,
       child: Column(
@@ -1235,7 +1236,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       height: SizeConfig.safeBlockVertical * 8,
                       width: SizeConfig.safeBlockVertical * 9,
                       decoration: new BoxDecoration(
-                        color: Colors.greenAccent,
+                        color: StaticColor.colorGreenAccent,
                       ),
                       child: product.base64 != ""
                           ? CommonUtils.imageFromBase64String(product.base64)
@@ -1331,12 +1332,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
         },
         child: Text(
           Strings.print_reciept,
-          style: TextStyle(color: Colors.deepOrange, fontSize: 15),
+          style: TextStyle(color: StaticColor.deepOrange, fontSize: 15),
         ),
         color: Colors.transparent,
         shape: RoundedRectangleBorder(
           side: BorderSide(
-              width: 1, style: BorderStyle.solid, color: Colors.deepOrange),
+              width: 1,
+              style: BorderStyle.solid,
+              color: StaticColor.deepOrange),
           borderRadius: BorderRadius.circular(50.0),
         ),
       )
@@ -1379,8 +1382,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
               padding: EdgeInsets.symmetric(horizontal: 5),
               decoration: new BoxDecoration(
                   color: selectedOrder.app_id == item.app_id
-                      ? Colors.grey[200]
-                      : Colors.white),
+                      ? StaticColor.lightGrey100
+                      : StaticColor.colorWhite),
               child: ListTile(
                 contentPadding: EdgeInsets.all(0),
                 dense: false,
@@ -1398,7 +1401,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     item.order_status == 3
                         ? Container(
                             padding: EdgeInsets.all(3),
-                            color: Colors.red,
+                            color: StaticColor.colorRed,
                             child: Text(
                               "Cancel",
                               style: Styles.whiteBoldsmall(),
@@ -1408,7 +1411,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     item.order_status == 5
                         ? Container(
                             padding: EdgeInsets.all(3),
-                            color: Colors.red,
+                            color: StaticColor.colorRed,
                             child: Text(
                               "Refunded",
                               style: Styles.whiteBoldsmall(),
@@ -1443,8 +1446,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 decoration: new BoxDecoration(
                     color: selectedOrder.app_id == item.app_id &&
                             selectedOrder.terminal_id == item.terminal_id
-                        ? Colors.grey[200]
-                        : Colors.white),
+                        ? StaticColor.lightGrey100
+                        : StaticColor.colorWhite),
                 child: ListTile(
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0),
@@ -1463,7 +1466,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       item.order_status == 3
                           ? Container(
                               padding: EdgeInsets.all(3),
-                              color: Colors.red,
+                              color: StaticColor.colorRed,
                               child: Text(
                                 "Cancel",
                                 style: Styles.whiteBoldsmall(),
@@ -1473,7 +1476,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       item.order_status == 5
                           ? Container(
                               padding: EdgeInsets.all(3),
-                              color: Colors.red,
+                              color: StaticColor.colorRed,
                               child: Text(
                                 "Refunded",
                                 style: Styles.whiteBoldsmall(),
@@ -1519,7 +1522,7 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: 70,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -1592,10 +1595,10 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
       },
       child: Text("Confirm",
           style: TextStyle(
-            color: Colors.white,
+            color: StaticColor.colorWhite,
             fontSize: 20,
           )),
-      textColor: Colors.white,
+      textColor: StaticColor.colorWhite,
     );
   }
 
@@ -1611,14 +1614,15 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -1663,11 +1667,13 @@ class AddOtherReasonState extends State<AddOtherReason> {
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(width: 1, color: Colors.grey),
+                      borderSide:
+                          BorderSide(width: 1, color: StaticColor.colorGrey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(width: 1, color: Colors.grey),
+                      borderSide:
+                          BorderSide(width: 1, color: StaticColor.colorGrey),
                     ),
                   ),
                 ),
@@ -1685,7 +1691,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
         widget.onClose(reasonController.text);
       },
       child: Text("Confirm", style: Styles.orangeSmall()),
-      textColor: Colors.white,
+      textColor: StaticColor.colorWhite,
     );
   }
 
@@ -1695,7 +1701,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
         Navigator.of(context).pop();
       },
       child: Text("Cancel", style: Styles.orangeSmall()),
-      textColor: Colors.white,
+      textColor: StaticColor.colorWhite,
     );
   }
 }

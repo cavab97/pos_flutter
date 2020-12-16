@@ -12,6 +12,7 @@ import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class VoucherPop extends StatefulWidget {
   // Opning ammount popup
@@ -210,7 +211,7 @@ class VoucherPopState extends State<VoucherPop> {
           children: <Widget>[
             Container(
               height: SizeConfig.safeBlockVertical * 9,
-              color: Colors.black,
+              color: StaticColor.colorBlack,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -218,7 +219,7 @@ class VoucherPopState extends State<VoucherPop> {
                   Text(Strings.applycoupen,
                       style: TextStyle(
                           fontSize: SizeConfig.safeBlockVertical * 3,
-                          color: Colors.white)),
+                          color: StaticColor.colorWhite)),
                 ],
               ),
             ),
@@ -256,14 +257,15 @@ class VoucherPopState extends State<VoucherPop> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -289,24 +291,25 @@ class VoucherPopState extends State<VoucherPop> {
               keyboardType: TextInputType.text,
               decoration: InputDecoration(
                 errorStyle: TextStyle(
-                    color: Colors.red,
+                    color: StaticColor.colorRed,
                     fontSize: SizeConfig.safeBlockVertical * 3),
                 errorText: errorMSG != "" ? errorMSG : "",
                 hintText: Strings.enter_Code,
                 hintStyle: TextStyle(
                     fontSize: SizeConfig.safeBlockVertical * 2,
-                    color: Colors.black),
+                    color: StaticColor.colorBlack),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(width: 3, color: Colors.grey),
+                  borderSide:
+                      BorderSide(width: 3, color: StaticColor.colorGrey),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(width: 3, color: Colors.grey),
+                  borderSide: BorderSide(width: 3, color: StaticColor.colorRed),
                 ),
                 filled: true,
                 contentPadding: EdgeInsets.all(15),
-                fillColor: Colors.white,
+                fillColor: StaticColor.colorWhite,
               ),
               style: Styles.greysmall(),
               onChanged: (e) {
