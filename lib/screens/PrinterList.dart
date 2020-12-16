@@ -71,15 +71,17 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
             ),
           ),
           Positioned(
-              left: 30,
-              top: 15,
-              child: IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.sync,
-                    color: Colors.white,
-                    size: 40,
-                  ))),
+            left: 30,
+            top: 15,
+            child: IconButton(
+              onPressed: () {},
+              icon: Icon(
+                Icons.sync,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+          ),
           closeButton(context),
         ],
       ),

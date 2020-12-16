@@ -53,7 +53,6 @@ class DatabaseHelper {
 
   void _createDb(Database db, int newVersion) async {
     var data = await createTablehelper.createTable(db);
-    print(data);
   }
 
   Future<dynamic> insertData1(tablesData) async {

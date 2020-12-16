@@ -61,9 +61,11 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
                 Constant.TERMINAL_KEY, value["terminal_id"].toString());
             Preferences.setStringToSF(
                 Constant.BRANCH_ID, value["branch_id"].toString());
-            Navigator.pushNamedAndRemoveUntil(
+            await Preferences.setStringToSF(Constant.IS_LOGIN, "true");
+            await CommunFun.syncAfterSuccess(context, true);
+            /* Navigator.pushNamedAndRemoveUntil(
                 context, Constant.LoginScreen, (Route<dynamic> route) => false,
-                arguments: {"terminalId": value["terminal_id"]});
+                arguments: {"terminalId": value["terminal_id"]}); */
           } else if (value != null && value["status"] == Constant.STATUS422) {
             CommunFun.showToast(context, value["message"]);
           } else {
@@ -148,7 +150,6 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
     return TextField(
       controller: terminalKey,
       keyboardType: TextInputType.text,
-      textInputAction: TextInputAction.newline,
       decoration: InputDecoration(
         prefixIcon: Padding(
           padding: EdgeInsets.only(left: 25, right: 25),
@@ -171,9 +172,6 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
       ),
       style: Styles.normalBlack(),
       onChanged: onChange,
-      onSubmitted: (input) {
-        setTerminalkey();
-      },
     );
   }
 }

@@ -182,8 +182,7 @@ class DrawerWidState extends State<DrawerWid> {
       await CommunFun.printShiftReportData(
           printerreceiptList[0].printerIp.toString(), context, shiftid);
     }
-    checkshift();
-    await Navigator.pushNamedAndRemoveUntil(
+    Navigator.pushNamedAndRemoveUntil(
         context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
         arguments: {"isAssign": false});
   }
@@ -198,16 +197,8 @@ class DrawerWidState extends State<DrawerWid> {
   }
 
   syncOrdersTodatabase() async {
-    if (permissions.contains(Constant.VIEW_SYNC)) {
-      await CommunFun.opneSyncPop(context);
-      await CommunFun.syncOrdersANDStore(context, true);
-    } else {
-      await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
-          () async {
-        await CommunFun.opneSyncPop(context);
-        await CommunFun.syncOrdersANDStore(context, true);
-      }, () {});
-    }
+    await CommunFun.opneSyncPop(context);
+    await CommunFun.syncOrdersANDStore(context, true);
   }
 
   syncAllTables() async {

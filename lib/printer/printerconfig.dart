@@ -10,9 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/components/StringFile.dart';
-import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
-import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Order.dart';
@@ -21,9 +19,10 @@ import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/Payment.dart';
+import 'package:image/image.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
-import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/Terminal.dart';
 
 class PrintReceipt {
   PaperSize paper = PaperSize.mm80;
@@ -106,7 +105,7 @@ class PrintReceipt {
       if (item.isSendKichen == null || isReprint) {
         ticket.row([
           PosColumn(
-              text: item.productQty.toString(),
+              text: item.productQty.toStringAsFixed(0),
               width: 2,
               styles: PosStyles(
                 align: PosAlign.left,
@@ -240,6 +239,7 @@ class PrintReceipt {
   ========================================================================*/
 
   Future<Ticket> Receipt(
+      String pax,
       Branch branchData,
       List taxJson,
       List<OrderDetail> orderdetail,
@@ -250,9 +250,7 @@ class PrintReceipt {
       List<Payments> paymentMethods,
       String tableName,
       var currency,
-      String customerName,
-      ctx,
-      bool isper) async {
+      String customerName) async {
     bool isCashPayment = false;
     double cashPaymentTotal = 0.00;
     double cashPaymentChange = 0.00;
@@ -290,7 +288,7 @@ class PrintReceipt {
 
     ticket.row([
       PosColumn(
-          text: "Document No.",
+          text: "Invoice No.",
           width: 4,
           styles: PosStyles(
             align: PosAlign.left,
@@ -357,6 +355,24 @@ class PrintReceipt {
           )),
       PosColumn(
           text: " : " + branchData.contactPerson,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Pax",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + pax,
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -582,9 +598,7 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: orderData.serviceCharge != null
-              ? orderData.serviceCharge.toStringAsFixed(2)
-              : "0.00",
+          text: orderData.serviceCharge.toStringAsFixed(2),
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
@@ -776,14 +790,14 @@ class PrintReceipt {
     ticket.cut();
 
     /*Open Drawer only when select payment method cash*/
-
-    if (isper && isCashPayment) {
+    if (isCashPayment) {
       ticket.drawer();
     }
     return ticket;
   }
 
   void checkReceiptPrint(
+      String pax,
       String printerIp,
       BuildContext ctx,
       Branch branchData,
@@ -800,8 +814,9 @@ class PrintReceipt {
       isper) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
-    PosPrintResult res;
-    res = await printerManager.printTicket(await Receipt(
+
+    final PosPrintResult res = await printerManager.printTicket(await Receipt(
+        pax,
         branchData,
         taxJson,
         orderdetail,
@@ -812,10 +827,9 @@ class PrintReceipt {
         paymentMethods,
         tableName,
         currency,
-        customerName,
-        ctx,
-        isper));
-    await CommunFun.showToast(ctx, res.msg);
+        customerName));
+
+    CommunFun.showToast(ctx, res.msg);
   }
 
 /*========================================================================
@@ -823,6 +837,7 @@ class PrintReceipt {
   ========================================================================*/
 
   Future<Ticket> DraftReceipt(
+      String pax,
       List taxJson,
       List<MSTCartdetails> cartList,
       String tableName,
@@ -833,7 +848,6 @@ class PrintReceipt {
       double tax,
       Branch branchData,
       String currency,
-      String pax,
       String custName) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
@@ -914,6 +928,24 @@ class PrintReceipt {
           )),
       PosColumn(
           text: " : " + branchData.contactPerson,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Pax",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + pax,
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -1047,7 +1079,6 @@ class PrintReceipt {
       /*Print attributes without price*/
       /*Print attributes without price*/
       if (cartList[i].attrName != null) {
-        print("=== String into List ===");
         List<String> attributes = cartList[i].attrName.split(",");
         if (attributes.length > 0) {
           for (var a = 0; a < attributes.length; a++) {
@@ -1224,6 +1255,7 @@ class PrintReceipt {
 
     final PosPrintResult res = await printerManager.printTicket(
         await DraftReceipt(
+            pax,
             taxJson,
             cartList,
             tableName,
@@ -1234,7 +1266,6 @@ class PrintReceipt {
             tax,
             branchData,
             currency,
-            pax,
             custName));
 
     CommunFun.showToast(ctx, res.msg);
@@ -1358,6 +1389,24 @@ class PrintReceipt {
           )),
       PosColumn(
           text: " : " + Strings.terminalName,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Pax",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + pax,
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -1502,19 +1551,19 @@ class PrintReceipt {
       }
     }
     ticket.hr();
-    ticket.setStyles(PosStyles(align: PosAlign.right));
+    // ticket.setStyles(PosStyles(align: PosAlign.right));
     ticket.row([
       PosColumn(
           text: "Total QTY:",
-          width: 8,
+          width: 9,
           styles: PosStyles(
             align: PosAlign.right,
             fontType: PosFontType.fontA,
             bold: true,
           )),
       PosColumn(
-          text: totalQTY.toStringAsFixed(1),
-          width: 4,
+          text: totalQTY.toStringAsFixed(0) + " ",
+          width: 3,
           styles: PosStyles(
             align: PosAlign.right,
             fontType: PosFontType.fontA,
@@ -1522,6 +1571,7 @@ class PrintReceipt {
           )),
     ]);
     ticket.hr();
+
     ticket.feed(1);
     ticket.cut();
     return ticket;
@@ -1544,9 +1594,9 @@ class PrintReceipt {
     CommunFun.showToast(ctx, res.msg);
   }
 
-/* ========================================================================
+/*========================================================================
   ===========================Print Shift Report==================
-  ======================================================================== */
+  ========================================================================*/
 
   Future<Ticket> shiftReportReceipt(
       Branch branchData,
@@ -2040,30 +2090,14 @@ class PrintReceipt {
       String isFor) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
-    bool isper = await checkPermission(Constant.OPEN_DRAWER);
-    PosPrintResult res;
-    if (isper) {
-      res = await printerManager.printTicket(
-          await testPrintReceipt(printerName, printerIp, isFor, ctx, isper));
-    } else {
-      await CommonUtils.openPermissionPop(ctx, Constant.OPEN_DRAWER, () async {
-        res = await printerManager.printTicket(
-            await testPrintReceipt(printerName, printerIp, isFor, ctx, true));
-      }, () async {
-        res = await printerManager.printTicket(
-            await testPrintReceipt(printerName, printerIp, isFor, ctx, false));
-      });
-    }
 
-    // final PosPrintResult res = await printerManager.printTicket(
-    //     await testPrintReceipt(printerName, printerIp, isFor, ctx, isper));
-    if (res != null) {
-      await CommunFun.showToast(ctx, res.msg);
-    }
+    final PosPrintResult res = await printerManager
+        .printTicket(await testPrintReceipt(printerName, printerIp, isFor));
+    await CommunFun.showToast(ctx, res.msg);
   }
 
-  Future<Ticket> testPrintReceipt(String printerName, String printerIp,
-      String isFor, ctx, bool isper) async {
+  Future<Ticket> testPrintReceipt(
+      String printerName, String printerIp, String isFor) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
@@ -2091,21 +2125,8 @@ class PrintReceipt {
       ticket.feed(2);
       ticket.cut();
     }
-    //Constant.VIEW_ORDER//
-
-    if (isper) {
-      ticket.drawer();
-    }
+    ticket.drawer();
     return ticket;
-  }
-
-  Future<bool> checkPermission(isfor) async {
-    var permission = await CommunFun.getPemission();
-    if (permission.contains(isfor)) {
-      return true;
-    } else {
-      return false;
-    }
   }
 
   String checkRoundData(String total) {
@@ -2122,9 +2143,7 @@ class PrintReceipt {
       if (tempValue <= 2) {
         round = prefix + "." + postFilx.substring(0, 1) + "0";
       } else if (tempValue <= 7) {
-        print(postFilx.substring(0, 1));
         round = prefix + "." + postFilx.substring(0, 1) + "5";
-        print(round);
       } else {
         int values = 0;
         if (int.parse(postFilx.substring(1)) == 9) {

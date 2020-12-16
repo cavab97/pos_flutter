@@ -9,7 +9,6 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/CheckInout.dart';
 import 'package:mcncashier/models/User.dart';
-import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 
@@ -82,12 +81,6 @@ class _PINPageState extends State<PINPage> {
           checkIn.createdAt = date.toString();
           checkIn.sync = 0;
           var result = await localAPI.userCheckInOut(checkIn);
-          // List<Role> rolData = await localAPI.getRoldata(user.role);
-          // if (rolData.length > 0) {
-          //   Role rolda = rolData[0];
-          //   await Preferences.setStringToSF(
-          //       Constant.USER_ROLE, json.encode(rolda));
-          // }
           await Preferences.setStringToSF(
               Constant.LOIGN_USER, json.encode(user));
           await CommunFun.checkUserPermission(user.id);

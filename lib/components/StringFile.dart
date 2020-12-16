@@ -21,7 +21,6 @@ class Strings {
   static String qty = "QTY";
   static String amount = "Amount";
   static String discount = "Discount";
-
   static String service_charge = "Service Charge";
   static String tax = "TAX";
   static String grand_total = "GRAND TOTAL";
@@ -43,7 +42,7 @@ class Strings {
   static String fisrtname = "First Name";
   static String lastname = "Last Name";
   static String email = "Email";
-  static String phone = "Phone";
+  static String phone = "Mobile";
   static String password = "Password";
   static String birthdate = "Birth Date";
   static String addressline1 = "Address";
@@ -61,14 +60,16 @@ class Strings {
   static String view_order = "View Order";
   static String change_pax = "Change Pax";
   static String change_table = "Change Table";
+  static String cancelChangeTable = "Cancel Switch";
   static String cancle_order = "Cancel Order";
   static String merge_order = "Merge Order";
+  static String cancelMergeOrder = "Cancel Merging";
   static String enterPax = "Enter Pax";
   static String scanQRcode = "Scan QRCode";
 
   static String open_shift = "Open Shift";
-  static String shiftTextLable = "Sorry, we're";
-  static String shiftTextLableOpen = "Yes, we're\nOpen";
+  static String shiftTextLable = "Sorry,we're";
+  static String shiftTextLableOpen = "Yes,we're\nOpen";
   static String opened_at = "Open at";
   static String closed = "CLOSED";
   static String syncText = "Syncing...";
@@ -88,16 +89,15 @@ class Strings {
   static String split_order = "Split Order";
   static String close_shift = "Close Shift";
   static String opne_shift = "Open Shift";
-  static String draft_report = "Draft Report";
+  static String draft_report = "Print Bill";
   static String check_list = "Check list";
   static String no_image = "assets/no_image.png";
   static String delete_order = "Delete Order";
-  static String reprint_Order = "Resend to Kitchen";
+  static String reprint_Order = "Kitchen Reprint";
   static String out_of_stoke = "OUT OF STOCK";
-  static String out_of_box = "OUT OF BOX";
   static String out_of_stoke_msg = "Product Out of Stock";
-  static String out_of_box_msg = "Product not available in Box";
   static String apply_promocode = "Apply Promocode";
+  static String removePromocode = "Remove Promocode";
   static String item_not_available = "No item available";
   static String asset_headerLogo = "assets/headerlogo.png";
   static String assetsBG = "assets/bg.jpg";
@@ -133,8 +133,9 @@ class Strings {
   static String voucher_expired = "Voucher already expired.";
   static String stock_not_valilable = "Product is Out of stock.";
   static String procesing = "Processing";
-  static String send = "SEND";
+  static String send = "Confirm Order";
   static String open = "OPEN";
+  static String shift_close_msg = "Please close your shift and Sync data.";
   static String internet_connection_lost = "Internet Connection Lost";
   static String shift_opne_alert_msg =
       "Currently shift was closed,Please opne shift after you can see shift report.";
@@ -165,11 +166,11 @@ class Strings {
   static String yes = "Yes";
   static String no = "No";
   static String foc_product_msg = "FOC Product is not editable.";
-  static String total = "Total :";
+  static String total = "TOTAL";
   static String amountPaid = "Amount Paid :";
   static String change = "Change :";
   static String enterMsg = "Press screen to Continue";
-  static String pay_in_ammount = "Pay In Amount";
+  static String pay_in_ammount = "Cash In Amount";
   static String please_select_reason = 'Please select reason';
   static String enter_last = "Enter last 4 digits : ";
   static String approval_code = "Approval Code: ";
@@ -193,7 +194,8 @@ class Strings {
   static String scan = "Scan";
   static String list = "List";
   static String table_pax_msg = "Please enter pax minimum table capcity.";
-  static String cancle_order_msg = "Are you want to sure cancel this table order?";
+  static String cancle_order_msg =
+      "Are you want to sure cancel this table order?";
   static String change_table_msg = "Are you want to sure change your table?";
   static String table_not_avalilable = "Table not available for merge.";
   static String table_already_merged = "Table already merged with other table.";

@@ -1217,7 +1217,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
           children: orderItemList.map((product) {
         var index = orderItemList.indexOf(product);
         var item = orderItemList[index];
-        print(item.product_detail);
         var producrdata = json.decode(item.product_detail);
         // print(producrdata);
         return InkWell(

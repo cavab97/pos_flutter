@@ -571,7 +571,6 @@ class CommunFun {
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
     if (countrys != null) {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print(result);
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {
@@ -775,12 +774,12 @@ class CommunFun {
     if (timeZone != null) {
       final detroitTime =
           new tz.TZDateTime.from(dateTime, tz.getLocation(timeZone));
-      print('Local India Time: ' + dateTime.toString());
-      print('Detroit Time: ' + detroitTime.toString());
+      // print('Local India Time: ' + dateTime.toString());
+      // print('Detroit Time: ' + detroitTime.toString());
       // DateTime serverDate = DateTime.parse(detroitTime.toString());
       String formattedDate =
           DateFormat('yyyy-MM-dd HH:mm:ss').format(detroitTime);
-      print(formattedDate);
+      //print(formattedDate);
       return formattedDate;
     } else {
       String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
@@ -944,6 +943,7 @@ class CommunFun {
     if (permission != null) {
       return permission;
     } else {
+      print("error");
       return "";
     }
   }
@@ -1098,7 +1098,7 @@ class CommunFun {
     Printer printer = await CommunFun.getPrinter(productItem);
     bool isEditing = false;
     MSTCartdetails sameitem;
-    var contain = cartItems
+    /* var contain = cartItems
         .where((element) => element.productId == productItem.productId);
     if (contain.isNotEmpty) {
       isEditing = true;
@@ -1107,7 +1107,7 @@ class CommunFun {
           .map((i) => MSTCartdetails.fromJson(i))
           .toList();
       sameitem = myModels[0];
-    }
+    } */
     if (productItem.hasInventory == 1) {
       var qty = 1.0;
       if (isEditing) {
@@ -1200,7 +1200,7 @@ class CommunFun {
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = await CommunFun.getLocalID();
     var detailID = await localAPI.addintoCartDetails(cartdetails);
-    print(detailID);
+    //print(detailID);
     callback();
   }
 
@@ -1316,7 +1316,7 @@ class CommunFun {
         refundval += 0;
         netsale = grosssale - refundval;
         taxval += order.tax_amount;
-        totalPax += order.pax;
+        totalPax += order.pax ?? 0;
         roundingAmount += order.rounding_amount;
         textService += order.serviceCharge;
         discountval += order.voucher_amount != null ? order.voucher_amount : 0;

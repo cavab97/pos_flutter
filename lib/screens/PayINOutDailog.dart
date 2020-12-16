@@ -54,7 +54,6 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
           return OpeningAmmountPage(
               ammountext: Strings.pay_in_ammount,
               onEnter: (ammountext) {
-                print(ammountext);
                 setamount(ammountext);
               });
         });
@@ -115,8 +114,8 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
 
   Widget closeButton(context) {
     return Positioned(
-      top: -30,
-      right: -20,
+      top: 0,
+      right: 0,
       child: GestureDetector(
         onTap: () {
           Navigator.of(context).pop();

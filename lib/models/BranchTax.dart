@@ -6,7 +6,7 @@ class BranchTax {
   int status;
   String updatedAt;
   int updatedBy;
-
+  String code;
   BranchTax(
       {this.id,
       this.taxId,
@@ -14,7 +14,8 @@ class BranchTax {
       this.rate,
       this.status,
       this.updatedAt,
-      this.updatedBy});
+      this.updatedBy,
+      this.code});
 
   BranchTax.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -24,6 +25,7 @@ class BranchTax {
     status = json['status'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
+    code = json['code'];
   }
 
   Map<String, dynamic> toJson() {
@@ -35,6 +37,7 @@ class BranchTax {
     data['status'] = this.status;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;
+    data['code'] = this.code;
     return data;
   }
 }

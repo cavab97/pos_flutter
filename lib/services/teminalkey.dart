@@ -19,6 +19,8 @@ Future<dynamic> sendTerminalKey(TemimalKey terminal) async {
       headers: headers,
       body: json.encode(params),
     );
+    print(url);
+    print(response.statusCode);
     var data = json.decode(response.body);
     return data;
   } catch (e) {

@@ -493,11 +493,12 @@ class CreateTables {
         "app_id INTEGER," +
         "table_no TEXT," +
         "table_id INTEGER," +
-        "pax INTEGER," +
         "invoice_no TEXT," +
         "customer_id INTEGER," +
         "tax_percent INTEGER," +
+        "pax INTEGER," +
         "tax_amount REAL," +
+        "rounding_amount REAL," +
         "tax_json TEXT," +
         "voucher_id INTEGER," +
         "voucher_detail TEXT," +
@@ -507,7 +508,6 @@ class CreateTables {
         "service_charge REAL," +
         "sub_total_after_discount REAL," +
         "grand_total REAL," +
-        "rounding_amount REAL," +
         "order_source INTEGER," + // 1  web, 2  app
         "order_status INTEGER," + //1 New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
         "order_item_count INTEGER," +
@@ -606,11 +606,11 @@ class CreateTables {
         "is_split NUMERIC," +
         "remark TEXT," +
         "last_digits TEXT," +
-        "is_cash NUMERIC," +
         "approval_code TEXT," +
         "reference_number TEXT," +
         "op_method_id INTEGER," +
         "op_amount REAL," +
+        "is_cash NUMERIC," +
         "op_method_response TEXT," +
         "op_amount_change REAL," +
         "op_status INTEGER," + // 1 New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
@@ -767,17 +767,17 @@ class CreateTables {
     datatables = db.execute("CREATE TABLE shift(" +
         "shift_id INTEGER," +
         "uuid TEXT," +
-        "app_id INTEGER," +
-        "server_id INTEGER," +
-        "terminal_id INTEGER," +
         "user_id INTEGER," +
+        "app_id INTEGER," +
         "branch_id INTEGER," +
         "start_amount INTEGER," +
         "end_amount INTEGER," +
         "status INTEGER," +
         "updated_by INTEGER," +
         "updated_at TEXT," +
-        "created_at TEXT" +
+        "server_id INTEGER," +
+        "created_at TEXT," +
+        "terminal_id INTEGER" +
         ")");
 
     datatables = db.execute("CREATE TABLE category_attribute(" +
@@ -897,16 +897,19 @@ class CreateTables {
     datatables = db.execute("CREATE TABLE shift_invoice ( " +
         "id INTEGER," +
         "shift_id INTEGER," +
-        "shift_app_id INTEGER," +
-        "app_id INTEGER," +
-        "server_id INTEGER," +
         "invoice_id INTEGER," +
         "status INTEGER," +
         "created_by INTEGER," +
+        "shift_app_id INTEGER," +
+        "app_id INTEGER," +
+        "server_id INTEGER," +
         "updated_by INTEGER," +
         "created_at TEXT," +
         "updated_at TEXT," +
-        "terminal_id INTEGER" +
+        "sync NUMERIC," +
+        "localID TEXT," +
+        "terminal_id INTEGER," +
+        "shift_terminal_id INTEGER" +
         ")");
 
     //set Meal Tables \

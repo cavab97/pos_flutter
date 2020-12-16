@@ -1,5 +1,6 @@
 import 'dart:convert';
-
+import 'package:mcncashier/models/Shift.dart';
+import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
@@ -14,8 +15,6 @@ import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
-import 'package:mcncashier/models/Shift.dart';
-import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/TerminalLog.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
@@ -264,7 +263,6 @@ class SyncAPICalls {
             "terminal_id": order.terminal_id,
             "app_id": order.app_id,
             "table_id": order.table_id,
-            "pax": order.pax,
             "invoice_no": order.invoice_no,
             "customer_id": order.customer_id,
             "tax_json": order.tax_json,
@@ -299,6 +297,7 @@ class SyncAPICalls {
           'orders': json.encode(ordersList)
         };
         var res = await APICalls.apiCall(apiurl, context, stringParams);
+
         if (res["status"] == Constant.STATUS200) {
           await savesyncORderData(res["data"]);
           //await CommunFun.showToast(context, "All orders upto dates.");
@@ -328,7 +327,6 @@ class SyncAPICalls {
           order.terminal_id = orderdata["terminal_id"];
           order.app_id = orderdata["app_id"];
           order.table_id = orderdata["table_id"];
-          order.pax = orderdata["pax"];
           order.invoice_no = orderdata["invoice_no"];
           order.customer_id = orderdata["customer_id"];
           order.tax_json = orderdata["tax_json"];
@@ -568,8 +566,8 @@ class SyncAPICalls {
           CommunFun.showToast(context, "Sync sucessfully done.");
         }
       } else {
-        //Navigator.of(context).pop();
-        // CommunFun.showToast(context, "all cancel tables up to dates.");
+        Navigator.of(context).pop();
+        //CommunFun.showToast(context, "all cancel tables up to dates.");
       }
     } catch (e) {
       print(e);

@@ -1,11 +1,15 @@
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/helpers/CustomeIcons.dart';
+import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/screens/PrinteTypeDailog.dart';
 import 'package:mcncashier/screens/SelectPrinterDailog.dart';
@@ -25,7 +29,6 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   LocalAPI localAPI = LocalAPI();
   PrintReceipt testPrint = PrintReceipt();
-
   List<Printer> printerList = new List<Printer>();
   bool isAutoSync = false;
   bool isPrinterSettings = false;
@@ -33,6 +36,9 @@ class _SettingsPageState extends State<SettingsPage> {
   bool isChangeTheme = false;
   bool isChangeLanguage = false;
   bool alwaysPrint = false;
+  bool isLocalServer = false;
+  var scanResult;
+  bool isJoinLoaclServer = false;
 
   @override
   void initState() {
@@ -42,6 +48,16 @@ class _SettingsPageState extends State<SettingsPage> {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
+    setDefault();
+  }
+
+  setDefault() async {
+    var isjoined = await Preferences.getStringValuesSF(Constant.IS_JOIN_SERVER);
+    if (isjoined != null) {
+      setState(() {
+        isJoinLoaclServer = isjoined == "true" ? true : false;
+      });
+    }
     checkisAutoSync();
   }
 
@@ -97,7 +113,6 @@ class _SettingsPageState extends State<SettingsPage> {
   /*Get all Printer from DB*/
   getAllPrinter() async {
     List<Printer> printer = await localAPI.getAllPrinter();
-
     setState(() {
       printerList = printer;
     });
@@ -117,7 +132,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 Printer table_printe = new Printer();
                 table_printe.printerIp = ip;
                 table_printe.printerIsCashier = selected;
-                var result = await localAPI.insertTablePrinter(table_printe);
+                //var result = await localAPI.insertTablePrinter(table_printe);
+                //var result = await localAPI.insertTablePrinter(table_printe);
               });
         });
   }
@@ -134,6 +150,79 @@ class _SettingsPageState extends State<SettingsPage> {
             },
           );
         });
+  }
+
+  joinLocalServer(value) async {
+    var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
+    // if (isOpen != null && isOpen == "true") {
+    //   CommunFun.showToast(context, Strings.shift_close_msg);
+    // } else {
+    setState(() {
+      isJoinLoaclServer = value;
+    });
+    if (value == true) {
+      scanQRCode();
+    } else {
+      remvoveLocalServer();
+    }
+    //}
+  }
+
+  remvoveLocalServer() async {
+    await Preferences.removeSinglePref(Constant.IS_JOIN_SERVER);
+    await Preferences.removeSinglePref(Constant.SERVER_IP);
+  }
+
+  opneqrcodePop() async {
+    /* var wifiData = await CommunFun.wifiDetails();
+    if (wifiData.ip != null) {
+      //await Server.createSetver(wifiData.ip, context);
+    } else {
+      CommunFun.showToast(context, "Error when getting device ip address");
+    } */
+  }
+
+  Future scanQRCode() async {
+    try {
+      var options = ScanOptions(
+          // strings: {
+          //   "cancel": _cancelController.text,
+          //   "flash_on": _flashOnController.text,
+          //   "flash_off": _flashOffController.text,
+          // },
+          // restrictFormat: selectedFormats,
+          // useCamera: -1,
+          // autoEnableFlash: _autoEnableFlash,
+          // android: AndroidOptions(
+          //   aspectTolerance: _aspectTolerance,
+          //   useAutoFocus: _useAutoFocus,
+          // ),
+          );
+      var result = await BarcodeScanner.scan(options: options);
+
+      setState(() => scanResult = result);
+      // print(result.type);
+      // print(result.rawContent);
+      // print(result.format);
+      // print(result.formatNote);
+      //await checkIPisvalid(result.rawContent);
+    } on PlatformException catch (e) {
+      print(e);
+      var result = ScanResult(
+        type: ResultType.Error,
+        format: BarcodeFormat.unknown,
+      );
+      if (e.code == BarcodeScanner.cameraAccessDenied) {
+        setState(() {
+          result.rawContent = 'The user did not grant the camera permission!';
+        });
+      } else {
+        result.rawContent = 'Unknown error: $e';
+      }
+      setState(() {
+        scanResult = result;
+      });
+    }
   }
 
   @override
@@ -262,17 +351,140 @@ class _SettingsPageState extends State<SettingsPage> {
           decoration:
               new BoxDecoration(border: new Border.all(color: Colors.white)),
           child: ListTile(
-              title: Text(Strings.auto_sync, style: Styles.whiteSimpleSmall()),
-              trailing: Transform.scale(
-                scale: 1,
-                child: CupertinoSwitch(
-                  activeColor: Colors.deepOrange,
-                  value: isAutoSync,
-                  onChanged: (bool value) {
-                    setAutosync(value);
-                  },
+            title: Text(Strings.auto_sync, style: Styles.whiteSimpleSmall()),
+            trailing: Transform.scale(
+              scale: 1,
+              child: CupertinoSwitch(
+                activeColor: Colors.deepOrange,
+                value: isAutoSync,
+                onChanged: (bool value) {
+                  setAutosync(value);
+                },
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          decoration:
+              new BoxDecoration(border: new Border.all(color: Colors.white)),
+          child: ListTile(
+            title:
+                Text("This is Local Server", style: Styles.whiteSimpleSmall()),
+            trailing: Container(
+              width: 150,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  isLocalServer
+                      ? IconButton(
+                          icon: Icon(
+                            CustomeIcons.qrcode,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                          onPressed: () {
+                            opneqrcodePop();
+                          })
+                      : SizedBox(),
+                  SizedBox(
+                    width: 20,
+                  ),
+                  Transform.scale(
+                    scale: 1.2,
+                    child: CupertinoSwitch(
+                      activeColor: Colors.deepOrange,
+                      value: isLocalServer,
+                      onChanged: (bool value) {
+                        setState(() {
+                          isLocalServer = value;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        !isLocalServer
+            ? Container(
+                decoration: new BoxDecoration(
+                    border: new Border.all(color: Colors.white)),
+                child: ListTile(
+                  title: Text("Join Local server",
+                      style: Styles.whiteSimpleSmall()),
+                  trailing: Container(
+                    width: 150,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        Transform.scale(
+                          scale: 1.2,
+                          child: CupertinoSwitch(
+                            activeColor: Colors.deepOrange,
+                            value: isJoinLoaclServer,
+                            onChanged: (bool value) {
+                              joinLocalServer(value);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              )),
+              )
+            : SizedBox(),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          decoration:
+              new BoxDecoration(border: new Border.all(color: Colors.white)),
+          child: ListTile(
+            title:
+                Text("Show logo in recipt", style: Styles.whiteSimpleSmall()),
+            trailing: Transform.scale(
+              scale: 1.2,
+              child: CupertinoSwitch(
+                activeColor: Colors.deepOrange,
+                value: false,
+                onChanged: (bool value) {
+                  // setState(() {
+                  //   _switchValue = value;
+                  // });
+                },
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          decoration:
+              new BoxDecoration(border: new Border.all(color: Colors.white)),
+          child: ListTile(
+            title: Text("Show QR code in reciept",
+                style: Styles.whiteSimpleSmall()),
+            trailing: Transform.scale(
+              scale: 1.2,
+              child: CupertinoSwitch(
+                activeColor: Colors.deepOrange,
+                value: false,
+                onChanged: (bool value) {
+                  // setState(() {
+                  //   _switchValue = value;
+                  // });
+                },
+              ),
+            ),
+          ),
         )
       ],
     );

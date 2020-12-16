@@ -31,7 +31,6 @@ class _LoginPageState extends State<LoginPage> {
   bool isValidateEmail = true;
   bool isValidatePassword = true;
   bool isScreenLoad = false;
-  final focus = FocusNode();
   @override
   void initState() {
     super.initState();
@@ -70,10 +69,11 @@ class _LoginPageState extends State<LoginPage> {
 
   sendlogin() async {
     // Login click fun
-
     var isValid = await validateFields(); // check validation
     var deviceinfo = await CommunFun.deviceInfo();
+    print('check connect');
     var connected = await CommunFun.checkConnectivity();
+
     if (connected) {
       if (isValid) {
         setState(() {
@@ -223,17 +223,12 @@ class _LoginPageState extends State<LoginPage> {
       ),
       style: Styles.normalBlack(),
       onChanged: onChange,
-      textInputAction: TextInputAction.next,
-      onSubmitted: (v) {
-        FocusScope.of(context).requestFocus(focus);
-      },
     );
   }
 
   Widget passwordInput(Function onChange) {
     return TextField(
       // User pin input
-      focusNode: focus,
       controller: userPin,
       obscureText: true,
       keyboardType: TextInputType.number,
@@ -270,9 +265,6 @@ class _LoginPageState extends State<LoginPage> {
       //obscureText: true,
       style: Styles.normalBlack(),
       onChanged: onChange,
-      onSubmitted: (value) => {
-        sendlogin(),
-      },
     );
   }
 }

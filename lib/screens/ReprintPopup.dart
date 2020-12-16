@@ -193,7 +193,6 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
                   children: <Widget>[
                     printAll(context),
                     SizedBox(width: 5),
-                    print(context),
                   ],
                 )
               ],

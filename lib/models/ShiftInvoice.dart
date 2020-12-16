@@ -10,7 +10,9 @@ class ShiftInvoice {
   String created_at;
   String updated_at;
   int serverId;
+  String localID;
   int terminal_id;
+  int shift_terminal_id;
 
   ShiftInvoice({
     this.id,
@@ -24,7 +26,9 @@ class ShiftInvoice {
     this.created_at,
     this.updated_at,
     this.serverId,
+    this.localID,
     this.terminal_id,
+    this.shift_terminal_id,
   });
 
   ShiftInvoice.fromJson(Map<String, dynamic> json) {
@@ -39,11 +43,14 @@ class ShiftInvoice {
     created_at = json["created_at"];
     updated_at = json["updated_at"];
     serverId = json["server_id"];
+    localID = json["localID"];
     terminal_id = json["terminal_id"];
+    shift_terminal_id = json["shift_terminal_id"];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+
     data["id"] = this.id;
     data["shift_id"] = this.shift_id;
     data["shift_app_id"] = this.shift_app_id;
@@ -55,7 +62,10 @@ class ShiftInvoice {
     data["created_at"] = this.created_at;
     data["updated_at"] = this.updated_at;
     data["server_id"] = this.serverId;
+    data["localID"] = this.localID;
     data["terminal_id"] = this.terminal_id;
+    data["shift_terminal_id"] = this.shift_terminal_id;
+
     return data;
   }
 }

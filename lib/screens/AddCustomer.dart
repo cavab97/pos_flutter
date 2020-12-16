@@ -49,7 +49,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
     getaddresFileds();
   }
 
-  getaddresFileds() {
+  getaddresFileds() async {
     getCountrysList();
     getStatesList();
     getCitysList();
@@ -87,7 +87,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   filterState() async {
     if (selectedCountry != null) {
       var list = states.where((x) => x.countryId == selectedCountry).toList();
-      print(list);
+
       setState(() {
         filterstates = list;
         filtercitys = [];
@@ -103,7 +103,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   filterCity() {
     if (selectedState != null) {
       var list = citys.where((x) => x.stateId == selectedState).toList();
-      print(list);
+
       setState(() {
         filtercitys = list;
         selectedCity = filtercitys.length > 0 ? filtercitys[0].cityId : null;
@@ -148,7 +148,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
       if (appid != 0) {
         customer.appId = appid + 1;
       } else {
-        customer.appId = 1;
+        customer.appId = int.parse(terminalkey);
       }
       customer.terminalId = int.parse(terminalkey);
       customer.name = firstname_controller.text;
@@ -210,14 +210,14 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
           ),
           Positioned(
               left: 15,
-              top: 0,
+              top: 10,
               child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     RaisedButton(
-                      padding:
-                          EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 0),
+                      padding: EdgeInsets.only(
+                          left: 10, right: 10, top: 0, bottom: 0),
                       onPressed: () {
                         addCustomer();
                       },
@@ -238,8 +238,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
 
   Widget closeButton(context) {
     return Positioned(
-      top: -30,
-      right: -20,
+      top: 0,
+      right: 0,
       child: GestureDetector(
         onTap: () {
           Navigator.of(context).pop();
