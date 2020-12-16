@@ -3482,7 +3482,7 @@ class _DashboradPageState extends State<DashboradPage>
                 cart.productQty = currentQuantity.toDouble();
                 cart.productPrice = currentQuantity *
                     (cart.productNetPrice == null
-                        ? cart.productPrice
+                        ? cart.productDetailAmount
                         : cart.productNetPrice);
                 currentQuantity = 0;
                 //_selectedQuantity(0);
