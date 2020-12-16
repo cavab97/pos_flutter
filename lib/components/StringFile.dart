@@ -194,8 +194,9 @@ class Strings {
   static String scan = "Scan";
   static String list = "List";
   static String table_pax_msg = "Please enter pax minimum table capcity.";
-  static String cancle_order_msg = "Are you want sure cancel this table order?";
-  static String change_table_msg = "Are you want sure to change your table?";
+  static String cancle_order_msg =
+      "Are you want to sure cancel this table order?";
+  static String change_table_msg = "Are you want to sure change your table?";
   static String table_not_avalilable = "Table not available for merge.";
   static String table_already_merged = "Table already merged with other table.";
   static String table_already_occupied = "Table already occupied";

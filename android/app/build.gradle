@@ -69,7 +69,7 @@ android {
 
         staging {
             dimension "flavors"
-            versionNameSuffix " Stagging"
+            versionNameSuffix " Staging"
         }
 
         production {

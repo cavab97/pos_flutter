@@ -601,8 +601,8 @@ class CreateTables {
         "order_app_id INTEGER," +
         "branch_id  INTEGER," +
         "terminal_id INTEGER," +
-        "app_id INTEGER," +
         "server_id INTEGER," +
+        "app_id INTEGER," +
         "is_split NUMERIC," +
         "remark TEXT," +
         "last_digits TEXT," +
@@ -620,7 +620,7 @@ class CreateTables {
         "updated_at TEXT," +
         "updated_by INTEGER" +
         ")");
-// TABLE order_cancel
+// TABLE order_payment
     datatables = db.execute("CREATE TABLE order_cancel (" +
         "id INTEGER," +
         "order_id INTEGER," +
@@ -836,9 +836,10 @@ class CreateTables {
         "id INTEGER PRIMARY KEY AUTOINCREMENT," +
         "uuid INTEGER," +
         "terminal_id INTEGER," +
+        "isSync NUMERIC," +
         "branch_id INTEGER," +
         "module_name TEXT," +
-        "discription TEXT," +
+        "description TEXT," +
         "activity_date TEXT," +
         "activity_time TEXT," +
         "table_name TEXT," +

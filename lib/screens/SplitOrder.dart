@@ -177,7 +177,14 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             child: GestureDetector(
               onTap: () {
                 if (tempCart.length > 0) {
-                  openPaymentMethod();
+                  if (permissions.contains(Constant.PAYMENT)) {
+                    openPaymentMethod();
+                  } else {
+                    CommonUtils.openPermissionPop(context, Constant.PAYMENT,
+                        () async {
+                      openPaymentMethod();
+                    }, () {});
+                  }
                 } else {
                   CommunFun.showToast(context, "Please select item for split");
                 }
@@ -674,18 +681,16 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           orderDetail.branch_id = int.parse(branchid);
           orderDetail.terminal_id = int.parse(terminalId);
           orderDetail.product_id = cartItem.productId;
-          orderDetail.detail_amount = cartItem.productDetailAmount;
           orderDetail.product_price = cartItem.productPrice;
+          orderDetail.detail_amount = cartItem.productDetailAmount;
           orderDetail.product_old_price = cartItem.productNetPrice;
           orderDetail.detail_qty = cartItem.productQty;
-          orderDetail.isSync = 0;
-          orderDetail.server_id = 0;
           orderDetail.product_discount = cartItem.discount;
           orderDetail.product_detail = json.encode(pdata);
+          orderDetail.isSync = 0;
+          orderDetail.server_id = 0;
           orderDetail.updated_at =
               await CommunFun.getCurrentDateTime(DateTime.now());
-          orderDetail.detail_amount =
-              (cartItem.productPrice * cartItem.productQty);
           orderDetail.detail_datetime =
               await CommunFun.getCurrentDateTime(DateTime.now());
           orderDetail.updated_by = userdata.id;

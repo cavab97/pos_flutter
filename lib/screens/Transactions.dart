@@ -176,7 +176,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               if (reason == "Other") {
                 otherReasonPop();
               } else {
-                paymentMethodPop(reason);
+                cancleTransation(reason);
               }
             },
           );
@@ -191,7 +191,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           return AddOtherReason(
             onClose: (otherText) {
               Navigator.of(context).pop();
-              paymentMethodPop(otherText);
+              cancleTransation(otherText);
             },
           );
         });
@@ -213,12 +213,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   cancleTransactionWithMethod(paymehtod, reason) {
-    cancleTransation(reason, paymehtod);
+    cancleTransation(reason);
     Navigator.of(context).pop();
   }
 
-  cancleTransation(reason, paymehtod) async {
-    //TODO :Cancle Transation Pop // 1 for  cancle
+  cancleTransation(reason) async {
+    //:Cancle Transation Pop // 1 for  cancle
     Orders orderData = Orders();
     User userdata = await CommunFun.getuserDetails();
     orderData = selectedOrder;
@@ -242,26 +242,26 @@ class _TransactionsPageState extends State<TransactionsPage> {
     order.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     order.terminalId = int.parse(terminalId);
     var addTocancle = await localAPI.insertCancelOrder(order);
-    if (paymehtod.length > 0) {
-      for (var i = 0; i < paymehtod.length; i++) {
-        OrderPayment orderpayment = paymehtod[i];
-        if (orderpayment.isCash == 1) {
-          var shiftid =
-              await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
-          Drawerdata drawer = new Drawerdata();
-          drawer.shiftId = int.parse(shiftid);
-          drawer.amount = orderpayment.op_amount.toDouble();
-          drawer.isAmountIn = 2;
-          drawer.reason = "cancelORder";
-          drawer.status = 1;
-          drawer.createdBy = userdata.id;
-          drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-          drawer.localID = uuid;
-          drawer.terminalid = int.parse(terminalId);
-          var result = await localAPI.saveInOutDrawerData(drawer);
-        }
-      }
-    }
+    // if (paymehtod.length > 0) {
+    //   for (var i = 0; i < paymehtod.length; i++) {
+    //     OrderPayment orderpayment = paymehtod[i];
+    //     if (orderpayment.isCash == 1) {
+    //       var shiftid =
+    //           await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+    //       Drawerdata drawer = new Drawerdata();
+    //       drawer.shiftId = int.parse(shiftid);
+    //       drawer.amount = orderpayment.op_amount.toDouble();
+    //       drawer.isAmountIn = 2;
+    //       drawer.reason = "cancelORder";
+    //       drawer.status = 1;
+    //       drawer.createdBy = userdata.id;
+    //       drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    //       drawer.localID = uuid;
+    //       drawer.terminalid = int.parse(terminalId);
+    //       var result = await localAPI.saveInOutDrawerData(drawer);
+    //     }
+    //   }
+    // }
     List<OrderDetail> orderItem = orderItemList;
     if (orderItem.length > 0) {
       for (var i = 0; i < orderItem.length; i++) {
@@ -354,7 +354,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
           drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
           drawer.localID = uuid;
           drawer.terminalid = int.parse(terminalId);
-          await localAPI.saveInOutDrawerData(drawer);
+          if (permissions.contains(Constant.CASH_OUT)) {
+            await localAPI.saveInOutDrawerData(drawer);
+          } else {
+            await CommonUtils.openPermissionPop(context, Constant.CASH_OUT,
+                () async {
+              await localAPI.saveInOutDrawerData(drawer);
+            }, () {});
+          }
         }
       }
     }
@@ -815,7 +822,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
         }),
         SizedBox(width: 10),
         refundNextButton(() {
-          refundSelectedammout();
+          if (permissions.contains(Constant.PAYMENT)) {
+            refundSelectedammout();
+          } else {
+            CommonUtils.openPermissionPop(context, Constant.PAYMENT, () async {
+              refundSelectedammout();
+            }, () {});
+          }
         }),
       ],
     );
@@ -870,19 +883,19 @@ class _TransactionsPageState extends State<TransactionsPage> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         refundButton(() {
-          if (permissions.contains(Constant.DELETE_ORDER)) {
+          if (permissions.contains(Constant.REFUND)) {
             if (orderpayment[0].op_status == 1) {
               refundProcessStart();
             }
           } else {
-            CommonUtils.openPermissionPop(context, Constant.EDIT_ORDER, () {
+            CommonUtils.openPermissionPop(context, Constant.REFUND, () {
               refundProcessStart();
             }, () {});
           }
         }),
         SizedBox(width: 10),
         cancelButton(() {
-          if (permissions.contains(Constant.DELETE_ORDER)) {
+          if (permissions.contains(Constant.CANCLE_TRANSACTION)) {
             if (orderpayment[0].op_status == 1) {
               CommonUtils.showAlertDialog(context, () {
                 Navigator.of(context).pop();
@@ -897,7 +910,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   true);
             }
           } else {
-            CommonUtils.openPermissionPop(context, Constant.EDIT_ORDER, () {
+            CommonUtils.openPermissionPop(context, Constant.CANCLE_TRANSACTION,
+                () {
               if (orderpayment[0].op_status == 1) {
                 CommonUtils.showAlertDialog(context, () {
                   Navigator.of(context).pop();

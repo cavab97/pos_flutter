@@ -614,7 +614,7 @@ class LocalAPI {
     }
     var dis = clockinOutData.status == "IN" ? "User checkin" : "user checkout";
     await SyncAPICalls.logActivity(
-        "PIN number", dis, "user_checkinout", shiftid);
+        "PIN number", dis, "user_checkinout", clockinOutData.userId);
     return shiftid;
   }
 
@@ -2294,18 +2294,18 @@ class LocalAPI {
         " AND server_id = 0";
     var shiftList = await db.rawQuery(qry);
     List<Shift> list = shiftList.length > 0
-        ? shiftList.map((c) => ProductStoreInventory.fromJson(c)).toList()
+        ? shiftList.map((c) => Shift.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
         "shift", "get shift table for sync", "shift", branchid);
     return list;
   }
 
-  Future<List<ShiftInvoice>> getShiftInvoiceTable(shiftid) async {
+  Future<List<ShiftInvoice>> getShiftInvoiceTable(termianlId) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry =
-        "SELECT * from shift_invoice WHERE server_id = 0 AND shift_app_id = " +
-            shiftid.toString();
+        "SELECT * from shift_invoice WHERE server_id = 0 AND terminal_id = " +
+            termianlId.toString();
     var inList = await db.rawQuery(qry);
     List<ShiftInvoice> list = inList.length > 0
         ? inList.map((c) => ShiftInvoice.fromJson(c)).toList()
@@ -2314,7 +2314,7 @@ class LocalAPI {
         "sync inventory log",
         "get product store inventory log table",
         "product_store_inventory_log",
-        shiftid);
+        termianlId);
     return list;
   }
 
@@ -2361,5 +2361,37 @@ class LocalAPI {
     } else {
       return 0;
     }
+  }
+
+  Future<List<TerminalLog>> getTerminalLogTables(branchid, termianlId) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var qry = "SELECT * from terminal_log  WHERE branch_id = " +
+        branchid.toString() +
+        " AND terminal_id = " +
+        termianlId.toString() +
+        " AND isSync = 0";
+    var shiftList = await db.rawQuery(qry);
+    List<TerminalLog> list = shiftList.length > 0
+        ? shiftList.map((c) => TerminalLog.fromJson(c)).toList()
+        : [];
+
+    await SyncAPICalls.logActivity("terminal log",
+        "terminal log table for sync", "terminal_log", branchid);
+    return list;
+  }
+
+  Future<int> saveTerminalLogFromSync(TerminalLog log) async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var checkisExitqry =
+        "SELECT *  FROM terminal_log where id =" + log.id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry);
+    var result;
+    if (checkisExit.length > 0) {
+      result = await db.update("terminal_log", log.toJson(),
+          where: "id =?", whereArgs: [log.id]);
+    } else {
+      result = await db.insert("terminal_log", log.toJson());
+    }
+    return result;
   }
 }

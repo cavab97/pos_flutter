@@ -73,10 +73,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
       if (tableorder.length > 0) {
         await Preferences.setStringToSF(
             Constant.TABLE_DATA, json.encode(tableorder[0]));
-
-        await Navigator.pushNamedAndRemoveUntil(context,
-            Constant.SelectTableScreen, (Route<dynamic> route) => false,
-            arguments: {"isAssign": false});
+        Navigator.pushNamed(context, Constant.DashboardScreen);
       } else {
         assignTable(cart);
       }
@@ -285,8 +282,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
                         ]),
                   ),
                 ),
-                permissions.contains(Constant.EDIT_ORDER) &&
-                        cart.table_id == null
+                cart.table_id == null
                     ? GestureDetector(
                         onTap: () {
                           checkTableAssigned(cart);

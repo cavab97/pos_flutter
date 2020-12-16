@@ -239,34 +239,34 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     });
   }
 
-  splitPayment() {
-    setState(() {
-      isSpliting = true;
-      ispaymented = false;
-    });
+  // splitPayment() {
+  //   setState(() {
+  //     isSpliting = true;
+  //     ispaymented = false;
+  //   });
 
-    showDialog(
-        // Opning Ammount Popup
-        context: context,
-        builder: (BuildContext context) {
-          return OpeningAmmountPage(
-              ammountext: newAmmount.toString(),
-              onEnter: (ammount) {
-                double newap = splitedPayment + double.parse(ammount);
-                setState(() {
-                  splitedPayment = newap;
-                  updatedAmmount = double.parse(ammount);
-                });
-                OrderPayment payment = new OrderPayment();
-                payment.op_amount =
-                    ammount != null ? double.parse(ammount) : newAmmount;
-                splitpaymentList.add(payment);
-                setState(() {
-                  splitpaymentList = splitpaymentList;
-                });
-              });
-        });
-  }
+  //   showDialog(
+  //       // Opning Ammount Popup
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return OpeningAmmountPage(
+  //             ammountext: newAmmount.toString(),
+  //             onEnter: (ammount) {
+  //               double newap = splitedPayment + double.parse(ammount);
+  //               setState(() {
+  //                 splitedPayment = newap;
+  //                 updatedAmmount = double.parse(ammount);
+  //               });
+  //               OrderPayment payment = new OrderPayment();
+  //               payment.op_amount =
+  //                   ammount != null ? double.parse(ammount) : newAmmount;
+  //               splitpaymentList.add(payment);
+  //               setState(() {
+  //                 splitpaymentList = splitpaymentList;
+  //               });
+  //             });
+  //       });
+  // }
 
   @override
   Widget build(BuildContext context) {
