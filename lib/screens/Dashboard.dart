@@ -1013,9 +1013,9 @@ class _DashboradPageState extends State<DashboradPage>
                 selproduct: selectedProduct,
                 issetMeal: isSetMeal,
                 cartID: currentCart,
-                onClose: (cartitem) {
+                onClose: () {
                   refreshAfterAction(false);
-                  cartList.add(cartitem);
+                  //cartList.add(cartitem);
                 });
           });
     } else {

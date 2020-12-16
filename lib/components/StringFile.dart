@@ -21,6 +21,7 @@ class Strings {
   static String qty = "QTY";
   static String amount = "Amount";
   static String discount = "Discount";
+  static String currency = "RM ";
 
   static String service_charge = "Service Charge";
   static String tax = "TAX";

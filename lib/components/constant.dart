@@ -35,9 +35,9 @@ class Constant {
                               Manage Permission  status
   =================================================================================*/
 
-  static final String VIEW_ORDER = "view_order";
-  static final String ADD_ORDER = "add_order";
-  static final String EDIT_ORDER = "edit_order";
+  static final String VIEW_ORDER = "opening";
+  static final String ADD_ORDER = "opening";
+  static final String EDIT_ORDER = "opening";
   static final String DELETE_ORDER = "delete_order";
   static final String DISCOUNT_ORDER = "discount_order";
 

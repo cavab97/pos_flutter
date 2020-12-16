@@ -9,6 +9,7 @@ class Table_order {
   int table_locked_by;
   int is_order_merged;
   double service_charge;
+  double current_amount;
   String assignTime;
 
   Table_order(
@@ -22,6 +23,7 @@ class Table_order {
       this.table_locked_by,
       this.is_order_merged,
       this.service_charge,
+      this.current_amount,
       this.assignTime});
 
   Table_order.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class Table_order {
     table_locked_by = json["table_locked_by"];
     is_order_merged = json["is_order_merge"];
     service_charge = json["service_charge"];
+    current_amount = json["current_amount"] != null ? json["current_amount"] : 0.00;
     assignTime = json["assing_time"];
   }
 
@@ -50,6 +53,7 @@ class Table_order {
     data["table_locked_by"] = this.table_locked_by;
     data["is_order_merged"] = this.is_order_merged;
     data["service_charge"] = this.service_charge;
+    data["current_amount"] = this.current_amount;
     data["assing_time"] = this.assignTime;
     return data;
   }

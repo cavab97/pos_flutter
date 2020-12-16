@@ -670,6 +670,7 @@ class CreateTables {
         "table_seat  TEXT," +
         "save_order_id  INTEGER," +
         "merged_pax TEXT," +
+        "current_amount DOUBLE," +
         "table_locked_by  INTEGER," +
         "is_order_merged  REAl," +
         "assing_time TEXT" +

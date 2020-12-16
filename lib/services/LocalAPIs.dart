@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/models/Drawer.dart';
 import 'package:mcncashier/models/Branch.dart';
@@ -98,26 +100,32 @@ class LocalAPI {
   //   return list;
   // }
   Future<int> mergeTableOrder(Table_order table_order) async {
+
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from table_order where table_id =" +
         table_order.merged_table_id.toString();
     var res = await db.rawQuery(qry);
     List<Table_order> list =
         res.isNotEmpty ? res.map((c) => Table_order.fromJson(c)).toList() : [];
+        print('here');
     if (list.length > 0) {
+       print('here1');
       if (list[0].save_order_id != 0) {
+         print('here2');
         List<SaveOrder> cartIDs =
             await gettableCartID(list[0].save_order_id);
         if (table_order.save_order_id == 0 && list[0].save_order_id != 0) {
+           print('here3');
           if (cartIDs.length > 0) {
+             print('here4');
             var qry1 = "UPDATE mst_cart SET table_id = " +
-                table_order.table_id.toString() +
+                table_order.table_id.toString() + 
                 " where id = " +
                 cartIDs[0].cartId.toString();
             var result1 = await db.rawQuery(qry1);
             list[0].table_id = table_order.table_id;
             var qry2 = "UPDATE table_order SET table_id = " +
-                table_order.table_id.toString() +
+                table_order.table_id.toString() + 
                 " where table_id = " +
                 list[0].table_id.toString();
             var res = await db.rawQuery(qry2);
@@ -134,7 +142,7 @@ class LocalAPI {
                 await gettableCartID(table_order.save_order_id);
             if (carts.length > 0) {
               var detailqry = "UPDATE mst_cart_detail SET cart_id = " +
-                  carts[0].cartId.toString() +
+                  carts[0].cartId.toString() + 
                   " where cart_id = " +
                   cartIDs[0].cartId.toString();
               var res1 = await db.rawQuery(detailqry);
@@ -241,6 +249,8 @@ class LocalAPI {
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<Table_order> list =
         res.isNotEmpty ? res.map((c) => Table_order.fromJson(c)).toList() : [];
+
+    print(jsonEncode(list));
     var result;
     if (list.length > 0) {
       result = await db.update("table_order", table_order.toJson(),

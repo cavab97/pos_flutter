@@ -27,7 +27,9 @@ import 'package:mcncashier/models/TableDetails.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/models/colorTable.dart';
+import 'package:mcncashier/models/MST_Cart.dart';
 
+import '../components/communText.dart';
 import '../components/communText.dart';
 import '../helpers/LocalAPI/OrdersList.dart';
 import '../helpers/LocalAPI/ShiftList.dart';
@@ -140,9 +142,26 @@ class _SelectTablePageState extends State<SelectTablePage>
     setState(() {
       isLoading = true;
     });
+
+    var currentCart = [];
+    MST_Cart cart;
     var branchid = await CommunFun.getbranchId();
     List<TablesDetails> tables = await tabList.getTables(context, branchid);
-    print(jsonEncode(tables));
+
+    for (int i = 0; i < tables.length; i++) {
+      currentCart = await localAPI.getSaveOrder(tables[i].saveorderid);
+
+      if (currentCart.isNotEmpty) {
+        cart = await CommunFun.getCartData(currentCart[0].cartId);
+
+        if (cart != null) {
+          tables[i].currentAmount = cart.grand_total;
+        }
+      }
+
+      currentCart = [];
+    } 
+
     setState(() {
       tableList = tables;
       isLoading = false;
@@ -218,6 +237,7 @@ class _SelectTablePageState extends State<SelectTablePage>
         table1.saveorderid != 0 ? table1.saveorderid : 0;
     table_order.is_merge_table = "1";
     table_order.merged_table_id = table2.tableId;
+    table_order.current_amount = table1.currentAmount + table2.currentAmount;
     table_order.assignTime = await CommunFun.getCurrentDateTime(DateTime.now());
     var result = await localAPI.mergeTableOrder(table_order);
     setState(() {
@@ -226,7 +246,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       isLoading = false;
     });
     CommunFun.showToast(context, Strings.table_mearged_msg);
-    getTables();
+    await getTables();
   }
 
   mergeTable(table) {
@@ -1213,17 +1233,24 @@ class _SelectTablePageState extends State<SelectTablePage>
                             )
                           : table.numberofpax != null
                               ? Text(
-                                  Strings.occupied +
-                                      table.numberofpax.toString() +
+                                  Strings.amount + ' : ' + 
+                                    Strings.currency +
+                                    table.currentAmount.toStringAsFixed(2) /* +
                                       "/" +
-                                      table.tableCapacity.toString(),
+                                      table.tableCapacity.toString() */,
                                   style: Styles.whiteSimpleSmall())
                               : Text(
-                                  Strings.vacant +
+                                  Strings.amount + ' : ' + 
+                                    Strings.currency +
+                                    table.currentAmount.toStringAsFixed(2) /* +
+                                      "/" +
+                                      table.tableCapacity.toString() */,
+                                  style: Styles.whiteSimpleSmall())
+                                 /*  Strings.vacant +
                                       "0" +
                                       "/" +
                                       table.tableCapacity.toString(),
-                                  style: Styles.whiteSimpleSmall())
+                                  style: Styles.whiteSimpleSmall()) */
                     ],
                   ),
                 ),
