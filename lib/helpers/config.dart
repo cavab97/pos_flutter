@@ -6,7 +6,7 @@ import 'package:mcncashier/app/app_config.dart';
 class Configrations {
   //static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
   static String base_URL =
-      "http://staging.mcnpos.com.my/api/v1/en/"; //Config.SERVER_URL
+      "https://staging.mcnpos.com.my/api/v1/en/"; //Config.SERVER_URL
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String config = "configs";

@@ -212,6 +212,27 @@ class CommunFun {
     }
   }
 
+  static getTextAndSplit(String value) {
+    // var maximumLength = 32;
+    // var total = value.length;
+    // var totalParagraph = total / 32;
+    // var arr = value.split('');
+
+    // var completeWord = List.from(arr);
+    // print(arr);
+    // for (int i = 4; i < arr.length; i++) {
+    //   print((i + 1) % 32);
+
+    //   if ((i + 1) % 36 == 1 || (i + 1) % 36 == 2 || (i + 1) % 36 == 3) {
+    //     completeWord.insert(i, " ");
+    //   }
+    // }
+
+    // String paragraph = completeWord.join();
+
+    return value;
+  }
+
   static deviceInfo() async {
     // Device Info
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();

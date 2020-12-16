@@ -23,6 +23,7 @@ import 'package:image/image.dart';
 import 'package:mcncashier/models/SetMealProduct.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Terminal.dart';
+import 'package:mcncashier/components/string_extension.dart';
 
 class PrintReceipt {
   PaperSize paper = PaperSize.mm80;
@@ -1189,6 +1190,194 @@ class PrintReceipt {
         ));
 
     ticket.feed(1);
+    ticket.cut();
+    return ticket;
+  }
+
+  void cashInPrint(
+      String printerIp,
+      BuildContext ctx,
+      String title,
+      String reason,
+      Branch branchData,
+      Terminal terminalData,
+      String type,
+      double amount) async {
+    final PrinterNetworkManager printerManager = PrinterNetworkManager();
+    printerManager.selectPrinter(printerIp, port: 9100);
+
+    final PosPrintResult res = await printerManager.printTicket(
+        await CashInPrint(printerIp, ctx, title, reason, branchData,
+            terminalData, type, amount));
+
+    CommunFun.showToast(ctx, res.msg);
+  }
+
+/*========================================================================
+  ===========================Print Cash in==================
+  ========================================================================*/
+
+  Future<Ticket> CashInPrint(
+      String printerIp,
+      BuildContext ctx,
+      String title,
+      String reason,
+      Branch branchData,
+      Terminal terminalData,
+      String type,
+      double amount) async {
+    final profile = await CapabilityProfile.load();
+    final Ticket ticket = Ticket(paper, profile);
+
+    ticket.setStyles(
+        PosStyles(align: PosAlign.center, fontType: PosFontType.fontA));
+
+    ticket.text(title,
+        styles: PosStyles(
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size2,
+            align: PosAlign.center));
+    ticket.emptyLines(1);
+
+    ticket.text(branchData.name,
+        styles: PosStyles(
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size1,
+            align: PosAlign.center));
+
+    ticket.text(branchData.address,
+        styles: PosStyles(
+            fontType: PosFontType.fontA,
+            bold: true,
+            width: PosTextSize.size1,
+            align: PosAlign.center));
+
+    ticket.emptyLines(1);
+
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+    ticket.hr();
+    ticket.setStyles(PosStyles(align: PosAlign.left));
+    ticket.row([
+      PosColumn(
+          text: "Terminal : ",
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: terminalData.terminalName,
+          width: 9,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    ticket.row([
+      PosColumn(
+          text: "Cashier  : ",
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: branchData.contactPerson,
+          width: 9,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    final now = DateTime.now();
+    final formatter = DateFormat('MM/dd/yyyy HH:mm');
+    final String timestamp = formatter.format(now);
+    ticket.row([
+      PosColumn(
+          text: "Date     : ",
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: timestamp,
+          width: 9,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    ticket.row([
+      PosColumn(
+          text: "Amount   : ",
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: "RM " + amount.toStringAsFixed(2),
+          width: 9,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    ticket.row([
+      PosColumn(
+          text: "Type     : ",
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: type.capitalize(),
+          width: 9,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
+
+    type == "other"
+        ? ticket.row([
+            PosColumn(
+                text: "Remark   : ",
+                width: 3,
+                styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontA,
+                  bold: false,
+                )),
+            PosColumn(
+                text: CommunFun.getTextAndSplit(reason.capitalize()).toString(),
+                width: 9,
+                styles: PosStyles(
+                  align: PosAlign.left,
+                  fontType: PosFontType.fontA,
+                  bold: false,
+                )),
+          ])
+        : ticket.emptyLines(1);
+    ticket.feed(2);
     ticket.cut();
     return ticket;
   }

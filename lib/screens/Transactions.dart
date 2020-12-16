@@ -895,7 +895,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         ]),
             ),
           ]),
-            TableRow(children: [
+          TableRow(children: [
             TableCell(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -914,7 +914,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           padding: EdgeInsets.symmetric(vertical: 5),
                           child: Text(
                             selectedOrder.rounding_amount != null
-                                ? selectedOrder.rounding_amount.toStringAsFixed(2)
+                                ? selectedOrder.rounding_amount
+                                    .toStringAsFixed(2)
                                 : "00:00",
                             textAlign: TextAlign.end,
                             style: Styles.darkGray(),
@@ -923,7 +924,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
               ),
             ),
           ]),
-       
           TableRow(children: [
             TableCell(
               child: Row(

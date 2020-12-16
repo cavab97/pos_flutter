@@ -4,6 +4,15 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
+import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/models/Terminal.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
+import 'package:mcncashier/models/Branch.dart';
+import 'package:mcncashier/helpers/LocalAPI/Branch.dart';
+
+List<Printer> printerreceiptList = new List<Printer>();
 
 class PayInOutDailog extends StatefulWidget {
   PayInOutDailog({Key key, this.title, this.ammount, this.onClose})
@@ -18,7 +27,12 @@ class PayInOutDailog extends StatefulWidget {
 class PayInOutDailogstate extends State<PayInOutDailog> {
   DatabaseHelper databaseHelper = DatabaseHelper();
   LocalAPI localAPI = LocalAPI();
+  PrinterList printerAPI = new PrinterList();
+  PrintReceipt printKOT = PrintReceipt();
   double ammount = 0.00;
+  BranchList branchAPI = new BranchList();
+  Terminal terminal;
+  Branch branchData;
   var selectedreason;
   List<String> reasonList = [
     "Add Change",
@@ -28,6 +42,8 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
   @override
   void initState() {
     super.initState();
+    getAllPrinter();
+    getbranch();
     // setState(() {
     //   ammount = widget.ammount;
     // });
@@ -52,6 +68,27 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         ammount = double.parse(ammountext);
       });
     }
+  }
+
+  getbranch() async {
+    var branchid = await CommunFun.getbranchId();
+    var branch = await branchAPI.getbranchData(branchid);
+    setState(() {
+      branchData = branch;
+    });
+    return branch;
+  }
+
+  getAllPrinter() async {
+    List<Printer> printerDraft =
+        await printerAPI.getAllPrinterList(context, "0");
+    var terminalid = await CommunFun.getTeminalKey();
+    Terminal terminalData = await localAPI.getTerminalDetails(terminalid);
+
+    setState(() {
+      printerreceiptList = printerDraft;
+      terminal = terminalData;
+    });
   }
 
   @override
@@ -85,6 +122,22 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
     return RaisedButton(
       padding: EdgeInsets.all(2),
       onPressed: () {
+        if (selectedreason != "Other") {
+          if (printerreceiptList.length > 0) {
+            printKOT.cashInPrint(
+                printerreceiptList[0].printerIp,
+                context,
+                widget.title,
+                selectedreason,
+                branchData,
+                terminal,
+                selectedreason,
+                ammount);
+          } else {
+            CommunFun.showToast(context, Strings.printer_not_available);
+          }
+        }
+
         widget.onClose(ammount, selectedreason);
       },
       child: Text(
