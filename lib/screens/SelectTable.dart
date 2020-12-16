@@ -228,45 +228,40 @@ class _SelectTablePageState extends State<SelectTablePage>
   mergeTable(table) {
     if (table == null) {
       CommunFun.showToast(context, "Please select table first");
-    } else if (permissions.contains(Constant.JOIN_TABLE)) {
-      setState(() {
-        isMenuOpne = true;
-        isMergeing = true;
-        mergeInTable = table;
-      });
     } else {
-      CommonUtils.openPermissionPop(context, Constant.JOIN_TABLE, () async {
-        setState(() {
-          isMenuOpne = true;
-          //isMenuOpne = false;
-          isMergeing = true;
-          mergeInTable = table;
-        });
-      }, () {});
-    }
-    setState(() {
-      isMenuOpne = true;
-      //isMenuOpne = false;
       if (isMergeing && mergeInTable == table) {
-        isMergeing = false;
-        mergeInTable = null;
-        selectedTable = null;
+        if (permissions.contains(Constant.JOIN_TABLE)) {
+          setState(() {
+            isMenuOpne = true;
+            isMergeing = true;
+            mergeInTable = table;
+          });
+        } else {
+          CommonUtils.openPermissionPop(context, Constant.JOIN_TABLE, () async {
+            setState(() {
+              isMenuOpne = true;
+              //isMenuOpne = false;
+              isMergeing = true;
+              mergeInTable = table;
+            });
+          }, () {});
+        }
       } else {
         isMergeing = true;
         mergeInTable = table;
       }
       if (!changingColors) changeColors();
-    });
+    }
   }
 
   selectTableForNewOrder() async {
     //if ((int.tryParse(paxController.text) ?? 0) <= selectedTable.tableCapacity) {
     Table_order tableOrder = new Table_order();
     tableOrder.table_id = selectedTable.tableId;
-    tableOrder.number_of_pax = int.tryParse(paxController.text);
+    tableOrder.number_of_pax = int.tryParse(paxController.text) ?? 0;
     tableOrder.save_order_id = selectedTable.saveorderid;
     tableOrder.service_charge =
-        CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
+        await CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
     tableOrder.assignTime = await CommunFun.getCurrentDateTime(DateTime.now());
     var result = await localAPI.insertTableOrder(tableOrder);
     await Preferences.setStringToSF(
@@ -296,11 +291,11 @@ class _SelectTablePageState extends State<SelectTablePage>
       SaveOrder orderData = new SaveOrder();
       orderData.orderName = selectedTable.tableName;
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-      orderData.numberofPax = (int.tryParse(paxController.text) ?? 0);
+      orderData.numberofPax = (int.tryParse(paxController.text)) ?? 0;
       orderData.cartId = orderid;
       Table_order tableorder = new Table_order();
       tableorder.table_id = selectedTable.tableId;
-      tableorder.number_of_pax = (int.tryParse(paxController.text));
+      tableorder.number_of_pax = (int.tryParse(paxController.text)) ?? 0;
       tableorder.service_charge = selectedTable.tableServiceCharge;
       tableorder.assignTime =
           await CommunFun.getCurrentDateTime(DateTime.now());
@@ -311,7 +306,7 @@ class _SelectTablePageState extends State<SelectTablePage>
         isLoading = false;
       });
       Navigator.of(context).pop();
-      getTables();
+      //getTables();
       await Navigator.pushNamed(context, Constant.WebOrderPages);
     } else {
       CommunFun.showToast(context, Strings.table_pax_msg);

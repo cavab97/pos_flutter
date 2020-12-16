@@ -306,10 +306,11 @@ class _DashboradPageState extends State<DashboradPage>
   getCartItem(cartId) async {
     List<MSTCartdetails> cartItem = await localAPI.getCartItem(cartId);
     if (cartItem.length > 0) {
-      setState(() {
-        cartList = cartItem;
-        temporaryCartList.add(cartItem);
-      });
+      if (this.mounted) {
+        setState(() {
+          cartList = cartItem;
+        });
+      }
       await countTotals(cartId);
     }
   }
@@ -323,19 +324,21 @@ class _DashboradPageState extends State<DashboradPage>
       vaocher = Voucher.fromJson(voucherdetail);
     }
     taxJson = json.decode(cart.tax_json);
-    setState(() {
-      allcartData = cart;
-      subtotal = cart.sub_total;
-      serviceCharge = cart.serviceCharge == null ? 0.00 : cart.serviceCharge;
-      serviceChargePer =
-          cart.serviceChargePercent == null ? 0 : cart.serviceChargePercent;
-      discount = cart.discount;
-      tax = cart.tax;
-      isWebOrder = cart.source == 1 ? true : false;
-      grandTotal =
-          (subtotal - discount) + tax + serviceCharge; //cart.grand_total;
-      selectedvoucher = vaocher;
-    });
+    if (this.mounted) {
+      setState(() {
+        allcartData = cart;
+        subtotal = cart.sub_total;
+        serviceCharge = cart.serviceCharge == null ? 0.00 : cart.serviceCharge;
+        serviceChargePer =
+            cart.serviceChargePercent == null ? 0 : cart.serviceChargePercent;
+        discount = cart.discount;
+        tax = cart.tax;
+        isWebOrder = cart.source == 1 ? true : false;
+        grandTotal =
+            (subtotal - discount) + tax + serviceCharge; //cart.grand_total;
+        selectedvoucher = vaocher;
+      });
+    }
   }
 
   removeCutomer() async {
@@ -451,7 +454,7 @@ class _DashboradPageState extends State<DashboradPage>
             context: context,
             builder: (BuildContext context) {
               return SplitBillDialog(
-                onSelectedRemove: (cart) {
+                onSelectedRemove: (MSTCartdetails cart) {
                   itememovefromCart(cart);
                 },
                 onClose: (String isFor) {
@@ -1023,10 +1026,9 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   addTocartItem(selectedProduct) async {
-    await CommunFun.addItemToCart(selectedProduct, cartList, allcartData, () {
-      if (cartList.length > 0) {
-        temporaryCartList.add(cartList[cartList.length - 1]);
-      }
+    await CommunFun.addItemToCart(selectedProduct, cartList, allcartData,
+        (MSTCartdetails addedProduct) {
+      //temporaryCartList.add(addedProduct);
       if (selectedTable.save_order_id != null &&
           selectedTable.save_order_id != 0) {
         getCurrentCart();
@@ -1091,6 +1093,9 @@ class _DashboradPageState extends State<DashboradPage>
 
   Future<List<MSTCartdetails>> getcartDetails(cartid) async {
     List<MSTCartdetails> list = await localAPI.getCartItem(currentCart);
+    for (MSTCartdetails cart in list) {
+      temporaryCartList.add(cart);
+    }
     return list;
   }
 
@@ -1211,7 +1216,6 @@ class _DashboradPageState extends State<DashboradPage>
                   productdata["name"] +
                       " Product is out of stock.Please check store.");
               await localAPI.deleteOrderid(orderId);
-              Navigator.of(context).pop();
               Navigator.of(context).pop();
               return false;
             }
@@ -1530,25 +1534,27 @@ class _DashboradPageState extends State<DashboradPage>
     List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
     bool print_reciept = permissions.contains(Constant.PRINT_RECIEPT);
     bool open_drawer = permissions.contains(Constant.OPEN_DRAWER);
-    Future<void> asyncFunc() async => () async {
-          printKOT.checkReceiptPrint(
-              selectedTable.number_of_pax.toString(),
-              printerreceiptList[0].printerIp,
-              context,
-              branchData,
-              taxJson,
-              orderitem,
-              attributes,
-              modifires,
-              order,
-              orderpaymentdata,
-              paymentMethod,
-              tableName,
-              currency,
-              customer != null ? customer.name : Strings.walkin_customer,
-              true); //"  ? :"
-          await clearCartAfterSuccess(orderid);
-        };
+    Function asyncFunc = () {
+      printKOT.checkReceiptPrint(
+          selectedTable.number_of_pax.toString(),
+          printerreceiptList[0].printerIp,
+          context,
+          branchData,
+          taxJson,
+          orderitem,
+          attributes,
+          modifires,
+          order,
+          orderpaymentdata,
+          paymentMethod,
+          tableName,
+          currency,
+          customer != null ? customer.name : Strings.walkin_customer,
+          true); //"  ? :"
+    };
+    //temporary print receipt, cannot print if no permission, pop out dirently close
+    asyncFunc();
+    await clearCartAfterSuccess(orderid);
     // if (!print_reciept) {
     //   await CommonUtils.openPermissionPop(
     //       context, Constant.PRINT_RECIEPT, asyncFunc(), asyncFunc());
@@ -1683,6 +1689,7 @@ class _DashboradPageState extends State<DashboradPage>
           });
         }
       }, () async {
+        print('enter clear cart');
         await clearCartAfterSuccess(orderid);
       });
     }
@@ -1751,7 +1758,7 @@ class _DashboradPageState extends State<DashboradPage>
     return totalTax;
   }
 
-  itememovefromCart(cartitem) async {
+  itememovefromCart(MSTCartdetails cartitem) async {
     //try {
     MST_Cart cart = new MST_Cart();
     MSTCartdetails cartitemdata = cartitem;
@@ -1878,7 +1885,7 @@ class _DashboradPageState extends State<DashboradPage>
     var result =
         await localAPI.makeAsFocProduct(focProduct, isupdate, cart, cartitem);
 
-    getCartItem(currentCart);
+    await getCartItem(currentCart);
   }
 
   editCartItem(cart) async {
@@ -1916,8 +1923,15 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   selectTable() {
-    for (var index = 0; index < temporaryCartList.length; index++) {
-      itememovefromCart(temporaryCartList[index]);
+    var diffCartDetails = [];
+    cartList.every((element) {
+      if (!temporaryCartList.contains(element)) {
+        diffCartDetails.add(element);
+      }
+      return true;
+    });
+    for (var index = 0; index < diffCartDetails.length; index++) {
+      itememovefromCart(diffCartDetails[index]);
     }
 
     Navigator.pushNamedAndRemoveUntil(
