@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
@@ -17,7 +18,7 @@ class TerminalKeyPage extends StatefulWidget {
 }
 
 class _TerminalKeyPageState extends State<TerminalKeyPage> {
-  TextEditingController terminalKey = new TextEditingController(text: "2FFc");
+  TextEditingController terminalKey = new TextEditingController(text: "Vd5g");
   GlobalKey<ScaffoldState> scaffoldKey;
   var errormessage = "";
   bool isValidatekey = true;
@@ -53,9 +54,8 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
           isLoading = true;
         });
         terminal.terminalKey = terminalKey.text;
-        terminal.deviceid = "gto"; //deviceinfo["deviceId"];
-        terminal.terDeviceToken =
-            "ac3928f14a767e7a"; //deviceinfo["deviceToken"];
+        terminal.deviceid = deviceinfo["deviceId"];
+        terminal.terDeviceToken = deviceinfo["deviceToken"];
         await repo.sendTerminalKey(terminal).then((value) async {
           if (value != null && value["status"] == Constant.STATUS200) {
             Preferences.setStringToSF(
@@ -129,7 +129,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
             ),
           ),
           isLoading: isLoading,
-          color: Colors.black87,
+          color: StaticColor.colorLightBlack,
           progressIndicator: CommunFun.overLayLoader()),
     );
   }
@@ -155,12 +155,12 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
           padding: EdgeInsets.only(left: 25, right: 25),
           child: Icon(
             Icons.vpn_key,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             size: 40,
           ),
         ),
         errorText: !isValidatekey ? errormessage : null,
-        errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
+        errorStyle: TextStyle(color: StaticColor.colorRed, fontSize: 25.0),
         hintText: Strings.terminalKey,
         hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
@@ -168,7 +168,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
         ),
         filled: true,
         contentPadding: EdgeInsets.only(top: 20, bottom: 20),
-        fillColor: Colors.white,
+        fillColor: StaticColor.colorWhite,
       ),
       style: Styles.normalBlack(),
       onChanged: onChange,

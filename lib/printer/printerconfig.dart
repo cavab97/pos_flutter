@@ -252,6 +252,7 @@ class PrintReceipt {
       var currency,
       String customerName,
       ctx,
+      bool isFor,
       bool isper) async {
     bool isCashPayment = false;
     double cashPaymentTotal = 0.00;
@@ -771,7 +772,16 @@ class PrintReceipt {
           align: PosAlign.center,
           fontType: PosFontType.fontA,
         ));
-
+    if (isFor) {
+      ticket.emptyLines(1);
+      ticket.text('Duplicate',
+          styles: PosStyles(
+            width: PosTextSize.size2,
+            bold: true,
+            align: PosAlign.center,
+            fontType: PosFontType.fontA,
+          ));
+    }
     ticket.feed(1);
     ticket.cut();
 
@@ -797,9 +807,10 @@ class PrintReceipt {
       String tableName,
       var currency,
       String customerName,
+      isFor,
       isper) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter(printerIp, port: 9100);
+    printerManager.selectPrinter("192.168.0.109", port: 9100);
     PosPrintResult res;
     res = await printerManager.printTicket(await Receipt(
         branchData,
@@ -814,6 +825,7 @@ class PrintReceipt {
         currency,
         customerName,
         ctx,
+        isFor,
         isper));
     await CommunFun.showToast(ctx, res.msg);
   }

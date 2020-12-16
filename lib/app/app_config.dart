@@ -1,12 +1,7 @@
 import 'dart:async';
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
 import 'package:mcncashier/components/communText.dart';
-
 import '../main.dart';
 import 'environment_config.dart';
 
@@ -18,9 +13,7 @@ enum AppEnvironment {
 }
 
 class FlutterAppConfig {
-  FlutterAppConfig({
-    @required this.environment
-  });
+  FlutterAppConfig({@required this.environment});
 
   final AppEnvironment environment;
 
@@ -48,13 +41,10 @@ class FlutterAppConfig {
   }
 
   Future run() async {
-      setEnvironment(environment);
-
-      WidgetsFlutterBinding.ensureInitialized();
-
-      WidgetsFlutterBinding.ensureInitialized();
-      final bool isLogged = await CommunFun.isLogged();
-      
-      runApp(MyApp(islogin: isLogged));
+    setEnvironment(environment);
+    WidgetsFlutterBinding.ensureInitialized();
+    WidgetsFlutterBinding.ensureInitialized();
+    final bool isLogged = await CommunFun.isLogged();
+    runApp(MyApp(islogin: isLogged));
   }
 }

@@ -993,6 +993,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
               "", // Add table name here
               "", // Add Currency here
               widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
+              false,
               true);
           clearSelected();
         } else {
@@ -1012,6 +1013,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 "", // Add table name here
                 "", // Add Currency here
                 widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
+                false,
                 true);
             clearSelected();
           }, () async {
@@ -1029,6 +1031,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 "", // Add table name here
                 "", // Add Currency here
                 widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
+                false,
                 false);
             clearSelected();
           });
@@ -1051,12 +1054,13 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 "", // Add table name here
                 "", // Add Currency here
                 widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
+                false,
                 true);
             clearSelected();
           } else {
             await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
                 () async {
-              await _printReceipt.checkReceiptPrint(
+              _printReceipt.checkReceiptPrint(
                   widget.printerIP,
                   context,
                   branchAddress,
@@ -1072,10 +1076,11 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                   widget.customer.isEmpty
                       ? "Walk-in customer"
                       : widget.customer,
+                  false,
                   true);
               clearSelected();
             }, () async {
-              await _printReceipt.checkReceiptPrint(
+              _printReceipt.checkReceiptPrint(
                   widget.printerIP,
                   context,
                   branchAddress,
@@ -1091,6 +1096,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                   widget.customer.isEmpty
                       ? "Walk-in customer"
                       : widget.customer,
+                  false,
                   false);
               clearSelected();
             });

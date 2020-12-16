@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
@@ -21,8 +22,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController emailAddress =
-      new TextEditingController(text: "branch");
+  TextEditingController emailAddress = new TextEditingController(text: "branch");
   TextEditingController userPin = new TextEditingController(text: "121355");
   GlobalKey<ScaffoldState> scaffoldKey;
 
@@ -170,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             isLoading: isScreenLoad,
-            color: Colors.black87,
+            color: StaticColor.colorLightBlack,
             progressIndicator: CommunFun.overLayLoader()),
       ),
       onWillPop: _willPopCallback,
@@ -200,13 +200,14 @@ class _LoginPageState extends State<LoginPage> {
           padding: EdgeInsets.only(left: 20, right: 20),
           child: Icon(
             Icons.perm_identity,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             size: SizeConfig.safeBlockVertical * 6,
           ),
         ),
         errorText: !isValidateEmail ? errorUserName : null,
         errorStyle: TextStyle(
-            color: Colors.red, fontSize: SizeConfig.safeBlockVertical * 4),
+            color: StaticColor.colorRed,
+            fontSize: SizeConfig.safeBlockVertical * 4),
         hintText: Strings.username_hint,
         hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
@@ -220,7 +221,7 @@ class _LoginPageState extends State<LoginPage> {
         contentPadding: EdgeInsets.only(
             top: SizeConfig.safeBlockVertical * 3,
             bottom: SizeConfig.safeBlockVertical * 3),
-        fillColor: Colors.white,
+        fillColor: StaticColor.colorWhite,
       ),
       style: Styles.normalBlack(),
       onChanged: onChange,
@@ -246,13 +247,14 @@ class _LoginPageState extends State<LoginPage> {
           padding: EdgeInsets.only(left: 20, right: 20),
           child: Icon(
             Icons.lock_outline,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             size: SizeConfig.safeBlockVertical * 6,
           ),
         ),
         errorText: !isValidatePassword ? errorPin : null,
         errorStyle: TextStyle(
-            color: Colors.red, fontSize: SizeConfig.safeBlockVertical * 4),
+            color: StaticColor.colorRed,
+            fontSize: SizeConfig.safeBlockVertical * 4),
         hintText: Strings.pin_hint,
         hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
@@ -266,7 +268,7 @@ class _LoginPageState extends State<LoginPage> {
         contentPadding: EdgeInsets.only(
             top: SizeConfig.safeBlockVertical * 3,
             bottom: SizeConfig.safeBlockVertical * 3),
-        fillColor: Colors.white,
+        fillColor: StaticColor.colorWhite,
       ),
       //obscureText: true,
       style: Styles.normalBlack(),

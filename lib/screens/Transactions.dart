@@ -6,6 +6,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Drawer.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
@@ -21,8 +22,12 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
+import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/models/Order_Modifire.dart';
+import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/models/Branch.dart';
 
 class TransactionsPage extends StatefulWidget {
   // Transactions list
@@ -39,8 +44,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
   List<Orders> filterList = [];
   Orders selectedOrder = new Orders();
   List taxJson = [];
+  List<Printer> printerreceiptList = new List<Printer>();
+  List<Printer> printerList = new List<Printer>();
   List<OrderPayment> orderpayment = [];
   User paymemtUser = new User();
+  Branch branchData;
   List<ProductDetails> detailsList = [];
   List<OrderDetail> orderItemList = [];
   bool isFiltering = false;
@@ -50,9 +58,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
   var orderDate = "";
   double change = 0.0;
   bool isScreenLoad = false;
-  Customer customer = new Customer();
+  Customer customer;
   List<Payments> paymentMethod = new List<Payments>();
-
+  var currency = "RM";
   @override
   void initState() {
     super.initState();
@@ -63,6 +71,28 @@ class _TransactionsPageState extends State<TransactionsPage> {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
+    getAllPrinter();
+    getbranch();
+  }
+
+  getbranch() async {
+    var branchid = await CommunFun.getbranchId();
+    var branch = await localAPI.getbranchData(branchid);
+    var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
+    setState(() {
+      currency = curre;
+      branchData = branch;
+    });
+    return branch;
+  }
+
+  getAllPrinter() async {
+    List<Printer> printer = await localAPI.getAllPrinterForKOT();
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    setState(() {
+      printerList = printer;
+      printerreceiptList = printerDraft;
+    });
   }
 
   setPermissons() async {
@@ -441,310 +471,288 @@ class _TransactionsPageState extends State<TransactionsPage> {
     }
   }
 
+  reprintRecipt() async {
+    if (selectedOrder != null) {
+      List<OrderPayment> orderpaymentdata = await localAPI.getOrderpaymentData(
+          selectedOrder.app_id, selectedOrder.terminal_id);
+      List<Payments> paymentMethod = await localAPI.getOrderpaymentmethod(
+          selectedOrder.app_id, selectedOrder.terminal_id);
+      List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(
+          selectedOrder.app_id, selectedOrder.terminal_id);
+      Orders order = await localAPI.getcurrentOrders(
+          selectedOrder.app_id, selectedOrder.terminal_id);
+      List<OrderAttributes> attributes =
+          await localAPI.getOrderAttributes(order.app_id);
+      List<OrderModifire> modifires =
+          await localAPI.getOrderModifire(order.app_id);
+      PrintReceipt printKOT = PrintReceipt();
+      printKOT.checkReceiptPrint(
+          printerreceiptList[0].printerIp,
+          context,
+          branchData,
+          taxJson,
+          orderitem,
+          attributes,
+          modifires,
+          order,
+          orderpaymentdata,
+          paymentMethod,
+          "",
+          currency,
+          Strings.walkin_customer,
+          true,
+          true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return Scaffold(
-      // drawer: transactionsDrawer(), // page Drawer
       body: LoadingOverlay(
           child: SafeArea(
-              child: new GestureDetector(
-            onTap: () {
-              FocusScope.of(context).requestFocus(new FocusNode());
-              setState(() {
-                isFiltering = false;
-              });
-            },
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Table(
-                columnWidths: {
-                  0: FractionColumnWidth(.3),
-                  1: FractionColumnWidth(.6),
-                },
-                children: [
-                  TableRow(children: [
-                    TableCell(
-                      // Part 1 white
-                      child: SingleChildScrollView(
-                        physics: BouncingScrollPhysics(),
-                        child: Container(
-                          //    padding: EdgeInsets.only(top: 20, left: 20, right: 20),
-                          height: MediaQuery.of(context).size.height,
-                          color: Colors.white,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  IconButton(
-                                    padding: EdgeInsets.all(0),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    icon: Icon(
-                                      Icons.keyboard_arrow_left,
-                                      size: SizeConfig.safeBlockVertical * 7,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(Strings.transaction,
-                                      style: Styles.drawerText()),
-                                ],
-                              ),
-                              SizedBox(height: 10),
-                              transationsSearchBox(),
-                              SizedBox(height: 5),
-                              orderLists.length > 0
-                                  ? searchTransationList()
-                                  : Center(
-                                      child: Text(Strings.no_order_found,
-                                          style: Styles.darkBlue()))
-                            ],
+            child: new GestureDetector(
+              onTap: () {
+                FocusScope.of(context).requestFocus(new FocusNode());
+                setState(() {
+                  isFiltering = false;
+                });
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Table(
+                  columnWidths: {
+                    0: FractionColumnWidth(.3),
+                    1: FractionColumnWidth(.6),
+                  },
+                  children: [
+                    TableRow(children: [
+                      TableCell(
+                        // Part 1 white
+                        child: SingleChildScrollView(
+                          physics: BouncingScrollPhysics(),
+                          child: Container(
+                            height: MediaQuery.of(context).size.height,
+                            color: Colors.white,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                CommunFun.verticalSpace(10),
+                                pageTitle(),
+                                CommunFun.verticalSpace(10),
+                                transationsSearchBox(),
+                                CommunFun.verticalSpace(5),
+                                orderLists.length > 0
+                                    ? searchTransationList()
+                                    : Center(
+                                        child: Text(Strings.no_order_found,
+                                            style: Styles.darkBlue()))
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    TableCell(
-                      // Part 2 transactions list
-                      child: Center(
-                          child: orderLists.length > 0
-                              ? SingleChildScrollView(
-                                  physics: BouncingScrollPhysics(),
-                                  child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 50),
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height /
-                                              2,
-                                          child: SingleChildScrollView(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: <Widget>[
-                                                SizedBox(height: 10),
-                                                Text(orderDate,
-                                                    style: Styles
-                                                        .whiteMediumBold()),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Text(
-                                                  selectedOrder.grand_total !=
-                                                          null
-                                                      ? selectedOrder
-                                                          .grand_total
-                                                          .toStringAsFixed(2)
-                                                      : "",
-                                                  style: TextStyle(
-                                                      fontSize: SizeConfig
-                                                              .safeBlockVertical *
-                                                          4,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Theme.of(context)
-                                                          .accentColor),
-                                                ),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                selectedOrder != null &&
-                                                        paymemtUser.username !=
-                                                            null
-                                                    ? Text(
-                                                        selectedOrder
-                                                                .invoice_no +
-                                                            " - Processed by " +
-                                                            paymemtUser
-                                                                .username,
-                                                        style: Styles
-                                                            .whiteBoldsmall(),
-                                                      )
-                                                    : SizedBox(),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Container(
-                                                  height: SizeConfig
-                                                          .safeBlockVertical *
-                                                      8,
-                                                  width: MediaQuery.of(context)
+                      TableCell(
+                          // Part 2 transactions list
+                          child: Center(
+                              child: orderLists.length > 0
+                                  ? SingleChildScrollView(
+                                      physics: BouncingScrollPhysics(),
+                                      child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 50),
+                                              height: MediaQuery.of(context)
                                                       .size
-                                                      .width,
-                                                  child: Center(
-                                                    child: Text(
-                                                      customer.firstName != null
-                                                          ? customer.firstName
-                                                          : "Walk-In Customer",
-                                                      style:
-                                                          Styles.orangeSmall(),
-                                                    ),
-                                                  ),
-                                                  color: Colors.grey[900]
-                                                      .withOpacity(0.4),
-                                                ),
-                                                productList(),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        Container(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height /
-                                              2.2,
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 50),
-                                          child: SingleChildScrollView(
-                                            child: Column(children: <Widget>[
-                                              Divider(),
-                                              totalAmountValues(),
-                                              Divider(),
-                                              Column(
-                                                  children: orderpayment
-                                                      .map((payment) {
-                                                var index = orderpayment
-                                                    .indexOf(payment);
-                                                change = payment
-                                                            .op_amount_change !=
-                                                        null
-                                                    ? payment.op_amount_change
-                                                    : 0.0;
-                                                return Row(
+                                                      .height /
+                                                  2,
+                                              child: SingleChildScrollView(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment.end,
+                                                      MainAxisAlignment.start,
                                                   children: <Widget>[
-                                                    new Expanded(
-                                                      flex: 7,
-                                                      child: Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                          top: 0,
-                                                        ),
-                                                        child: Text(
-                                                          paymentMethod.length >
-                                                                  0
-                                                              ? paymentMethod[
-                                                                      index]
-                                                                  .name
-                                                                  .toUpperCase()
-                                                              : "",
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style:
-                                                              Styles.darkGray(),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    new Expanded(
-                                                      flex: 3,
-                                                      child: Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                            top: 0,
-                                                          ),
-                                                          child: Text(
-                                                            payment.op_amount !=
-                                                                    null
-                                                                ? payment
-                                                                    .op_amount
-                                                                    .toStringAsFixed(
-                                                                        2)
-                                                                : "00:00",
-                                                            textAlign:
-                                                                TextAlign.end,
-                                                            style: Styles
-                                                                .darkGray(),
-                                                          )),
-                                                    )
+                                                    CommunFun.verticalSpace(10),
+                                                    reprintRecipet(),
+                                                    CommunFun.verticalSpace(10),
+                                                    orderDateText(),
+                                                    CommunFun.verticalSpace(10),
+                                                    grandTotalText(),
+                                                    CommunFun.verticalSpace(10),
+                                                    userNameText(),
+                                                    CommunFun.verticalSpace(10),
+                                                    customerBanner(),
+                                                    productList(),
                                                   ],
-                                                );
-                                              }).toList()),
-                                              change != null
-                                                  ? Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment.end,
-                                                      children: <Widget>[
-                                                        new Expanded(
-                                                          flex: 7,
-                                                          child: Padding(
-                                                            padding:
-                                                                EdgeInsets.only(
-                                                              top: 0,
-                                                            ),
-                                                            child: Text(
-                                                              "Change",
-                                                              textAlign:
-                                                                  TextAlign.end,
-                                                              style: Styles
-                                                                  .darkGray(),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        new Expanded(
-                                                          flex: 3,
-                                                          child: Padding(
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .only(
-                                                                top: 0,
-                                                              ),
-                                                              child: Text(
-                                                                change
-                                                                    .toStringAsFixed(
-                                                                        2),
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .end,
-                                                                style: Styles
-                                                                    .darkGray(),
-                                                              )),
-                                                        )
-                                                      ],
-                                                    )
-                                                  : SizedBox(),
-                                              isRefunding
-                                                  ? refundButtons(context)
-                                                  : transationsButton()
-                                            ]),
-                                          ),
-                                        )
-                                        // ),
-                                      ]))
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    SizedBox(
-                                      height: 50,
-                                    ),
-                                    Text(
-                                      Strings.no_order_found,
-                                      style: Styles.whiteBold(),
-                                    ),
-                                  ],
-                                )),
-                    )
-                  ]),
-                ],
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height /
+                                                  2.2,
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 50),
+                                              child: SingleChildScrollView(
+                                                child:
+                                                    Column(children: <Widget>[
+                                                  Divider(),
+                                                  totalAmountValues(),
+                                                  Divider(),
+                                                  paymentDetails(),
+                                                  changeText(),
+                                                  isRefunding
+                                                      ? refundButtons(context)
+                                                      : transationsButton()
+                                                ]),
+                                              ),
+                                            )
+                                            // ),
+                                          ]))
+                                  : noOrderFoundText()))
+                    ]),
+                  ],
+                ),
               ),
             ),
-          )),
+          ),
           isLoading: isScreenLoad,
           color: Colors.black87,
           progressIndicator: CommunFun.overLayLoader()),
+    );
+  }
+
+  Widget noOrderFoundText() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        CommunFun.verticalSpace(50),
+        Text(
+          Strings.no_order_found,
+          style: Styles.whiteBold(),
+        ),
+      ],
+    );
+  }
+
+  Widget pageTitle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        IconButton(
+          padding: EdgeInsets.all(0),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: Icon(
+            Icons.keyboard_arrow_left,
+            size: SizeConfig.safeBlockVertical * 7,
+          ),
+        ),
+        CommunFun.horisontalSpace(10),
+        Text(Strings.transaction, style: Styles.drawerText()),
+      ],
+    );
+  }
+
+  Widget changeText() {
+    return change != null
+        ? Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              new Expanded(
+                flex: 7,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: 0,
+                  ),
+                  child: Text(
+                    "Change",
+                    textAlign: TextAlign.end,
+                    style: Styles.darkGray(),
+                  ),
+                ),
+              ),
+              new Expanded(
+                flex: 3,
+                child: Padding(
+                    padding: EdgeInsets.only(
+                      top: 0,
+                    ),
+                    child: Text(
+                      change.toStringAsFixed(2),
+                      textAlign: TextAlign.end,
+                      style: Styles.darkGray(),
+                    )),
+              )
+            ],
+          )
+        : SizedBox();
+  }
+
+  Widget paymentDetails() {
+    return Column(
+        children: orderpayment.map((payment) {
+      var index = orderpayment.indexOf(payment);
+      change =
+          payment.op_amount_change != null ? payment.op_amount_change : 0.0;
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          new Expanded(
+            flex: 7,
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: 0,
+              ),
+              child: Text(
+                paymentMethod.length > 0
+                    ? paymentMethod[index].name.toUpperCase()
+                    : "",
+                textAlign: TextAlign.end,
+                style: Styles.darkGray(),
+              ),
+            ),
+          ),
+          new Expanded(
+            flex: 3,
+            child: Padding(
+                padding: EdgeInsets.only(
+                  top: 0,
+                ),
+                child: Text(
+                  payment.op_amount != null
+                      ? payment.op_amount.toStringAsFixed(2)
+                      : "00:00",
+                  textAlign: TextAlign.end,
+                  style: Styles.darkGray(),
+                )),
+          )
+        ],
+      );
+    }).toList());
+  }
+
+  Widget customerBanner() {
+    return Container(
+      height: SizeConfig.safeBlockVertical * 8,
+      width: MediaQuery.of(context).size.width,
+      child: Center(
+        child: Text(
+          customer != null ? customer.firstName : "Walk-In Customer",
+          style: Styles.orangeSmall(),
+        ),
+      ),
+      color: Colors.grey[900].withOpacity(0.4),
     );
   }
 
@@ -758,12 +766,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
       ),
-    );
-  }
-
-  transactionsDrawer() {
-    return Drawer(
-      child: Container(color: Colors.white),
     );
   }
 
@@ -820,7 +822,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             isRefunding = false;
           });
         }),
-        SizedBox(width: 10),
+        CommunFun.horisontalSpace(10),
         refundNextButton(() {
           if (permissions.contains(Constant.PAYMENT)) {
             refundSelectedammout();
@@ -834,7 +836,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
   }
 
-  refundCancelButton(_onPress) {
+  Widget refundCancelButton(_onPress) {
     return Expanded(
       child: RaisedButton(
         padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
@@ -856,7 +858,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
   }
 
-  refundNextButton(_onPress) {
+  Widget refundNextButton(_onPress) {
     return Expanded(
       child: RaisedButton(
         padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
@@ -893,7 +895,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             }, () {});
           }
         }),
-        SizedBox(width: 10),
+        CommunFun.horisontalSpace(10),
         cancelButton(() {
           if (permissions.contains(Constant.CANCLE_TRANSACTION)) {
             if (orderpayment[0].op_status == 1) {
@@ -1244,7 +1246,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                             ),
                     ),
                   ),
-                  SizedBox(width: 15),
+                  CommunFun.horisontalSpace(15),
                   Flexible(
                     child: Row(
                       // crossAxisAlignment: CrossAxisAlignment.center,
@@ -1313,6 +1315,58 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
   }
 
+  Widget reprintRecipet() {
+    return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+      RaisedButton(
+        padding: EdgeInsets.only(left: 10, right: 10),
+        onPressed: () {
+          if (permissions.contains(Constant.REPRINT_PREVIOS_RECIEPT)) {
+            reprintRecipt();
+          } else {
+            CommonUtils.openPermissionPop(
+                context, Constant.REPRINT_PREVIOS_RECIEPT, () async {
+              reprintRecipt();
+            }, () {});
+          }
+        },
+        child: Text(
+          Strings.print_reciept,
+          style: TextStyle(color: Colors.deepOrange, fontSize: 15),
+        ),
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+              width: 1, style: BorderStyle.solid, color: Colors.deepOrange),
+          borderRadius: BorderRadius.circular(50.0),
+        ),
+      )
+    ]);
+  }
+
+  Widget orderDateText() {
+    return Text(orderDate, style: Styles.whiteMediumBold());
+  }
+
+  Widget grandTotalText() {
+    return Text(
+      selectedOrder.grand_total != null
+          ? selectedOrder.grand_total.toStringAsFixed(2)
+          : "",
+      style: Styles.whiteBold(),
+    );
+  }
+
+  Widget userNameText() {
+    return selectedOrder != null && paymemtUser.username != null
+        ? Text(
+            selectedOrder.invoice_no +
+                " - Processed by " +
+                paymemtUser.username,
+            style: Styles.whiteBoldsmall(),
+          )
+        : SizedBox();
+  }
+
   Widget searchTransationList() {
     if (isFiltering) {
       return Expanded(
@@ -1340,7 +1394,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                         DateFormat('hh:mm aaa')
                             .format(DateTime.parse(item.order_date)),
                         style: Styles.greysmall()),
-                    SizedBox(width: 10),
+                    CommunFun.horisontalSpace(10),
                     item.order_status == 3
                         ? Container(
                             padding: EdgeInsets.all(3),
@@ -1405,7 +1459,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           DateFormat('hh:mm aaa')
                               .format(DateTime.parse(item.order_date)),
                           style: Styles.greysmall()),
-                      SizedBox(width: 10),
+                      CommunFun.horisontalSpace(10),
                       item.order_status == 3
                           ? Container(
                               padding: EdgeInsets.all(3),
@@ -1602,7 +1656,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
                   "Reason",
                   style: Styles.communBlack(),
                 ),
-                SizedBox(height: 10),
+                CommunFun.verticalSpace(10),
                 TextField(
                   controller: reasonController,
                   maxLines: 4,

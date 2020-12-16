@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
@@ -50,7 +51,21 @@ class CommunFun {
   static loginText() {
     return Text(Strings.login_text,
         style: TextStyle(
-            color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold));
+            color: StaticColor.colorWhite,
+            fontSize: 18,
+            fontWeight: FontWeight.bold));
+  }
+
+  static verticalSpace(double val) {
+    return SizedBox(
+      height: val,
+    );
+  }
+
+  static horisontalSpace(double val) {
+    return SizedBox(
+      width: val,
+    );
   }
 
   static checkConnectivity() async {
@@ -79,10 +94,11 @@ class CommunFun {
       height: 70,
       width: 70,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(100), color: Colors.white),
+          borderRadius: BorderRadius.circular(100),
+          color: StaticColor.colorWhite),
       child: CircularProgressIndicator(
         strokeWidth: 4,
-        backgroundColor: Colors.grey[200],
+        backgroundColor: StaticColor.lightGrey,
       ),
     );
   }
@@ -121,8 +137,8 @@ class CommunFun {
           bottom: SizeConfig.safeBlockVertical * 3),
       onPressed: _onPress,
       child: Text(text, style: Styles.whiteBold()),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
+      color: StaticColor.deepOrange,
+      textColor: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(50.0),
       ),

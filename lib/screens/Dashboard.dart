@@ -1414,6 +1414,7 @@ class _DashboradPageState extends State<DashboradPage>
             tableName,
             currency,
             customer != null ? customer.name : Strings.walkin_customer,
+            false,
             true);
         await clearCartAfterSuccess(orderid);
       } else {
@@ -1433,6 +1434,7 @@ class _DashboradPageState extends State<DashboradPage>
               tableName,
               currency,
               customer != null ? customer.name : Strings.walkin_customer,
+              false,
               true);
           await clearCartAfterSuccess(orderid);
         }, () async {
@@ -1450,6 +1452,7 @@ class _DashboradPageState extends State<DashboradPage>
               tableName,
               currency,
               customer != null ? customer.name : Strings.walkin_customer,
+              false,
               false);
           await clearCartAfterSuccess(orderid);
         });
@@ -1458,7 +1461,7 @@ class _DashboradPageState extends State<DashboradPage>
       await CommonUtils.openPermissionPop(context, Constant.PRINT_BILL,
           () async {
         if (permissions.contains(Constant.OPEN_DRAWER)) {
-          await printKOT.checkReceiptPrint(
+          printKOT.checkReceiptPrint(
               printerreceiptList[0].printerIp,
               context,
               branchData,
@@ -1472,12 +1475,13 @@ class _DashboradPageState extends State<DashboradPage>
               tableName,
               currency,
               customer != null ? customer.name : Strings.walkin_customer,
+              false,
               true);
           await clearCartAfterSuccess(orderid);
         } else {
           await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
               () async {
-            await printKOT.checkReceiptPrint(
+            printKOT.checkReceiptPrint(
                 printerreceiptList[0].printerIp,
                 context,
                 branchData,
@@ -1491,10 +1495,11 @@ class _DashboradPageState extends State<DashboradPage>
                 tableName,
                 currency,
                 customer != null ? customer.name : Strings.walkin_customer,
+                false,
                 true);
             await clearCartAfterSuccess(orderid);
           }, () async {
-            await printKOT.checkReceiptPrint(
+            printKOT.checkReceiptPrint(
                 printerreceiptList[0].printerIp,
                 context,
                 branchData,
@@ -1508,6 +1513,7 @@ class _DashboradPageState extends State<DashboradPage>
                 tableName,
                 currency,
                 customer != null ? customer.name : Strings.walkin_customer,
+                false,
                 false);
             await clearCartAfterSuccess(orderid);
           });

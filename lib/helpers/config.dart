@@ -1,7 +1,8 @@
 class Configrations {
   //static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/"; // local
   static String base_URL = "https://mcnpos.com.my/api/v1/en/"; // live
-  //static String base_URL = "https://staging.mcnpos.com.my/api/v1/en/"; // staging
+  //static String base_URL =
+  //  "https://staging.mcnpos.com.my/api/v1/en/"; // staging
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String config = "configs";
