@@ -988,7 +988,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
 
     var qry = "SELECT DISTINCT order_detail.*,asset.base64 from order_detail LEFT JOIN" +
-        " asset on asset.base64 =(SELECT base64  from asset WHERE asset.asset_type_id = order_detail.product_id AND asset.status = 1 AND " +
+        " asset on asset.base64 =(SELECT base64 from asset WHERE asset.asset_type_id = order_detail.product_id AND asset.status = 1 AND " +
         " asset.asset_type = CASE WHEN order_detail.issetMeal == 1 THEN  2 ELSE  1 END ORDER By asset.asset_id DESC LIMIT 1) " +
         " WHERE terminal_id =  " +
         terminalid.toString() +

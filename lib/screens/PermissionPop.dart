@@ -103,8 +103,8 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
 
   Widget closeButton(context) {
     return Positioned(
-      top: -30,
-      right: -20,
+      top: 0,
+      right: 0,
       child: GestureDetector(
         onTap: () {
           widget.onClose();
