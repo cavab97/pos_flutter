@@ -1112,10 +1112,8 @@ class _SelectTablePageState extends State<SelectTablePage>
                       enterButton(() {
                         if (!isMergeing) {
                           if (isAssigning) {
-                            print("only pax");
                             assignTabletoOrder();
                           } else {
-                            print("new order");
                             selectTableForNewOrder();
                           }
                         }

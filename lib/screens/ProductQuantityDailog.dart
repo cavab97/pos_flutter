@@ -257,7 +257,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               }
             }
           } else {
-            // Modi
+            // Modifier
             if (modifireList.length > 0) {
               for (var j = 0; j < modifireList.length; j++) {
                 if (modifireList[j].modifierId == item.modifierId) {
@@ -319,7 +319,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (isSelected) {
       var isarrSelected =
           selectedSetMealAttr.any((item) => item['attribute'] == attribute);
-
       selectedSetMealAttr.removeWhere((item) =>
           item['ca_id'] == id && item["setmeal_productID"] == setmealproduct);
       if (!isarrSelected) {
@@ -572,16 +571,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (isSelected) {
       if (mod.isDefault == 0) {
         selectedModifier.removeWhere((item) => item.pmId == mod.pmId);
-        setState(() {
-          selectedModifier = selectedModifier;
-        });
       }
     } else {
       selectedModifier.add(mod);
-      setState(() {
-        selectedModifier = selectedModifier;
-      });
     }
+    setState(() {
+      selectedModifier = selectedModifier;
+    });
     setPrice();
   }
 
@@ -1289,9 +1285,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                       textColor: Colors.black,
                                       color: Colors.grey[300],
                                       onPressed: () {
-                                        print("\\\\");
-                                        print(attributisDefault[i]);
-                                        print("touched");
                                         onSelectAttr(
                                             i,
                                             attribute.ca_id,

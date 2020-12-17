@@ -500,7 +500,11 @@ class LocalAPI {
           where: 'id = ?', whereArgs: [cartdetails.id]);
       cartdetailid = cartdetails.id;
     } else {
-      cartdetailid = await db.insert("mst_cart_detail", newObj);
+      try {
+        cartdetailid = await db.insert("mst_cart_detail", newObj);
+      } catch (e) {
+        print(e);
+      }
     }
     await SyncAPICalls.logActivity(
         "product", "insert  cart details", "mst_cart_detail", cartdetailid);
@@ -519,8 +523,6 @@ class LocalAPI {
 
     print(data.toJson());
     var result1 = await db.insert("mst_cart_sub_detail", data.toJson());
-    print("hi");
-    print(result1);
     await SyncAPICalls.logActivity(
         "product", "insert sub cart details", "mst_cart_sub_detail", result1);
     return result1;
@@ -541,6 +543,19 @@ class LocalAPI {
 
   Future<List<MSTCartdetails>> getCartItem(cartId) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
+    //var isjoin = await CommunFun.checkIsJoinServer();
+    List<MSTCartdetails> list = [];
+    /* if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.cart_items;
+      var stringParams = {"cart_id": cartId};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => MSTCartdetails.fromJson(c)).toList()
+            : [];
+      }
+    } else { */
     var qry = " SELECT mst_cart_detail.* ,group_concat(attributes.name) as attrName ,group_concat(modifier.name) as modiName from mst_cart_detail " +
         " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  (mst_cart_sub_detail.attribute_id != '' OR mst_cart_sub_detail.modifier_id != '' )" +
         " LEFT JOIN attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != " +
@@ -553,11 +568,12 @@ class LocalAPI {
     var res = await db.rawQuery(qry);
     print("length");
     print(res.length);
-    List<MSTCartdetails> list = res.isNotEmpty
+    list = res.isNotEmpty
         ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
         "product", "get cart list", "mst_cart_detail", cartId);
+    //}
     return list;
   }
 
@@ -976,7 +992,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
 
     var qry = "SELECT DISTINCT order_detail.*,asset.base64 from order_detail LEFT JOIN" +
-        " asset on asset.base64 =(SELECT base64  from asset WHERE asset.asset_type_id = order_detail.product_id AND asset.status = 1 AND " +
+        " asset on asset.base64 =(SELECT base64 from asset WHERE asset.asset_type_id = order_detail.product_id AND asset.status = 1 AND " +
         " asset.asset_type = CASE WHEN order_detail.issetMeal == 1 THEN  2 ELSE  1 END ORDER By asset.asset_id DESC LIMIT 1) " +
         " WHERE terminal_id =  " +
         terminalid.toString() +
@@ -1071,7 +1087,10 @@ class LocalAPI {
     List<MST_Cart> list = cartdata.isNotEmpty
         ? cartdata.map((c) => MST_Cart.fromJson(c)).toList()
         : [];
-    return list[0];
+    if (list.length > 0) {
+      return list[0];
+    } else
+      return new MST_Cart();
   }
 
   Future<Branch> getbranchData(branchID) async {

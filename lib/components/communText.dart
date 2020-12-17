@@ -317,7 +317,9 @@ class CommunFun {
       opneSyncPop(context);
     }
     var lastSync = await Preferences.getStringValuesSF(Constant.LastSync_Table);
-    if (lastSync == null) {
+    if (context == null) {
+      return;
+    } else if (lastSync == null) {
       CommunFun.getDataTables1(context, isOpen);
     } else if (lastSync == "1") {
       CommunFun.getDataTables2(context, isOpen);
@@ -444,9 +446,6 @@ class CommunFun {
         if (aceets["data"]["next_offset"] != 0) {
           getAssetsData(context, isOpen);
         }
-        if (isOpen) {
-          Navigator.of(context).pop();
-        }
         var serverTime =
             await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
         if (serverTime == null) {
@@ -456,7 +455,11 @@ class CommunFun {
           await checkpermission();
           await Navigator.pushNamed(context, Constant.SelectTableScreen,
               arguments: {"isAssign": false});
+          isOpen = false;
         }
+        /* if (isOpen) {
+          Navigator.of(context).pop();
+        } */
       } else {
         if (aceets["data"]["next_offset"] == 0) {
           await CommunFun.setServerTime(aceets, "5");
@@ -961,6 +964,10 @@ class CommunFun {
 
   static getsetWebOrders(context) async {
     var res = await SyncAPICalls.getWebOrders(context);
+    if (res.length < 1 || res["data"] == null) {
+      print('getsetWebOrders api error');
+      return;
+    }
     var sertvertime = res["data"]["serverdatetime"];
     await Preferences.setStringToSF(
         Constant.ORDER_SERVER_DATE_TIME, sertvertime);
@@ -1199,7 +1206,6 @@ class CommunFun {
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = await CommunFun.getLocalID();
-    print('enter here');
     var detailID = await localAPI.addintoCartDetails(cartdetails);
     //print(detailID);
     callback(cartdetails);

@@ -319,11 +319,14 @@ class _DashboradPageState extends State<DashboradPage>
     MST_Cart cart = await localAPI.getCartData(cartId);
 
     Voucher vaocher;
-    if (cart.voucher_id != null) {
+    if (cart.voucher_id != null && cart.voucher_id != 0) {
       var voucherdetail = jsonDecode(cart.voucher_detail);
       vaocher = Voucher.fromJson(voucherdetail);
     }
     // taxJson = json.decode(cart.tax_json);
+    if (cart.id == null) {
+      return;
+    }
     if (this.mounted) {
       setState(() {
         allcartData = cart;
@@ -892,7 +895,6 @@ class _DashboradPageState extends State<DashboradPage>
         return false;
       }
     }
-    selectTable();
   }
 
   sendPayment() async {
@@ -1093,9 +1095,6 @@ class _DashboradPageState extends State<DashboradPage>
 
   Future<List<MSTCartdetails>> getcartDetails(cartid) async {
     List<MSTCartdetails> list = await localAPI.getCartItem(currentCart);
-    for (MSTCartdetails cart in list) {
-      temporaryCartList.add(cart);
-    }
     return list;
   }
 
@@ -1119,6 +1118,11 @@ class _DashboradPageState extends State<DashboradPage>
 
   sendPaymentByCash(List<OrderPayment> payment) async {
     var cartData = await getcartData();
+    if (cartData.id == null) {
+      print("cart data empty");
+      await clearCartAfterSuccess(0);
+      return;
+    }
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     Orders order = new Orders();
     VoucherHistory history = new VoucherHistory();
@@ -1144,8 +1148,8 @@ class _DashboradPageState extends State<DashboradPage>
       invoiceNo =
           branchData.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
-    var convertGrand =
-        await CommunFun.checkRoundData(cartData.grand_total.toStringAsFixed(2));
+    var convertGrand = await CommunFun.checkRoundData(
+        (cartData.grand_total ?? 0).toStringAsFixed(2));
     double newGtotal = double.parse(convertGrand);
     var roundingVal =
         await CommunFun.calRounded(newGtotal, cartData.grand_total);
@@ -1227,7 +1231,6 @@ class _DashboradPageState extends State<DashboradPage>
           } else {
             orderDetail.app_id = 1;
           }
-          print(productdata);
           orderDetail.uuid = uuid;
           orderDetail.order_app_id = orderId;
           orderDetail.branch_id = int.parse(branchid);
@@ -1458,8 +1461,6 @@ class _DashboradPageState extends State<DashboradPage>
       shiftinvoice.terminal_id = int.parse(terminalId);
       var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
       await printReceipt(orderId);
-      print('clearCartAfterSuccess');
-      print(orderId);
       await clearCartAfterSuccess(orderId);
     }
   }
@@ -1700,9 +1701,10 @@ class _DashboradPageState extends State<DashboradPage>
     await localAPI.removeCartItem(currentCart, tables.table_id);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
-    await Navigator.pushNamedAndRemoveUntil(
-        context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
-        arguments: {"isAssign": false});
+    if (context != null)
+      await Navigator.pushNamedAndRemoveUntil(
+          context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
+          arguments: {"isAssign": false});
   }
 
   getTaxs() async {
@@ -1725,14 +1727,11 @@ class _DashboradPageState extends State<DashboradPage>
     MST_Cart cart = new MST_Cart();
     var subtNServ = subT +
         await CommunFun.countServiceCharge(cart.serviceChargePercent, subT);
-    print(subtNServ);
     var totalTax = [];
     double taxvalue = 0.00;
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
-        print("taxlistitem");
-        print(taxlist[i].rate);
         var taxval = taxlistitem.rate != null
             ? subtNServ * double.parse(taxlistitem.rate) / 100
             : 0.0;
@@ -1924,8 +1923,8 @@ class _DashboradPageState extends State<DashboradPage>
 
   selectTable() {
     var diffCartDetails = [];
-    cartList.every((element) {
-      if (!temporaryCartList.contains(element)) {
+    temporaryCartList.every((element) {
+      if (!cartList.contains(element)) {
         diffCartDetails.add(element);
       }
       return true;
@@ -1933,7 +1932,10 @@ class _DashboradPageState extends State<DashboradPage>
     for (var index = 0; index < diffCartDetails.length; index++) {
       itememovefromCart(diffCartDetails[index]);
     }
+    goToTableScreen();
+  }
 
+  goToTableScreen() {
     Navigator.pushNamedAndRemoveUntil(
         context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
         arguments: {"isAssign": false});
@@ -3124,13 +3126,13 @@ class _DashboradPageState extends State<DashboradPage>
                       if (permissions.contains(Constant.ADD_ORDER)) {
                         confirmOrder = true;
                         await sendTokitched(cartList);
-                        selectTable();
+                        goToTableScreen();
                       } else {
                         CommonUtils.openPermissionPop(
                             context, Constant.ADD_ORDER, () async {
                           confirmOrder = true;
                           await sendTokitched(cartList);
-                          selectTable();
+                          goToTableScreen();
                         }, () {});
                       }
                     },
@@ -3295,7 +3297,6 @@ class _DashboradPageState extends State<DashboradPage>
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
                 //removeItem();
-                print('enter here');
                 selectTable();
               },
               child: Row(
@@ -3480,8 +3481,12 @@ class _DashboradPageState extends State<DashboradPage>
               if (currentQuantity > 0) {
                 currentProductQuantity = cart.productQty;
                 cart.productQty = currentQuantity.toDouble();
-                cart.productPrice = currentQuantity * cart.productNetPrice;
+                cart.productPrice = currentQuantity *
+                    (cart.productNetPrice == null
+                        ? cart.productDetailAmount
+                        : cart.productNetPrice);
                 currentQuantity = 0;
+                //_selectedQuantity(0);
               } else if (cart.id == itemSelectedIndex.id) {
                 itemSelectedIndex = new MSTCartdetails();
               } else {
@@ -3529,7 +3534,7 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                   Expanded(
                     child: Text(
-                      cart.productPrice.toStringAsFixed(2),
+                      cart.productDetailAmount.toStringAsFixed(2),
                       style: Styles.greysmall(),
                       textAlign: TextAlign.end,
                     ),
@@ -3654,7 +3659,7 @@ class _DashboradPageState extends State<DashboradPage>
                   style: Styles.darkBlue(),
                 ),
                 Text(
-                  subtotal.toStringAsFixed(2),
+                  (subtotal ?? 0).toStringAsFixed(2),
                   style: Styles.darkBlue(),
                 ),
               ],
@@ -3673,7 +3678,7 @@ class _DashboradPageState extends State<DashboradPage>
                   style: Styles.orangeDis(),
                 ),
                 Text(
-                  discount.toStringAsFixed(2),
+                  (discount ?? 0).toStringAsFixed(2),
                   style: Styles.orangeDis(),
                 ),
               ],
@@ -3731,7 +3736,7 @@ class _DashboradPageState extends State<DashboradPage>
                         style: Styles.darkBlue(),
                       ),
                       Text(
-                        tax.toStringAsFixed(2),
+                        (tax ?? 0).toStringAsFixed(2),
                         style: Styles.darkBlue(),
                       ),
                     ],
@@ -3821,7 +3826,7 @@ class _DashboradPageState extends State<DashboradPage>
                       style: Styles.darkBlue(),
                     ),
                     Text(
-                      subtotal.toStringAsFixed(2),
+                      (subtotal ?? 0).toStringAsFixed(2),
                       style: Styles.darkBlue(),
                     ),
                   ],
@@ -3840,7 +3845,7 @@ class _DashboradPageState extends State<DashboradPage>
                       style: Styles.orangeDis(),
                     ),
                     Text(
-                      discount.toStringAsFixed(2),
+                      (discount ?? 0).toStringAsFixed(2),
                       style: Styles.orangeDis(),
                     ),
                   ],
@@ -3894,7 +3899,7 @@ class _DashboradPageState extends State<DashboradPage>
                             style: Styles.darkBlue(),
                           ),
                           Text(
-                            tax.toStringAsFixed(2),
+                            (tax ?? 0).toStringAsFixed(2),
                             style: Styles.darkBlue(),
                           )
                         ],
