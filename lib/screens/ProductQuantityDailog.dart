@@ -318,6 +318,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (isSelected) {
       var isarrSelected =
           selectedSetMealAttr.any((item) => item['attribute'] == attribute);
+      print(isarrSelected);
       selectedSetMealAttr.removeWhere((item) =>
           item['ca_id'] == id && item["setmeal_productID"] == setmealproduct);
       if (!isarrSelected) {
