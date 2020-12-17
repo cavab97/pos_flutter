@@ -298,6 +298,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     });
     //}
     if (isEditing) {
+      print("hi");
       setProductEditingData();
     }
   }
@@ -318,7 +319,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (isSelected) {
       var isarrSelected =
           selectedSetMealAttr.any((item) => item['attribute'] == attribute);
-      print(isarrSelected);
+
       selectedSetMealAttr.removeWhere((item) =>
           item['ca_id'] == id && item["setmeal_productID"] == setmealproduct);
       if (!isarrSelected) {
@@ -492,48 +493,50 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   onSelectAttr(i, id, attribute, attrTypeIDs, attrPrice, setmealid, isDefault) {
-    print(".........................");
+    // var secondselected =
+    //     selectedAttr.any((item) => item['attribute'] == attribute);
+    // if (secondselected) {
+    //   selectedAttr.removeWhere((item) => item['attribute'] == attribute);
+    //   print("sone");
+    // }
 
-    print("id");
-    print(attribute);
-    print("isDefault");
-    print(isDefault);
-    print(".........................");
-    if (isDefault == 1) {
-      isDefault = 0;
-      print("catch");
-    }
     // if (selectedAttr.length > 1) {
     //   selectedAttr.removeWhere((item) => item['attribute'] == attribute);
     // }
     var prvSeelected = selectedAttr;
     var isSelected = selectedAttr.any((item) => item['ca_id'] == id);
+
     if (isSelected) {
       var isarrSelected =
           selectedAttr.any((item) => item['attribute'] == attribute);
-      selectedAttr.removeWhere((item) => item['attribute'] == attribute);
-      print("isarrSelected");
-      print(isarrSelected);
+      // selectedAttr.removeWhere((item) => item['attribute'] == attribute);
+      selectedAttr.removeWhere((item) => item['attribute'] != attribute);
       if (!isarrSelected) {
         prvSeelected.add({
           'ca_id': id,
           'attribute': attribute,
           'attrType_ID': attrTypeIDs,
           'attr_price': attrPrice,
-          'isDefault': isDefault == "1" ? "0" : "1"
         });
+      } else {
+        selectedAttr.removeWhere((item) => item['attribute'] != attribute);
+        print("same");
       }
+
+      print(attribute);
       setState(() {
-        selectedAttr = selectedAttr;
+        selectedAttr = prvSeelected;
       });
-    } else {
+    } else if (selectedAttr.length < 1) {
+      print("seconddddddddddddddddddddddddd");
+
       prvSeelected.add({
         'ca_id': id,
         'attribute': attribute,
         'attrType_ID': attrTypeIDs,
         'attr_price': attrPrice,
-        'isDefault': isDefault == "1" ? "0" : "1"
       });
+
       setState(() {
         selectedAttr = prvSeelected;
       });
@@ -1211,6 +1214,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         scrollDirection: Axis.vertical,
         physics: BouncingScrollPhysics(),
         children: attributeList.map((attribute) {
+          print("attributeList");
+          print(attributeList.length);
           var attributType = attribute.attr_types.split(',');
           var attrIDs = attribute.attributeId.split(',').asMap();
           var attrtypesPrice = attribute.attr_types_price.split(',').asMap();
@@ -1245,7 +1250,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                             print("isadded");
                             print(isadded);
                             print(attributisDefault[i]);
-                            if (attributisDefault[i] == "1" && !isadded) {
+                            if (attributisDefault[i] == "1" &&
+                                !isadded &&
+                                selectedAttr.length < 1) {
                               print("trigger");
                               onSelectAttr(
                                   i,

@@ -323,7 +323,7 @@ class _DashboradPageState extends State<DashboradPage>
       var voucherdetail = jsonDecode(cart.voucher_detail);
       vaocher = Voucher.fromJson(voucherdetail);
     }
-    taxJson = json.decode(cart.tax_json);
+    // taxJson = json.decode(cart.tax_json);
     if (this.mounted) {
       setState(() {
         allcartData = cart;
