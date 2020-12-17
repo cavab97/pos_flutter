@@ -416,24 +416,6 @@ class PrintReceipt {
             bold: false,
           )),
     ]);
-    ticket.row([
-      PosColumn(
-          text: "Pax",
-          width: 4,
-          styles: PosStyles(
-            align: PosAlign.left,
-            fontType: PosFontType.fontA,
-            bold: false,
-          )),
-      PosColumn(
-          text: " : " + pax,
-          width: 8,
-          styles: PosStyles(
-            align: PosAlign.left,
-            fontType: PosFontType.fontA,
-            bold: false,
-          )),
-    ]);
 
     /*For font - A size 1 = 4 Character print */
     ticket.hr();

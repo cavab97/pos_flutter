@@ -898,14 +898,15 @@ class _DashboradPageState extends State<DashboradPage>
 
   sendPayment() async {
     if (cartList.length != 0) {
-      if (permissions.contains(Constant.PAYMENT)) {
+      opnePaymentMethod();
+      /* if (permissions.contains(Constant.PAYMENT)) {
         opnePaymentMethod();
       } else {
         await CommonUtils.openPermissionPop(context, Constant.PAYMENT,
             () async {
           opnePaymentMethod();
         }, () {});
-      }
+      } */
     } else {
       CommunFun.showToast(context, Strings.cart_empty);
     }
