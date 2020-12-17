@@ -571,8 +571,8 @@ class SyncAPICalls {
       }
     } catch (e) {
       print(e);
-      Navigator.of(context).pop();
       CommunFun.showToast(context, e.message);
+      Navigator.of(context).pop();
     }
   }
 

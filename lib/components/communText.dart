@@ -1258,9 +1258,7 @@ class CommunFun {
       if (tempValue <= 2) {
         round = prefix + "." + postFilx.substring(0, 1) + "0";
       } else if (tempValue <= 7) {
-        print(postFilx.substring(0, 1));
         round = prefix + "." + postFilx.substring(0, 1) + "5";
-        print(round);
       } else {
         int values = 0;
         if (int.parse(postFilx.substring(1)) == 9) {

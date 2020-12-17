@@ -3495,7 +3495,7 @@ class _DashboradPageState extends State<DashboradPage>
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
               color: cart.id == itemSelectedIndex.id
-                  ? Colors.deepOrange[400]
+                  ? Colors.deepOrange[200]
                   : Colors.transparent,
               child: Row(
                 children: <Widget>[
@@ -3557,8 +3557,13 @@ class _DashboradPageState extends State<DashboradPage>
                       child: Icon(
                         Icons.close,
                         color: Colors.red,
-                        size: 30,
-                      ),
+                      ), /* Text('x',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                            fontSize: SizeConfig.safeBlockVertical * 4,
+                          ),
+                          textAlign: TextAlign.center), */
                     ),
                     flex: 1,
                   ),

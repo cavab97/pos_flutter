@@ -68,7 +68,6 @@ class LocalAPI {
     Terminal terminalDat;
     List<Terminal> list =
         res.length > 0 ? res.map((c) => Terminal.fromJson(c)).toList() : [];
-    print(list.length);
     if (list.length > 0) {
       terminalDat = list[0];
     }
@@ -1948,7 +1947,6 @@ class LocalAPI {
     List<SaveOrder> list = result.length > 0
         ? result.map((c) => SaveOrder.fromJson(c)).toList()
         : [];
-    print(list);
     if (list.length > 0 && list[0].cartId != null) {
       return list;
     } else {
@@ -1963,14 +1961,12 @@ class LocalAPI {
         " where table_id = " +
         tableID.toString();
     var result = await db.rawQuery(qry);
-    print(result);
     if (cartid != null) {
       var qry1 = "UPDATE mst_cart SET table_id = " +
           totableid.toString() +
           " where  id = " +
           cartid.toString();
       var result1 = await db.rawQuery(qry1);
-      print(result1);
     }
   }
 
