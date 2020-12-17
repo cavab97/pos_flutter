@@ -611,12 +611,12 @@ class _SelectTablePageState extends State<SelectTablePage>
                             ),
                             SizedBox(height: 30),
                             shiftbtn(() {
-                              if (permissions.contains(Constant.OPEN_SHIFT)) {
+                              if (permissions.contains(Constant.OPENING)) {
                                 openOpningAmmountPop(
                                     Strings.title_opening_amount);
                               } else {
                                 CommonUtils.openPermissionPop(
-                                    context, Constant.OPEN_SHIFT, () async {
+                                    context, Constant.OPENING, () async {
                                   openOpningAmmountPop(
                                       Strings.title_opening_amount);
                                 }, () {});
@@ -690,11 +690,24 @@ class _SelectTablePageState extends State<SelectTablePage>
                 sendOpenShft(ammountext);
                 if (isopning == Strings.title_opening_amount) {
                   if (printerreceiptList.length > 0) {
-                    printKOT.testReceiptPrint(
-                        printerreceiptList[0].printerIp.toString(),
-                        context,
-                        "",
-                        Strings.openDrawer);
+                    if (permissions.contains(Constant.OPEN_DRAWER)) {
+                      printKOT.testReceiptPrint(
+                          printerreceiptList[0].printerIp.toString(),
+                          context,
+                          "",
+                          Strings.openDrawer,
+                          true);
+                    } else {
+                      CommonUtils.openPermissionPop(
+                          context, Constant.OPEN_DRAWER, () async {
+                        printKOT.testReceiptPrint(
+                            printerreceiptList[0].printerIp.toString(),
+                            context,
+                            "",
+                            Strings.openDrawer,
+                            true);
+                      }, () {});
+                    }
                   } else {
                     CommunFun.showToast(context, Strings.printer_not_available);
                   }

@@ -332,7 +332,8 @@ class _SettingsPageState extends State<SettingsPage> {
                           printerList[index].printerIp,
                           context,
                           printerList[index].printerName,
-                          Strings.testing),
+                          Strings.testing,
+                          true),
                       child: Column(
                         children: <Widget>[
                           Container(

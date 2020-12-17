@@ -324,12 +324,25 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         builder: (BuildContext context) {
           return CloseShiftPage(onClose: () {
-            printKOT.testReceiptPrint(
-                printerreceiptList[0].printerIp.toString(),
-                context,
-                "",
-                Strings.openDrawer);
-            openOpningAmmountPop(Strings.title_closing_amount);
+            if (permissions.contains(Constant.OPEN_DRAWER)) {
+              printKOT.testReceiptPrint(
+                  printerreceiptList[0].printerIp.toString(),
+                  context,
+                  "",
+                  Strings.openDrawer,
+                  true);
+              openOpningAmmountPop(Strings.title_closing_amount);
+            } else {
+              CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
+                  () async {
+                printKOT.testReceiptPrint(
+                    printerreceiptList[0].printerIp.toString(),
+                    context,
+                    "",
+                    Strings.openDrawer,
+                    true);
+              }, () {});
+            }
           });
         });
   }
@@ -431,10 +444,10 @@ class _DashboradPageState extends State<DashboradPage>
             });
         break;
       case 3:
-        if (permissions.contains(Constant.CLOSE_SHIFT)) {
+        if (permissions.contains(Constant.CLOSING)) {
           closeShift();
         } else {
-          CommonUtils.openPermissionPop(context, Constant.CLOSE_SHIFT,
+          CommonUtils.openPermissionPop(context, Constant.CLOSING,
               () async {
             closeShift();
           }, () {});
@@ -689,11 +702,24 @@ class _DashboradPageState extends State<DashboradPage>
               onEnter: (ammountext) {
                 if (isopning == Strings.title_opening_amount) {
                   if (printerreceiptList.length > 0) {
-                    printKOT.testReceiptPrint(
-                        printerreceiptList[0].printerIp.toString(),
-                        context,
-                        "",
-                        Strings.openDrawer);
+                    if (permissions.contains(Constant.OPEN_DRAWER)) {
+                      printKOT.testReceiptPrint(
+                          printerreceiptList[0].printerIp.toString(),
+                          context,
+                          "",
+                          Strings.openDrawer,
+                          true);
+                    } else {
+                      CommonUtils.openPermissionPop(
+                          context, Constant.OPEN_DRAWER, () async {
+                        printKOT.testReceiptPrint(
+                            printerreceiptList[0].printerIp.toString(),
+                            context,
+                            "",
+                            Strings.openDrawer,
+                            true);
+                      }, () {});
+                    }
                   } else {
                     CommunFun.showToast(context, Strings.printer_not_available);
                   }
@@ -2572,7 +2598,9 @@ class _DashboradPageState extends State<DashboradPage>
           final prodprice = product.price.toStringAsFixed(2);
           return InkWell(
             onTap: () {
-              if (product.hasInventory == 1 && product.qty < 0.0 ||
+              if (product.qty != null &&
+                      product.hasInventory == 1 &&
+                      product.qty < 0.0 ||
                   product.hasRacManagemant == 1 && product.box_pId == null) {
                 CommunFun.showToast(
                     context,
@@ -2803,10 +2831,10 @@ class _DashboradPageState extends State<DashboradPage>
               ),
               SizedBox(height: 30),
               shiftbtn(() {
-                if (permissions.contains(Constant.OPEN_SHIFT)) {
+                if (permissions.contains(Constant.OPENING)) {
                   openOpningAmmountPop(Strings.title_opening_amount);
                 } else {
-                  CommonUtils.openPermissionPop(context, Constant.OPEN_SHIFT,
+                  CommonUtils.openPermissionPop(context, Constant.OPENING,
                       () async {
                     openOpningAmmountPop(Strings.title_opening_amount);
                   }, () {});
@@ -3202,7 +3230,7 @@ class _DashboradPageState extends State<DashboradPage>
                             child: Chip(
                               backgroundColor: StaticColor.colorGrey,
                               avatar: CircleAvatar(
-                                backgroundColor: StaticColor.colorGrey600,
+                                backgroundColor: StaticColor.colorGrey,
                                 child: Icon(
                                   Icons.close,
                                   color: StaticColor.colorWhite,
@@ -3261,7 +3289,7 @@ class _DashboradPageState extends State<DashboradPage>
         Container(
           height: MediaQuery.of(context).size.height -
               SizeConfig.safeBlockVertical * 10,
-          color: StaticColor.colorGrey400,
+          color: StaticColor.colorGrey300,
           padding: EdgeInsets.all(0),
           child: Stack(
             children: <Widget>[
@@ -3292,7 +3320,7 @@ class _DashboradPageState extends State<DashboradPage>
                       left: 0,
                       right: 0,
                       child: Container(
-                          color: StaticColor.colorGrey400,
+                          color: StaticColor.colorGrey300,
                           child: totalPriceTable),
                     )
                   : Center(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
@@ -17,6 +18,7 @@ import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:mcncashier/components/colors.dart';
+
 class ShiftReports extends StatefulWidget {
   // PIN Enter PAGE
   ShiftReports({Key key}) : super(key: key);
@@ -400,8 +402,8 @@ class _ShiftReportsState extends State<ShiftReports> {
       ),
       color: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
-        side:
-            BorderSide(width: 1, style: BorderStyle.solid, color: StaticColor.colorWhite),
+        side: BorderSide(
+            width: 1, style: BorderStyle.solid, color: StaticColor.colorWhite),
         borderRadius: BorderRadius.circular(5.0),
       ),
     );
@@ -418,7 +420,9 @@ class _ShiftReportsState extends State<ShiftReports> {
           margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: _current == index ? StaticColor.deepOrange : StaticColor.colorWhite,
+            color: _current == index
+                ? StaticColor.deepOrange
+                : StaticColor.colorWhite,
           ),
         );
       }).toList(),
@@ -703,86 +707,98 @@ class _ShiftReportsState extends State<ShiftReports> {
     return Container(
         width: MediaQuery.of(context).size.width / screenArea,
         child: Center(
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Expanded(
-                  child: RaisedButton(
-                    padding: EdgeInsets.all(20),
-                    onPressed: () {
-                      setState(() {
-                        isInAmmount = true;
-                      });
-                      openpayInOUTPop("Pay In Amount", "5.00");
-                    },
-                    child: Text(
-                      "Pay In",
-                      style: TextStyle(
-                        color: StaticColor.colorWhite,
-                        fontSize: 20,
-                      ),
-                    ),
-                    color: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(color: StaticColor.colorWhite, width: 2),
-                    ),
+          child:
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: <
+                  Widget>[
+            Expanded(
+              child: RaisedButton(
+                padding: EdgeInsets.all(20),
+                onPressed: () {
+                  setState(() {
+                    isInAmmount = true;
+                  });
+                  openpayInOUTPop("Pay In Amount", "5.00");
+                },
+                child: Text(
+                  "Pay In",
+                  style: TextStyle(
+                    color: StaticColor.colorWhite,
+                    fontSize: 20,
                   ),
                 ),
-                SizedBox(
-                  width: 10,
+                color: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  side: BorderSide(color: StaticColor.colorWhite, width: 2),
                 ),
-                Expanded(
-                  child: RaisedButton(
-                    padding: EdgeInsets.all(20),
-                    onPressed: () {
-                      setState(() {
-                        isInAmmount = false;
-                      });
-                      openpayInOUTPop("Pay Out Amount", "5.00");
-                    },
-                    child: Text(
-                      "Pay Out",
-                      style: TextStyle(color: StaticColor.colorWhite, fontSize: 20),
-                    ),
-                    color: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(color: StaticColor.colorWhite, width: 2),
-                    ),
-                  ),
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: RaisedButton(
+                padding: EdgeInsets.all(20),
+                onPressed: () {
+                  setState(() {
+                    isInAmmount = false;
+                  });
+                  openpayInOUTPop("Pay Out Amount", "5.00");
+                },
+                child: Text(
+                  "Pay Out",
+                  style: TextStyle(color: StaticColor.colorWhite, fontSize: 20),
                 ),
-                SizedBox(
-                  width: 10,
+                color: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  side: BorderSide(color: StaticColor.colorWhite, width: 2),
                 ),
-                Expanded(
-                  child: RaisedButton(
-                    padding: EdgeInsets.all(20),
-                    onPressed: () {
-                      if (printerreceiptList.length > 0) {
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: RaisedButton(
+                padding: EdgeInsets.all(20),
+                onPressed: () {
+                  if (printerreceiptList.length > 0) {
+                    if (permissions.contains(Constant.OPEN_DRAWER)) {
+                      printKOT.testReceiptPrint(
+                          printerreceiptList[0].printerIp.toString(),
+                          context,
+                          "",
+                          Strings.openDrawer,
+                          true);
+                    } else {
+                      CommonUtils.openPermissionPop(
+                          context, Constant.OPEN_DRAWER, () async {
                         printKOT.testReceiptPrint(
                             printerreceiptList[0].printerIp.toString(),
                             context,
                             "",
-                            Strings.openDrawer);
-                      } else {
-                        CommunFun.showToast(
-                            context, Strings.printer_not_available);
-                      }
-                    },
-                    child: Text(
-                      "Open Cash Drawer",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: StaticColor.colorWhite, fontSize: 20),
-                    ),
-                    color: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(color: StaticColor.colorWhite, width: 2),
-                    ),
-                  ),
+                            Strings.openDrawer,
+                            true);
+                      }, () {});
+                    }
+                  } else {
+                    CommunFun.showToast(context, Strings.printer_not_available);
+                  }
+                },
+                child: Text(
+                  "Open Cash Drawer",
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: StaticColor.colorWhite, fontSize: 20),
                 ),
-              ]),
+                color: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  side: BorderSide(color: StaticColor.colorWhite, width: 2),
+                ),
+              ),
+            ),
+          ]),
         ));
   }
 
@@ -915,11 +931,13 @@ class AddOtherReasonState extends State<AddOtherReason> {
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(width: 1, color: StaticColor.colorGrey),
+                      borderSide:
+                          BorderSide(width: 1, color: StaticColor.colorGrey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(width: 1, color: StaticColor.colorGrey),
+                      borderSide:
+                          BorderSide(width: 1, color: StaticColor.colorGrey),
                     ),
                   ),
                 ),

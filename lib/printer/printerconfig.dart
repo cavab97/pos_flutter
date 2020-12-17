@@ -228,7 +228,7 @@ class PrintReceipt {
   void checkKOTPrint(String printerIp, String tableName, BuildContext ctx,
       List<MSTCartdetails> cartList, String pax, bool isReprint) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter(printerIp, port: 9100);
+    printerManager.selectPrinter("192.168.0.109", port: 9100);
     final PosPrintResult res = await printerManager
         .printTicket(await KOTReceipt(tableName, cartList, pax, isReprint));
 
@@ -267,9 +267,18 @@ class PrintReceipt {
 
     final ByteData data =
         await rootBundle.load('assets/headerlogo_receipt.png');
-    final Uint8List bytes = data.buffer.asUint8List();
-    final image = decodeImage(bytes);
-    ticket.image(image);
+
+    var strImage;
+    Uint8List bytes = data.buffer.asUint8List();
+    if (branchData != null) {
+      strImage = branchData.base64;
+      if (branchData.base64.contains("base64,")) {
+        strImage = branchData.base64.split("base64,")[1];
+      }
+      bytes = base64Decode(strImage);
+    }
+
+    ticket.image(decodeImage(bytes));
 
     ticket.emptyLines(1);
 
@@ -445,12 +454,12 @@ class PrintReceipt {
           printColumnWitSpace(4, item.detail_qty.toStringAsFixed(0), true);
       String priceOfProduct = printColumnWitSpace(
           8,
-          item.product_old_price != null
-              ? item.product_old_price.toStringAsFixed(2)
+          item.product_price != null
+              ? item.product_price.toStringAsFixed(2)
               : "0.00",
           true);
       String amountOfProduct =
-          printColumnWitSpace(8, item.product_price.toStringAsFixed(2), true);
+          printColumnWitSpace(8, item.detail_amount.toStringAsFixed(2), true);
 
       ticket.text("$nameOfProduct$qtyOfProduct$priceOfProduct$amountOfProduct",
           containsChinese: true,
@@ -855,12 +864,17 @@ class PrintReceipt {
 
     final ByteData data =
         await rootBundle.load('assets/headerlogo_receipt.png');
-    final Uint8List bytes = data.buffer.asUint8List();
-    final image = decodeImage(bytes);
-    ticket.image(image);
-
+    var strImage;
+    Uint8List bytes = data.buffer.asUint8List();
+    if (branchData != null) {
+      strImage = branchData.base64;
+      if (branchData.base64.contains("base64,")) {
+        strImage = branchData.base64.split("base64,")[1];
+      }
+      bytes = base64Decode(strImage);
+    }
+    ticket.image(decodeImage(bytes));
     ticket.emptyLines(1);
-
     ticket.text(branchData.address,
         styles: PosStyles(
             fontType: PosFontType.fontA,
@@ -1009,8 +1023,8 @@ class PrintReceipt {
           4, cartList[i].productQty.toStringAsFixed(0), true);
       String priceOfProduct = printColumnWitSpace(
           8, cartList[i].productPrice.toStringAsFixed(2), true);
-      String amountOfProduct =
-          printColumnWitSpace(8, total.toStringAsFixed(2), true);
+      String amountOfProduct = printColumnWitSpace(
+          8, cartList[i].productDetailAmount.toStringAsFixed(2), true);
 
       ticket.text("$nameOfProduct$qtyOfProduct$priceOfProduct$amountOfProduct",
           containsChinese: true,
@@ -1233,7 +1247,7 @@ class PrintReceipt {
       String pax,
       String custName) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter(printerIp, port: 9100);
+    printerManager.selectPrinter("192.168.0.109", port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
         await DraftReceipt(
@@ -1550,7 +1564,7 @@ class PrintReceipt {
       String pax,
       String custName) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter(printerIp, port: 9100);
+    printerManager.selectPrinter("192.168.0.109", port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
         await CheckListReceipt(cartList, tableName, branchData, pax, custName));
@@ -2016,7 +2030,7 @@ class PrintReceipt {
       List<Payments> paymentMethods,
       var ordersCount) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter(printerIp, port: 9100);
+    printerManager.selectPrinter("192.168.0.109", port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
         await shiftReportReceipt(
@@ -2051,23 +2065,23 @@ class PrintReceipt {
   ========================================================================*/
 
   void testReceiptPrint(String printerIp, BuildContext ctx, String printerName,
-      String isFor) async {
+      String isFor, bool isper) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter(printerIp, port: 9100);
-    bool isper = await checkPermission(Constant.OPEN_DRAWER);
+    printerManager.selectPrinter("192.168.0.109", port: 9100);
+    //bool isper = await checkPermission(Constant.OPEN_DRAWER);
     PosPrintResult res;
-    if (isper) {
-      res = await printerManager.printTicket(
-          await testPrintReceipt(printerName, printerIp, isFor, ctx, isper));
-    } else {
-      await CommonUtils.openPermissionPop(ctx, Constant.OPEN_DRAWER, () async {
-        res = await printerManager.printTicket(
-            await testPrintReceipt(printerName, printerIp, isFor, ctx, true));
-      }, () async {
-        res = await printerManager.printTicket(
-            await testPrintReceipt(printerName, printerIp, isFor, ctx, false));
-      });
-    }
+    // if (isper) {
+    res = await printerManager.printTicket(
+        await testPrintReceipt(printerName, printerIp, isFor, ctx, isper));
+    // } else {
+    //   await CommonUtils.openPermissionPop(ctx, Constant.OPEN_DRAWER, () async {
+    //     res = await printerManager.printTicket(
+    //         await testPrintReceipt(printerName, printerIp, isFor, ctx, true));
+    //   }, () async {
+    //     res = await printerManager.printTicket(
+    //         await testPrintReceipt(printerName, printerIp, isFor, ctx, false));
+    //   });
+    // }
 
     // final PosPrintResult res = await printerManager.printTicket(
     //     await testPrintReceipt(printerName, printerIp, isFor, ctx, isper));

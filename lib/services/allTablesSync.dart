@@ -884,14 +884,16 @@ class SyncAPICalls {
       LocalAPI localAPI = LocalAPI();
       List<ShiftInvoice> invoiceData =
           await localAPI.getShiftInvoiceTable(terminalId);
-      var stringParams = {
-        'branch_id': branchid,
-        'terminal_id': terminalId,
-        'shift_detail': json.encode(invoiceData)
-      };
-      var res = await APICalls.apiCall(apiurl, context, stringParams);
-      if (res["status"] == Constant.STATUS200) {
-        saveShiftDetailToTable(context, res);
+      if (invoiceData.length > 0) {
+        var stringParams = {
+          'branch_id': branchid,
+          'terminal_id': terminalId,
+          'shift_detail': json.encode(invoiceData)
+        };
+        var res = await APICalls.apiCall(apiurl, context, stringParams);
+        if (res["status"] == Constant.STATUS200) {
+          saveShiftDetailToTable(context, res);
+        }
       }
     } catch (e) {
       print(e);

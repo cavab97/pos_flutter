@@ -302,7 +302,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             .map((i) => MSTCartdetails.fromJson(i))
             .toList();
         var sameAttributes = [];
-        MSTCartdetails itemset = new MSTCartdetails();
         for (var m = 0; m < myModels.length; m++) {
           List<MSTSubCartdetails> details =
               await localAPI.getItemModifire(myModels[m].id);
@@ -436,11 +435,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   onSelectAttr(i, id, attribute, attrTypeIDs, attrPrice, setmealid, isDefault) {
+    print("click .++++++++++++++++++++++");
     var prvSeelected = selectedAttr;
     var isSelected = selectedAttr.any((item) => item['ca_id'] == id);
     if (isSelected) {
       var isarrSelected =
           selectedAttr.any((item) => item['attribute'] == attribute);
+      // if (isDefault == 0) {
       selectedAttr.removeWhere((item) => item['ca_id'] == id);
       if (!isarrSelected) {
         prvSeelected.add({
@@ -450,6 +451,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           'attr_price': attrPrice
         });
       }
+      // }
       setState(() {
         selectedAttr = selectedAttr;
       });
@@ -1241,14 +1243,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                                         attribute.ca_id &&
                                                     item['attribute'] == attr)
                                                 ? StaticColor.colorGreen
-                                                : StaticColor.colorGrey400,
+                                                : StaticColor.colorGrey300,
                                             width: 4,
                                           )),
                                       minWidth: 50,
                                       child: Text(attr.toString(),
                                           style: Styles.blackMediumBold()),
                                       textColor: StaticColor.colorBlack,
-                                      color: StaticColor.colorGrey400,
+                                      color: StaticColor.colorGrey300,
                                       onPressed: () {
                                         onSelectAttr(
                                             i,
@@ -1293,7 +1295,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                     item.pmId == modifier.pmId ||
                                     modifier.isDefault == 1)
                                 ? StaticColor.colorGreen
-                                : StaticColor.colorGrey400,
+                                : StaticColor.colorGrey300,
                             width: 4)),
                     minWidth: 50,
                     child: Row(
@@ -1312,7 +1314,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                       ],
                     ),
                     textColor: StaticColor.colorBlack,
-                    color: StaticColor.colorGrey400,
+                    color: StaticColor.colorGrey300,
                     onPressed: () {
                       setModifire(modifier);
                     },

@@ -41,6 +41,7 @@ class TransactionsPage extends StatefulWidget {
 
 class _TransactionsPageState extends State<TransactionsPage> {
   LocalAPI localAPI = LocalAPI();
+  ScrollController _scrollController = ScrollController();
   List<Orders> orderLists = [];
   List<Orders> filterList = [];
   Orders selectedOrder = new Orders();
@@ -58,6 +59,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   var permissions = "";
   var orderDate = "";
   double change = 0.0;
+  int currentOffset = 0;
   bool isScreenLoad = false;
   Customer customer;
   List<Payments> paymentMethod = new List<Payments>();
@@ -74,6 +76,22 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
     getAllPrinter();
     getbranch();
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent ==
+          _scrollController.position.pixels) {
+        if (!isScreenLoad) {
+          isScreenLoad = !isScreenLoad;
+          // Perform event when user reach at the end of list (e.g. do Api call)
+          getTansactionList();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    if (_scrollController != null) _scrollController.dispose();
+    super.dispose();
   }
 
   getbranch() async {
@@ -109,10 +127,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
     var terminalid = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
-    List<Orders> orderList = await localAPI.getOrdersList(branchid, terminalid);
+    List<Orders> orderList =
+        await localAPI.getOrdersList(branchid, terminalid, currentOffset);
     if (orderList.length > 0) {
       setState(() {
-        orderLists = orderList;
+        orderLists.addAll(orderList);
+        currentOffset += 10;
       });
       getOrderDetails(orderLists[0]);
     }
@@ -335,7 +355,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         }
       }
     }
-    Navigator.of(context).pop();
+    //Navigator.of(context).pop();
     getTansactionList();
   }
 
@@ -802,6 +822,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
           fillColor: StaticColor.colorWhite,
         ),
         style: Styles.blackMediumBold(),
+        onSubmitted: (e) {
+          if (e.length == 0) {
+            isFiltering = false;
+          }
+        },
         onTap: () {
           startFilter();
         },
@@ -1373,133 +1398,106 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Widget searchTransationList() {
     if (isFiltering) {
       return Expanded(
-        child: ListView(
-          shrinkWrap: true,
-          physics: BouncingScrollPhysics(),
-          padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
-          children: filterList.map((item) {
-            return Container(
-              padding: EdgeInsets.symmetric(horizontal: 5),
-              decoration: new BoxDecoration(
-                  color: selectedOrder.app_id == item.app_id
-                      ? StaticColor.lightGrey100
-                      : StaticColor.colorWhite),
-              child: ListTile(
-                contentPadding: EdgeInsets.all(0),
-                dense: false,
-                selected: selectedOrder.app_id == item.app_id,
-                onTap: () {
-                  getOrderDetails(item);
-                },
-                title: Row(
-                  children: <Widget>[
-                    Text(
-                        DateFormat('hh:mm aaa')
-                            .format(DateTime.parse(item.order_date)),
-                        style: Styles.greysmall()),
-                    CommunFun.horisontalSpace(10),
-                    item.order_status == 3
-                        ? Container(
-                            padding: EdgeInsets.all(3),
-                            color: StaticColor.colorRed,
-                            child: Text(
-                              "Cancel",
-                              style: Styles.whiteBoldsmall(),
-                            ),
-                          )
-                        : SizedBox(),
-                    item.order_status == 5
-                        ? Container(
-                            padding: EdgeInsets.all(3),
-                            color: StaticColor.colorRed,
-                            child: Text(
-                              "Refunded",
-                              style: Styles.whiteBoldsmall(),
-                            ),
-                          )
-                        : SizedBox()
-                  ],
-                ),
-                subtitle: Text(Strings.invoice + item.invoice_no.toString(),
-                    style: Styles.greysmall()),
-                isThreeLine: true,
-                trailing: Text(
-                  item.grand_total.toStringAsFixed(2),
-                  style: Styles.greysmall(),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      );
+          child: ListView.builder(
+        //+1 for progressbar
+        padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
+        physics: BouncingScrollPhysics(),
+        itemExtent: 65,
+        shrinkWrap: true,
+        itemCount: filterList.length,
+        itemBuilder: (BuildContext context, int index) {
+          return orderitemTile(filterList[index]);
+        },
+      ));
     } else {
       return Expanded(
-        child: ListView(
-          itemExtent: 65,
-          padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
-          shrinkWrap: true,
-          physics: BouncingScrollPhysics(),
-          children: orderLists.map((item) {
-            return Container(
-                height: 100.0,
-                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
-                decoration: new BoxDecoration(
-                    color: selectedOrder.app_id == item.app_id &&
-                            selectedOrder.terminal_id == item.terminal_id
-                        ? StaticColor.lightGrey100
-                        : StaticColor.colorWhite),
-                child: ListTile(
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0),
-                  dense: false,
-                  selected: selectedOrder.app_id == item.app_id,
-                  onTap: () {
-                    getOrderDetails(item);
-                  },
-                  title: Row(
-                    children: <Widget>[
-                      Text(
-                          DateFormat('hh:mm aaa')
-                              .format(DateTime.parse(item.order_date)),
-                          style: Styles.greysmall()),
-                      CommunFun.horisontalSpace(10),
-                      item.order_status == 3
-                          ? Container(
-                              padding: EdgeInsets.all(3),
-                              color: StaticColor.colorRed,
-                              child: Text(
-                                "Cancel",
-                                style: Styles.whiteBoldsmall(),
-                              ),
-                            )
-                          : SizedBox(),
-                      item.order_status == 5
-                          ? Container(
-                              padding: EdgeInsets.all(3),
-                              color: StaticColor.colorRed,
-                              child: Text(
-                                "Refunded",
-                                style: Styles.whiteBoldsmall(),
-                              ),
-                            )
-                          : SizedBox()
-                    ],
-                  ),
-                  subtitle: Text(
-                      Strings.invoice +
-                          item.invoice_no.toString() +
-                          "(" +
-                          item.terminal_id.toString() +
-                          ")",
-                      style: Styles.greysmall()),
-                  isThreeLine: true,
-                  trailing: Text(item.grand_total.toStringAsFixed(2),
-                      style: Styles.greysmall()),
-                ));
-          }).toList(),
-        ),
-      );
+          child: ListView.builder(
+        //+1 for progressbar
+        padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
+        physics: BouncingScrollPhysics(),
+        itemExtent: 65,
+        shrinkWrap: true,
+        itemCount: orderLists.length + 1,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == orderLists.length) {
+            return _buildProgressIndicator();
+          } else {
+            return orderitemTile(orderLists[index]);
+          }
+        },
+        controller: _scrollController,
+      ));
     }
+  }
+
+  Widget _buildProgressIndicator() {
+    return new Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: new Center(
+        child: new Opacity(
+          opacity: isScreenLoad ? 1.0 : 00,
+          child: new CircularProgressIndicator(),
+        ),
+      ),
+    );
+  }
+
+  Widget orderitemTile(item) {
+    return Container(
+        height: 100.0,
+        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
+        decoration: new BoxDecoration(
+            color: selectedOrder.app_id == item.app_id &&
+                    selectedOrder.terminal_id == item.terminal_id
+                ? StaticColor.lightGrey100
+                : StaticColor.colorWhite),
+        child: ListTile(
+          contentPadding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0),
+          dense: false,
+          selected: selectedOrder.app_id == item.app_id,
+          onTap: () {
+            getOrderDetails(item);
+          },
+          title: Row(
+            children: <Widget>[
+              Text(
+                  DateFormat('hh:mm aaa')
+                      .format(DateTime.parse(item.order_date)),
+                  style: Styles.greysmall()),
+              CommunFun.horisontalSpace(10),
+              item.order_status == 3
+                  ? Container(
+                      padding: EdgeInsets.all(3),
+                      color: StaticColor.colorRed,
+                      child: Text(
+                        "Cancel",
+                        style: Styles.whiteBoldsmall(),
+                      ),
+                    )
+                  : SizedBox(),
+              item.order_status == 5
+                  ? Container(
+                      padding: EdgeInsets.all(3),
+                      color: StaticColor.colorRed,
+                      child: Text(
+                        "Refunded",
+                        style: Styles.whiteBoldsmall(),
+                      ),
+                    )
+                  : SizedBox()
+            ],
+          ),
+          subtitle: Text(
+              Strings.invoice +
+                  item.invoice_no.toString() +
+                  "(" +
+                  item.terminal_id.toString() +
+                  ")",
+              style: Styles.greysmall()),
+          isThreeLine: true,
+          trailing: Text(item.grand_total.toStringAsFixed(2),
+              style: Styles.greysmall()),
+        ));
   }
 }
 

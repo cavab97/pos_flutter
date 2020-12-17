@@ -25,7 +25,9 @@ class StaticColor {
   static Color colorGrey = Color(0xFF9E9E9E); //grey
   static Color lightGrey100 = Color(0xFFF5F5F5); // grey 100
   static Color colorGrey600 = Color(0xFF757575); // grey 600
+  static Color colorGrey500 = Color(0xFF757575);
   static Color colorGrey400 = Color(0xFFBDBDBD); // grey 400
+  static Color colorGrey300 = Color(0xFFE0E0E0);// grey 300
   static Color colorGrey800 = Color(0xFF424242); // grey 800
   static Color colorGreen = Color(0xFF4CAF50); // green
   static Color colorwhite38 = Color(0x62FFFFFF); // grey 900
