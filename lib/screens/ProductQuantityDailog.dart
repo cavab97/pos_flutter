@@ -1229,9 +1229,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                             var isadded = selectedAttr.any((item) =>
                                 item['ca_id'] == attribute.ca_id &&
                                 item['attribute'] == attr);
-                            print("isadded");
-                            print(isadded);
-                            print(attributisDefault[i]);
                             if (attributisDefault[i] == "1" && !isadded) {
                               print("trigger");
                               onSelectAttr(

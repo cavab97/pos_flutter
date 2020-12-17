@@ -1230,7 +1230,6 @@ class _DashboradPageState extends State<DashboradPage>
           } else {
             orderDetail.app_id = 1;
           }
-          print(productdata);
           orderDetail.uuid = uuid;
           orderDetail.order_app_id = orderId;
           orderDetail.branch_id = int.parse(branchid);
@@ -1461,8 +1460,6 @@ class _DashboradPageState extends State<DashboradPage>
       shiftinvoice.terminal_id = int.parse(terminalId);
       var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
       await printReceipt(orderId);
-      print('clearCartAfterSuccess');
-      print(orderId);
       await clearCartAfterSuccess(orderId);
     }
   }
@@ -1729,14 +1726,11 @@ class _DashboradPageState extends State<DashboradPage>
     MST_Cart cart = new MST_Cart();
     var subtNServ = subT +
         await CommunFun.countServiceCharge(cart.serviceChargePercent, subT);
-    print(subtNServ);
     var totalTax = [];
     double taxvalue = 0.00;
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
         var taxlistitem = taxlist[i];
-        print("taxlistitem");
-        print(taxlist[i].rate);
         var taxval = taxlistitem.rate != null
             ? subtNServ * double.parse(taxlistitem.rate) / 100
             : 0.0;
@@ -3302,7 +3296,6 @@ class _DashboradPageState extends State<DashboradPage>
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
                 //removeItem();
-                print('enter here');
                 selectTable();
               },
               child: Row(

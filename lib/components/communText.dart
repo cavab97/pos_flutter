@@ -1206,7 +1206,6 @@ class CommunFun {
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = await CommunFun.getLocalID();
-    print('enter here');
     var detailID = await localAPI.addintoCartDetails(cartdetails);
     //print(detailID);
     callback(cartdetails);
