@@ -1083,7 +1083,10 @@ class LocalAPI {
     List<MST_Cart> list = cartdata.isNotEmpty
         ? cartdata.map((c) => MST_Cart.fromJson(c)).toList()
         : [];
-    return list[0];
+    if (list.length > 0) {
+      return list[0];
+    } else
+      return new MST_Cart();
   }
 
   Future<Branch> getbranchData(branchID) async {

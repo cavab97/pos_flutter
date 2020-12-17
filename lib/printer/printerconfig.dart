@@ -426,7 +426,7 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: " : " + orderData.pax.toString(),
+          text: " : " + pax,
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -453,19 +453,20 @@ class PrintReceipt {
       var item = orderdetail[i];
 
       var name = jsonDecode(item.product_detail);
-
+      double price =
+          item.detail_amount != null ? item.detail_amount : item.product_price;
       String nameOfProduct =
           printColumnWitSpace(28, name["name"].toString().trim(), false);
       String qtyOfProduct =
           printColumnWitSpace(4, item.detail_qty.toStringAsFixed(0), true);
       String priceOfProduct = printColumnWitSpace(
           8,
-          item.product_old_price != null
+          (item.product_old_price != null && item.product_old_price > 0
               ? item.product_old_price.toStringAsFixed(2)
-              : "0.00",
+              : (price / item.detail_qty).toStringAsFixed(2)),
           true);
       String amountOfProduct =
-          printColumnWitSpace(8, item.product_price.toStringAsFixed(2), true);
+          printColumnWitSpace(8, price.toStringAsFixed(2), true);
 
       ticket.text("$nameOfProduct$qtyOfProduct$priceOfProduct$amountOfProduct",
           containsChinese: true,
@@ -928,24 +929,6 @@ class PrintReceipt {
           )),
       PosColumn(
           text: " : " + branchData.contactPerson,
-          width: 8,
-          styles: PosStyles(
-            align: PosAlign.left,
-            fontType: PosFontType.fontA,
-            bold: false,
-          )),
-    ]);
-    ticket.row([
-      PosColumn(
-          text: "Pax",
-          width: 4,
-          styles: PosStyles(
-            align: PosAlign.left,
-            fontType: PosFontType.fontA,
-            bold: false,
-          )),
-      PosColumn(
-          text: " : " + pax,
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,

@@ -319,11 +319,13 @@ class _DashboradPageState extends State<DashboradPage>
     MST_Cart cart = await localAPI.getCartData(cartId);
 
     Voucher vaocher;
-    if (cart.voucher_id != null) {
+    if (cart.voucher_id != null && cart.voucher_id != 0) {
       var voucherdetail = jsonDecode(cart.voucher_detail);
       vaocher = Voucher.fromJson(voucherdetail);
     }
-    taxJson = json.decode(cart.tax_json);
+    if (cart.id == null) {
+      return;
+    }
     if (this.mounted) {
       setState(() {
         allcartData = cart;
@@ -1115,6 +1117,11 @@ class _DashboradPageState extends State<DashboradPage>
 
   sendPaymentByCash(List<OrderPayment> payment) async {
     var cartData = await getcartData();
+    if (cartData.id == null) {
+      print("cart data empty");
+      await clearCartAfterSuccess(0);
+      return;
+    }
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     Orders order = new Orders();
     VoucherHistory history = new VoucherHistory();
@@ -1140,8 +1147,8 @@ class _DashboradPageState extends State<DashboradPage>
       invoiceNo =
           branchData.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
-    var convertGrand =
-        await CommunFun.checkRoundData(cartData.grand_total.toStringAsFixed(2));
+    var convertGrand = await CommunFun.checkRoundData(
+        (cartData.grand_total ?? 0).toStringAsFixed(2));
     double newGtotal = double.parse(convertGrand);
     var roundingVal =
         await CommunFun.calRounded(newGtotal, cartData.grand_total);
@@ -1696,9 +1703,10 @@ class _DashboradPageState extends State<DashboradPage>
     await localAPI.removeCartItem(currentCart, tables.table_id);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
-    await Navigator.pushNamedAndRemoveUntil(
-        context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
-        arguments: {"isAssign": false});
+    if (context != null)
+      await Navigator.pushNamedAndRemoveUntil(
+          context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
+          arguments: {"isAssign": false});
   }
 
   getTaxs() async {
@@ -3657,7 +3665,7 @@ class _DashboradPageState extends State<DashboradPage>
                   style: Styles.darkBlue(),
                 ),
                 Text(
-                  subtotal.toStringAsFixed(2),
+                  (subtotal ?? 0).toStringAsFixed(2),
                   style: Styles.darkBlue(),
                 ),
               ],
@@ -3676,7 +3684,7 @@ class _DashboradPageState extends State<DashboradPage>
                   style: Styles.orangeDis(),
                 ),
                 Text(
-                  discount.toStringAsFixed(2),
+                  (discount ?? 0).toStringAsFixed(2),
                   style: Styles.orangeDis(),
                 ),
               ],
@@ -3734,7 +3742,7 @@ class _DashboradPageState extends State<DashboradPage>
                         style: Styles.darkBlue(),
                       ),
                       Text(
-                        tax.toStringAsFixed(2),
+                        (tax ?? 0).toStringAsFixed(2),
                         style: Styles.darkBlue(),
                       ),
                     ],
@@ -3824,7 +3832,7 @@ class _DashboradPageState extends State<DashboradPage>
                       style: Styles.darkBlue(),
                     ),
                     Text(
-                      subtotal.toStringAsFixed(2),
+                      (subtotal ?? 0).toStringAsFixed(2),
                       style: Styles.darkBlue(),
                     ),
                   ],
@@ -3843,7 +3851,7 @@ class _DashboradPageState extends State<DashboradPage>
                       style: Styles.orangeDis(),
                     ),
                     Text(
-                      discount.toStringAsFixed(2),
+                      (discount ?? 0).toStringAsFixed(2),
                       style: Styles.orangeDis(),
                     ),
                   ],
@@ -3897,7 +3905,7 @@ class _DashboradPageState extends State<DashboradPage>
                             style: Styles.darkBlue(),
                           ),
                           Text(
-                            tax.toStringAsFixed(2),
+                            (tax ?? 0).toStringAsFixed(2),
                             style: Styles.darkBlue(),
                           )
                         ],
