@@ -520,7 +520,11 @@ class LocalAPI {
 
   Future<int> addsubCartData(MSTSubCartdetails data) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
+
+    print(data.toJson());
     var result1 = await db.insert("mst_cart_sub_detail", data.toJson());
+    print("hi");
+    print(result1);
     await SyncAPICalls.logActivity(
         "product", "insert sub cart details", "mst_cart_sub_detail", result1);
     return result1;
@@ -564,6 +568,8 @@ class LocalAPI {
         cartId.toString() +
         " group by mst_cart_detail.id";
     var res = await db.rawQuery(qry);
+    print("length");
+    print(res.length);
     list = res.isNotEmpty
         ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
         : [];

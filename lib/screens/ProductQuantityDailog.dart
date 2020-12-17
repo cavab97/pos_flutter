@@ -491,18 +491,26 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   onSelectAttr(i, id, attribute, attrTypeIDs, attrPrice, setmealid, isDefault) {
+    if (isDefault == 1) {
+      isDefault = 0;
+      print("catch");
+    }
+    // if (selectedAttr.length > 1) {
+    //   selectedAttr.removeWhere((item) => item['attribute'] == attribute);
+    // }
     var prvSeelected = selectedAttr;
     var isSelected = selectedAttr.any((item) => item['ca_id'] == id);
     if (isSelected) {
       var isarrSelected =
           selectedAttr.any((item) => item['attribute'] == attribute);
-      selectedAttr.removeWhere((item) => item['ca_id'] == id);
+      selectedAttr.removeWhere((item) => item['attribute'] == attribute);
       if (!isarrSelected) {
         prvSeelected.add({
           'ca_id': id,
           'attribute': attribute,
           'attrType_ID': attrTypeIDs,
-          'attr_price': attrPrice
+          'attr_price': attrPrice,
+          'isDefault': isDefault == "1" ? "0" : "1"
         });
       }
       setState(() {
@@ -513,7 +521,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         'ca_id': id,
         'attribute': attribute,
         'attrType_ID': attrTypeIDs,
-        'attr_price': attrPrice
+        'attr_price': attrPrice,
+        'isDefault': isDefault == "1" ? "0" : "1"
       });
       setState(() {
         selectedAttr = prvSeelected;
@@ -783,6 +792,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       for (var i = 0; i < selectedModifier.length; i++) {
         MSTSubCartdetails subCartData = new MSTSubCartdetails();
         var modifire = selectedModifier[i];
+
         subCartData.cartdetailsId = detailID;
         subCartData.localID = cart.localID;
         subCartData.productId = productItem.productId;
@@ -793,6 +803,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     for (var i = 0; i < selectedAttr.length; i++) {
       var attr = selectedAttr[i];
+
       MSTSubCartdetails subCartData = new MSTSubCartdetails();
       subCartData.cartdetailsId = detailID;
       subCartData.localID = cart.localID;
@@ -1218,7 +1229,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                             var isadded = selectedAttr.any((item) =>
                                 item['ca_id'] == attribute.ca_id &&
                                 item['attribute'] == attr);
+                            print("isadded");
+                            print(isadded);
+                            print(attributisDefault[i]);
                             if (attributisDefault[i] == "1" && !isadded) {
+                              print("trigger");
                               onSelectAttr(
                                   i,
                                   attribute.ca_id,
@@ -1246,7 +1261,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                             width: 4,
                                           )),
                                       minWidth: 50,
-                                      child: Text(attr.toString(),
+                                      child: Text(
+                                          attr.toString() +
+                                              " " +
+                                              attrtypesPrice[i],
                                           style: Styles.blackMediumBold()),
                                       textColor: Colors.black,
                                       color: Colors.grey[300],
