@@ -808,13 +808,12 @@ class TableData {
           orderdetails.server_id = orderdetails.detailId;
           var detail = orderdetails.toJson();
           await detail.remove("base64");
-
           if (count == 0) {
             if (orderdetails.detailId != null) {
-              await db.insert("order_detail", orderdetails.toJson());
+              await db.insert("order_detail", detail);
             }
           } else {
-            await db.update("order_detail", orderdetails.toJson(),
+            await db.update("order_detail", detail,
                 where: "detail_id =?", whereArgs: [orderdetails.detailId]);
           }
         }

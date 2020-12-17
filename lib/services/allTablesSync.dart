@@ -862,8 +862,10 @@ class SyncAPICalls {
           'shift': json.encode(storeData)
         };
         var res = await APICalls.apiCall(apiurl, context, stringParams);
-        if (res["status"] == Constant.STATUS200) {
+        if (res.length > 0 && res["status"] == Constant.STATUS200) {
           saveShiftToTable(context, res);
+        } else {
+          print('sendShiftTable api error');
         }
       } else {
         //  CommunFun.showToast(context, "all cancel tables up to dates.");
@@ -882,14 +884,19 @@ class SyncAPICalls {
       LocalAPI localAPI = LocalAPI();
       List<ShiftInvoice> invoiceData =
           await localAPI.getShiftInvoiceTable(terminalId);
+      if (invoiceData.length < 1) {
+        invoiceData = [];
+      }
       var stringParams = {
         'branch_id': branchid,
         'terminal_id': terminalId,
         'shift_detail': json.encode(invoiceData)
       };
       var res = await APICalls.apiCall(apiurl, context, stringParams);
-      if (res["status"] == Constant.STATUS200) {
+      if (res.length > 0 && res["status"] == Constant.STATUS200) {
         saveShiftDetailToTable(context, res);
+      } else {
+        print('sendShiftdetails api error');
       }
     } catch (e) {
       print(e);
@@ -960,8 +967,10 @@ class SyncAPICalls {
           'terminal_log': json.encode(storeData)
         };
         var res = await APICalls.apiCall(apiurl, context, stringParams);
-        if (res["status"] == Constant.STATUS200) {
+        if (res.length > 0 && res["status"] == Constant.STATUS200) {
           saveTerminalLogTable(context, storeData);
+        } else {
+          print('sendTerminalLogTable api error');
         }
       } else {
         //  CommunFun.showToast(context, "all cancel tables up to dates.");

@@ -257,7 +257,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               }
             }
           } else {
-            // Modi
+            // Modifier
             if (modifireList.length > 0) {
               for (var j = 0; j < modifireList.length; j++) {
                 if (modifireList[j].modifierId == item.modifierId) {
@@ -550,16 +550,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (isSelected) {
       if (mod.isDefault == 0) {
         selectedModifier.removeWhere((item) => item.pmId == mod.pmId);
-        setState(() {
-          selectedModifier = selectedModifier;
-        });
       }
     } else {
       selectedModifier.add(mod);
-      setState(() {
-        selectedModifier = selectedModifier;
-      });
     }
+    setState(() {
+      selectedModifier = selectedModifier;
+    });
     setPrice();
   }
 

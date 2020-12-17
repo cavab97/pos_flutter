@@ -892,7 +892,6 @@ class _DashboradPageState extends State<DashboradPage>
         return false;
       }
     }
-    selectTable();
   }
 
   sendPayment() async {
@@ -1093,9 +1092,6 @@ class _DashboradPageState extends State<DashboradPage>
 
   Future<List<MSTCartdetails>> getcartDetails(cartid) async {
     List<MSTCartdetails> list = await localAPI.getCartItem(currentCart);
-    for (MSTCartdetails cart in list) {
-      temporaryCartList.add(cart);
-    }
     return list;
   }
 
@@ -1924,8 +1920,8 @@ class _DashboradPageState extends State<DashboradPage>
 
   selectTable() {
     var diffCartDetails = [];
-    cartList.every((element) {
-      if (!temporaryCartList.contains(element)) {
+    temporaryCartList.every((element) {
+      if (!cartList.contains(element)) {
         diffCartDetails.add(element);
       }
       return true;
@@ -1933,7 +1929,10 @@ class _DashboradPageState extends State<DashboradPage>
     for (var index = 0; index < diffCartDetails.length; index++) {
       itememovefromCart(diffCartDetails[index]);
     }
+    goToTableScreen();
+  }
 
+  goToTableScreen() {
     Navigator.pushNamedAndRemoveUntil(
         context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
         arguments: {"isAssign": false});
@@ -3124,13 +3123,13 @@ class _DashboradPageState extends State<DashboradPage>
                       if (permissions.contains(Constant.ADD_ORDER)) {
                         confirmOrder = true;
                         await sendTokitched(cartList);
-                        selectTable();
+                        goToTableScreen();
                       } else {
                         CommonUtils.openPermissionPop(
                             context, Constant.ADD_ORDER, () async {
                           confirmOrder = true;
                           await sendTokitched(cartList);
-                          selectTable();
+                          goToTableScreen();
                         }, () {});
                       }
                     },
@@ -3482,7 +3481,7 @@ class _DashboradPageState extends State<DashboradPage>
                 cart.productQty = currentQuantity.toDouble();
                 cart.productPrice = currentQuantity *
                     (cart.productNetPrice == null
-                        ? cart.productPrice
+                        ? cart.productDetailAmount
                         : cart.productNetPrice);
                 currentQuantity = 0;
                 //_selectedQuantity(0);
@@ -3533,7 +3532,7 @@ class _DashboradPageState extends State<DashboradPage>
                   ),
                   Expanded(
                     child: Text(
-                      cart.productPrice.toStringAsFixed(2),
+                      cart.productDetailAmount.toStringAsFixed(2),
                       style: Styles.greysmall(),
                       textAlign: TextAlign.end,
                     ),
