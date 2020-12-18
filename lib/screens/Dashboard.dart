@@ -858,6 +858,7 @@ class _DashboradPageState extends State<DashboradPage>
         MSTCartdetails temp = MSTCartdetails();
 
         if (printerList[i].printerId == cartLists[j].printer_id) {
+          print(cartLists[j].remark);
           temp = cartLists[j];
           tempCart.add(temp);
         }
