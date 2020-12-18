@@ -12,14 +12,12 @@ Future<dynamic> syncTable(dynamic data) async {
       'serverdatetime': reqdata["serverdatetime"],
       'table': reqdata["table"],
     };
-    print(params);
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await client.post(
       url,
       headers: headers,
       body: json.encode(params),
     );
-    print(response);
     var data = json.decode(response.body);
     return data;
   } catch (e) {

@@ -51,7 +51,6 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
         List<PosPermission> permissions =
             await localAPI.getUserPermissions(checkUserExit[0].id);
         if (permissions.length > 0) {
-          print(permissions[0].posPermissionName);
           if (permissions[0].posPermissionName != null &&
               permissions[0].posPermissionName.contains(widget.perFor)) {
             Navigator.of(context).pop();

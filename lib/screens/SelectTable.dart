@@ -132,7 +132,6 @@ class _SelectTablePageState extends State<SelectTablePage>
     });
     var branchid = await CommunFun.getbranchId();
     List<TablesDetails> tables = await localAPI.getTables(branchid);
-    print(jsonEncode(tables));
     setState(() {
       tableList = tables;
       isLoading = false;
@@ -152,8 +151,6 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   backToRefresh(value) {
-    print("++++++++++++++++++++++++++++++++");
-    print(value);
     getTables();
   }
 
@@ -1037,6 +1034,23 @@ class _SelectTablePageState extends State<SelectTablePage>
       style: TextStyle(
           color: Colors.black, fontSize: SizeConfig.safeBlockVertical * 4),
       onChanged: (e) {},
+      onSubmitted: (value) {
+        /* setState(() {
+          tableList.map((e) {
+            if (e == selectedTable) {
+              return e.numberofpax = int.tryParse(value);
+            } else
+              return e;
+          });
+        }); */
+        if (!isMergeing) {
+          if (isAssigning) {
+            assignTabletoOrder();
+          } else {
+            selectTableForNewOrder();
+          }
+        }
+      },
     );
   }
 

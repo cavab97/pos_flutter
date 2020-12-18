@@ -53,6 +53,7 @@ import 'package:mcncashier/screens/ChangeQtyDailog.dart';
 import 'package:mcncashier/screens/SplitOrder.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/screens/ReprintPopup.dart';
+import 'package:mcncashier/screens/payment/PaymentAlertDialog.dart';
 import 'package:mcncashier/screens/CashPayment.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -323,6 +324,7 @@ class _DashboradPageState extends State<DashboradPage>
       var voucherdetail = jsonDecode(cart.voucher_detail);
       vaocher = Voucher.fromJson(voucherdetail);
     }
+    // taxJson = json.decode(cart.tax_json);
     if (cart.id == null) {
       return;
     }
@@ -898,15 +900,16 @@ class _DashboradPageState extends State<DashboradPage>
 
   sendPayment() async {
     if (cartList.length != 0) {
-      opnePaymentMethod();
-      /* if (permissions.contains(Constant.PAYMENT)) {
-        opnePaymentMethod();
+      if (permissions.contains(Constant.PAYMENT)) {
+        openPaymentMethod();
+        //opnePaymentMethod();
       } else {
         await CommonUtils.openPermissionPop(context, Constant.PAYMENT,
             () async {
-          opnePaymentMethod();
+          openPaymentMethod();
+          //opnePaymentMethod();
         }, () {});
-      } */
+      }
     } else {
       CommunFun.showToast(context, Strings.cart_empty);
     }
@@ -1055,6 +1058,20 @@ class _DashboradPageState extends State<DashboradPage>
                 checkCustomerSelected();
               },
               isFor: Constant.dashboard);
+        });
+  }
+
+  openPaymentMethod() async {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return PaymentAlertDialog(
+            totalAmount: grandTotal,
+            onClose: (mehtod) {
+              CommunFun.processingPopup(context);
+              paymentWithMethod(mehtod);
+            },
+          );
         });
   }
 
@@ -3496,7 +3513,7 @@ class _DashboradPageState extends State<DashboradPage>
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
               color: cart.id == itemSelectedIndex.id
-                  ? Colors.deepOrange[400]
+                  ? Colors.deepOrange[200]
                   : Colors.transparent,
               child: Row(
                 children: <Widget>[
@@ -3558,8 +3575,13 @@ class _DashboradPageState extends State<DashboradPage>
                       child: Icon(
                         Icons.close,
                         color: Colors.red,
-                        size: 30,
-                      ),
+                      ), /* Text('x',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                            fontSize: SizeConfig.safeBlockVertical * 4,
+                          ),
+                          textAlign: TextAlign.center), */
                     ),
                     flex: 1,
                   ),
