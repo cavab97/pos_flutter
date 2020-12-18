@@ -72,7 +72,6 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
             List<Payments> subList = subPaymenttyppeList
                 .where((i) => i.isParent == payment.paymentId)
                 .toList();
-            print(subPaymenttyppeList.toString());
             if (subList.length > 0) {
               openSubPaymentDialog(subList);
               //subPaymenttyppeList = subList;
@@ -604,7 +603,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   }
 
   finalPayment() async {
-    List<OrderPayment> totalPayment = [];
+    //List<OrderPayment> totalPayment = [];
     double change = paidAmount - widget.totalAmount;
     await showDialog(
         context: context,

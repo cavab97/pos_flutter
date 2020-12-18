@@ -5,6 +5,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class CashPaymentPage extends StatefulWidget {
   // Opning ammount popup
@@ -102,7 +103,8 @@ class _CashPaymentState extends State<CashPaymentPage> {
                 horizontal: SizeConfig.safeBlockVertical * 5),
             height: SizeConfig.safeBlockVertical * 9,
             decoration: BoxDecoration(
-                color: Colors.white, border: Border.all(color: Colors.black)),
+                color: StaticColor.colorWhite,
+                border: Border.all(color: StaticColor.colorBlack)),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -162,14 +164,15 @@ class _CashPaymentState extends State<CashPaymentPage> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -192,13 +195,13 @@ class _CashPaymentState extends State<CashPaymentPage> {
       child: MaterialButton(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
-            side: BorderSide(color: Colors.grey)),
+            side: BorderSide(color: StaticColor.colorGrey)),
         child: number != Strings.enter
             ? Text(number,
                 textAlign: TextAlign.center, style: Styles.blackMediumBold())
             : Icon(Icons.subdirectory_arrow_left, size: 30),
-        textColor: Colors.black,
-        color: Colors.grey[100],
+        textColor: StaticColor.colorBlack,
+        color: StaticColor.lightGrey100,
         onPressed: f,
       ),
     );
@@ -214,13 +217,13 @@ class _CashPaymentState extends State<CashPaymentPage> {
       child: MaterialButton(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
-            side: BorderSide(color: Colors.grey)),
+            side: BorderSide(color: StaticColor.colorGrey)),
         child: number != Strings.enter
             ? Text(number,
                 textAlign: TextAlign.center, style: Styles.blackMediumBold())
             : Icon(Icons.subdirectory_arrow_left, size: 30),
-        textColor: Colors.black,
-        color: Colors.grey[100],
+        textColor: StaticColor.colorBlack,
+        color: StaticColor.lightGrey100,
         onPressed: f,
       ),
     );
@@ -237,13 +240,13 @@ class _CashPaymentState extends State<CashPaymentPage> {
         child: MaterialButton(
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10.0),
-              side: BorderSide(color: Colors.grey)),
+              side: BorderSide(color: StaticColor.colorGrey)),
           child: number != Strings.enter
               ? Text(number,
                   textAlign: TextAlign.center, style: Styles.blackMediumBold())
               : Icon(Icons.subdirectory_arrow_left, size: 30),
-          textColor: Colors.black,
-          color: Colors.grey[100],
+          textColor: StaticColor.colorBlack,
+          color: StaticColor.lightGrey100,
           onPressed: f,
         ),
       ),
@@ -260,14 +263,14 @@ class _CashPaymentState extends State<CashPaymentPage> {
       child: MaterialButton(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
-            side: BorderSide(color: Colors.grey)),
+            side: BorderSide(color: StaticColor.colorGrey)),
         child: Icon(
           Icons.backspace,
-          color: Colors.black,
+          color: StaticColor.colorBlack,
           size: SizeConfig.safeBlockVertical * 4,
         ),
-        textColor: Colors.black,
-        color: Colors.grey[100],
+        textColor: StaticColor.colorBlack,
+        color: StaticColor.lightGrey100,
         onPressed: f,
       ),
     );
@@ -279,7 +282,7 @@ class _CashPaymentState extends State<CashPaymentPage> {
       width: MediaQuery.of(context).size.width / 1.8,
       child: Center(
           child: Table(
-        border: TableBorder.all(color: Colors.white, width: 0.6),
+        border: TableBorder.all(color: StaticColor.colorWhite, width: 0.6),
         columnWidths: {
           //0: FractionColumnWidth(.2),
           0: FractionColumnWidth(.2),

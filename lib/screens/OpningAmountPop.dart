@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class OpeningAmmountPage extends StatefulWidget {
   // Opning ammount popup
@@ -29,7 +30,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
           Container(
             padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 3),
             height: SizeConfig.safeBlockVertical * 9,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -89,14 +90,15 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -126,13 +128,13 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
       child: MaterialButton(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
-            side: BorderSide(color: Colors.grey)),
+            side: BorderSide(color: StaticColor.colorGrey)),
         child: number != Strings.enter
             ? Text(number,
                 textAlign: TextAlign.center, style: Styles.blackMediumBold())
             : Icon(Icons.subdirectory_arrow_left, size: 35),
-        textColor: Colors.black,
-        color: Colors.grey[100],
+        textColor: StaticColor.colorBlack,
+        color: StaticColor.lightGrey100,
         onPressed: f,
       ),
     );
@@ -148,14 +150,14 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
       child: MaterialButton(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
-            side: BorderSide(color: Colors.grey)),
+            side: BorderSide(color: StaticColor.colorGrey)),
         child: Icon(
           Icons.backspace,
-          color: Colors.black,
+          color: StaticColor.colorBlack,
           size: SizeConfig.safeBlockVertical * 4,
         ),
-        textColor: Colors.black,
-        color: Colors.grey[100],
+        textColor: StaticColor.colorBlack,
+        color: StaticColor.lightGrey100,
         onPressed: f,
       ),
     );

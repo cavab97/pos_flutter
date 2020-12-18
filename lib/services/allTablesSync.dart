@@ -199,7 +199,7 @@ class SyncAPICalls {
     log.status = 1;
     log.updated_at = datetime;
     log.updated_by = userdata.id;
-    var logid = await localAPI.terminalLog(log);
+    await localAPI.terminalLog(log);
   }
 
   static syncOrderstoDatabase(context) async {
@@ -459,7 +459,7 @@ class SyncAPICalls {
                   attr.updated_by = attributeDt["updated_by"];
                   attr.isSync = 1;
                   attr.server_id = attributeDt["server_id"];
-                  var attrres = await localAPI.saveSyncOrderAttribute(attr);
+                  await localAPI.saveSyncOrderAttribute(attr);
                 }
               }
             }
@@ -549,29 +549,26 @@ class SyncAPICalls {
       var apiurl = Configrations.cancle_order;
       var terminalId = await CommunFun.getTeminalKey();
       var branchid = await CommunFun.getbranchId();
-      LocalAPI localAPI = LocalAPI();
       List<CancelOrder> orderdata = await localAPI.getCancleOrder(terminalId);
       if (orderdata.length > 0) {
-        if (orderdata.length > 0) {
-          var stringParams = {
-            'branch_id': branchid,
-            'terminal_id': terminalId,
-            'order_cancel': json.encode(orderdata)
-          };
-          var res = await APICalls.apiCall(apiurl, context, stringParams);
+        var stringParams = {
+          'branch_id': branchid,
+          'terminal_id': terminalId,
+          'order_cancel': json.encode(orderdata)
+        };
+        var res = await APICalls.apiCall(apiurl, context, stringParams);
 
-          if (res["status"] == Constant.STATUS200) {
-            saveCancleORderTable(res);
-          }
-          CommunFun.showToast(context, "Sync sucessfully done.");
+        if (res["status"] == Constant.STATUS200) {
+          saveCancleORderTable(res);
         }
+        CommunFun.showToast(context, "Sync sucessfully done.");
       } else {
-        Navigator.of(context).pop();
+        //Navigator.of(context).pop();
         //CommunFun.showToast(context, "all cancel tables up to dates.");
       }
     } catch (e) {
       print(e);
-      CommunFun.showToast(context, e.message);
+      await CommunFun.showToast(context, e.message);
       Navigator.of(context).pop();
     }
   }
@@ -643,7 +640,7 @@ class SyncAPICalls {
           inventory.updatedAt = storeitem['updated_at'];
           inventory.updatedBy = storeitem['updated_by'];
           var storLodGata = storeitem["product_store_inventory_log"];
-          var result1 = await localAPI.saveSyncInvStoreTable(inventory);
+          await localAPI.saveSyncInvStoreTable(inventory);
           if (storLodGata.length > 0) {
             for (var j = 0; j < storLodGata.length; j++) {
               var storLoditem = storLodGata[j];
@@ -667,7 +664,7 @@ class SyncAPICalls {
                   : storLoditem['qty_after_change'];
               log.updated_at = storLoditem["updated_at"];
               log.updated_by = storLoditem["updated_by"];
-              var result2 = await localAPI.saveSyncInvStoreLogTable(log);
+              await localAPI.saveSyncInvStoreLogTable(log);
             }
           }
         }
@@ -698,7 +695,7 @@ class SyncAPICalls {
         cancle_order.serverId = order['server_id'];
         cancle_order.terminalId = order['terminal_id'];
         cancle_order.isSync = 1;
-        var result2 = await localAPI.saveSyncCancelTable(cancle_order);
+        await localAPI.saveSyncCancelTable(cancle_order);
       }
     }
   }
@@ -817,7 +814,7 @@ class SyncAPICalls {
           customerWineInt.updatedAt: custInv["updated_at"],
           customerWineInt.updatedBy: custInv["updated_by"],
         };
-        var result = await localAPI.saveSuctomerWineInventory(customerWineInt);
+        await localAPI.saveSuctomerWineInventory(customerWineInt);
 
         var storLodGata = custInv["product_store_inventory_log"];
         for (var j = 0; j < storLodGata.length; j++) {
@@ -841,7 +838,7 @@ class SyncAPICalls {
             invLog.updatedAt: logint['updated_at'],
             invLog.updatedBy: logint['updated_by'],
           };
-          var result = await localAPI.saveSuctomerWineInventoryLogs(invLog);
+          await localAPI.saveSuctomerWineInventoryLogs(invLog);
         }
       }
     }
@@ -884,19 +881,20 @@ class SyncAPICalls {
       LocalAPI localAPI = LocalAPI();
       List<ShiftInvoice> invoiceData =
           await localAPI.getShiftInvoiceTable(terminalId);
-      if (invoiceData.length < 1) {
-        invoiceData = [];
-      }
-      var stringParams = {
-        'branch_id': branchid,
-        'terminal_id': terminalId,
-        'shift_detail': json.encode(invoiceData)
-      };
-      var res = await APICalls.apiCall(apiurl, context, stringParams);
-      if (res.length > 0 && res["status"] == Constant.STATUS200) {
-        saveShiftDetailToTable(context, res);
+      if (invoiceData.length > 0) {
+        var stringParams = {
+          'branch_id': branchid,
+          'terminal_id': terminalId,
+          'shift_detail': json.encode(invoiceData)
+        };
+        var res = await APICalls.apiCall(apiurl, context, stringParams);
+        if (res.length > 0 && res["status"] == Constant.STATUS200) {
+          saveShiftDetailToTable(context, res);
+        } else {
+          print('sendShiftdetails api error');
+        }
       } else {
-        print('sendShiftdetails api error');
+        print('invoice data is empty');
       }
     } catch (e) {
       print(e);
@@ -924,7 +922,7 @@ class SyncAPICalls {
         shift.updatedBy = shiftitem['updated_by'];
         shift.createdAt = shiftitem['created_at'];
         shift.serverId = shiftitem['server_id'];
-        var result = await localAPI.saveShiftDatafromSync(shift);
+        await localAPI.saveShiftDatafromSync(shift);
       }
     }
   }
@@ -947,7 +945,7 @@ class SyncAPICalls {
         shiftInvoice.updated_at = logint["updated_at"];
         shiftInvoice.serverId = logint["server_id"];
         shiftInvoice.terminal_id = logint["terminal_id"];
-        var result = await localAPI.saveShiftInvoiceDatafromSync(shiftInvoice);
+        await localAPI.saveShiftInvoiceDatafromSync(shiftInvoice);
       }
     }
   }
@@ -1000,7 +998,7 @@ class SyncAPICalls {
         terminalLog.status = logint.status;
         terminalLog.updated_at = logint.updated_at;
         terminalLog.updated_by = logint.updated_by;
-        var result = await localAPI.saveTerminalLogFromSync(terminalLog);
+        await localAPI.saveTerminalLogFromSync(terminalLog);
       }
     }
   }

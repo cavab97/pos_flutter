@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class ChoosePrinterDailog extends StatefulWidget {
   ChoosePrinterDailog({Key key, this.selectedIP, this.onClose})
@@ -29,12 +30,12 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: 70,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(Strings.printer_type, style: Styles.whiteBold()),
+                Text(Strings.printerType, style: Styles.whiteBold()),
               ],
             ),
           ),
@@ -65,14 +66,15 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -98,7 +100,7 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
             children: <Widget>[
               ListTile(
                   title: Text(
-                    Strings.recipt_printer,
+                    Strings.reciptPrinter,
                     style: Styles.communBlack(),
                   ),
                   trailing: Transform.scale(
@@ -114,7 +116,7 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
                   )),
               ListTile(
                 title: Text(
-                  Strings.kitchen_printer,
+                  Strings.kitchenPrinter,
                   style: Styles.communBlack(),
                 ),
                 trailing: Transform.scale(

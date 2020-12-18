@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class ChangeQtyDailog extends StatefulWidget {
   ChangeQtyDailog({Key key, this.type, this.qty, this.onClose})
@@ -55,14 +56,14 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: SizeConfig.safeBlockVertical * 9,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(Strings.enter_qty,
+                Text(Strings.enterQty,
                     style: TextStyle(
                         fontSize: SizeConfig.safeBlockVertical * 3,
-                        color: Colors.white)),
+                        color: StaticColor.colorWhite)),
                 addbutton(context)
               ],
             ),
@@ -114,7 +115,7 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
 
   Widget remarkfield() {
     return Card(
-        color: Colors.grey[200],
+        color: StaticColor.lightGrey100,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -148,14 +149,15 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -174,14 +176,14 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
           Text(
             Strings.done,
             style: TextStyle(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               fontSize: SizeConfig.safeBlockVertical * 3,
             ),
           ),
         ],
       ),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
+      color: StaticColor.deepOrange,
+      textColor: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(50.0),
       ),
@@ -197,11 +199,11 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
         child: Text(number,
             textAlign: TextAlign.center,
             style: TextStyle(
-                color: Colors.white,
+                color: StaticColor.colorWhite,
                 fontWeight: FontWeight.bold,
                 fontSize: 30.0)),
-        textColor: Colors.black,
-        color: Colors.deepOrange,
+        textColor: StaticColor.colorBlack,
+        color: StaticColor.deepOrange,
         onPressed: f,
       ),
     );
@@ -211,13 +213,13 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
     return Container(
       height: 40,
       width: 100,
-      decoration:
-          BoxDecoration(border: Border.all(width: 1, color: Colors.grey)),
+      decoration: BoxDecoration(
+          border: Border.all(width: 1, color: StaticColor.colorGrey)),
       child: Center(
           child: Text(
               productQty.toString() +
                   (widget.type != null ? " " + widget.type : ""),
-              style: TextStyle(color: Colors.grey, fontSize: 20))),
+              style: TextStyle(color: StaticColor.colorGrey, fontSize: 20))),
     );
   }
 }

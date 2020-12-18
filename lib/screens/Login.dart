@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
@@ -46,14 +47,14 @@ class _LoginPageState extends State<LoginPage> {
   validateFields() async {
     if (emailAddress.text == "" || emailAddress.text.length == 0) {
       setState(() {
-        errorUserName = Strings.username_validation_msg;
+        errorUserName = Strings.usernameValidationMsg;
         errorPin = "";
         isValidateEmail = false;
       });
       return false;
     } else if (userPin.text == "" || userPin.text.length == 0) {
       setState(() {
-        errorPin = Strings.userPin_validation_msg;
+        errorPin = Strings.userPinValidationMsg;
         errorUserName = "";
         isValidatePassword = false;
       });
@@ -109,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
         }).whenComplete(() {});
       }
     } else {
-      CommunFun.showToast(context, Strings.internet_connection_lost);
+      CommunFun.showToast(context, Strings.internetConnectionLost);
     }
   }
 
@@ -169,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             isLoading: isScreenLoad,
-            color: Colors.black87,
+            color: StaticColor.colorLightBlack,
             progressIndicator: CommunFun.overLayLoader()),
       ),
       onWillPop: _willPopCallback,
@@ -182,7 +183,7 @@ class _LoginPageState extends State<LoginPage> {
       //height: 110.0,
       height: SizeConfig.safeBlockVertical * 15,
       child: Image.asset(
-        Strings.asset_headerLogo,
+        Strings.assetHeaderLogo,
         fit: BoxFit.contain,
         gaplessPlayback: true,
       ),
@@ -199,14 +200,15 @@ class _LoginPageState extends State<LoginPage> {
           padding: EdgeInsets.only(left: 20, right: 20),
           child: Icon(
             Icons.perm_identity,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             size: SizeConfig.safeBlockVertical * 6,
           ),
         ),
         errorText: !isValidateEmail ? errorUserName : null,
         errorStyle: TextStyle(
-            color: Colors.red, fontSize: SizeConfig.safeBlockVertical * 4),
-        hintText: Strings.username_hint,
+            color: StaticColor.colorRed,
+            fontSize: SizeConfig.safeBlockVertical * 4),
+        hintText: Strings.usernameHint,
         hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50),
@@ -219,7 +221,7 @@ class _LoginPageState extends State<LoginPage> {
         contentPadding: EdgeInsets.only(
             top: SizeConfig.safeBlockVertical * 3,
             bottom: SizeConfig.safeBlockVertical * 3),
-        fillColor: Colors.white,
+        fillColor: StaticColor.colorWhite,
       ),
       style: Styles.normalBlack(),
       onChanged: onChange,
@@ -233,6 +235,7 @@ class _LoginPageState extends State<LoginPage> {
       obscureText: true,
       keyboardType: TextInputType.number,
       inputFormatters: <TextInputFormatter>[
+        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
         WhitelistingTextInputFormatter.digitsOnly
       ],
       decoration: InputDecoration(
@@ -240,14 +243,15 @@ class _LoginPageState extends State<LoginPage> {
           padding: EdgeInsets.only(left: 20, right: 20),
           child: Icon(
             Icons.lock_outline,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             size: SizeConfig.safeBlockVertical * 6,
           ),
         ),
         errorText: !isValidatePassword ? errorPin : null,
         errorStyle: TextStyle(
-            color: Colors.red, fontSize: SizeConfig.safeBlockVertical * 4),
-        hintText: Strings.pin_hint,
+            color: StaticColor.colorRed,
+            fontSize: SizeConfig.safeBlockVertical * 4),
+        hintText: Strings.pinHint,
         hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50),
@@ -260,7 +264,7 @@ class _LoginPageState extends State<LoginPage> {
         contentPadding: EdgeInsets.only(
             top: SizeConfig.safeBlockVertical * 3,
             bottom: SizeConfig.safeBlockVertical * 3),
-        fillColor: Colors.white,
+        fillColor: StaticColor.colorWhite,
       ),
       //obscureText: true,
       style: Styles.normalBlack(),

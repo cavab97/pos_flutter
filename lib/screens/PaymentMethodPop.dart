@@ -10,7 +10,7 @@ import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/screens/CashPayment.dart';
 import 'package:mcncashier/screens/FinalPaymentScreen.dart';
-import 'package:mcncashier/screens/OpningAmountPop.dart';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
@@ -281,7 +281,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: SizeConfig.safeBlockVertical * 9,
             decoration: BoxDecoration(
-                color: Colors.white, border: Border.all(color: Colors.black)),
+                color: StaticColor.colorWhite,
+                border: Border.all(color: StaticColor.colorBlack)),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -315,13 +316,13 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                     leading: Hero(
                       tag: payment.paymentId != null ? payment.paymentId : 0,
                       child: Container(
-                        //color: Colors.grey,
+                        //color: StaticColor.colorGrey,
                         width: 40,
                         height: 40,
                         child: payment.base64 != ""
                             ? CommonUtils.imageFromBase64String(payment.base64)
                             : new Image.asset(
-                                Strings.no_image,
+                                Strings.noImage,
                                 fit: BoxFit.cover,
                                 gaplessPlayback: true,
                               ),
@@ -331,7 +332,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                 payment.name.contains("Wallet")
                     ? Icons.account_balance_wallet
                     : Icons.credit_card,
-                color: Colors.black,
+                color: StaticColor.colorBlack,
                 size: SizeConfig.safeBlockVertical * 7,
               ),*/
                     // Container(
@@ -354,7 +355,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                     title: Text(payment.name, style: Styles.blackMediumBold()),
                     trailing: Icon(
                       Icons.arrow_forward_ios,
-                      color: Colors.black,
+                      color: StaticColor.colorBlack,
                       size: SizeConfig.safeBlockVertical * 4,
                     ));
               }).toList(),
@@ -362,7 +363,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
             Container(
               decoration: BoxDecoration(
                   border: Border.all(
-                    color: Colors.grey,
+                    color: StaticColor.colorGrey,
                     width: 1,
                   ),
                   borderRadius: BorderRadius.circular(5.0)),
@@ -378,7 +379,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                 //   },
                 //   icon: Icon(
                 //     ispaymented ? Icons.call_split : Icons.close,
-                //     color: Colors.black,
+                //     color: StaticColor.colorBlack,
                 //     size: SizeConfig.safeBlockVertical * 4,
                 //   ),
                 // ),
@@ -428,14 +429,15 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -467,7 +469,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(Strings.enter_last, style: Styles.blackMediumBold()),
+                  Text(Strings.enterLast, style: Styles.blackMediumBold()),
                   SizedBox(
                     height: 20,
                   ),
@@ -475,7 +477,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                   SizedBox(
                     height: 10,
                   ),
-                  Text(Strings.approval_code, style: Styles.blackMediumBold()),
+                  Text(Strings.approvalCode, style: Styles.blackMediumBold()),
                   SizedBox(
                     height: 20,
                   ),
@@ -516,34 +518,37 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       controller: digitController,
       validator: (value) {
         if (value.isEmpty) {
-          return Strings.digit_validation_msg;
+          return Strings.digitValidationMsg;
         } else if (value.length < 4) {
-          return Strings.minimum_Req_msg;
+          return Strings.minimumReqMsg;
         }
         return null;
       },
       inputFormatters: <TextInputFormatter>[
+        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
         WhitelistingTextInputFormatter.digitsOnly
       ],
       keyboardType: TextInputType.number,
       maxLength: 4,
       decoration: InputDecoration(
         errorStyle: TextStyle(
-            color: Colors.red, fontSize: SizeConfig.safeBlockVertical * 2),
-        hintText: Strings.enter_digit,
+            color: StaticColor.colorRed,
+            fontSize: SizeConfig.safeBlockVertical * 2),
+        hintText: Strings.enterDigit,
         hintStyle: TextStyle(
-            fontSize: SizeConfig.safeBlockVertical * 2, color: Colors.grey),
+            fontSize: SizeConfig.safeBlockVertical * 2,
+            color: StaticColor.colorGrey),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(width: 3, color: Colors.grey),
+          borderSide: BorderSide(width: 3, color: StaticColor.colorGrey),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(width: 3, color: Colors.grey),
+          borderSide: BorderSide(width: 3, color: StaticColor.colorGrey),
         ),
         filled: true,
         contentPadding: EdgeInsets.all(15),
-        fillColor: Colors.white,
+        fillColor: StaticColor.colorWhite,
       ),
       style: Styles.greysmall(),
       onChanged: (e) {
@@ -558,7 +563,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     return TextFormField(
       validator: (value) {
         if (value.isEmpty) {
-          return Strings.approval_code_msg;
+          return Strings.approvalCodeMsg;
         }
         return null;
       },
@@ -566,21 +571,23 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       keyboardType: TextInputType.text,
       decoration: InputDecoration(
         errorStyle: TextStyle(
-            color: Colors.red, fontSize: SizeConfig.safeBlockVertical * 2),
-        hintText: Strings.enter_Code,
+            color: StaticColor.colorRed,
+            fontSize: SizeConfig.safeBlockVertical * 2),
+        hintText: Strings.enterCode,
         hintStyle: TextStyle(
-            fontSize: SizeConfig.safeBlockVertical * 2, color: Colors.grey),
+            fontSize: SizeConfig.safeBlockVertical * 2,
+            color: StaticColor.colorGrey),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(width: 3, color: Colors.grey),
+          borderSide: BorderSide(width: 3, color: StaticColor.colorGrey),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(width: 3, color: Colors.grey),
+          borderSide: BorderSide(width: 3, color: StaticColor.colorGrey),
         ),
         filled: true,
         contentPadding: EdgeInsets.all(15),
-        fillColor: Colors.white,
+        fillColor: StaticColor.colorWhite,
       ),
       style: Styles.greysmall(),
       onChanged: (e) {
@@ -597,21 +604,23 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       keyboardType: TextInputType.text,
       decoration: InputDecoration(
         errorStyle: TextStyle(
-            color: Colors.red, fontSize: SizeConfig.safeBlockVertical * 2),
-        hintText: Strings.enter_remark,
+            color: StaticColor.colorRed,
+            fontSize: SizeConfig.safeBlockVertical * 2),
+        hintText: Strings.enterRemark,
         hintStyle: TextStyle(
-            fontSize: SizeConfig.safeBlockVertical * 2, color: Colors.grey),
+            fontSize: SizeConfig.safeBlockVertical * 2,
+            color: StaticColor.colorGrey),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(width: 3, color: Colors.grey),
+          borderSide: BorderSide(width: 3, color: StaticColor.colorGrey),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(width: 3, color: Colors.grey),
+          borderSide: BorderSide(width: 3, color: StaticColor.colorGrey),
         ),
         filled: true,
         contentPadding: EdgeInsets.all(15),
-        fillColor: Colors.white,
+        fillColor: StaticColor.colorWhite,
       ),
       style: Styles.greysmall(),
       onChanged: (e) {
@@ -627,28 +636,30 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       controller: refInputController,
       validator: (value) {
         if (value.isEmpty) {
-          return Strings.reference_num_msg;
+          return Strings.referenceNumMsg;
         }
         return null;
       },
       keyboardType: TextInputType.text,
       decoration: InputDecoration(
         errorStyle: TextStyle(
-            color: Colors.red, fontSize: SizeConfig.safeBlockVertical * 2),
-        hintText: Strings.enterref_number,
+            color: StaticColor.colorRed,
+            fontSize: SizeConfig.safeBlockVertical * 2),
+        hintText: Strings.enterRefNum,
         hintStyle: TextStyle(
-            fontSize: SizeConfig.safeBlockVertical * 2, color: Colors.grey),
+            fontSize: SizeConfig.safeBlockVertical * 2,
+            color: StaticColor.colorGrey),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(width: 3, color: Colors.grey),
+          borderSide: BorderSide(width: 3, color: StaticColor.colorGrey),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(width: 3, color: Colors.grey),
+          borderSide: BorderSide(width: 3, color: StaticColor.colorGrey),
         ),
         filled: true,
         contentPadding: EdgeInsets.all(15),
-        fillColor: Colors.white,
+        fillColor: StaticColor.colorWhite,
       ),
       style: Styles.greysmall(),
       onChanged: (e) {
@@ -682,7 +693,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(Strings.enter_ref_num, style: Styles.blackMediumBold()),
+                  Text(Strings.enterRefNum, style: Styles.blackMediumBold()),
                   SizedBox(
                     height: 20,
                   ),

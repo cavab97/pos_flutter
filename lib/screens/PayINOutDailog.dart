@@ -7,6 +7,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/Terminal.dart';
@@ -64,7 +65,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         context: context,
         builder: (BuildContext context) {
           return OpeningAmmountPage(
-              ammountext: Strings.pay_in_ammount,
+              ammountext: Strings.payInAmmount,
               onEnter: (ammountext) {
                 setamount(ammountext);
               });
@@ -109,7 +110,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
           Container(
             padding: EdgeInsets.only(left: 50, right: 30, top: 10, bottom: 10),
             height: 70,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -142,7 +143,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
                 selectedreason,
                 ammount);
           } else {
-            CommunFun.showToast(context, Strings.printer_not_available);
+            CommunFun.showToast(context, Strings.printerNotAvailable);
           }
         }
 
@@ -152,8 +153,8 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         "Confirm",
         style: Styles.whiteSimpleSmall(),
       ),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
+      color: StaticColor.deepOrange,
+      textColor: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(50.0),
       ),
@@ -172,14 +173,15 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -214,13 +216,13 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
               },
               child: Text(ammount.toStringAsFixed(2),
                   style: Styles.blackBoldLarge())),
-          Text(Strings.please_select_reason, style: Styles.drawerText()),
+          Text(Strings.pleaseSelectReason, style: Styles.drawerText()),
           Container(
               width: MediaQuery.of(context).size.width / 4,
               padding: EdgeInsets.all(12),
               margin: EdgeInsets.only(top: 5),
               height: 50,
-              color: Colors.grey[300],
+              color: StaticColor.colorGrey400,
               child: Center(
                 child: DropdownButton<String>(
                   underline: Container(
@@ -231,7 +233,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
                     Icons.arrow_forward_ios,
                     size: 12,
                   ),
-                  hint: Text(Strings.please_select_reason),
+                  hint: Text(Strings.pleaseSelectReason),
                   value: selectedreason,
                   isExpanded: true,
                   onChanged: (String string) {

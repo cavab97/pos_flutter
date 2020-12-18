@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
@@ -83,7 +84,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
         });
       }
     } else {
-      CommunFun.showToast(context, Strings.internet_connection_lost);
+      CommunFun.showToast(context, Strings.internetConnectionLost);
     }
   }
 
@@ -118,8 +119,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
                         // Key add button
                         width: MediaQuery.of(context).size.width,
                         child: CommunFun.roundedButton(
-                            Strings.set_terminal_key.toUpperCase(), context,
-                            () {
+                            Strings.setTerminalKey.toUpperCase(), context, () {
                           setTerminalkey();
                         }),
                       )
@@ -130,7 +130,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
             ),
           ),
           isLoading: isLoading,
-          color: Colors.black87,
+          color: StaticColor.colorLightBlack,
           progressIndicator: CommunFun.overLayLoader()),
     );
   }
@@ -139,7 +139,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
     return SizedBox(
       height: 110.0,
       child: Image.asset(
-        Strings.asset_headerLogo,
+        Strings.assetHeaderLogo,
         fit: BoxFit.contain,
         gaplessPlayback: true,
       ),
@@ -155,12 +155,12 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
           padding: EdgeInsets.only(left: 25, right: 25),
           child: Icon(
             Icons.vpn_key,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             size: 40,
           ),
         ),
         errorText: !isValidatekey ? errormessage : null,
-        errorStyle: TextStyle(color: Colors.red, fontSize: 25.0),
+        errorStyle: TextStyle(color: StaticColor.colorRed, fontSize: 25.0),
         hintText: Strings.terminalKey,
         hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
@@ -168,7 +168,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
         ),
         filled: true,
         contentPadding: EdgeInsets.only(top: 20, bottom: 20),
-        fillColor: Colors.white,
+        fillColor: StaticColor.colorWhite,
       ),
       style: Styles.normalBlack(),
       onChanged: onChange,

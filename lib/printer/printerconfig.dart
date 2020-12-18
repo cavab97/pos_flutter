@@ -48,7 +48,7 @@ class PrintReceipt {
         ),
         linesAfter: 1);
 
-    ticket.text('Pax : ' + pax,
+    ticket.text('Pax : ' + (pax ?? 0),
         styles: PosStyles(
           fontType: PosFontType.fontA,
           bold: true,
@@ -116,7 +116,7 @@ class PrintReceipt {
           PosColumn(
               text: item.productName,
               width: 10,
-              containsChinese: false,
+              containsChinese: true,
               styles: PosStyles(
                 align: PosAlign.left,
                 fontType: PosFontType.fontA,
@@ -306,7 +306,10 @@ class PrintReceipt {
       List<Payments> paymentMethods,
       String tableName,
       var currency,
-      String customerName) async {
+      String customerName,
+      ctx,
+      bool isFor,
+      bool isper) async {
     bool isCashPayment = false;
     double cashPaymentTotal = 0.00;
     double cashPaymentChange = 0.00;
@@ -320,9 +323,18 @@ class PrintReceipt {
 
     final ByteData data =
         await rootBundle.load('assets/headerlogo_receipt.png');
-    final Uint8List bytes = data.buffer.asUint8List();
-    final image = decodeImage(bytes);
-    ticket.image(image);
+
+    var strImage;
+    Uint8List bytes = data.buffer.asUint8List();
+    if (branchData != null) {
+      strImage = branchData.base64;
+      if (branchData.base64.contains("base64,")) {
+        strImage = branchData.base64.split("base64,")[1];
+      }
+      bytes = base64Decode(strImage);
+    }
+
+    ticket.image(decodeImage(bytes));
 
     ticket.emptyLines(1);
 
@@ -428,7 +440,7 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: " : " + pax,
+          text: " : " + (pax ?? 0),
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -726,8 +738,8 @@ class PrintReceipt {
           styles: PosStyles(
               align: PosAlign.right, fontType: PosFontType.fontA, bold: false)),
       PosColumn(
-          text: calRounded(total, orderData.grand_total).toStringAsFixed(2) +
-              "  ",
+          text: orderData.rounding_amount.toStringAsFixed(
+              2), //calRounded(total, orderData.grand_total).toStringAsFixed(2),
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
@@ -820,8 +832,9 @@ class PrintReceipt {
           )),
       PosColumn(
           text: cashPaymentChange > 0
-              ? "-" + cashPaymentChange.toStringAsFixed(2) + "  "
-              : cashPaymentChange.toStringAsFixed(2) + "  ",
+              ? "-" + cashPaymentChange.toStringAsFixed(2)
+              : cashPaymentChange.toStringAsFixed(
+                  2), //(paymentdaWta.length > 0 ? paymentdata[0].op_amount_change :
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
@@ -837,6 +850,8 @@ class PrintReceipt {
       double amount = 0.00;
       if (paymentMethods[p].name.toLowerCase() == "cash") {
         amount = cashPaymentTotal - cashPaymentChange;
+      } else if (paymentMethods[p].name.toLowerCase() == "Entertainment Bill") {
+        amount = total;
       } else {
         amount = paymentdata[p].op_amount;
       }
@@ -877,7 +892,16 @@ class PrintReceipt {
           align: PosAlign.center,
           fontType: PosFontType.fontA,
         ));
-
+    if (isFor) {
+      ticket.emptyLines(1);
+      ticket.text('Duplicate',
+          styles: PosStyles(
+            width: PosTextSize.size2,
+            bold: true,
+            align: PosAlign.center,
+            fontType: PosFontType.fontA,
+          ));
+    }
     ticket.feed(1);
     ticket.cut();
 
@@ -903,6 +927,7 @@ class PrintReceipt {
       String tableName,
       var currency,
       String customerName,
+      isFor,
       isper) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
@@ -919,9 +944,11 @@ class PrintReceipt {
         paymentMethods,
         tableName,
         currency,
-        customerName));
-
-    CommunFun.showToast(ctx, res.msg);
+        customerName,
+        ctx,
+        isFor,
+        isper));
+    await CommunFun.showToast(ctx, res.msg);
   }
 
 /*========================================================================
@@ -949,12 +976,17 @@ class PrintReceipt {
 
     final ByteData data =
         await rootBundle.load('assets/headerlogo_receipt.png');
-    final Uint8List bytes = data.buffer.asUint8List();
-    final image = decodeImage(bytes);
-    ticket.image(image);
-
+    var strImage;
+    Uint8List bytes = data.buffer.asUint8List();
+    if (branchData != null) {
+      strImage = branchData.base64;
+      if (branchData.base64.contains("base64,")) {
+        strImage = branchData.base64.split("base64,")[1];
+      }
+      bytes = base64Decode(strImage);
+    }
+    ticket.image(decodeImage(bytes));
     ticket.emptyLines(1);
-
     ticket.text(branchData.address,
         styles: PosStyles(
             fontType: PosFontType.fontA,
@@ -1073,7 +1105,7 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: " : " + pax,
+          text: " : " + (pax ?? 0),
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -1095,7 +1127,7 @@ class PrintReceipt {
     ticket.hr();
 
     for (var i = 0; i < cartList.length; i++) {
-      var total = cartList[i].productQty * cartList[i].productPrice;
+      //var total = cartList[i].productQty * cartList[i].productPrice;
 
       String nameOfProduct = printColumnWitSpace(
           28, cartList[i].productName.toString().trim(), false);
@@ -1103,10 +1135,11 @@ class PrintReceipt {
           4, cartList[i].productQty.toStringAsFixed(0), true);
       String priceOfProduct = printColumnWitSpace(
           8, cartList[i].productPrice.toStringAsFixed(2), true);
-      String amountOfProduct =
-          printColumnWitSpace(8, total.toStringAsFixed(2), true);
+      String amountOfProduct = printColumnWitSpace(
+          8, cartList[i].productDetailAmount.toStringAsFixed(2), true);
 
       ticket.text("$nameOfProduct$qtyOfProduct$priceOfProduct$amountOfProduct",
+          containsChinese: true,
           styles: PosStyles(
               align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
@@ -1595,7 +1628,7 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: " : " + pax,
+          text: " : " + (pax ?? 0),
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -1716,6 +1749,7 @@ class PrintReceipt {
         PosColumn(
             text: cartList[i].productName,
             width: 7,
+            containsChinese: true,
             styles: PosStyles(
                 align: PosAlign.left,
                 fontType: PosFontType.fontA,
@@ -2333,7 +2367,7 @@ class PrintReceipt {
   ========================================================================*/
 
   void testReceiptPrint(String printerIp, BuildContext ctx, String printerName,
-      String isFor) async {
+      String isFor, bool isper) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 

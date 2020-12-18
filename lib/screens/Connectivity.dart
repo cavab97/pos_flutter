@@ -55,7 +55,6 @@ class _HomeState extends State<Home> {
   }
 
   void handlePOST(HttpRequest request) {
-   
     CommonUtils.showAlertDialog(context, () {
       Navigator.of(context).pop();
     }, () {
@@ -64,8 +63,7 @@ class _HomeState extends State<Home> {
   }
 
   void handleGet(HttpRequest request) {
- 
-    final guess = request.uri.queryParameters['q'];
+    //final guess = request.uri.queryParameters['q'];
     final response = request.response;
     response.statusCode = HttpStatus.ok;
   }
@@ -80,9 +78,10 @@ class _HomeState extends State<Home> {
       'ship': 'Millennium Falcon',
       'weakness': 'smuggling debts'
     };
-    HttpClientRequest request = await HttpClient().post("192.168.0.113", 8080, path) /*1*/
-      ..headers.contentType = ContentType.json /*2*/
-      ..write(jsonEncode(jsonData)); /*3*/
+    HttpClientRequest request =
+        await HttpClient().post("192.168.0.113", 8080, path) /*1*/
+          ..headers.contentType = ContentType.json /*2*/
+          ..write(jsonEncode(jsonData)); /*3*/
     HttpClientResponse response = await request.close(); /*4*/
     await utf8.decoder.bind(response /*5*/).forEach(print);
   }

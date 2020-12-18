@@ -33,7 +33,7 @@ class CustomTextFormField extends StatelessWidget {
       decoration: InputDecoration(
         errorStyle: TextStyle(
             color: Colors.red, fontSize: SizeConfig.safeBlockVertical * 2),
-        hintText: hintText, //Strings.enter_remark,
+        hintText: hintText, //Strings.enterRemark,
         hintStyle: TextStyle(
             fontSize: SizeConfig.safeBlockVertical * 2, color: Colors.grey),
         border: OutlineInputBorder(
