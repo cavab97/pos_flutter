@@ -40,7 +40,7 @@ class CloseShiftPageState extends State<CloseShiftPage> {
       padding: EdgeInsets.only(top: 20, left: 30, right: 30, bottom: 20),
       onPressed: onPress,
       child: Text(
-        Strings.close_shift,
+        Strings.closeShift,
         style: TextStyle(color: StaticColor.colorWhite, fontSize: 25),
       ),
       color: Colors.transparent,
@@ -87,7 +87,7 @@ class CloseShiftPageState extends State<CloseShiftPage> {
               ),
               SizedBox(height: 30),
               Text(
-                Strings.opened_at,
+                Strings.openedAt,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     decoration: TextDecoration.underline,

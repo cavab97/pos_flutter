@@ -120,7 +120,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       orderpayment.reference_number = refInputController.text;
       orderpayment.is_split = isSpliting ? 1 : 0;
       orderpayment.op_amount = ammount;
-      orderpayment.isCash = payment.name.toLowerCase().contains("cash") ? 1 : 0;
       double change = 0.0;
       if (ammount > widget.grandTotal) {
         change = ammount - widget.grandTotal;
@@ -176,8 +175,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       orderpayment.last_digits = digitController.text;
       orderpayment.reference_number = refInputController.text;
       orderpayment.is_split = isSpliting ? 1 : 0;
-      orderpayment.isCash =
-          seletedPayment.name.toLowerCase().contains("cash") ? 1 : 0;
       lastamount = lastamount - orderpayment.op_amount;
       setState(() {
         splitedPayment = splitedPayment + ammount;
@@ -314,7 +311,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               children: paymenttyppeList.map((payment) {
-                print(payment);
                 return ListTile(
                     contentPadding: EdgeInsets.all(5),
                     leading: Hero(
@@ -326,7 +322,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                         child: payment.base64 != ""
                             ? CommonUtils.imageFromBase64String(payment.base64)
                             : new Image.asset(
-                                Strings.no_image,
+                                Strings.noImage,
                                 fit: BoxFit.cover,
                                 gaplessPlayback: true,
                               ),
@@ -473,7 +469,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(Strings.enter_last, style: Styles.blackMediumBold()),
+                  Text(Strings.enterLast, style: Styles.blackMediumBold()),
                   SizedBox(
                     height: 20,
                   ),
@@ -481,7 +477,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                   SizedBox(
                     height: 10,
                   ),
-                  Text(Strings.approval_code, style: Styles.blackMediumBold()),
+                  Text(Strings.approvalCode, style: Styles.blackMediumBold()),
                   SizedBox(
                     height: 20,
                   ),
@@ -522,13 +518,14 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       controller: digitController,
       validator: (value) {
         if (value.isEmpty) {
-          return Strings.digit_validation_msg;
+          return Strings.digitValidationMsg;
         } else if (value.length < 4) {
-          return Strings.minimum_Req_msg;
+          return Strings.minimumReqMsg;
         }
         return null;
       },
       inputFormatters: <TextInputFormatter>[
+        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
         WhitelistingTextInputFormatter.digitsOnly
       ],
       keyboardType: TextInputType.number,
@@ -537,7 +534,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         errorStyle: TextStyle(
             color: StaticColor.colorRed,
             fontSize: SizeConfig.safeBlockVertical * 2),
-        hintText: Strings.enter_digit,
+        hintText: Strings.enterDigit,
         hintStyle: TextStyle(
             fontSize: SizeConfig.safeBlockVertical * 2,
             color: StaticColor.colorGrey),
@@ -566,7 +563,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     return TextFormField(
       validator: (value) {
         if (value.isEmpty) {
-          return Strings.approval_code_msg;
+          return Strings.approvalCodeMsg;
         }
         return null;
       },
@@ -576,7 +573,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         errorStyle: TextStyle(
             color: StaticColor.colorRed,
             fontSize: SizeConfig.safeBlockVertical * 2),
-        hintText: Strings.enter_Code,
+        hintText: Strings.enterCode,
         hintStyle: TextStyle(
             fontSize: SizeConfig.safeBlockVertical * 2,
             color: StaticColor.colorGrey),
@@ -609,7 +606,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         errorStyle: TextStyle(
             color: StaticColor.colorRed,
             fontSize: SizeConfig.safeBlockVertical * 2),
-        hintText: Strings.enter_remark,
+        hintText: Strings.enterRemark,
         hintStyle: TextStyle(
             fontSize: SizeConfig.safeBlockVertical * 2,
             color: StaticColor.colorGrey),
@@ -639,7 +636,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       controller: refInputController,
       validator: (value) {
         if (value.isEmpty) {
-          return Strings.reference_num_msg;
+          return Strings.referenceNumMsg;
         }
         return null;
       },
@@ -648,7 +645,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         errorStyle: TextStyle(
             color: StaticColor.colorRed,
             fontSize: SizeConfig.safeBlockVertical * 2),
-        hintText: Strings.enterref_number,
+        hintText: Strings.enterRefNum,
         hintStyle: TextStyle(
             fontSize: SizeConfig.safeBlockVertical * 2,
             color: StaticColor.colorGrey),
@@ -696,7 +693,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(Strings.enter_ref_num, style: Styles.blackMediumBold()),
+                  Text(Strings.enterRefNum, style: Styles.blackMediumBold()),
                   SizedBox(
                     height: 20,
                   ),

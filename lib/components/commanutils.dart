@@ -74,6 +74,7 @@ class CommonUtils {
   }
 
   static openPermissionPop(context, permissionFor, callback, closeCallback) {
+    if (context == null) return;
     showDialog(
         context: context,
         barrierDismissible: false,

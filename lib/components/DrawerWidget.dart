@@ -60,7 +60,7 @@ class DrawerWidState extends State<DrawerWid> {
       Navigator.of(context).pop();
       Navigator.pushNamed(context, Constant.TransactionScreen).then(backEvent);
     } else {
-      CommunFun.showToast(context, Strings.shift_opne_alert_msg_transaction);
+      CommunFun.showToast(context, Strings.shiftopenAlertMsgTransaction);
     }
   }
 
@@ -80,7 +80,7 @@ class DrawerWidState extends State<DrawerWid> {
       Navigator.of(context).pop();
       Navigator.pushNamed(context, Constant.WebOrderPages).then(backEvent);
     } else {
-      CommunFun.showToast(context, Strings.shift_opne_alert_msg_webOrder);
+      CommunFun.showToast(context, Strings.shiftopenAlertMsgWebOrder);
     }
   }
 
@@ -89,7 +89,7 @@ class DrawerWidState extends State<DrawerWid> {
       Navigator.of(context).pop();
       Navigator.pushNamed(context, Constant.WineStorage).then(backEvent);
     } else {
-      CommunFun.showToast(context, Strings.shift_opne_alert_wineStorage);
+      CommunFun.showToast(context, Strings.shiftopenAlertWineStorage);
     }
   }
 
@@ -114,7 +114,7 @@ class DrawerWidState extends State<DrawerWid> {
                   "",
                   Strings.openDrawer,
                   true);
-              openOpningAmmountPop(context, Strings.title_closing_amount);
+              openOpningAmmountPop(context, Strings.titleClosingAmount);
             } else {
               CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
                   () async {
@@ -139,7 +139,7 @@ class DrawerWidState extends State<DrawerWid> {
               ammountext: isopning,
               onEnter: (ammountext) {
                 sendOpenShft(ammountext);
-                if (isopning == Strings.title_opening_amount) {
+                if (isopning == Strings.titleOpeningAmount) {
                   if (printerreceiptList.length > 0) {
                     if (permissions.contains(Constant.OPEN_DRAWER)) {
                       printKOT.testReceiptPrint(
@@ -160,7 +160,7 @@ class DrawerWidState extends State<DrawerWid> {
                       }, () {});
                     }
                   } else {
-                    CommunFun.showToast(context, Strings.printer_not_available);
+                    CommunFun.showToast(context, Strings.printerNotAvailable);
                   }
                 }
               });
@@ -211,8 +211,7 @@ class DrawerWidState extends State<DrawerWid> {
           shiftid,
           permissions);
     }
-    checkshift();
-    await Navigator.pushNamedAndRemoveUntil(
+    Navigator.pushNamedAndRemoveUntil(
         context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
         arguments: {"isAssign": false});
   }
@@ -229,18 +228,19 @@ class DrawerWidState extends State<DrawerWid> {
         }, () {});
       }
     } else {
-      CommunFun.showToast(context, Strings.shift_opne_alert_msg);
+      CommunFun.showToast(context, Strings.shiftopenAlertMsg);
     }
   }
 
   syncOrdersTodatabase() async {
     if (permissions.contains(Constant.SYNC_ORDER)) {
-      await CommunFun.opneSyncPop(context);
+      var syncAlert = await CommunFun.openSyncPop(context);
       await CommunFun.syncOrdersANDStore(context, true);
+      Navigator.of(context).pop(syncAlert);
     } else {
       await CommonUtils.openPermissionPop(context, Constant.SYNC_ORDER,
           () async {
-        await CommunFun.opneSyncPop(context);
+        await CommunFun.openSyncPop(context);
         await CommunFun.syncOrdersANDStore(context, true);
       }, () {});
     }
@@ -251,7 +251,7 @@ class DrawerWidState extends State<DrawerWid> {
     if (permissions.contains(Constant.VIEW_SYNC)) {
       await Preferences.removeSinglePref(Constant.LastSync_Table);
       await Preferences.removeSinglePref(Constant.OFFSET);
-      await CommunFun.opneSyncPop(context);
+      await CommunFun.openSyncPop(context);
       await CommunFun.syncOrdersANDStore(context, false);
       await CommunFun.syncAfterSuccess(context, false);
     } else {
@@ -259,7 +259,7 @@ class DrawerWidState extends State<DrawerWid> {
           () async {
         await Preferences.removeSinglePref(Constant.LastSync_Table);
         await Preferences.removeSinglePref(Constant.OFFSET);
-        await CommunFun.opneSyncPop(context);
+        await CommunFun.openSyncPop(context);
         await CommunFun.syncOrdersANDStore(context, false);
         await CommunFun.syncAfterSuccess(context, false);
       }, () {});
@@ -315,7 +315,7 @@ class DrawerWidState extends State<DrawerWid> {
                 size: SizeConfig.safeBlockVertical * 5,
               ),
               title: Text(
-                Strings.web_orders,
+                Strings.webOrders,
                 style: Styles.drawerText(),
               ),
             ),
@@ -339,20 +339,19 @@ class DrawerWidState extends State<DrawerWid> {
                     if (permissions.contains(Constant.CLOSING)) {
                       closeShift(context);
                     } else {
-                      CommonUtils.openPermissionPop(
-                          context, Constant.CLOSING, () async {
+                      CommonUtils.openPermissionPop(context, Constant.CLOSING,
+                          () async {
                         closeShift(context);
                       }, () {});
                     }
                   } else {
                     if (permissions.contains(Constant.OPENING)) {
-                      openOpningAmmountPop(
-                          context, Strings.title_opening_amount);
+                      openOpningAmmountPop(context, Strings.titleOpeningAmount);
                     } else {
-                      CommonUtils.openPermissionPop(
-                          context, Constant.OPENING, () async {
+                      CommonUtils.openPermissionPop(context, Constant.OPENING,
+                          () async {
                         openOpningAmmountPop(
-                            context, Strings.title_opening_amount);
+                            context, Strings.titleOpeningAmount);
                       }, () {});
                     }
                   }
@@ -363,7 +362,7 @@ class DrawerWidState extends State<DrawerWid> {
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
                 title: Text(
-                    isShiftOpen ? Strings.close_shift : Strings.opne_shift,
+                    isShiftOpen ? Strings.closeShift : Strings.openShift,
                     style: Styles.drawerText())),
             // permissions.contains(Constant.VIEW_REPORT)
             //     ?
@@ -377,7 +376,7 @@ class DrawerWidState extends State<DrawerWid> {
                 size: SizeConfig.safeBlockVertical * 5,
               ),
               title: Text(
-                Strings.shift_Report,
+                Strings.shiftReport,
                 style: Styles.drawerText(),
               ),
             ),
@@ -393,7 +392,7 @@ class DrawerWidState extends State<DrawerWid> {
                   color: Colors.black,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
-                title: Text(Strings.sync_orders, style: Styles.drawerText())),
+                title: Text(Strings.syncOrders, style: Styles.drawerText())),
             // : SizedBox(),
             ListTile(
                 onTap: () async {
@@ -404,7 +403,7 @@ class DrawerWidState extends State<DrawerWid> {
                   color: Colors.black,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
-                title: Text(Strings.sync, style: Styles.drawerText())),
+                title: Text(Strings.syncTxt, style: Styles.drawerText())),
             ListTile(
                 onTap: () {
                   Navigator.of(context).pop();

@@ -6,8 +6,8 @@ class MSTCartdetails {
   int printer_id;
   String productName;
   String productSecondName;
-  double productPrice;
-  double productDetailAmount;
+  double productPrice; // product total
+  double productDetailAmount; // product net price
   double productQty;
   double productNetPrice;
   int taxId;

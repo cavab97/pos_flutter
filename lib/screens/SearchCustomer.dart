@@ -92,7 +92,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(Strings.search_customer, style: Styles.whiteBoldsmall()),
+                Text(Strings.searchCustomer, style: Styles.whiteBoldsmall()),
               ],
             ),
           ),
@@ -109,8 +109,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
                     onPressed: () {
                       addCustomer();
                     },
-                    child:
-                        Text(Strings.add_new, style: Styles.whiteBoldsmall()),
+                    child: Text(Strings.addNew, style: Styles.whiteBoldsmall()),
                     color: StaticColor.deepOrange,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(50.0),
@@ -145,7 +144,8 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
             width: 50.0,
             height: 50.0,
             decoration: BoxDecoration(
-                color: StaticColor.colorRed, borderRadius: BorderRadius.circular(30.0)),
+                color: StaticColor.colorRed,
+                borderRadius: BorderRadius.circular(30.0)),
             child: Icon(
               Icons.clear,
               color: StaticColor.colorWhite,
@@ -193,11 +193,11 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
             padding: EdgeInsets.only(left: 15),
             child: Icon(
               Icons.search,
-              color:StaticColor.colorGrey400,
+              color: StaticColor.colorGrey400,
               size: SizeConfig.safeBlockVertical * 5,
             ),
           ),
-          hintText: Strings.customer_Search_Hint,
+          hintText: Strings.customerSearchHint,
           hintStyle: TextStyle(
               fontSize: SizeConfig.safeBlockVertical * 2.5,
               fontWeight: FontWeight.bold,

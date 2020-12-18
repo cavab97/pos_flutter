@@ -60,7 +60,7 @@ class FinalEndScreentate extends State<FinalEndScreen> {
                           color: StaticColor.colorGrey,
                           child: SizedBox(
                             height: SizeConfig.safeBlockVertical * 15,
-                            child: Image.asset(Strings.asset_headerLogo,
+                            child: Image.asset(Strings.assetHeaderLogo,
                                 fit: BoxFit.contain, gaplessPlayback: true),
                           ),
                         ),

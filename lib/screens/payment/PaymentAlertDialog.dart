@@ -1,28 +1,37 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
-import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
-import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
+import 'package:mcncashier/models/OrderPayment.dart';
+import 'package:mcncashier/screens/FinalPaymentScreen.dart';
+import 'package:mcncashier/components/commanutils.dart';
+import 'package:mcncashier/services/LocalAPIs.dart';
+import 'ShowEnterCardDetailPop.dart';
+import 'ShowEnterEwalletDetailPop.dart';
 
-class CashPaymentPage extends StatefulWidget {
+class PaymentAlertDialog extends StatefulWidget {
   // Opning ammount popup
-  CashPaymentPage({Key key, this.paymentType, this.ammountext, this.onEnter})
+  PaymentAlertDialog({Key key, this.totalAmount, this.onClose})
       : super(key: key);
-  Function onEnter;
-  final Payments paymentType;
-  final double ammountext;
+  Function onClose;
+  final double totalAmount;
 
   @override
-  _CashPaymentState createState() => _CashPaymentState();
+  _PaymentAlertDialogState createState() => _PaymentAlertDialogState();
 }
 
-class _CashPaymentState extends State<CashPaymentPage> {
+class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
+  double paidAmount = 0;
+  List<OrderPayment> totalPaymentList = [];
+  OrderPayment currentPayment = new OrderPayment();
   String currentNumber = "0";
   bool isSubPayment = false;
+  bool isPaymented = false;
   List<Payments> mainPaymentList = [];
+  LocalAPI localAPI = LocalAPI();
   Payments seletedPayment = new Payments();
   List<Widget> paymentListTile = [];
   List<Payments> subPaymenttyppeList = [];
@@ -30,6 +39,7 @@ class _CashPaymentState extends State<CashPaymentPage> {
   @override
   void initState() {
     super.initState();
+    setState(() {});
     getPaymentMethods();
   }
 
@@ -39,27 +49,39 @@ class _CashPaymentState extends State<CashPaymentPage> {
     if (result.length != 0) {
       setState(() {
         mainPaymentList = result.where((i) => i.isParent == 0).toList();
+        subPaymenttyppeList = result.toList();
       });
     }
   }
 
   List<Widget> setPaymentListTile(List<Payments> listTilePaymentType) {
+    var size = MediaQuery.of(context).size.width / 2.3;
     return listTilePaymentType.map((payment) {
+      if (payment.name.toUpperCase() == "CASH") return SizedBox();
       return MaterialButton(
+          minWidth: (size / 3.5),
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-              side: BorderSide(color: Colors.grey)),
+            borderRadius: BorderRadius.circular(10.0),
+            side: BorderSide(color: Colors.grey),
+          ),
           child: Text(payment.name, style: Styles.blackMediumBold()),
           textColor: Colors.black,
           color: Colors.grey[100],
           onPressed: () {
             seletedPayment = payment;
-            List<Payments> subList = mainPaymentList
+            List<Payments> subList = subPaymenttyppeList
                 .where((i) => i.isParent == payment.paymentId)
                 .toList();
             if (subList.length > 0) {
-              subPaymenttyppeList = subList;
+              openSubPaymentDialog(subList);
+              //subPaymenttyppeList = subList;
+              /* setState(() {
+                isSubPayment = true;
+              }); */
             } else {
+              setState(() {
+                seletedPayment = payment;
+              });
               //insertPaymentOption(payment);
               //select payment
             }
@@ -67,8 +89,77 @@ class _CashPaymentState extends State<CashPaymentPage> {
     }).toList();
   }
 
+  openSubPaymentDialog(List<Payments> subList) {
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return SubPaymentMethodPop(
+            subList: subList,
+            subTotal: widget.totalAmount,
+            grandTotal: widget.totalAmount,
+            onClose: (mehtod) {
+              Navigator.of(context).pop();
+              insertPaymentOption(mehtod);
+            },
+          );
+        });
+  }
+
+  insertPaymentOption(Payments payment) {
+    if (seletedPayment.name.toLowerCase().contains("wallet")) {
+      setState(() {
+        seletedPayment = payment;
+      });
+      showEwalletOptionPop();
+    } else if (seletedPayment.name.toLowerCase().contains("card")) {
+      setState(() {
+        seletedPayment = payment;
+      });
+      showCardOptionPop();
+    } else {
+      //cashPayment(payment);
+    }
+  }
+
+  showEwalletOptionPop() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return ShowEnterEwalletDetailPop(currentPayment: currentPayment);
+      },
+    );
+  }
+
+  showCardOptionPop() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return ShowEnterCardDetailPop(currentPayment: currentPayment);
+      },
+    );
+  }
+
   List<Widget> subPaymentListTile(List<Payments> listTilePaymentType) {
-    return listTilePaymentType.map((payment) {
+    List<Widget> returnList = [];
+    returnList += [
+      MaterialButton(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              side: BorderSide(color: Colors.grey)),
+          child: Icon(Icons.arrow_back),
+          textColor: Colors.black,
+          color: Colors.grey[100],
+          onPressed: () {
+            setState(() {
+              isSubPayment = false;
+            });
+          }),
+    ];
+    returnList += listTilePaymentType.map((payment) {
+      if (payment.name.toUpperCase() == "CASH") return SizedBox();
       return MaterialButton(
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10.0),
@@ -84,10 +175,12 @@ class _CashPaymentState extends State<CashPaymentPage> {
             if (subList.length > 0) {
               subPaymenttyppeList = subList;
             } else {
+              seletedPayment = payment;
               //select payment
             }
           });
     }).toList();
+    return returnList;
   }
 
   @override
@@ -103,13 +196,17 @@ class _CashPaymentState extends State<CashPaymentPage> {
                 horizontal: SizeConfig.safeBlockVertical * 5),
             height: SizeConfig.safeBlockVertical * 9,
             decoration: BoxDecoration(
-                color: StaticColor.colorWhite,
-                border: Border.all(color: StaticColor.colorBlack)),
+                color: Colors.white, border: Border.all(color: Colors.black)),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(widget.paymentType.name, style: Styles.communBlack()),
+                Text(
+                    "Paid" +
+                        (seletedPayment.name != null
+                            ? ' (' + seletedPayment.name + ')'
+                            : ''),
+                    style: Styles.communBlack()),
                 Text(currentNumber, style: Styles.communBlack()),
               ],
             ),
@@ -164,15 +261,14 @@ class _CashPaymentState extends State<CashPaymentPage> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: StaticColor.colorRed,
-              borderRadius: BorderRadius.circular(30.0)),
+              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: StaticColor.colorWhite,
+              color: Colors.white,
               size: 30,
             ),
           ),
@@ -195,13 +291,13 @@ class _CashPaymentState extends State<CashPaymentPage> {
       child: MaterialButton(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
-            side: BorderSide(color: StaticColor.colorGrey)),
+            side: BorderSide(color: Colors.grey)),
         child: number != Strings.enter
             ? Text(number,
                 textAlign: TextAlign.center, style: Styles.blackMediumBold())
             : Icon(Icons.subdirectory_arrow_left, size: 30),
-        textColor: StaticColor.colorBlack,
-        color: StaticColor.lightGrey100,
+        textColor: Colors.black,
+        color: Colors.grey[100],
         onPressed: f,
       ),
     );
@@ -217,13 +313,13 @@ class _CashPaymentState extends State<CashPaymentPage> {
       child: MaterialButton(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
-            side: BorderSide(color: StaticColor.colorGrey)),
+            side: BorderSide(color: Colors.grey)),
         child: number != Strings.enter
             ? Text(number,
                 textAlign: TextAlign.center, style: Styles.blackMediumBold())
             : Icon(Icons.subdirectory_arrow_left, size: 30),
-        textColor: StaticColor.colorBlack,
-        color: StaticColor.lightGrey100,
+        textColor: Colors.black,
+        color: Colors.grey[100],
         onPressed: f,
       ),
     );
@@ -240,13 +336,13 @@ class _CashPaymentState extends State<CashPaymentPage> {
         child: MaterialButton(
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10.0),
-              side: BorderSide(color: StaticColor.colorGrey)),
+              side: BorderSide(color: Colors.grey)),
           child: number != Strings.enter
               ? Text(number,
                   textAlign: TextAlign.center, style: Styles.blackMediumBold())
               : Icon(Icons.subdirectory_arrow_left, size: 30),
-          textColor: StaticColor.colorBlack,
-          color: StaticColor.lightGrey100,
+          textColor: Colors.black,
+          color: Colors.grey[100],
           onPressed: f,
         ),
       ),
@@ -263,14 +359,14 @@ class _CashPaymentState extends State<CashPaymentPage> {
       child: MaterialButton(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
-            side: BorderSide(color: StaticColor.colorGrey)),
+            side: BorderSide(color: Colors.grey)),
         child: Icon(
           Icons.backspace,
-          color: StaticColor.colorBlack,
+          color: Colors.black,
           size: SizeConfig.safeBlockVertical * 4,
         ),
-        textColor: StaticColor.colorBlack,
-        color: StaticColor.lightGrey100,
+        textColor: Colors.black,
+        color: Colors.grey[100],
         onPressed: f,
       ),
     );
@@ -279,28 +375,75 @@ class _CashPaymentState extends State<CashPaymentPage> {
   Widget getNumbers(context) {
     return Container(
       height: MediaQuery.of(context).size.height / 1.2,
-      width: MediaQuery.of(context).size.width / 1.8,
+      width: MediaQuery.of(context).size.width * .8,
       child: Center(
           child: Table(
-        border: TableBorder.all(color: StaticColor.colorWhite, width: 0.6),
+        border: TableBorder.all(color: Colors.white, width: 0.6),
         columnWidths: {
-          //0: FractionColumnWidth(.2),
-          0: FractionColumnWidth(.2),
-          1: FractionColumnWidth(.6),
+          0: FractionColumnWidth(.15),
+          1: FractionColumnWidth(.2),
+          2: FractionColumnWidth(.2),
+          3: FractionColumnWidth(.6),
         },
         children: [
           TableRow(children: [
-            /*  false
-                ? Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: Column(
-                      children: mainPaymentList.length > 0
-                          ? (isSubPayment
-                              ? subPaymentListTile(subPaymenttyppeList)
-                              : setPaymentListTile(mainPaymentList))
-                          : [],
-                    ))
-                : SizedBox(), */
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    child: Text(
+                      'Total :',
+                      style: Styles.blackMediumBold(),
+                    ),
+                  ),
+                  Text(
+                    widget.totalAmount.toStringAsFixed(2),
+                    style: Styles.blackMediumBold(),
+                  ),
+                  SizedBox(height: 5),
+                  Container(
+                    width: double.infinity,
+                    child: Text(
+                      'Amount Paid :',
+                      style: Styles.blackMediumBold(),
+                    ),
+                  ),
+                  Text(
+                    (paidAmount).toStringAsFixed(2),
+                    style: Styles.blackMediumBold(),
+                  ),
+                  SizedBox(height: 5),
+                  Container(
+                    width: double.infinity,
+                    child: Text(
+                      'Remaining :',
+                      style: Styles.blackMediumBold(),
+                    ),
+                  ),
+                  Text(
+                    (widget.totalAmount - paidAmount).toStringAsFixed(2),
+                    style: Styles.blackMediumBold(),
+                  ),
+                  /* SizedBox(height: 15),
+                  Text('PaymentList :', style: Styles.blackMediumBold()),
+                  Text(
+                    widget.totalAmount.toStringAsFixed(2),
+                    style: Styles.blackMediumBold(),
+                  ), */
+                ],
+              ),
+            ),
+            Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: Column(
+                  children: mainPaymentList.length > 0
+                      ? (isSubPayment
+                          ? subPaymentListTile(subPaymenttyppeList)
+                          : setPaymentListTile(mainPaymentList))
+                      : [],
+                )),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
               child: Column(
@@ -424,13 +567,29 @@ class _CashPaymentState extends State<CashPaymentPage> {
                       ],
                     ),
                     _button(Strings.enter, () {
-                      widget.onEnter(currentNumber);
+                      paidAmount = widget.totalAmount;
+                      finalPayment();
+                      //widget.onEnter(currentNumber);
                     })
                   ]),
                   Row(
                     children: <Widget>[
-                      _totalbutton(widget.ammountext.toStringAsFixed(2), () {
-                        widget.onEnter(widget.ammountext.toString());
+                      _totalbutton(widget.totalAmount.toStringAsFixed(2), () {
+                        if (double.parse(currentNumber) <
+                            (widget.totalAmount - paidAmount)) {
+                          setState(() {
+                            currentPayment.op_amount =
+                                double.parse(currentNumber);
+                            currentPayment.op_method_id =
+                                seletedPayment.paymentId;
+                            totalPaymentList.add(currentPayment);
+                            isPaymented = false;
+                          });
+                        } else {
+                          Navigator.of(context).pop();
+                          finalPayment();
+                        }
+                        //widget.onEnter(widget.totalAmount.toString());
                       }),
                     ],
                   ),
@@ -441,5 +600,22 @@ class _CashPaymentState extends State<CashPaymentPage> {
         ],
       )),
     );
+  }
+
+  finalPayment() async {
+    //List<OrderPayment> totalPayment = [];
+    double change = paidAmount - widget.totalAmount;
+    await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return FinalEndScreen(
+              total: widget.totalAmount,
+              totalPaid: paidAmount,
+              change: change,
+              onClose: () {
+                Navigator.of(context).pop();
+                widget.onClose(totalPaymentList);
+              });
+        });
   }
 }

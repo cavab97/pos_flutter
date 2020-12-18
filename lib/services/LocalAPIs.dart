@@ -68,7 +68,6 @@ class LocalAPI {
     Terminal terminalDat;
     List<Terminal> list =
         res.length > 0 ? res.map((c) => Terminal.fromJson(c)).toList() : [];
-    print(list.length);
     if (list.length > 0) {
       terminalDat = list[0];
     }
@@ -269,18 +268,18 @@ class LocalAPI {
                 table_order.table_id.toString() +
                 " where id = " +
                 cartIDs[0].cartId.toString();
-            var result1 = await db.rawQuery(qry1);
+            await db.rawQuery(qry1);
             list[0].table_id = table_order.table_id;
             var qry2 = "UPDATE table_order SET table_id = " +
                 table_order.table_id.toString() +
                 " where table_id = " +
                 list[0].table_id.toString();
-            var res = await db.rawQuery(qry2);
+            await db.rawQuery(qry2);
             var qrysabve = "UPDATE save_order SET cart_id = " +
                 cartIDs[0].cartId.toString() +
                 " where id = " +
                 list[0].save_order_id.toString();
-            var res1 = await db.rawQuery(qrysabve);
+            await db.rawQuery(qrysabve);
             table_order.save_order_id = list[0].save_order_id;
           }
         } else {
@@ -292,7 +291,7 @@ class LocalAPI {
                   carts[0].cartId.toString() +
                   " where cart_id = " +
                   cartIDs[0].cartId.toString();
-              var res1 = await db.rawQuery(detailqry);
+              await db.rawQuery(detailqry);
             }
           }
           await deleteTableOrder(list[0].table_id);
@@ -335,7 +334,7 @@ class LocalAPI {
         tableid.toString() +
         " where app_id =" +
         orderid.toString();
-    var res = await db.rawQuery(qry);
+    await db.rawQuery(qry);
     await SyncAPICalls.logActivity(
         "assign table", "assing table to web order", "orders", tableid);
   }
@@ -377,7 +376,6 @@ class LocalAPI {
 
   Future<int> insertShift(Shift shift, shiftId) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var result;
     if (shiftId != null) {
       var qry = "UPDATE shift set end_amount = " +
           shift.endAmount.toString() +
@@ -385,9 +383,9 @@ class LocalAPI {
           shift.updatedAt +
           "' where app_id = " +
           shift.appId.toString();
-      result = await db.rawQuery(qry);
+      await db.rawQuery(qry);
     } else {
-      result = await db.insert("shift", shift.toJson());
+      await db.insert("shift", shift.toJson());
     }
     var dis = shiftId != null ? "Update shift" : "Insert shift";
     await SyncAPICalls.logActivity("Product", dis, "shift", shift.appId);
@@ -485,7 +483,7 @@ class LocalAPI {
         tableiD.toString() +
         " WHERE id = " +
         cartid.toString();
-    var res = await db.rawQuery(rawQuery);
+    await db.rawQuery(rawQuery);
 
     await SyncAPICalls.logActivity(
         "weborder", "update table_id", "mst_cart", tableiD.toString());
@@ -503,7 +501,11 @@ class LocalAPI {
           where: 'id = ?', whereArgs: [cartdetails.id]);
       cartdetailid = cartdetails.id;
     } else {
-      cartdetailid = await db.insert("mst_cart_detail", newObj);
+      try {
+        cartdetailid = await db.insert("mst_cart_detail", newObj);
+      } catch (e) {
+        print(e);
+      }
     }
     await SyncAPICalls.logActivity(
         "product", "insert  cart details", "mst_cart_detail", cartdetailid);
@@ -521,6 +523,8 @@ class LocalAPI {
 
   Future<int> addsubCartData(MSTSubCartdetails data) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
+
+    print(data.toJson());
     var result1 = await db.insert("mst_cart_sub_detail", data.toJson());
     await SyncAPICalls.logActivity(
         "product", "insert sub cart details", "mst_cart_sub_detail", result1);
@@ -542,6 +546,19 @@ class LocalAPI {
 
   Future<List<MSTCartdetails>> getCartItem(cartId) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
+    //var isjoin = await CommunFun.checkIsJoinServer();
+    List<MSTCartdetails> list = [];
+    /* if (isjoin == true) {
+      var apiurl = await Configrations.ipAddress() + Configrations.cart_items;
+      var stringParams = {"cart_id": cartId};
+      var result = await APICall.localapiCall(null, apiurl, stringParams);
+      if (result["status"] == Constant.STATUS200) {
+        List<dynamic> data = result["data"];
+        list = data.length > 0
+            ? data.map((c) => MSTCartdetails.fromJson(c)).toList()
+            : [];
+      }
+    } else { */
     var qry = " SELECT mst_cart_detail.* ,group_concat(attributes.name) as attrName ,group_concat(modifier.name) as modiName from mst_cart_detail " +
         " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  (mst_cart_sub_detail.attribute_id != '' OR mst_cart_sub_detail.modifier_id != '' )" +
         " LEFT JOIN attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != " +
@@ -552,11 +569,14 @@ class LocalAPI {
         cartId.toString() +
         " group by mst_cart_detail.id";
     var res = await db.rawQuery(qry);
-    List<MSTCartdetails> list = res.isNotEmpty
+    print("length");
+    print(res.length);
+    list = res.isNotEmpty
         ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
         : [];
     await SyncAPICalls.logActivity(
         "product", "get cart list", "mst_cart_detail", cartId);
+    //}
     return list;
   }
 
@@ -845,7 +865,7 @@ class LocalAPI {
     await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartid]);
     var qry = "Update table_order set save_order_id = 0 where table_id =" +
         tableID.toString();
-    var res = await db.rawQuery(qry);
+    await db.rawQuery(qry);
     var cartDetail = await db
         .query("mst_cart_detail", where: 'cart_id = ?', whereArgs: [cartid]);
     await SyncAPICalls.logActivity(
@@ -855,7 +875,7 @@ class LocalAPI {
         : [];
     if (list.length > 0) {
       for (var i = 0; i < list.length; i++) {
-        var cartsubdatad = await db.delete("mst_cart_sub_detail",
+        await db.delete("mst_cart_sub_detail",
             where: 'cart_details_id = ?', whereArgs: [list[i].id]);
       }
       await SyncAPICalls.logActivity(
@@ -867,8 +887,7 @@ class LocalAPI {
   Future<int> removeCartItem(cartid, tableID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
 
-    var cart = // cart table
-        await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
+    await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
 
     await SyncAPICalls.logActivity("orders", "clear cart", "mst_cart", 1);
 
@@ -890,7 +909,7 @@ class LocalAPI {
         : [];
     if (list.length > 0) {
       for (var i = 0; i < list.length; i++) {
-        var cartsubdatad = await db.delete("mst_cart_sub_detail",
+        await db.delete("mst_cart_sub_detail",
             where: 'cart_details_id = ?', whereArgs: [list[i].id]);
       }
     }
@@ -975,7 +994,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
 
     var qry = "SELECT DISTINCT order_detail.*,asset.base64 from order_detail LEFT JOIN" +
-        " asset on asset.base64 =(SELECT base64  from asset WHERE asset.asset_type_id = order_detail.product_id AND asset.status = 1 AND " +
+        " asset on asset.base64 =(SELECT base64 from asset WHERE asset.asset_type_id = order_detail.product_id AND asset.status = 1 AND " +
         " asset.asset_type = CASE WHEN order_detail.issetMeal == 1 THEN  2 ELSE  1 END ORDER By asset.asset_id DESC LIMIT 1) " +
         " WHERE terminal_id =  " +
         terminalid.toString() +
@@ -1002,7 +1021,7 @@ class LocalAPI {
   }
 
   Future<List<OrderPayment>> getOrderpaymentData(orderid, terminalid) async {
-    OrderPayment data = new OrderPayment();
+    //OrderPayment data = new OrderPayment();
     var qry = "SELECT * from order_payment where terminal_id = " +
         terminalid.toString() +
         " AND order_app_id = " +
@@ -1070,7 +1089,10 @@ class LocalAPI {
     List<MST_Cart> list = cartdata.isNotEmpty
         ? cartdata.map((c) => MST_Cart.fromJson(c)).toList()
         : [];
-    return list[0];
+    if (list.length > 0) {
+      return list[0];
+    } else
+      return new MST_Cart();
   }
 
   Future<Branch> getbranchData(branchID) async {
@@ -1312,7 +1334,7 @@ class LocalAPI {
         produtdata.detail_qty.toString() +
         ") WHERE product_id = " +
         produtdata.product_id.toString();
-    var updateed = await db.rawUpdate(intupdate);
+    //var updateed = await db.rawUpdate(intupdate);
     var productitem = await db.query("product_store_inventory",
         where: 'product_id = ?', whereArgs: [produtdata.product_id]);
     List<ProductStoreInventory> inventory = productitem.length > 0
@@ -1337,8 +1359,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     if (data.length > 0) {
       for (var i = 0; i < data.length; i++) {
-        var inventory = await db.update(
-            "product_store_inventory", data[i].toJson(),
+        await db.update("product_store_inventory", data[i].toJson(),
             where: "inventory_id =?", whereArgs: [data[i].inventoryId]);
         await SyncAPICalls.logActivity("Order", "update InventoryTable",
             "product_store_inventory", data[i].productId);
@@ -1352,8 +1373,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     if (log.length > 0) {
       for (var i = 0; i < log.length; i++) {
-        var inventory =
-            await db.insert("product_store_inventory_log", log[i].toJson());
+        await db.insert("product_store_inventory_log", log[i].toJson());
         await SyncAPICalls.logActivity("product_store_inventory_log insert",
             "insert", "product_store_inventory_log", log[i].inventory_id);
       }
@@ -1963,7 +1983,6 @@ class LocalAPI {
     List<SaveOrder> list = result.length > 0
         ? result.map((c) => SaveOrder.fromJson(c)).toList()
         : [];
-    print(list);
     if (list.length > 0 && list[0].cartId != null) {
       return list;
     } else {
@@ -1977,15 +1996,13 @@ class LocalAPI {
         totableid.toString() +
         " where table_id = " +
         tableID.toString();
-    var result = await db.rawQuery(qry);
-    print(result);
+    await db.rawQuery(qry);
     if (cartid != null) {
       var qry1 = "UPDATE mst_cart SET table_id = " +
           totableid.toString() +
           " where  id = " +
           cartid.toString();
-      var result1 = await db.rawQuery(qry1);
-      print(result1);
+      await db.rawQuery(qry1);
     }
     await SyncAPICalls.logActivity(
         "table selection", "change table", "table_order", cartid);
@@ -1998,15 +2015,15 @@ class LocalAPI {
     newObj.remove("attrName");
     newObj.remove("modiName");
     if (isUpdate) {
-      var data = await db.update("mst_cart_detail", newObj,
+      await db.update("mst_cart_detail", newObj,
           where: "id =?", whereArgs: [focProduct.id]);
     } else {
-      var data = await db.insert(
+      await db.insert(
         "mst_cart_detail",
         newObj,
       );
     }
-    var res = await db.update("mst_cart", cart.toJson(),
+    await db.update("mst_cart", cart.toJson(),
         where: "id =?", whereArgs: [cart.id]);
     await SyncAPICalls.logActivity(
         "mst_cart_detail", "Added Foc Product", "mst_cart_detail", cart.id);

@@ -82,12 +82,6 @@ class _PINPageState extends State<PINPage> {
           checkIn.createdAt = date.toString();
           checkIn.sync = 0;
           var result = await localAPI.userCheckInOut(checkIn);
-          // List<Role> rolData = await localAPI.getRoldata(user.role);
-          // if (rolData.length > 0) {
-          //   Role rolda = rolData[0];
-          //   await Preferences.setStringToSF(
-          //       Constant.USER_ROLE, json.encode(rolda));
-          // }
           await Preferences.setStringToSF(
               Constant.LOIGN_USER, json.encode(user));
           await CommunFun.checkUserPermission(user.id);
@@ -103,17 +97,17 @@ class _PINPageState extends State<PINPage> {
           setState(() {
             isLoading = false;
           });
-          CommunFun.showToast(context, Strings.invalid_pin_msg);
+          CommunFun.showToast(context, Strings.invalidPinMsg);
         }
       } else {
         if (pinNumber.length >= 6) {
-          CommunFun.showToast(context, Strings.invalid_pin_msg);
+          CommunFun.showToast(context, Strings.invalidPinMsg);
         } else {
-          CommunFun.showToast(context, Strings.pin_validation_message);
+          CommunFun.showToast(context, Strings.pinValidationMessage);
         }
       }
     } else {
-      CommunFun.showToast(context, Strings.already_clockin_msg);
+      CommunFun.showToast(context, Strings.alreadyClockinMsg);
     }
   }
 
@@ -139,17 +133,17 @@ class _PINPageState extends State<PINPage> {
         checkIn.status = "OUT";
         checkIn.timeInOut = date.toString();
         checkIn.sync = 0;
-        var result = await localAPI.userCheckInOut(checkIn);
+        await localAPI.userCheckInOut(checkIn);
         clearAfterCheckout();
       } else {
         if (pinNumber.length >= 6) {
-          CommunFun.showToast(context, Strings.invalid_pin_msg);
+          CommunFun.showToast(context, Strings.invalidPinMsg);
         } else {
-          CommunFun.showToast(context, Strings.pin_validation_message);
+          CommunFun.showToast(context, Strings.pinValidationMessage);
         }
       }
     } else {
-      CommunFun.showToast(context, Strings.already_clockout_msg);
+      CommunFun.showToast(context, Strings.alreadyClockoutMsg);
     }
   }
 
@@ -245,7 +239,7 @@ class _PINPageState extends State<PINPage> {
             // login logo
             height: SizeConfig.safeBlockVertical * 10,
             child: Image.asset(
-              Strings.asset_headerLogo,
+              Strings.assetHeaderLogo,
               fit: BoxFit.contain,
               gaplessPlayback: true,
             ),
@@ -295,7 +289,7 @@ class _PINPageState extends State<PINPage> {
                 child: Align(
                   alignment: Alignment.center,
                   child: Text(
-                    Strings.pin_Number,
+                    Strings.pinNumber,
                     style: Styles.communBlack(),
                   ),
                 ),

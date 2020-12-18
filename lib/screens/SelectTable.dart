@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +15,6 @@ import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/Terminal.dart';
-import 'package:mcncashier/models/colorTable.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
@@ -23,6 +23,8 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/models/colorTable.dart';
+import '../components/communText.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mcncashier/components/colors.dart';
 
@@ -40,30 +42,33 @@ class _SelectTablePageState extends State<SelectTablePage>
   GlobalKey<ScaffoldState> scaffoldKey;
   LocalAPI localAPI = LocalAPI();
   List<TablesDetails> tableList = new List<TablesDetails>();
+  List<int> mergeTableList = [];
   PrintReceipt printKOT = PrintReceipt();
   List<Printer> printerList = new List<Printer>();
   List<Printer> printerreceiptList = new List<Printer>();
-  List<ColorTable> tableColors = new List<ColorTable>();
-  var selectedTable;
-  var number_of_pax;
+  TablesDetails selectedTable;
+  int number_of_pax = 0;
   var orderid;
-  var mergeInTable;
-  var changeInTable;
+  TablesDetails mergeInTable;
+  TablesDetails changeInTable;
   bool isLoading = false;
   bool isMergeing = false;
   bool isChangingTable = false;
   bool isAssigning = false;
+  String qrCodeString = "";
   bool isChanging = false;
   bool isShiftOpen = true;
-  bool isMenuOpne = true;
+  bool isMenuopen = true;
+  bool changingColors = false;
   var permissions = "";
   TabController _tabController;
+  MaterialColor tableSelectedColor = Colors.orange;
+  List<ColorTable> tableColors = new List<ColorTable>();
 
   @override
   void initState() {
     super.initState();
     this.scaffoldKey = new GlobalKey<ScaffoldState>();
-    getTables();
     KeyboardVisibilityNotification().addNewListener(
       onHide: () {
         FocusScope.of(context).requestFocus(new FocusNode());
@@ -92,10 +97,10 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   afterInit() {
+    getTables();
     checkshift();
     getAllPrinter();
     setPermissons();
-    getTablesColor();
   }
 
   setPermissons() async {
@@ -103,7 +108,6 @@ class _SelectTablePageState extends State<SelectTablePage>
     setState(() {
       permissions = permission;
     });
-    print(permissions);
   }
 
   checkshift() async {
@@ -131,15 +135,6 @@ class _SelectTablePageState extends State<SelectTablePage>
     setState(() {
       tableList = tables;
       isLoading = false;
-      isMenuOpne = true;
-    });
-  }
-
-  getTablesColor() async {
-    List<ColorTable> tables = await localAPI.getTablesColor();
-    setState(() {
-      tableColors = tables;
-      isLoading = false;
     });
   }
 
@@ -149,21 +144,20 @@ class _SelectTablePageState extends State<SelectTablePage>
     List<Table_order> order = await localAPI.getTableOrders(tableid);
     await Preferences.setStringToSF(Constant.TABLE_DATA, json.encode(order[0]));
     setState(() {
-      isMenuOpne = true;
+      isMenuopen = true;
+      //isMenuopen = false;
     });
     Navigator.pushNamed(context, Constant.DashboardScreen).then(backToRefresh);
   }
 
   backToRefresh(value) {
-    print("++++++++++++++++++++++++++++++++");
-    print(value);
     getTables();
   }
 
   ontableTap(table) async {
     setState(() {
       selectedTable = table;
-      isMenuOpne = true;
+      isMenuopen = true;
     });
     paxController.text =
         table.numberofpax != null ? table.numberofpax.toString() : "";
@@ -173,8 +167,32 @@ class _SelectTablePageState extends State<SelectTablePage>
       viewOrder();
     } else {
       addNewOrder();
-      selectTableForNewOrder();
     }
+  }
+
+  ontableLongTap(table) {
+    setState(() {
+      selectedTable = table;
+      //isMenuopen = true;
+    });
+    paxController.text =
+        table.numberofpax != null ? table.numberofpax.toString() : "";
+  }
+
+  changeColors() {
+    Future.delayed(Duration(seconds: 1), () {
+      setState(() {
+        tableSelectedColor =
+            (tableSelectedColor == null || tableSelectedColor == Colors.orange)
+                ? Colors.grey
+                : Colors.orange;
+        if (isMergeing || isChangingTable) {
+          changeColors();
+          changingColors = true;
+        } else
+          changingColors = false;
+      });
+    });
   }
 
   mergeTabledata(TablesDetails table) async {
@@ -188,7 +206,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       Table_order tableOrder = new Table_order();
       var pax = table1.numberofpax != null ? table1.numberofpax : 0;
       pax += table2.numberofpax != null ? table2.numberofpax : 0;
-      tableOrder.number_of_pax = pax;
+      tableOrder.number_of_pax = pax ?? 0;
       tableOrder.table_id = table1.tableId;
       tableOrder.save_order_id =
           table1.saveorderid != 0 ? table1.saveorderid : 0;
@@ -203,73 +221,84 @@ class _SelectTablePageState extends State<SelectTablePage>
         isLoading = false;
       });
       getTables();
-      CommunFun.showToast(context, Strings.table_mearged_msg);
+      CommunFun.showToast(context, Strings.tableMeargedMsg);
+      getTables();
     } catch (e) {
       print(e);
     }
   }
 
   mergeTable(table) {
-    if (permissions.contains(Constant.JOIN_TABLE)) {
-      setState(() {
-        isMenuOpne = true;
+    if (table == null) {
+      CommunFun.showToast(context, "Please select table first");
+    } else {
+      if (isMergeing && mergeInTable == table) {
+        if (permissions.contains(Constant.JOIN_TABLE)) {
+          setState(() {
+            isMenuopen = true;
+            isMergeing = true;
+            mergeInTable = table;
+          });
+        } else {
+          CommonUtils.openPermissionPop(context, Constant.JOIN_TABLE, () async {
+            setState(() {
+              isMenuopen = true;
+              //isMenuopen = false;
+              isMergeing = true;
+              mergeInTable = table;
+            });
+          }, () {});
+        }
+      } else {
         isMergeing = true;
         mergeInTable = table;
-      });
-    } else {
-      CommonUtils.openPermissionPop(context, Constant.JOIN_TABLE, () async {
-        setState(() {
-          isMenuOpne = false;
-          isMergeing = true;
-          mergeInTable = table;
-        });
-      }, () {});
+      }
+      if (!changingColors) changeColors();
     }
   }
 
   selectTableForNewOrder() async {
-    if ((int.tryParse(paxController.text) ?? 0) <=
-        selectedTable.tableCapacity) {
-      Table_order tableOrder = new Table_order();
-      tableOrder.table_id = selectedTable.tableId;
-      tableOrder.number_of_pax = int.tryParse(paxController.text);
-      tableOrder.save_order_id = selectedTable.saveorderid;
-      tableOrder.service_charge =
-          CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
-      tableOrder.assignTime =
-          await CommunFun.getCurrentDateTime(DateTime.now());
-      var result = await localAPI.insertTableOrder(tableOrder);
-      await Preferences.setStringToSF(
-          Constant.TABLE_DATA, json.encode(tableOrder));
-      paxController.text = "";
-      Navigator.of(context).pop();
-      if (!isChanging) {
-        setState(() {
-          isMenuOpne = false;
-        });
-        Navigator.pushNamed(context, Constant.DashboardScreen)
-            .then(backToRefresh);
-      }
-      getTables();
-    } else {
-      CommunFun.showToast(context, Strings.table_pax_msg);
+    //if ((int.tryParse(paxController.text) ?? 0) <= selectedTable.tableCapacity) {
+    Table_order tableOrder = new Table_order();
+    tableOrder.table_id = selectedTable.tableId;
+    tableOrder.number_of_pax = int.tryParse(paxController.text) ?? 0;
+    tableOrder.save_order_id = selectedTable.saveorderid;
+    tableOrder.service_charge =
+        await CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
+    tableOrder.assignTime = await CommunFun.getCurrentDateTime(DateTime.now());
+    await localAPI.insertTableOrder(tableOrder);
+    await Preferences.setStringToSF(
+        Constant.TABLE_DATA, json.encode(tableOrder));
+    paxController.text = "";
+    Navigator.of(context).pop();
+    if (!isChanging) {
+      setState(() {
+        isMenuopen = true;
+        //isMenuopen = false;
+      });
+      Navigator.pushNamed(context, Constant.DashboardScreen)
+          .then(backToRefresh);
     }
+    //getTables();
   }
+  /*   else {
+      CommunFun.showToast(context, Strings.table_paxMsg);
+    }
+  } */
 
   assignTabletoOrder() async {
     setState(() {
       isLoading = true;
     });
-    if ((int.tryParse(paxController.text) ?? 0) <=
-        selectedTable.tableCapacity) {
+    if (int.tryParse(paxController.text) <= selectedTable.tableCapacity) {
       SaveOrder orderData = new SaveOrder();
       orderData.orderName = selectedTable.tableName;
       orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-      orderData.numberofPax = (int.tryParse(paxController.text));
+      orderData.numberofPax = (int.tryParse(paxController.text)) ?? 0;
       orderData.cartId = orderid;
       Table_order tableorder = new Table_order();
       tableorder.table_id = selectedTable.tableId;
-      tableorder.number_of_pax = (int.tryParse(paxController.text));
+      tableorder.number_of_pax = (int.tryParse(paxController.text)) ?? 0;
       tableorder.service_charge = selectedTable.tableServiceCharge;
       tableorder.assignTime =
           await CommunFun.getCurrentDateTime(DateTime.now());
@@ -280,10 +309,10 @@ class _SelectTablePageState extends State<SelectTablePage>
         isLoading = false;
       });
       Navigator.of(context).pop();
-      getTables();
+      //getTables();
       await Navigator.pushNamed(context, Constant.WebOrderPages);
     } else {
-      CommunFun.showToast(context, Strings.table_pax_msg);
+      CommunFun.showToast(context, Strings.tablePaxMsg);
     }
   }
 
@@ -297,7 +326,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     );
   }
 
-  opneQrcodePop() async {
+  openQrcodePop() async {
     if (permissions.contains(Constant.PRINT_QR)) {
       await showDialog(
           context: context,
@@ -329,21 +358,21 @@ class _SelectTablePageState extends State<SelectTablePage>
     }, () async {
       Navigator.of(context).pop();
       cancleTOrder();
-    }, Strings.warning, Strings.cancle_order_msg, Strings.yes, Strings.no,
-        true);
+    }, Strings.warning, Strings.cancleOrderMsg, Strings.yes, Strings.no, true);
   }
 
   cancleTOrder() async {
     setState(() {
       isLoading = true;
+      if (selectedTable.merged_table_id != null) {
+        mergeTableList.remove(selectedTable.merged_table_id);
+      }
     });
     if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
       List<SaveOrder> cartID =
           await localAPI.gettableCartID(selectedTable.saveorderid);
       if (cartID.length > 0) {
         await localAPI.removeCartItem(cartID[0].cartId, selectedTable.tableId);
-      } else {
-        await localAPI.deleteTableOrder(selectedTable.tableId);
       }
     } else {
       await localAPI.deleteTableOrder(selectedTable.tableId);
@@ -351,49 +380,53 @@ class _SelectTablePageState extends State<SelectTablePage>
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     setState(() {
       isLoading = false;
-      isMenuOpne = true;
+      isMenuopen = true;
+      selectedTable = null;
+      //isMenuopen = false;
     });
     await getTables();
   }
 
   changeTablePop() {
-    CommonUtils.showAlertDialog(context, () {
-      Navigator.of(context).pop();
-    }, () {
-      Navigator.of(context).pop();
-      if (permissions.contains(Constant.CHANGE_TABLE)) {
-        setState(() {
-          isMenuOpne = true;
-          isChangingTable = true;
-        });
-      } else {
-        CommonUtils.openPermissionPop(context, Constant.CHANGE_TABLE, () async {
+    if (isChangingTable) {
+      setState(() {
+        isChangingTable = false;
+        changingColors = false;
+      });
+    } else {
+      CommonUtils.showAlertDialog(context, () {
+        Navigator.of(context).pop();
+      }, () {
+        Navigator.of(context).pop();
+        if (permissions.contains(Constant.CHANGE_TABLE)) {
           setState(() {
-            isMenuOpne = true;
+            isMenuopen = true;
             isChangingTable = true;
           });
-        }, () {});
-      }
-    }, Strings.warning, Strings.change_table_msg, Strings.yes, Strings.no,
-        true);
+        } else {
+          CommonUtils.openPermissionPop(context, Constant.CHANGE_TABLE,
+              () async {
+            setState(() {
+              isMenuopen = true;
+              isChangingTable = true;
+            });
+          }, () {});
+        }
+      }, Strings.warning, Strings.changeTableMsg, Strings.yes, Strings.no,
+          true);
+    }
   }
 
   changeTableToOtherTable(table) async {
     var cartid;
-    if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
-      List<SaveOrder> cartID =
-          await localAPI.gettableCartID(selectedTable.saveorderid);
-      if (cartID.length > 0) {
-        cartid = cartID[0].cartId;
-      }
-    }
-    var tables = await localAPI.changeTable(
-        selectedTable.tableId, table.tableId, cartid);
-    print(tables);
-    setState(() {
-      changeInTable = null;
-      isChangingTable = false;
-    });
+    // if (selectedTable.saveorderid != null && selectedTable.saveorderid != 0) {
+    //   List<SaveOrder> cartID =
+    //       await localAPI.gettableCartID(selectedTable.saveorderid);
+    //   if (cartID.length > 0) {
+    //     cartid = cartID[0].cartId;
+    //   }
+    // }
+    await localAPI.changeTable(selectedTable.tableId, table.tableId, cartid);
     var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
     if (tableid != null) {
       var tableddata = json.decode(tableid);
@@ -407,6 +440,11 @@ class _SelectTablePageState extends State<SelectTablePage>
       }
     }
     await getTables();
+    setState(() {
+      changeInTable = null;
+      isChangingTable = false;
+      selectedTable = null;
+    });
   }
 
   changePax() {
@@ -425,13 +463,22 @@ class _SelectTablePageState extends State<SelectTablePage>
     }
   }
 
-  ontableLongTap(table) {
+  Color colorConvert(String color) {
+    color = color.replaceAll("#", "");
+    if (color.length == 6) {
+      return Color(int.parse("0xFF" + color));
+    } else if (color.length == 8) {
+      return Color(int.parse("0x" + color));
+    }
+    return Colors.black;
+  }
+
+  getTablesColor() async {
+    List<ColorTable> tables = await localAPI.getTablesColor();
     setState(() {
-      selectedTable = table;
-      //isMenuOpne = true;
+      tableColors = tables;
+      isLoading = false;
     });
-    paxController.text =
-        table.numberofpax != null ? table.numberofpax.toString() : "";
   }
 
   addNewOrder() {
@@ -439,13 +486,15 @@ class _SelectTablePageState extends State<SelectTablePage>
       setState(() {
         isChanging = false;
       });
-      opnPaxDailog();
+      selectTableForNewOrder();
+      //opnPaxDailog();
     } else {
       CommonUtils.openPermissionPop(context, Constant.NEW_ORDER, () async {
         setState(() {
           isChanging = false;
         });
-        opnPaxDailog();
+        selectTableForNewOrder();
+        //opnPaxDailog();
       }, () {});
     }
   }
@@ -493,7 +542,7 @@ class _SelectTablePageState extends State<SelectTablePage>
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           title: SizedBox(
             height: SizeConfig.safeBlockVertical * 5,
-            child: Image.asset(Strings.asset_headerLogo,
+            child: Image.asset(Strings.assetHeaderLogo,
                 fit: BoxFit.contain, gaplessPlayback: true),
           ),
           bottom: TabBar(
@@ -512,7 +561,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Text(
-                    Strings.dine_in,
+                    Strings.dineIn,
                   ),
                 ),
               ),
@@ -523,7 +572,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Text(
-                    Strings.take_away,
+                    Strings.takeAway,
                   ),
                 ),
               ),
@@ -552,11 +601,11 @@ class _SelectTablePageState extends State<SelectTablePage>
                               Container(
                                   padding: EdgeInsets.all(10),
                                   height: MediaQuery.of(context).size.height,
-                                  width: isMenuOpne
+                                  width: isMenuopen
                                       ? MediaQuery.of(context).size.width / 1.5
-                                      : MediaQuery.of(context).size.width,
+                                      : MediaQuery.of(context).size.width / 0.9,
                                   child: tablesListwidget(1)),
-                              menuItemDiv()
+                              menuItemDiv(),
                             ],
                           ),
                         ),
@@ -568,13 +617,14 @@ class _SelectTablePageState extends State<SelectTablePage>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
                               Container(
-                                  padding: EdgeInsets.all(10),
-                                  height: MediaQuery.of(context).size.height,
-                                  width: isMenuOpne
-                                      ? MediaQuery.of(context).size.width / 1.5
-                                      : MediaQuery.of(context).size.width,
-                                  child: tablesListwidget(2)),
-                              menuItemDiv()
+                                padding: EdgeInsets.all(10),
+                                height: MediaQuery.of(context).size.height,
+                                width: isMenuopen
+                                    ? MediaQuery.of(context).size.width / 1.5
+                                    : MediaQuery.of(context).size.width,
+                                child: tablesListwidget(2),
+                              ),
+                              menuItemDiv(),
                             ],
                           ),
                         ),
@@ -613,12 +663,12 @@ class _SelectTablePageState extends State<SelectTablePage>
                             shiftbtn(() {
                               if (permissions.contains(Constant.OPENING)) {
                                 openOpningAmmountPop(
-                                    Strings.title_opening_amount);
+                                    Strings.titleOpeningAmount);
                               } else {
                                 CommonUtils.openPermissionPop(
                                     context, Constant.OPENING, () async {
                                   openOpningAmmountPop(
-                                      Strings.title_opening_amount);
+                                      Strings.titleOpeningAmount);
                                 }, () {});
                               }
                             })
@@ -646,10 +696,10 @@ class _SelectTablePageState extends State<SelectTablePage>
     User userdata = await CommunFun.getuserDetails();
     Shift shift = new Shift();
     int appid = await localAPI.getLastShiftAppID(terminalId);
-    if (appid != 0) {
+    if (shiftid == null && appid != 0) {
       shift.appId = appid + 1;
     } else {
-      shift.appId = 1;
+      shift.appId = shiftid == null ? 1 : int.parse(shiftid);
     }
     shift.terminalId = int.parse(terminalId);
     shift.branchId = int.parse(branchid);
@@ -688,7 +738,7 @@ class _SelectTablePageState extends State<SelectTablePage>
               ammountext: isopning,
               onEnter: (ammountext) {
                 sendOpenShft(ammountext);
-                if (isopning == Strings.title_opening_amount) {
+                if (isopning == Strings.titleOpeningAmount) {
                   if (printerreceiptList.length > 0) {
                     if (permissions.contains(Constant.OPEN_DRAWER)) {
                       printKOT.testReceiptPrint(
@@ -709,7 +759,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                       }, () {});
                     }
                   } else {
-                    CommunFun.showToast(context, Strings.printer_not_available);
+                    CommunFun.showToast(context, Strings.printerNotAvailable);
                   }
                 }
               });
@@ -730,7 +780,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       padding: EdgeInsets.only(top: 15, left: 30, right: 30, bottom: 15),
       onPressed: onPress,
       child: Text(
-        Strings.open_shift,
+        Strings.openShift,
         style: TextStyle(
             color: StaticColor.deepOrange,
             fontSize: SizeConfig.safeBlockVertical * 4),
@@ -745,7 +795,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   Widget menuItemDiv() {
-    return isMenuOpne
+    return isMenuopen
         ? Container(
             margin: EdgeInsets.all(10),
             padding: EdgeInsets.all(10),
@@ -762,6 +812,21 @@ class _SelectTablePageState extends State<SelectTablePage>
       physics: BouncingScrollPhysics(),
       shrinkWrap: true,
       children: [
+        selectedTable == null
+            ? Container(
+                height: MediaQuery.of(context).size.height * .6,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'Select a Table',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ],
+                ),
+              )
+            : SizedBox(),
         selectedTable != null
             ? Text(
                 selectedTable != null && selectedTable.numberofpax == null
@@ -775,30 +840,34 @@ class _SelectTablePageState extends State<SelectTablePage>
             : SizedBox(),
         selectedTable != null && selectedTable.numberofpax == null
             ? neworder_button(
-                Icons.supervised_user_circle, Strings.new_order, context, () {
+                Icons.supervised_user_circle, Strings.newOrder, context, () {
                 addNewOrder();
               })
             : SizedBox(),
         selectedTable != null && selectedTable.numberofpax != null
             ? neworder_button(
-                Icons.supervised_user_circle, Strings.change_pax, context, () {
+                Icons.supervised_user_circle, Strings.changePax, context, () {
                 changePax();
               })
             : SizedBox(),
         selectedTable != null && selectedTable.numberofpax != null
-            ? neworder_button(Icons.remove_red_eye, Strings.view_order, context,
+            ? neworder_button(Icons.remove_red_eye, Strings.viewOrder, context,
                 () {
                 viewOrder();
               })
             : SizedBox(),
         selectedTable != null && selectedTable.numberofpax != null
             ? neworder_button(
-                Icons.change_history, Strings.change_table, context, () {
+                Icons.change_history,
+                !isChangingTable
+                    ? Strings.changeTable
+                    : Strings.cancelChangeTable,
+                context, () {
                 changeTablePop();
               })
             : SizedBox(),
         selectedTable != null && selectedTable.numberofpax != null
-            ? neworder_button(Icons.cancel, Strings.cancle_order, context, () {
+            ? neworder_button(Icons.cancel, Strings.cancleOrder, context, () {
                 if (permissions.contains(Constant.CANCEL_ORDER)) {
                   cancleTableOrder();
                 } else {
@@ -809,12 +878,17 @@ class _SelectTablePageState extends State<SelectTablePage>
                 }
               })
             : SizedBox(),
-        neworder_button(Icons.call_merge, Strings.merge_order, context, () {
-          mergeTable(selectedTable);
-        }),
-        selectedTable != null && selectedTable.tableQr != null
+        selectedTable != null
+            ? neworder_button(
+                Icons.call_merge,
+                isMergeing ? Strings.cancelMergeOrder : Strings.mergeOrder,
+                context, () {
+                mergeTable(selectedTable);
+              })
+            : SizedBox(),
+        false && selectedTable != null && selectedTable.tableQr != null
             ? neworder_button(Icons.cancel, Strings.scanQRcode, context, () {
-                opneQrcodePop();
+                openQrcodePop();
               })
             : SizedBox(),
       ],
@@ -855,7 +929,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       onTap: () {
         changeTablePop();
       },
-      child: Text(Strings.change_table,
+      child: Text(Strings.changeTable,
           textAlign: TextAlign.center, style: Styles.bluesmall()),
     );
   }
@@ -888,7 +962,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       onTap: () {
         changePax();
       },
-      child: Text(Strings.change_pax,
+      child: Text(Strings.changePax,
           textAlign: TextAlign.center, style: Styles.bluesmall()),
     );
   }
@@ -898,7 +972,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       onTap: () {
         cancleTableOrder();
       },
-      child: Text(Strings.cancle_order,
+      child: Text(Strings.cancleOrder,
           textAlign: TextAlign.center, style: Styles.bluesmall()),
     );
   }
@@ -908,17 +982,17 @@ class _SelectTablePageState extends State<SelectTablePage>
       onTap: () {
         viewOrder();
       },
-      child: Text(Strings.view_order,
+      child: Text(Strings.viewOrder,
           textAlign: TextAlign.center, style: Styles.bluesmall()),
     );
   }
 
   Widget paxTextInput() {
     return TextField(
-      autofocus: true,
       controller: paxController,
       keyboardType: TextInputType.number,
       inputFormatters: <TextInputFormatter>[
+        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
         WhitelistingTextInputFormatter.digitsOnly
       ],
       decoration: InputDecoration(
@@ -933,7 +1007,7 @@ class _SelectTablePageState extends State<SelectTablePage>
           color: StaticColor.colorGrey400,
           size: SizeConfig.safeBlockVertical * 5,
         ),
-        hintText: Strings.enter_pax,
+        hintText: Strings.enterPax,
         hintStyle: TextStyle(
             fontSize: SizeConfig.safeBlockVertical * 3,
             fontWeight: FontWeight.bold,
@@ -953,6 +1027,23 @@ class _SelectTablePageState extends State<SelectTablePage>
           color: StaticColor.colorBlack,
           fontSize: SizeConfig.safeBlockVertical * 4),
       onChanged: (e) {},
+      onSubmitted: (value) {
+        /* setState(() {
+          tableList.map((e) {
+            if (e == selectedTable) {
+              return e.numberofpax = int.tryParse(value);
+            } else
+              return e;
+          });
+        }); */
+        if (!isMergeing) {
+          if (isAssigning) {
+            assignTabletoOrder();
+          } else {
+            selectTableForNewOrder();
+          }
+        }
+      },
     );
   }
 
@@ -961,7 +1052,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
       onPressed: _onPress,
       child: Text(
-        isChanging ? Strings.change_pax : Strings.enterPax,
+        isChanging ? Strings.changePax : Strings.enterPax,
         style: TextStyle(
             color: StaticColor.colorWhite,
             fontSize: SizeConfig.safeBlockVertical * 4),
@@ -997,7 +1088,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(isChanging ? Strings.change_pax : Strings.enterPax,
+                  Text(isChanging ? Strings.changePax : Strings.enterPax,
                       style: TextStyle(
                           fontSize: SizeConfig.safeBlockVertical * 3,
                           color: StaticColor.colorWhite)),
@@ -1044,15 +1135,6 @@ class _SelectTablePageState extends State<SelectTablePage>
         ));
   }
 
-  Color colorConvert(String color) {
-    color = color.replaceAll("#", "");
-    if (color.length == 6) {
-      return Color(int.parse("0xFF" + color));
-    } else if (color.length == 8) {
-      return Color(int.parse("0x" + color));
-    }
-  }
-
   Widget tablesListwidget(type) {
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2.4;
@@ -1066,13 +1148,13 @@ class _SelectTablePageState extends State<SelectTablePage>
       });
     }
     if (isMergeing || isChangingTable) {
-      var list =
-          tableList.where((x) => x.tableId != selectedTable.tableId).toList();
+      var list = tableList.toList();
+      //var list = tableList.where((x) => x.tableId != selectedTable.tableId).toList();
       setState(() {
         tableList = list;
       });
       if (tableList.length == 0) {
-        CommunFun.showToast(context, Strings.table_not_avalilable);
+        CommunFun.showToast(context, Strings.tableNotAvalilable);
       }
     }
     List<TablesDetails> newtableList = new List<TablesDetails>();
@@ -1092,8 +1174,14 @@ class _SelectTablePageState extends State<SelectTablePage>
       crossAxisSpacing: 10,
       mainAxisSpacing: 10,
       childAspectRatio: (itemWidth / itemHeight),
-      crossAxisCount: isMenuOpne ? 4 : 6,
+      crossAxisCount: isMenuopen ? 4 : 6,
       children: newtableList.map((table) {
+        if (table.merged_table_id != null &&
+            !mergeTableList.contains(table.merged_table_id)) {
+          setState(() {
+            if (!isLoading) mergeTableList.add(table.merged_table_id);
+          });
+        }
         var selected;
         if (tableColors.length > 0 && table.occupiedMinute != null) {
           selected = tableColors.firstWhere(
@@ -1114,38 +1202,28 @@ class _SelectTablePageState extends State<SelectTablePage>
         return InkWell(
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
           onTap: () {
-            if (isMergeing) {
+            if (mergeTableList.contains(table.tableId)) {
+            } else if (selectedTable != null &&
+                selectedTable.tableId == table.tableId) {
+            } else if (isMergeing) {
               if (table.merged_table_id == null) {
+                //mergeInTable.
                 mergeTabledata(table);
               } else {
-                CommunFun.showToast(context, Strings.table_already_merged);
+                CommunFun.showToast(context, Strings.tableAlreadyMerged);
               }
             } else if (isChangingTable) {
               if (table.saveorderid == 0) {
                 changeTableToOtherTable(table);
               } else {
-                CommunFun.showToast(context, Strings.table_already_occupied);
+                CommunFun.showToast(context, Strings.tableAlreadyOccupied);
               }
             } else {
               ontableLongTap(table);
             }
           },
           onDoubleTap: () {
-            if (isMergeing) {
-              if (table.merged_table_id == null) {
-                mergeTabledata(table);
-              } else {
-                CommunFun.showToast(context, Strings.table_already_merged);
-              }
-            } else if (isChangingTable) {
-              if (table.saveorderid == 0) {
-                changeTableToOtherTable(table);
-              } else {
-                CommunFun.showToast(context, Strings.table_already_occupied);
-              }
-            } else {
-              ontableTap(table);
-            }
+            ontableTap(table);
           },
           child: Container(
             width: itemHeight,
@@ -1168,7 +1246,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                     height: itemHeight / 2,
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           SizedBox(height: 30),
                           Text(
@@ -1204,9 +1282,18 @@ class _SelectTablePageState extends State<SelectTablePage>
                   width: MediaQuery.of(context).size.width,
                   //height: itemHeight / 5,
                   decoration: BoxDecoration(
-                      color: table.numberofpax != null
-                          ? StaticColor.deepOrange
-                          : StaticColor.colorGrey600,
+                      color: table.is_merge_table != null
+                          ? Colors.blue
+                          : ((isMergeing || isChangingTable) &&
+                                  selectedTable != null &&
+                                  selectedTable.tableId == table.tableId)
+                              ? tableSelectedColor
+                              : (selectedTable != null &&
+                                      selectedTable.tableId == table.tableId)
+                                  ? Colors.orange
+                                  : table.numberofpax != null
+                                      ? StaticColor.deepOrange
+                                      : StaticColor.colorGrey600,
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(8.0),
                           bottomRight: Radius.circular(8.0))),
@@ -1214,19 +1301,24 @@ class _SelectTablePageState extends State<SelectTablePage>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      table.numberofpax != null
+                      mergeTableList.contains(table.tableId)
                           ? Text(
-                              Strings.occupied +
-                                  table.numberofpax.toString() +
-                                  "/" +
-                                  table.tableCapacity.toString(),
-                              style: Styles.whiteSimpleSmall())
-                          : Text(
-                              Strings.vacant +
-                                  "0" +
-                                  "/" +
-                                  table.tableCapacity.toString(),
-                              style: Styles.whiteSimpleSmall())
+                              "-",
+                              style: Styles.whiteSimpleSmall(),
+                            )
+                          : table.numberofpax != null
+                              ? Text(
+                                  Strings.occupied +
+                                      table.numberofpax.toString() +
+                                      "/" +
+                                      table.tableCapacity.toString(),
+                                  style: Styles.whiteSimpleSmall())
+                              : Text(
+                                  Strings.vacant +
+                                      "0" +
+                                      "/" +
+                                      table.tableCapacity.toString(),
+                                  style: Styles.whiteSimpleSmall())
                     ],
                   ),
                 ),

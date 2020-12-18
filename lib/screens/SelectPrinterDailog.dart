@@ -52,7 +52,7 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(Strings.scan_printer, style: Styles.whiteBold()),
+                Text(Strings.scanPrinter, style: Styles.whiteBold()),
               ],
             ),
           ),
@@ -81,7 +81,8 @@ class SelectPrinterDailogState extends State<SelectPrinterDailog> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: StaticColor.colorRed, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();

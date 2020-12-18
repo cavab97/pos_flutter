@@ -49,7 +49,7 @@ double taxvalues = 0;
 
 class CommunFun {
   static loginText() {
-    return Text(Strings.login_text,
+    return Text(Strings.loginText,
         style: TextStyle(
             color: StaticColor.colorWhite,
             fontSize: 18,
@@ -121,7 +121,7 @@ class CommunFun {
       width: MediaQuery.of(context).size.width,
       alignment: Alignment.centerRight,
       child: Text(
-        Strings.forgot_password,
+        Strings.forgotPassword,
         style: TextStyle(color: Colors.blue, fontSize: 22),
       ),
     );
@@ -220,6 +220,27 @@ class CommunFun {
     }
   }
 
+  static getTextAndSplit(String value) {
+    // var maximumLength = 32;
+    // var total = value.length;
+    // var totalParagraph = total / 32;
+    // var arr = value.split('');
+
+    // var completeWord = List.from(arr);
+    // print(arr);
+    // for (int i = 4; i < arr.length; i++) {
+    //   print((i + 1) % 32);
+
+    //   if ((i + 1) % 36 == 1 || (i + 1) % 36 == 2 || (i + 1) % 36 == 3) {
+    //     completeWord.insert(i, " ");
+    //   }
+    // }
+
+    // String paragraph = completeWord.join();
+
+    return value;
+  }
+
   static deviceInfo() async {
     // Device Info
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -304,7 +325,7 @@ class CommunFun {
         ));
   }
 
-  static opneSyncPop(context) {
+  static openSyncPop(context) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -324,17 +345,19 @@ class CommunFun {
     await SyncAPICalls.sendTerminalLogTable(context);
     await SyncAPICalls.sendShiftTable(context);
     await SyncAPICalls.sendShiftdetails(context);
-    if (isClose) {
-      Navigator.of(context).pop();
+    if (isClose && Navigator.of(context).canPop()) {
+      //Navigator.of(context).pop();
     }
   }
 
   static syncAfterSuccess(context, isOpen) async {
     if (isOpen) {
-      opneSyncPop(context);
+      openSyncPop(context);
     }
     var lastSync = await Preferences.getStringValuesSF(Constant.LastSync_Table);
-    if (lastSync == null) {
+    if (context == null) {
+      return;
+    } else if (lastSync == null) {
       CommunFun.getDataTables1(context, isOpen);
     } else if (lastSync == "1") {
       CommunFun.getDataTables2(context, isOpen);
@@ -461,9 +484,6 @@ class CommunFun {
         if (aceets["data"]["next_offset"] != 0) {
           getAssetsData(context, isOpen);
         }
-        if (isOpen) {
-          Navigator.of(context).pop();
-        }
         var serverTime =
             await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
         if (serverTime == null) {
@@ -473,7 +493,11 @@ class CommunFun {
           await checkpermission();
           await Navigator.pushNamed(context, Constant.SelectTableScreen,
               arguments: {"isAssign": false});
+          isOpen = false;
         }
+        /* if (isOpen) {
+          Navigator.of(context).pop();
+        } */
       } else {
         if (aceets["data"]["next_offset"] == 0) {
           await CommunFun.setServerTime(aceets, "5");
@@ -588,7 +612,6 @@ class CommunFun {
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
     if (countrys != null) {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print(result);
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {
@@ -792,12 +815,12 @@ class CommunFun {
     if (timeZone != null) {
       final detroitTime =
           new tz.TZDateTime.from(dateTime, tz.getLocation(timeZone));
-      print('Local India Time: ' + dateTime.toString());
-      print('Detroit Time: ' + detroitTime.toString());
+      // print('Local India Time: ' + dateTime.toString());
+      // print('Detroit Time: ' + detroitTime.toString());
       // DateTime serverDate = DateTime.parse(detroitTime.toString());
       String formattedDate =
           DateFormat('yyyy-MM-dd HH:mm:ss').format(detroitTime);
-      print(formattedDate);
+      //print(formattedDate);
       return formattedDate;
     } else {
       String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime);
@@ -961,6 +984,7 @@ class CommunFun {
     if (permission != null) {
       return permission;
     } else {
+      print("error");
       return "";
     }
   }
@@ -978,6 +1002,10 @@ class CommunFun {
 
   static getsetWebOrders(context) async {
     var res = await SyncAPICalls.getWebOrders(context);
+    if (res.length < 1 || res["data"] == null) {
+      print('getsetWebOrders api error');
+      return;
+    }
     var sertvertime = res["data"]["serverdatetime"];
     await Preferences.setStringToSF(
         Constant.ORDER_SERVER_DATE_TIME, sertvertime);
@@ -1115,7 +1143,7 @@ class CommunFun {
     Printer printer = await CommunFun.getPrinter(productItem);
     bool isEditing = false;
     MSTCartdetails sameitem;
-    var contain = cartItems
+    /* var contain = cartItems
         .where((element) => element.productId == productItem.productId);
     if (contain.isNotEmpty) {
       isEditing = true;
@@ -1124,7 +1152,7 @@ class CommunFun {
           .map((i) => MSTCartdetails.fromJson(i))
           .toList();
       sameitem = myModels[0];
-    }
+    } */
     if (productItem.hasInventory == 1) {
       var qty = 1.0;
       if (isEditing) {
@@ -1135,7 +1163,7 @@ class CommunFun {
       if (cartval.length > 0) {
         double storeqty = cartval[0].qty;
         if (storeqty < qty) {
-          CommunFun.showToast(context, Strings.stock_not_valilable);
+          CommunFun.showToast(context, Strings.stockNotValilable);
           callback();
           return false;
         }
@@ -1216,9 +1244,9 @@ class CommunFun {
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = await CommunFun.getLocalID();
-    var detailID = await localAPI.addintoCartDetails(cartdetails);
-    print(detailID);
-    callback();
+    await localAPI.addintoCartDetails(cartdetails);
+    //print(detailID);
+    callback(cartdetails);
   }
 
   static getCustomer() async {
@@ -1268,9 +1296,7 @@ class CommunFun {
       if (tempValue <= 2) {
         round = prefix + "." + postFilx.substring(0, 1) + "0";
       } else if (tempValue <= 7) {
-        print(postFilx.substring(0, 1));
         round = prefix + "." + postFilx.substring(0, 1) + "5";
-        print(round);
       } else {
         int values = 0;
         if (int.parse(postFilx.substring(1)) == 9) {
@@ -1333,7 +1359,7 @@ class CommunFun {
         refundval += 0;
         netsale = grosssale - refundval;
         taxval += order.tax_amount;
-        totalPax += order.pax;
+        totalPax += order.pax ?? 0;
         roundingAmount += order.rounding_amount;
         textService += order.serviceCharge;
         discountval += order.voucher_amount != null ? order.voucher_amount : 0;
