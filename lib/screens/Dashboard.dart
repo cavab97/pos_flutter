@@ -1057,6 +1057,7 @@ class _DashboradPageState extends State<DashboradPage>
                 issetMeal: isSetMeal,
                 cartID: currentCart,
                 onClose: () {
+                  getCurrentCart();
                   refreshAfterAction(false);
                   //cartList.add(cartitem);
                 });

@@ -838,7 +838,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         overflow: Overflow.visible,
         children: <Widget>[
           Container(
-            padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
+            padding: EdgeInsets.only(left: 30, right: 70, top: 10, bottom: 10),
             height: SizeConfig.safeBlockVertical * 9,
             color: StaticColor.colorBlack,
             child: Row(
@@ -852,7 +852,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                       fontSize: SizeConfig.safeBlockVertical * 3,
                       color: StaticColor.colorWhite),
                 ),
-                addbutton(context)
+                //addbutton(context)
               ],
             ),
           ),
@@ -1480,6 +1480,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           }
         },
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             !isEditing
                 ? Icon(

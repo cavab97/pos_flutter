@@ -44,6 +44,7 @@ class FinalEndScreentate extends State<FinalEndScreen> {
           child: new GestureDetector(
             onTap: () {
               widget.onClose();
+              Navigator.of(context).pop();
             },
             child: Container(
               width: MediaQuery.of(context).size.width,

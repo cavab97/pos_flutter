@@ -78,7 +78,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
               /* setState(() {
                 isSubPayment = true;
               }); */
-            } else {
+            } else if (this.mounted) {
               setState(() {
                 seletedPayment = payment;
               });
@@ -567,28 +567,35 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                       ],
                     ),
                     _button(Strings.enter, () {
-                      paidAmount = widget.totalAmount;
-                      finalPayment();
+                      //paidAmount = widget.totalAmount;
+                      double currentPaidAmount = double.parse(currentNumber);
+
+                      if (!isPaymented && this.mounted) {
+                        setState(() {
+                          currentPayment.op_amount = currentPaidAmount;
+                          currentPayment.op_method_id =
+                              seletedPayment.paymentId;
+                          totalPaymentList.add(currentPayment);
+                          paidAmount += currentPaidAmount;
+                        });
+                      }
+                      if (paidAmount < (widget.totalAmount) && this.mounted) {
+                        setState(() {
+                          isPaymented = false;
+                          currentNumber = "0";
+                        });
+                      } else {
+                        isPaymented = true;
+                        Navigator.of(context).pop();
+                        finalPayment();
+                      }
                       //widget.onEnter(currentNumber);
                     })
                   ]),
                   Row(
                     children: <Widget>[
                       _totalbutton(widget.totalAmount.toStringAsFixed(2), () {
-                        if (double.parse(currentNumber) <
-                            (widget.totalAmount - paidAmount)) {
-                          setState(() {
-                            currentPayment.op_amount =
-                                double.parse(currentNumber);
-                            currentPayment.op_method_id =
-                                seletedPayment.paymentId;
-                            totalPaymentList.add(currentPayment);
-                            isPaymented = false;
-                          });
-                        } else {
-                          Navigator.of(context).pop();
-                          finalPayment();
-                        }
+                        finalPayment();
                         //widget.onEnter(widget.totalAmount.toString());
                       }),
                     ],
@@ -613,7 +620,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
               totalPaid: paidAmount,
               change: change,
               onClose: () {
-                Navigator.of(context).pop();
+                //Navigator.of(context).pop();
                 widget.onClose(totalPaymentList);
               });
         });

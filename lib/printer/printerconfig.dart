@@ -801,7 +801,7 @@ class PrintReceipt {
     if (isCashPayment) {
       ticket.drawer();
     }
-    return ticket;
+    //return ticket;
   }
 
   void checkReceiptPrint(

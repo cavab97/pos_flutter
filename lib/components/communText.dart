@@ -708,7 +708,7 @@ class CommunFun {
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
     if (countrys != null) {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print(result);
+      print('counry state city' + result);
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {
