@@ -53,6 +53,7 @@ import 'package:mcncashier/screens/ChangeQtyDailog.dart';
 import 'package:mcncashier/screens/SplitOrder.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/screens/ReprintPopup.dart';
+import 'package:mcncashier/screens/payment/PaymentAlertDialog.dart';
 import 'package:mcncashier/screens/CashPayment.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -899,11 +900,13 @@ class _DashboradPageState extends State<DashboradPage>
   sendPayment() async {
     if (cartList.length != 0) {
       if (permissions.contains(Constant.PAYMENT)) {
-        opnePaymentMethod();
+        openPaymentMethod();
+        //opnePaymentMethod();
       } else {
         await CommonUtils.openPermissionPop(context, Constant.PAYMENT,
             () async {
-          opnePaymentMethod();
+          openPaymentMethod();
+          //opnePaymentMethod();
         }, () {});
       }
     } else {
@@ -1054,6 +1057,20 @@ class _DashboradPageState extends State<DashboradPage>
                 checkCustomerSelected();
               },
               isFor: Constant.dashboard);
+        });
+  }
+
+  openPaymentMethod() async {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return PaymentAlertDialog(
+            totalAmount: grandTotal,
+            onClose: (mehtod) {
+              CommunFun.processingPopup(context);
+              paymentWithMethod(mehtod);
+            },
+          );
         });
   }
 
