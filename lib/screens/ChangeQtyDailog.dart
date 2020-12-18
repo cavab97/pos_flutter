@@ -60,7 +60,7 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(Strings.enter_qty,
+                Text(Strings.enterQty,
                     style: TextStyle(
                         fontSize: SizeConfig.safeBlockVertical * 3,
                         color: StaticColor.colorWhite)),

@@ -14,6 +14,7 @@ import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
+import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
@@ -295,8 +296,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     order.createdBy = userdata.id;
     order.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     order.terminalId = int.parse(terminalId);
-    var addTocancle = await localAPI.insertCancelOrder(order);
-
+    await localAPI.insertCancelOrder(order);
     // if (paymehtod.length > 0) {
     //   for (var i = 0; i < paymehtod.length; i++) {
     //     OrderPayment orderpayment = paymehtod[i];
@@ -336,7 +336,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 await CommunFun.getCurrentDateTime(DateTime.now());
             invData.updatedBy = userdata.id;
             updatedInt.add(invData);
-            var ulog = await localAPI.updateInvetory(updatedInt);
+            await localAPI.updateInvetory(updatedInt);
             ProductStoreInventoryLog log = new ProductStoreInventoryLog();
             if (inventory.length > 0) {
               log.uuid = uuid;
@@ -352,8 +352,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   await CommunFun.getCurrentDateTime(DateTime.now());
               log.updated_by = userdata.id;
               updatedIntLog.add(log);
-              var ulog =
-                  await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
+              await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
             }
           }
         }
@@ -433,7 +432,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 await CommunFun.getCurrentDateTime(DateTime.now());
             invData.updatedBy = userdata.id;
             updatedInt.add(invData);
-            var ulog = await localAPI.updateInvetory(updatedInt);
+            await localAPI.updateInvetory(updatedInt);
             ProductStoreInventoryLog log = new ProductStoreInventoryLog();
             if (inventory.length > 0) {
               log.uuid = uuid;
@@ -449,8 +448,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   await CommunFun.getCurrentDateTime(DateTime.now());
               log.updated_by = userdata.id;
               updatedIntLog.add(log);
-              var ulog =
-                  await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
+              await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
             }
           }
         }
@@ -473,8 +471,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
       order.sub_total = subtotal;
       order.order_item_count = qty.toInt();
       order.grand_total = grandtotal;
-      var result = await localAPI.deleteOrderItem(product.app_id);
-      var result1 = await localAPI.updateInvoice(order);
+      await localAPI.deleteOrderItem(product.app_id);
+      await localAPI.updateInvoice(order);
       setState(() {
         isRefunding = false;
       });
@@ -503,8 +501,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
           await localAPI.getOrderAttributes(order.app_id);
       List<OrderModifire> modifires =
           await localAPI.getOrderModifire(order.app_id);
+      var branchid = await CommunFun.getbranchId();
+      List<TablesDetails> tabledata =
+          await localAPI.getTableData(branchid, order.table_id);
       PrintReceipt printKOT = PrintReceipt();
       printKOT.checkReceiptPrint(
+          (order.pax != null ? order.pax.toString() : 0.toString()),
           printerreceiptList[0].printerIp,
           context,
           branchData,
@@ -515,9 +517,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
           order,
           orderpaymentdata,
           paymentMethod,
-          "",
+          tabledata[0].tableName,
           currency,
-          Strings.walkin_customer,
+          Strings.walkinCustomer,
           true,
           true);
     }
@@ -565,7 +567,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                 orderLists.length > 0
                                     ? searchTransationList()
                                     : Center(
-                                        child: Text(Strings.no_order_found,
+                                        child: Text(Strings.noOrderFound,
                                             style: Styles.darkBlue()))
                               ],
                             ),
@@ -654,7 +656,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       children: <Widget>[
         CommunFun.verticalSpace(50),
         Text(
-          Strings.no_order_found,
+          Strings.noOrderFound,
           style: Styles.whiteBold(),
         ),
       ],
@@ -802,7 +804,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
               size: SizeConfig.safeBlockVertical * 5,
             ),
           ),
-          hintText: Strings.searchbox_hint,
+          hintText: Strings.searchboxHint,
           hintStyle: TextStyle(
               fontSize: SizeConfig.safeBlockVertical * 3,
               fontWeight: FontWeight.bold,
@@ -995,7 +997,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   new Expanded(
                     flex: 7,
                     child: Text(
-                      Strings.sub_total.toUpperCase(),
+                      Strings.subTotal.toUpperCase(),
                       textAlign: TextAlign.end,
                       style: Styles.darkGray(),
                     ),
@@ -1061,8 +1063,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     flex: 7,
                     child: Text(
                       selectedOrder.serviceChargePercent == null
-                          ? Strings.service_charge.toUpperCase()
-                          : Strings.service_charge.toUpperCase() +
+                          ? Strings.serviceCharge.toUpperCase()
+                          : Strings.serviceCharge.toUpperCase() +
                               "(" +
                               selectedOrder.serviceChargePercent.toString() +
                               "%)",
@@ -1162,7 +1164,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   new Expanded(
                     flex: 7,
                     child: Text(
-                      Strings.grand_total,
+                      Strings.grandTotal,
                       textAlign: TextAlign.end,
                       style: Styles.darkGray(),
                     ),
@@ -1190,7 +1192,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   new Expanded(
                     flex: 7,
                     child: Text(
-                      Strings.rounding_ammount.toUpperCase(),
+                      Strings.roundingAmmount.toUpperCase(),
                       textAlign: TextAlign.end,
                       style: Styles.darkGray(),
                     ),
@@ -1242,7 +1244,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
         onPressed: _onPress,
         child: Text(
-          Strings.cancel_tansaction,
+          Strings.cancelTransaction,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
               color: orderpayment.length > 0 && orderpayment[0].op_status == 1
@@ -1268,7 +1270,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
           children: orderItemList.map((product) {
         var index = orderItemList.indexOf(product);
         var item = orderItemList[index];
-        print(item.product_detail);
         var producrdata = json.decode(item.product_detail);
         // print(producrdata);
         return InkWell(
@@ -1289,7 +1290,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       child: product.base64 != ""
                           ? CommonUtils.imageFromBase64String(product.base64)
                           : new Image.asset(
-                              Strings.no_imageAsset,
+                              Strings.noImageAsset,
                               fit: BoxFit.cover,
                               gaplessPlayback: true,
                             ),
@@ -1389,7 +1390,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           }
         },
         child: Text(
-          Strings.print_reciept,
+          Strings.printReciept,
           style: TextStyle(color: StaticColor.deepOrange, fontSize: 15),
         ),
         color: Colors.transparent,

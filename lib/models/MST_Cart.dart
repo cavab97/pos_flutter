@@ -86,7 +86,9 @@ class MST_Cart {
     created_at = json["created_at"];
     customer_terminal = json["customer_terminal"];
     voucher_detail = json["voucher_detail"];
-    sub_total_after_discount = json["sub_total_after_discount"];
+    sub_total_after_discount = json["sub_total_after_discount"] is int
+        ? (json['sub_total_after_discount'] as int).toDouble()
+        : json['sub_total_after_discount'];
     source = json["source"];
     total_item = json["total_item"] is int
         ? (json['total_item'] as int).toDouble()

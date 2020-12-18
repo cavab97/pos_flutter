@@ -9,6 +9,13 @@ import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/models/Terminal.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
+import 'package:mcncashier/models/Branch.dart';
+
+List<Printer> printerreceiptList = new List<Printer>();
 
 class PayInOutDailog extends StatefulWidget {
   PayInOutDailog({Key key, this.title, this.ammount, this.isIn, this.onClose})
@@ -24,7 +31,10 @@ class PayInOutDailog extends StatefulWidget {
 class PayInOutDailogstate extends State<PayInOutDailog> {
   DatabaseHelper databaseHelper = DatabaseHelper();
   LocalAPI localAPI = LocalAPI();
+  PrintReceipt printKOT = PrintReceipt();
   double ammount = 0.00;
+  Terminal terminal;
+  Branch branchData;
   var selectedreason;
   var permissions = "";
   List<String> reasonList = [
@@ -35,6 +45,8 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
   @override
   void initState() {
     super.initState();
+    getAllPrinter();
+    getbranch();
     // setState(() {
     //   ammount = widget.ammount;
     // });
@@ -54,9 +66,8 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         context: context,
         builder: (BuildContext context) {
           return OpeningAmmountPage(
-              ammountext: Strings.pay_in_ammount,
+              ammountext: Strings.payInAmmount,
               onEnter: (ammountext) {
-                print(ammountext);
                 setamount(ammountext);
               });
         });
@@ -68,6 +79,26 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         ammount = double.parse(ammountext);
       });
     }
+  }
+
+  getbranch() async {
+    var branchid = await CommunFun.getbranchId();
+    var branch = await localAPI.getbranchData(branchid);
+    setState(() {
+      branchData = branch;
+    });
+    return branch;
+  }
+
+  getAllPrinter() async {
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    var terminalid = await CommunFun.getTeminalKey();
+    Terminal terminalData = await localAPI.getTerminalDetails(terminalid);
+
+    setState(() {
+      printerreceiptList = printerDraft;
+      terminal = terminalData;
+    });
   }
 
   @override
@@ -101,6 +132,22 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
     return RaisedButton(
       padding: EdgeInsets.all(2),
       onPressed: () async {
+        if (selectedreason != "Other") {
+          if (printerreceiptList.length > 0) {
+            printKOT.cashInPrint(
+                printerreceiptList[0].printerIp,
+                context,
+                widget.title,
+                selectedreason,
+                branchData,
+                terminal,
+                selectedreason,
+                ammount);
+          } else {
+            CommunFun.showToast(context, Strings.printerNotAvailable);
+          }
+        }
+
         widget.onClose(ammount, selectedreason);
         if (widget.isIn) {
           await SyncAPICalls.logActivity(
@@ -124,8 +171,8 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
 
   Widget closeButton(context) {
     return Positioned(
-      top: -30,
-      right: -20,
+      top: 0,
+      right: 0,
       child: GestureDetector(
         onTap: () {
           Navigator.of(context).pop();
@@ -184,7 +231,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
               },
               child: Text(ammount.toStringAsFixed(2),
                   style: Styles.blackBoldLarge())),
-          Text(Strings.please_select_reason, style: Styles.drawerText()),
+          Text(Strings.pleaseSelectReason, style: Styles.drawerText()),
           Container(
               width: MediaQuery.of(context).size.width / 4,
               padding: EdgeInsets.all(12),
@@ -201,7 +248,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
                     Icons.arrow_forward_ios,
                     size: 12,
                   ),
-                  hint: Text(Strings.please_select_reason),
+                  hint: Text(Strings.pleaseSelectReason),
                   value: selectedreason,
                   isExpanded: true,
                   onChanged: (String string) {

@@ -64,7 +64,7 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
       onPressed: () {
         widget.onClose(cartList);
       },
-      child: Text(Strings.reprint_all,
+      child: Text(Strings.reprintAll,
           style: TextStyle(
             color: StaticColor.colorWhite,
             fontSize: SizeConfig.safeBlockVertical * 3,
@@ -186,7 +186,7 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(Strings.rePrint_kitchen_Print,
+                Text(Strings.rePrintKitchenPrint,
                     style: TextStyle(
                         fontSize: SizeConfig.safeBlockVertical * 3,
                         color: StaticColor.colorWhite)),
@@ -195,7 +195,6 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
                   children: <Widget>[
                     printAll(context),
                     SizedBox(width: 5),
-                    print(context),
                   ],
                 )
               ],

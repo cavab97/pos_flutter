@@ -15,7 +15,6 @@ class SplashScreen extends StatefulWidget {
 class SplashScreenstate extends State<SplashScreen> {
   @override
   void initState() {
-// TODO: implement initState
     super.initState();
     getconfigdata();
     navigatePage();

@@ -35,7 +35,7 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(Strings.printer_type, style: Styles.whiteBold()),
+                Text(Strings.printerType, style: Styles.whiteBold()),
               ],
             ),
           ),
@@ -100,7 +100,7 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
             children: <Widget>[
               ListTile(
                   title: Text(
-                    Strings.recipt_printer,
+                    Strings.reciptPrinter,
                     style: Styles.communBlack(),
                   ),
                   trailing: Transform.scale(
@@ -116,7 +116,7 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
                   )),
               ListTile(
                 title: Text(
-                  Strings.kitchen_printer,
+                  Strings.kitchenPrinter,
                   style: Styles.communBlack(),
                 ),
                 trailing: Transform.scale(

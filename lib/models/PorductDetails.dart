@@ -81,7 +81,6 @@ class ProductDetails {
     base64 = json['base64'] != null ? json['base64'] : "";
     attrCat = json["attr_cat"];
     modifireName = json["modifire_Name"];
-    box_pId = json["box_pId"];
   }
 
   Map<String, dynamic> toJson() {
@@ -109,7 +108,6 @@ class ProductDetails {
     data['deleted_by'] = this.deletedBy;
     data['base64'] = this.base64;
     data['attr_cat'] = this.attrCat;
-    data['box_pId'] = this.box_pId;
     data["modifire_Name"] = this.modifireName;
     return data;
   }

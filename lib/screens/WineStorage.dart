@@ -53,7 +53,6 @@ class _WineStorageState extends State<WineStorage>
     setState(() {
       permissions = permission;
     });
-    print("permissions :-- " + permissions);
   }
 
   void _handleTabSelection() {
@@ -107,7 +106,7 @@ class _WineStorageState extends State<WineStorage>
     }
   }
 
-  opneShowAddCustomerDailog() {
+  openShowAddCustomerDailog() {
     // Send receipt Popup
     showDialog(
         context: context,
@@ -135,7 +134,6 @@ class _WineStorageState extends State<WineStorage>
 
   getCustomerRedeem(Customer customer) async {
     var result = await localAPI.getCustomerRedeem(customer.customerId);
-    print(result);
     setState(() {
       inventoryData = result;
       isEditing = result.length > 0 ? true : false;
@@ -209,7 +207,7 @@ class _WineStorageState extends State<WineStorage>
             context, "Item is not available in you redeem.");
       }
     } else {
-      await CommunFun.showToast(context, Strings.please_select_customer);
+      await CommunFun.showToast(context, Strings.pleaseSelectCustomer);
     }
   }
 
@@ -248,7 +246,7 @@ class _WineStorageState extends State<WineStorage>
         inventory.updatedAt =
             await CommunFun.getCurrentDateTime(DateTime.now());
         inventory.updatedBy = user.id;
-        var clid = await localAPI.insertWineInventory(inventory, isUpdate);
+        await localAPI.insertWineInventory(inventory, isUpdate);
         Customer_Liquor_Inventory_Log log = new Customer_Liquor_Inventory_Log();
         var lastappid = await localAPI.getLastCustomerInventoryLog();
         if (lastappid != 0) {
@@ -267,7 +265,7 @@ class _WineStorageState extends State<WineStorage>
         log.qtyAfterChange = box.wineQty != null ? (box.wineQty - qty) : 0;
         log.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
         log.updatedBy = user.id;
-        var lid = await localAPI.insertWineInventoryLog(log);
+        await localAPI.insertWineInventoryLog(log);
         await SyncAPICalls.logActivity(
             "redeem wine", "Chasier has redeem wine", "wine storage", 1);
         getCustomerRedeem(customer);
@@ -282,7 +280,7 @@ class _WineStorageState extends State<WineStorage>
         });
       }
     } else {
-      CommunFun.showToast(context, Strings.please_select_customer);
+      CommunFun.showToast(context, Strings.pleaseSelectCustomer);
     }
   }
 
@@ -322,7 +320,7 @@ class _WineStorageState extends State<WineStorage>
                 ? Container(
                     child: RaisedButton(
                       onPressed: () {
-                        opneShowAddCustomerDailog();
+                        openShowAddCustomerDailog();
                       },
                       child: Row(
                         children: <Widget>[
@@ -332,7 +330,7 @@ class _WineStorageState extends State<WineStorage>
                             size: SizeConfig.safeBlockVertical * 4,
                           ),
                           SizedBox(width: 5),
-                          Text(Strings.select_customer,
+                          Text(Strings.selectCustomer,
                               style: Styles.whiteBoldsmall()),
                         ],
                       ),

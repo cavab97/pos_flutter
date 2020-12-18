@@ -121,9 +121,9 @@ class Orders {
     data["branch_id"] = this.branch_id;
     data["terminal_id"] = this.terminal_id;
     data["app_id"] = this.app_id;
+    data["pax"] = this.pax;
     data["table_no"] = this.table_no;
     data["table_id"] = this.table_id;
-    data["pax"] = this.pax;
     data["invoice_no"] = this.invoice_no;
     data["customer_id"] = this.customer_id;
     data["tax_percent"] = this.tax_percent;

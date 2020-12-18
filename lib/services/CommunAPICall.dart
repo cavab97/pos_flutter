@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/config.dart';
+import 'package:mcncashier/app/app_config.dart';
 import 'package:http/http.dart' as http;
 
 class APICalls {
@@ -10,27 +11,29 @@ class APICalls {
     try {
       var connected = await CommunFun.checkConnectivity();
       if (connected) {
-        print(apiurl);
         Uri url = Uri.parse(Configrations.base_URL + apiurl);
         final client = new http.Client();
         final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
         var params = json.encode(stringParams);
-        print(params);
         final response = await client.post(
           url,
           headers: headers,
           body: params,
         );
-        var data = json.decode(response.body);
-        print(data);
-        return data;
+        if (response.statusCode == 500) {
+          print('code error in laravel, check log in laravel');
+          return [];
+        } else {
+          var data = json.decode(response.body);
+          return data;
+        }
       } else {
-        CommunFun.showToast(context, Strings.internet_connection_lost);
+        CommunFun.showToast(context, Strings.internetConnectionLost);
       }
     } catch (e) {
       print(e);
-      CommunFun.showToast(context, e.message.toString());
-      //return null;
+      //CommunFun.showToast(context, e.message.toString());
+      return [];
     }
   }
 }

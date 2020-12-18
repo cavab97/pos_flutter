@@ -19,6 +19,9 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
+import 'package:mcncashier/models/Branch.dart';
+import 'package:mcncashier/models/Terminal.dart';
+import '../models/Shift.dart';
 
 class ShiftReports extends StatefulWidget {
   // PIN Enter PAGE
@@ -54,6 +57,8 @@ class _ShiftReportsState extends State<ShiftReports> {
   double overShort = 0.00;
   double payInOutAmount = 0.00;
   bool isInAmmount = false;
+  Terminal terminal;
+  Branch branchData;
   double payOutAmmount = 0.00;
   double payInAmmount = 0.00;
   List<OrderPayment> orderpaymentData = [];
@@ -72,6 +77,16 @@ class _ShiftReportsState extends State<ShiftReports> {
     getOrders();
     setPermissons();
     getAllPrinter();
+    getbranch();
+  }
+
+  getbranch() async {
+    var branchid = await CommunFun.getbranchId();
+    var branch = await localAPI.getbranchData(branchid);
+    setState(() {
+      branchData = branch;
+    });
+    return branch;
   }
 
   setPermissons() async {
@@ -83,8 +98,11 @@ class _ShiftReportsState extends State<ShiftReports> {
 
   getAllPrinter() async {
     List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    var terminalid = await CommunFun.getTeminalKey();
+    Terminal terminalData = await localAPI.getTerminalDetails(terminalid);
     setState(() {
       printerreceiptList = printerDraft;
+      terminal = terminalData;
     });
   }
 
@@ -156,7 +174,7 @@ class _ShiftReportsState extends State<ShiftReports> {
             onClose: (amount, reson) {
               if (reson == "Other") {
                 Navigator.of(context).pop();
-                otherReasonPop(amount);
+                otherReasonPop(amount, title);
               } else {
                 Navigator.of(context).pop();
                 insertPayinOUT(amount, reson);
@@ -166,12 +184,15 @@ class _ShiftReportsState extends State<ShiftReports> {
         });
   }
 
-  otherReasonPop(amount) {
+  otherReasonPop(amount, title) {
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AddOtherReason(
+            amount: amount,
+            title: title,
+            type: "other",
             onClose: (otherText) {
               Navigator.of(context).pop();
               insertPayinOUT(amount, otherText);
@@ -193,8 +214,7 @@ class _ShiftReportsState extends State<ShiftReports> {
     drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     drawer.localID = await CommunFun.getLocalID();
     drawer.terminalid = int.parse(terminalid);
-    var result = await localAPI.saveInOutDrawerData(drawer);
-    print(result);
+    await localAPI.saveInOutDrawerData(drawer);
     getpayInOutAmmount();
   }
 
@@ -213,7 +233,6 @@ class _ShiftReportsState extends State<ShiftReports> {
     if (shifittem.appId != null) {
       List<Drawerdata> result =
           await localAPI.getPayinOutammount(shifittem.appId);
-      print(result);
       if (result.length > 0) {
         setState(() {
           drawerData = result;
@@ -285,7 +304,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      Strings.shift_Report,
+                      Strings.shiftReport,
                       style: Styles.whiteBold(),
                     ),
                     SizedBox(
@@ -300,7 +319,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                 ),
                 Text(
                   shifittem.createdAt != null
-                      ? Strings.opened_at +
+                      ? Strings.openedAt +
                           " " +
                           DateFormat('EEE, MMM d yyyy, hh:mm aaa')
                               .format(DateTime.parse(shifittem.createdAt)) +
@@ -561,7 +580,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
-                  "Opnening Amount",
+                  "openning Amount",
                   style: Styles.whiteMediumBold(),
                 ),
                 trailing: Text(
@@ -784,7 +803,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                       }, () {});
                     }
                   } else {
-                    CommunFun.showToast(context, Strings.printer_not_available);
+                    CommunFun.showToast(context, Strings.printerNotAvailable);
                   }
                 },
                 child: Text(
@@ -827,7 +846,7 @@ class _ShiftReportsState extends State<ShiftReports> {
         printShiftReport();
       },
       child: Text(
-        Strings.print_reciept,
+        Strings.printReciept,
         style: TextStyle(color: StaticColor.deepOrange, fontSize: 15),
       ),
       color: Colors.transparent,
@@ -893,15 +912,52 @@ class _ShiftReportsState extends State<ShiftReports> {
 }
 
 class AddOtherReason extends StatefulWidget {
-  AddOtherReason({Key key, this.onClose}) : super(key: key);
+  AddOtherReason({Key key, this.onClose, this.amount, this.title, this.type})
+      : super(key: key);
   Function onClose;
+  final double amount;
+  final String title;
+  final String type;
 
   @override
   AddOtherReasonState createState() => AddOtherReasonState();
 }
 
 class AddOtherReasonState extends State<AddOtherReason> {
+  List<Printer> printerreceiptList = new List<Printer>();
+  PrintReceipt printKOT = PrintReceipt();
   TextEditingController reasonController = new TextEditingController();
+  ShiftReports shiftReports = ShiftReports();
+
+  Branch branchData;
+  Terminal terminal;
+
+  @override
+  void initState() {
+    super.initState();
+    getAllPrinter();
+    getbranch();
+  }
+
+  getAllPrinter() async {
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    var terminalid = await CommunFun.getTeminalKey();
+    Terminal terminalData = await localAPI.getTerminalDetails(terminalid);
+
+    setState(() {
+      printerreceiptList = printerDraft;
+      terminal = terminalData;
+    });
+  }
+
+  getbranch() async {
+    var branchid = await CommunFun.getbranchId();
+    var branch = await localAPI.getbranchData(branchid);
+    setState(() {
+      branchData = branch;
+    });
+    return branch;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -953,6 +1009,20 @@ class AddOtherReasonState extends State<AddOtherReason> {
     // Add button header rounded
     return FlatButton(
       onPressed: () {
+        if (printerreceiptList.length > 0) {
+          printKOT.cashInPrint(
+              printerreceiptList[0].printerIp,
+              context,
+              widget.title,
+              reasonController.text,
+              branchData,
+              terminal,
+              widget.type,
+              widget.amount);
+        } else {
+          CommunFun.showToast(context, Strings.printerNotAvailable);
+        }
+
         widget.onClose(reasonController.text);
       },
       child: Text("Confirm", style: Styles.orangeSmall()),

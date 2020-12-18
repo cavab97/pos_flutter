@@ -21,8 +21,8 @@ Future<dynamic> sendTerminalKey(TemimalKey terminal) async {
       body: json.encode(params),
     );
     var data = json.decode(response.body);
-    await SyncAPICalls.logActivity(
-        "Terminal", "verify terminal", "user",1);
+    // await SyncAPICalls.logActivity(
+    //     "Terminal", "verify terminal", "user",1);
     return data;
   } catch (e) {
     print(e);

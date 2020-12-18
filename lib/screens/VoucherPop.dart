@@ -150,7 +150,7 @@ class VoucherPopState extends State<VoucherPop> {
             }
             if (cartitem.discount != null && cartitem.discount != 0.0) {
               totaldiscount += cartitem.discount;
-              var result = await localAPI.addVoucherIndetail(
+              await localAPI.addVoucherIndetail(
                 cartitem,
                 vaocher.voucherId,
               );
@@ -165,7 +165,7 @@ class VoucherPopState extends State<VoucherPop> {
               cartData.grand_total = cartData.grand_total - cartData.discount;
           cartData.voucher_detail = json.encode(vaocher);
           cartData.voucher_id = vaocher.voucherId;
-          var result1 = await localAPI.addVoucherInOrder(cartData, vaocher);
+          await localAPI.addVoucherInOrder(cartData, vaocher);
           selectedvoucher = vaocher;
           isadded = true;
           selectedvoucher = vaocher;
@@ -185,7 +185,7 @@ class VoucherPopState extends State<VoucherPop> {
         }
       }
     } else {
-      CommunFun.showToast(context, Strings.voucher_expired);
+      CommunFun.showToast(context, Strings.voucherExpired);
     }
   }
 
@@ -197,12 +197,12 @@ class VoucherPopState extends State<VoucherPop> {
         checkValidVoucher(vaocher[0]);
       } else {
         setState(() {
-          errorMSG = Strings.voucher_not_exit;
+          errorMSG = Strings.voucherNotExit;
         });
       }
     } else {
       setState(() {
-        errorMSG = Strings.voucher_code_msg;
+        errorMSG = Strings.voucherCodeMsg;
       });
     }
   }
@@ -300,7 +300,7 @@ class VoucherPopState extends State<VoucherPop> {
                     color: StaticColor.colorRed,
                     fontSize: SizeConfig.safeBlockVertical * 3),
                 errorText: errorMSG != "" ? errorMSG : "",
-                hintText: Strings.enter_Code,
+                hintText: Strings.enterCode,
                 hintStyle: TextStyle(
                     fontSize: SizeConfig.safeBlockVertical * 2,
                     color: StaticColor.colorBlack),

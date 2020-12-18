@@ -32,7 +32,6 @@ class _LoginPageState extends State<LoginPage> {
   bool isValidateEmail = true;
   bool isValidatePassword = true;
   bool isScreenLoad = false;
-  final focus = FocusNode();
   @override
   void initState() {
     super.initState();
@@ -48,14 +47,14 @@ class _LoginPageState extends State<LoginPage> {
   validateFields() async {
     if (emailAddress.text == "" || emailAddress.text.length == 0) {
       setState(() {
-        errorUserName = Strings.username_validation_msg;
+        errorUserName = Strings.usernameValidationMsg;
         errorPin = "";
         isValidateEmail = false;
       });
       return false;
     } else if (userPin.text == "" || userPin.text.length == 0) {
       setState(() {
-        errorPin = Strings.userPin_validation_msg;
+        errorPin = Strings.userPinValidationMsg;
         errorUserName = "";
         isValidatePassword = false;
       });
@@ -71,10 +70,11 @@ class _LoginPageState extends State<LoginPage> {
 
   sendlogin() async {
     // Login click fun
-
     var isValid = await validateFields(); // check validation
     var deviceinfo = await CommunFun.deviceInfo();
+    print('check connect');
     var connected = await CommunFun.checkConnectivity();
+
     if (connected) {
       if (isValid) {
         setState(() {
@@ -110,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
         }).whenComplete(() {});
       }
     } else {
-      CommunFun.showToast(context, Strings.internet_connection_lost);
+      CommunFun.showToast(context, Strings.internetConnectionLost);
     }
   }
 
@@ -183,7 +183,7 @@ class _LoginPageState extends State<LoginPage> {
       //height: 110.0,
       height: SizeConfig.safeBlockVertical * 15,
       child: Image.asset(
-        Strings.asset_headerLogo,
+        Strings.assetHeaderLogo,
         fit: BoxFit.contain,
         gaplessPlayback: true,
       ),
@@ -208,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
         errorStyle: TextStyle(
             color: StaticColor.colorRed,
             fontSize: SizeConfig.safeBlockVertical * 4),
-        hintText: Strings.username_hint,
+        hintText: Strings.usernameHint,
         hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50),
@@ -225,21 +225,17 @@ class _LoginPageState extends State<LoginPage> {
       ),
       style: Styles.normalBlack(),
       onChanged: onChange,
-      textInputAction: TextInputAction.next,
-      onSubmitted: (v) {
-        FocusScope.of(context).requestFocus(focus);
-      },
     );
   }
 
   Widget passwordInput(Function onChange) {
     return TextField(
       // User pin input
-      focusNode: focus,
       controller: userPin,
       obscureText: true,
       keyboardType: TextInputType.number,
       inputFormatters: <TextInputFormatter>[
+        FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
         WhitelistingTextInputFormatter.digitsOnly
       ],
       decoration: InputDecoration(
@@ -255,7 +251,7 @@ class _LoginPageState extends State<LoginPage> {
         errorStyle: TextStyle(
             color: StaticColor.colorRed,
             fontSize: SizeConfig.safeBlockVertical * 4),
-        hintText: Strings.pin_hint,
+        hintText: Strings.pinHint,
         hintStyle: Styles.normalBlack(),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50),
@@ -273,9 +269,6 @@ class _LoginPageState extends State<LoginPage> {
       //obscureText: true,
       style: Styles.normalBlack(),
       onChanged: onChange,
-      onSubmitted: (value) => {
-        sendlogin(),
-      },
     );
   }
 }
