@@ -7,6 +7,7 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class CloseShiftPage extends StatefulWidget {
   CloseShiftPage({Key key, this.onClose}) : super(key: key);
@@ -39,13 +40,13 @@ class CloseShiftPageState extends State<CloseShiftPage> {
       padding: EdgeInsets.only(top: 20, left: 30, right: 30, bottom: 20),
       onPressed: onPress,
       child: Text(
-        Strings.close_shift,
-        style: TextStyle(color: Colors.white, fontSize: 25),
+        Strings.closeShift,
+        style: TextStyle(color: StaticColor.colorWhite, fontSize: 25),
       ),
       color: Colors.transparent,
       shape: RoundedRectangleBorder(
-        side:
-            BorderSide(width: 1, style: BorderStyle.solid, color: Colors.white),
+        side: BorderSide(
+            width: 1, style: BorderStyle.solid, color: StaticColor.colorWhite),
         borderRadius: BorderRadius.circular(10.0),
       ),
     );
@@ -61,7 +62,7 @@ class CloseShiftPageState extends State<CloseShiftPage> {
         children: <Widget>[
           IconButton(
               icon: Icon(Icons.close),
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               iconSize: 50,
               onPressed: () {
                 Navigator.of(context).pop();
@@ -81,16 +82,16 @@ class CloseShiftPageState extends State<CloseShiftPage> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontSize: 40,
-                    color: Colors.white,
+                    color: StaticColor.colorWhite,
                     fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 30),
               Text(
-                Strings.opened_at,
+                Strings.openedAt,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     decoration: TextDecoration.underline,
-                    color: Colors.white,
+                    color: StaticColor.colorWhite,
                     fontSize: 25),
               ),
               SizedBox(height: 30),

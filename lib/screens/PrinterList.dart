@@ -57,7 +57,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(Strings.select_printer, style: Styles.whiteBold()),
+                Text(Strings.selectPrinter, style: Styles.whiteBold()),
               ],
             ),
           ),
@@ -160,7 +160,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
                                     style: TextStyle(fontSize: 16),
                                   ),
                                   Text(
-                                    Strings.test_print_msg,
+                                    Strings.testPrintMsg,
                                     style: TextStyle(color: Colors.grey[700]),
                                   ),
                                 ],

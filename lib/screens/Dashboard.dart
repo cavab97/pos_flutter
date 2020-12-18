@@ -375,12 +375,25 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         builder: (BuildContext context) {
           return CloseShiftPage(onClose: () {
-            printKOT.testReceiptPrint(
-                printerreceiptList[0].printerIp.toString(),
-                context,
-                "",
-                "OpenDrawer");
-            openOpningAmmountPop(Strings.title_closing_amount);
+            if (permissions.contains(Constant.OPEN_DRAWER)) {
+              printKOT.testReceiptPrint(
+                  printerreceiptList[0].printerIp.toString(),
+                  context,
+                  "",
+                  Strings.openDrawer,
+                  true);
+              openOpningAmmountPop(Strings.titleClosingAmount);
+            } else {
+              CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
+                  () async {
+                printKOT.testReceiptPrint(
+                    printerreceiptList[0].printerIp.toString(),
+                    context,
+                    "",
+                    Strings.openDrawer,
+                    true);
+              }, () {});
+            }
           });
         });
   }
@@ -403,7 +416,7 @@ class _DashboradPageState extends State<DashboradPage>
               branchData,
               currency,
               selectedTable.number_of_pax.toString(),
-              customer != null ? customer.name : Strings.walkin_customer);
+              customer != null ? customer.name : Strings.walkinCustomer);
         } else {
           await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
               () {
@@ -421,14 +434,14 @@ class _DashboradPageState extends State<DashboradPage>
                 branchData,
                 currency,
                 selectedTable.number_of_pax.toString(),
-                customer != null ? customer.name : Strings.walkin_customer);
+                customer != null ? customer.name : Strings.walkinCustomer);
           }, () {});
         }
       } else {
-        CommunFun.showToast(context, Strings.printer_not_available);
+        CommunFun.showToast(context, Strings.printerNotAvailable);
       }
     } else {
-      CommunFun.showToast(context, Strings.cart_empty);
+      CommunFun.showToast(context, Strings.cartEmpty);
     }
   }
 
@@ -446,10 +459,18 @@ class _DashboradPageState extends State<DashboradPage>
     switch (choice) {
       case 0:
         //selectTable();
-        opneShowAddCustomerDailog();
+        openShowAddCustomerDailog();
         break;
       case 1:
-        closeTable();
+        if (permissions.contains(Constant.CLOSE_TABLE)) {
+          closeTable();
+        } else {
+          CommonUtils.openPermissionPop(context, Constant.CLOSE_TABLE,
+              () async {
+            closeTable();
+          }, () {});
+        }
+
         break;
       case 2:
         showDialog(
@@ -478,11 +499,11 @@ class _DashboradPageState extends State<DashboradPage>
         break;
       case 3:
         if (permissions.contains(Constant.CLOSING)) {
+          closeShift();
+        } else {
           CommonUtils.openPermissionPop(context, Constant.CLOSING, () async {
             closeShift();
           }, () {});
-        } else {
-          closeShift();
         }
         break;
       case 4:
@@ -492,7 +513,15 @@ class _DashboradPageState extends State<DashboradPage>
         draftreciptPrint();
         break;
       case 6:
-        deleteCurrentCart();
+        if (permissions.contains(Constant.DELETE_ORDER)) {
+          deleteCurrentCart();
+        } else {
+          CommonUtils.openPermissionPop(context, Constant.DELETE_ORDER,
+              () async {
+            deleteCurrentCart();
+          }, () {});
+        }
+
         break;
       case 7:
         resendToKitchen();
@@ -536,16 +565,16 @@ class _DashboradPageState extends State<DashboradPage>
               onClose: (resendList) {
                 if (resendList.length > 0 && printerreceiptList.length > 0) {
                   Navigator.of(context).pop();
-                  if (permissions.contains(Constant.PRINT_RECIEPT)) {
+                  if (permissions.contains(Constant.REPRINT_KITECHEN)) {
                     openPrinterPop(resendList, true);
                   } else {
                     CommonUtils.openPermissionPop(
-                        context, Constant.PRINT_RECIEPT, () {
+                        context, Constant.REPRINT_KITECHEN, () {
                       openPrinterPop(resendList, true);
                     }, () {});
                   }
                 } else {
-                  CommunFun.showToast(context, Strings.printer_not_available);
+                  CommunFun.showToast(context, Strings.printerNotAvailable);
                 }
               });
         });
@@ -554,7 +583,7 @@ class _DashboradPageState extends State<DashboradPage>
   printCheckList() async {
     if (cartList.length > 0) {
       if (printerreceiptList.length > 0) {
-        if (permissions.contains(Constant.PRINT_RECIEPT)) {
+        if (permissions.contains(Constant.PRINT_CHECKLIST)) {
           printKOT.checkListReceiptPrint(
               printerreceiptList[0].printerIp.toString(),
               context,
@@ -562,9 +591,9 @@ class _DashboradPageState extends State<DashboradPage>
               tableName,
               branchData,
               selectedTable.number_of_pax.toString(),
-              customer != null ? customer.name : Strings.walkin_customer);
+              customer != null ? customer.name : Strings.walkinCustomer);
         } else {
-          await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+          await CommonUtils.openPermissionPop(context, Constant.PRINT_CHECKLIST,
               () {
             printKOT.checkListReceiptPrint(
                 printerreceiptList[0].printerIp.toString(),
@@ -573,20 +602,20 @@ class _DashboradPageState extends State<DashboradPage>
                 tableName,
                 branchData,
                 selectedTable.number_of_pax.toString(),
-                customer != null ? customer.name : Strings.walkin_customer);
+                customer != null ? customer.name : Strings.walkinCustomer);
           }, () {});
         }
       } else {
-        CommunFun.showToast(context, Strings.printer_not_available);
+        CommunFun.showToast(context, Strings.printerNotAvailable);
       }
     } else {
-      CommunFun.showToast(context, Strings.cart_empty);
+      CommunFun.showToast(context, Strings.cartEmpty);
     }
   }
 
 /*this function used for remove promocode from cart*/
   removePromoCode(voucherdata) async {
-    List<MSTCartdetails> cartListUpdate = [];
+    //List<MSTCartdetails> cartListUpdate = [];
     Voucher voucher = Voucher.fromJson(voucherdata);
     for (int i = 0; i < cartList.length; i++) {
       var cartitem = cartList[i];
@@ -813,15 +842,28 @@ class _DashboradPageState extends State<DashboradPage>
           return OpeningAmmountPage(
               ammountext: isopning,
               onEnter: (ammountext) {
-                if (isopning == Strings.title_opening_amount) {
+                if (isopning == Strings.titleOpeningAmount) {
                   if (printerreceiptList.length > 0) {
-                    printKOT.testReceiptPrint(
-                        printerreceiptList[0].printerIp.toString(),
-                        context,
-                        "",
-                        Strings.openDrawer);
+                    if (permissions.contains(Constant.OPEN_DRAWER)) {
+                      printKOT.testReceiptPrint(
+                          printerreceiptList[0].printerIp.toString(),
+                          context,
+                          "",
+                          Strings.openDrawer,
+                          true);
+                    } else {
+                      CommonUtils.openPermissionPop(
+                          context, Constant.OPEN_DRAWER, () async {
+                        printKOT.testReceiptPrint(
+                            printerreceiptList[0].printerIp.toString(),
+                            context,
+                            "",
+                            Strings.openDrawer,
+                            true);
+                      }, () {});
+                    }
                   } else {
-                    CommunFun.showToast(context, Strings.printer_not_available);
+                    CommunFun.showToast(context, Strings.printerNotAvailable);
                   }
                 }
                 sendOpenShft(ammountext);
@@ -889,7 +931,7 @@ class _DashboradPageState extends State<DashboradPage>
       }
       if (i == itemList.length - 1) {
         if (list.length > 0) {
-          openPrinterPop(list, false);
+          await openPrinterPop(list, false);
           await localAPI.sendToKitched(ids);
           await getCartItem(currentCart);
         }
@@ -902,16 +944,16 @@ class _DashboradPageState extends State<DashboradPage>
     if (cartList.length != 0) {
       if (permissions.contains(Constant.PAYMENT)) {
         openPaymentMethod();
-        //opnePaymentMethod();
+        //openPaymentMethod();
       } else {
         await CommonUtils.openPermissionPop(context, Constant.PAYMENT,
             () async {
           openPaymentMethod();
-          //opnePaymentMethod();
+          //openPaymentMethod();
         }, () {});
       }
     } else {
-      CommunFun.showToast(context, Strings.cart_empty);
+      CommunFun.showToast(context, Strings.cartEmpty);
     }
   }
 
@@ -921,7 +963,7 @@ class _DashboradPageState extends State<DashboradPage>
       List<OrderPayment> payment = [];
       sendPaymentByCash(payment);
     } else {
-      CommunFun.showToast(context, Strings.cart_empty);
+      CommunFun.showToast(context, Strings.cartEmpty);
     }
   }
 
@@ -959,8 +1001,6 @@ class _DashboradPageState extends State<DashboradPage>
     if (shiftid == null) {
       await Preferences.setStringToSF(Constant.DASH_SHIFT, result.toString());
     } else {
-      await CommunFun.printShiftReportData(
-          printerreceiptList[0].printerIp.toString(), context, shiftid);
       await Preferences.removeSinglePref(Constant.DASH_SHIFT);
       await Preferences.removeSinglePref(Constant.IS_SHIFT_OPEN);
       await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
@@ -975,7 +1015,7 @@ class _DashboradPageState extends State<DashboradPage>
     scaffoldKey.currentState.openDrawer();
   }
 
-  checkshiftopne(product) {
+  checkshiftopen(product) {
     if (isShiftOpen) {
       if (isTableSelected && !isWebOrder) {
         showQuantityDailog(product, false);
@@ -985,7 +1025,7 @@ class _DashboradPageState extends State<DashboradPage>
         }
       }
     } else {
-      CommunFun.showToast(context, Strings.shift_open_message);
+      CommunFun.showToast(context, Strings.shiftOpenMessage);
     }
   }
 
@@ -1046,7 +1086,7 @@ class _DashboradPageState extends State<DashboradPage>
     }, context);
   }
 
-  opneShowAddCustomerDailog() {
+  openShowAddCustomerDailog() {
     // Send receipt Popup
     showDialog(
         context: context,
@@ -1142,11 +1182,11 @@ class _DashboradPageState extends State<DashboradPage>
     }
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     Orders order = new Orders();
-    VoucherHistory history = new VoucherHistory();
+    /* VoucherHistory history = new VoucherHistory();
     List<OrderModifire> orderModifires = new List<OrderModifire>();
-    List<OrderAttributes> orderAttributes = new List<OrderAttributes>();
     List<OrderPayment> orderPaymentList = new List<OrderPayment>();
-    ShiftInvoice shiftinvoice = new ShiftInvoice();
+    ShiftInvoice shiftinvoice = new ShiftInvoice(); */
+    List<OrderAttributes> orderAttributes = new List<OrderAttributes>();
     Table_order tables = await getTableData();
     User userdata = await CommunFun.getuserDetails();
     List<MSTCartdetails> cartList = await getcartDetails(currentCart);
@@ -1214,7 +1254,7 @@ class _DashboradPageState extends State<DashboradPage>
       history.uuid = uuid;
       history.server_id = 0;
       history.terminal_id = int.parse(terminalId);
-      var hisID = await localAPI.saveVoucherHistory(history);
+      await localAPI.saveVoucherHistory(history);
     }
     var orderDetailid;
     if (orderId > 0) {
@@ -1307,8 +1347,7 @@ class _DashboradPageState extends State<DashboradPage>
                   modifireData.updated_at =
                       await CommunFun.getCurrentDateTime(DateTime.now());
                   modifireData.updated_by = userdata.id;
-                  var ordermodifreid =
-                      await localAPI.sendModifireData(modifireData);
+                  await localAPI.sendModifireData(modifireData);
                 } else {
                   OrderAttributes attributes = new OrderAttributes();
                   List<OrderAttributes> lapApid =
@@ -1336,7 +1375,7 @@ class _DashboradPageState extends State<DashboradPage>
                       await CommunFun.getCurrentDateTime(DateTime.now());
                   attributes.updated_by = userdata.id;
                   orderAttributes.add(attributes);
-                  var orderAttri = await localAPI.sendAttrData(attributes);
+                  await localAPI.sendAttrData(attributes);
                 }
               }
             }
@@ -1430,7 +1469,7 @@ class _DashboradPageState extends State<DashboradPage>
                 await CommunFun.getCurrentDateTime(DateTime.now());
             drawer.localID = uuid;
             drawer.terminalid = int.parse(terminalId);
-            var result = await localAPI.saveInOutDrawerData(drawer);
+            await localAPI.saveInOutDrawerData(drawer);
           }
         }
       } else if (isWebOrder) {
@@ -1476,7 +1515,7 @@ class _DashboradPageState extends State<DashboradPage>
           await CommunFun.getCurrentDateTime(DateTime.now());
       shiftinvoice.serverId = 0;
       shiftinvoice.terminal_id = int.parse(terminalId);
-      var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
+      await localAPI.sendtoShiftInvoice(shiftinvoice);
       await printReceipt(orderId);
       await clearCartAfterSuccess(orderId);
     }
@@ -1513,7 +1552,7 @@ class _DashboradPageState extends State<DashboradPage>
       inventory.status = 1;
       inventory.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
       inventory.updatedBy = user.id;
-      var clid = await localAPI.insertWineInventory(inventory, false);
+      await localAPI.insertWineInventory(inventory, false);
       Customer_Liquor_Inventory_Log log = new Customer_Liquor_Inventory_Log();
       var lastappid = await localAPI.getLastCustomerInventoryLog();
       if (lastappid != 0) {
@@ -1534,7 +1573,7 @@ class _DashboradPageState extends State<DashboradPage>
           : 0;
       log.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
       log.updatedBy = user.id;
-      var lid = await localAPI.insertWineInventoryLog(log);
+      await localAPI.insertWineInventoryLog(log);
     }
   }
 
@@ -1567,7 +1606,8 @@ class _DashboradPageState extends State<DashboradPage>
           paymentMethod,
           tableName,
           currency,
-          customer != null ? customer.name : Strings.walkin_customer,
+          customer != null ? customer.name : Strings.walkinCustomer,
+          false,
           true); //"  ? :"
     };
     //temporary print receipt, cannot print if no permission, pop out dirently close
@@ -1586,7 +1626,7 @@ class _DashboradPageState extends State<DashboradPage>
     // }
     // await clearCartAfterSuccess(orderid);
 
-    if (permissions.contains(Constant.PRINT_RECIEPT)) {
+    if (permissions.contains(Constant.PRINT_BILL)) {
       if (permissions.contains(Constant.OPEN_DRAWER)) {
         printKOT.checkReceiptPrint(
             selectedTable.number_of_pax.toString(),
@@ -1602,7 +1642,8 @@ class _DashboradPageState extends State<DashboradPage>
             paymentMethod,
             tableName,
             currency,
-            customer != null ? customer.name : Strings.walkin_customer,
+            customer != null ? customer.name : Strings.walkinCustomer,
+            false,
             true);
         await clearCartAfterSuccess(orderid);
       } else {
@@ -1622,7 +1663,8 @@ class _DashboradPageState extends State<DashboradPage>
               paymentMethod,
               tableName,
               currency,
-              customer != null ? customer.name : Strings.walkin_customer,
+              customer != null ? customer.name : Strings.walkinCustomer,
+              false,
               true);
           await clearCartAfterSuccess(orderid);
         }, () async {
@@ -1640,13 +1682,14 @@ class _DashboradPageState extends State<DashboradPage>
               paymentMethod,
               tableName,
               currency,
-              customer != null ? customer.name : Strings.walkin_customer,
+              customer != null ? customer.name : Strings.walkinCustomer,
+              false,
               false);
           await clearCartAfterSuccess(orderid);
         });
       }
     } else {
-      await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+      await CommonUtils.openPermissionPop(context, Constant.PRINT_BILL,
           () async {
         if (permissions.contains(Constant.OPEN_DRAWER)) {
           printKOT.checkReceiptPrint(
@@ -1663,7 +1706,8 @@ class _DashboradPageState extends State<DashboradPage>
               paymentMethod,
               tableName,
               currency,
-              customer != null ? customer.name : Strings.walkin_customer,
+              customer != null ? customer.name : Strings.walkinCustomer,
+              false,
               true);
           await clearCartAfterSuccess(orderid);
         } else {
@@ -1683,7 +1727,8 @@ class _DashboradPageState extends State<DashboradPage>
                 paymentMethod,
                 tableName,
                 currency,
-                customer != null ? customer.name : Strings.walkin_customer,
+                customer != null ? customer.name : Strings.walkinCustomer,
+                false,
                 true);
             await clearCartAfterSuccess(orderid);
           }, () async {
@@ -1701,7 +1746,8 @@ class _DashboradPageState extends State<DashboradPage>
                 paymentMethod,
                 tableName,
                 currency,
-                customer != null ? customer.name : Strings.walkin_customer,
+                customer != null ? customer.name : Strings.walkinCustomer,
+                false,
                 false);
             await clearCartAfterSuccess(orderid);
           });
@@ -1774,60 +1820,65 @@ class _DashboradPageState extends State<DashboradPage>
     return totalTax;
   }
 
-  itememovefromCart(MSTCartdetails cartitem) async {
-    //try {
-    MST_Cart cart = new MST_Cart();
-    MSTCartdetails cartitemdata = cartitem;
-    var subt = allcartData.sub_total - cartitemdata.productPrice;
-    var taxjson = await countTax(subt);
-    // print(taxjson[0].taxmap.taxAmount);
-    var disc = allcartData.discount != null
-        ? allcartData.discount - cartitemdata.discount
-        : 0;
-    if (cartList.length == 1) {
-      cart = allcartData;
-      cart.sub_total = 0.0;
-      cart.serviceCharge = 0.0;
-      cart.discount = 0.0;
-      cart.total_qty = 0.0;
-      cart.grand_total = 0.0;
-      cart.tax_json = "";
-      cart.voucher_id = 0;
-      cart.voucher_detail = "";
-    } else {
-      cart = allcartData;
-      cart.sub_total = subt;
-      cart.discount = disc;
-      cart.serviceCharge =
-          await CommunFun.countServiceCharge(cart.serviceChargePercent, subt);
-      cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
-      cart.grand_total = (subt - disc) +
-          taxvalues +
-          await CommunFun.countServiceCharge(cart.serviceChargePercent, subt);
-
-      cart.tax_json = json.encode(taxjson);
-    }
-    await localAPI.deleteCartItem(
-        cartitem, currentCart, cart, cartList.length == 1);
-    if (cartitem.isSendKichen == 1) {
-      var deletedlist = [];
-      deletedlist.add(cartitem);
-      //openPrinterPop(deletedlist);
-    }
-    if (cartList.length > 1) {
-      await getCartItem(currentCart);
-    } else {
-      if (this.mounted) {
-        setState(() {
-          cartList = [];
-          grandTotal = 0.0;
-          discount = 0.0;
-          tax = 0.0;
-          subtotal = 0.0;
-          serviceCharge = 0.0;
-          serviceChargePer = 0;
-        });
+  itememovefromCart(cartitem) async {
+    try {
+      MST_Cart cart = new MST_Cart();
+      MSTCartdetails cartitemdata = cartitem;
+      var subt = allcartData.sub_total - cartitemdata.productPrice;
+      var taxjson = await countTax(subt);
+      var disc = allcartData.discount != null
+          ? allcartData.discount - cartitemdata.discount
+          : 0;
+      if (cartList.length == 1) {
+        cart = allcartData;
+        cart.sub_total = 0.0;
+        cart.serviceCharge = 0.0;
+        cart.discount = 0.0;
+        cart.total_qty = 0.0;
+        cart.grand_total = 0.0;
+        cart.tax_json = "";
+        cart.voucher_id = 0;
+        cart.voucher_detail = "";
+      } else {
+        cart = allcartData;
+        cart.sub_total = subt;
+        cart.discount = disc;
+        cart.serviceCharge =
+            await CommunFun.countServiceCharge(cart.serviceChargePercent, subt);
+        cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
+        cart.grand_total = (subt - disc) + taxvalues;
+        cart.tax_json = json.encode(taxjson);
       }
+      await localAPI.deleteCartItem(
+          cartitem, currentCart, cart, cartList.length == 1);
+      if (cartitem.isSendKichen == 1) {
+        var deletedlist = [];
+        deletedlist.add(cartitem);
+        if (permissions.contains(Constant.SEND_KITCHEN)) {
+          openPrinterPop(deletedlist, false);
+        } else {
+          CommonUtils.openPermissionPop(context, Constant.SEND_KITCHEN, () {
+            openPrinterPop(deletedlist, false);
+          }, () {});
+        }
+      }
+      if (cartList.length > 1) {
+        await getCartItem(currentCart);
+      } else {
+        if (this.mounted) {
+          setState(() {
+            cartList = [];
+            grandTotal = 0.0;
+            discount = 0.0;
+            tax = 0.0;
+            subtotal = 0.0;
+            serviceCharge = 0.0;
+            serviceChargePer = 0;
+          });
+        }
+      }
+    } catch (e) {
+      CommunFun.showToast(context, e.message.toString());
     }
   }
 
@@ -1836,11 +1887,11 @@ class _DashboradPageState extends State<DashboradPage>
       Navigator.of(context).pop();
     }, () {
       Navigator.of(context).pop();
-      opneSelectQtyPop(cartitem);
-    }, Strings.warning, Strings.warning_msg, Strings.yes, Strings.no, true);
+      openSelectQtyPop(cartitem);
+    }, Strings.warning, Strings.warningMsg, Strings.yes, Strings.no, true);
   }
 
-  opneSelectQtyPop(cartitem) async {
+  openSelectQtyPop(cartitem) async {
     await showDialog(
         context: context,
         barrierDismissible: false,
@@ -1868,7 +1919,8 @@ class _DashboradPageState extends State<DashboradPage>
     focProduct.productId = cartitem.productId;
     focProduct.productName = cartitem.productName;
     focProduct.productSecondName = cartitem.productSecondName;
-    focProduct.productPrice = 0.0;
+    focProduct.productPrice = cartitem.productPrice;
+    focProduct.productDetailAmount = 0.0;
     focProduct.productQty = qty;
     focProduct.productNetPrice = cartitem.productNetPrice;
     focProduct.createdBy = userdata.id;
@@ -1880,10 +1932,10 @@ class _DashboradPageState extends State<DashboradPage>
     focProduct.printer_id = cartitem.printer_id;
     focProduct.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     focProduct.setmeal_product_detail = cartitem.setmeal_product_detail;
-    var realprice = (cartitem.productPrice / cartitem.productQty);
+    var realprice = (cartitem.productDetailAmount / cartitem.productQty);
     var dis = (cartitem.discount / cartitem.productQty);
     cartitem.productQty = cartitem.productQty - qty;
-    cartitem.productPrice = (realprice * cartitem.productQty);
+    cartitem.productDetailAmount = (realprice * cartitem.productQty);
     cartitem.discount = (realprice * dis);
     MST_Cart cart = new MST_Cart();
     cart = allcartData;
@@ -1898,8 +1950,7 @@ class _DashboradPageState extends State<DashboradPage>
     cart.total_qty = allcartData.total_qty - qty;
     cart.grand_total = (cart.sub_total - disc) + taxvalues;
     cart.tax_json = json.encode(taxjson);
-    var result =
-        await localAPI.makeAsFocProduct(focProduct, isupdate, cart, cartitem);
+    await localAPI.makeAsFocProduct(focProduct, isupdate, cart, cartitem);
 
     await getCartItem(currentCart);
   }
@@ -2143,14 +2194,15 @@ class _DashboradPageState extends State<DashboradPage>
     final _tabs = TabBar(
         controller: _tabController,
         indicatorSize: TabBarIndicatorSize.label,
-        unselectedLabelColor: Colors.white,
-        labelColor: Colors.white,
+        unselectedLabelColor: StaticColor.colorWhite,
+        labelColor: StaticColor.colorWhite,
         isScrollable: true,
         labelPadding: EdgeInsets.all(2),
         indicatorPadding: EdgeInsets.all(2),
         indicator: BoxDecoration(
-            borderRadius: BorderRadius.circular(8), color: Colors.deepOrange),
-        tabs: List<Widget>.generate(categoryFirstRow.length, (int index) {
+            borderRadius: BorderRadius.circular(8),
+            color: StaticColor.deepOrange),
+        tabs: List<Widget>.generate(tabsList.length, (int index) {
           return new Tab(
             child: Container(
                 padding: EdgeInsets.symmetric(
@@ -2196,13 +2248,14 @@ class _DashboradPageState extends State<DashboradPage>
     /* final _subtabs = TabBar(
       controller: _subtabController,
       indicatorSize: TabBarIndicatorSize.label,
-      unselectedLabelColor: Colors.white,
-      labelColor: Colors.white,
+      unselectedLabelColor: StaticColor.colorWhite,
+      labelColor: StaticColor.colorWhite,
       labelPadding: EdgeInsets.all(1),
       indicatorPadding: EdgeInsets.all(0),
       isScrollable: true,
       indicator: BoxDecoration(
-          borderRadius: BorderRadius.circular(30), color: Colors.deepOrange),
+          borderRadius: BorderRadius.circular(30),
+          color: StaticColor.deepOrange),
       tabs: List<Widget>.generate(subCatList.length, (int index) {
         return new Tab(
           child: Container(
@@ -2235,7 +2288,8 @@ class _DashboradPageState extends State<DashboradPage>
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 child: Table(
-                  border: TableBorder.all(color: Colors.white, width: 0.6),
+                  border: TableBorder.all(
+                      color: StaticColor.colorWhite, width: 0.6),
                   columnWidths: {
                     0: FractionColumnWidth(.3),
                     1: FractionColumnWidth(.6),
@@ -2420,7 +2474,7 @@ class _DashboradPageState extends State<DashboradPage>
                                               onPressed: _backtoMainCat,
                                               icon: Icon(
                                                 Icons.arrow_back,
-                                                color: Colors.white,
+                                                color: StaticColor.colorWhite,
                                                 size: SizeConfig
                                                         .safeBlockVertical *
                                                     4,
@@ -2576,11 +2630,11 @@ class _DashboradPageState extends State<DashboradPage>
                           right: SizeConfig.safeBlockVertical * 3),
                       child: Icon(
                         Icons.search,
-                        color: Colors.deepOrange,
+                        color: StaticColor.deepOrange,
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                     ),
-                    hintText: Strings.search_bar_text,
+                    hintText: Strings.searchBarText,
                     hintStyle: Styles.communGrey(),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(50),
@@ -2590,7 +2644,7 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                     ),
                     filled: true,
-                    fillColor: Colors.white),
+                    fillColor: StaticColor.colorWhite),
               ),
               suggestionsCallback: (pattern) async {
                 return SearchProductList;
@@ -2600,14 +2654,14 @@ class _DashboradPageState extends State<DashboradPage>
                 //     .replaceAll("data:image/jpg;base64,", '');
                 return ListTile(
                     leading: Container(
-                      color: Colors.grey,
+                      color: StaticColor.colorGrey,
                       width: 40,
                       height: 40,
                       child: SearchProductList.base64 != ""
                           ? CommonUtils.imageFromBase64String(
                               SearchProductList.base64)
                           : new Image.asset(
-                              Strings.no_image,
+                              Strings.noImage,
                               gaplessPlayback: true,
                               fit: BoxFit.cover,
                             ),
@@ -2620,7 +2674,7 @@ class _DashboradPageState extends State<DashboradPage>
                     trailing: SearchProductList.qty != null &&
                             SearchProductList.hasInventory == 1 &&
                             SearchProductList.qty <= 0
-                        ? Text(Strings.out_of_stoke,
+                        ? Text(Strings.outOfStoke,
                             style: Styles.orangesimpleSmall())
                         : SizedBox());
               },
@@ -2638,10 +2692,10 @@ class _DashboradPageState extends State<DashboradPage>
                       }
                     }
                   } else {
-                    CommunFun.showToast(context, Strings.shift_open_message);
+                    CommunFun.showToast(context, Strings.shiftOpenMessage);
                   }
                 } else {
-                  CommunFun.showToast(context, Strings.out_of_stoke_msg);
+                  CommunFun.showToast(context, Strings.outOfStokeMsg);
                 }
                 // }
                 // Navigator.of(context).push(MaterialPageRoute(
@@ -2661,24 +2715,31 @@ class _DashboradPageState extends State<DashboradPage>
             padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
             onPressed: () {
               if (isShiftOpen) {
-                opneShowAddCustomerDailog();
+                if (permissions.contains(Constant.ADD_CUSTOMER)) {
+                  openShowAddCustomerDailog();
+                } else {
+                  CommonUtils.openPermissionPop(context, Constant.ADD_CUSTOMER,
+                      () async {
+                    openShowAddCustomerDailog();
+                  }, () {});
+                }
               } else {
-                CommunFun.showToast(context, Strings.shift_open_message);
+                CommunFun.showToast(context, Strings.shiftOpenMessage);
               }
             },
             child: Row(
               children: <Widget>[
                 Icon(
                   Icons.add_circle_outline,
-                  color: Colors.white,
+                  color: StaticColor.colorWhite,
                   size: SizeConfig.safeBlockVertical * 3,
                 ),
                 SizedBox(width: 5),
-                Text(Strings.btn_Add_customer.toUpperCase(),
+                Text(Strings.btnAddCustomer.toUpperCase(),
                     style: Styles.whiteBoldsmall()),
               ],
             ),
-            color: Colors.deepOrange,
+            color: StaticColor.deepOrange,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(50.0),
             ),
@@ -2708,7 +2769,7 @@ class _DashboradPageState extends State<DashboradPage>
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                       SizedBox(width: 15),
-                      Text(Strings.btn_Add_customer,
+                      Text(Strings.btnAddCustomer,
                           style: Styles.communBlacksmall()),
                     ],
                   ),
@@ -2727,8 +2788,7 @@ class _DashboradPageState extends State<DashboradPage>
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                       SizedBox(width: 15),
-                      Text(Strings.close_table,
-                          style: Styles.communBlacksmall())
+                      Text(Strings.closeTable, style: Styles.communBlacksmall())
                     ],
                   ),
                 ),
@@ -2746,7 +2806,7 @@ class _DashboradPageState extends State<DashboradPage>
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                       SizedBox(width: 15),
-                      Text(Strings.split_order,
+                      Text(Strings.splitOrder,
                           style: Styles.communBlacksmall()),
                     ],
                   ),
@@ -2765,7 +2825,7 @@ class _DashboradPageState extends State<DashboradPage>
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                       SizedBox(width: 15),
-                      Text(Strings.close_shift,
+                      Text(Strings.closeShift,
                           style: Styles.communBlacksmall()),
                     ],
                   ),
@@ -2818,10 +2878,7 @@ class _DashboradPageState extends State<DashboradPage>
                 ),
               ), */
               PopupMenuItem(
-                enabled: permissions.contains(Constant.DELETE_ORDER) &&
-                        cartList.length > 0
-                    ? true
-                    : false,
+                enabled: cartList.length > 0 ? true : false,
                 value: 6,
                 child: Padding(
                   padding: EdgeInsets.all(10),
@@ -2833,7 +2890,7 @@ class _DashboradPageState extends State<DashboradPage>
                         size: SizeConfig.safeBlockVertical * 5,
                       ),
                       SizedBox(width: 15),
-                      Text(Strings.delete_order,
+                      Text(Strings.deleteOrder,
                           style: Styles.communBlacksmall()),
                     ],
                   ),
@@ -2857,7 +2914,7 @@ class _DashboradPageState extends State<DashboradPage>
                       SizedBox(width: 15),
                       Text(
                         selectedvoucher == null
-                            ? Strings.apply_promocode
+                            ? Strings.applyPromocode
                             : Strings
                                 .removePromocode, //selectedvoucher.voucherName,
                         style: Styles.communBlacksmall(),
@@ -2919,7 +2976,7 @@ class _DashboradPageState extends State<DashboradPage>
                   }
                 }
               } else {
-                CommunFun.showToast(context, Strings.shift_open_message);
+                CommunFun.showToast(context, Strings.shiftOpenMessage);
               }
               // }
             },
@@ -2933,13 +2990,13 @@ class _DashboradPageState extends State<DashboradPage>
                   Hero(
                       tag: meal.setmealId != null ? meal.setmealId : 0,
                       child: Container(
-                        color: Colors.grey,
+                        color: StaticColor.colorGrey,
                         width: MediaQuery.of(context).size.width,
                         height: itemHeight / 2.2,
                         child: meal.base64 != ""
                             ? CommonUtils.imageFromBase64String(meal.base64)
                             : new Image.asset(
-                                Strings.no_image,
+                                Strings.noImage,
                                 fit: BoxFit.cover,
                                 gaplessPlayback: true,
                               ),
@@ -2949,7 +3006,7 @@ class _DashboradPageState extends State<DashboradPage>
                     margin: EdgeInsets.only(top: itemHeight / 2.2),
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
-                      color: Colors.grey[600],
+                      color: StaticColor.colorGrey600,
                     ),
                     child: Center(
                       child: Text(
@@ -2968,7 +3025,7 @@ class _DashboradPageState extends State<DashboradPage>
                       height: SizeConfig.safeBlockVertical * 5,
                       // width: 50,
                       padding: EdgeInsets.all(5),
-                      color: Colors.deepOrange,
+                      color: StaticColor.deepOrange,
                       child: Center(
                         child: Text(
                             currency != null
@@ -3015,22 +3072,34 @@ class _DashboradPageState extends State<DashboradPage>
                       product.hasInventory != 1 ||
                       product.qty > 0.0) ||
                   (product.hasRacManagemant == 1 && product.box_pId != null)) {
+                CommunFun.showToast(
+                    context,
+                    product.hasRacManagemant != 1
+                        ? Strings.outOfStokeMsg
+                        : Strings.outOfBoxMsg);
                 //  if (permissions.contains(Constant.ADD_ORDER)) {
-                checkshiftopne(product);
+                checkshiftopen(product);
                 // } else {
                 //   CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
                 //       () {
-                //     checkshiftopne(product);
+                //     checkshiftopen(product);
                 //   }, () {});
                 // }
               } else {
-                CommunFun.showToast(context, Strings.out_of_stoke_msg);
+                CommunFun.showToast(context, Strings.outOfStokeMsg);
               }
+
+              // if ((product.qty == null ||
+              //         product.hasInventory != 1 ||
+              //         product.qty > 0.0) ||
+              //     (product.hasRacManagemant == 1 && product.box_pId != null)) {
+              //   checkshiftopen(product);
+              // } else {}
             },
             child: Container(
               height: itemHeight,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: StaticColor.colorWhite,
                 borderRadius: BorderRadius.circular(8),
               ),
               margin: EdgeInsets.all(0),
@@ -3042,7 +3111,7 @@ class _DashboradPageState extends State<DashboradPage>
                       child: Container(
                           width: MediaQuery.of(context).size.width,
                           decoration: BoxDecoration(
-                            color: Colors.grey,
+                            color: StaticColor.colorGrey,
                             borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(8),
                                 topRight: Radius.circular(8)),
@@ -3056,7 +3125,7 @@ class _DashboradPageState extends State<DashboradPage>
                                 ? CommonUtils.imageFromBase64String(
                                     product.base64)
                                 : new Image.asset(
-                                    Strings.no_image,
+                                    Strings.noImage,
                                     fit: BoxFit.cover,
                                     gaplessPlayback: true,
                                   ),
@@ -3066,7 +3135,7 @@ class _DashboradPageState extends State<DashboradPage>
                     margin: EdgeInsets.only(top: itemHeight / 2.2),
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
-                      color: Colors.grey[600],
+                      color: StaticColor.colorGrey600,
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(8),
                           bottomRight: Radius.circular(8)),
@@ -3088,7 +3157,7 @@ class _DashboradPageState extends State<DashboradPage>
                       height: SizeConfig.safeBlockVertical * 5,
                       // width: 50,
                       padding: EdgeInsets.all(5),
-                      color: Colors.deepOrange,
+                      color: StaticColor.deepOrange,
                       child: Center(
                         child: Text(
                             currency != null
@@ -3108,9 +3177,9 @@ class _DashboradPageState extends State<DashboradPage>
                             height: SizeConfig.safeBlockVertical * 4,
                             // width: 50,
                             padding: EdgeInsets.all(2),
-                            color: Colors.deepOrange,
+                            color: StaticColor.deepOrange,
                             child: Center(
-                              child: Text(Strings.out_of_stoke,
+                              child: Text(Strings.outOfStoke,
                                   style: Styles.whiteSimpleSmall()),
                             ),
                           ),
@@ -3136,7 +3205,7 @@ class _DashboradPageState extends State<DashboradPage>
               ? Container(
                   //margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3),
                   height: SizeConfig.safeBlockVertical * 7,
-                  width: MediaQuery.of(context).size.width / 6.5,
+                  width: MediaQuery.of(context).size.width / 7,
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () async {
@@ -3179,31 +3248,14 @@ class _DashboradPageState extends State<DashboradPage>
             /* margin: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height / 1.3 + 10),*/
             height: SizeConfig.safeBlockVertical * 7,
-            width: MediaQuery.of(context).size.width / 10,
+            width: MediaQuery.of(context).size.width / 7,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
                 if (!isWebOrder) {
-                  // if (permissions.contains(Constant.ADD_ORDER) ||
-                  //     permissions.contains(Constant.EDIT_ORDER)) {
                   sendPayment();
-                  // } else {
-                  //   CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
-                  //       () {
-                  //     sendPayment();
-                  //   }, () {});
-                  // }
                 } else {
-                  //weborder payment
-                  // if (permissions.contains(Constant.ADD_ORDER) ||
-                  //     permissions.contains(Constant.EDIT_ORDER)) {
                   checkoutWebOrder();
-                  // } else {
-                  //   CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
-                  //       () {
-                  //     checkoutWebOrder();
-                  //   }, () {});
-                  // }
                 }
               },
               child: Row(
@@ -3216,14 +3268,12 @@ class _DashboradPageState extends State<DashboradPage>
                     ),
                     SizedBox(width: 5),
                     Text(
-                      !isWebOrder
-                          ? Strings.title_pay.toUpperCase()
-                          : Strings.checkout.toUpperCase(),
+                      !isWebOrder ? Strings.titlePay : Strings.checkout,
                       style: Styles.whiteBoldsmall(),
                     ),
                   ]),
-              color: Colors.deepOrange,
-              textColor: Colors.white,
+              color: StaticColor.deepOrange,
+              textColor: StaticColor.colorWhite,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50.0),
               ),
@@ -3231,7 +3281,7 @@ class _DashboradPageState extends State<DashboradPage>
           ),
           Container(
             height: SizeConfig.safeBlockVertical * 7,
-            width: MediaQuery.of(context).size.width / 8,
+            width: MediaQuery.of(context).size.width / 7,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
@@ -3246,7 +3296,7 @@ class _DashboradPageState extends State<DashboradPage>
                     size: SizeConfig.safeBlockVertical * 3,
                   ),
                   SizedBox(width: 5),
-                  Text(Strings.check_list.toUpperCase(),
+                  Text(Strings.checkList.toUpperCase(),
                       style: Styles.whiteBoldsmall()),
                 ],
               ),
@@ -3257,7 +3307,7 @@ class _DashboradPageState extends State<DashboradPage>
           ),
           Container(
             height: SizeConfig.safeBlockVertical * 7,
-            width: MediaQuery.of(context).size.width / 8,
+            width: MediaQuery.of(context).size.width / 7,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () {
@@ -3272,7 +3322,7 @@ class _DashboradPageState extends State<DashboradPage>
                     size: SizeConfig.safeBlockVertical * 3,
                   ),
                   SizedBox(width: 5),
-                  Text(Strings.draft_report.toUpperCase(),
+                  Text(Strings.draftReport.toUpperCase(),
                       style: Styles.whiteBoldsmall()),
                 ],
               ),
@@ -3298,7 +3348,7 @@ class _DashboradPageState extends State<DashboradPage>
                     size: SizeConfig.safeBlockVertical * 3,
                   ),
                   SizedBox(width: 5),
-                  Text(Strings.reprint_Order.toUpperCase(),
+                  Text(Strings.reprintOrder.toUpperCase(),
                       style: Styles.whiteBoldsmall()),
                 ],
               ),
@@ -3325,7 +3375,7 @@ class _DashboradPageState extends State<DashboradPage>
                     size: SizeConfig.safeBlockVertical * 3,
                   ),
                   SizedBox(width: 5),
-                  Text(Strings.select_table.toUpperCase(),
+                  Text(Strings.selectTable.toUpperCase(),
                       style: Styles.whiteBoldsmall()),
                 ],
               ),
@@ -3366,10 +3416,14 @@ class _DashboradPageState extends State<DashboradPage>
               ),
               SizedBox(height: 30),
               shiftbtn(() {
-                CommonUtils.openPermissionPop(context, Constant.OPENING,
-                    () async {
-                  openOpningAmmountPop(Strings.title_opening_amount);
-                }, () {});
+                if (permissions.contains(Constant.OPENING)) {
+                  openOpningAmmountPop(Strings.titleOpeningAmount);
+                } else {
+                  CommonUtils.openPermissionPop(context, Constant.OPENING,
+                      () async {
+                    openOpningAmmountPop(Strings.titleOpeningAmount);
+                  }, () {});
+                }
               })
             ],
           ),
@@ -3383,15 +3437,15 @@ class _DashboradPageState extends State<DashboradPage>
       padding: EdgeInsets.only(top: 15, left: 30, right: 30, bottom: 15),
       onPressed: onPress,
       child: Text(
-        Strings.open_shift,
+        Strings.openShift,
         style: TextStyle(
-            color: Colors.deepOrange,
+            color: StaticColor.deepOrange,
             fontSize: SizeConfig.safeBlockVertical * 4),
       ),
-      color: Colors.white,
+      color: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         side: BorderSide(
-            width: 1, style: BorderStyle.solid, color: Colors.deepOrange),
+            width: 1, style: BorderStyle.solid, color: StaticColor.deepOrange),
         borderRadius: BorderRadius.circular(10.0),
       ),
     );
@@ -3405,7 +3459,7 @@ class _DashboradPageState extends State<DashboradPage>
       children: <Widget>[
         Icon(
           Icons.account_circle,
-          color: Colors.grey,
+          color: StaticColor.colorGrey,
           size: SizeConfig.safeBlockVertical * 4,
         ),
         Column(
@@ -3434,7 +3488,7 @@ class _DashboradPageState extends State<DashboradPage>
       children: [
         Expanded(
           child: Text(
-            Strings.header_name,
+            Strings.headerName,
             style: Styles.darkBlue(),
           ),
           flex: 6,
@@ -3465,7 +3519,9 @@ class _DashboradPageState extends State<DashboradPage>
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         border: TableBorder(
             horizontalInside: BorderSide(
-                width: 1, color: Colors.grey, style: BorderStyle.solid)),
+                width: 1,
+                color: StaticColor.colorGrey,
+                style: BorderStyle.solid)),
         columnWidths: {
           0: FractionColumnWidth(.6),
           1: FractionColumnWidth(.2),
@@ -3474,7 +3530,7 @@ class _DashboradPageState extends State<DashboradPage>
         },
         children: [
           TableRow(children: [
-            Text(Strings.header_name, style: Styles.darkBlue()),
+            Text(Strings.headerName, style: Styles.darkBlue()),
             Text(Strings.qty, style: Styles.darkBlue()),
             Text(Strings.amount, style: Styles.darkBlue()),
             Text(''),
@@ -3596,14 +3652,14 @@ class _DashboradPageState extends State<DashboradPage>
                           color: Colors.blueAccent,
                           icon: Icons.free_breakfast,
                           onTap: () {
-                            // if (permissions.contains(Constant.EDIT_ITEM)) {
-                            applyforFocProduct(cart);
-                            // } else {
-                            //   CommonUtils.openPermissionPop(
-                            //       context, Constant.EDIT_ITEM, () {
-                            //     applyforFocProduct(cart);
-                            //   }, () {});
-                            // }
+                            if (permissions.contains(Constant.FREE_ITEM)) {
+                              applyforFocProduct(cart);
+                            } else {
+                              CommonUtils.openPermissionPop(
+                                  context, Constant.FREE_ITEM, () {
+                                applyforFocProduct(cart);
+                              }, () {});
+                            }
                           },
                         )
                       : SizedBox(),
@@ -3614,14 +3670,14 @@ class _DashboradPageState extends State<DashboradPage>
                           color: Colors.blueAccent,
                           icon: Icons.free_breakfast,
                           onTap: () {
-                            // if (permissions.contains(Constant.EDIT_ITEM)) {
-                            applyforFocProduct(cart);
-                            // } else {
-                            //   CommonUtils.openPermissionPop(
-                            //       context, Constant.EDIT_ITEM, () {
-                            //     applyforFocProduct(cart);
-                            //   }, () {});
-                            // }
+                            if (permissions.contains(Constant.FREE_ITEM)) {
+                              applyforFocProduct(cart);
+                            } else {
+                              CommonUtils.openPermissionPop(
+                                  context, Constant.FREE_ITEM, () {
+                                applyforFocProduct(cart);
+                              }, () {});
+                            }
                           },
                         )
                       : SizedBox(),
@@ -3630,16 +3686,9 @@ class _DashboradPageState extends State<DashboradPage>
                     icon: Icons.edit,
                     onTap: () {
                       if (cart.isFocProduct != 1) {
-                        // if (permissions.contains(Constant.EDIT_ORDER)) {
                         editCartItem(cart);
-                        // } else {
-                        //   CommonUtils.openPermissionPop(
-                        //       context, Constant.EDIT_ORDER, () {
-                        //     editCartItem(cart);
-                        //   }, () {});
-                        // }
                       } else {
-                        CommunFun.showToast(context, Strings.foc_product_msg);
+                        CommunFun.showToast(context, Strings.focProductMsg);
                       }
                     },
                   ),
@@ -3677,7 +3726,7 @@ class _DashboradPageState extends State<DashboradPage>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                  Strings.sub_total.toUpperCase(),
+                  Strings.subTotal.toUpperCase(),
                   style: Styles.darkBlue(),
                 ),
                 Text(
@@ -3712,7 +3761,7 @@ class _DashboradPageState extends State<DashboradPage>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                  Strings.service_charge.toUpperCase() +
+                  Strings.serviceCharge.toUpperCase() +
                       (serviceChargePer > 0
                           ? " ($serviceChargePer%)"
                           : " (0%)"),
@@ -3773,7 +3822,7 @@ class _DashboradPageState extends State<DashboradPage>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(Strings.grand_total, style: Styles.darkBlue()),
+                Text(Strings.grandTotal, style: Styles.darkBlue()),
                 Text(
                   CommunFun.checkRoundData(grandTotal.toStringAsFixed(2)),
                   style: Styles.darkBlue(),
@@ -3844,7 +3893,7 @@ class _DashboradPageState extends State<DashboradPage>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      Strings.sub_total.toUpperCase(),
+                      Strings.subTotal.toUpperCase(),
                       style: Styles.darkBlue(),
                     ),
                     Text(
@@ -3879,7 +3928,7 @@ class _DashboradPageState extends State<DashboradPage>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      Strings.service_charge.toUpperCase() +
+                      Strings.serviceCharge.toUpperCase() +
                           " ($serviceChargePer%)",
                       style: Styles.darkBlue(),
                     ),
@@ -3936,7 +3985,7 @@ class _DashboradPageState extends State<DashboradPage>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text(Strings.grand_total, style: Styles.darkBlue()),
+                    Text(Strings.grandTotal, style: Styles.darkBlue()),
                     Text(
                       grandTotal.toStringAsFixed(2),
                       style: Styles.darkBlue(),
@@ -3979,7 +4028,7 @@ class _DashboradPageState extends State<DashboradPage>
                   ? Container(
                       width: MediaQuery.of(context).size.width / 1.2,
                       margin: EdgeInsets.only(top: customer != null ? 50 : 0),
-                      color: Colors.white,
+                      color: StaticColor.colorWhite,
                       padding: EdgeInsets.all(5),
                       child: carttitle,
                     )
@@ -4001,11 +4050,12 @@ class _DashboradPageState extends State<DashboradPage>
                       left: 0,
                       right: 0,
                       child: Container(
-                          color: Colors.grey[300], child: totalPriceTable),
+                          color: StaticColor.colorGrey300,
+                          child: totalPriceTable),
                     )
                   : Center(
                       child: Text(
-                        Strings.item_not_available,
+                        Strings.itemNotAvailable,
                         style: Styles.communBlacksmall(),
                       ),
                     )

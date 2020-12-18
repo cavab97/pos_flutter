@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 
 class Styles {
@@ -198,7 +199,7 @@ class Styles {
     return TextStyle(
         fontSize: SizeConfig.safeBlockVertical * 4,
         fontWeight: FontWeight.w600,
-        color: Color(0xffff531a),
+        color: StaticColor.deepOrange,
         fontFamily: Strings.fontFamily);
   }
 

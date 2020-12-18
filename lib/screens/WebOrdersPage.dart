@@ -8,6 +8,7 @@ import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class WebOrderPages extends StatefulWidget {
   // Transactions list
@@ -93,8 +94,8 @@ class _WebOrderPagesState extends State<WebOrderPages>
             Navigator.of(context).pop();
           },
         ),
-        backgroundColor: Colors.white,
-        iconTheme: IconThemeData(color: Colors.black, size: 60),
+        backgroundColor: StaticColor.colorWhite,
+        iconTheme: IconThemeData(color: StaticColor.colorBlack, size: 60),
         elevation: 0.0,
         title: Text(
           "Cart",
@@ -103,10 +104,10 @@ class _WebOrderPagesState extends State<WebOrderPages>
         bottom: TabBar(
           controller: _tabController,
           indicatorSize: TabBarIndicatorSize.tab,
-          unselectedLabelColor: Colors.black,
+          unselectedLabelColor: StaticColor.colorBlack,
           unselectedLabelStyle: Styles.blackBoldsmall(),
-          indicator: BoxDecoration(color: Colors.deepOrange),
-          labelColor: Colors.white,
+          indicator: BoxDecoration(color: StaticColor.deepOrange),
+          labelColor: StaticColor.colorWhite,
           labelStyle: Styles.whiteBoldsmall(),
           tabs: [
             Tab(
@@ -180,7 +181,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
                   tag: cart.id,
                   child: Container(
                     decoration: new BoxDecoration(
-                        color: Colors.white,
+                        color: StaticColor.colorWhite,
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(20.0),
                             topRight: Radius.circular(20.0))),
@@ -202,7 +203,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
                   margin: EdgeInsets.only(top: itemHeight / 2.5),
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
-                      color: Colors.grey,
+                      color: StaticColor.colorGrey,
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(20.0),
                           bottomRight: Radius.circular(20.0))),
@@ -264,7 +265,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
                   tag: cart.id,
                   child: Container(
                     decoration: new BoxDecoration(
-                        color: Colors.white,
+                        color: StaticColor.colorWhite,
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(20.0),
                             topRight: Radius.circular(20.0))),
@@ -292,8 +293,8 @@ class _WebOrderPagesState extends State<WebOrderPages>
                           width: MediaQuery.of(context).size.width,
                           decoration: BoxDecoration(
                               color: cart.table_id == null
-                                  ? Colors.deepOrange
-                                  : Colors.grey,
+                                  ? StaticColor.deepOrange
+                                  : StaticColor.colorGrey,
                               borderRadius: BorderRadius.only(
                                   bottomLeft: Radius.circular(20.0),
                                   bottomRight: Radius.circular(20.0))),
@@ -315,7 +316,7 @@ class _WebOrderPagesState extends State<WebOrderPages>
                         width: MediaQuery.of(context).size.width,
                         padding: EdgeInsets.all(2),
                         decoration: BoxDecoration(
-                            color: Colors.grey,
+                            color: StaticColor.colorGrey,
                             borderRadius: BorderRadius.only(
                                 bottomLeft: Radius.circular(20.0),
                                 bottomRight: Radius.circular(20.0))),

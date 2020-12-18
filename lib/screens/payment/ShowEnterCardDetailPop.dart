@@ -40,31 +40,31 @@ class _ShowEnterCardDetailPopState extends State<ShowEnterCardDetailPop> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(Strings.enter_last, style: Styles.blackMediumBold()),
+              Text(Strings.enterLast, style: Styles.blackMediumBold()),
               SizedBox(height: 20),
               CustomTextFormField(
                 inputController: digitController,
                 textInputType: TextInputType.number,
-                hintText: Strings.enter_digit,
+                hintText: Strings.enterDigit,
                 errorMSG: errorMSG,
                 validatorFunction: (value) {
                   if (value.isEmpty) {
-                    return Strings.reference_num_msg;
+                    return Strings.referenceNumMsg;
                   } else
                     return null;
                 },
               ),
               SizedBox(height: 10),
-              Text(Strings.approval_code, style: Styles.blackMediumBold()),
+              Text(Strings.approvalCode, style: Styles.blackMediumBold()),
               SizedBox(height: 20),
               CustomTextFormField(
                 inputController: codeInput,
                 textInputType: TextInputType.text,
-                hintText: Strings.enter_Code,
+                hintText: Strings.enterCode,
                 errorMSG: errorMSG,
                 validatorFunction: (value) {
                   if (value.isEmpty) {
-                    return Strings.approval_code_msg;
+                    return Strings.approvalCodeMsg;
                   } else
                     return null;
                 },
@@ -75,7 +75,7 @@ class _ShowEnterCardDetailPopState extends State<ShowEnterCardDetailPop> {
               CustomTextFormField(
                 inputController: remarkInputController,
                 textInputType: TextInputType.text,
-                hintText: Strings.enter_remark,
+                hintText: Strings.enterRemark,
                 errorMSG: errorMSG,
               ),
             ],

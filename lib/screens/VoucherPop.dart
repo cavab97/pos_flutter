@@ -12,6 +12,7 @@ import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class VoucherPop extends StatefulWidget {
   // Opning ammount popup
@@ -148,7 +149,7 @@ class VoucherPopState extends State<VoucherPop> {
             }
             if (cartitem.discount != null && cartitem.discount != 0.0) {
               totaldiscount += cartitem.discount;
-              var result = await localAPI.addVoucherIndetail(
+              await localAPI.addVoucherIndetail(
                 cartitem,
                 vaocher.voucherId,
               );
@@ -163,7 +164,7 @@ class VoucherPopState extends State<VoucherPop> {
               cartData.grand_total = cartData.grand_total - cartData.discount;
           cartData.voucher_detail = json.encode(vaocher);
           cartData.voucher_id = vaocher.voucherId;
-          var result1 = await localAPI.addVoucherInOrder(cartData, vaocher);
+          await localAPI.addVoucherInOrder(cartData, vaocher);
           selectedvoucher = vaocher;
           isadded = true;
           selectedvoucher = vaocher;
@@ -178,7 +179,7 @@ class VoucherPopState extends State<VoucherPop> {
         }
       }
     } else {
-      CommunFun.showToast(context, Strings.voucher_expired);
+      CommunFun.showToast(context, Strings.voucherExpired);
     }
   }
 
@@ -190,12 +191,12 @@ class VoucherPopState extends State<VoucherPop> {
         checkValidVoucher(vaocher[0]);
       } else {
         setState(() {
-          errorMSG = Strings.voucher_not_exit;
+          errorMSG = Strings.voucherNotExit;
         });
       }
     } else {
       setState(() {
-        errorMSG = Strings.voucher_code_msg;
+        errorMSG = Strings.voucherCodeMsg;
       });
     }
   }
@@ -210,7 +211,7 @@ class VoucherPopState extends State<VoucherPop> {
           children: <Widget>[
             Container(
               height: SizeConfig.safeBlockVertical * 9,
-              color: Colors.black,
+              color: StaticColor.colorBlack,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -218,7 +219,7 @@ class VoucherPopState extends State<VoucherPop> {
                   Text(Strings.applycoupen,
                       style: TextStyle(
                           fontSize: SizeConfig.safeBlockVertical * 3,
-                          color: Colors.white)),
+                          color: StaticColor.colorWhite)),
                 ],
               ),
             ),
@@ -256,14 +257,15 @@ class VoucherPopState extends State<VoucherPop> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -289,24 +291,25 @@ class VoucherPopState extends State<VoucherPop> {
               keyboardType: TextInputType.text,
               decoration: InputDecoration(
                 errorStyle: TextStyle(
-                    color: Colors.red,
+                    color: StaticColor.colorRed,
                     fontSize: SizeConfig.safeBlockVertical * 3),
                 errorText: errorMSG != "" ? errorMSG : "",
-                hintText: Strings.enter_Code,
+                hintText: Strings.enterCode,
                 hintStyle: TextStyle(
                     fontSize: SizeConfig.safeBlockVertical * 2,
-                    color: Colors.black),
+                    color: StaticColor.colorBlack),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(width: 3, color: Colors.grey),
+                  borderSide:
+                      BorderSide(width: 3, color: StaticColor.colorGrey),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(width: 3, color: Colors.grey),
+                  borderSide: BorderSide(width: 3, color: StaticColor.colorRed),
                 ),
                 filled: true,
                 contentPadding: EdgeInsets.all(15),
-                fillColor: Colors.white,
+                fillColor: StaticColor.colorWhite,
               ),
               style: Styles.greysmall(),
               onChanged: (e) {

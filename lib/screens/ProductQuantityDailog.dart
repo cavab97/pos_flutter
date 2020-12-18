@@ -7,7 +7,6 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Attribute_data.dart';
-import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
@@ -23,6 +22,7 @@ import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
@@ -71,7 +71,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   var productnetprice = 0.00;
   var currency = "MYR";
   String attributeTitle = "";
-
+  var permissions = "";
   @override
   void initState() {
     super.initState();
@@ -81,6 +81,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       cartitem = widget.cartItem;
     });
     setInitstate();
+    setPermissons();
+  }
+
+  setPermissons() async {
+    var permission = await CommunFun.getPemission();
+    setState(() {
+      permissions = permission;
+    });
   }
 
   setInitstate() async {
@@ -298,16 +306,106 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     });
     //}
     if (isEditing) {
-      print("hi");
       setProductEditingData();
     }
   }
-
+/* 
   getcartItemsDetails(productData) async {
     if (productData["CartItems"].length != 0) {
       setState(() {
         cartItems.addAll(productData["CartItems"]);
       });
+    }
+  } */
+
+  getcartItemsDetails() async {
+    if (!isSetMeal) {
+      var contain = cartItems
+          .where((element) => element.productId == productItem.productId);
+      if (contain.isNotEmpty) {
+        var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
+        List<MSTCartdetails> myModels = (json.decode(jsonString) as List)
+            .map((i) => MSTCartdetails.fromJson(i))
+            .toList();
+        var sameAttributes = [];
+        for (var m = 0; m < myModels.length; m++) {
+          List<MSTSubCartdetails> details =
+              await localAPI.getItemModifire(myModels[m].id);
+          if (details.length > 0) {
+            for (var p = 0; p < details.length; p++) {
+              var item = details[p];
+              if (item.caId != null) {
+                if (selectedAttr.length > 0) {
+                  for (var i = 0; i < selectedAttr.length; i++) {
+                    var attr = selectedAttr[i];
+                    if (item.attributeId == int.parse(attr["attrType_ID"])) {
+                      sameAttributes.add(item);
+                    }
+                  }
+                }
+              } else {
+                if (selectedModifier.length > 0) {
+                  for (var i = 0; i < selectedModifier.length; i++) {
+                    var modifire = selectedModifier[i];
+                    if (item.modifierId == modifire.modifierId) {
+                      sameAttributes.add(item);
+                    }
+                  }
+                }
+              }
+            }
+          }
+          if (selectedAttr.length != 0 || selectedModifier.length != 0) {
+            if (details.length > 0 && sameAttributes.length == details.length) {
+              setState(() {
+                isEditing = true;
+                cartitem = myModels[m];
+              });
+            }
+          } else {
+            if (details.length == 0) {
+              setState(() {
+                isEditing = true;
+                cartitem = myModels[m];
+              });
+            }
+          }
+        }
+        if (isEditing && cartitem != null) {
+          setState(() {
+            product_qty =
+                isEditing ? product_qty + cartitem.productQty : product_qty;
+            price = isEditing ? price + cartitem.productPrice : price;
+          });
+        }
+      }
+    } else {
+      //Put logic here for set Meal update
+      var contain =
+          cartItems.where((element) => element.productId == setmeal.setmealId);
+      if (contain.isNotEmpty) {
+        var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
+        List<MSTCartdetails> prodData = (json.decode(jsonString) as List)
+            .map((i) => MSTCartdetails.fromJson(i))
+            .toList();
+        setmeal.price = prodData[0].productPrice;
+        List<SetMealProduct> tCartData = [];
+        if (prodData[0] != null) {
+          List<dynamic> cartData =
+              jsonDecode(prodData[0].setmeal_product_detail);
+          tCartData = cartData.isNotEmpty
+              ? cartData.map((c) => SetMealProduct.fromJson(c)).toList()
+              : [];
+        }
+        setState(() {
+          isEditing = true;
+          setmeal = setmeal;
+          price = setmeal.price;
+          product_qty = prodData[0].productQty;
+          tempCart = tCartData;
+          cartitem = prodData[0];
+        });
+      }
     }
   }
 
@@ -333,114 +431,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       setState(() {
         selectedSetMealAttr = selectedSetMealAttr;
       });
-    } else {
-      prvSeelected.add({
-        'setmeal_productID': setmealproduct,
-        'ca_id': id,
-        'attribute': attribute,
-        'attrType_ID': attrTypeIDs,
-        'attr_price': attrPrice
-      });
-      setState(() {
-        selectedSetMealAttr = prvSeelected;
-      });
     }
-    setPrice();
   }
-
-  // getcartItemsDetails() async {
-  //   if (!isSetMeal) {
-  //     var contain = cartItems
-  //         .where((element) => element.productId == productItem.productId);
-  //     if (contain.isNotEmpty) {
-  //       var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
-  //       List<MSTCartdetails> myModels = (json.decode(jsonString) as List)
-  //           .map((i) => MSTCartdetails.fromJson(i))
-  //           .toList();
-  //       var sameAttributes = [];
-  //       MSTCartdetails itemset = new MSTCartdetails();
-  //       for (var m = 0; m < myModels.length; m++) {
-  //         List<MSTSubCartdetails> details =
-  //             await localAPI.getItemModifire(myModels[m].id);
-  //         if (details.length > 0) {
-  //           for (var p = 0; p < details.length; p++) {
-  //             var item = details[p];
-  //             if (item.caId != null) {
-  //               if (selectedAttr.length > 0) {
-  //                 for (var i = 0; i < selectedAttr.length; i++) {
-  //                   var attr = selectedAttr[i];
-  //                   if (item.attributeId == int.parse(attr["attrType_ID"])) {
-  //                     sameAttributes.add(item);
-  //                   }
-  //                 }
-  //               }
-  //             } else {
-  //               if (selectedModifier.length > 0) {
-  //                 for (var i = 0; i < selectedModifier.length; i++) {
-  //                   var modifire = selectedModifier[i];
-  //                   if (item.modifierId == modifire.modifierId) {
-  //                     sameAttributes.add(item);
-  //                   }
-  //                 }
-  //               }
-  //             }
-  //           }
-  //         }
-  //         if (selectedAttr.length != 0 || selectedModifier.length != 0) {
-  //           if (details.length > 0 && sameAttributes.length == details.length) {
-  //             setState(() {
-  //               isEditing = true;
-  //               cartitem = myModels[m];
-  //             });
-  //           }
-  //         } else {
-  //           if (details.length == 0) {
-  //             setState(() {
-  //               isEditing = true;
-  //               cartitem = myModels[m];
-  //             });
-  //           }
-  //         }
-  //       }
-  //       if (isEditing && cartitem != null) {
-  //         setState(() {
-  //           product_qty =
-  //               isEditing ? product_qty + cartitem.productQty : product_qty;
-  //           price = isEditing ? price + cartitem.productPrice : price;
-  //         });
-  //       }
-  //     }
-  //   } else {
-  //     //Put logic here for set Meal update
-  //     print(cartItems);
-  //     var contain =
-  //         cartItems.where((element) => element.productId == setmeal.setmealId);
-  //     print(contain);
-  //     if (contain.isNotEmpty) {
-  //       var jsonString = jsonEncode(contain.map((e) => e.toJson()).toList());
-  //       List<MSTCartdetails> prodData = (json.decode(jsonString) as List)
-  //           .map((i) => MSTCartdetails.fromJson(i))
-  //           .toList();
-  //       setmeal.price = prodData[0].productPrice;
-  //       List<SetMealProduct> tCartData = [];
-  //       if (prodData[0] != null) {
-  //         List<dynamic> cartData =
-  //             jsonDecode(prodData[0].setmeal_product_detail);
-  //         tCartData = cartData.isNotEmpty
-  //             ? cartData.map((c) => SetMealProduct.fromJson(c)).toList()
-  //             : [];
-  //       }
-  //       setState(() {
-  //         isEditing = true;
-  //         setmeal = setmeal;
-  //         price = setmeal.price;
-  //         product_qty = prodData[0].productQty;
-  //         tempCart = tCartData;
-  //         cartitem = prodData[0];
-  //       });
-  //     }
-  //   }
-  // }
 
   increaseQty() async {
     if (isSetMeal) {
@@ -462,7 +454,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             });
             setPrice();
           } else {
-            CommunFun.showToast(context, Strings.stock_not_valilable);
+            CommunFun.showToast(context, Strings.stockNotValilable);
           }
         } else {
           var prevproductqty = product_qty;
@@ -492,24 +484,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   onSelectAttr(i, id, attribute, attrTypeIDs, attrPrice, setmealid, isDefault) {
-    // var secondselected =
-    //     selectedAttr.any((item) => item['attribute'] == attribute);
-    // if (secondselected) {
-    //   selectedAttr.removeWhere((item) => item['attribute'] == attribute);
-    //   print("sone");
-    // }
-
-    // if (selectedAttr.length > 1) {
-    //   selectedAttr.removeWhere((item) => item['attribute'] == attribute);
-    // }
     var prvSeelected = selectedAttr;
     var isSelected = selectedAttr.any((item) => item['ca_id'] == id);
 
     if (isSelected) {
       var isarrSelected =
           selectedAttr.any((item) => item['attribute'] == attribute);
-      // selectedAttr.removeWhere((item) => item['attribute'] == attribute);
-      selectedAttr.removeWhere((item) => item['attribute'] != attribute);
+      // if (isDefault == 0) {
+      selectedAttr.removeWhere((item) => item['ca_id'] == id);
       if (!isarrSelected) {
         prvSeelected.add({
           'ca_id': id,
@@ -519,15 +501,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         });
       } else {
         selectedAttr.removeWhere((item) => item['attribute'] != attribute);
-        print("same");
       }
-
-      print(attribute);
+      // }
       setState(() {
-        selectedAttr = prvSeelected;
+        selectedAttr = selectedAttr;
       });
     } else if (selectedAttr.length < 1) {
-      print("seconddddddddddddddddddddddddd");
+      // print("seconddddddddddddddddddddddddd");
 
       prvSeelected.add({
         'ca_id': id,
@@ -536,6 +516,16 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         'attr_price': attrPrice,
       });
 
+      setState(() {
+        selectedAttr = prvSeelected;
+      });
+    } else {
+      prvSeelected.add({
+        'ca_id': id,
+        'attribute': attribute,
+        'attrType_ID': attrTypeIDs,
+        'attr_price': attrPrice
+      });
       setState(() {
         selectedAttr = prvSeelected;
       });
@@ -698,7 +688,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   produtAddTocart() async {
     MST_Cart cart = new MST_Cart();
-    MSTSubCartdetails subCartData = new MSTSubCartdetails();
+    //MSTSubCartdetails subCartData = new MSTSubCartdetails();
     SaveOrder orderData = new SaveOrder();
 
     var branchid = await CommunFun.getbranchId();
@@ -850,17 +840,19 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: SizeConfig.safeBlockVertical * 9,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                    isSetMeal
-                        ? setmeal.name.toUpperCase()
-                        : productItem.name.toUpperCase(),
-                    style: TextStyle(
-                        fontSize: SizeConfig.safeBlockVertical * 3,
-                        color: Colors.white)),
+                  isSetMeal
+                      ? setmeal.name.toUpperCase()
+                      : productItem.name.toUpperCase(),
+                  style: TextStyle(
+                      fontSize: SizeConfig.safeBlockVertical * 3,
+                      color: StaticColor.colorWhite),
+                ),
+                addbutton(context)
               ],
             ),
           ),
@@ -922,14 +914,15 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -943,11 +936,25 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       child: Row(
         children: <Widget>[
           _button("-", () {
-            decreaseQty();
+            if (permissions.contains(Constant.CHANGE_QUANTITY)) {
+              decreaseQty();
+            } else {
+              CommonUtils.openPermissionPop(context, Constant.CHANGE_QUANTITY,
+                  () async {
+                increaseQty();
+              }, () {});
+            }
           }),
           _quantityTextInput(),
           _button("+", () {
-            increaseQty();
+            if (permissions.contains(Constant.CHANGE_QUANTITY)) {
+              increaseQty();
+            } else {
+              CommonUtils.openPermissionPop(context, Constant.CHANGE_QUANTITY,
+                  () async {
+                increaseQty();
+              }, () {});
+            }
           }),
         ],
       ),
@@ -995,7 +1002,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   Widget getMealsProductList() {
     return isSetMeal
         ? Container(
-            // color: Colors.green,
+            // color: StaticColor.colorGreen,
             height: MediaQuery.of(context).size.height / 2.1,
             child: SingleChildScrollView(
               physics: BouncingScrollPhysics(),
@@ -1003,7 +1010,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   children: mealProducts.map((product) {
-                    var index = mealProducts.indexOf(product);
+                    //var index = mealProducts.indexOf(product);
                     return InkWell(
                         onTap: () {
                           _setSelectUnselect(product);
@@ -1012,15 +1019,15 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                         child: Container(
                           margin: EdgeInsets.only(top: 8),
                           decoration: new BoxDecoration(
-                              color: Colors.grey[100],
+                              color: StaticColor.lightGrey100,
                               borderRadius: BorderRadius.circular(8.0)),
                           /* color: tempCart
                               .where((element) =>
                                   element.setmealProductId ==
                                   product.setmealProductId)
                               .isNotEmpty
-                          ? Colors.grey[100]
-                          : Colors.white,*/
+                          ? StaticColor.colorGrey[100]
+                          : StaticColor.colorWhite,*/
                           padding:
                               EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                           child: Column(
@@ -1043,7 +1050,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                                   .imageFromBase64String(
                                                       product.base64)
                                               : new Image.asset(
-                                                  Strings.no_imageAsset,
+                                                  Strings.noImageAsset,
                                                   fit: BoxFit.cover,
                                                   gaplessPlayback: true,
                                                 ),
@@ -1085,7 +1092,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                                   .isNotEmpty
                                               ? Icons.check_circle
                                               : Icons.check_circle_outline,
-                                          color: Colors.green,
+                                          color: StaticColor.colorGreen,
                                           size: 40,
                                         ),
                                       ],
@@ -1113,7 +1120,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
 
     return Container(
-      //color: Colors.white,
+      //color: StaticColor.colorWhite,
       margin: EdgeInsets.only(bottom: isSetMeal ? 0 : 10, top: 0),
       // MediaQuery.of(context).size.height /8,
       child: ListView(
@@ -1169,16 +1176,17 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                                           product.setmealProductId ==
                                                               item[
                                                                   "setmeal_productID"])
-                                                      ? Colors.green
-                                                      : Colors.grey[300],
+                                                      ? StaticColor.colorGreen
+                                                      : StaticColor
+                                                          .colorGrey400,
                                                   width: 4,
                                                 )),
                                             minWidth: 50,
                                             child: Text(attr.toString(),
                                                 style:
                                                     Styles.blackMediumBold()),
-                                            textColor: Colors.black,
-                                            color: Colors.grey[300],
+                                            textColor: StaticColor.colorBlack,
+                                            color: StaticColor.colorGrey400,
                                             onPressed: () {
                                               onSelectSetmealAttr(
                                                   i,
@@ -1202,7 +1210,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   Widget getAttributeList() {
     return Container(
-      //color: Colors.white,
+      //color: StaticColor.colorWhite,
       margin: EdgeInsets.only(bottom: isSetMeal ? 0 : 10, top: 0),
       // MediaQuery.of(context).size.height /8,
       child: ListView(
@@ -1210,8 +1218,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         scrollDirection: Axis.vertical,
         physics: BouncingScrollPhysics(),
         children: attributeList.map((attribute) {
-          print("attributeList");
-          print(attributeList.length);
           var attributType = attribute.attr_types.split(',');
           var attrIDs = attribute.attributeId.split(',').asMap();
           var attrtypesPrice = attribute.attr_types_price.split(',').asMap();
@@ -1243,13 +1249,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                             var isadded = selectedAttr.any((item) =>
                                 item['ca_id'] == attribute.ca_id &&
                                 item['attribute'] == attr);
-                            print("isadded");
-                            print(isadded);
-                            print(attributisDefault[i]);
                             if (attributisDefault[i] == "1" &&
                                 !isadded &&
                                 selectedAttr.length < 1) {
-                              print("trigger");
                               onSelectAttr(
                                   i,
                                   attribute.ca_id,
@@ -1272,8 +1274,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                                     item['ca_id'] ==
                                                         attribute.ca_id &&
                                                     item['attribute'] == attr)
-                                                ? Colors.green
-                                                : Colors.grey[300],
+                                                ? StaticColor.colorGreen
+                                                : StaticColor.colorGrey300,
                                             width: 4,
                                           )),
                                       minWidth: 50,
@@ -1282,8 +1284,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                               " " +
                                               attrtypesPrice[i],
                                           style: Styles.blackMediumBold()),
-                                      textColor: Colors.black,
-                                      color: Colors.grey[300],
+                                      textColor: StaticColor.colorBlack,
+                                      color: StaticColor.colorGrey300,
                                       onPressed: () {
                                         onSelectAttr(
                                             i,
@@ -1327,8 +1329,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                             color: selectedModifier.any((item) =>
                                     item.pmId == modifier.pmId ||
                                     modifier.isDefault == 1)
-                                ? Colors.green
-                                : Colors.grey[300],
+                                ? StaticColor.colorGreen
+                                : StaticColor.colorGrey300,
                             width: 4)),
                     minWidth: 50,
                     child: Row(
@@ -1341,13 +1343,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                         Text(
                           modifier.price.toStringAsFixed(2).toString(),
                           style: TextStyle(
-                              color: Colors.deepOrange,
+                              color: StaticColor.deepOrange,
                               fontSize: SizeConfig.safeBlockVertical * 2.5),
                         ),
                       ],
                     ),
-                    textColor: Colors.black,
-                    color: Colors.grey[300],
+                    textColor: StaticColor.colorBlack,
+                    color: StaticColor.colorGrey300,
                     onPressed: () {
                       setModifire(modifier);
                     },
@@ -1359,7 +1361,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return Text(
       Strings.size,
       style: TextStyle(
-          fontSize: 18, fontWeight: FontWeight.w400, color: Colors.grey[800]),
+          fontSize: 18,
+          fontWeight: FontWeight.w400,
+          color: StaticColor.colorGrey800),
     );
   }
 
@@ -1369,7 +1373,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       style: TextStyle(
           fontSize: SizeConfig.safeBlockVertical * 3,
           fontWeight: FontWeight.w400,
-          color: Colors.grey[800]),
+          color: StaticColor.colorGrey800),
     );
   }
 
@@ -1379,7 +1383,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         //height: 170, // MediaQuery.of(context).size.height / 4,
         width: MediaQuery.of(context).size.width,
         child: Card(
-          color: Colors.grey[200],
+          color: StaticColor.lightGrey100,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -1416,8 +1420,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return Container(
       height: 40,
       width: 100,
-      decoration:
-          BoxDecoration(border: Border.all(width: 1, color: Colors.grey)),
+      decoration: BoxDecoration(
+          border: Border.all(width: 1, color: StaticColor.colorGrey)),
       child: Center(
         child: Text(
             product_qty.toStringAsFixed(0) +
@@ -1427,7 +1431,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                         ? productItem.priceTypeName
                         : ""
                     : ""),
-            style: TextStyle(color: Colors.grey, fontSize: 20)),
+            style: TextStyle(color: StaticColor.colorGrey, fontSize: 20)),
       ),
     );
   }
@@ -1441,11 +1445,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         child: Text(number,
             textAlign: TextAlign.center,
             style: TextStyle(
-                color: Colors.white,
+                color: StaticColor.colorWhite,
                 fontWeight: FontWeight.bold,
                 fontSize: 30.0)),
-        textColor: Colors.black,
-        color: Colors.deepOrange,
+        textColor: StaticColor.colorBlack,
+        color: StaticColor.deepOrange,
         onPressed: f,
       ),
     );
@@ -1476,29 +1480,28 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           }
         },
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             !isEditing
                 ? Icon(
                     Icons.add_circle_outline,
-                    color: Colors.white,
-                    size: SizeConfig.safeBlockVertical * 3,
+                    color: StaticColor.colorWhite,
+                    size: SizeConfig.safeBlockVertical * 3.5,
                   )
                 : Icon(
                     Icons.edit,
-                    color: Colors.white,
-                    size: SizeConfig.safeBlockVertical * 3,
+                    color: StaticColor.colorWhite,
+                    size: SizeConfig.safeBlockVertical * 3.5,
                   ),
             SizedBox(width: 5),
             Text(isEditing ? Strings.update : Strings.add,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: StaticColor.colorWhite,
                   fontSize: SizeConfig.safeBlockVertical * 3,
                 )),
           ],
         ),
-        color: Colors.deepOrange,
-        textColor: Colors.white,
+        color: StaticColor.deepOrange,
+        textColor: StaticColor.colorWhite,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(50.0),
         ),

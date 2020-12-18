@@ -42,18 +42,18 @@ class _ShowEnterEwalletDetailPopState extends State<ShowEnterEwalletDetailPop> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(Strings.enter_ref_num, style: Styles.blackMediumBold()),
+              Text(Strings.enterRefNum, style: Styles.blackMediumBold()),
               SizedBox(
                 height: 20,
               ),
               CustomTextFormField(
                 inputController: refInputController,
                 textInputType: TextInputType.text,
-                hintText: Strings.enterref_number,
+                hintText: Strings.enterRefNum,
                 errorMSG: errorMSG,
                 validatorFunction: (value) {
                   if (value.isEmpty) {
-                    return Strings.reference_num_msg;
+                    return Strings.referenceNumMsg;
                   }
                   return null;
                 },
@@ -68,11 +68,11 @@ class _ShowEnterEwalletDetailPopState extends State<ShowEnterEwalletDetailPop> {
               CustomTextFormField(
                 inputController: remarkInputController,
                 textInputType: TextInputType.text,
-                hintText: Strings.enter_remark,
+                hintText: Strings.enterRemark,
                 errorMSG: errorMSG,
                 validatorFunction: (value) {
                   if (value.isEmpty) {
-                    return Strings.reference_num_msg;
+                    return Strings.referenceNumMsg;
                   }
                   return null;
                 },

@@ -22,7 +22,7 @@ class APICall {
         return data;
       } else {
         print("Internet Connection lost");
-        await CommunFun.showToast(context, Strings.internet_connection_lost);
+        await CommunFun.showToast(context, Strings.internetConnectionLost);
       }
     } catch (e) {
       print(e);

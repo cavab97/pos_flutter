@@ -4,6 +4,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class ReprintKitchenPirntPop extends StatefulWidget {
   // quantity Dailog
@@ -47,11 +48,11 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
       },
       child: Text(Strings.reprint,
           style: TextStyle(
-            color: Colors.white,
+            color: StaticColor.colorWhite,
             fontSize: SizeConfig.safeBlockVertical * 3,
           )),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
+      color: StaticColor.deepOrange,
+      textColor: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(50.0),
       ),
@@ -63,13 +64,13 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
       onPressed: () {
         widget.onClose(cartList);
       },
-      child: Text(Strings.reprint_all,
+      child: Text(Strings.reprintAll,
           style: TextStyle(
-            color: Colors.white,
+            color: StaticColor.colorWhite,
             fontSize: SizeConfig.safeBlockVertical * 3,
           )),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
+      color: StaticColor.deepOrange,
+      textColor: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(50.0),
       ),
@@ -88,14 +89,15 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -119,8 +121,8 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
               color: tempCart
                       .where((element) => element.id == product.id)
                       .isNotEmpty
-                  ? Colors.grey[200]
-                  : Colors.white,
+                  ? StaticColor.lightGrey100
+                  : StaticColor.colorWhite,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -146,7 +148,7 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
                         IconButton(
                             icon: Icon(
                               Icons.add_circle,
-                              color: Colors.deepOrange,
+                              color: StaticColor.deepOrange,
                             ),
                             onPressed: null),
                         Text(product.productQty.toString(),
@@ -154,7 +156,7 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
                         IconButton(
                             icon: Icon(
                               Icons.remove_circle,
-                              color: Colors.deepOrange,
+                              color: StaticColor.deepOrange,
                             ),
                             onPressed: null)
                       ],
@@ -180,14 +182,14 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: SizeConfig.safeBlockVertical * 9,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(Strings.rePrint_kitchen_Print,
+                Text(Strings.rePrintKitchenPrint,
                     style: TextStyle(
                         fontSize: SizeConfig.safeBlockVertical * 3,
-                        color: Colors.white)),
+                        color: StaticColor.colorWhite)),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[

@@ -25,13 +25,12 @@ import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
-import 'package:mcncashier/models/Voucher_History.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
-
+import 'package:mcncashier/components/colors.dart';
 import 'PaymentMethodPop.dart';
 
 class SplitBillDialog extends StatefulWidget {
@@ -124,7 +123,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: SizeConfig.safeBlockVertical * 9,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -145,7 +144,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                         },
                         icon: Icon(
                           Icons.add_circle_outline,
-                          color: Colors.white,
+                          color: StaticColor.colorWhite,
                           size: 30,
                         ))
                     : IconButton(
@@ -165,7 +164,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                         },
                         icon: Icon(
                           Icons.remove_circle_outline,
-                          color: Colors.white,
+                          color: StaticColor.colorWhite,
                           size: 30,
                         )),
               ],
@@ -288,10 +287,11 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             width: 50.0,
             height: 50.0,
             decoration: BoxDecoration(
-                color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+                color: StaticColor.colorRed,
+                borderRadius: BorderRadius.circular(30.0)),
             child: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -365,7 +365,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         padding: EdgeInsets.all(0),
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        color: Colors.white,
+        color: StaticColor.colorWhite,
         child: Stack(children: <Widget>[
           isLoading ? CommunFun.loader(context) : productList(),
           Positioned(
@@ -373,7 +373,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             left: 0,
             right: 0,
             child: Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               padding: EdgeInsets.only(right: 0),
               child: Column(children: <Widget>[
                 Divider(),
@@ -489,7 +489,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
 
   Widget productList() {
     return Container(
-      color: Colors.white,
+      color: StaticColor.colorWhite,
       child: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
         padding: EdgeInsets.only(bottom: 200),
@@ -504,8 +504,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 color: tempCart
                         .where((element) => element.id == product.id)
                         .isNotEmpty
-                    ? Colors.grey[100]
-                    : Colors.white,
+                    ? StaticColor.lightGrey100
+                    : StaticColor.colorWhite,
                 padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -526,7 +526,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                                     ? CommonUtils.imageFromBase64String(
                                         productdata["base64"])
                                     : new Image.asset(
-                                        Strings.no_imageAsset,
+                                        Strings.noImageAsset,
                                         fit: BoxFit.cover,
                                         gaplessPlayback: true,
                                       ),
@@ -546,7 +546,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                                           },
                                           icon: Icon(
                                             Icons.check_circle,
-                                            color: Colors.white,
+                                            color: StaticColor.colorWhite,
                                             size: 30,
                                           ),
                                         ),
@@ -627,10 +627,9 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       invoiceNo =
           branchdata.orderPrefix + order.app_id.toString().padLeft(length, "0");
     }
-    double newg_total =
+    double newgTotal =
         double.parse(CommunFun.checkRoundData(grandTotal.toStringAsFixed(2)));
-    double rounding =
-        double.parse(CommunFun.calRounded(newg_total, grandTotal));
+    double rounding = double.parse(CommunFun.calRounded(newgTotal, grandTotal));
     order.uuid = uuid;
     order.branch_id = int.parse(branchid);
     order.terminal_id = int.parse(terminalId);
@@ -640,7 +639,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     order.customer_id = cartData.user_id;
     order.sub_total = subTotal;
     order.sub_total_after_discount = subTotal;
-    order.grand_total = newg_total;
+    order.grand_total = newgTotal;
     order.rounding_amount = rounding;
     order.order_item_count = totalQty;
     order.tax_amount = taxValues;
@@ -654,7 +653,6 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
     order.updated_by = userdata.id;
     var orderid = await localAPI.placeOrder(order);
-    print(orderid);
     var orderDetailid;
     if (orderid > 0) {
       if (tempCart.length > 0) {
@@ -701,7 +699,6 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 cartItem.setmeal_product_detail;
           }
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
-          print(orderDetailid);
           if (cartItem.issetMeal == 0) {
             List<ProductStoreInventory> updatedInt = [];
             List<ProductStoreInventoryLog> updatedIntLog = [];
@@ -722,8 +719,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                     await CommunFun.getCurrentDateTime(DateTime.now());
                 invData.updatedBy = userdata.id;
                 updatedInt.add(invData);
-                var ulog = await localAPI.updateInvetory(updatedInt);
-                print(ulog);
+                await localAPI.updateInvetory(updatedInt);
 
                 //Inventory log update
                 ProductStoreInventoryLog log = new ProductStoreInventoryLog();
@@ -739,9 +735,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                     await CommunFun.getCurrentDateTime(DateTime.now());
                 log.updated_by = userdata.id;
                 updatedIntLog.add(log);
-                var inventoryLog =
-                    await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
-                print(inventoryLog);
+                await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
               }
             }
           }
@@ -781,8 +775,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             modifireData.updated_at =
                 await CommunFun.getCurrentDateTime(DateTime.now());
             modifireData.updated_by = userdata.id;
-            var ordermodifreid = await localAPI.sendModifireData(modifireData);
-            print(ordermodifreid);
+            await localAPI.sendModifireData(modifireData);
           } else {
             OrderAttributes attributes = new OrderAttributes();
             List<OrderAttributes> lapApid =
@@ -809,8 +802,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             attributes.updated_at =
                 await CommunFun.getCurrentDateTime(DateTime.now());
             attributes.updated_by = userdata.id;
-            var orderAttri = await localAPI.sendAttrData(attributes);
-            print(orderAttri);
+            await localAPI.sendAttrData(attributes);
           }
         }
       }
@@ -847,7 +839,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         orderpayment.updated_at =
             await CommunFun.getCurrentDateTime(DateTime.now());
         orderpayment.updated_by = userdata.id;
-        var paymentd = await localAPI.sendtoOrderPayment(orderpayment);
+        await localAPI.sendtoOrderPayment(orderpayment);
 
         if (payment[i].isCash == 1) {
           var shiftid =
@@ -862,7 +854,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
           drawer.localID = uuid;
           drawer.terminalid = int.parse(terminalId);
-          var result = await localAPI.saveInOutDrawerData(drawer);
+          await localAPI.saveInOutDrawerData(drawer);
         }
       }
     }
@@ -883,8 +875,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         await CommunFun.getCurrentDateTime(DateTime.now());
     shiftinvoice.serverId = 0;
     shiftinvoice.terminal_id = int.parse(terminalId);
-    var shift = await localAPI.sendtoShiftInvoice(shiftinvoice);
-    print(shift);
+    await localAPI.sendtoShiftInvoice(shiftinvoice);
 
     if (this.cartList.length == tempCart.length) {
       await clearCartAfterSuccess(orderid);
@@ -916,9 +907,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
 
   clearCartAfterSuccess(orderid) async {
     Table_order tables = await getTableData();
-    var result =
-        await localAPI.removeCartItem(widget.currentCartID, tables.table_id);
-    print(result);
+    await localAPI.removeCartItem(widget.currentCartID, tables.table_id);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     Navigator.of(context).pop();
@@ -951,14 +940,12 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   Future<List<MSTCartdetails>> getcartDetails() async {
     List<MSTCartdetails> list =
         await localAPI.getCartItem(widget.currentCartID);
-    print(list);
     return list;
   }
 
   Future<List<MSTSubCartdetails>> getmodifireList() async {
     List<MSTSubCartdetails> list =
         await localAPI.itemmodifireList(widget.currentCartID);
-    print(list);
     return list;
   }
 
@@ -970,7 +957,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         await localAPI.getOrderpaymentData(orderid, treminalID);
     List<Payments> paymentMethod =
         await localAPI.getOrderpaymentmethod(orderid, treminalID);
-    User user = await localAPI.getPaymentUser(orderpaymentdata[0].op_by);
+    await localAPI.getPaymentUser(orderpaymentdata[0].op_by);
     List<OrderDetail> orderitem =
         await localAPI.getOrderDetailsList(orderid, treminalID);
     Orders order = await localAPI.getcurrentOrders(orderid, treminalID);
@@ -979,7 +966,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
 
     if (widget.printerIP.isNotEmpty) {
-      if (permissions.contains(Constant.PRINT_RECIEPT)) {
+      if (permissions.contains(Constant.PRINT_BILL)) {
         if (permissions.contains(Constant.OPEN_DRAWER)) {
           _printReceipt.checkReceiptPrint(
               widget.pax,
@@ -996,6 +983,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
               "", // Add table name here
               "", // Add Currency here
               widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
+              false,
               true);
           clearSelected();
         } else {
@@ -1016,6 +1004,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 "", // Add table name here
                 "", // Add Currency here
                 widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
+                false,
                 true);
             clearSelected();
           }, () async {
@@ -1034,12 +1023,13 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 "", // Add table name here
                 "", // Add Currency here
                 widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
+                false,
                 false);
             clearSelected();
           });
         }
       } else {
-        await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+        await CommonUtils.openPermissionPop(context, Constant.PRINT_BILL,
             () async {
           if (permissions.contains(Constant.OPEN_DRAWER)) {
             _printReceipt.checkReceiptPrint(
@@ -1057,12 +1047,13 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 "", // Add table name here
                 "", // Add Currency here
                 widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
+                false,
                 true);
             clearSelected();
           } else {
             await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
                 () async {
-              await _printReceipt.checkReceiptPrint(
+              _printReceipt.checkReceiptPrint(
                   widget.pax,
                   widget.printerIP,
                   context,
@@ -1079,10 +1070,11 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                   widget.customer.isEmpty
                       ? "Walk-in customer"
                       : widget.customer,
+                  false,
                   true);
               clearSelected();
             }, () async {
-              await _printReceipt.checkReceiptPrint(
+              _printReceipt.checkReceiptPrint(
                   widget.pax,
                   widget.printerIP,
                   context,
@@ -1099,6 +1091,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                   widget.customer.isEmpty
                       ? "Walk-in customer"
                       : widget.customer,
+                  false,
                   false);
               clearSelected();
             });
@@ -1108,7 +1101,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         });
       }
     } else {
-      CommunFun.showToast(context, Strings.printer_not_available);
+      CommunFun.showToast(context, Strings.printerNotAvailable);
     }
   }
 }

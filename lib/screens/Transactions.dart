@@ -6,6 +6,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Drawer.dart';
+import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/models/Order.dart';
 import 'package:mcncashier/models/OrderDetails.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
@@ -13,6 +14,7 @@ import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/ProductStoreInventoryLog.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
+import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/cancelOrder.dart';
 import 'package:mcncashier/screens/PaymentMethodPop.dart';
@@ -21,8 +23,13 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
+import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/models/Order_Modifire.dart';
+import 'package:mcncashier/models/OrderAttributes.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/models/Branch.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class TransactionsPage extends StatefulWidget {
   // Transactions list
@@ -35,12 +42,16 @@ class TransactionsPage extends StatefulWidget {
 
 class _TransactionsPageState extends State<TransactionsPage> {
   LocalAPI localAPI = LocalAPI();
+  ScrollController _scrollController = ScrollController();
   List<Orders> orderLists = [];
   List<Orders> filterList = [];
   Orders selectedOrder = new Orders();
   List taxJson = [];
+  List<Printer> printerreceiptList = new List<Printer>();
+  List<Printer> printerList = new List<Printer>();
   List<OrderPayment> orderpayment = [];
   User paymemtUser = new User();
+  Branch branchData;
   List<ProductDetails> detailsList = [];
   List<OrderDetail> orderItemList = [];
   bool isFiltering = false;
@@ -49,10 +60,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
   var permissions = "";
   var orderDate = "";
   double change = 0.0;
+  int currentOffset = 0;
   bool isScreenLoad = false;
-  Customer customer = new Customer();
+  Customer customer;
   List<Payments> paymentMethod = new List<Payments>();
-
+  var currency = "RM";
   @override
   void initState() {
     super.initState();
@@ -63,6 +75,44 @@ class _TransactionsPageState extends State<TransactionsPage> {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
+    getAllPrinter();
+    getbranch();
+    _scrollController.addListener(() {
+      if (_scrollController.position.maxScrollExtent ==
+          _scrollController.position.pixels) {
+        if (!isScreenLoad) {
+          isScreenLoad = !isScreenLoad;
+          // Perform event when user reach at the end of list (e.g. do Api call)
+          getTansactionList();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    if (_scrollController != null) _scrollController.dispose();
+    super.dispose();
+  }
+
+  getbranch() async {
+    var branchid = await CommunFun.getbranchId();
+    var branch = await localAPI.getbranchData(branchid);
+    var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
+    setState(() {
+      currency = curre;
+      branchData = branch;
+    });
+    return branch;
+  }
+
+  getAllPrinter() async {
+    List<Printer> printer = await localAPI.getAllPrinterForKOT();
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
+    setState(() {
+      printerList = printer;
+      printerreceiptList = printerDraft;
+    });
   }
 
   setPermissons() async {
@@ -78,10 +128,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
     var terminalid = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
-    List<Orders> orderList = await localAPI.getOrdersList(branchid, terminalid);
+    List<Orders> orderList =
+        await localAPI.getOrdersList(branchid, terminalid, currentOffset);
     if (orderList.length > 0) {
       setState(() {
-        orderLists = orderList;
+        orderLists.addAll(orderList);
+        currentOffset += 10;
       });
       getOrderDetails(orderLists[0]);
     }
@@ -241,7 +293,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     order.createdBy = userdata.id;
     order.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     order.terminalId = int.parse(terminalId);
-    var addTocancle = await localAPI.insertCancelOrder(order);
+    await localAPI.insertCancelOrder(order);
     // if (paymehtod.length > 0) {
     //   for (var i = 0; i < paymehtod.length; i++) {
     //     OrderPayment orderpayment = paymehtod[i];
@@ -281,7 +333,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 await CommunFun.getCurrentDateTime(DateTime.now());
             invData.updatedBy = userdata.id;
             updatedInt.add(invData);
-            var ulog = await localAPI.updateInvetory(updatedInt);
+            await localAPI.updateInvetory(updatedInt);
             ProductStoreInventoryLog log = new ProductStoreInventoryLog();
             if (inventory.length > 0) {
               log.uuid = uuid;
@@ -297,14 +349,13 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   await CommunFun.getCurrentDateTime(DateTime.now());
               log.updated_by = userdata.id;
               updatedIntLog.add(log);
-              var ulog =
-                  await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
+              await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
             }
           }
         }
       }
     }
-    Navigator.of(context).pop();
+    //Navigator.of(context).pop();
     getTansactionList();
   }
 
@@ -385,7 +436,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 await CommunFun.getCurrentDateTime(DateTime.now());
             invData.updatedBy = userdata.id;
             updatedInt.add(invData);
-            var ulog = await localAPI.updateInvetory(updatedInt);
+            await localAPI.updateInvetory(updatedInt);
             ProductStoreInventoryLog log = new ProductStoreInventoryLog();
             if (inventory.length > 0) {
               log.uuid = uuid;
@@ -401,8 +452,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   await CommunFun.getCurrentDateTime(DateTime.now());
               log.updated_by = userdata.id;
               updatedIntLog.add(log);
-              var ulog =
-                  await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
+              await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
             }
           }
         }
@@ -425,8 +475,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
       order.sub_total = subtotal;
       order.order_item_count = qty.toInt();
       order.grand_total = grandtotal;
-      var result = await localAPI.deleteOrderItem(product.app_id);
-      var result1 = await localAPI.updateInvoice(order);
+      await localAPI.deleteOrderItem(product.app_id);
+      await localAPI.updateInvoice(order);
       setState(() {
         isRefunding = false;
       });
@@ -441,310 +491,292 @@ class _TransactionsPageState extends State<TransactionsPage> {
     }
   }
 
+  reprintRecipt() async {
+    if (selectedOrder != null) {
+      List<OrderPayment> orderpaymentdata = await localAPI.getOrderpaymentData(
+          selectedOrder.app_id, selectedOrder.terminal_id);
+      List<Payments> paymentMethod = await localAPI.getOrderpaymentmethod(
+          selectedOrder.app_id, selectedOrder.terminal_id);
+      List<OrderDetail> orderitem = await localAPI.getOrderDetailsList(
+          selectedOrder.app_id, selectedOrder.terminal_id);
+      Orders order = await localAPI.getcurrentOrders(
+          selectedOrder.app_id, selectedOrder.terminal_id);
+      List<OrderAttributes> attributes =
+          await localAPI.getOrderAttributes(order.app_id);
+      List<OrderModifire> modifires =
+          await localAPI.getOrderModifire(order.app_id);
+      var branchid = await CommunFun.getbranchId();
+      List<TablesDetails> tabledata =
+          await localAPI.getTableData(branchid, order.table_id);
+      PrintReceipt printKOT = PrintReceipt();
+      printKOT.checkReceiptPrint(
+          (order.pax != null ? order.pax.toString() : 0.toString()),
+          printerreceiptList[0].printerIp,
+          context,
+          branchData,
+          taxJson,
+          orderitem,
+          attributes,
+          modifires,
+          order,
+          orderpaymentdata,
+          paymentMethod,
+          tabledata[0].tableName,
+          currency,
+          Strings.walkinCustomer,
+          true,
+          true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return Scaffold(
-      // drawer: transactionsDrawer(), // page Drawer
       body: LoadingOverlay(
           child: SafeArea(
-              child: new GestureDetector(
-            onTap: () {
-              FocusScope.of(context).requestFocus(new FocusNode());
-              setState(() {
-                isFiltering = false;
-              });
-            },
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Table(
-                columnWidths: {
-                  0: FractionColumnWidth(.3),
-                  1: FractionColumnWidth(.6),
-                },
-                children: [
-                  TableRow(children: [
-                    TableCell(
-                      // Part 1 white
-                      child: SingleChildScrollView(
-                        physics: BouncingScrollPhysics(),
-                        child: Container(
-                          //    padding: EdgeInsets.only(top: 20, left: 20, right: 20),
-                          height: MediaQuery.of(context).size.height,
-                          color: Colors.white,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: <Widget>[
-                                  IconButton(
-                                    padding: EdgeInsets.all(0),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    icon: Icon(
-                                      Icons.keyboard_arrow_left,
-                                      size: SizeConfig.safeBlockVertical * 7,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(Strings.transaction,
-                                      style: Styles.drawerText()),
-                                ],
-                              ),
-                              SizedBox(height: 10),
-                              transationsSearchBox(),
-                              SizedBox(height: 5),
-                              orderLists.length > 0
-                                  ? searchTransationList()
-                                  : Center(
-                                      child: Text(Strings.no_order_found,
-                                          style: Styles.darkBlue()))
-                            ],
+            child: new GestureDetector(
+              onTap: () {
+                FocusScope.of(context).requestFocus(new FocusNode());
+                setState(() {
+                  isFiltering = false;
+                });
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Table(
+                  columnWidths: {
+                    0: FractionColumnWidth(.3),
+                    1: FractionColumnWidth(.6),
+                  },
+                  children: [
+                    TableRow(children: [
+                      TableCell(
+                        // Part 1 white
+                        child: SingleChildScrollView(
+                          physics: BouncingScrollPhysics(),
+                          child: Container(
+                            height: MediaQuery.of(context).size.height,
+                            color: StaticColor.colorWhite,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                CommunFun.verticalSpace(10),
+                                pageTitle(),
+                                CommunFun.verticalSpace(10),
+                                transationsSearchBox(),
+                                CommunFun.verticalSpace(5),
+                                orderLists.length > 0
+                                    ? searchTransationList()
+                                    : Center(
+                                        child: Text(Strings.noOrderFound,
+                                            style: Styles.darkBlue()))
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    TableCell(
-                      // Part 2 transactions list
-                      child: Center(
-                          child: orderLists.length > 0
-                              ? SingleChildScrollView(
-                                  physics: BouncingScrollPhysics(),
-                                  child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 50),
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height /
-                                              2,
-                                          child: SingleChildScrollView(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: <Widget>[
-                                                SizedBox(height: 10),
-                                                Text(orderDate,
-                                                    style: Styles
-                                                        .whiteMediumBold()),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Text(
-                                                  selectedOrder.grand_total !=
-                                                          null
-                                                      ? selectedOrder
-                                                          .grand_total
-                                                          .toStringAsFixed(2)
-                                                      : "",
-                                                  style: TextStyle(
-                                                      fontSize: SizeConfig
-                                                              .safeBlockVertical *
-                                                          4,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Theme.of(context)
-                                                          .accentColor),
-                                                ),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                selectedOrder != null &&
-                                                        paymemtUser.username !=
-                                                            null
-                                                    ? Text(
-                                                        selectedOrder
-                                                                .invoice_no +
-                                                            " - Processed by " +
-                                                            paymemtUser
-                                                                .username,
-                                                        style: Styles
-                                                            .whiteBoldsmall(),
-                                                      )
-                                                    : SizedBox(),
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Container(
-                                                  height: SizeConfig
-                                                          .safeBlockVertical *
-                                                      8,
-                                                  width: MediaQuery.of(context)
+                      TableCell(
+                          // Part 2 transactions list
+                          child: Center(
+                              child: orderLists.length > 0
+                                  ? SingleChildScrollView(
+                                      physics: BouncingScrollPhysics(),
+                                      child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 50),
+                                              height: MediaQuery.of(context)
                                                       .size
-                                                      .width,
-                                                  child: Center(
-                                                    child: Text(
-                                                      customer.firstName != null
-                                                          ? customer.firstName
-                                                          : "Walk-In Customer",
-                                                      style:
-                                                          Styles.orangeSmall(),
-                                                    ),
-                                                  ),
-                                                  color: Colors.grey[900]
-                                                      .withOpacity(0.4),
-                                                ),
-                                                productList(),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        Container(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height /
-                                              2.2,
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 50),
-                                          child: SingleChildScrollView(
-                                            child: Column(children: <Widget>[
-                                              Divider(),
-                                              totalAmountValues(),
-                                              Divider(),
-                                              Column(
-                                                  children: orderpayment
-                                                      .map((payment) {
-                                                var index = orderpayment
-                                                    .indexOf(payment);
-                                                change = payment
-                                                            .op_amount_change !=
-                                                        null
-                                                    ? payment.op_amount_change
-                                                    : 0.0;
-                                                return Row(
+                                                      .height /
+                                                  2,
+                                              child: SingleChildScrollView(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment.end,
+                                                      MainAxisAlignment.start,
                                                   children: <Widget>[
-                                                    new Expanded(
-                                                      flex: 7,
-                                                      child: Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                          top: 0,
-                                                        ),
-                                                        child: Text(
-                                                          paymentMethod.length >
-                                                                  0
-                                                              ? paymentMethod[
-                                                                      index]
-                                                                  .name
-                                                                  .toUpperCase()
-                                                              : "",
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style:
-                                                              Styles.darkGray(),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    new Expanded(
-                                                      flex: 3,
-                                                      child: Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                            top: 0,
-                                                          ),
-                                                          child: Text(
-                                                            payment.op_amount !=
-                                                                    null
-                                                                ? payment
-                                                                    .op_amount
-                                                                    .toStringAsFixed(
-                                                                        2)
-                                                                : "00:00",
-                                                            textAlign:
-                                                                TextAlign.end,
-                                                            style: Styles
-                                                                .darkGray(),
-                                                          )),
-                                                    )
+                                                    CommunFun.verticalSpace(10),
+                                                    reprintRecipet(),
+                                                    CommunFun.verticalSpace(10),
+                                                    orderDateText(),
+                                                    CommunFun.verticalSpace(10),
+                                                    grandTotalText(),
+                                                    CommunFun.verticalSpace(10),
+                                                    userNameText(),
+                                                    CommunFun.verticalSpace(10),
+                                                    customerBanner(),
+                                                    productList(),
                                                   ],
-                                                );
-                                              }).toList()),
-                                              change != null
-                                                  ? Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment.end,
-                                                      children: <Widget>[
-                                                        new Expanded(
-                                                          flex: 7,
-                                                          child: Padding(
-                                                            padding:
-                                                                EdgeInsets.only(
-                                                              top: 0,
-                                                            ),
-                                                            child: Text(
-                                                              "Change",
-                                                              textAlign:
-                                                                  TextAlign.end,
-                                                              style: Styles
-                                                                  .darkGray(),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        new Expanded(
-                                                          flex: 3,
-                                                          child: Padding(
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .only(
-                                                                top: 0,
-                                                              ),
-                                                              child: Text(
-                                                                change
-                                                                    .toStringAsFixed(
-                                                                        2),
-                                                                textAlign:
-                                                                    TextAlign
-                                                                        .end,
-                                                                style: Styles
-                                                                    .darkGray(),
-                                                              )),
-                                                        )
-                                                      ],
-                                                    )
-                                                  : SizedBox(),
-                                              isRefunding
-                                                  ? refundButtons(context)
-                                                  : transationsButton()
-                                            ]),
-                                          ),
-                                        )
-                                        // ),
-                                      ]))
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    SizedBox(
-                                      height: 50,
-                                    ),
-                                    Text(
-                                      Strings.no_order_found,
-                                      style: Styles.whiteBold(),
-                                    ),
-                                  ],
-                                )),
-                    )
-                  ]),
-                ],
+                                                ),
+                                              ),
+                                            ),
+                                            Container(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height /
+                                                  2.2,
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 50),
+                                              child: SingleChildScrollView(
+                                                child:
+                                                    Column(children: <Widget>[
+                                                  Divider(),
+                                                  totalAmountValues(),
+                                                  Divider(),
+                                                  paymentDetails(),
+                                                  changeText(),
+                                                  isRefunding
+                                                      ? refundButtons(context)
+                                                      : transationsButton()
+                                                ]),
+                                              ),
+                                            )
+                                            // ),
+                                          ]))
+                                  : noOrderFoundText()))
+                    ]),
+                  ],
+                ),
               ),
             ),
-          )),
+          ),
           isLoading: isScreenLoad,
           color: Colors.black87,
           progressIndicator: CommunFun.overLayLoader()),
+    );
+  }
+
+  Widget noOrderFoundText() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        CommunFun.verticalSpace(50),
+        Text(
+          Strings.noOrderFound,
+          style: Styles.whiteBold(),
+        ),
+      ],
+    );
+  }
+
+  Widget pageTitle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        IconButton(
+          padding: EdgeInsets.all(0),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: Icon(
+            Icons.keyboard_arrow_left,
+            size: SizeConfig.safeBlockVertical * 7,
+          ),
+        ),
+        CommunFun.horisontalSpace(10),
+        Text(Strings.transaction, style: Styles.drawerText()),
+      ],
+    );
+  }
+
+  Widget changeText() {
+    return change != null
+        ? Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              new Expanded(
+                flex: 7,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: 0,
+                  ),
+                  child: Text(
+                    "Change",
+                    textAlign: TextAlign.end,
+                    style: Styles.darkGray(),
+                  ),
+                ),
+              ),
+              new Expanded(
+                flex: 3,
+                child: Padding(
+                    padding: EdgeInsets.only(
+                      top: 0,
+                    ),
+                    child: Text(
+                      change.toStringAsFixed(2),
+                      textAlign: TextAlign.end,
+                      style: Styles.darkGray(),
+                    )),
+              )
+            ],
+          )
+        : SizedBox();
+  }
+
+  Widget paymentDetails() {
+    return Column(
+        children: orderpayment.map((payment) {
+      var index = orderpayment.indexOf(payment);
+      change =
+          payment.op_amount_change != null ? payment.op_amount_change : 0.0;
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          new Expanded(
+            flex: 7,
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: 0,
+              ),
+              child: Text(
+                paymentMethod.length > 0
+                    ? paymentMethod[index].name.toUpperCase()
+                    : "",
+                textAlign: TextAlign.end,
+                style: Styles.darkGray(),
+              ),
+            ),
+          ),
+          new Expanded(
+            flex: 3,
+            child: Padding(
+                padding: EdgeInsets.only(
+                  top: 0,
+                ),
+                child: Text(
+                  payment.op_amount != null
+                      ? payment.op_amount.toStringAsFixed(2)
+                      : "00:00",
+                  textAlign: TextAlign.end,
+                  style: Styles.darkGray(),
+                )),
+          )
+        ],
+      );
+    }).toList());
+  }
+
+  Widget customerBanner() {
+    return Container(
+      height: SizeConfig.safeBlockVertical * 8,
+      width: MediaQuery.of(context).size.width,
+      child: Center(
+        child: Text(
+          customer != null ? customer.firstName : "Walk-In Customer",
+          style: Styles.orangeSmall(),
+        ),
+      ),
+      color: Colors.grey[900].withOpacity(0.4),
     );
   }
 
@@ -753,24 +785,18 @@ class _TransactionsPageState extends State<TransactionsPage> {
       padding: EdgeInsets.all(10),
       onPressed: onPress,
       child: Text("Assign Table", style: Styles.whiteSimpleSmall()),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
+      color: StaticColor.deepOrange,
+      textColor: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
       ),
     );
   }
 
-  transactionsDrawer() {
-    return Drawer(
-      child: Container(color: Colors.white),
-    );
-  }
-
   Widget transationsSearchBox() {
     return Container(
       padding: EdgeInsets.all(10),
-      color: Colors.grey[400],
+      color: StaticColor.colorGrey400,
       child: TextField(
         keyboardType: TextInputType.text,
         decoration: InputDecoration(
@@ -778,15 +804,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
             padding: EdgeInsets.only(left: 15),
             child: Icon(
               Icons.search,
-              color: Colors.grey[400],
+              color: StaticColor.colorGrey400,
               size: SizeConfig.safeBlockVertical * 5,
             ),
           ),
-          hintText: Strings.searchbox_hint,
+          hintText: Strings.searchboxHint,
           hintStyle: TextStyle(
               fontSize: SizeConfig.safeBlockVertical * 3,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[400]),
+              color: StaticColor.colorGrey400),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(50),
             borderSide: BorderSide(
@@ -796,9 +822,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
           ),
           filled: true,
           contentPadding: EdgeInsets.only(left: 20),
-          fillColor: Colors.white,
+          fillColor: StaticColor.colorWhite,
         ),
         style: Styles.blackMediumBold(),
+        onSubmitted: (e) {
+          if (e.length == 0) {
+            isFiltering = false;
+          }
+        },
         onTap: () {
           startFilter();
         },
@@ -820,7 +851,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             isRefunding = false;
           });
         }),
-        SizedBox(width: 10),
+        CommunFun.horisontalSpace(10),
         refundNextButton(() {
           if (permissions.contains(Constant.PAYMENT)) {
             refundSelectedammout();
@@ -834,7 +865,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
   }
 
-  refundCancelButton(_onPress) {
+  Widget refundCancelButton(_onPress) {
     return Expanded(
       child: RaisedButton(
         padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
@@ -843,12 +874,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
           "Cancel",
           style: TextStyle(
               color: orderpayment[0].op_status == 1
-                  ? Colors.white
-                  : Colors.white38,
+                  ? StaticColor.colorWhite
+                  : StaticColor.colorwhite38,
               fontSize: 20),
         ),
-        color: Colors.deepOrange,
-        textColor: Colors.white,
+        color: StaticColor.deepOrange,
+        textColor: StaticColor.colorWhite,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
@@ -856,7 +887,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
   }
 
-  refundNextButton(_onPress) {
+  Widget refundNextButton(_onPress) {
     return Expanded(
       child: RaisedButton(
         padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
@@ -865,12 +896,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
           "Next",
           style: TextStyle(
               color: orderpayment[0].op_status == 1
-                  ? Colors.white
-                  : Colors.white38,
+                  ? StaticColor.colorWhite
+                  : StaticColor.colorwhite38,
               fontSize: 20),
         ),
-        color: Colors.deepOrange,
-        textColor: Colors.white,
+        color: StaticColor.deepOrange,
+        textColor: StaticColor.colorWhite,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
@@ -893,7 +924,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
             }, () {});
           }
         }),
-        SizedBox(width: 10),
+        CommunFun.horisontalSpace(10),
         cancelButton(() {
           if (permissions.contains(Constant.CANCLE_TRANSACTION)) {
             if (orderpayment[0].op_status == 1) {
@@ -944,7 +975,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   new Expanded(
                     flex: 7,
                     child: Text(
-                      Strings.sub_total.toUpperCase(),
+                      Strings.subTotal.toUpperCase(),
                       textAlign: TextAlign.end,
                       style: Styles.darkGray(),
                     ),
@@ -1010,8 +1041,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                     flex: 7,
                     child: Text(
                       selectedOrder.serviceChargePercent == null
-                          ? Strings.service_charge.toUpperCase()
-                          : Strings.service_charge.toUpperCase() +
+                          ? Strings.serviceCharge.toUpperCase()
+                          : Strings.serviceCharge.toUpperCase() +
                               "(" +
                               selectedOrder.serviceChargePercent.toString() +
                               "%)",
@@ -1111,7 +1142,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   new Expanded(
                     flex: 7,
                     child: Text(
-                      Strings.grand_total,
+                      Strings.grandTotal,
                       textAlign: TextAlign.end,
                       style: Styles.darkGray(),
                     ),
@@ -1139,7 +1170,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   new Expanded(
                     flex: 7,
                     child: Text(
-                      Strings.rounding_ammount.toUpperCase(),
+                      Strings.roundingAmmount.toUpperCase(),
                       textAlign: TextAlign.end,
                       style: Styles.darkGray(),
                     ),
@@ -1172,12 +1203,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
           "Refund",
           style: TextStyle(
               color: orderpayment.length > 0 && orderpayment[0].op_status == 1
-                  ? Colors.white
-                  : Colors.white38,
+                  ? StaticColor.colorWhite
+                  : StaticColor.colorwhite38,
               fontSize: 20),
         ),
-        color: Colors.deepOrange,
-        textColor: Colors.white,
+        color: StaticColor.deepOrange,
+        textColor: StaticColor.colorWhite,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
@@ -1191,16 +1222,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
         padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 10),
         onPressed: _onPress,
         child: Text(
-          Strings.cancel_tansaction,
+          Strings.cancelTransaction,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
               color: orderpayment.length > 0 && orderpayment[0].op_status == 1
-                  ? Colors.white
-                  : Colors.white38,
+                  ? StaticColor.colorWhite
+                  : StaticColor.colorwhite38,
               fontSize: 20),
         ),
-        color: Colors.deepOrange,
-        textColor: Colors.white,
+        color: StaticColor.deepOrange,
+        textColor: StaticColor.colorWhite,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
         ),
@@ -1210,7 +1241,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   Widget productList() {
     return Container(
-      //color: Colors.white,
+      //color: StaticColor.colorWhite,
       padding: EdgeInsets.only(left: 20, right: 20, bottom: 0),
       // height: MediaQuery.of(context).size.height / 2,
       child: Column(
@@ -1232,18 +1263,18 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       height: SizeConfig.safeBlockVertical * 8,
                       width: SizeConfig.safeBlockVertical * 9,
                       decoration: new BoxDecoration(
-                        color: Colors.greenAccent,
+                        color: StaticColor.colorGreenAccent,
                       ),
                       child: product.base64 != ""
                           ? CommonUtils.imageFromBase64String(product.base64)
                           : new Image.asset(
-                              Strings.no_imageAsset,
+                              Strings.noImageAsset,
                               fit: BoxFit.cover,
                               gaplessPlayback: true,
                             ),
                     ),
                   ),
-                  SizedBox(width: 15),
+                  CommunFun.horisontalSpace(15),
                   Flexible(
                     child: Row(
                       // crossAxisAlignment: CrossAxisAlignment.center,
@@ -1312,136 +1343,163 @@ class _TransactionsPageState extends State<TransactionsPage> {
     );
   }
 
+  Widget reprintRecipet() {
+    return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+      RaisedButton(
+        padding: EdgeInsets.only(left: 10, right: 10),
+        onPressed: () {
+          if (permissions.contains(Constant.REPRINT_PREVIOS_RECIEPT)) {
+            reprintRecipt();
+          } else {
+            CommonUtils.openPermissionPop(
+                context, Constant.REPRINT_PREVIOS_RECIEPT, () async {
+              reprintRecipt();
+            }, () {});
+          }
+        },
+        child: Text(
+          Strings.printReciept,
+          style: TextStyle(color: StaticColor.deepOrange, fontSize: 15),
+        ),
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+              width: 1,
+              style: BorderStyle.solid,
+              color: StaticColor.deepOrange),
+          borderRadius: BorderRadius.circular(50.0),
+        ),
+      )
+    ]);
+  }
+
+  Widget orderDateText() {
+    return Text(orderDate, style: Styles.whiteMediumBold());
+  }
+
+  Widget grandTotalText() {
+    return Text(
+      selectedOrder.grand_total != null
+          ? selectedOrder.grand_total.toStringAsFixed(2)
+          : "",
+      style: Styles.whiteBold(),
+    );
+  }
+
+  Widget userNameText() {
+    return selectedOrder != null && paymemtUser.username != null
+        ? Text(
+            selectedOrder.invoice_no +
+                " - Processed by " +
+                paymemtUser.username,
+            style: Styles.whiteBoldsmall(),
+          )
+        : SizedBox();
+  }
+
   Widget searchTransationList() {
     if (isFiltering) {
       return Expanded(
-        child: ListView(
-          shrinkWrap: true,
-          physics: BouncingScrollPhysics(),
-          padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
-          children: filterList.map((item) {
-            return Container(
-              padding: EdgeInsets.symmetric(horizontal: 5),
-              decoration: new BoxDecoration(
-                  color: selectedOrder.app_id == item.app_id
-                      ? Colors.grey[200]
-                      : Colors.white),
-              child: ListTile(
-                contentPadding: EdgeInsets.all(0),
-                dense: false,
-                selected: selectedOrder.app_id == item.app_id,
-                onTap: () {
-                  getOrderDetails(item);
-                },
-                title: Row(
-                  children: <Widget>[
-                    Text(
-                        DateFormat('hh:mm aaa')
-                            .format(DateTime.parse(item.order_date)),
-                        style: Styles.greysmall()),
-                    SizedBox(width: 10),
-                    item.order_status == 3
-                        ? Container(
-                            padding: EdgeInsets.all(3),
-                            color: Colors.red,
-                            child: Text(
-                              "Cancel",
-                              style: Styles.whiteBoldsmall(),
-                            ),
-                          )
-                        : SizedBox(),
-                    item.order_status == 5
-                        ? Container(
-                            padding: EdgeInsets.all(3),
-                            color: Colors.red,
-                            child: Text(
-                              "Refunded",
-                              style: Styles.whiteBoldsmall(),
-                            ),
-                          )
-                        : SizedBox()
-                  ],
-                ),
-                subtitle: Text(Strings.invoice + item.invoice_no.toString(),
-                    style: Styles.greysmall()),
-                isThreeLine: true,
-                trailing: Text(
-                  item.grand_total.toStringAsFixed(2),
-                  style: Styles.greysmall(),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      );
+          child: ListView.builder(
+        //+1 for progressbar
+        padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
+        physics: BouncingScrollPhysics(),
+        itemExtent: 65,
+        shrinkWrap: true,
+        itemCount: filterList.length,
+        itemBuilder: (BuildContext context, int index) {
+          return orderitemTile(filterList[index]);
+        },
+      ));
     } else {
       return Expanded(
-        child: ListView(
-          itemExtent: 65,
-          padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
-          shrinkWrap: true,
-          physics: BouncingScrollPhysics(),
-          children: orderLists.map((item) {
-            return Container(
-                height: 100.0,
-                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
-                decoration: new BoxDecoration(
-                    color: selectedOrder.app_id == item.app_id &&
-                            selectedOrder.terminal_id == item.terminal_id
-                        ? Colors.grey[200]
-                        : Colors.white),
-                child: ListTile(
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0),
-                  dense: false,
-                  selected: selectedOrder.app_id == item.app_id,
-                  onTap: () {
-                    getOrderDetails(item);
-                  },
-                  title: Row(
-                    children: <Widget>[
-                      Text(
-                          DateFormat('hh:mm aaa')
-                              .format(DateTime.parse(item.order_date)),
-                          style: Styles.greysmall()),
-                      SizedBox(width: 10),
-                      item.order_status == 3
-                          ? Container(
-                              padding: EdgeInsets.all(3),
-                              color: Colors.red,
-                              child: Text(
-                                "Cancel",
-                                style: Styles.whiteBoldsmall(),
-                              ),
-                            )
-                          : SizedBox(),
-                      item.order_status == 5
-                          ? Container(
-                              padding: EdgeInsets.all(3),
-                              color: Colors.red,
-                              child: Text(
-                                "Refunded",
-                                style: Styles.whiteBoldsmall(),
-                              ),
-                            )
-                          : SizedBox()
-                    ],
-                  ),
-                  subtitle: Text(
-                      Strings.invoice +
-                          item.invoice_no.toString() +
-                          "(" +
-                          item.terminal_id.toString() +
-                          ")",
-                      style: Styles.greysmall()),
-                  isThreeLine: true,
-                  trailing: Text(item.grand_total.toStringAsFixed(2),
-                      style: Styles.greysmall()),
-                ));
-          }).toList(),
-        ),
-      );
+          child: ListView.builder(
+        //+1 for progressbar
+        padding: EdgeInsets.only(left: 5, right: 5, bottom: 100),
+        physics: BouncingScrollPhysics(),
+        itemExtent: 65,
+        shrinkWrap: true,
+        itemCount: orderLists.length + 1,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == orderLists.length) {
+            return _buildProgressIndicator();
+          } else {
+            return orderitemTile(orderLists[index]);
+          }
+        },
+        controller: _scrollController,
+      ));
     }
+  }
+
+  Widget _buildProgressIndicator() {
+    return new Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: new Center(
+        child: new Opacity(
+          opacity: isScreenLoad ? 1.0 : 00,
+          child: new CircularProgressIndicator(),
+        ),
+      ),
+    );
+  }
+
+  Widget orderitemTile(item) {
+    return Container(
+        height: 100.0,
+        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
+        decoration: new BoxDecoration(
+            color: selectedOrder.app_id == item.app_id &&
+                    selectedOrder.terminal_id == item.terminal_id
+                ? StaticColor.lightGrey100
+                : StaticColor.colorWhite),
+        child: ListTile(
+          contentPadding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 5.0),
+          dense: false,
+          selected: selectedOrder.app_id == item.app_id,
+          onTap: () {
+            getOrderDetails(item);
+          },
+          title: Row(
+            children: <Widget>[
+              Text(
+                  DateFormat('hh:mm aaa')
+                      .format(DateTime.parse(item.order_date)),
+                  style: Styles.greysmall()),
+              CommunFun.horisontalSpace(10),
+              item.order_status == 3
+                  ? Container(
+                      padding: EdgeInsets.all(3),
+                      color: StaticColor.colorRed,
+                      child: Text(
+                        "Cancel",
+                        style: Styles.whiteBoldsmall(),
+                      ),
+                    )
+                  : SizedBox(),
+              item.order_status == 5
+                  ? Container(
+                      padding: EdgeInsets.all(3),
+                      color: StaticColor.colorRed,
+                      child: Text(
+                        "Refunded",
+                        style: Styles.whiteBoldsmall(),
+                      ),
+                    )
+                  : SizedBox()
+            ],
+          ),
+          subtitle: Text(
+              Strings.invoice +
+                  item.invoice_no.toString() +
+                  "(" +
+                  item.terminal_id.toString() +
+                  ")",
+              style: Styles.greysmall()),
+          isThreeLine: true,
+          trailing: Text(item.grand_total.toStringAsFixed(2),
+              style: Styles.greysmall()),
+        ));
   }
 }
 
@@ -1464,7 +1522,7 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
           Container(
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: 70,
-            color: Colors.black,
+            color: StaticColor.colorBlack,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -1537,10 +1595,10 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
       },
       child: Text("Confirm",
           style: TextStyle(
-            color: Colors.white,
+            color: StaticColor.colorWhite,
             fontSize: 20,
           )),
-      textColor: Colors.white,
+      textColor: StaticColor.colorWhite,
     );
   }
 
@@ -1556,14 +1614,15 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -1601,18 +1660,20 @@ class AddOtherReasonState extends State<AddOtherReason> {
                   "Reason",
                   style: Styles.communBlack(),
                 ),
-                SizedBox(height: 10),
+                CommunFun.verticalSpace(10),
                 TextField(
                   controller: reasonController,
                   maxLines: 4,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(width: 1, color: Colors.grey),
+                      borderSide:
+                          BorderSide(width: 1, color: StaticColor.colorGrey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(width: 1, color: Colors.grey),
+                      borderSide:
+                          BorderSide(width: 1, color: StaticColor.colorGrey),
                     ),
                   ),
                 ),
@@ -1630,7 +1691,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
         widget.onClose(reasonController.text);
       },
       child: Text("Confirm", style: Styles.orangeSmall()),
-      textColor: Colors.white,
+      textColor: StaticColor.colorWhite,
     );
   }
 
@@ -1640,7 +1701,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
         Navigator.of(context).pop();
       },
       child: Text("Cancel", style: Styles.orangeSmall()),
-      textColor: Colors.white,
+      textColor: StaticColor.colorWhite,
     );
   }
 }

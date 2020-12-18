@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
@@ -16,6 +17,7 @@ import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Terminal.dart';
 import '../models/Shift.dart';
@@ -182,7 +184,6 @@ class _ShiftReportsState extends State<ShiftReports> {
   }
 
   otherReasonPop(amount, title) {
-    print(amount);
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -212,7 +213,7 @@ class _ShiftReportsState extends State<ShiftReports> {
     drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     drawer.localID = await CommunFun.getLocalID();
     drawer.terminalid = int.parse(terminalid);
-    var result = await localAPI.saveInOutDrawerData(drawer);
+    await localAPI.saveInOutDrawerData(drawer);
     getpayInOutAmmount();
   }
 
@@ -220,7 +221,10 @@ class _ShiftReportsState extends State<ShiftReports> {
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     if (shiftid != null) {
       await CommunFun.printShiftReportData(
-          printerreceiptList[0].printerId.toString(), context, shiftid);
+          printerreceiptList[0].printerId.toString(),
+          context,
+          shiftid,
+          permissions);
     }
   }
 
@@ -228,7 +232,6 @@ class _ShiftReportsState extends State<ShiftReports> {
     if (shifittem.appId != null) {
       List<Drawerdata> result =
           await localAPI.getPayinOutammount(shifittem.appId);
-      print(result);
       if (result.length > 0) {
         setState(() {
           drawerData = result;
@@ -300,7 +303,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      Strings.shift_Report,
+                      Strings.shiftReport,
                       style: Styles.whiteBold(),
                     ),
                     SizedBox(
@@ -315,7 +318,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                 ),
                 Text(
                   shifittem.createdAt != null
-                      ? Strings.opened_at +
+                      ? Strings.openedAt +
                           " " +
                           DateFormat('EEE, MMM d yyyy, hh:mm aaa')
                               .format(DateTime.parse(shifittem.createdAt)) +
@@ -414,12 +417,12 @@ class _ShiftReportsState extends State<ShiftReports> {
       onPressed: () {},
       child: Text(
         name,
-        style: TextStyle(color: Colors.deepOrange, fontSize: 20),
+        style: TextStyle(color: StaticColor.deepOrange, fontSize: 20),
       ),
-      color: Colors.white,
+      color: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
-        side:
-            BorderSide(width: 1, style: BorderStyle.solid, color: Colors.white),
+        side: BorderSide(
+            width: 1, style: BorderStyle.solid, color: StaticColor.colorWhite),
         borderRadius: BorderRadius.circular(5.0),
       ),
     );
@@ -436,7 +439,9 @@ class _ShiftReportsState extends State<ShiftReports> {
           margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: _current == index ? Colors.deepOrange : Colors.white,
+            color: _current == index
+                ? StaticColor.deepOrange
+                : StaticColor.colorWhite,
           ),
         );
       }).toList(),
@@ -469,7 +474,7 @@ class _ShiftReportsState extends State<ShiftReports> {
           shrinkWrap: true,
           children: <Widget>[
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Gross Sales",
@@ -482,7 +487,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Refunds",
@@ -495,7 +500,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Discount",
@@ -508,7 +513,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Net Sales",
@@ -521,7 +526,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Tax",
@@ -534,7 +539,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Service Charge",
@@ -547,7 +552,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Total Tenders :",
@@ -571,10 +576,10 @@ class _ShiftReportsState extends State<ShiftReports> {
           shrinkWrap: true,
           children: <Widget>[
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
-                  "Opnening Amount",
+                  "openning Amount",
                   style: Styles.whiteMediumBold(),
                 ),
                 trailing: Text(
@@ -586,7 +591,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Cash Sales",
@@ -599,7 +604,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Cash Deposit",
@@ -612,7 +617,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Cash Refunds",
@@ -625,7 +630,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Cash Rounding",
@@ -638,7 +643,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Pay In",
@@ -651,7 +656,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Pay Out",
@@ -664,7 +669,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
                   "Drawer Expected/Actual",
@@ -677,7 +682,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               ),
             ),
             Container(
-              color: Colors.grey,
+              color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
                   "Over/Short",
@@ -702,7 +707,7 @@ class _ShiftReportsState extends State<ShiftReports> {
             children: orderPaymenttypes.map((pay) {
               var index = orderPaymenttypes.indexOf(pay);
               return Container(
-                color: Colors.grey,
+                color: StaticColor.colorGrey,
                 child: ListTile(
                   title: Text(
                     pay.name,
@@ -721,86 +726,98 @@ class _ShiftReportsState extends State<ShiftReports> {
     return Container(
         width: MediaQuery.of(context).size.width / screenArea,
         child: Center(
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Expanded(
-                  child: RaisedButton(
-                    padding: EdgeInsets.all(20),
-                    onPressed: () {
-                      setState(() {
-                        isInAmmount = true;
-                      });
-                      openpayInOUTPop("Pay In Amount", "5.00");
-                    },
-                    child: Text(
-                      "Pay In",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                      ),
-                    ),
-                    color: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(color: Colors.white, width: 2),
-                    ),
+          child:
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: <
+                  Widget>[
+            Expanded(
+              child: RaisedButton(
+                padding: EdgeInsets.all(20),
+                onPressed: () {
+                  setState(() {
+                    isInAmmount = true;
+                  });
+                  openpayInOUTPop("Pay In Amount", "5.00");
+                },
+                child: Text(
+                  "Pay In",
+                  style: TextStyle(
+                    color: StaticColor.colorWhite,
+                    fontSize: 20,
                   ),
                 ),
-                SizedBox(
-                  width: 10,
+                color: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  side: BorderSide(color: StaticColor.colorWhite, width: 2),
                 ),
-                Expanded(
-                  child: RaisedButton(
-                    padding: EdgeInsets.all(20),
-                    onPressed: () {
-                      setState(() {
-                        isInAmmount = false;
-                      });
-                      openpayInOUTPop("Pay Out Amount", "5.00");
-                    },
-                    child: Text(
-                      "Pay Out",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    color: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(color: Colors.white, width: 2),
-                    ),
-                  ),
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: RaisedButton(
+                padding: EdgeInsets.all(20),
+                onPressed: () {
+                  setState(() {
+                    isInAmmount = false;
+                  });
+                  openpayInOUTPop("Pay Out Amount", "5.00");
+                },
+                child: Text(
+                  "Pay Out",
+                  style: TextStyle(color: StaticColor.colorWhite, fontSize: 20),
                 ),
-                SizedBox(
-                  width: 10,
+                color: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  side: BorderSide(color: StaticColor.colorWhite, width: 2),
                 ),
-                Expanded(
-                  child: RaisedButton(
-                    padding: EdgeInsets.all(20),
-                    onPressed: () {
-                      if (printerreceiptList.length > 0) {
+              ),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: RaisedButton(
+                padding: EdgeInsets.all(20),
+                onPressed: () {
+                  if (printerreceiptList.length > 0) {
+                    if (permissions.contains(Constant.OPEN_DRAWER)) {
+                      printKOT.testReceiptPrint(
+                          printerreceiptList[0].printerIp.toString(),
+                          context,
+                          "",
+                          Strings.openDrawer,
+                          true);
+                    } else {
+                      CommonUtils.openPermissionPop(
+                          context, Constant.OPEN_DRAWER, () async {
                         printKOT.testReceiptPrint(
                             printerreceiptList[0].printerIp.toString(),
                             context,
                             "",
-                            Strings.openDrawer);
-                      } else {
-                        CommunFun.showToast(
-                            context, Strings.printer_not_available);
-                      }
-                    },
-                    child: Text(
-                      "Open Cash Drawer",
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    color: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(color: Colors.white, width: 2),
-                    ),
-                  ),
+                            Strings.openDrawer,
+                            true);
+                      }, () {});
+                    }
+                  } else {
+                    CommunFun.showToast(context, Strings.printerNotAvailable);
+                  }
+                },
+                child: Text(
+                  "Open Cash Drawer",
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: StaticColor.colorWhite, fontSize: 20),
                 ),
-              ]),
+                color: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  side: BorderSide(color: StaticColor.colorWhite, width: 2),
+                ),
+              ),
+            ),
+          ]),
         ));
   }
 
@@ -810,12 +827,12 @@ class _ShiftReportsState extends State<ShiftReports> {
       onPressed: () {},
       child: Text(
         Strings.open,
-        style: TextStyle(color: Colors.deepOrange, fontSize: 15),
+        style: TextStyle(color: StaticColor.deepOrange, fontSize: 15),
       ),
       color: Colors.transparent,
       shape: RoundedRectangleBorder(
         side: BorderSide(
-            width: 1, style: BorderStyle.solid, color: Colors.deepOrange),
+            width: 1, style: BorderStyle.solid, color: StaticColor.deepOrange),
         borderRadius: BorderRadius.circular(50.0),
       ),
     );
@@ -828,13 +845,13 @@ class _ShiftReportsState extends State<ShiftReports> {
         printShiftReport();
       },
       child: Text(
-        Strings.print_reciept,
-        style: TextStyle(color: Colors.deepOrange, fontSize: 15),
+        Strings.printReciept,
+        style: TextStyle(color: StaticColor.deepOrange, fontSize: 15),
       ),
       color: Colors.transparent,
       shape: RoundedRectangleBorder(
         side: BorderSide(
-            width: 1, style: BorderStyle.solid, color: Colors.deepOrange),
+            width: 1, style: BorderStyle.solid, color: StaticColor.deepOrange),
         borderRadius: BorderRadius.circular(50.0),
       ),
     );
@@ -970,11 +987,13 @@ class AddOtherReasonState extends State<AddOtherReason> {
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(width: 1, color: Colors.grey),
+                      borderSide:
+                          BorderSide(width: 1, color: StaticColor.colorGrey),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(width: 1, color: Colors.grey),
+                      borderSide:
+                          BorderSide(width: 1, color: StaticColor.colorGrey),
                     ),
                   ),
                 ),
@@ -1000,15 +1019,13 @@ class AddOtherReasonState extends State<AddOtherReason> {
               widget.type,
               widget.amount);
         } else {
-          CommunFun.showToast(context, Strings.printer_not_available);
+          CommunFun.showToast(context, Strings.printerNotAvailable);
         }
 
         widget.onClose(reasonController.text);
-        print(reasonController.text);
-        print(widget.type);
       },
       child: Text("Confirm", style: Styles.orangeSmall()),
-      textColor: Colors.white,
+      textColor: StaticColor.colorWhite,
     );
   }
 
@@ -1018,7 +1035,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
         Navigator.of(context).pop();
       },
       child: Text("Cancel", style: Styles.orangeSmall()),
-      textColor: Colors.white,
+      textColor: StaticColor.colorWhite,
     );
   }
 }

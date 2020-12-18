@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/CheckInout.dart';
@@ -47,9 +49,23 @@ double taxvalues = 0;
 
 class CommunFun {
   static loginText() {
-    return Text(Strings.login_text,
+    return Text(Strings.loginText,
         style: TextStyle(
-            color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold));
+            color: StaticColor.colorWhite,
+            fontSize: 18,
+            fontWeight: FontWeight.bold));
+  }
+
+  static verticalSpace(double val) {
+    return SizedBox(
+      height: val,
+    );
+  }
+
+  static horisontalSpace(double val) {
+    return SizedBox(
+      width: val,
+    );
   }
 
   static checkConnectivity() async {
@@ -78,10 +94,11 @@ class CommunFun {
       height: 70,
       width: 70,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(100), color: Colors.white),
+          borderRadius: BorderRadius.circular(100),
+          color: StaticColor.colorWhite),
       child: CircularProgressIndicator(
         strokeWidth: 4,
-        backgroundColor: Colors.grey[200],
+        backgroundColor: StaticColor.lightGrey,
       ),
     );
   }
@@ -104,7 +121,7 @@ class CommunFun {
       width: MediaQuery.of(context).size.width,
       alignment: Alignment.centerRight,
       child: Text(
-        Strings.forgot_password,
+        Strings.forgotPassword,
         style: TextStyle(color: Colors.blue, fontSize: 22),
       ),
     );
@@ -120,8 +137,8 @@ class CommunFun {
           bottom: SizeConfig.safeBlockVertical * 3),
       onPressed: _onPress,
       child: Text(text, style: Styles.whiteBold()),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
+      color: StaticColor.deepOrange,
+      textColor: StaticColor.colorWhite,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(50.0),
       ),
@@ -308,7 +325,7 @@ class CommunFun {
         ));
   }
 
-  static opneSyncPop(context) {
+  static openSyncPop(context) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -328,14 +345,14 @@ class CommunFun {
     await SyncAPICalls.sendTerminalLogTable(context);
     await SyncAPICalls.sendShiftTable(context);
     await SyncAPICalls.sendShiftdetails(context);
-    if (isClose) {
-      Navigator.of(context).pop();
+    if (isClose && Navigator.of(context).canPop()) {
+      //Navigator.of(context).pop();
     }
   }
 
   static syncAfterSuccess(context, isOpen) async {
     if (isOpen) {
-      opneSyncPop(context);
+      openSyncPop(context);
     }
     var lastSync = await Preferences.getStringValuesSF(Constant.LastSync_Table);
     if (context == null) {
@@ -1146,7 +1163,7 @@ class CommunFun {
       if (cartval.length > 0) {
         double storeqty = cartval[0].qty;
         if (storeqty < qty) {
-          CommunFun.showToast(context, Strings.stock_not_valilable);
+          CommunFun.showToast(context, Strings.stockNotValilable);
           callback();
           return false;
         }
@@ -1227,7 +1244,7 @@ class CommunFun {
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = await CommunFun.getLocalID();
-    var detailID = await localAPI.addintoCartDetails(cartdetails);
+    await localAPI.addintoCartDetails(cartdetails);
     //print(detailID);
     callback(cartdetails);
   }
@@ -1310,7 +1327,7 @@ class CommunFun {
     }
   }
 
-  static printShiftReportData(printerIP, context, shiftid) async {
+  static printShiftReportData(printerIP, context, shiftid, permissions) async {
     PrintReceipt printKOT = PrintReceipt();
 
     Shift shifittem = new Shift();
@@ -1388,36 +1405,71 @@ class CommunFun {
 
     // terminal Data
     Terminal terminalData = await localAPI.getTerminalDetails(terminalID);
-
-    printKOT.shiftReportPrint(
-        printerIP,
-        context,
-        // Branch data
-        branchData,
-        totalPax,
-        // terminal data
-        terminalData,
-        //Summery Sales data
-        grosssale,
-        refundval,
-        discountval,
-        netsale,
-        taxval,
-        textService,
-        roundingAmount,
-        totalRend,
-        // Drawer Data
-        shifittem,
-        cashSale,
-        cashDeposit,
-        cashRefund,
-        cashRounding,
-        payInAmmount,
-        payOutAmmount,
-        expectedVal,
-        // Paymemts Data
-        orderPayments,
-        paymentMethods,
-        ordersList.length);
+    if (permissions.contains(Constant.PRINT_RECIEPT)) {
+      printKOT.shiftReportPrint(
+          printerIP,
+          context,
+          // Branch data
+          branchData,
+          totalPax,
+          // terminal data
+          terminalData,
+          //Summery Sales data
+          grosssale,
+          refundval,
+          discountval,
+          netsale,
+          taxval,
+          textService,
+          roundingAmount,
+          totalRend,
+          // Drawer Data
+          shifittem,
+          cashSale,
+          cashDeposit,
+          cashRefund,
+          cashRounding,
+          payInAmmount,
+          payOutAmmount,
+          expectedVal,
+          // Paymemts Data
+          orderPayments,
+          paymentMethods,
+          ordersList.length);
+    } else {
+      await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+          () async {
+        printKOT.shiftReportPrint(
+            printerIP,
+            context,
+            // Branch data
+            branchData,
+            totalPax,
+            // terminal data
+            terminalData,
+            //Summery Sales data
+            grosssale,
+            refundval,
+            discountval,
+            netsale,
+            taxval,
+            textService,
+            roundingAmount,
+            totalRend,
+            // Drawer Data
+            shifittem,
+            cashSale,
+            cashDeposit,
+            cashRefund,
+            cashRounding,
+            payInAmmount,
+            payOutAmmount,
+            expectedVal,
+            // Paymemts Data
+            orderPayments,
+            paymentMethods,
+            ordersList.length);
+      }, () {});
+    }
   }
 }

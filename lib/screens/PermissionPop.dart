@@ -7,6 +7,7 @@ import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/components/colors.dart';
 
 class OpenPermissionPop extends StatefulWidget {
   // Opning ammount popup
@@ -25,7 +26,6 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
   @override
   void initState() {
     super.initState();
-    print("perFor" + widget.perFor.toString());
   }
 
   addINPin(val) {
@@ -56,14 +56,14 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
             Navigator.of(context).pop();
             widget.onEnter();
           } else {
-            CommunFun.showToast(context, Strings.permission_msg);
+            CommunFun.showToast(context, Strings.permissionMsg);
           }
         }
       } else {
-        CommunFun.showToast(context, Strings.invalid_pin_msg);
+        CommunFun.showToast(context, Strings.invalidPinMsg);
       }
     } else {
-      CommunFun.showToast(context, Strings.invalid_pin_msg);
+      CommunFun.showToast(context, Strings.invalidPinMsg);
     }
   }
 
@@ -82,13 +82,12 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
               Container(
                 padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 3),
                 height: SizeConfig.safeBlockVertical * 9,
-                color: Colors.black,
+                color: StaticColor.colorBlack,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text(Strings.invalid_pin_msg,
-                        style: Styles.whiteBoldsmall()),
+                    Text(Strings.invalidPinMsg, style: Styles.whiteBoldsmall()),
                   ],
                 ),
               ),
@@ -114,7 +113,8 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               widget.onClose();
@@ -122,7 +122,7 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
             },
             icon: Icon(
               Icons.clear,
-              color: Colors.white,
+              color: StaticColor.colorWhite,
               size: 30,
             ),
           ),
@@ -162,32 +162,32 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
               children: <Widget>[
                 Icon(
                   pinNumber.length >= 1 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
+                  color: StaticColor.deepOrange,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
                 Icon(
                   pinNumber.length >= 2 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
+                  color: StaticColor.deepOrange,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
                 Icon(
                   pinNumber.length >= 3 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
+                  color: StaticColor.deepOrange,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
                 Icon(
                   pinNumber.length >= 4 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
+                  color: StaticColor.deepOrange,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
                 Icon(
                   pinNumber.length >= 5 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
+                  color: StaticColor.deepOrange,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
                 Icon(
                   pinNumber.length >= 6 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
+                  color: StaticColor.deepOrange,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
               ],
@@ -281,13 +281,15 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
     return MaterialButton(
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18.0),
-          side: BorderSide(color: Colors.grey)),
+          side: BorderSide(
+            color: StaticColor.colorGrey,
+          )),
       height: MediaQuery.of(context).size.height / 9,
       // minWidth: MediaQuery.of(context).size.width / 9.9,
       child: Text(number,
           textAlign: TextAlign.center, style: Styles.communBlack()),
-      textColor: Colors.black,
-      color: Colors.grey[100],
+      textColor: StaticColor.colorBlack,
+      color: StaticColor.lightGrey100,
       onPressed: f,
     );
   }
@@ -297,12 +299,12 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
     return MaterialButton(
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18.0),
-          side: BorderSide(color: Colors.grey)),
+          side: BorderSide(color: StaticColor.colorGrey)),
       height: MediaQuery.of(context).size.height / 9,
       // minWidth: MediaQuery.of(context).size.width / 9.9,
       child: Icon(Icons.subdirectory_arrow_left),
-      textColor: Colors.black,
-      color: Colors.grey[100],
+      textColor: StaticColor.colorBlack,
+      color: StaticColor.lightGrey100,
       onPressed: f,
     );
   }
@@ -312,12 +314,14 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
     return MaterialButton(
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18.0),
-          side: BorderSide(color: Colors.grey)),
+          side: BorderSide(
+            color: StaticColor.colorGrey,
+          )),
       height: MediaQuery.of(context).size.height / 9,
       // minWidth: MediaQuery.of(context).size.width / 9.9,
       child: Icon(Icons.clear),
-      textColor: Colors.black,
-      color: Colors.grey[100],
+      textColor: StaticColor.colorBlack,
+      color: StaticColor.lightGrey100,
       onPressed: f,
     );
   }

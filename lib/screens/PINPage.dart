@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
@@ -96,17 +97,17 @@ class _PINPageState extends State<PINPage> {
           setState(() {
             isLoading = false;
           });
-          CommunFun.showToast(context, Strings.invalid_pin_msg);
+          CommunFun.showToast(context, Strings.invalidPinMsg);
         }
       } else {
         if (pinNumber.length >= 6) {
-          CommunFun.showToast(context, Strings.invalid_pin_msg);
+          CommunFun.showToast(context, Strings.invalidPinMsg);
         } else {
-          CommunFun.showToast(context, Strings.pin_validation_message);
+          CommunFun.showToast(context, Strings.pinValidationMessage);
         }
       }
     } else {
-      CommunFun.showToast(context, Strings.already_clockin_msg);
+      CommunFun.showToast(context, Strings.alreadyClockinMsg);
     }
   }
 
@@ -132,17 +133,17 @@ class _PINPageState extends State<PINPage> {
         checkIn.status = "OUT";
         checkIn.timeInOut = date.toString();
         checkIn.sync = 0;
-        var result = await localAPI.userCheckInOut(checkIn);
+        await localAPI.userCheckInOut(checkIn);
         clearAfterCheckout();
       } else {
         if (pinNumber.length >= 6) {
-          CommunFun.showToast(context, Strings.invalid_pin_msg);
+          CommunFun.showToast(context, Strings.invalidPinMsg);
         } else {
-          CommunFun.showToast(context, Strings.pin_validation_message);
+          CommunFun.showToast(context, Strings.pinValidationMessage);
         }
       }
     } else {
-      CommunFun.showToast(context, Strings.already_clockout_msg);
+      CommunFun.showToast(context, Strings.alreadyClockoutMsg);
     }
   }
 
@@ -184,7 +185,7 @@ class _PINPageState extends State<PINPage> {
                     Container(
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(30.0),
-                          color: Colors.white),
+                          color: StaticColor.colorWhite),
                       width: MediaQuery.of(context).size.width / 1.2,
                       height: MediaQuery.of(context).size.height / 1.2,
                       child: Table(
@@ -193,7 +194,7 @@ class _PINPageState extends State<PINPage> {
                         border: TableBorder(
                             horizontalInside: BorderSide(
                                 width: 1,
-                                color: Colors.grey,
+                                color: StaticColor.colorGrey,
                                 style: BorderStyle.solid)),
                         columnWidths: {
                           0: FractionColumnWidth(.2),
@@ -214,7 +215,7 @@ class _PINPageState extends State<PINPage> {
             ),
           ),
           isLoading: isLoading,
-          color: Colors.black87,
+          color: StaticColor.colorLightBlack,
           progressIndicator: CommunFun.overLayLoader()),
       onWillPop: _willPopCallback,
     );
@@ -225,7 +226,7 @@ class _PINPageState extends State<PINPage> {
       // width: MediaQuery.of(context).size.width / 2.9,
       height: MediaQuery.of(context).size.height / 1.2,
       decoration: BoxDecoration(
-        color: Colors.grey,
+        color: StaticColor.colorGrey,
         borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(30), topLeft: Radius.circular(30)),
         // image: DecorationImage(
@@ -238,7 +239,7 @@ class _PINPageState extends State<PINPage> {
             // login logo
             height: SizeConfig.safeBlockVertical * 10,
             child: Image.asset(
-              Strings.asset_headerLogo,
+              Strings.assetHeaderLogo,
               fit: BoxFit.contain,
               gaplessPlayback: true,
             ),
@@ -288,7 +289,7 @@ class _PINPageState extends State<PINPage> {
                 child: Align(
                   alignment: Alignment.center,
                   child: Text(
-                    Strings.pin_Number,
+                    Strings.pinNumber,
                     style: Styles.communBlack(),
                   ),
                 ),
@@ -304,7 +305,7 @@ class _PINPageState extends State<PINPage> {
                           },
                           icon: Icon(
                             Icons.close,
-                            color: Colors.black,
+                            color: StaticColor.colorBlack,
                             size: SizeConfig.safeBlockVertical * 7,
                           )),
                     )
@@ -325,32 +326,32 @@ class _PINPageState extends State<PINPage> {
               children: <Widget>[
                 Icon(
                   pinNumber.length >= 1 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
+                  color: StaticColor.deepOrange,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
                 Icon(
                   pinNumber.length >= 2 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
+                  color: StaticColor.deepOrange,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
                 Icon(
                   pinNumber.length >= 3 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
+                  color: StaticColor.deepOrange,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
                 Icon(
                   pinNumber.length >= 4 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
+                  color: StaticColor.deepOrange,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
                 Icon(
                   pinNumber.length >= 5 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
+                  color: StaticColor.deepOrange,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
                 Icon(
                   pinNumber.length >= 6 ? Icons.lens : Icons.panorama_fish_eye,
-                  color: Colors.deepOrange,
+                  color: StaticColor.deepOrange,
                   size: SizeConfig.safeBlockVertical * 5,
                 ),
               ],
@@ -455,13 +456,13 @@ class _PINPageState extends State<PINPage> {
     return MaterialButton(
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18.0),
-          side: BorderSide(color: Colors.grey)),
+          side: BorderSide(color: StaticColor.colorGrey)),
       height: MediaQuery.of(context).size.height / 9,
       // minWidth: MediaQuery.of(context).size.width / 9.9,
       child: Text(number,
           textAlign: TextAlign.center, style: Styles.communBlack()),
-      textColor: Colors.black,
-      color: Colors.grey[100],
+      textColor: StaticColor.colorBlack,
+      color: StaticColor.lightGrey100,
       onPressed: f,
     );
   }
@@ -472,13 +473,15 @@ class _PINPageState extends State<PINPage> {
       padding: EdgeInsets.all(0),
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18.0),
-          side: BorderSide(color: Colors.grey)),
+          side: BorderSide(
+            color: StaticColor.colorGrey,
+          )),
       height: MediaQuery.of(context).size.height / 8.7,
       // minWidth: MediaQuery.of(context).size.width / 9.9,
       child: Text(number,
           textAlign: TextAlign.center, style: Styles.blackBoldsmall()),
-      textColor: Colors.black,
-      color: Colors.grey[100],
+      textColor: StaticColor.colorBlack,
+      color: StaticColor.lightGrey100,
       onPressed: f,
     );
   }
