@@ -21,7 +21,6 @@ class Strings {
   static String qty = "QTY";
   static String amount = "Amount";
   static String discount = "Discount";
-
   static String service_charge = "Service Charge";
   static String tax = "TAX";
   static String grand_total = "GRAND TOTAL";
@@ -104,7 +103,7 @@ class Strings {
   static String assetsBG = "assets/bg.jpg";
   static String no_imageAsset = 'assets/no_image.png';
   static String enter = "E\nn\nt\ne\nr";
-  static String invalid_pin_msg = "Invalid PIN.";
+  static String invalid_pin_msg = "Authorization Required";
   static String clear = "Clear";
   static String store_Validation_message =
       "selected qty is not available in store";
@@ -195,8 +194,9 @@ class Strings {
   static String scan = "Scan";
   static String list = "List";
   static String table_pax_msg = "Please enter pax minimum table capcity.";
-  static String cancle_order_msg = "Are you want sure cancel this table order?";
-  static String change_table_msg = "Are you want sure to change your table?";
+  static String cancle_order_msg =
+      "Are you want to sure cancel this table order?";
+  static String change_table_msg = "Are you want to sure change your table?";
   static String table_not_avalilable = "Table not available for merge.";
   static String table_already_merged = "Table already merged with other table.";
   static String table_already_occupied = "Table already occupied";

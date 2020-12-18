@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/commanutils.dart';
+import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/Printer.dart';
-import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/Terminal.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/models/Branch.dart';
-import 'package:mcncashier/helpers/LocalAPI/Branch.dart';
 
 List<Printer> printerreceiptList = new List<Printer>();
 
 class PayInOutDailog extends StatefulWidget {
-  PayInOutDailog({Key key, this.title, this.ammount, this.onClose})
+  PayInOutDailog({Key key, this.title, this.ammount, this.isIn, this.onClose})
       : super(key: key);
   Function onClose;
   final title;
   final ammount;
+  final isIn;
   @override
   PayInOutDailogstate createState() => PayInOutDailogstate();
 }
@@ -27,13 +29,12 @@ class PayInOutDailog extends StatefulWidget {
 class PayInOutDailogstate extends State<PayInOutDailog> {
   DatabaseHelper databaseHelper = DatabaseHelper();
   LocalAPI localAPI = LocalAPI();
-  PrinterList printerAPI = new PrinterList();
   PrintReceipt printKOT = PrintReceipt();
   double ammount = 0.00;
-  BranchList branchAPI = new BranchList();
   Terminal terminal;
   Branch branchData;
   var selectedreason;
+  var permissions = "";
   List<String> reasonList = [
     "Add Change",
     "Deposit",
@@ -47,6 +48,14 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
     // setState(() {
     //   ammount = widget.ammount;
     // });
+    setPermissons();
+  }
+
+  setPermissons() async {
+    var permission = await CommunFun.getPemission();
+    setState(() {
+      permissions = permission;
+    });
   }
 
   openAmmountPop() {
@@ -72,7 +81,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
 
   getbranch() async {
     var branchid = await CommunFun.getbranchId();
-    var branch = await branchAPI.getbranchData(branchid);
+    var branch = await localAPI.getbranchData(branchid);
     setState(() {
       branchData = branch;
     });
@@ -80,8 +89,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
   }
 
   getAllPrinter() async {
-    List<Printer> printerDraft =
-        await printerAPI.getAllPrinterList(context, "0");
+    List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
     var terminalid = await CommunFun.getTeminalKey();
     Terminal terminalData = await localAPI.getTerminalDetails(terminalid);
 
@@ -193,7 +201,16 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
           Text(widget.title, style: Styles.drawerText()),
           GestureDetector(
               onTap: () {
-                openAmmountPop();
+                if (widget.isIn && permissions.contains(Constant.CASH_IN) ||
+                    !widget.isIn && permissions.contains(Constant.CASH_OUT)) {
+                  openAmmountPop();
+                } else {
+                  CommonUtils.openPermissionPop(context,
+                      widget.isIn ? Constant.CASH_IN : Constant.CASH_OUT,
+                      () async {
+                    openAmmountPop();
+                  }, () {});
+                }
               },
               child: Text(ammount.toStringAsFixed(2),
                   style: Styles.blackBoldLarge())),

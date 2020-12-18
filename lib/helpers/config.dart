@@ -4,9 +4,11 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/app/app_config.dart';
 
 class Configrations {
-  //static String base_URL = "http://mcnpos.dailybills.in/public/api/v1/en/";
+  // static String base_URL =
+  //     "http://192.168.1.39/laravel-admin-panel/api/v1/en/"; // local
+  //static String base_URL = "https://mcnpos.com.my/api/v1/en/"; // live
   static String base_URL =
-      "https://staging.mcnpos.com.my/api/v1/en/"; //Config.SERVER_URL
+      "https://staging.mcnpos.com.my/api/v1/en/"; // staging
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String config = "configs";
@@ -96,7 +98,6 @@ class Configrations {
       "rac-box-liquor-inventory-datatable";
   static String update_customer_liquor_inventory_data =
       "update-customer-liquor-inventory-data";
-  static String createShiftdata = "create-shift-detail-data";
   static String order_data = "order_data";
   static String product_details = "product_details";
   static String lastcustomer_id = "last_customer";
@@ -104,4 +105,7 @@ class Configrations {
   static String get_modifires = "get_modifires";
   static String get_user_permission = "get_user_permission";
   static String cancel_order = "cancel_order";
+  static String createShiftdata = "create-shift-data";
+  static String createShiftdetaildata = "create-shift-detail-data";
+  static String create_terminal_log_data = "create-terminal-log-data";
 }

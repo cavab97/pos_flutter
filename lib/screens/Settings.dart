@@ -9,9 +9,6 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/CustomeIcons.dart';
-import 'package:mcncashier/helpers/LocalAPI/CategoriesList.dart';
-import 'package:mcncashier/helpers/LocalAPI/PrinterList.dart';
-import 'package:mcncashier/helpers/Server.dart';
 import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/screens/PrinteTypeDailog.dart';
@@ -31,7 +28,6 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   LocalAPI localAPI = LocalAPI();
-  PrinterList printerAPI = new PrinterList();
   PrintReceipt testPrint = PrintReceipt();
   List<Printer> printerList = new List<Printer>();
   bool isAutoSync = false;
@@ -116,7 +112,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   /*Get all Printer from DB*/
   getAllPrinter() async {
-    List<Printer> printer = await printerAPI.getAllPrinterList(context, "0");
+    List<Printer> printer = await localAPI.getAllPrinter();
     setState(() {
       printerList = printer;
     });
@@ -178,12 +174,12 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   opneqrcodePop() async {
-    var wifiData = await CommunFun.wifiDetails();
+    /* var wifiData = await CommunFun.wifiDetails();
     if (wifiData.ip != null) {
-      await Server.createSetver(wifiData.ip, context);
+      //await Server.createSetver(wifiData.ip, context);
     } else {
       CommunFun.showToast(context, "Error when getting device ip address");
-    }
+    } */
   }
 
   Future scanQRCode() async {
@@ -209,7 +205,7 @@ class _SettingsPageState extends State<SettingsPage> {
       // print(result.rawContent);
       // print(result.format);
       // print(result.formatNote);
-      await checkIPisvalid(result.rawContent);
+      //await checkIPisvalid(result.rawContent);
     } on PlatformException catch (e) {
       print(e);
       var result = ScanResult(
@@ -226,27 +222,6 @@ class _SettingsPageState extends State<SettingsPage> {
       setState(() {
         scanResult = result;
       });
-    }
-  }
-
-  checkIPisvalid(ip) async {
-    var branchid = await CommunFun.getbranchId();
-    CategoriesList category = new CategoriesList();
-    var ipadd = "http://" + ip + ":8080/";
-    await Preferences.setStringToSF(Constant.SERVER_IP, ipadd);
-    await Preferences.setStringToSF(Constant.IS_JOIN_SERVER, "true");
-    try {
-      List<Category> categorys =
-          await category.getCategories(context, branchid);
-
-      if (categorys != null) {
-        await Preferences.setStringToSF(Constant.SERVER_IP, ipadd);
-      }
-    } catch (e) {
-      print(e);
-      CommunFun.showToast(context, "server not found");
-      await Preferences.removeSinglePref(Constant.SERVER_IP);
-      await Preferences.removeSinglePref(Constant.IS_JOIN_SERVER);
     }
   }
 
@@ -267,17 +242,16 @@ class _SettingsPageState extends State<SettingsPage> {
                   TableCell(
                     // Part 1 white
                     child: Container(
-                      padding: EdgeInsets.only(left: 15),
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
                       color: Colors.white,
                       child: ListView(
                         physics: BouncingScrollPhysics(),
                         shrinkWrap: true,
+                        padding: EdgeInsets.only(left: 20, right: 20),
                         children: <Widget>[
                           ListTile(
-                            contentPadding:
-                                EdgeInsets.only(left: 10, right: 10, top: 20),
+                            contentPadding: EdgeInsets.only(left: 0, top: 20),
                             leading: IconButton(
                               onPressed: () {
                                 Navigator.of(context).pop();

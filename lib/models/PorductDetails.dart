@@ -22,6 +22,7 @@ class ProductDetails {
   String deletedBy;
   String base64;
   String attrCat;
+  int box_pId;
   String modifireName;
 
   ProductDetails(
@@ -47,6 +48,7 @@ class ProductDetails {
       this.deletedBy,
       this.base64,
       this.attrCat,
+      this.box_pId,
       this.modifireName});
 
   ProductDetails.fromJson(Map<String, dynamic> json) {

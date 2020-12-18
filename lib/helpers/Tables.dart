@@ -450,9 +450,12 @@ class CreateTables {
         "voucher_history_id INTEGER PRIMARY KEY," +
         "uuid TEXT," +
         "voucher_id INTEGER," +
+        "terminal_id INTEGER," +
         "order_id INTEGER," +
+        "app_id INTEGER," +
         "app_order_id INTEGER," +
         "user_id INTEGER," +
+        "server_id INTEGER," +
         "amount REAL," +
         "created_at TEXT" +
         ")");
@@ -510,6 +513,7 @@ class CreateTables {
         "order_item_count INTEGER," +
         "order_date TEXT," +
         "server_id INTEGER," +
+        "isSync NUMERIC," +
         "order_by INTEGER," +
         "updated_at TEXT," +
         "updated_by INTEGER" +
@@ -525,6 +529,7 @@ class CreateTables {
         "branch_id INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
+        "server_id INTEGER," +
         "product_id INTEGER," +
         "product_price REAL," +
         "product_old_price INTEGER," +
@@ -532,6 +537,7 @@ class CreateTables {
         "product_detail TEXT," +
         "issetMeal NUMERIC," +
         "has_rac_managemant NUMERIC," +
+        "isSync NUMERIC," +
         "setmeal_product_detail TEXT," +
         "category_id INTEGER," +
         "detail_amount REAL," +
@@ -553,12 +559,14 @@ class CreateTables {
         "detail_app_id INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
+        "server_id INTEGER," +
         "product_id INTEGER," +
         "modifier_id INTEGER," +
         "om_amount INTEGER," +
         "om_status INTEGER," +
         "om_datetime TEXT," +
         "om_by INTEGER," +
+        "isSync NUMERIC," +
         "updated_at TEXT," +
         "updated_by INTEGER" +
         ")");
@@ -572,6 +580,7 @@ class CreateTables {
         "detail_app_id INTEGER," +
         "terminal_id INTEGER," +
         "app_id INTEGER," +
+        "server_id INTEGER," +
         "product_id INTEGER," +
         "attribute_id INTEGER," +
         "attr_price INTEGER," +
@@ -579,6 +588,7 @@ class CreateTables {
         "oa_status INTEGER," +
         "oa_datetime TEXT," +
         "oa_by INTEGER," +
+        "isSync NUMERIC," +
         "updated_at TEXT," +
         "updated_by INTEGER" +
         ")");
@@ -591,6 +601,7 @@ class CreateTables {
         "order_app_id INTEGER," +
         "branch_id  INTEGER," +
         "terminal_id INTEGER," +
+        "server_id INTEGER," +
         "app_id INTEGER," +
         "is_split NUMERIC," +
         "remark TEXT," +
@@ -605,6 +616,7 @@ class CreateTables {
         "op_status INTEGER," + // 1 New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
         "op_datetime TEXT," +
         "op_by INTEGER," +
+        "isSync NUMERIC," +
         "updated_at TEXT," +
         "updated_by INTEGER" +
         ")");
@@ -621,6 +633,7 @@ class CreateTables {
         "created_at TEXT," +
         "updated_at TEXT," +
         "server_id INTEGER," +
+        "isSync NUMERIC," +
         "terminal_id INTEGER" +
         ")");
 
@@ -731,6 +744,7 @@ class CreateTables {
         'name_2 TEXT,' +
         'product_price REAL,' +
         'product_net_price REAL,' +
+        'product_detail_amount REAL,' +
         'product_qty REAL,' +
         'tax_id INTEGER,' +
         'tax_value REAL,' + //varchar
@@ -822,9 +836,10 @@ class CreateTables {
         "id INTEGER PRIMARY KEY AUTOINCREMENT," +
         "uuid INTEGER," +
         "terminal_id INTEGER," +
+        "isSync NUMERIC," +
         "branch_id INTEGER," +
         "module_name TEXT," +
-        "discription TEXT," +
+        "description TEXT," +
         "activity_date TEXT," +
         "activity_time TEXT," +
         "table_name TEXT," +

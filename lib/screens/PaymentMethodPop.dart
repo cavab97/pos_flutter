@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/components/styles.dart';
-import 'package:mcncashier/helpers/LocalAPI/PaymentList.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
@@ -36,7 +35,6 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   final _formKey = GlobalKey<FormState>();
   final _formKey1 = GlobalKey<FormState>();
   LocalAPI localAPI = LocalAPI();
-  PaymentList paymentAPI = new PaymentList();
   bool isLoading = false;
   var errorMSG = "";
   var newAmmount;
@@ -62,7 +60,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   }
 
   getPaymentMethods() async {
-    var result = await paymentAPI.getPaymentMethods();
+    var result = await localAPI.getPaymentMethods();
     List<Payments> mainPaymentList =
         result.where((i) => i.isParent == 0).toList();
 
@@ -241,34 +239,34 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     });
   }
 
-  splitPayment() {
-    setState(() {
-      isSpliting = true;
-      ispaymented = false;
-    });
+  // splitPayment() {
+  //   setState(() {
+  //     isSpliting = true;
+  //     ispaymented = false;
+  //   });
 
-    showDialog(
-        // Opning Ammount Popup
-        context: context,
-        builder: (BuildContext context) {
-          return OpeningAmmountPage(
-              ammountext: newAmmount.toString(),
-              onEnter: (ammount) {
-                double newap = splitedPayment + double.parse(ammount);
-                setState(() {
-                  splitedPayment = newap;
-                  updatedAmmount = double.parse(ammount);
-                });
-                OrderPayment payment = new OrderPayment();
-                payment.op_amount =
-                    ammount != null ? double.parse(ammount) : newAmmount;
-                splitpaymentList.add(payment);
-                setState(() {
-                  splitpaymentList = splitpaymentList;
-                });
-              });
-        });
-  }
+  //   showDialog(
+  //       // Opning Ammount Popup
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return OpeningAmmountPage(
+  //             ammountext: newAmmount.toString(),
+  //             onEnter: (ammount) {
+  //               double newap = splitedPayment + double.parse(ammount);
+  //               setState(() {
+  //                 splitedPayment = newap;
+  //                 updatedAmmount = double.parse(ammount);
+  //               });
+  //               OrderPayment payment = new OrderPayment();
+  //               payment.op_amount =
+  //                   ammount != null ? double.parse(ammount) : newAmmount;
+  //               splitpaymentList.add(payment);
+  //               setState(() {
+  //                 splitpaymentList = splitpaymentList;
+  //               });
+  //             });
+  //       });
+  // }
 
   @override
   Widget build(BuildContext context) {

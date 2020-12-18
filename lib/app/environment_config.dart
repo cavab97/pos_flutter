@@ -7,7 +7,7 @@ class Config {
   static Map<String, dynamic> localConstants = {
     WHERE_AM_I: "local",
     //backend
-    SERVER_URL: "c",
+    SERVER_URL: "http://localhost/pos/api/v1/en/",
     //SERVER_ACCESS_TOKEN: "lkriekxqo1w04rsxugfvijwcya3lth59"
   };
 

@@ -20,15 +20,20 @@ class APICalls {
           headers: headers,
           body: params,
         );
-        var data = json.decode(response.body);
-        return data;
+        if (response.statusCode == 500) {
+          print('code error in laravel, check log in laravel');
+          return [];
+        } else {
+          var data = json.decode(response.body);
+          return data;
+        }
       } else {
         CommunFun.showToast(context, Strings.internet_connection_lost);
       }
     } catch (e) {
       print(e);
-      CommunFun.showToast(context, e.message.toString());
-      //return null;
+      //CommunFun.showToast(context, e.message.toString());
+      return [];
     }
   }
 }

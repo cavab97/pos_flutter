@@ -24,8 +24,6 @@ Future<dynamic> login(dynamic user) async {
       headers: headers,
       body: json.encode(params),
     );
-    print(url);
-    print(response.body);
     var data = json.decode(response.body);
     await SyncAPICalls.logActivity(
         "Login", "login-user", "user", user.terminalId);

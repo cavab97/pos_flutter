@@ -2,9 +2,10 @@ class TerminalLog {
   int id;
   String uuid;
   int terminal_id;
+  int isSync;
   int branch_id;
   String module_name;
-  String discription;
+  String description;
   String activity_date;
   String activity_time;
   String table_name;
@@ -17,9 +18,10 @@ class TerminalLog {
     this.id,
     this.uuid,
     this.terminal_id,
+    this.isSync,
     this.branch_id,
     this.module_name,
-    this.discription,
+    this.description,
     this.activity_date,
     this.activity_time,
     this.table_name,
@@ -33,13 +35,14 @@ class TerminalLog {
     id = json["id"];
     uuid = json["uuid"];
     terminal_id = json["terminal_id"];
+    isSync = json["isSync"];
     branch_id = json["branch_id"];
     module_name = json["module_name"];
-    discription = json["discription"];
+    description = json["description"];
     activity_date = json["activity_date"];
     activity_time = json["activity_time"];
     table_name = json["table_name"];
-    entity_id = json["table_name"];
+    entity_id = json["entity_id"];
     status = json["status"];
     updated_at = json["updated_at"];
     updated_by = json["updated_by"];
@@ -50,9 +53,10 @@ class TerminalLog {
     data["id"] = this.id;
     data["uuid"] = this.uuid;
     data["terminal_id"] = this.terminal_id;
+    data["isSync"] = this.isSync;
     data["branch_id"] = this.branch_id;
     data["module_name"] = this.module_name;
-    data["discription"] = this.discription;
+    data["description"] = this.description;
     data["activity_date"] = this.activity_date;
     data["activity_time"] = this.activity_time;
     data["table_name"] = this.table_name;

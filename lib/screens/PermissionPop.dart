@@ -25,6 +25,7 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
   @override
   void initState() {
     super.initState();
+    print("perFor" + widget.perFor.toString());
   }
 
   addINPin(val) {
@@ -48,9 +49,8 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
       List<User> checkUserExit = await localAPI.checkUserExit(pinNumber);
       if (checkUserExit.length != 0) {
         List<PosPermission> permissions =
-            await branchapi.getUserPermissions(checkUserExit[0].id);
+            await localAPI.getUserPermissions(checkUserExit[0].id);
         if (permissions.length > 0) {
-          print(permissions[0].posPermissionName);
           if (permissions[0].posPermissionName != null &&
               permissions[0].posPermissionName.contains(widget.perFor)) {
             Navigator.of(context).pop();
@@ -102,8 +102,8 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
 
   Widget closeButton(context) {
     return Positioned(
-      top: -30,
-      right: -20,
+      top: 0,
+      right: 0,
       child: GestureDetector(
         onTap: () {
           widget.onClose();

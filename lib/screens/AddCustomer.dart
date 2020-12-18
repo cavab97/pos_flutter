@@ -3,7 +3,6 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
-import 'package:mcncashier/helpers/LocalAPI/CustomerList.dart';
 import 'package:mcncashier/models/Citys.dart';
 import 'package:mcncashier/models/Countrys.dart';
 import 'package:mcncashier/models/Customer.dart';
@@ -31,7 +30,6 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   TextEditingController addressLine1_controller = new TextEditingController();
   TextEditingController postcode_controller = new TextEditingController();
   LocalAPI localAPI = LocalAPI();
-  CustomersList customersList = new CustomersList();
   final _formKey = GlobalKey<FormState>();
   List<Countrys> countrys = [];
   List<States> states = [];
@@ -52,54 +50,44 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   }
 
   getaddresFileds() async {
-    dynamic customerData = await customersList.getCustomerAddressList();
-    setState(() {
-      countrys =
-          customerData["Country"].length > 0 ? customerData["Country"] : [];
-      states = customerData["State"].length > 0 ? customerData["State"] : [];
-      citys = customerData["City"].length > 0 ? customerData["City"] : [];
-      filterstates = states;
-      filtercitys = citys;
-    });
-
-    // getCountrysList();
-    // getStatesList();
-    // getCitysList();
+    getCountrysList();
+    getStatesList();
+    getCitysList();
   }
 
-  // getCountrysList() async {
-  //   List<Countrys> country = await localAPI.getCountrysList();
-  //   if (country.length > 0) {
-  //     setState(() {
-  //       countrys = country;
-  //     });
-  //   }
-  // }
+  getCountrysList() async {
+    List<Countrys> country = await localAPI.getCountrysList();
+    if (country.length > 0) {
+      setState(() {
+        countrys = country;
+      });
+    }
+  }
 
-  // getStatesList() async {
-  //   List<States> state = await localAPI.getStatesList();
-  //   if (state.length > 0) {
-  //     setState(() {
-  //       states = state;
-  //       filterstates = state;
-  //     });
-  //   }
-  // }
+  getStatesList() async {
+    List<States> state = await localAPI.getStatesList();
+    if (state.length > 0) {
+      setState(() {
+        states = state;
+        filterstates = state;
+      });
+    }
+  }
 
-  // getCitysList() async {
-  //   List<Citys> city = await customersList.getCitysList();
-  //   if (city.length > 0) {
-  //     setState(() {
-  //       citys = city;
-  //       filtercitys = city;
-  //     });
-  //   }
-  // }
+  getCitysList() async {
+    List<Citys> city = await localAPI.getCitysList();
+    if (city.length > 0) {
+      setState(() {
+        citys = city;
+        filtercitys = city;
+      });
+    }
+  }
 
   filterState() async {
     if (selectedCountry != null) {
       var list = states.where((x) => x.countryId == selectedCountry).toList();
-    
+
       setState(() {
         filterstates = list;
         filtercitys = [];
@@ -115,7 +103,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   filterCity() {
     if (selectedState != null) {
       var list = citys.where((x) => x.stateId == selectedState).toList();
-    
+
       setState(() {
         filtercitys = list;
         selectedCity = filtercitys.length > 0 ? filtercitys[0].cityId : null;
@@ -156,7 +144,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
       var terminalkey = await CommunFun.getTeminalKey();
       Customer customer = new Customer();
       User userdata = await CommunFun.getuserDetails();
-      int appid = await branchapi.getLastCustomerid(terminalkey);
+      int appid = await localAPI.getLastCustomerid(terminalkey);
       if (appid != 0) {
         customer.appId = appid + 1;
       } else {
@@ -177,7 +165,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
       customer.countryId = selectedCountry != null ? selectedCountry : 0;
       customer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
       customer.createdBy = userdata.id;
-      var result = await customersList.addCustomer(context, customer);
+      var result = await localAPI.addCustomer(customer);
       Navigator.of(context).pop();
       setState(() {
         selectedCityError = "";
@@ -228,8 +216,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     RaisedButton(
-                      padding:
-                          EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
+                      padding: EdgeInsets.only(
+                          left: 10, right: 10, top: 0, bottom: 0),
                       onPressed: () {
                         addCustomer();
                       },

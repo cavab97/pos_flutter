@@ -435,17 +435,23 @@ class PrintReceipt {
       var item = orderdetail[i];
 
       var name = jsonDecode(item.product_detail);
-
+      double price =
+          item.detail_amount != null ? item.detail_amount : item.product_price;
       String nameOfProduct =
           printColumnWitSpace(28, name["name"].toString().trim(), false);
       String qtyOfProduct =
           printColumnWitSpace(4, item.detail_qty.toStringAsFixed(0), true);
       String priceOfProduct = printColumnWitSpace(
-          8, item.product_old_price.toStringAsFixed(2), true);
+          8,
+          (item.product_old_price != null && item.product_old_price > 0
+              ? item.product_old_price.toStringAsFixed(2)
+              : (price / item.detail_qty).toStringAsFixed(2)),
+          true);
       String amountOfProduct =
-          printColumnWitSpace(8, item.product_price.toStringAsFixed(2), true);
+          printColumnWitSpace(8, price.toStringAsFixed(2), true);
 
       ticket.text("$nameOfProduct$qtyOfProduct$priceOfProduct$amountOfProduct",
+          containsChinese: true,
           styles: PosStyles(
               align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
 
@@ -466,7 +472,7 @@ class PrintReceipt {
       }
 
       /*For set meal product*/
-      if (item.issetMeal == 1) {
+      if (item.issetMeal == 1 && item.setmeal_product_detail != null) {
         List<dynamic> setmealproduct = json.decode(item.setmeal_product_detail);
         List<SetMealProduct> setMealProducts = [];
         if (setmealproduct[0] != null) {
@@ -504,7 +510,8 @@ class PrintReceipt {
         for (var a = 0; a < attrList.length; a++) {
           ticket.row([
             PosColumn(
-                text: "  " + attrList[a].name.trim(),
+                text: "  " +
+                    (attrList[a].name != null ? attrList[a].name.trim() : ""),
                 width: 12,
                 containsChinese: true,
                 styles: PosStyles(
@@ -786,7 +793,8 @@ class PrintReceipt {
       List<Payments> paymentMethods,
       String tableName,
       var currency,
-      String customerName) async {
+      String customerName,
+      isper) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
@@ -912,24 +920,6 @@ class PrintReceipt {
     ]);
     ticket.row([
       PosColumn(
-          text: "Pax",
-          width: 4,
-          styles: PosStyles(
-            align: PosAlign.left,
-            fontType: PosFontType.fontA,
-            bold: false,
-          )),
-      PosColumn(
-          text: " : " + pax,
-          width: 8,
-          styles: PosStyles(
-            align: PosAlign.left,
-            fontType: PosFontType.fontA,
-            bold: false,
-          )),
-    ]);
-    ticket.row([
-      PosColumn(
           text: "Terminal",
           width: 4,
           styles: PosStyles(
@@ -964,7 +954,24 @@ class PrintReceipt {
             bold: false,
           )),
     ]);
-
+    ticket.row([
+      PosColumn(
+          text: "Pax",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + pax,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+    ]);
     ticket.setStyles(PosStyles(align: PosAlign.left));
 
     ticket.hr();
@@ -1384,7 +1391,6 @@ class PrintReceipt {
   }
 
   void checkDraftPrint(
-      String pax,
       List taxJson,
       String printerIp,
       BuildContext ctx,
@@ -1397,6 +1403,7 @@ class PrintReceipt {
       double tax,
       Branch branchData,
       String currency,
+      String pax,
       String custName) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
@@ -1423,8 +1430,8 @@ class PrintReceipt {
   ===========================Print Order check list print==================
   ========================================================================*/
 
-  Future<Ticket> CheckListReceipt(String pax, List<MSTCartdetails> cartList,
-      String tableName, Branch branchData, String custName) async {
+  Future<Ticket> CheckListReceipt(List<MSTCartdetails> cartList,
+      String tableName, Branch branchData, String pax, String custName) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
@@ -1467,6 +1474,24 @@ class PrintReceipt {
             align: PosAlign.left,
             fontType: PosFontType.fontA,
             bold: true,
+          )),
+    ]);
+    ticket.row([
+      PosColumn(
+          text: "Pax",
+          width: 4,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
+          )),
+      PosColumn(
+          text: " : " + pax,
+          width: 8,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: false,
           )),
     ]);
     final now = DateTime.now();
@@ -1519,24 +1544,6 @@ class PrintReceipt {
           )),
       PosColumn(
           text: " : " + Strings.terminalName,
-          width: 8,
-          styles: PosStyles(
-            align: PosAlign.left,
-            fontType: PosFontType.fontA,
-            bold: false,
-          )),
-    ]);
-    ticket.row([
-      PosColumn(
-          text: "Pax",
-          width: 4,
-          styles: PosStyles(
-            align: PosAlign.left,
-            fontType: PosFontType.fontA,
-            bold: false,
-          )),
-      PosColumn(
-          text: " : " + pax,
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -1708,18 +1715,18 @@ class PrintReceipt {
   }
 
   void checkListReceiptPrint(
-      String pax,
       String printerIp,
       BuildContext ctx,
       List<MSTCartdetails> cartList,
       String tableName,
       Branch branchData,
+      String pax,
       String custName) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
-        await CheckListReceipt(pax, cartList, tableName, branchData, custName));
+        await CheckListReceipt(cartList, tableName, branchData, pax, custName));
 
     CommunFun.showToast(ctx, res.msg);
   }
@@ -1738,6 +1745,7 @@ class PrintReceipt {
       var netsale,
       var taxval,
       var serviceTax,
+      var roundingAmount,
       var totalRend,
       Shift shift,
       var cashSale,
@@ -1748,7 +1756,8 @@ class PrintReceipt {
       var payOutAmmount,
       var expectedVal,
       List<OrderPayment> orderPayments,
-      List<Payments> paymentMethods) async {
+      List<Payments> paymentMethods,
+      var ordersCount) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
@@ -1926,7 +1935,8 @@ class PrintReceipt {
 
     /*For Rounding/Amount Redeemed 48 char*/
     String roundingAmountRedeem = printColumnWitSpace(38, "Rounding", false);
-    String roundingAmountRedeemAmt = printColumnWitSpace(10, "00.00", true);
+    String roundingAmountRedeemAmt =
+        printColumnWitSpace(10, roundingAmount.toStringAsFixed(2), true);
     ticket.text("$roundingAmountRedeem$roundingAmountRedeemAmt",
         styles: PosStyles(
             align: PosAlign.left, fontType: PosFontType.fontA, bold: false));
@@ -2102,7 +2112,7 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: "10",
+          text: ordersCount.toString(),
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
@@ -2120,7 +2130,7 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: (netsale / 10).toStringAsFixed(2),
+          text: (netsale / ordersCount).toStringAsFixed(2),
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
@@ -2154,29 +2164,30 @@ class PrintReceipt {
   }
 
   void shiftReportPrint(
-    String printerIp,
-    BuildContext ctx,
-    Branch branchData,
-    int totalPax,
-    Terminal terminalData,
-    var grosssale,
-    var refundval,
-    var discountval,
-    var netsale,
-    var taxval,
-    var serviceTax,
-    var totalRend,
-    Shift shifittem,
-    var cashSale,
-    var cashDeposit,
-    var cashRefund,
-    var cashRounding,
-    var payInAmmount,
-    var payOutAmmount,
-    var expectedVal,
-    List<OrderPayment> orderPayments,
-    List<Payments> paymentMethods,
-  ) async {
+      String printerIp,
+      BuildContext ctx,
+      Branch branchData,
+      int totalPax,
+      Terminal terminalData,
+      var grosssale,
+      var refundval,
+      var discountval,
+      var netsale,
+      var taxval,
+      var serviceTax,
+      var roundingAmount,
+      var totalRend,
+      Shift shifittem,
+      var cashSale,
+      var cashDeposit,
+      var cashRefund,
+      var cashRounding,
+      var payInAmmount,
+      var payOutAmmount,
+      var expectedVal,
+      List<OrderPayment> orderPayments,
+      List<Payments> paymentMethods,
+      var ordersCount) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
@@ -2191,6 +2202,7 @@ class PrintReceipt {
             netsale,
             taxval,
             serviceTax,
+            roundingAmount,
             totalRend,
             shifittem,
             cashSale,
@@ -2201,7 +2213,8 @@ class PrintReceipt {
             payOutAmmount,
             expectedVal,
             orderPayments,
-            paymentMethods));
+            paymentMethods,
+            ordersCount));
 
     CommunFun.showToast(ctx, res.msg);
   }
@@ -2217,7 +2230,7 @@ class PrintReceipt {
 
     final PosPrintResult res = await printerManager
         .printTicket(await testPrintReceipt(printerName, printerIp, isFor));
-    CommunFun.showToast(ctx, res.msg);
+    await CommunFun.showToast(ctx, res.msg);
   }
 
   Future<Ticket> testPrintReceipt(

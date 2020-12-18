@@ -52,11 +52,10 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
         setState(() {
           isLoading = true;
         });
-        terminal.terminalKey = terminalKey.text;
+        terminal.terminalKey = terminalKey.text.trim();
         terminal.deviceid = deviceinfo["deviceId"];
         terminal.terDeviceToken = deviceinfo["deviceToken"];
         await repo.sendTerminalKey(terminal).then((value) async {
-          print(value);
           if (value != null && value["status"] == Constant.STATUS200) {
             Preferences.setStringToSF(
                 Constant.TERMINAL_KEY, value["terminal_id"].toString());
@@ -173,6 +172,9 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
       ),
       style: Styles.normalBlack(),
       onChanged: onChange,
+      onSubmitted: (value) async {
+        await setTerminalkey();
+      },
     );
   }
 }

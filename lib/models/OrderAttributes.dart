@@ -17,7 +17,8 @@ class OrderAttributes {
   int updated_by;
   int oa_status;
   String name;
-
+  int isSync;
+  int server_id;
   OrderAttributes({
     this.oa_id,
     this.uuid,
@@ -37,6 +38,8 @@ class OrderAttributes {
     this.updated_at,
     this.updated_by,
     this.name,
+    this.isSync,
+    this.server_id,
   });
 
   OrderAttributes.fromJson(Map<String, dynamic> json) {
@@ -60,6 +63,8 @@ class OrderAttributes {
     updated_at = json["updated_at"];
     updated_by = json["updated_by"];
     name = json["name"];
+    isSync = json["isSync"];
+    server_id = json['server_id'];
   }
 
   Map<String, dynamic> toJson() {
@@ -82,6 +87,8 @@ class OrderAttributes {
     data["updated_at"] = this.updated_at;
     data["updated_by"] = this.updated_by;
     data["name"] = this.name;
+    data["isSync"] = this.isSync;
+    data["server_id"] = this.server_id;
     return data;
   }
 }
