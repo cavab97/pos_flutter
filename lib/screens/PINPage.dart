@@ -12,6 +12,7 @@ import 'package:mcncashier/models/CheckInout.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class PINPage extends StatefulWidget {
   // PIN Enter PAGE
@@ -82,17 +83,13 @@ class _PINPageState extends State<PINPage> {
           checkIn.createdAt = date.toString();
           checkIn.sync = 0;
           var result = await localAPI.userCheckInOut(checkIn);
-          // List<Role> rolData = await localAPI.getRoldata(user.role);
-          // if (rolData.length > 0) {
-          //   Role rolda = rolData[0];
-          //   await Preferences.setStringToSF(
-          //       Constant.USER_ROLE, json.encode(rolda));
-          // }
           await Preferences.setStringToSF(
               Constant.LOIGN_USER, json.encode(user));
           await CommunFun.checkUserPermission(user.id);
           await Preferences.setStringToSF(Constant.IS_CHECKIN, "true");
           await Preferences.setStringToSF(Constant.SHIFT_ID, result.toString());
+          await SyncAPICalls.logActivity("Check In",
+              user.name.toString() + " checked In", "user_checkinout", 1);
           await Navigator.pushNamedAndRemoveUntil(context,
               Constant.SelectTableScreen, (Route<dynamic> route) => false,
               arguments: {"isAssign": false});
@@ -140,6 +137,8 @@ class _PINPageState extends State<PINPage> {
         checkIn.timeInOut = date.toString();
         checkIn.sync = 0;
         var result = await localAPI.userCheckInOut(checkIn);
+        await SyncAPICalls.logActivity("Check OUT",
+            user.name.toString() + " checked Out", "user_checkinout", 1);
         clearAfterCheckout();
       } else {
         if (pinNumber.length >= 6) {

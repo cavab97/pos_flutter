@@ -19,6 +19,7 @@ import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class WineStorage extends StatefulWidget {
   // PIN Enter PAGE
@@ -128,6 +129,8 @@ class _WineStorageState extends State<WineStorage>
     var racID = racList[_tabController.index].racId;
     getBoxList(racID);
     getCustomerRedeem(customer);
+    await SyncAPICalls.logActivity(
+        "customer", "Selected customer for wine redeem", "wine storage", 1);
   }
 
   getCustomerRedeem(Customer customer) async {
@@ -175,14 +178,24 @@ class _WineStorageState extends State<WineStorage>
                 return ChangeQtyDailog(
                     type: "cm",
                     qty: bqty,
-                    onClose: (qty, remark) {
+                    onClose: (qty, remark) async {
                       Navigator.of(context).pop();
                       if (permissions.contains(Constant.REDEEM_WINE)) {
                         addtoInventory(box, qty);
                       } else {
+                        await SyncAPICalls.logActivity(
+                            "redeem wine",
+                            "Chasier has no permission for redeem wine",
+                            "wine storage",
+                            1);
                         CommonUtils.openPermissionPop(
                             context, Constant.REDEEM_WINE, () async {
-                          addtoInventory(box, qty);
+                          await SyncAPICalls.logActivity(
+                              "redeem wine",
+                              "Manager have given permission for redeem wine",
+                              "wine storage",
+                              1);
+                          await addtoInventory(box, qty);
                         }, () {});
                       }
                     });
@@ -255,6 +268,8 @@ class _WineStorageState extends State<WineStorage>
         log.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
         log.updatedBy = user.id;
         var lid = await localAPI.insertWineInventoryLog(log);
+        await SyncAPICalls.logActivity(
+            "redeem wine", "Chasier has redeem wine", "wine storage", 1);
         getCustomerRedeem(customer);
         setState(() {
           isLoading = false;
@@ -358,7 +373,8 @@ class _WineStorageState extends State<WineStorage>
       labelPadding: EdgeInsets.all(2),
       indicatorPadding: EdgeInsets.all(2),
       indicator: BoxDecoration(
-          borderRadius: BorderRadius.circular(5), color: StaticColor.deepOrange),
+          borderRadius: BorderRadius.circular(5),
+          color: StaticColor.deepOrange),
       tabs: List<Widget>.generate(racList.length, (int index) {
         return new Tab(
           child: Container(

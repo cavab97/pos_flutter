@@ -12,6 +12,7 @@ import 'package:mcncashier/screens/SelectPrinterDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class SettingsPage extends StatefulWidget {
   // Transactions list
@@ -61,9 +62,13 @@ class _SettingsPageState extends State<SettingsPage> {
     if (issync) {
       await Preferences.setStringToSF(Constant.IS_AUTO_SYNC, issync.toString());
       await CommunFun.checkisAutoSync(context);
+      await SyncAPICalls.logActivity(
+          "Settings", "auto sync Enabled", "setting", 1);
     } else {
       await Preferences.removeSinglePref(Constant.IS_AUTO_SYNC);
-      CommunFun.stopAutoSync();
+      await CommunFun.stopAutoSync();
+      await SyncAPICalls.logActivity(
+          "Settings", "auto sync disabled", "setting", 1);
     }
   }
 
@@ -97,7 +102,6 @@ class _SettingsPageState extends State<SettingsPage> {
   /*Get all Printer from DB*/
   getAllPrinter() async {
     List<Printer> printer = await localAPI.getAllPrinter();
-
     setState(() {
       printerList = printer;
     });

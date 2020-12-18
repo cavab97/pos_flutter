@@ -228,7 +228,7 @@ class PrintReceipt {
   void checkKOTPrint(String printerIp, String tableName, BuildContext ctx,
       List<MSTCartdetails> cartList, String pax, bool isReprint) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter("192.168.0.109", port: 9100);
+    printerManager.selectPrinter(printerIp, port: 9100);
     final PosPrintResult res = await printerManager
         .printTicket(await KOTReceipt(tableName, cartList, pax, isReprint));
 
@@ -819,7 +819,7 @@ class PrintReceipt {
       isFor,
       isper) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter("192.168.0.109", port: 9100);
+    printerManager.selectPrinter(printerIp, port: 9100);
     PosPrintResult res;
     res = await printerManager.printTicket(await Receipt(
         branchData,
@@ -1247,7 +1247,7 @@ class PrintReceipt {
       String pax,
       String custName) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter("192.168.0.109", port: 9100);
+    printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
         await DraftReceipt(
@@ -1564,7 +1564,7 @@ class PrintReceipt {
       String pax,
       String custName) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter("192.168.0.109", port: 9100);
+    printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
         await CheckListReceipt(cartList, tableName, branchData, pax, custName));
@@ -2030,7 +2030,7 @@ class PrintReceipt {
       List<Payments> paymentMethods,
       var ordersCount) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter("192.168.0.109", port: 9100);
+    printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
         await shiftReportReceipt(
@@ -2067,7 +2067,7 @@ class PrintReceipt {
   void testReceiptPrint(String printerIp, BuildContext ctx, String printerName,
       String isFor, bool isper) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
-    printerManager.selectPrinter("192.168.0.109", port: 9100);
+    printerManager.selectPrinter(printerIp, port: 9100);
     //bool isper = await checkPermission(Constant.OPEN_DRAWER);
     PosPrintResult res;
     // if (isper) {

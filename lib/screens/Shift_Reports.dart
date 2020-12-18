@@ -18,6 +18,7 @@ import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class ShiftReports extends StatefulWidget {
   // PIN Enter PAGE

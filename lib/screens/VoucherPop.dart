@@ -13,6 +13,7 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class VoucherPop extends StatefulWidget {
   // Opning ammount popup
@@ -169,6 +170,11 @@ class VoucherPopState extends State<VoucherPop> {
           isadded = true;
           selectedvoucher = vaocher;
           widget.onEnter(selectedvoucher);
+          await SyncAPICalls.logActivity(
+              "add promocode",
+              "Cashier Removed promocode form order",
+              "voucher",
+              vaocher.voucherId);
           Navigator.of(context).pop(); // close Pop
         } else {
           CommunFun.showToast(

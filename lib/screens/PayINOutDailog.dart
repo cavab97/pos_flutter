@@ -7,7 +7,9 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/components/colors.dart';
+
 class PayInOutDailog extends StatefulWidget {
   PayInOutDailog({Key key, this.title, this.ammount, this.isIn, this.onClose})
       : super(key: key);
@@ -98,8 +100,15 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
   Widget addbutton(context) {
     return RaisedButton(
       padding: EdgeInsets.all(2),
-      onPressed: () {
+      onPressed: () async {
         widget.onClose(ammount, selectedreason);
+        if (widget.isIn) {
+          await SyncAPICalls.logActivity(
+              "Pay In", "Added Pay in amount", "drawer", 1);
+        } else {
+          await SyncAPICalls.logActivity(
+              "Pay OUT", "Added Pay Out amount", "drawer", 1);
+        }
       },
       child: Text(
         "Confirm",
@@ -125,7 +134,8 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: StaticColor.colorRed, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
@@ -153,15 +163,22 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         children: <Widget>[
           Text(widget.title, style: Styles.drawerText()),
           GestureDetector(
-              onTap: () {
+              onTap: () async {
                 if (widget.isIn && permissions.contains(Constant.CASH_IN) ||
                     !widget.isIn && permissions.contains(Constant.CASH_OUT)) {
                   openAmmountPop();
                 } else {
+                  await SyncAPICalls.logActivity("cash In",
+                      "Cashier has no permission for cash in/out", "drawer", 1);
                   CommonUtils.openPermissionPop(context,
                       widget.isIn ? Constant.CASH_IN : Constant.CASH_OUT,
                       () async {
-                    openAmmountPop();
+                    await openAmmountPop();
+                    await SyncAPICalls.logActivity(
+                        "cash In",
+                        "Manager given permission for cash in/out",
+                        "drawer",
+                        1);
                   }, () {});
                 }
               },

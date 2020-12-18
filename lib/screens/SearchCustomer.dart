@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
@@ -61,6 +62,8 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
       await Preferences.setStringToSF(
           Constant.CUSTOMER_DATA_SPLIT, json.encode(customer));
     }
+    await SyncAPICalls.logActivity(
+        "customer", "Customer selected", "customer", 1);
     Navigator.of(context).pop();
     widget.onClose();
   }
@@ -145,7 +148,8 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
             width: 50.0,
             height: 50.0,
             decoration: BoxDecoration(
-                color: StaticColor.colorRed, borderRadius: BorderRadius.circular(30.0)),
+                color: StaticColor.colorRed,
+                borderRadius: BorderRadius.circular(30.0)),
             child: Icon(
               Icons.clear,
               color: StaticColor.colorWhite,
@@ -193,7 +197,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
             padding: EdgeInsets.only(left: 15),
             child: Icon(
               Icons.search,
-              color:StaticColor.colorGrey400,
+              color: StaticColor.colorGrey400,
               size: SizeConfig.safeBlockVertical * 5,
             ),
           ),

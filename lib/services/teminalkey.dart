@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:mcncashier/helpers/config.dart';
 import 'package:mcncashier/models/TerminalKey.dart';
 import 'package:http/http.dart' as http;
+import 'package:mcncashier/services/allTablesSync.dart';
 
 Future<dynamic> sendTerminalKey(TemimalKey terminal) async {
   try {
@@ -20,6 +21,8 @@ Future<dynamic> sendTerminalKey(TemimalKey terminal) async {
       body: json.encode(params),
     );
     var data = json.decode(response.body);
+    await SyncAPICalls.logActivity(
+        "Terminal", "verify terminal", "user",1);
     return data;
   } catch (e) {
     print(e);

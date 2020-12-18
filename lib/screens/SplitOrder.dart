@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/commanutils.dart';
@@ -173,14 +173,18 @@ class _SplitBillDialog extends State<SplitBillDialog> {
             left: 18,
             top: 18,
             child: GestureDetector(
-              onTap: () {
+              onTap: () async {
                 if (tempCart.length > 0) {
                   if (permissions.contains(Constant.PAYMENT)) {
                     openPaymentMethod();
                   } else {
-                    CommonUtils.openPermissionPop(context, Constant.PAYMENT,
-                        () async {
-                      openPaymentMethod();
+                    await SyncAPICalls.logActivity("payment",
+                        "Chasier has no permission for payment", "payment", 1);
+                    await CommonUtils.openPermissionPop(
+                        context, Constant.PAYMENT, () async {
+                      await SyncAPICalls.logActivity("payment",
+                          "Manager given permission for payment", "payment", 1);
+                      await openPaymentMethod();
                     }, () {});
                   }
                 } else {
@@ -899,7 +903,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         widget.onSelectedRemove(element);
       });
     }
-
+    await SyncAPICalls.logActivity("split order", "Splited order", "order", 1);
     await printReceipt(orderid);
   }
 
@@ -978,134 +982,23 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
 
     if (widget.printerIP.isNotEmpty) {
-      if (permissions.contains(Constant.PRINT_BILL)) {
-        if (permissions.contains(Constant.OPEN_DRAWER)) {
-          _printReceipt.checkReceiptPrint(
-              widget.printerIP,
-              context,
-              branchAddress,
-              taxJson,
-              orderitem,
-              attributes,
-              modifires,
-              order,
-              orderpaymentdata,
-              paymentMethod,
-              "", // Add table name here
-              "", // Add Currency here
-              widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
-              false,
-              true);
-          clearSelected();
-        } else {
-          await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
-              () async {
-            _printReceipt.checkReceiptPrint(
-                widget.printerIP,
-                context,
-                branchAddress,
-                taxJson,
-                orderitem,
-                attributes,
-                modifires,
-                order,
-                orderpaymentdata,
-                paymentMethod,
-                "", // Add table name here
-                "", // Add Currency here
-                widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
-                false,
-                true);
-            clearSelected();
-          }, () async {
-            _printReceipt.checkReceiptPrint(
-                widget.printerIP,
-                context,
-                branchAddress,
-                taxJson,
-                orderitem,
-                attributes,
-                modifires,
-                order,
-                orderpaymentdata,
-                paymentMethod,
-                "", // Add table name here
-                "", // Add Currency here
-                widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
-                false,
-                false);
-            clearSelected();
-          });
-        }
-      } else {
-        await CommonUtils.openPermissionPop(context, Constant.PRINT_BILL,
-            () async {
-          if (permissions.contains(Constant.OPEN_DRAWER)) {
-            _printReceipt.checkReceiptPrint(
-                widget.printerIP,
-                context,
-                branchAddress,
-                taxJson,
-                orderitem,
-                attributes,
-                modifires,
-                order,
-                orderpaymentdata,
-                paymentMethod,
-                "", // Add table name here
-                "", // Add Currency here
-                widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
-                false,
-                true);
-            clearSelected();
-          } else {
-            await CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
-                () async {
-              _printReceipt.checkReceiptPrint(
-                  widget.printerIP,
-                  context,
-                  branchAddress,
-                  taxJson,
-                  orderitem,
-                  attributes,
-                  modifires,
-                  order,
-                  orderpaymentdata,
-                  paymentMethod,
-                  "", // Add table name here
-                  "", // Add Currency here
-                  widget.customer.isEmpty
-                      ? "Walk-in customer"
-                      : widget.customer,
-                  false,
-                  true);
-              clearSelected();
-            }, () async {
-              _printReceipt.checkReceiptPrint(
-                  widget.printerIP,
-                  context,
-                  branchAddress,
-                  taxJson,
-                  orderitem,
-                  attributes,
-                  modifires,
-                  order,
-                  orderpaymentdata,
-                  paymentMethod,
-                  "", // Add table name here
-                  "", // Add Currency here
-                  widget.customer.isEmpty
-                      ? "Walk-in customer"
-                      : widget.customer,
-                  false,
-                  false);
-              clearSelected();
-            });
-          }
-        }, () async {
-          clearSelected();
-        });
-      }
+      _printReceipt.checkReceiptPrint(
+          widget.printerIP,
+          context,
+          branchAddress,
+          taxJson,
+          orderitem,
+          attributes,
+          modifires,
+          order,
+          orderpaymentdata,
+          paymentMethod,
+          "", // Add table name here
+          "", // Add Currency here
+          widget.customer.isEmpty ? "Walk-in customer" : widget.customer,
+          false,
+          true);
+      clearSelected();
     } else {
       CommunFun.showToast(context, Strings.printer_not_available);
     }

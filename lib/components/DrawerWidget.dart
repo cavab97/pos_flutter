@@ -15,6 +15,7 @@ import 'package:mcncashier/screens/CloseShiftPage.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/commanutils.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class DrawerWid extends StatefulWidget {
   DrawerWid({Key key, this.onClose}) : super(key: key);
@@ -107,25 +108,13 @@ class DrawerWidState extends State<DrawerWid> {
         builder: (BuildContext context) {
           return CloseShiftPage(onClose: () {
             Navigator.of(context).pop();
-            if (permissions.contains(Constant.OPEN_DRAWER)) {
-              printKOT.testReceiptPrint(
-                  printerreceiptList[0].printerIp.toString(),
-                  context,
-                  "",
-                  Strings.openDrawer,
-                  true);
-              openOpningAmmountPop(context, Strings.title_closing_amount);
-            } else {
-              CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
-                  () async {
-                printKOT.testReceiptPrint(
-                    printerreceiptList[0].printerIp.toString(),
-                    context,
-                    "",
-                    Strings.openDrawer,
-                    true);
-              }, () {});
-            }
+            printKOT.testReceiptPrint(
+                printerreceiptList[0].printerIp.toString(),
+                context,
+                "",
+                Strings.openDrawer,
+                true);
+            openOpningAmmountPop(context, Strings.title_closing_amount);
           });
         });
   }
@@ -141,24 +130,12 @@ class DrawerWidState extends State<DrawerWid> {
                 sendOpenShft(ammountext);
                 if (isopning == Strings.title_opening_amount) {
                   if (printerreceiptList.length > 0) {
-                    if (permissions.contains(Constant.OPEN_DRAWER)) {
-                      printKOT.testReceiptPrint(
-                          printerreceiptList[0].printerIp.toString(),
-                          context,
-                          "",
-                          Strings.openDrawer,
-                          true);
-                    } else {
-                      CommonUtils.openPermissionPop(
-                          context, Constant.OPEN_DRAWER, () async {
-                        printKOT.testReceiptPrint(
-                            printerreceiptList[0].printerIp.toString(),
-                            context,
-                            "",
-                            Strings.openDrawer,
-                            true);
-                      }, () {});
-                    }
+                    printKOT.testReceiptPrint(
+                        printerreceiptList[0].printerIp.toString(),
+                        context,
+                        "",
+                        Strings.openDrawer,
+                        true);
                   } else {
                     CommunFun.showToast(context, Strings.printer_not_available);
                   }
@@ -217,15 +194,21 @@ class DrawerWidState extends State<DrawerWid> {
         arguments: {"isAssign": false});
   }
 
-  gotoShiftReport() {
+  gotoShiftReport() async {
     if (isShiftOpen) {
       if (permissions.contains(Constant.VIEW_SHIFT)) {
         Navigator.of(context).pop();
         Navigator.pushNamed(context, Constant.ShiftOrders).then(backEvent);
       } else {
-        CommonUtils.openPermissionPop(context, Constant.VIEW_SHIFT, () async {
+        await SyncAPICalls.logActivity(
+            "view shift", "chashier has permission for view shift", "shift", 1);
+        await CommonUtils.openPermissionPop(context, Constant.VIEW_SHIFT,
+            () async {
+          await SyncAPICalls.logActivity("view shift",
+              "manager given permission for view shift", "shift", 1);
           Navigator.of(context).pop();
-          Navigator.pushNamed(context, Constant.ShiftOrders).then(backEvent);
+          await Navigator.pushNamed(context, Constant.ShiftOrders)
+              .then(backEvent);
         }, () {});
       }
     } else {
@@ -238,10 +221,14 @@ class DrawerWidState extends State<DrawerWid> {
       await CommunFun.opneSyncPop(context);
       await CommunFun.syncOrdersANDStore(context, true);
     } else {
+      await SyncAPICalls.logActivity("Sync order tables",
+          "chashier has permission for Sync order tables", "order", 1);
       await CommonUtils.openPermissionPop(context, Constant.SYNC_ORDER,
           () async {
         await CommunFun.opneSyncPop(context);
         await CommunFun.syncOrdersANDStore(context, true);
+        await SyncAPICalls.logActivity("Sync order tables",
+            "Manager given permission for Sync order tables", "order", 1);
       }, () {});
     }
   }
@@ -255,6 +242,8 @@ class DrawerWidState extends State<DrawerWid> {
       await CommunFun.syncOrdersANDStore(context, false);
       await CommunFun.syncAfterSuccess(context, false);
     } else {
+      await SyncAPICalls.logActivity("Sync tables",
+          "chashier has permission for Sync tables", "all tables", 1);
       await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
           () async {
         await Preferences.removeSinglePref(Constant.LastSync_Table);
@@ -262,6 +251,8 @@ class DrawerWidState extends State<DrawerWid> {
         await CommunFun.opneSyncPop(context);
         await CommunFun.syncOrdersANDStore(context, false);
         await CommunFun.syncAfterSuccess(context, false);
+        await SyncAPICalls.logActivity("Sync tables",
+            "Manager given permission for Sync tables", "all tables", 1);
       }, () {});
     }
   }
@@ -334,14 +325,24 @@ class DrawerWidState extends State<DrawerWid> {
               ),
             ),
             ListTile(
-                onTap: () {
+                onTap: () async {
                   if (isShiftOpen) {
                     if (permissions.contains(Constant.CLOSING)) {
                       closeShift(context);
                     } else {
-                      CommonUtils.openPermissionPop(
+                      await SyncAPICalls.logActivity(
+                          "Close store",
+                          "Chasier has No permission for close store",
+                          "shift",
+                          1);
+                      await CommonUtils.openPermissionPop(
                           context, Constant.CLOSING, () async {
-                        closeShift(context);
+                        await closeShift(context);
+                        await SyncAPICalls.logActivity(
+                            "Close store",
+                            "Manager given permission for close store",
+                            "shift",
+                            1);
                       }, () {});
                     }
                   } else {
@@ -349,10 +350,20 @@ class DrawerWidState extends State<DrawerWid> {
                       openOpningAmmountPop(
                           context, Strings.title_opening_amount);
                     } else {
-                      CommonUtils.openPermissionPop(
+                      await SyncAPICalls.logActivity(
+                          "Open store",
+                          "Chasier has No permission for Open store",
+                          "shift",
+                          1);
+                      await CommonUtils.openPermissionPop(
                           context, Constant.OPENING, () async {
-                        openOpningAmmountPop(
+                        await openOpningAmmountPop(
                             context, Strings.title_opening_amount);
+                        await SyncAPICalls.logActivity(
+                            "Open store",
+                            "Manager given permission for Open store",
+                            "shift",
+                            1);
                       }, () {});
                     }
                   }
@@ -365,8 +376,7 @@ class DrawerWidState extends State<DrawerWid> {
                 title: Text(
                     isShiftOpen ? Strings.close_shift : Strings.opne_shift,
                     style: Styles.drawerText())),
-            // permissions.contains(Constant.VIEW_REPORT)
-            //     ?
+
             ListTile(
               onTap: () {
                 gotoShiftReport();
@@ -381,8 +391,7 @@ class DrawerWidState extends State<DrawerWid> {
                 style: Styles.drawerText(),
               ),
             ),
-            //: SizedBox(),,
-            // permissions.contains(Constant.VIEW_ORDER)
+
             ListTile(
                 onTap: () {
                   Navigator.of(context).pop();

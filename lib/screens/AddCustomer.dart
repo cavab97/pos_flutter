@@ -12,6 +12,7 @@ import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class AddCustomerPage extends StatefulWidget {
   AddCustomerPage({Key key}) : super(key: key);
@@ -167,6 +168,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
       customer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
       customer.createdBy = userdata.id;
       var result = await localAPI.addCustomer(customer);
+      await SyncAPICalls.logActivity(
+          "Add customer", "customer added by cashier", "customer", result);
       Navigator.of(context).pop();
       setState(() {
         selectedCityError = "";
