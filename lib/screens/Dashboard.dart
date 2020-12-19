@@ -343,7 +343,8 @@ class _DashboradPageState extends State<DashboradPage>
     });
 
     cart.sub_total = currentSubtotal;
-
+    cart.serviceCharge = currentSubtotal * (cart.serviceChargePercent / 100);
+    cart.grand_total = (cart.sub_total - cart.discount) + cart.tax + (cart.serviceCharge == null ? 0.00 : cart.serviceCharge);
     await localAPI.updateWebCart(cart);
 
     if (this.mounted) {

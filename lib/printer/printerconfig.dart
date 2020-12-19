@@ -739,7 +739,7 @@ class PrintReceipt {
               align: PosAlign.right, fontType: PosFontType.fontA, bold: false)),
       PosColumn(
           text: orderData.rounding_amount.toStringAsFixed(
-              2), //calRounded(total, orderData.grand_total).toStringAsFixed(2),
+              2) + "  ", //calRounded(total, orderData.grand_total).toStringAsFixed(2),
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
@@ -832,9 +832,9 @@ class PrintReceipt {
           )),
       PosColumn(
           text: cashPaymentChange > 0
-              ? "-" + cashPaymentChange.toStringAsFixed(2)
+              ? "-" + cashPaymentChange.toStringAsFixed(2) + "  "
               : cashPaymentChange.toStringAsFixed(
-                  2), //(paymentdaWta.length > 0 ? paymentdata[0].op_amount_change :
+                  2) + "  ", //(paymentdaWta.length > 0 ? paymentdata[0].op_amount_change :
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
