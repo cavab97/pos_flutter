@@ -61,6 +61,7 @@ import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:expandable/expandable.dart';
 
 import '../components/communText.dart';
+import '../components/communText.dart';
 import '../models/ProductStoreInventoryLog.dart';
 import '../models/Product_Store_Inventory.dart';
 import 'package:loading_overlay/loading_overlay.dart';
@@ -3073,11 +3074,11 @@ class _DashboradPageState extends State<DashboradPage>
                       product.hasInventory != 1 ||
                       product.qty > 0.0) ||
                   (product.hasRacManagemant == 1 && product.box_pId != null)) {
-                CommunFun.showToast(
+                /* CommunFun.showToast(
                     context,
                     product.hasRacManagemant != 1
                         ? Strings.outOfStokeMsg
-                        : Strings.outOfBoxMsg);
+                        : Strings.outOfBoxMsg); */
                 //  if (permissions.contains(Constant.ADD_ORDER)) {
                 checkshiftopen(product);
                 // } else {
@@ -3555,10 +3556,11 @@ class _DashboradPageState extends State<DashboradPage>
               if (currentQuantity > 0) {
                 currentProductQuantity = cart.productQty;
                 cart.productQty = currentQuantity.toDouble();
-                cart.productPrice = currentQuantity *
-                    (cart.productNetPrice == null
+                cart.productDetailAmount = currentQuantity * cart.productPrice;
+                print(jsonEncode(cart));
+                    /* (cart.productNetPrice == null
                         ? cart.productDetailAmount
-                        : cart.productNetPrice);
+                        : cart.productNetPrice); */
                 currentQuantity = 0;
                 //_selectedQuantity(0);
               } else if (cart.id == itemSelectedIndex.id) {
