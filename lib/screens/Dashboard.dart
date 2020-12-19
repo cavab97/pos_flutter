@@ -66,6 +66,8 @@ import '../models/ProductStoreInventoryLog.dart';
 import '../models/Product_Store_Inventory.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 
+import '../services/LocalAPIs.dart';
+
 class DashboradPage extends StatefulWidget {
   // main Product list page
   DashboradPage({Key key}) : super(key: key);
@@ -3556,8 +3558,11 @@ class _DashboradPageState extends State<DashboradPage>
               if (currentQuantity > 0) {
                 currentProductQuantity = cart.productQty;
                 cart.productQty = currentQuantity.toDouble();
+                
                 cart.productDetailAmount = currentQuantity * cart.productPrice;
-                print(jsonEncode(cart));
+                localAPI.addintoCartDetails(cart);
+                
+                //print(jsonEncode(cart));
                     /* (cart.productNetPrice == null
                         ? cart.productDetailAmount
                         : cart.productNetPrice); */
