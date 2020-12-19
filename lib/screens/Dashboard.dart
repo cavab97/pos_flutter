@@ -62,6 +62,7 @@ import 'package:expandable/expandable.dart';
 
 import '../components/communText.dart';
 import '../components/communText.dart';
+import '../models/MST_Cart_Details.dart';
 import '../models/ProductStoreInventoryLog.dart';
 import '../models/Product_Store_Inventory.dart';
 import 'package:loading_overlay/loading_overlay.dart';
@@ -321,6 +322,8 @@ class _DashboradPageState extends State<DashboradPage>
 
   countTotals(cartId) async {
     MST_Cart cart = await localAPI.getCartData(cartId);
+    List<MSTCartdetails> cartdetails = await localAPI.getCartItem(cartId);
+    var currentSubtotal = 0.00;
 
     Voucher vaocher;
     if (cart.voucher_id != null && cart.voucher_id != 0) {
@@ -331,6 +334,18 @@ class _DashboradPageState extends State<DashboradPage>
     if (cart.id == null) {
       return;
     }
+
+    cartdetails.forEach((cartdetail) {
+      currentSubtotal += cartdetail.productDetailAmount != null 
+                    && cartdetail.productDetailAmount != 0.00 
+                      ? cartdetail.productDetailAmount 
+                      : cartdetail.productPrice;
+    });
+
+    cart.sub_total = currentSubtotal;
+
+    await localAPI.updateWebCart(cart);
+
     if (this.mounted) {
       setState(() {
         allcartData = cart;
@@ -3561,11 +3576,9 @@ class _DashboradPageState extends State<DashboradPage>
                 
                 cart.productDetailAmount = currentQuantity * cart.productPrice;
                 localAPI.addintoCartDetails(cart);
+                countTotals(cart.cartId);
                 
                 //print(jsonEncode(cart));
-                    /* (cart.productNetPrice == null
-                        ? cart.productDetailAmount
-                        : cart.productNetPrice); */
                 currentQuantity = 0;
                 //_selectedQuantity(0);
               } else if (cart.id == itemSelectedIndex.id) {
