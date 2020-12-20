@@ -1,5 +1,6 @@
 class Strings {
-  static String print15line = "---------------";
+  static String print15line =
+      "------------------------------------------------";
   /*Only for set name */
   static String terminalName = "";
   static String fontFamily = "Roboto";
