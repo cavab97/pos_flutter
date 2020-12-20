@@ -5,6 +5,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/screens/FinalPaymentScreen.dart';
 import 'package:mcncashier/components/commanutils.dart';
@@ -570,6 +571,9 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                       //paidAmount = widget.totalAmount;
                       double currentPaidAmount = double.parse(currentNumber);
 
+    if (seletedPayment.paymentId == null || totalPaymentList[0].op_amount == 0.00) {
+      return CommunFun.showToast(context, Strings.selectPayment);
+    }
                       if (!isPaymented && this.mounted) {
                         setState(() {
                           currentPayment.op_amount = currentPaidAmount;
@@ -586,7 +590,6 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                         });
                       } else {
                         isPaymented = true;
-                        Navigator.of(context).pop();
                         finalPayment();
                       }
                       //widget.onEnter(currentNumber);
@@ -612,6 +615,9 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   finalPayment() async {
     //List<OrderPayment> totalPayment = [];
     double change = paidAmount - widget.totalAmount;
+    if (totalPaymentList[0].op_amount == 0.00) {
+      return CommunFun.showToast(context, Strings.selectPayment);
+    }
     await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -620,7 +626,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
               totalPaid: paidAmount,
               change: change,
               onClose: () {
-                //Navigator.of(context).pop();
+                Navigator.of(context).pop();
                 widget.onClose(totalPaymentList);
               });
         });

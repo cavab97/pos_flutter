@@ -150,6 +150,7 @@ class Strings {
   static String takeAway = "Take Away";
   static String dineIn = "Dine In";
   static String tableMeargedMsg = "Table merged.";
+  static String selectPayment = "Please select a payment option";
   static String rePrintKitchenPrint = "Reprint Kitchen Bill";
   static String pleaseSelectCountry = "Please select country!";
   static String pleaseSelectState = "Please select state!";
