@@ -168,10 +168,10 @@ class DrawerWidState extends State<DrawerWid> {
     shift.status = 1;
     shift.serverId = 0;
     if (shiftid == null) {
-      shift.startAmount = int.parse(ammount);
+      shift.startAmount = double.parse(ammount);
       shift.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     } else {
-      shift.endAmount = int.parse(ammount);
+      shift.endAmount = double.parse(ammount);
       shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
     shift.updatedBy = userdata.id;

@@ -91,7 +91,7 @@ class Strings {
   static String closeShift = "Close Shift";
   static String draftReport = "Draft Report";
   static String checkList = "Check list";
-  static String noImage = "assets/noImage.png";
+
   static String deleteOrder = "Delete Order";
   static String reprintOrder = "Resend to Kitchen";
   static String outOfStoke = "OUT OF STOCK";

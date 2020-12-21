@@ -276,6 +276,7 @@ class SyncAPICalls {
             "service_charge": order.serviceCharge,
             "sub_total_after_discount": order.sub_total_after_discount,
             "rounding_amount": order.rounding_amount,
+            "pax": order.pax,
             "grand_total": order.grand_total,
             "order_source": order.order_source,
             "order_status": order.order_status,
@@ -327,6 +328,7 @@ class SyncAPICalls {
           order.terminal_id = orderdata["terminal_id"];
           order.app_id = orderdata["app_id"];
           order.table_id = orderdata["table_id"];
+          order.pax = orderdata["pax"];
           order.invoice_no = orderdata["invoice_no"];
           order.customer_id = orderdata["customer_id"];
           order.tax_json = orderdata["tax_json"];
@@ -915,8 +917,12 @@ class SyncAPICalls {
         shift.appId = shiftitem['app_id'];
         shift.userId = shiftitem['user_id'];
         shift.branchId = shiftitem['branch_id'];
-        shift.startAmount = shiftitem['start_amount'];
-        shift.endAmount = shiftitem['end_amount'];
+        shift.startAmount = shiftitem['start_amount'] is int
+            ? (shiftitem['start_amount'] as int).toDouble()
+            : shiftitem['start_amount'];
+        shift.endAmount = shiftitem['end_amount'] is int
+            ? (shiftitem['end_amount'] as int).toDouble()
+            : shiftitem['end_amount'];
         shift.status = shiftitem['status'];
         shift.updatedAt = shiftitem['updated_at'];
         shift.updatedBy = shiftitem['updated_by'];

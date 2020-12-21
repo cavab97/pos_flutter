@@ -329,7 +329,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                         child: payment.base64 != ""
                             ? CommonUtils.imageFromBase64String(payment.base64)
                             : new Image.asset(
-                                Strings.noImage,
+                                Strings.noImageAsset,
                                 fit: BoxFit.cover,
                                 gaplessPlayback: true,
                               ),

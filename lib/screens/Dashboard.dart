@@ -1009,10 +1009,10 @@ class _DashboradPageState extends State<DashboradPage>
     shift.status = 1;
     shift.serverId = 0;
     if (shiftid == null) {
-      shift.startAmount = int.parse(ammount);
+      shift.startAmount = double.parse(ammount);
       shift.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     } else {
-      shift.endAmount = int.parse(ammount);
+      shift.endAmount = double.parse(ammount);
       shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
     shift.updatedBy = userdata.id;
@@ -1249,6 +1249,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.order_status = 1;
     order.server_id = 0;
     order.isSync = 0;
+    order.pax = selectedTable.number_of_pax;
     order.order_source = cartData.source;
     order.order_by = userdata.id;
     order.voucher_detail = cartData.voucher_detail;
@@ -1465,6 +1466,7 @@ class _DashboradPageState extends State<DashboradPage>
           orderpayment.op_amount_change = payment[i].op_amount_change;
           orderpayment.op_method_response = '';
           orderpayment.op_status = 1;
+          orderpayment.is_split = 0;
           orderpayment.op_datetime =
               await CommunFun.getCurrentDateTime(DateTime.now());
           orderpayment.op_by = userdata.id;
@@ -1510,6 +1512,7 @@ class _DashboradPageState extends State<DashboradPage>
         orderpayment.op_status = 1;
         orderpayment.isSync = 0;
         orderpayment.server_id = 0;
+        orderpayment.is_split = 0;
         orderpayment.op_datetime =
             await CommunFun.getCurrentDateTime(DateTime.now());
         orderpayment.op_by = userdata.id;
@@ -2093,7 +2096,7 @@ class _DashboradPageState extends State<DashboradPage>
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Text(
-                  categoryFirstRow[index].name.toUpperCase(),
+                  tabsList[index].name.toUpperCase(),
                   style: Styles.whiteBoldsmall(),
                 )),
           );
@@ -2542,7 +2545,7 @@ class _DashboradPageState extends State<DashboradPage>
                           ? CommonUtils.imageFromBase64String(
                               SearchProductList.base64)
                           : new Image.asset(
-                              Strings.noImage,
+                              Strings.noImageAsset,
                               gaplessPlayback: true,
                               fit: BoxFit.cover,
                             ),
@@ -2879,7 +2882,7 @@ class _DashboradPageState extends State<DashboradPage>
                         child: meal.base64 != ""
                             ? CommonUtils.imageFromBase64String(meal.base64)
                             : new Image.asset(
-                                Strings.noImage,
+                                Strings.noImageAsset,
                                 fit: BoxFit.cover,
                                 gaplessPlayback: true,
                               ),
@@ -3000,7 +3003,7 @@ class _DashboradPageState extends State<DashboradPage>
                                 ? CommonUtils.imageFromBase64String(
                                     product.base64)
                                 : new Image.asset(
-                                    Strings.noImage,
+                                    Strings.noImageAsset,
                                     fit: BoxFit.cover,
                                     gaplessPlayback: true,
                                   ),

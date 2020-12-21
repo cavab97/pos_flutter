@@ -542,7 +542,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       if (selectedAttr.length > 0) {
         for (int i = 0; i < selectedAttr.length; i++) {
           var price = selectedAttr[i]["attr_price"];
-          newPrice += int.parse(price);
+          newPrice += double.parse(price);
         }
       }
       if (selectedModifier.length > 0) {
@@ -813,14 +813,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     for (var i = 0; i < selectedAttr.length; i++) {
       var attr = selectedAttr[i];
-
       MSTSubCartdetails subCartData = new MSTSubCartdetails();
       subCartData.cartdetailsId = detailID;
       subCartData.localID = cart.localID;
       subCartData.productId = productItem.productId;
       subCartData.caId = attr["ca_id"];
       subCartData.attributeId = int.parse(attr["attrType_ID"]);
-      subCartData.attrPrice = int.parse(attr["attr_price"]).toDouble();
+      subCartData.attrPrice = double.parse(attr["attr_price"]);
       await localAPI.addsubCartData(subCartData);
     }
     if (isEditing) {
@@ -1289,7 +1288,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                 item['attribute'] == attr);
                             if (attributisDefault[i] == "1" &&
                                 !isadded &&
-                                !isFirstMod) {
+                                !isFirstAttr) {
                               var prvSeelected = selectedAttr;
                               prvSeelected.add({
                                 'ca_id': attribute.ca_id,
@@ -1299,7 +1298,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                               });
                               setState(() {
                                 selectedAttr = prvSeelected;
-                                isFirstMod = true;
+                                isFirstAttr = true;
                               });
                             }
                             return MapEntry(

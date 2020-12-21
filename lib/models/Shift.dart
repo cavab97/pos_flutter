@@ -6,16 +6,15 @@ class Shift {
   int serverId;
   int userId;
   int branchId;
-  int startAmount;
-  int endAmount;
+  double startAmount;
+  double endAmount;
   int status;
   String updatedAt;
   int updatedBy;
   String createdAt;
 
   Shift(
-      {
-      this.shiftId,
+      {this.shiftId,
       this.uuid,
       this.terminalId,
       this.appId,
@@ -27,8 +26,7 @@ class Shift {
       this.serverId,
       this.updatedAt,
       this.updatedBy,
-      this.createdAt
-      });
+      this.createdAt});
 
   Shift.fromJson(Map<String, dynamic> json) {
     shiftId = json['shift_id'];
@@ -37,8 +35,12 @@ class Shift {
     appId = json['app_id'] != null ? json['app_id'] : 0;
     userId = json['user_id'];
     branchId = json['branch_id'];
-    startAmount = json['start_amount'];
-    endAmount = json['end_amount'];
+    startAmount = json['start_amount'] is int
+        ? (json['start_amount'] as int).toDouble()
+        : json['start_amount'];
+    endAmount = json['end_amount'] is int
+        ? (json['end_amount'] as int).toDouble()
+        : json['end_amount'];
     status = json['status'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
