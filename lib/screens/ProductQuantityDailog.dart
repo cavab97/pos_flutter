@@ -540,7 +540,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       if (selectedAttr.length > 0) {
         for (int i = 0; i < selectedAttr.length; i++) {
           var price = selectedAttr[i]["attr_price"];
-          newPrice += int.parse(price);
+          newPrice += double.parse(price);
         }
       }
       if (selectedModifier.length > 0) {
@@ -812,7 +812,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       subCartData.productId = productItem.productId;
       subCartData.caId = attr["ca_id"];
       subCartData.attributeId = int.parse(attr["attrType_ID"]);
-      subCartData.attrPrice = int.parse(attr["attr_price"]).toDouble();
+      subCartData.attrPrice = double.parse(attr["attr_price"]).toDouble();
       await localAPI.addsubCartData(subCartData);
     }
     if (isEditing) {
