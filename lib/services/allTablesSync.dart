@@ -250,6 +250,7 @@ class SyncAPICalls {
               "order_modifier": ordersModifire,
               "order_attributes": ordersAttribute,
             };
+
             detailList.add(productMap);
           }
           List<OrderPayment> ordersPayment =

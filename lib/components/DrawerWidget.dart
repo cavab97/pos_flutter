@@ -254,6 +254,7 @@ class DrawerWidState extends State<DrawerWid> {
       await CommunFun.openSyncPop(context);
       await CommunFun.syncOrdersANDStore(context, false);
       await CommunFun.syncAfterSuccess(context, false);
+      print("first1");
     } else {
       await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
           () async {
@@ -262,6 +263,7 @@ class DrawerWidState extends State<DrawerWid> {
         await CommunFun.openSyncPop(context);
         await CommunFun.syncOrdersANDStore(context, false);
         await CommunFun.syncAfterSuccess(context, false);
+        print("first2");
       }, () {});
     }
   }
