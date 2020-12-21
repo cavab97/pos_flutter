@@ -236,7 +236,7 @@ class DrawerWidState extends State<DrawerWid> {
     if (permissions.contains(Constant.SYNC_ORDER)) {
       var syncAlert = await CommunFun.openSyncPop(context);
       await CommunFun.syncOrdersANDStore(context, true);
-      Navigator.of(context).pop(syncAlert);
+      //Navigator.of(context).pop(syncAlert);
     } else {
       await CommonUtils.openPermissionPop(context, Constant.SYNC_ORDER,
           () async {

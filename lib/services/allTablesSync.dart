@@ -33,7 +33,7 @@ class SyncAPICalls {
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
-      'branchId': branchid,
+      'branch_id': branchid,
       'terminal_id': terminalId
     };
     return await APICalls.apiCall(apiurl, context, stringParams);
@@ -45,10 +45,9 @@ class SyncAPICalls {
     var branchid = await CommunFun.getbranchId();
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
-
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
-      'branchId': branchid,
+      'branch_id': branchid,
       'terminal_id': terminalId
     };
     return await APICalls.apiCall(apiurl, context, stringParams);
@@ -62,7 +61,7 @@ class SyncAPICalls {
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
-      'branchId': branchid,
+      'branch_id': branchid,
       'terminal_id': terminalId
     };
     return await APICalls.apiCall(apiurl, context, stringParams);
@@ -76,7 +75,7 @@ class SyncAPICalls {
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
-      'branchId': branchid,
+      'branch_id': branchid,
       'terminal_id': terminalId
     };
     return await APICalls.apiCall(apiurl, context, stringParams);
@@ -90,7 +89,7 @@ class SyncAPICalls {
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
-      'branchId': branchid,
+      'branch_id': branchid,
       'terminal_id': terminalId
     };
     return await APICalls.apiCall(apiurl, context, stringParams);
@@ -104,7 +103,7 @@ class SyncAPICalls {
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
-      'branchId': branchid,
+      'branch_id': branchid,
       'terminal_id': terminalId
     };
     return await APICalls.apiCall(apiurl, context, stringParams);
@@ -119,7 +118,7 @@ class SyncAPICalls {
 
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
-      'branchId': branchid,
+      'branch_id': branchid,
       'terminal_id': terminalId
     };
     return await APICalls.apiCall(apiurl, context, stringParams);
@@ -133,7 +132,7 @@ class SyncAPICalls {
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
-      'branchId': branchid,
+      'branch_id': branchid,
       'terminal_id': terminalId
     };
     return await APICalls.apiCall(apiurl, context, stringParams);
@@ -147,7 +146,7 @@ class SyncAPICalls {
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
-      'branchId': branchid,
+      'branch_id': branchid,
       'terminal_id': terminalId
     };
     return await APICalls.apiCall(apiurl, context, stringParams);
@@ -162,7 +161,7 @@ class SyncAPICalls {
     var offset = await Preferences.getStringValuesSF(Constant.OFFSET);
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
-      'branchId': branchid, // serverTime,
+      'branch_id': branchid, // serverTime,
       'terminal_id': terminalId,
       'offset': offset != null ? int.parse(offset) : 0
     };
