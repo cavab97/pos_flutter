@@ -9,7 +9,6 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/CustomeIcons.dart';
-import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/screens/PrinteTypeDailog.dart';
 import 'package:mcncashier/screens/SelectPrinterDailog.dart';
@@ -69,6 +68,8 @@ class _SettingsPageState extends State<SettingsPage> {
         isAutoSync = isSync == "true" ? true : false;
       });
     }
+    await SyncAPICalls.logActivity(
+        "settings", "Opened settigns page", "settings", 1);
   }
 
   setAutosync(issync) async {

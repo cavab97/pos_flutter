@@ -279,12 +279,11 @@ class _SelectTablePageState extends State<SelectTablePage>
     if (!isChanging) {
       setState(() {
         isMenuopen = true;
-        //isMenuopen = false;
       });
       Navigator.pushNamed(context, Constant.DashboardScreen)
           .then(backToRefresh);
     }
-    //getTables();
+    await getTables();
   }
   /*   else {
       CommunFun.showToast(context, Strings.table_paxMsg);

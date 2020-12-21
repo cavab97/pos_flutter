@@ -93,6 +93,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     setState(() {
       permissions = permission;
     });
+    await SyncAPICalls.logActivity(
+        "product details", "Opened product details popup", "product", 1);
   }
 
   setInitstate() async {
@@ -475,9 +477,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         setPrice();
       }
     }
+    await SyncAPICalls.logActivity(
+        "product details", "Increased product qty", "product", 1);
   }
 
-  decreaseQty() {
+  decreaseQty() async {
     if (product_qty > 1) {
       var prevproductqty = product_qty;
       setState(() {
@@ -485,9 +489,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       });
       setPrice();
     }
+    await SyncAPICalls.logActivity(
+        "product details", "Decresed product qty", "product", 1);
   }
 
-  onSelectAttr(i, id, attribute, attrTypeIDs, attrPrice, setmealid, isDefault) {
+  onSelectAttr(
+      i, id, attribute, attrTypeIDs, attrPrice, setmealid, isDefault) async {
     var prvSeelected = selectedAttr;
     var isSelected = selectedAttr.any((item) => item['ca_id'] == id);
 
@@ -504,13 +511,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         });
       } else {
         selectedAttr.removeWhere((item) => item['attribute'] != attribute);
+        await SyncAPICalls.logActivity(
+            "change attributes", "removed selected attribute", "product", 1);
       }
       setState(() {
         selectedAttr = selectedAttr;
       });
     } else if (selectedAttr.length < 1) {
-      // print("seconddddddddddddddddddddddddd");
-
       prvSeelected.add({
         'ca_id': id,
         'attribute': attribute,
@@ -531,6 +538,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       setState(() {
         selectedAttr = prvSeelected;
       });
+      await SyncAPICalls.logActivity(
+          "change attributes", "Added product attributes", "product", 1);
     }
     setPrice();
   }
@@ -558,19 +567,24 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     });
   }
 
-  setModifire(mod) {
+  setModifire(mod) async {
     var isSelected = selectedModifier.any((item) => item.pmId == mod.pmId);
     if (isSelected) {
       selectedModifier.removeWhere((item) => item.pmId == mod.pmId);
       setState(() {
         selectedModifier = selectedModifier;
       });
+      await SyncAPICalls.logActivity(
+          "change modifire", "removed selected product modifire", "product", 1);
     } else {
       selectedModifier.add(mod);
+      await SyncAPICalls.logActivity(
+          "change modifire", "Added product modifire", "product", 1);
     }
     setState(() {
       selectedModifier = selectedModifier;
     });
+
     setPrice();
   }
 
@@ -631,7 +645,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return grandTotal;
   }
 
-  _setSelectUnselect(SetMealProduct product) {
+  _setSelectUnselect(SetMealProduct product) async {
     var isSelected = tempCart
         .any((item) => item.setmealProductId == product.setmealProductId);
     if (isSelected) {
@@ -640,11 +654,15 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       setState(() {
         tempCart = tempCart;
       });
+      await SyncAPICalls.logActivity("setmeal attributes",
+          "removed setmeal product attributes", "product", 1);
     } else {
       tempCart.add(product);
       setState(() {
         tempCart = tempCart;
       });
+      await SyncAPICalls.logActivity("setmeal attributes",
+          "removed added product attributes", "product", 1);
     }
   }
 
@@ -831,6 +849,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         }
       }
     }
+    await SyncAPICalls.logActivity(
+        "product details", "Added items to cart", "cart", 1);
     widget.onClose();
     Navigator.of(context).pop();
   }

@@ -82,6 +82,8 @@ class _WineStorageState extends State<WineStorage>
     }
     _tabController = TabController(vsync: this, length: racList.length);
     _tabController.addListener(_handleTabSelection);
+    await SyncAPICalls.logActivity(
+        "wine storage", "Open wine storage for redeem wine", "wine storage", 1);
   }
 
   getBoxList(racID) async {
@@ -140,7 +142,7 @@ class _WineStorageState extends State<WineStorage>
     });
   }
 
-  removeCustomer() {
+  removeCustomer() async {
     CommonUtils.showAlertDialog(context, () {
       Navigator.of(context).pop();
     }, () {
@@ -156,6 +158,8 @@ class _WineStorageState extends State<WineStorage>
       isEditing = false;
       inventoryData = [];
     });
+    await SyncAPICalls.logActivity("wine storage",
+        "removed selected customer from wine storage", "wine storage", 1);
   }
 
   openInvtQtyPop(Box box) async {

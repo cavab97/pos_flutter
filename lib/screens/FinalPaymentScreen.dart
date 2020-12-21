@@ -30,6 +30,12 @@ class FinalEndScreentate extends State<FinalEndScreen> {
       ammountPaid = widget.totalPaid;
       change = widget.change;
     });
+    getPaymentPage();
+  }
+
+  getPaymentPage() async {
+    await SyncAPICalls.logActivity("payment",
+        "Opened final payment screen for payment done", "payment", 1);
   }
 
   @override

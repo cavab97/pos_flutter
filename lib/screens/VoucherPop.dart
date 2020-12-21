@@ -93,7 +93,6 @@ class VoucherPopState extends State<VoucherPop> {
     DateTime now = new DateTime.now();
     String nowDate = DateFormat('yyyy-MM-dd').format(now);
     String fromtonow = DateFormat('yyyy-MM-dd').format(toDate);
-
     if (now.isBefore(toDate) && now.isAfter(fromDate) || nowDate == fromtonow) {
       return true;
     } else {
@@ -177,15 +176,19 @@ class VoucherPopState extends State<VoucherPop> {
               vaocher.voucherId);
           Navigator.of(context).pop(); // close Pop
         } else {
-          CommunFun.showToast(
+          await CommunFun.showToast(
               context,
               "Voucher already used " +
                   vaocher.usesTotal.toString() +
                   " times.");
+          await SyncAPICalls.logActivity(
+              "Voucher", "cashier choosed voucher already used", "Voucher", 1);
         }
       }
     } else {
-      CommunFun.showToast(context, Strings.voucherExpired);
+      await CommunFun.showToast(context, Strings.voucherExpired);
+      await SyncAPICalls.logActivity(
+          "voucher", "voucher already expired", "voucher", 1);
     }
   }
 
@@ -205,6 +208,8 @@ class VoucherPopState extends State<VoucherPop> {
         errorMSG = Strings.voucherCodeMsg;
       });
     }
+    await SyncAPICalls.logActivity("apply promocode",
+        "Opened voucher popup for apply voucher", "voucher", 1);
   }
 
   @override

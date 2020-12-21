@@ -58,6 +58,8 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
     setState(() {
       permissions = permission;
     });
+    await SyncAPICalls.logActivity(
+        "payIn/Out", "Opened pay in/out popup for cash in/out", "payIn/Out", 1);
   }
 
   openAmmountPop() {
@@ -73,12 +75,14 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         });
   }
 
-  setamount(ammountext) {
+  setamount(ammountext) async {
     if (ammountext is String) {
       setState(() {
         ammount = double.parse(ammountext);
       });
     }
+    await SyncAPICalls.logActivity("cash in/out amount",
+        "Added In/Out amount " + ammount.toString(), "cash in/out amount", 1);
   }
 
   getbranch() async {
@@ -251,10 +255,12 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
                   hint: Text(Strings.pleaseSelectReason),
                   value: selectedreason,
                   isExpanded: true,
-                  onChanged: (String string) {
+                  onChanged: (String string) async {
                     setState(() {
                       selectedreason = string;
                     });
+                    await SyncAPICalls.logActivity(
+                        "reason", "Changed reason for pay In/Out", "reason", 1);
                   },
                   selectedItemBuilder: (BuildContext context) {
                     return reasonList.map<Widget>((item) {

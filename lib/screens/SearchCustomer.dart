@@ -237,8 +237,10 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           shrinkWrap: true,
           children: filterList.map((customer) {
             return ListTile(
-              onTap: () {
-                saveCustomerTolocal(customer);
+              onTap: () async {
+                await SyncAPICalls.logActivity(
+                    "customer", "Select customer", "Order", 1);
+                await saveCustomerTolocal(customer);
               },
               leading: Text(
                 customer.name == null ? customer.firstName : customer.name,

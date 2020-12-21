@@ -43,9 +43,11 @@ class _PINPageState extends State<PINPage> {
         isCheckIn = isClockin == "true" ? true : false;
       });
     }
+    await SyncAPICalls.logActivity(
+        "check in/out", "Opened check in out page", "checkIn", 1);
   }
 
-  addINPin(val) {
+  addINPin(val) async {
     if (pinNumber.length < 6) {
       var currentpinNumber = pinNumber;
       currentpinNumber += val;

@@ -50,6 +50,8 @@ class _WebOrderPagesState extends State<WebOrderPages>
         onlineList = onlineListitem;
       });
     }
+    await SyncAPICalls.logActivity(
+        "web orders", "Cashier Opened web orders page", "web orders", 1);
   }
 
   assignTable(cart) async {

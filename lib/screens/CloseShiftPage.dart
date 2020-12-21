@@ -8,6 +8,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class CloseShiftPage extends StatefulWidget {
   CloseShiftPage({Key key, this.onClose}) : super(key: key);
@@ -33,6 +34,8 @@ class CloseShiftPageState extends State<CloseShiftPage> {
         shifittem = shift[0];
       });
     }
+    await SyncAPICalls.logActivity(
+        "close shift", "Open closed shift popup for close store", "shift", 1);
   }
 
   Widget shiftbtn(Function onPress) {
@@ -104,7 +107,9 @@ class CloseShiftPageState extends State<CloseShiftPage> {
                 style: Styles.whiteSimpleSmall(),
               ),
               SizedBox(height: 30),
-              shiftbtn(() {
+              shiftbtn(() async {
+                await SyncAPICalls.logActivity("close shift",
+                    "Cashier close shift button clicked", "shift", 1);
                 widget.onClose();
               })
             ],

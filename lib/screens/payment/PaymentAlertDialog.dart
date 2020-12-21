@@ -1,13 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Payment.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/screens/FinalPaymentScreen.dart';
-import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'ShowEnterCardDetailPop.dart';
 import 'ShowEnterEwalletDetailPop.dart';
@@ -45,13 +46,14 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
 
   getPaymentMethods() async {
     var result = await localAPI.getPaymentMethods();
-
     if (result.length != 0) {
       setState(() {
         mainPaymentList = result.where((i) => i.isParent == 0).toList();
         subPaymenttyppeList = result.toList();
       });
     }
+    await SyncAPICalls.logActivity(
+        "payment", "Opened payment types popup for order place", "payment", 1);
   }
 
   List<Widget> setPaymentListTile(List<Payments> listTilePaymentType) {
@@ -67,13 +69,22 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
           child: Text(payment.name, style: Styles.blackMediumBold()),
           textColor: Colors.black,
           color: Colors.grey[100],
-          onPressed: () {
-            seletedPayment = payment;
+          onPressed: () async {
+            setState(() {
+              seletedPayment = payment;
+            });
             List<Payments> subList = subPaymenttyppeList
                 .where((i) => i.isParent == payment.paymentId)
                 .toList();
+            await SyncAPICalls.logActivity(
+                "payment",
+                "Cashier selected payment type" +
+                    seletedPayment.name.toString(),
+                "payment",
+                1);
             if (subList.length > 0) {
               openSubPaymentDialog(subList);
+
               //subPaymenttyppeList = subList;
               /* setState(() {
                 isSubPayment = true;
@@ -106,7 +117,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
         });
   }
 
-  insertPaymentOption(Payments payment) {
+  insertPaymentOption(Payments payment) async {
     if (seletedPayment.name.toLowerCase().contains("wallet")) {
       setState(() {
         seletedPayment = payment;
@@ -120,6 +131,11 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
     } else {
       //cashPayment(payment);
     }
+    await SyncAPICalls.logActivity(
+        "payment",
+        "chasier selected payment option" + seletedPayment.name.toString(),
+        "payment",
+        1);
   }
 
   showEwalletOptionPop() {
@@ -567,7 +583,15 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                       ],
                     ),
                     _button(Strings.enter, () {
-                      paidAmount = widget.totalAmount;
+                      setState(() {
+                        currentPayment.op_amount = currentNumber == "0"
+                            ? widget.totalAmount
+                            : double.parse(currentNumber);
+                        currentPayment.op_method_id = seletedPayment.paymentId;
+                        totalPaymentList.add(currentPayment);
+                        paidAmount = widget.totalAmount;
+                        isPaymented = false;
+                      });
                       finalPayment();
                       //widget.onEnter(currentNumber);
                     })
@@ -578,15 +602,15 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                         if (double.parse(currentNumber) <
                             (widget.totalAmount - paidAmount)) {
                           setState(() {
-                            currentPayment.op_amount =
-                                double.parse(currentNumber);
+                            currentPayment.op_amount = currentNumber == "0"
+                                ? widget.totalAmount
+                                : double.parse(currentNumber);
                             currentPayment.op_method_id =
                                 seletedPayment.paymentId;
                             totalPaymentList.add(currentPayment);
                             isPaymented = false;
                           });
                         } else {
-                          Navigator.of(context).pop();
                           finalPayment();
                         }
                         //widget.onEnter(widget.totalAmount.toString());
@@ -604,18 +628,23 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
 
   finalPayment() async {
     //List<OrderPayment> totalPayment = [];
-    double change = paidAmount - widget.totalAmount;
-    await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return FinalEndScreen(
-              total: widget.totalAmount,
-              totalPaid: paidAmount,
-              change: change,
-              onClose: () {
-                Navigator.of(context).pop();
-                widget.onClose(totalPaymentList);
-              });
-        });
+    if (totalPaymentList.length > 0 &&
+        totalPaymentList[0].op_method_id != null) {
+      double change = paidAmount - widget.totalAmount;
+      await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return FinalEndScreen(
+                total: widget.totalAmount,
+                totalPaid: paidAmount,
+                change: change,
+                onClose: () {
+                  Navigator.of(context).pop();
+                  widget.onClose(totalPaymentList);
+                });
+          });
+    } else {
+      CommunFun.showToast(context, "Please select payment type");
+    }
   }
 }

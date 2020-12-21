@@ -37,7 +37,6 @@ import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
-import 'package:mcncashier/models/Tax.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/models/Voucher_History.dart';
@@ -46,7 +45,6 @@ import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/CloseShiftPage.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
-import 'package:mcncashier/screens/PaymentMethodPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/screens/ChangeQtyDailog.dart';
@@ -54,12 +52,10 @@ import 'package:mcncashier/screens/SplitOrder.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/screens/ReprintPopup.dart';
 import 'package:mcncashier/screens/payment/PaymentAlertDialog.dart';
-import 'package:mcncashier/screens/CashPayment.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:expandable/expandable.dart';
-
 import '../components/communText.dart';
 import '../models/ProductStoreInventoryLog.dart';
 import '../models/Product_Store_Inventory.dart';
@@ -452,10 +448,14 @@ class _DashboradPageState extends State<DashboradPage>
     switch (choice) {
       case 0:
         //selectTable();
+        await SyncAPICalls.logActivity(
+            "menu", "clicked add customer menu item", "menu", 1);
         openShowAddCustomerDailog();
         break;
       case 1:
         if (permissions.contains(Constant.CLOSE_TABLE)) {
+          await SyncAPICalls.logActivity(
+              "menu", "clicked closed table menu item", "menu", 1);
           closeTable();
         } else {
           await SyncAPICalls.logActivity("Close Table",
@@ -470,7 +470,9 @@ class _DashboradPageState extends State<DashboradPage>
 
         break;
       case 2:
-        showDialog(
+        await SyncAPICalls.logActivity(
+            "menu", "clicked split order menu item", "menu", 1);
+        await showDialog(
             // Opning Ammount Popup
             barrierDismissible: false,
             context: context,
@@ -495,6 +497,8 @@ class _DashboradPageState extends State<DashboradPage>
             });
         break;
       case 3:
+        await SyncAPICalls.logActivity(
+            "menu", "clicked close shift menu item", "menu", 1);
         if (permissions.contains(Constant.CLOSING)) {
           closeShift();
         } else {
@@ -509,12 +513,8 @@ class _DashboradPageState extends State<DashboradPage>
         }
         break;
       case 4:
-        printCheckList();
-        break;
-      case 5:
-        draftreciptPrint();
-        break;
-      case 6:
+        await SyncAPICalls.logActivity(
+            "menu", "clicked delete order menu item", "menu", 1);
         if (permissions.contains(Constant.DELETE_ORDER)) {
           deleteCurrentCart();
         } else {
@@ -533,12 +533,10 @@ class _DashboradPageState extends State<DashboradPage>
                 1);
           }, () {});
         }
-
         break;
-      case 7:
-        resendToKitchen();
-        break;
-      case 8:
+      case 5:
+        await SyncAPICalls.logActivity(
+            "menu", "clicked apply promocode menu item", "menu", 1);
         changePromoCode();
         break;
     }
@@ -773,7 +771,7 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
-  void _handleTabSelection() {
+  Future<void> _handleTabSelection() async {
     if (_tabController.indexIsChanging) {
       var cat = categoryFirstRow[_tabController.index].categoryId;
       List<Category> subList =
@@ -793,9 +791,11 @@ class _DashboradPageState extends State<DashboradPage>
         getProductList(cat);
       }
     }
+    await SyncAPICalls.logActivity(
+        "select category", "Changed category", "changed category", 1);
   }
 
-  void _handleSecondTabSelection() {
+  Future<void> _handleSecondTabSelection() async {
     if (_secondTabController.indexIsChanging) {
       var cat = categorySecondRow[_secondTabController.index].categoryId;
       List<Category> subList =
@@ -817,7 +817,7 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
-  void _handleSubTabSelection() {
+  Future<void> _handleSubTabSelection() async {
     if (_subtabController.indexIsChanging) {
       var cat = subCatList[_subtabController.index].categoryId;
       if (subCatList[_subtabController.index].isSetmeal == 1) {
@@ -825,17 +825,17 @@ class _DashboradPageState extends State<DashboradPage>
       } else {
         getProductList(cat);
       }
+      await SyncAPICalls.logActivity("select sub category",
+          "Changed sub category", "changed sub category", 1);
     }
   }
 
   void _selectedCategory(int index, String row) {
     var selected =
         row == 'first' ? categoryFirstRow[index] : categorySecondRow[index];
-
     setState(() {
       selectedCategory = selected;
     });
-
     if ((row == 'first'
             ? categoryFirstRow[index].isSetmeal
             : categorySecondRow[index].isSetmeal) ==
@@ -848,10 +848,12 @@ class _DashboradPageState extends State<DashboradPage>
     }
   }
 
-  void _selectedQuantity(int quantity) {
+  Future<void> _selectedQuantity(int quantity) async {
     setState(() {
       currentQuantity = quantity;
     });
+    await SyncAPICalls.logActivity(
+        "qauntity", "Clicked current quantity", "qauntity", 1);
   }
 
   @override
@@ -966,7 +968,7 @@ class _DashboradPageState extends State<DashboradPage>
             "Cashier has no permission for make payment", "Order", 1);
         await CommonUtils.openPermissionPop(context, Constant.PAYMENT,
             () async {
-          await opnePaymentMethod();
+          await openPaymentMethod();
           await SyncAPICalls.logActivity("Order Payment",
               "Manager given permission for make payment", "Order", 1);
         }, () {});
@@ -1134,23 +1136,23 @@ class _DashboradPageState extends State<DashboradPage>
         });
   }
 
-  opnePaymentMethod() async {
-    var roundingTotal =
-        await CommunFun.checkRoundData(grandTotal.toStringAsFixed(2));
-    showDialog(
-        // Opning Ammount Popup
-        context: context,
-        builder: (BuildContext context) {
-          return PaymentMethodPop(
-            subTotal: subtotal,
-            grandTotal: double.tryParse(roundingTotal),
-            onClose: (mehtod) {
-              CommunFun.processingPopup(context);
-              paymentWithMethod(mehtod);
-            },
-          );
-        });
-  }
+  // opnePaymentMethod() async {
+  //   var roundingTotal =
+  //       await CommunFun.checkRoundData(grandTotal.toStringAsFixed(2));
+  //   showDialog(
+  //       // Opning Ammount Popup
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return PaymentMethodPop(
+  //           subTotal: subtotal,
+  //           grandTotal: double.tryParse(roundingTotal),
+  //           onClose: (mehtod) {
+  //             CommunFun.processingPopup(context);
+  //             paymentWithMethod(mehtod);
+  //           },
+  //         );
+  //       });
+  // }
 
   Future<Table_order> getTableData() async {
     Table_order tables = new Table_order();
@@ -1435,6 +1437,9 @@ class _DashboradPageState extends State<DashboradPage>
               insertRacInv(userdata, cartItem, cartData.user_id);
             }
           }
+          var ulog = await localAPI.updateInvetory(updatedInt);
+          var inventoryLog =
+              await localAPI.updateStoreInvetoryLogTable(updatedLog);
         }
       }
 
@@ -1539,7 +1544,6 @@ class _DashboradPageState extends State<DashboradPage>
       shiftinvoice.terminal_id = int.parse(terminalId);
       await localAPI.sendtoShiftInvoice(shiftinvoice);
       await printReceipt(orderId);
-      await clearCartAfterSuccess(orderId);
     }
   }
 
@@ -2768,7 +2772,7 @@ class _DashboradPageState extends State<DashboradPage>
               ), */
               PopupMenuItem(
                 enabled: cartList.length > 0 ? true : false,
-                value: 6,
+                value: 4,
                 child: Padding(
                   padding: EdgeInsets.all(10),
                   child: Row(
@@ -2788,7 +2792,7 @@ class _DashboradPageState extends State<DashboradPage>
               PopupMenuItem(
                 enabled: permissions.contains(Constant.DISCOUNT_ORDER) &&
                     cartList.length > 0,
-                value: 8,
+                value: 5,
                 child: Padding(
                   padding: EdgeInsets.all(10),
                   child: Row(
@@ -2953,11 +2957,13 @@ class _DashboradPageState extends State<DashboradPage>
         children: productList.map((product) {
           final prodprice = product.price.toStringAsFixed(2);
           return InkWell(
-            onTap: () {
+            onTap: () async {
               if ((product.qty == null ||
                       product.hasInventory != 1 ||
                       product.qty > 0.0) ||
                   (product.hasRacManagemant == 1 && product.box_pId != null)) {
+                await SyncAPICalls.logActivity(
+                    "product", "Clicked product item", "product", 1);
                 checkshiftopen(product);
               } else {
                 CommunFun.showToast(
@@ -2966,13 +2972,6 @@ class _DashboradPageState extends State<DashboradPage>
                         ? Strings.outOfStokeMsg
                         : Strings.outOfBoxMsg);
               }
-
-              // if ((product.qty == null ||
-              //         product.hasInventory != 1 ||
-              //         product.qty > 0.0) ||
-              //     (product.hasRacManagemant == 1 && product.box_pId != null)) {
-              //   checkshiftopen(product);
-              // } else {}
             },
             child: Container(
               height: itemHeight,
@@ -3087,6 +3086,8 @@ class _DashboradPageState extends State<DashboradPage>
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () async {
+                      await SyncAPICalls.logActivity("send to kitchen",
+                          "Clicked sent to kitchen", "send to kitchen", 1);
                       if (permissions.contains(Constant.SEND_KITCHEN)) {
                         sendTokitched(cartList);
                         goToTableScreen();
@@ -3094,7 +3095,7 @@ class _DashboradPageState extends State<DashboradPage>
                         await SyncAPICalls.logActivity(
                             "send to kitchen",
                             "Cashier has no permission for send items to kitchen",
-                            "voucher",
+                            "send to kitchen",
                             1);
                         await CommonUtils.openPermissionPop(
                             context, Constant.SEND_KITCHEN, () async {
@@ -3103,7 +3104,7 @@ class _DashboradPageState extends State<DashboradPage>
                           await SyncAPICalls.logActivity(
                               "send to kitchen",
                               "Manager given permission for send items to kitchen",
-                              "voucher",
+                              "send to kitchen",
                               1);
                         }, () {});
                       }
@@ -3137,12 +3138,14 @@ class _DashboradPageState extends State<DashboradPage>
             width: MediaQuery.of(context).size.width / 7,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
-              onPressed: () {
+              onPressed: () async {
                 if (!isWebOrder) {
                   sendPayment();
                 } else {
                   checkoutWebOrder();
                 }
+                await SyncAPICalls.logActivity(
+                    "payment", "Clicked pay and perform payment", "voucher", 1);
               },
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -3170,8 +3173,10 @@ class _DashboradPageState extends State<DashboradPage>
             width: MediaQuery.of(context).size.width / 7,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
-              onPressed: () {
+              onPressed: () async {
                 printCheckList();
+                await SyncAPICalls.logActivity("print check list",
+                    "Cashier clicked print check list", "print check list", 1);
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -3196,8 +3201,10 @@ class _DashboradPageState extends State<DashboradPage>
             width: MediaQuery.of(context).size.width / 7,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
-              onPressed: () {
+              onPressed: () async {
                 draftreciptPrint();
+                await SyncAPICalls.logActivity("print draft",
+                    "Cashier clicked print draft reciept", "print draft", 1);
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -3222,8 +3229,10 @@ class _DashboradPageState extends State<DashboradPage>
             width: MediaQuery.of(context).size.width / 5,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
-              onPressed: () {
+              onPressed: () async {
                 resendToKitchen();
+                await SyncAPICalls.logActivity("reprint kitchen",
+                    "Clicked  resend to kitchen button", "reprint kitchen", 1);
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -3248,8 +3257,9 @@ class _DashboradPageState extends State<DashboradPage>
             width: MediaQuery.of(context).size.width / 7,
             child: RaisedButton(
               padding: EdgeInsets.only(top: 5, bottom: 5),
-              onPressed: () {
-                //removeItem();
+              onPressed: () async {
+                await SyncAPICalls.logActivity(
+                    "select table", "Clicked select table", "select table", 1);
                 selectTable();
               },
               child: Row(

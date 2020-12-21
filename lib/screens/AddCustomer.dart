@@ -89,7 +89,6 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   filterState() async {
     if (selectedCountry != null) {
       var list = states.where((x) => x.countryId == selectedCountry).toList();
-
       setState(() {
         filterstates = list;
         filtercitys = [];
@@ -316,7 +315,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     ),
                   );
                 }).toList(),
-                onChanged: (value) {
+                onChanged: (value) async {
                   setState(() {
                     selectedCountry = value;
                     selectedCityError = "";
@@ -324,6 +323,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     selectedStateError = "";
                   });
                   filterState();
+                  await SyncAPICalls.logActivity("customer",
+                      "cashier selected country of customer", "customer", 1);
                 },
               ),
             ),
@@ -382,13 +383,15 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     ),
                   );
                 }).toList(),
-                onChanged: (value) {
+                onChanged: (value) async {
                   setState(() {
                     selectedCity = value;
                     selectedCityError = "";
                     selectedCountryError = "";
                     selectedStateError = "";
                   });
+                  await SyncAPICalls.logActivity("customer",
+                      "cashier changed city of customer", "customer", 1);
                 },
               ),
             ),
@@ -447,7 +450,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     ),
                   );
                 }).toList(),
-                onChanged: (value) {
+                onChanged: (value) async {
                   setState(() {
                     selectedState = value;
                     selectedCityError = "";
@@ -455,6 +458,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     selectedStateError = "";
                   });
                   filterCity();
+                  await SyncAPICalls.logActivity("customer",
+                      "cashier changed state of customer", "customer", 1);
                 },
               ),
             ),

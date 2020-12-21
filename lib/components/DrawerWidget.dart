@@ -44,6 +44,7 @@ class DrawerWidState extends State<DrawerWid> {
     setState(() {
       permissions = permission;
     });
+    await SyncAPICalls.logActivity("drawer", "Opened drawer menu", "drawer", 1);
   }
 
   getUserData() async {
@@ -283,7 +284,9 @@ class DrawerWidState extends State<DrawerWid> {
             ),
             CommunFun.divider(),
             ListTile(
-              onTap: () {
+              onTap: () async {
+                await SyncAPICalls.logActivity(
+                    "drawer", "Select transaction menu", "drawer", 1);
                 gotoTansactionPage();
               },
               leading: Icon(
@@ -297,7 +300,9 @@ class DrawerWidState extends State<DrawerWid> {
               ),
             ),
             ListTile(
-              onTap: () {
+              onTap: () async {
+                await SyncAPICalls.logActivity(
+                    "drawer", "Select web Orders menu", "drawer", 1);
                 gotoWebCart();
               },
               leading: Icon(
@@ -311,7 +316,9 @@ class DrawerWidState extends State<DrawerWid> {
               ),
             ),
             ListTile(
-              onTap: () {
+              onTap: () async {
+                await SyncAPICalls.logActivity(
+                    "drawer", "Select wine storage menu", "drawer", 1);
                 gotoWineStorage();
               },
               leading: Icon(
@@ -377,7 +384,9 @@ class DrawerWidState extends State<DrawerWid> {
                     style: Styles.drawerText())),
 
             ListTile(
-              onTap: () {
+              onTap: () async {
+                await SyncAPICalls.logActivity(
+                    "drawer", "Select shift report menu", "drawer", 1);
                 gotoShiftReport();
               },
               leading: Icon(
@@ -392,8 +401,10 @@ class DrawerWidState extends State<DrawerWid> {
             ),
 
             ListTile(
-                onTap: () {
+                onTap: () async {
                   Navigator.of(context).pop();
+                  await SyncAPICalls.logActivity(
+                      "drawer", "Select sync orders menu", "drawer", 1);
                   syncOrdersTodatabase();
                 },
                 leading: Icon(
@@ -405,6 +416,8 @@ class DrawerWidState extends State<DrawerWid> {
             // : SizedBox(),
             ListTile(
                 onTap: () async {
+                  await SyncAPICalls.logActivity(
+                      "drawer", "Select sync menu item", "drawer", 1);
                   syncAllTables();
                 },
                 leading: Icon(
@@ -414,8 +427,10 @@ class DrawerWidState extends State<DrawerWid> {
                 ),
                 title: Text(Strings.syncTxt, style: Styles.drawerText())),
             ListTile(
-                onTap: () {
+                onTap: () async {
                   Navigator.of(context).pop();
+                  await SyncAPICalls.logActivity(
+                      "drawer", "Select settings menu", "drawer", 1);
                   Navigator.pushNamed(context, Constant.SettingsScreen)
                       .then(backEvent);
                 },
@@ -435,7 +450,9 @@ class DrawerWidState extends State<DrawerWid> {
     return Expanded(
       child: RaisedButton(
         padding: EdgeInsets.all(10),
-        onPressed: () {
+        onPressed: () async {
+          await SyncAPICalls.logActivity(
+              "check out", "user clicked checkout", "check out", 1);
           Navigator.pushNamed(context, Constant.PINScreen).then(backEvent);
         },
         child: Text(Strings.checkout, style: Styles.whiteBoldsmall()),

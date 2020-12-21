@@ -84,6 +84,8 @@ class _SplitBillDialog extends State<SplitBillDialog> {
     setState(() {
       permissions = permission;
     });
+    await SyncAPICalls.logActivity("split payment",
+        "open split payment popup for split orders", "split payment", 1);
   }
 
   getCartItem() async {
@@ -833,7 +835,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
         orderpayment.reference_number = payment[i].reference_number;
         orderpayment.approval_code = payment[i].approval_code;
         orderpayment.isCash = payment[i].isCash;
-         orderpayment.is_split = payment[i].is_split;
+        orderpayment.is_split = payment[i].is_split;
         orderpayment.op_method_response = '';
         orderpayment.op_status = 1;
         orderpayment.isSync = 0;

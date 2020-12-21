@@ -71,6 +71,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         allPaymentTypes = result;
       });
     }
+    await SyncAPICalls.logActivity(
+        "payment", "Opened payments listing popup", "payment", 1);
   }
 
   insertPaymentOption(Payments payment) {

@@ -121,6 +121,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
     setState(() {
       permissions = permission;
     });
+    await SyncAPICalls.logActivity("transactions",
+        "cashier opened transactions list page", "transactions", 1);
   }
 
   getTansactionList() async {
@@ -192,6 +194,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
     setState(() {
       isScreenLoad = false;
     });
+    await SyncAPICalls.logActivity(
+        "transactions", "clicked transaction details", "transactions", 1);
     //}
   }
 
@@ -214,10 +218,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
   }
 
-  refundProcessStart() {
+  refundProcessStart() async {
     setState(() {
       isRefunding = true;
     });
+    await SyncAPICalls.logActivity(
+        "transactions", "clicked redund button", "transactions", 1);
   }
 
   showReasontypePop() {
@@ -522,6 +528,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
           Strings.walkinCustomer,
           true,
           true);
+      await SyncAPICalls.logActivity(
+          "transactions",
+          "clicked reprint button for reprint duplicate bill print",
+          "transactions",
+          1);
     }
   }
 
