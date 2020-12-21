@@ -1287,7 +1287,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                           ),
                                           SizedBox(width: 10),
                                           Text(
-                                            attrtypesPrice[i],
+                                            double.parse(attrtypesPrice[i])
+                                                .toStringAsFixed(2),
                                             style: TextStyle(
                                                 color: StaticColor.deepOrange,
                                                 fontSize: SizeConfig
