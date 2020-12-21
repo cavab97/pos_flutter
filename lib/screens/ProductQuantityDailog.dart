@@ -1279,11 +1279,24 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                             width: 4,
                                           )),
                                       minWidth: 50,
-                                      child: Text(
-                                          attr.toString() +
-                                              " " +
-                                              attrtypesPrice[i],
-                                          style: Styles.blackMediumBold()),
+                                      child: Row(
+                                        children: <Widget>[
+                                          Text(
+                                            attr.toString(),
+                                            style: Styles.blackMediumBold(),
+                                          ),
+                                          SizedBox(width: 10),
+                                          Text(
+                                            double.parse(attrtypesPrice[i])
+                                                .toStringAsFixed(2),
+                                            style: TextStyle(
+                                                color: StaticColor.deepOrange,
+                                                fontSize: SizeConfig
+                                                        .safeBlockVertical *
+                                                    2.5),
+                                          ),
+                                        ],
+                                      ),
                                       textColor: StaticColor.colorBlack,
                                       color: StaticColor.colorGrey300,
                                       onPressed: () {
