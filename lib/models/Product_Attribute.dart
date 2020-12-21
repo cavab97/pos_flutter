@@ -4,7 +4,7 @@ class ProductAttribute {
   int productId;
   int attributeId;
   int caId;
-  int price;
+  double price;
   int status;
   String updatedAt;
   int updatedBy;
@@ -26,7 +26,7 @@ class ProductAttribute {
     productId = json['product_id'];
     attributeId = json['attribute_id'];
     caId = json["ca_id"];
-    price = json['price'];
+    price = double.tryParse(json['price'].toString());
     status = json['status'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
@@ -38,7 +38,7 @@ class ProductAttribute {
     data['uuid'] = this.uuid;
     data['product_id'] = this.productId;
     data['attribute_id'] = this.attributeId;
-    data['ca_id']= this.caId;
+    data['ca_id'] = this.caId;
     data['price'] = this.price;
     data['status'] = this.status;
     data['updated_at'] = this.updatedAt;
@@ -46,4 +46,3 @@ class ProductAttribute {
     return data;
   }
 }
-

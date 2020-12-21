@@ -346,7 +346,7 @@ class CommunFun {
     await SyncAPICalls.sendShiftTable(context);
     await SyncAPICalls.sendShiftdetails(context);
     if (isClose && Navigator.of(context).canPop()) {
-      //Navigator.of(context).pop();
+      Navigator.of(context).pop();
     }
   }
 

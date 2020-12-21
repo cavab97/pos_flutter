@@ -572,7 +572,8 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                       double currentPaidAmount = double.parse(currentNumber);
 
                       if (seletedPayment.paymentId == null ||
-                          totalPaymentList[0].op_amount == 0.00) {
+                          (totalPaymentList.length > 0 &&
+                              totalPaymentList[0].op_amount == 0.00)) {
                         return CommunFun.showToast(
                             context, Strings.selectPayment);
                       }
@@ -583,6 +584,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                               seletedPayment.paymentId;
                           totalPaymentList.add(currentPayment);
                           paidAmount += currentPaidAmount;
+                          seletedPayment = new Payments();
                         });
                       }
                       if (paidAmount < (widget.totalAmount) && this.mounted) {
@@ -599,7 +601,21 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                   ]),
                   Row(
                     children: <Widget>[
-                      _totalbutton(widget.totalAmount.toStringAsFixed(2), () {
+                      _totalbutton(
+                          (widget.totalAmount - paidAmount).toStringAsFixed(2),
+                          () {
+                        if (!isPaymented && this.mounted) {
+                          setState(() {
+                            double currentPaidAmount =
+                                (widget.totalAmount - paidAmount);
+                            currentPayment.op_amount = currentPaidAmount;
+                            currentPayment.op_method_id =
+                                seletedPayment.paymentId;
+                            totalPaymentList.add(currentPayment);
+                            paidAmount += currentPaidAmount;
+                            seletedPayment = new Payments();
+                          });
+                        }
                         finalPayment();
                         //widget.onEnter(widget.totalAmount.toString());
                       }),
@@ -617,7 +633,9 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   finalPayment() async {
     //List<OrderPayment> totalPayment = [];
     double change = paidAmount - widget.totalAmount;
-    if (totalPaymentList[0].op_amount == 0.00) {
+    if (!(paidAmount >= (widget.totalAmount)) &&
+        (seletedPayment.paymentId == null ||
+            totalPaymentList[0].op_amount == 0.00)) {
       return CommunFun.showToast(context, Strings.selectPayment);
     }
     await showDialog(

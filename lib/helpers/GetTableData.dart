@@ -449,7 +449,7 @@ class TableData {
             'key': "pa_id",
             'value': product.paId,
           };
-          var count = await ifExists(db, data);
+          int count = await ifExists(db, data);
           if (count == 0) {
             await db.insert(
               "product_attribute",

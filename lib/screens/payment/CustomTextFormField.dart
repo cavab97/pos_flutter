@@ -24,10 +24,9 @@ class CustomTextFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController codeInput = new TextEditingController();
     return TextFormField(
       validator: validatorFunction,
-      controller: codeInput,
+      controller: inputController,
       keyboardType: textInputType,
       inputFormatters: textInputFormatterList,
       decoration: InputDecoration(
