@@ -571,9 +571,11 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                       //paidAmount = widget.totalAmount;
                       double currentPaidAmount = double.parse(currentNumber);
 
-    if (seletedPayment.paymentId == null || totalPaymentList[0].op_amount == 0.00) {
-      return CommunFun.showToast(context, Strings.selectPayment);
-    }
+                      if (seletedPayment.paymentId == null ||
+                          totalPaymentList[0].op_amount == 0.00) {
+                        return CommunFun.showToast(
+                            context, Strings.selectPayment);
+                      }
                       if (!isPaymented && this.mounted) {
                         setState(() {
                           currentPayment.op_amount = currentPaidAmount;

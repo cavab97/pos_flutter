@@ -92,7 +92,6 @@ class Strings {
   static String closeShift = "Close Shift";
   static String draftReport = "Draft Report";
   static String checkList = "Check list";
-  static String noImage = "assets/noImage.png";
   static String deleteOrder = "Delete Order";
   static String reprintOrder = "Resend to Kitchen";
   static String outOfStoke = "OUT OF STOCK";
@@ -103,7 +102,7 @@ class Strings {
   static String itemNotAvailable = "No item available";
   static String assetHeaderLogo = "assets/headerlogo.png";
   static String assetsBG = "assets/bg.jpg";
-  static String noImageAsset = 'assets/noImage.png';
+  static String noImageAsset = 'assets/no_image.png';
   static String enter = "E\nn\nt\ne\nr";
   static String invalidPinMsg = "Invalid PIN.";
   static String clear = "Clear";

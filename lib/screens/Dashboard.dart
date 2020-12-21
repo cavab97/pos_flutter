@@ -336,15 +336,17 @@ class _DashboradPageState extends State<DashboradPage>
     }
 
     cartdetails.forEach((cartdetail) {
-      currentSubtotal += cartdetail.productDetailAmount != null 
-                    && cartdetail.productDetailAmount != 0.00 
-                      ? cartdetail.productDetailAmount 
-                      : cartdetail.productPrice;
+      currentSubtotal += cartdetail.productDetailAmount != null &&
+              cartdetail.productDetailAmount != 0.00
+          ? cartdetail.productDetailAmount
+          : cartdetail.productPrice;
     });
 
     cart.sub_total = currentSubtotal;
     cart.serviceCharge = currentSubtotal * (cart.serviceChargePercent / 100);
-    cart.grand_total = (cart.sub_total - cart.discount) + cart.tax + (cart.serviceCharge == null ? 0.00 : cart.serviceCharge);
+    cart.grand_total = (cart.sub_total - cart.discount) +
+        cart.tax +
+        (cart.serviceCharge == null ? 0.00 : cart.serviceCharge);
     await localAPI.updateWebCart(cart);
 
     if (this.mounted) {
@@ -1898,6 +1900,11 @@ class _DashboradPageState extends State<DashboradPage>
           });
         }
       }
+      if (this.mounted) {
+        setState(() {
+          itemSelectedIndex = new MSTCartdetails();
+        });
+      }
     } catch (e) {
       CommunFun.showToast(context, e.message.toString());
     }
@@ -2223,7 +2230,7 @@ class _DashboradPageState extends State<DashboradPage>
         indicator: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             color: StaticColor.deepOrange),
-        tabs: List<Widget>.generate(tabsList.length, (int index) {
+        tabs: List<Widget>.generate(categoryFirstRow.length, (int index) {
           return new Tab(
             child: Container(
                 padding: EdgeInsets.symmetric(
@@ -2682,7 +2689,7 @@ class _DashboradPageState extends State<DashboradPage>
                           ? CommonUtils.imageFromBase64String(
                               SearchProductList.base64)
                           : new Image.asset(
-                              Strings.noImage,
+                              Strings.noImageAsset,
                               gaplessPlayback: true,
                               fit: BoxFit.cover,
                             ),
@@ -3017,7 +3024,7 @@ class _DashboradPageState extends State<DashboradPage>
                         child: meal.base64 != ""
                             ? CommonUtils.imageFromBase64String(meal.base64)
                             : new Image.asset(
-                                Strings.noImage,
+                                Strings.noImageAsset,
                                 fit: BoxFit.cover,
                                 gaplessPlayback: true,
                               ),
@@ -3146,7 +3153,7 @@ class _DashboradPageState extends State<DashboradPage>
                                 ? CommonUtils.imageFromBase64String(
                                     product.base64)
                                 : new Image.asset(
-                                    Strings.noImage,
+                                    Strings.noImageAsset,
                                     fit: BoxFit.cover,
                                     gaplessPlayback: true,
                                   ),
@@ -3575,11 +3582,11 @@ class _DashboradPageState extends State<DashboradPage>
               if (currentQuantity > 0) {
                 currentProductQuantity = cart.productQty;
                 cart.productQty = currentQuantity.toDouble();
-                
+
                 cart.productDetailAmount = currentQuantity * cart.productPrice;
                 localAPI.addintoCartDetails(cart);
                 countTotals(cart.cartId);
-                
+
                 //print(jsonEncode(cart));
                 currentQuantity = 0;
                 //_selectedQuantity(0);
