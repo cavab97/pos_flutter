@@ -5,6 +5,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/screens/FinalPaymentScreen.dart';
 import 'package:mcncashier/components/commanutils.dart';
@@ -78,7 +79,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
               /* setState(() {
                 isSubPayment = true;
               }); */
-            } else {
+            } else if (this.mounted) {
               setState(() {
                 seletedPayment = payment;
               });
@@ -567,28 +568,39 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                       ],
                     ),
                     _button(Strings.enter, () {
-                      paidAmount = widget.totalAmount;
-                      finalPayment();
+                      //paidAmount = widget.totalAmount;
+                      double currentPaidAmount = double.parse(currentNumber);
+
+                      if (seletedPayment.paymentId == null ||
+                          totalPaymentList[0].op_amount == 0.00) {
+                        return CommunFun.showToast(
+                            context, Strings.selectPayment);
+                      }
+                      if (!isPaymented && this.mounted) {
+                        setState(() {
+                          currentPayment.op_amount = currentPaidAmount;
+                          currentPayment.op_method_id =
+                              seletedPayment.paymentId;
+                          totalPaymentList.add(currentPayment);
+                          paidAmount += currentPaidAmount;
+                        });
+                      }
+                      if (paidAmount < (widget.totalAmount) && this.mounted) {
+                        setState(() {
+                          isPaymented = false;
+                          currentNumber = "0";
+                        });
+                      } else {
+                        isPaymented = true;
+                        finalPayment();
+                      }
                       //widget.onEnter(currentNumber);
                     })
                   ]),
                   Row(
                     children: <Widget>[
                       _totalbutton(widget.totalAmount.toStringAsFixed(2), () {
-                        if (double.parse(currentNumber) <
-                            (widget.totalAmount - paidAmount)) {
-                          setState(() {
-                            currentPayment.op_amount =
-                                double.parse(currentNumber);
-                            currentPayment.op_method_id =
-                                seletedPayment.paymentId;
-                            totalPaymentList.add(currentPayment);
-                            isPaymented = false;
-                          });
-                        } else {
-                          Navigator.of(context).pop();
-                          finalPayment();
-                        }
+                        finalPayment();
                         //widget.onEnter(widget.totalAmount.toString());
                       }),
                     ],
@@ -605,6 +617,9 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   finalPayment() async {
     //List<OrderPayment> totalPayment = [];
     double change = paidAmount - widget.totalAmount;
+    if (totalPaymentList[0].op_amount == 0.00) {
+      return CommunFun.showToast(context, Strings.selectPayment);
+    }
     await showDialog(
         context: context,
         builder: (BuildContext context) {

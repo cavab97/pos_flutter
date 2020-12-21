@@ -95,7 +95,7 @@ class QRCodesImagePopState extends State<QRCodesImagePop> {
         version: QrVersions.auto,
         size: 320,
         gapless: false,
-        //embeddedImage: AssetImage('assets/noImage.png'),
+        //embeddedImage: AssetImage('assets/no_image.png'),
         embeddedImageStyle: QrEmbeddedImageStyle(
           size: Size(80, 80),
         ),
