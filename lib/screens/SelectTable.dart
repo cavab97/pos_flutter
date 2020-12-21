@@ -154,13 +154,11 @@ class _SelectTablePageState extends State<SelectTablePage>
     getTables();
   }
 
-  onDoubleTap(table) async {
-    if (this.mounted) {
+  ontableTap(table) async {
     setState(() {
       selectedTable = table;
       isMenuopen = true;
-    }); 
-    }
+    });
     paxController.text =
         table.numberofpax != null ? table.numberofpax.toString() : "";
     var tableid = selectedTable.tableId;
@@ -172,7 +170,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     }
   }
 
-  onSingleTap(table) {
+  ontableLongTap(table) {
     setState(() {
       selectedTable = table;
       //isMenuopen = true;
@@ -272,6 +270,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     await Preferences.setStringToSF(
         Constant.TABLE_DATA, json.encode(tableOrder));
     paxController.text = "";
+    Navigator.of(context).pop();
     if (!isChanging) {
       setState(() {
         isMenuopen = true;
@@ -279,12 +278,13 @@ class _SelectTablePageState extends State<SelectTablePage>
       });
       Navigator.pushNamed(context, Constant.DashboardScreen)
           .then(backToRefresh);
-    } else if(Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-    } else {
-      getTables();
     }
+    //getTables();
   }
+  /*   else {
+      CommunFun.showToast(context, Strings.table_paxMsg);
+    }
+  } */
 
   assignTabletoOrder() async {
     setState(() {
@@ -483,18 +483,19 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   addNewOrder() {
     if (permissions.contains(Constant.NEW_ORDER)) {
+      setState(() {
+        isChanging = false;
+      });
       selectTableForNewOrder();
       //opnPaxDailog();
     } else {
       CommonUtils.openPermissionPop(context, Constant.NEW_ORDER, () async {
-        selectTableForNewOrder();
-        //opnPaxDailog();
-      }, () {});
-    }
-    if(this.mounted) {
         setState(() {
           isChanging = false;
         });
+        selectTableForNewOrder();
+        //opnPaxDailog();
+      }, () {});
     }
   }
 
@@ -1218,11 +1219,11 @@ class _SelectTablePageState extends State<SelectTablePage>
                 CommunFun.showToast(context, Strings.tableAlreadyOccupied);
               }
             } else {
-              onSingleTap(table);
+              ontableLongTap(table);
             }
           },
           onDoubleTap: () {
-            onDoubleTap(table);
+            ontableTap(table);
           },
           child: Container(
             width: itemHeight,

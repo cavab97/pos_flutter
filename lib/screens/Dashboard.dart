@@ -323,6 +323,7 @@ class _DashboradPageState extends State<DashboradPage>
   countTotals(cartId) async {
     MST_Cart cart = await localAPI.getCartData(cartId);
     List<MSTCartdetails> cartdetails = await localAPI.getCartItem(cartId);
+    print(cartdetails);
     var currentSubtotal = 0.00;
 
     Voucher vaocher;
@@ -719,8 +720,10 @@ class _DashboradPageState extends State<DashboradPage>
       isLoading = true;
     });
     var branchid = await CommunFun.getbranchId();
+
     List<ProductDetails> product =
         await localAPI.getProduct(categoryId.toString(), branchid);
+    print(product);
     if (product.length > 0) {
       setState(() {
         // productList = [];
@@ -730,6 +733,8 @@ class _DashboradPageState extends State<DashboradPage>
       });
     } else {
       setState(() {
+        print("product.length");
+        print(product.length);
         productList = [];
         isLoading = false;
         mealsList = [];
@@ -2053,35 +2058,39 @@ class _DashboradPageState extends State<DashboradPage>
       padding: EdgeInsets.all(10),
       children: <Widget>[
         GestureDetector(
-          onTap: () {
-            if (permissions.contains(Constant.DISCOUNT_ITEM)) {
-              applyforFocProduct(itemSelectedIndex);
-              setState(() {
-                itemSelectedIndex = new MSTCartdetails();
-              });
-            } else {
-              CommonUtils.openPermissionPop(context, Constant.DISCOUNT_ITEM,
-                  () {
+            onTap: () {
+              if (permissions.contains(Constant.DISCOUNT_ITEM)) {
                 applyforFocProduct(itemSelectedIndex);
                 setState(() {
                   itemSelectedIndex = new MSTCartdetails();
                 });
-              }, () {});
-            }
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(Icons.free_breakfast),
-              SizedBox(height: 2),
-              Text(
-                'Make FOC',
-                textAlign: TextAlign.center,
-              )
-            ],
-          ),
-        ),
+              } else {
+                CommonUtils.openPermissionPop(context, Constant.DISCOUNT_ITEM,
+                    () {
+                  applyforFocProduct(itemSelectedIndex);
+                  setState(() {
+                    itemSelectedIndex = new MSTCartdetails();
+                  });
+                }, () {});
+              }
+            },
+            child: Container(
+              color: Colors.grey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.free_breakfast,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 2),
+                  Text('Make FOC',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white))
+                ],
+              ),
+            )),
         GestureDetector(
           onTap: () {
             if (permissions.contains(Constant.EDIT_ITEM)) {
@@ -2098,86 +2107,104 @@ class _DashboradPageState extends State<DashboradPage>
               }, () {});
             }
           },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(Icons.insert_drive_file),
-              SizedBox(height: 2),
-              Text(
-                'Edit Detail',
-                textAlign: TextAlign.center,
-              )
-            ],
+          child: Container(
+            color: Colors.grey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  Icons.insert_drive_file,
+                  color: Colors.white,
+                ),
+                SizedBox(height: 2),
+                Text('Edit Detail',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white))
+              ],
+            ),
           ),
         ),
         GestureDetector(
-          onTap: () {
-            setState(() {
-              itemSelectedIndex = new MSTCartdetails();
-            });
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(Icons.library_add),
-              SizedBox(height: 2),
-              Text(
-                'Set Quantity',
-                textAlign: TextAlign.center,
-              )
-            ],
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              itemSelectedIndex = new MSTCartdetails();
-            });
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(Icons.art_track),
-              SizedBox(height: 2),
-              Text(
-                'Set Remark',
-                textAlign: TextAlign.center,
-              )
-            ],
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            if (permissions.contains(Constant.DELETE_ITEM)) {
-              itememovefromCart(itemSelectedIndex);
+            onTap: () {
               setState(() {
                 itemSelectedIndex = new MSTCartdetails();
               });
-            } else {
-              CommonUtils.openPermissionPop(context, Constant.DELETE_ITEM, () {
+            },
+            child: Container(
+              color: Colors.grey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.library_add,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 2),
+                  Text('Set Quantity',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white))
+                ],
+              ),
+            )),
+        GestureDetector(
+            onTap: () {
+              setState(() {
+                itemSelectedIndex = new MSTCartdetails();
+              });
+            },
+            child: Container(
+              color: Colors.grey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.art_track,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 2),
+                  Text('Set Remark',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white))
+                ],
+              ),
+            )),
+        GestureDetector(
+            onTap: () {
+              if (permissions.contains(Constant.DELETE_ITEM)) {
                 itememovefromCart(itemSelectedIndex);
                 setState(() {
                   itemSelectedIndex = new MSTCartdetails();
                 });
-              }, () {});
-            }
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(Icons.delete),
-              SizedBox(height: 2),
-              Text(
-                'Delete',
-                textAlign: TextAlign.center,
-              )
-            ],
-          ),
-        ),
+              } else {
+                CommonUtils.openPermissionPop(context, Constant.DELETE_ITEM,
+                    () {
+                  itememovefromCart(itemSelectedIndex);
+                  setState(() {
+                    itemSelectedIndex = new MSTCartdetails();
+                  });
+                }, () {});
+              }
+            },
+            child: Container(
+              color: Colors.grey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 2),
+                  Text('Delete',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white))
+                ],
+              ),
+            )),
         /* GestureDetector(
           onTap: () {
             print(itemSelectedIndex);
@@ -3588,7 +3615,7 @@ class _DashboradPageState extends State<DashboradPage>
                 cart.productDetailAmount = currentQuantity * cart.productPrice;
                 localAPI.addintoCartDetails(cart);
                 countTotals(cart.cartId);
-
+                print("here");
                 //print(jsonEncode(cart));
                 currentQuantity = 0;
                 //_selectedQuantity(0);

@@ -493,6 +493,7 @@ class LocalAPI {
   Future<int> addintoCartDetails(cartdetails) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var cartdetailid;
+    print(cartdetails);
     var newObj = cartdetails.toJson();
     newObj.remove("attrName");
     newObj.remove("modiName");
