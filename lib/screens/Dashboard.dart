@@ -1125,11 +1125,13 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   openPaymentMethod() async {
+    var roundingTotal =
+        await CommunFun.checkRoundData(grandTotal.toStringAsFixed(2));
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return PaymentAlertDialog(
-            totalAmount: grandTotal,
+            totalAmount: double.tryParse(roundingTotal),
             onClose: (mehtod) {
               CommunFun.processingPopup(context);
               paymentWithMethod(mehtod);
@@ -1469,14 +1471,14 @@ class _DashboradPageState extends State<DashboradPage>
           orderpayment.op_amount_change = payment[i].op_amount_change;
           orderpayment.op_method_response = '';
           orderpayment.op_status = 1;
-          orderpayment.op_datetime =
-              await CommunFun.getCurrentDateTime(DateTime.now());
           orderpayment.op_by = userdata.id;
           orderpayment.isSync = 0;
           orderpayment.server_id = 0;
+          orderpayment.updated_by = userdata.id;
+          orderpayment.op_datetime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           orderpayment.updated_at =
               await CommunFun.getCurrentDateTime(DateTime.now());
-          orderpayment.updated_by = userdata.id;
           await localAPI.sendtoOrderPayment(orderpayment);
           if (payment[i].isCash == 1) {
             var shiftid =

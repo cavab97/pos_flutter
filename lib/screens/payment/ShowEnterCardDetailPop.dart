@@ -47,6 +47,7 @@ class _ShowEnterCardDetailPopState extends State<ShowEnterCardDetailPop> {
                 textInputType: TextInputType.number,
                 hintText: Strings.enterDigit,
                 errorMSG: errorMSG,
+                maxLength: 4,
                 validatorFunction: (value) {
                   if (value.isEmpty) {
                     return Strings.referenceNumMsg;
