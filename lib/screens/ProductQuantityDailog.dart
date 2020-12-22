@@ -876,7 +876,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                     : currency != null
                         ? currency + " " + price.toStringAsFixed(2).toString()
                         : price.toStringAsFixed(2).toString(),
-                style: Styles.orangeMedium(),
+                style: Styles.orangeLarge(),
               ),
             ),
             Container(
@@ -1436,14 +1436,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       decoration: BoxDecoration(
           border: Border.all(width: 1, color: StaticColor.colorGrey)),
       child: Center(
-        child: Text(
-            product_qty.toStringAsFixed(0) +
-                " " +
-                (!isSetMeal
-                    ? productItem.priceTypeName != null
-                        ? productItem.priceTypeName
-                        : ""
-                    : ""),
+        child: Text(product_qty.toStringAsFixed(0),
+            // " " +
+            // (!isSetMeal
+            //     ? productItem.priceTypeName != null
+            //         ? productItem.priceTypeName
+            //         : ""
+            //     : ""
+            //     ),
             style: TextStyle(color: StaticColor.colorGrey, fontSize: 20)),
       ),
     );
@@ -1470,7 +1470,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   Widget addbutton(context) {
     return Container(
-      height: SizeConfig.safeBlockVertical * 5,
+      height: SizeConfig.safeBlockVertical * 7,
       width: MediaQuery.of(context).size.width / 10,
       child: RaisedButton(
         onPressed: () {
@@ -1506,7 +1506,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                     color: StaticColor.colorWhite,
                     size: SizeConfig.safeBlockVertical * 3.5,
                   ),
-            SizedBox(width: 5),
+            SizedBox(width: 6),
             Text(isEditing ? Strings.update : Strings.add,
                 style: TextStyle(
                   color: StaticColor.colorWhite,

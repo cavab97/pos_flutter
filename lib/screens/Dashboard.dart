@@ -2069,7 +2069,10 @@ class _DashboradPageState extends State<DashboradPage>
               }
             },
             child: Container(
-              color: Colors.grey,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.grey,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -2078,7 +2081,7 @@ class _DashboradPageState extends State<DashboradPage>
                     Icons.free_breakfast,
                     color: Colors.white,
                   ),
-                  SizedBox(height: 2),
+                  SizedBox(height: 6),
                   Text('Make FOC',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white))
@@ -2102,7 +2105,10 @@ class _DashboradPageState extends State<DashboradPage>
             }
           },
           child: Container(
-            color: Colors.grey,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.grey,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -2111,7 +2117,7 @@ class _DashboradPageState extends State<DashboradPage>
                   Icons.insert_drive_file,
                   color: Colors.white,
                 ),
-                SizedBox(height: 2),
+                SizedBox(height: 6),
                 Text('Edit Detail',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white))
@@ -2126,7 +2132,10 @@ class _DashboradPageState extends State<DashboradPage>
               });
             },
             child: Container(
-              color: Colors.grey,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.grey,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -2135,7 +2144,7 @@ class _DashboradPageState extends State<DashboradPage>
                     Icons.library_add,
                     color: Colors.white,
                   ),
-                  SizedBox(height: 2),
+                  SizedBox(height: 6),
                   Text('Set Quantity',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white))
@@ -2149,7 +2158,10 @@ class _DashboradPageState extends State<DashboradPage>
               });
             },
             child: Container(
-              color: Colors.grey,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.grey,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -2158,7 +2170,7 @@ class _DashboradPageState extends State<DashboradPage>
                     Icons.art_track,
                     color: Colors.white,
                   ),
-                  SizedBox(height: 2),
+                  SizedBox(height: 6),
                   Text('Set Remark',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white))
@@ -2183,7 +2195,10 @@ class _DashboradPageState extends State<DashboradPage>
               }
             },
             child: Container(
-              color: Colors.grey,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.grey,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -2192,7 +2207,7 @@ class _DashboradPageState extends State<DashboradPage>
                     Icons.delete,
                     color: Colors.white,
                   ),
-                  SizedBox(height: 2),
+                  SizedBox(height: 6),
                   Text('Delete',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white))
@@ -3596,8 +3611,9 @@ class _DashboradPageState extends State<DashboradPage>
       children: cartList.map((cart) {
         return Slidable(
           key: Key(cart.id.toString()),
+          enabled: false,
           controller: slidableController,
-          actionPane: SlidableDrawerActionPane(),
+          actionPane: SlidableDrawerDismissal(),
           actionExtentRatio: 0.15,
           direction: Axis.horizontal,
           child: GestureDetector(
