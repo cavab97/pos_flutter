@@ -3617,8 +3617,9 @@ class _DashboradPageState extends State<DashboradPage>
       children: cartList.map((cart) {
         return Slidable(
           key: Key(cart.id.toString()),
+          enabled: false,
           controller: slidableController,
-          actionPane: SlidableDrawerActionPane(),
+          actionPane: SlidableDrawerDismissal(),
           actionExtentRatio: 0.15,
           direction: Axis.horizontal,
           child: GestureDetector(
