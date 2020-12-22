@@ -135,7 +135,6 @@ class _DashboradPageState extends State<DashboradPage>
   MSTCartdetails itemSelectedIndex = new MSTCartdetails();
   bool confirmOrder = false;
 
-  var vaucher;
   @override
   void initState() {
     super.initState();
@@ -144,11 +143,6 @@ class _DashboradPageState extends State<DashboradPage>
     });
     checkisInit();
     checkISlogin();
-    vaucher = allcartData != null &&
-            allcartData.voucher_detail != null &&
-            allcartData.voucher_detail != ""
-        ? json.decode(allcartData.voucher_detail)
-        : null;
   }
 
   refreshAfterAction(bool isClearCart) {
@@ -555,14 +549,14 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   changePromoCode() async {
-    if (vaucher != null) {
+    if (selectedvoucher != null) {
       CommonUtils.showAlertDialog(context, () {
         Navigator.of(context).pop();
       }, () {
         Navigator.of(context).pop();
-        removePromoCode(vaucher);
+        removePromoCode(selectedvoucher);
         setState(() {
-          vaucher = null;
+          selectedvoucher = null;
         });
       }, "Alert", "Are you sure you want to remove this promocode?", "Yes",
           "No", true);
@@ -636,9 +630,9 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
 /*this function used for remove promocode from cart*/
-  removePromoCode(voucherdata) async {
+  removePromoCode(Voucher voucher) async {
     //List<MSTCartdetails> cartListUpdate = [];
-    Voucher voucher = Voucher.fromJson(voucherdata);
+    //Voucher voucher = Voucher.fromJson(voucherdata);
     for (int i = 0; i < cartList.length; i++) {
       var cartitem = cartList[i];
       cartitem.discount = 0.0;
