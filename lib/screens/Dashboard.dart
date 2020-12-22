@@ -3606,6 +3606,7 @@ class _DashboradPageState extends State<DashboradPage>
     final cartTable = ListView(
       //physics: BouncingScrollPhysics(),
       shrinkWrap: true,
+
       // itemExtent:60.0,
       padding: EdgeInsets.only(bottom: 50),
       children: cartList.map((cart) {
