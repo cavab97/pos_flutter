@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
@@ -42,6 +43,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
     super.initState();
     setState(() {});
     getPaymentMethods();
+    currentNumber = widget.totalAmount.toStringAsFixed(2);
   }
 
   getPaymentMethods() async {
@@ -58,7 +60,11 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   List<Widget> setPaymentListTile(List<Payments> listTilePaymentType) {
     var size = MediaQuery.of(context).size.width / 2.3;
     return listTilePaymentType.map((payment) {
-      if (payment.name.toUpperCase() == "CASH") return SizedBox();
+      if (payment.name.toUpperCase() == "CASH") {
+        if (this.mounted) {
+          seletedPayment = payment;
+        }
+      }
       return MaterialButton(
           minWidth: (size / 3.5),
           shape: RoundedRectangleBorder(
@@ -67,7 +73,8 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
           ),
           child: Text(payment.name, style: Styles.blackMediumBold()),
           textColor: Colors.black,
-          color: Colors.grey[100],
+          color:
+              seletedPayment == payment ? Colors.orange[200] : Colors.grey[100],
           onPressed: () {
             seletedPayment = payment;
             List<Payments> subList = subPaymenttyppeList
@@ -108,6 +115,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   }
 
   insertPaymentOption(Payments payment) {
+    if (seletedPayment.name == null) return;
     if (seletedPayment.name.toLowerCase().contains("wallet")) {
       setState(() {
         seletedPayment = payment;
@@ -298,7 +306,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                 textAlign: TextAlign.center, style: Styles.blackMediumBold())
             : Icon(Icons.subdirectory_arrow_left, size: 30),
         textColor: Colors.black,
-        color: Colors.grey[100],
+        color: number == Strings.enter ? Colors.greenAccent : Colors.grey[100],
         onPressed: f,
       ),
     );
@@ -320,7 +328,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                 textAlign: TextAlign.center, style: Styles.blackMediumBold())
             : Icon(Icons.subdirectory_arrow_left, size: 30),
         textColor: Colors.black,
-        color: Colors.grey[100],
+        color: Colors.blueAccent,
         onPressed: f,
       ),
     );
@@ -401,9 +409,9 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                   ),
                   Text(
                     widget.totalAmount.toStringAsFixed(2),
-                    style: Styles.blackMediumBold(),
+                    style: Styles.blackLarge(),
                   ),
-                  SizedBox(height: 5),
+                  SizedBox(height: 15),
                   Container(
                     width: double.infinity,
                     child: Text(
@@ -413,9 +421,9 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                   ),
                   Text(
                     (paidAmount).toStringAsFixed(2),
-                    style: Styles.blackMediumBold(),
+                    style: Styles.blackLarge(),
                   ),
-                  SizedBox(height: 5),
+                  SizedBox(height: 15),
                   Container(
                     width: double.infinity,
                     child: Text(
@@ -425,7 +433,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                   ),
                   Text(
                     (widget.totalAmount - paidAmount).toStringAsFixed(2),
-                    style: Styles.blackMediumBold(),
+                    style: Styles.blackLarge(),
                   ),
                   /* SizedBox(height: 15),
                   Text('PaymentList :', style: Styles.blackMediumBold()),
@@ -570,10 +578,8 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                     _button(Strings.enter, () {
                       //paidAmount = widget.totalAmount;
                       double currentPaidAmount = double.parse(currentNumber);
-
-                      if (seletedPayment.paymentId == null ||
-                          (totalPaymentList.length > 0 &&
-                              totalPaymentList[0].op_amount == 0.00)) {
+                      if (currentPaidAmount < 0.01) return;
+                      if (seletedPayment.paymentId == null) {
                         return CommunFun.showToast(
                             context, Strings.selectPayment);
                       }
@@ -585,6 +591,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                           totalPaymentList.add(currentPayment);
                           paidAmount += currentPaidAmount;
                           seletedPayment = new Payments();
+                          currentPayment = new OrderPayment();
                         });
                       }
                       if (paidAmount < (widget.totalAmount) && this.mounted) {
@@ -614,6 +621,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                             totalPaymentList.add(currentPayment);
                             paidAmount += currentPaidAmount;
                             seletedPayment = new Payments();
+                            currentPayment = new OrderPayment();
                           });
                         }
                         finalPayment();
