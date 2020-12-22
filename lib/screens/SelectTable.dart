@@ -151,7 +151,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       }
 
       currentCart = [];
-    } 
+    }
 
     setState(() {
       tableList = tables;
@@ -1328,13 +1328,13 @@ class _SelectTablePageState extends State<SelectTablePage>
                               style: Styles.whiteSimpleSmall(),
                             )
                           : //table.numberofpax != null
-                            Text(
-                              Strings.amount + ' : ' +
-                              Strings.currency +
-                              table.currentAmount.toStringAsFixed(2),
-                              style: Styles.whiteSimpleSmall()
-                            )
-                              /* Text(
+                          Text(
+                              Strings.amount +
+                                  ' : ' +
+                                  Strings.currency +
+                                  table.currentAmount.toStringAsFixed(2),
+                              style: Styles.whiteSimpleSmall())
+                      /* Text(
                                   Strings.vacant +
                                       "0" +
                                       "/" +
