@@ -1471,7 +1471,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   Widget addbutton(context) {
     return Container(
       height: SizeConfig.safeBlockVertical * 7,
-      width: MediaQuery.of(context).size.width / 10,
+      width: MediaQuery.of(context).size.width / 8.5,
       child: RaisedButton(
         onPressed: () {
           if (attributeList.length > 0) {

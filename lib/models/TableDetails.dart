@@ -17,6 +17,7 @@ class TablesDetails {
   int updatedBy;
   String deletedAt;
   int deletedBy;
+  double currentAmount;
   double tableServiceCharge;
   double occupiedMinute;
   String assignTime;
@@ -39,6 +40,7 @@ class TablesDetails {
       this.deletedAt,
       this.deletedBy,
       this.saveorderid,
+      this.currentAmount,
       this.tableServiceCharge,
       this.numberofpax,
       this.merge_table_name,
@@ -64,6 +66,7 @@ class TablesDetails {
     updatedBy = json['updated_by'];
     deletedAt = json['deleted_at'];
     deletedBy = json['deleted_by'];
+    currentAmount = json['current_amount'] != null ? json['current_amount'] : 0.00;
     tableServiceCharge = json["table_service_charge"];
     occupiedMinute = json["occupiedMin"] is int
         ? (json['occupiedMin'] as int).toDouble()
@@ -91,6 +94,7 @@ class TablesDetails {
     data['updated_by'] = this.updatedBy;
     data['deleted_at'] = this.deletedAt;
     data['deleted_by'] = this.deletedBy;
+    data['current_amount'] = this.currentAmount;
     // data['number_of_pax'] = this.numberofpax;
     data['save_order_id'] = this.saveorderid;
     data["table_service_charge"] = this.tableServiceCharge;

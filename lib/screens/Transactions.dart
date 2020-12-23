@@ -65,6 +65,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Customer customer;
   List<Payments> paymentMethod = new List<Payments>();
   var currency = "RM";
+
   @override
   void initState() {
     super.initState();
@@ -1512,6 +1513,7 @@ class ChooseReasonType extends StatefulWidget {
 }
 
 class ChooseReasonTypeState extends State<ChooseReasonType> {
+  String reason = "";
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -1540,46 +1542,82 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
           physics: BouncingScrollPhysics(),
           shrinkWrap: true,
           children: <Widget>[
-            ListTile(
-                onTap: () {
-                  widget.onClose("Incorrect Item");
-                },
-                title: Text(
-                  "Incorrect Item",
-                  style: Styles.communBlacksmall(),
-                )),
-            ListTile(
-                onTap: () {
-                  widget.onClose("Incorrect variant");
-                },
-                title: Text(
-                  "Incorrect variant",
-                  style: Styles.communBlacksmall(),
-                )),
-            ListTile(
-                onTap: () {
-                  widget.onClose("Incorrect payment type");
-                },
-                title: Text(
-                  "Incorrect payment type",
-                  style: Styles.communBlacksmall(),
-                )),
-            ListTile(
-                onTap: () {
-                  widget.onClose("Incorrect quantity");
-                },
-                title: Text(
-                  "Incorrect quantity",
-                  style: Styles.communBlacksmall(),
-                )),
-            ListTile(
-                onTap: () {
-                  widget.onClose("Other");
-                },
-                title: Text(
-                  "Other",
-                  style: Styles.communBlacksmall(),
-                )),
+            ListTileTheme(
+              tileColor: reason == "Incorrect Item"
+                  ? Colors.orange[200]
+                  : Colors.white10,
+              child: ListTile(
+                  focusColor: Colors.blue,
+                  onTap: () {
+                    setState(() {
+                      reason = "Incorrect Item";
+                    });
+                    // widget.onClose("Incorrect Item");
+                  },
+                  title: Text(
+                    "Incorrect Item",
+                    style: Styles.communBlacksmall(),
+                  )),
+            ),
+            ListTileTheme(
+              tileColor: reason == "Incorrect variant"
+                  ? Colors.orange[200]
+                  : Colors.white10,
+              child: ListTile(
+                  onTap: () {
+                    setState(() {
+                      reason = "Incorrect variant";
+                    });
+                  },
+                  title: Text(
+                    "Incorrect variant",
+                    style: Styles.communBlacksmall(),
+                  )),
+            ),
+            ListTileTheme(
+              tileColor: reason == "Incorrect payment type"
+                  ? Colors.orange[200]
+                  : Colors.white10,
+              child: ListTile(
+                  onTap: () {
+                    setState(() {
+                      reason = "Incorrect payment type";
+                    });
+                  },
+                  title: Text(
+                    "Incorrect payment type",
+                    style: Styles.communBlacksmall(),
+                  )),
+            ),
+            ListTileTheme(
+              tileColor: reason == "Incorrect quantity"
+                  ? Colors.orange[200]
+                  : Colors.white10,
+              child: ListTile(
+                  onTap: () {
+                    setState(() {
+                      reason = "Incorrect quantity";
+                    });
+                  },
+                  title: Text(
+                    "Incorrect quantity",
+                    style: Styles.communBlacksmall(),
+                  )),
+            ),
+            ListTileTheme(
+              tileColor:
+                  reason == "Other" ? Colors.orange[200] : Colors.white10,
+              child: ListTile(
+                  onTap: () {
+                    setState(() {
+                      reason = "Other";
+                    });
+                  },
+                  title: Text(
+                    "Other",
+                    style: Styles.communBlacksmall(),
+                  )),
+            ),
           ],
         ),
       ),
@@ -1591,21 +1629,26 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
     return FlatButton(
       // padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
       onPressed: () {
-        widget.onClose();
+        widget.onClose(reason);
+        // Navigator.of(context).pop();
       },
       child: Text("Confirm",
           style: TextStyle(
             color: StaticColor.colorWhite,
             fontSize: 20,
           )),
+      color: StaticColor.deepOrange,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50.0),
+      ),
       textColor: StaticColor.colorWhite,
     );
   }
 
   Widget closeButton(context) {
     return Positioned(
-      top: -30,
-      right: -20,
+      top: 0,
+      right: 0,
       child: GestureDetector(
         onTap: () {
           Navigator.of(context).pop();
@@ -1619,6 +1662,9 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
+              setState(() {
+                reason = "";
+              });
             },
             icon: Icon(
               Icons.clear,
@@ -1648,7 +1694,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
     return AlertDialog(
       titlePadding: EdgeInsets.all(0),
       content: Container(
-        height: MediaQuery.of(context).size.height / 4,
+        height: MediaQuery.of(context).size.height / 3.5,
         width: MediaQuery.of(context).size.width / 3.4,
         child: SingleChildScrollView(
             physics: BouncingScrollPhysics(),
@@ -1660,7 +1706,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
                   "Reason",
                   style: Styles.communBlack(),
                 ),
-                CommunFun.verticalSpace(10),
+                CommunFun.verticalSpace(3),
                 TextField(
                   controller: reasonController,
                   maxLines: 4,
@@ -1690,8 +1736,12 @@ class AddOtherReasonState extends State<AddOtherReason> {
       onPressed: () {
         widget.onClose(reasonController.text);
       },
-      child: Text("Confirm", style: Styles.orangeSmall()),
+      child: Text("Confirm", style: Styles.whiteMediumBold()),
       textColor: StaticColor.colorWhite,
+      color: StaticColor.deepOrange,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50.0),
+      ),
     );
   }
 

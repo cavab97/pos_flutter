@@ -58,7 +58,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   }
 
   List<Widget> setPaymentListTile(List<Payments> listTilePaymentType) {
-    var size = MediaQuery.of(context).size.width / 2.3;
+    var size = MediaQuery.of(context).size.width / 2.0;
     return listTilePaymentType.map((payment) {
       if (payment.name.toUpperCase() == "CASH") {
         if (this.mounted) {
@@ -66,7 +66,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
         }
       }
       return MaterialButton(
-          minWidth: (size / 3.5),
+          minWidth: (size / 3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
             side: BorderSide(color: Colors.grey),
@@ -216,7 +216,8 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                             ? ' (' + seletedPayment.name + ')'
                             : ''),
                     style: Styles.communBlack()),
-                Text(currentNumber, style: Styles.communBlack()),
+                Text(CommunFun.getDecimalFormat(currentNumber),
+                    style: Styles.communBlack()),
               ],
             ),
           ),
@@ -305,8 +306,8 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
             ? Text(number,
                 textAlign: TextAlign.center, style: Styles.blackMediumBold())
             : Icon(Icons.subdirectory_arrow_left, size: 30),
-        textColor: Colors.black,
-        color: number == Strings.enter ? Colors.greenAccent : Colors.grey[100],
+        textColor: Colors.white,
+        color: number == Strings.enter ? Colors.green[900] : Colors.grey[100],
         onPressed: f,
       ),
     );
@@ -325,10 +326,14 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
             side: BorderSide(color: Colors.grey)),
         child: number != Strings.enter
             ? Text(number,
-                textAlign: TextAlign.center, style: Styles.blackMediumBold())
-            : Icon(Icons.subdirectory_arrow_left, size: 30),
+                textAlign: TextAlign.center, style: Styles.whiteMediumBold())
+            : Icon(
+                Icons.subdirectory_arrow_left,
+                size: 30,
+                color: Colors.white,
+              ),
         textColor: Colors.black,
-        color: Colors.blueAccent,
+        color: Colors.blue[900],
         onPressed: f,
       ),
     );
@@ -397,44 +402,62 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
         children: [
           TableRow(children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
+              padding: EdgeInsets.symmetric(horizontal: 1),
               child: Column(
                 children: [
                   Container(
                     width: double.infinity,
-                    child: Text(
-                      'Total :',
-                      style: Styles.blackMediumBold(),
-                    ),
+                    child: RichText(
+                        text: TextSpan(
+                            text: "Total",
+                            style: Styles.blueMediumBold(),
+                            children: <TextSpan>[
+                          TextSpan(
+                              text:
+                                  "\n" + widget.totalAmount.toStringAsFixed(2),
+                              style: TextStyle(fontSize: 30))
+                        ])),
                   ),
-                  Text(
-                    widget.totalAmount.toStringAsFixed(2),
-                    style: Styles.blackLarge(),
-                  ),
+                  // Text(
+                  //   widget.totalAmount.toStringAsFixed(2),
+                  //   style: Styles.blackLarge(),
+                  // ),
                   SizedBox(height: 15),
                   Container(
                     width: double.infinity,
-                    child: Text(
-                      'Amount Paid :',
-                      style: Styles.blackMediumBold(),
-                    ),
+                    child: RichText(
+                        text: TextSpan(
+                            text: "Amount Paid",
+                            style: Styles.greenMediumBold(),
+                            children: <TextSpan>[
+                          TextSpan(
+                              text: "\n" + (paidAmount).toStringAsFixed(2),
+                              style: TextStyle(fontSize: 30))
+                        ])),
                   ),
-                  Text(
-                    (paidAmount).toStringAsFixed(2),
-                    style: Styles.blackLarge(),
-                  ),
+                  // Text(
+                  //   (paidAmount).toStringAsFixed(2),
+                  //   style: Styles.blackLarge(),
+                  // ),
                   SizedBox(height: 15),
                   Container(
                     width: double.infinity,
-                    child: Text(
-                      'Remaining :',
-                      style: Styles.blackMediumBold(),
-                    ),
+                    child: RichText(
+                        text: TextSpan(
+                            text: "Remaining",
+                            style: Styles.redMediumBold(),
+                            children: <TextSpan>[
+                          TextSpan(
+                              text: "\n" +
+                                  (widget.totalAmount - paidAmount)
+                                      .toStringAsFixed(2),
+                              style: TextStyle(fontSize: 30))
+                        ])),
                   ),
-                  Text(
-                    (widget.totalAmount - paidAmount).toStringAsFixed(2),
-                    style: Styles.blackLarge(),
-                  ),
+                  // Text(
+                  //   (widget.totalAmount - paidAmount).toStringAsFixed(2),
+                  //   style: Styles.blackLarge(),
+                  // ),
                   /* SizedBox(height: 15),
                   Text('PaymentList :', style: Styles.blackMediumBold()),
                   Text(
@@ -577,7 +600,8 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                     ),
                     _button(Strings.enter, () {
                       //paidAmount = widget.totalAmount;
-                      double currentPaidAmount = double.parse(currentNumber);
+                      double currentPaidAmount =
+                          CommunFun.getDecimalFormat(currentNumber);
                       if (currentPaidAmount < 0.01) return;
                       if (seletedPayment.paymentId == null) {
                         return CommunFun.showToast(
