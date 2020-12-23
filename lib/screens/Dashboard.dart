@@ -287,7 +287,7 @@ class _DashboradPageState extends State<DashboradPage>
   getCurrentCart() async {
     List<SaveOrder> currentOrder =
         await localAPI.getSaveOrder(selectedTable.save_order_id);
-    if (currentOrder.length != 0) {
+    if (currentOrder.length != 0 && this.mounted) {
       setState(() {
         currentCart = currentOrder[0].cartId;
       });
@@ -306,12 +306,10 @@ class _DashboradPageState extends State<DashboradPage>
 
   getCartItem(int cartId) async {
     List<MSTCartdetails> cartItems = await localAPI.getCartItem(cartId);
-    if (cartItems.length > 0) {
-      if (this.mounted) {
-        setState(() {
-          cartList = cartItems;
-        });
-      }
+    if (cartItems.length > 0 && this.mounted) {
+      setState(() {
+        cartList = cartItems;
+      });
       await countTotals(cartId);
     }
   }
@@ -1039,10 +1037,8 @@ class _DashboradPageState extends State<DashboradPage>
     if (isShiftOpen) {
       if (isTableSelected && !isWebOrder) {
         showQuantityDailog(product, false);
-      } else {
-        if (!isWebOrder) {
-          selectTable();
-        }
+      } else if (!isWebOrder) {
+        selectTable();
       }
     } else {
       CommunFun.showToast(context, Strings.shiftOpenMessage);
@@ -1050,6 +1046,9 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   showQuantityDailog(product, isSetMeal) async {
+    if (originalCartList.length == 0 && isInit) {
+      isInit = false;
+    }
     var selectedProduct = product;
     if (!isSetMeal) {
       if (selectedProduct.isSetMeal != null) {
@@ -2015,23 +2014,25 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   selectTable() async {
-    var removeCartDetails = [];
-    var diffCartDetails = [];
+    //print(DateTime.now());
     if (originalCartList.length == 0) {
-      await localAPI.removeCartItem(cartList[0].cartId, selectedTable.table_id);
-      await localAPI.deleteTableOrder(selectedTable.table_id);
-      await Preferences.removeSinglePref(Constant.TABLE_DATA);
+      if (cartList.length > 0) {
+        localAPI.removeCartItem(cartList[0].cartId, selectedTable.table_id);
+      }
+      localAPI.deleteTableOrder(selectedTable.table_id);
+      Preferences.removeSinglePref(Constant.TABLE_DATA);
     } else {
       localAPI.updateCartListDetails(
           originalCartList, originalCartList[0].cartId);
     }
-    goToTableScreen();
+    //print(DateTime.now());
+    goToTableScreen(selectedTable.table_id);
   }
 
-  goToTableScreen() {
+  goToTableScreen([int updatedTableId = 0]) {
     Navigator.pushNamedAndRemoveUntil(
         context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
-        arguments: {"isAssign": false});
+        arguments: {"isAssign": false, "updatedTableId": updatedTableId});
   }
 
   @override
@@ -3271,6 +3272,9 @@ class _DashboradPageState extends State<DashboradPage>
                   child: RaisedButton(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () async {
+                      if (cartList.length == 0) {
+                        return false;
+                      }
                       if (permissions.contains(Constant.ADD_ORDER)) {
                         confirmOrder = true;
                         await sendTokitched(cartList);
