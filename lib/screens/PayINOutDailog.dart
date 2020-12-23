@@ -7,6 +7,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/components/communText.dart';
@@ -57,6 +58,8 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
     setState(() {
       permissions = permission;
     });
+    await SyncAPICalls.logActivity(
+        "payIn/Out", "Opened pay in/out popup for cash in/out", "payIn/Out", 1);
   }
 
   openAmmountPop() {
@@ -72,12 +75,14 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         });
   }
 
-  setamount(ammountext) {
+  setamount(ammountext) async {
     if (ammountext is String) {
       setState(() {
         ammount = double.parse(ammountext);
       });
     }
+    await SyncAPICalls.logActivity("cash in/out amount",
+        "Added In/Out amount " + ammount.toString(), "cash in/out amount", 1);
   }
 
   getbranch() async {
@@ -130,7 +135,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
   Widget addbutton(context) {
     return RaisedButton(
       padding: EdgeInsets.all(2),
-      onPressed: () {
+      onPressed: () async {
         if (selectedreason != "Other") {
           if (printerreceiptList.length > 0) {
             printKOT.cashInPrint(
@@ -148,6 +153,13 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         }
 
         widget.onClose(ammount, selectedreason);
+        if (widget.isIn) {
+          await SyncAPICalls.logActivity(
+              "Pay In", "Added Pay in amount", "drawer", 1);
+        } else {
+          await SyncAPICalls.logActivity(
+              "Pay OUT", "Added Pay Out amount", "drawer", 1);
+        }
       },
       child: Text(
         "Confirm",
@@ -202,15 +214,22 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
         children: <Widget>[
           Text(widget.title, style: Styles.drawerText()),
           GestureDetector(
-              onTap: () {
+              onTap: () async {
                 if (widget.isIn && permissions.contains(Constant.CASH_IN) ||
                     !widget.isIn && permissions.contains(Constant.CASH_OUT)) {
                   openAmmountPop();
                 } else {
+                  await SyncAPICalls.logActivity("cash In",
+                      "Cashier has no permission for cash in/out", "drawer", 1);
                   CommonUtils.openPermissionPop(context,
                       widget.isIn ? Constant.CASH_IN : Constant.CASH_OUT,
                       () async {
-                    openAmmountPop();
+                    await openAmmountPop();
+                    await SyncAPICalls.logActivity(
+                        "cash In",
+                        "Manager given permission for cash in/out",
+                        "drawer",
+                        1);
                   }, () {});
                 }
               },
@@ -236,10 +255,12 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
                   hint: Text(Strings.pleaseSelectReason),
                   value: selectedreason,
                   isExpanded: true,
-                  onChanged: (String string) {
+                  onChanged: (String string) async {
                     setState(() {
                       selectedreason = string;
                     });
+                    await SyncAPICalls.logActivity(
+                        "reason", "Changed reason for pay In/Out", "reason", 1);
                   },
                   selectedItemBuilder: (BuildContext context) {
                     return reasonList.map<Widget>((item) {

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
 
@@ -247,7 +248,12 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
                   ),
                 ],
               ),
-              _button(Strings.enter, () {
+              _button(Strings.enter, () async {
+                await SyncAPICalls.logActivity(
+                    "shift",
+                    "Added opning closing amount " + currentNumber.toString(),
+                    "shift",
+                    1);
                 widget.onEnter(currentNumber);
                 Navigator.of(context).pop();
               })

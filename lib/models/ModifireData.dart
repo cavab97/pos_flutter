@@ -18,7 +18,9 @@ class ModifireData {
     modifierId = json["modifier_id"];
     isDefault = json["is_default"];
     pmId = json["pm_id"];
-    price = json["price"];
+    price = json["price"] is int
+        ? (json['price'] as int).toDouble()
+        : json['price'];
   }
 
   Map<String, dynamic> toJson() {

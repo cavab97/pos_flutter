@@ -35,7 +35,6 @@ class _CashPaymentState extends State<CashPaymentPage> {
 
   getPaymentMethods() async {
     var result = await localAPI.getPaymentMethods();
-
     if (result.length != 0) {
       setState(() {
         mainPaymentList = result.where((i) => i.isParent == 0).toList();

@@ -3,7 +3,7 @@ class ProductModifier {
   String uuid;
   int productId;
   int modifierId;
-  int price;
+  double price;
   int status;
   String updatedAt;
   int updatedBy;
@@ -23,7 +23,9 @@ class ProductModifier {
     uuid = json['uuid'];
     productId = json['product_id'];
     modifierId = json['modifier_id'];
-    price = json['price'];
+    price = json['price'] is int
+        ? (json['price'] as int).toDouble()
+        : json['price'];
     status = json['status'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];

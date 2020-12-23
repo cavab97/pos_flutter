@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
 
@@ -43,7 +44,12 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
 
   Widget print(context) {
     return RaisedButton(
-      onPressed: () {
+      onPressed: () async {
+        await SyncAPICalls.logActivity(
+            "Reprint kitchen",
+            "Print Reprint kitchen reciept for selected items",
+            "Reprint kitchen",
+            1);
         widget.onClose(tempCart);
       },
       child: Text(Strings.reprint,
@@ -61,7 +67,9 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
 
   Widget printAll(context) {
     return RaisedButton(
-      onPressed: () {
+      onPressed: () async {
+        await SyncAPICalls.logActivity("Reprint kitchen",
+            "Selected all items for reprint reciept", "Reprint kitchen", 1);
         widget.onClose(cartList);
       },
       child: Text(Strings.reprintAll,

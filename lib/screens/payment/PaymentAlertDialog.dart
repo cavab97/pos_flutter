@@ -1,15 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Payment.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/screens/FinalPaymentScreen.dart';
-import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'ShowEnterCardDetailPop.dart';
 import 'ShowEnterEwalletDetailPop.dart';
@@ -48,13 +49,14 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
 
   getPaymentMethods() async {
     var result = await localAPI.getPaymentMethods();
-
     if (result.length != 0) {
       setState(() {
         mainPaymentList = result.where((i) => i.isParent == 0).toList();
         subPaymenttyppeList = result.toList();
       });
     }
+    await SyncAPICalls.logActivity(
+        "payment", "Opened payment types popup for order place", "payment", 1);
   }
 
   List<Widget> setPaymentListTile(List<Payments> listTilePaymentType) {
@@ -75,13 +77,20 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
           textColor: Colors.black,
           color:
               seletedPayment == payment ? Colors.orange[200] : Colors.grey[100],
-          onPressed: () {
+          onPressed: () async {
             seletedPayment = payment;
             List<Payments> subList = subPaymenttyppeList
                 .where((i) => i.isParent == payment.paymentId)
                 .toList();
+            await SyncAPICalls.logActivity(
+                "payment",
+                "Cashier selected payment type" +
+                    seletedPayment.name.toString(),
+                "payment",
+                1);
             if (subList.length > 0) {
               openSubPaymentDialog(subList);
+
               //subPaymenttyppeList = subList;
               /* setState(() {
                 isSubPayment = true;
@@ -114,7 +123,8 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
         });
   }
 
-  insertPaymentOption(Payments payment) {
+  insertPaymentOption(Payments payment) async {
+  /* insertPaymentOption(Payments payment) { */
     if (seletedPayment.name == null) return;
     if (seletedPayment.name.toLowerCase().contains("wallet")) {
       setState(() {
@@ -129,6 +139,11 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
     } else {
       //cashPayment(payment);
     }
+    await SyncAPICalls.logActivity(
+        "payment",
+        "chasier selected payment option" + seletedPayment.name.toString(),
+        "payment",
+        1);
   }
 
   showEwalletOptionPop() {
@@ -599,6 +614,16 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                       ],
                     ),
                     _button(Strings.enter, () {
+                      setState(() {
+                        currentPayment.op_amount = currentNumber == "0"
+                            ? widget.totalAmount
+                            : double.parse(currentNumber);
+                        currentPayment.op_method_id = seletedPayment.paymentId;
+                        totalPaymentList.add(currentPayment);
+                        paidAmount = widget.totalAmount;
+                        isPaymented = false;
+                      });
+                      finalPayment();
                       //paidAmount = widget.totalAmount;
                       double currentPaidAmount =
                           CommunFun.getDecimalFormat(currentNumber);
@@ -637,6 +662,9 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                           () {
                         if (!isPaymented && this.mounted) {
                           setState(() {
+                            currentPayment.op_amount = currentNumber == "0"
+                                ? widget.totalAmount
+                                : double.parse(currentNumber);
                             double currentPaidAmount =
                                 (widget.totalAmount - paidAmount);
                             currentPayment.op_amount = currentPaidAmount;

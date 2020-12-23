@@ -15,6 +15,7 @@ import 'package:mcncashier/screens/CloseShiftPage.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/commanutils.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class DrawerWid extends StatefulWidget {
   DrawerWid({Key key, this.onClose}) : super(key: key);
@@ -43,6 +44,7 @@ class DrawerWidState extends State<DrawerWid> {
     setState(() {
       permissions = permission;
     });
+    await SyncAPICalls.logActivity("drawer", "Opened drawer menu", "drawer", 1);
   }
 
   getUserData() async {
@@ -107,25 +109,13 @@ class DrawerWidState extends State<DrawerWid> {
         builder: (BuildContext context) {
           return CloseShiftPage(onClose: () {
             Navigator.of(context).pop();
-            if (permissions.contains(Constant.OPEN_DRAWER)) {
-              printKOT.testReceiptPrint(
-                  printerreceiptList[0].printerIp.toString(),
-                  context,
-                  "",
-                  Strings.openDrawer,
-                  true);
-              openOpningAmmountPop(context, Strings.titleClosingAmount);
-            } else {
-              CommonUtils.openPermissionPop(context, Constant.OPEN_DRAWER,
-                  () async {
-                printKOT.testReceiptPrint(
-                    printerreceiptList[0].printerIp.toString(),
-                    context,
-                    "",
-                    Strings.openDrawer,
-                    true);
-              }, () {});
-            }
+            printKOT.testReceiptPrint(
+                printerreceiptList[0].printerIp.toString(),
+                context,
+                "",
+                Strings.openDrawer,
+                true);
+            openOpningAmmountPop(context, Strings.titleClosingAmount);
           });
         });
   }
@@ -141,24 +131,12 @@ class DrawerWidState extends State<DrawerWid> {
                 sendOpenShft(ammountext);
                 if (isopning == Strings.titleOpeningAmount) {
                   if (printerreceiptList.length > 0) {
-                    if (permissions.contains(Constant.OPEN_DRAWER)) {
-                      printKOT.testReceiptPrint(
-                          printerreceiptList[0].printerIp.toString(),
-                          context,
-                          "",
-                          Strings.openDrawer,
-                          true);
-                    } else {
-                      CommonUtils.openPermissionPop(
-                          context, Constant.OPEN_DRAWER, () async {
-                        printKOT.testReceiptPrint(
-                            printerreceiptList[0].printerIp.toString(),
-                            context,
-                            "",
-                            Strings.openDrawer,
-                            true);
-                      }, () {});
-                    }
+                    printKOT.testReceiptPrint(
+                        printerreceiptList[0].printerIp.toString(),
+                        context,
+                        "",
+                        Strings.openDrawer,
+                        true);
                   } else {
                     CommunFun.showToast(context, Strings.printerNotAvailable);
                   }
@@ -191,10 +169,10 @@ class DrawerWidState extends State<DrawerWid> {
     shift.status = 1;
     shift.serverId = 0;
     if (shiftid == null) {
-      shift.startAmount = int.parse(ammount);
+      shift.startAmount = double.parse(ammount);
       shift.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     } else {
-      shift.endAmount = int.parse(ammount);
+      shift.endAmount = double.parse(ammount);
       shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
     shift.updatedBy = userdata.id;
@@ -216,15 +194,21 @@ class DrawerWidState extends State<DrawerWid> {
         arguments: {"isAssign": false});
   }
 
-  gotoShiftReport() {
+  gotoShiftReport() async {
     if (isShiftOpen) {
       if (permissions.contains(Constant.VIEW_SHIFT)) {
         Navigator.of(context).pop();
         Navigator.pushNamed(context, Constant.ShiftOrders).then(backEvent);
       } else {
-        CommonUtils.openPermissionPop(context, Constant.VIEW_SHIFT, () async {
+        await SyncAPICalls.logActivity(
+            "view shift", "chashier has permission for view shift", "shift", 1);
+        await CommonUtils.openPermissionPop(context, Constant.VIEW_SHIFT,
+            () async {
+          await SyncAPICalls.logActivity("view shift",
+              "manager given permission for view shift", "shift", 1);
           Navigator.of(context).pop();
-          Navigator.pushNamed(context, Constant.ShiftOrders).then(backEvent);
+          await Navigator.pushNamed(context, Constant.ShiftOrders)
+              .then(backEvent);
         }, () {});
       }
     } else {
@@ -238,10 +222,14 @@ class DrawerWidState extends State<DrawerWid> {
       await CommunFun.syncOrdersANDStore(context, true);
       //Navigator.of(context).pop(syncAlert);
     } else {
+      await SyncAPICalls.logActivity("Sync order tables",
+          "chashier has permission for Sync order tables", "order", 1);
       await CommonUtils.openPermissionPop(context, Constant.SYNC_ORDER,
           () async {
         await CommunFun.openSyncPop(context);
         await CommunFun.syncOrdersANDStore(context, true);
+        await SyncAPICalls.logActivity("Sync order tables",
+            "Manager given permission for Sync order tables", "order", 1);
       }, () {});
     }
   }
@@ -254,8 +242,9 @@ class DrawerWidState extends State<DrawerWid> {
       await CommunFun.openSyncPop(context);
       await CommunFun.syncOrdersANDStore(context, false);
       await CommunFun.syncAfterSuccess(context, false);
-      print("first1");
     } else {
+      await SyncAPICalls.logActivity("Sync tables",
+          "chashier has permission for Sync tables", "all tables", 1);
       await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
           () async {
         await Preferences.removeSinglePref(Constant.LastSync_Table);
@@ -263,7 +252,8 @@ class DrawerWidState extends State<DrawerWid> {
         await CommunFun.openSyncPop(context);
         await CommunFun.syncOrdersANDStore(context, false);
         await CommunFun.syncAfterSuccess(context, false);
-        print("first2");
+        await SyncAPICalls.logActivity("Sync tables",
+            "Manager given permission for Sync tables", "all tables", 1);
       }, () {});
     }
   }
@@ -294,7 +284,9 @@ class DrawerWidState extends State<DrawerWid> {
             ),
             CommunFun.divider(),
             ListTile(
-              onTap: () {
+              onTap: () async {
+                await SyncAPICalls.logActivity(
+                    "drawer", "Select transaction menu", "drawer", 1);
                 gotoTansactionPage();
               },
               leading: Icon(
@@ -308,7 +300,9 @@ class DrawerWidState extends State<DrawerWid> {
               ),
             ),
             ListTile(
-              onTap: () {
+              onTap: () async {
+                await SyncAPICalls.logActivity(
+                    "drawer", "Select web Orders menu", "drawer", 1);
                 gotoWebCart();
               },
               leading: Icon(
@@ -322,7 +316,9 @@ class DrawerWidState extends State<DrawerWid> {
               ),
             ),
             ListTile(
-              onTap: () {
+              onTap: () async {
+                await SyncAPICalls.logActivity(
+                    "drawer", "Select wine storage menu", "drawer", 1);
                 gotoWineStorage();
               },
               leading: Icon(
@@ -336,24 +332,44 @@ class DrawerWidState extends State<DrawerWid> {
               ),
             ),
             ListTile(
-                onTap: () {
+                onTap: () async {
                   if (isShiftOpen) {
                     if (permissions.contains(Constant.CLOSING)) {
                       closeShift(context);
                     } else {
-                      CommonUtils.openPermissionPop(context, Constant.CLOSING,
-                          () async {
-                        closeShift(context);
+                      await SyncAPICalls.logActivity(
+                          "Close store",
+                          "Chasier has No permission for close store",
+                          "shift",
+                          1);
+                      await CommonUtils.openPermissionPop(
+                          context, Constant.CLOSING, () async {
+                        await closeShift(context);
+                        await SyncAPICalls.logActivity(
+                            "Close store",
+                            "Manager given permission for close store",
+                            "shift",
+                            1);
                       }, () {});
                     }
                   } else {
                     if (permissions.contains(Constant.OPENING)) {
                       openOpningAmmountPop(context, Strings.titleOpeningAmount);
                     } else {
-                      CommonUtils.openPermissionPop(context, Constant.OPENING,
-                          () async {
-                        openOpningAmmountPop(
+                      await SyncAPICalls.logActivity(
+                          "Open store",
+                          "Chasier has No permission for Open store",
+                          "shift",
+                          1);
+                      await CommonUtils.openPermissionPop(
+                          context, Constant.OPENING, () async {
+                        await openOpningAmmountPop(
                             context, Strings.titleOpeningAmount);
+                        await SyncAPICalls.logActivity(
+                            "Open store",
+                            "Manager given permission for Open store",
+                            "shift",
+                            1);
                       }, () {});
                     }
                   }
@@ -366,10 +382,11 @@ class DrawerWidState extends State<DrawerWid> {
                 title: Text(
                     isShiftOpen ? Strings.closeShift : Strings.openShift,
                     style: Styles.drawerText())),
-            // permissions.contains(Constant.VIEW_REPORT)
-            //     ?
+
             ListTile(
-              onTap: () {
+              onTap: () async {
+                await SyncAPICalls.logActivity(
+                    "drawer", "Select shift report menu", "drawer", 1);
                 gotoShiftReport();
               },
               leading: Icon(
@@ -382,11 +399,12 @@ class DrawerWidState extends State<DrawerWid> {
                 style: Styles.drawerText(),
               ),
             ),
-            //: SizedBox(),,
-            // permissions.contains(Constant.VIEW_ORDER)
+
             ListTile(
-                onTap: () {
+                onTap: () async {
                   Navigator.of(context).pop();
+                  await SyncAPICalls.logActivity(
+                      "drawer", "Select sync orders menu", "drawer", 1);
                   syncOrdersTodatabase();
                 },
                 leading: Icon(
@@ -398,6 +416,8 @@ class DrawerWidState extends State<DrawerWid> {
             // : SizedBox(),
             ListTile(
                 onTap: () async {
+                  await SyncAPICalls.logActivity(
+                      "drawer", "Select sync menu item", "drawer", 1);
                   syncAllTables();
                 },
                 leading: Icon(
@@ -407,8 +427,10 @@ class DrawerWidState extends State<DrawerWid> {
                 ),
                 title: Text(Strings.syncTxt, style: Styles.drawerText())),
             ListTile(
-                onTap: () {
+                onTap: () async {
                   Navigator.of(context).pop();
+                  await SyncAPICalls.logActivity(
+                      "drawer", "Select settings menu", "drawer", 1);
                   Navigator.pushNamed(context, Constant.SettingsScreen)
                       .then(backEvent);
                 },
@@ -428,7 +450,9 @@ class DrawerWidState extends State<DrawerWid> {
     return Expanded(
       child: RaisedButton(
         padding: EdgeInsets.all(10),
-        onPressed: () {
+        onPressed: () async {
+          await SyncAPICalls.logActivity(
+              "check out", "user clicked checkout", "check out", 1);
           Navigator.pushNamed(context, Constant.PINScreen).then(backEvent);
         },
         child: Text(Strings.checkout, style: Styles.whiteBoldsmall()),

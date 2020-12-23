@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
@@ -61,6 +62,8 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
       await Preferences.setStringToSF(
           Constant.CUSTOMER_DATA_SPLIT, json.encode(customer));
     }
+    await SyncAPICalls.logActivity(
+        "customer", "Customer selected", "customer", 1);
     Navigator.of(context).pop();
     widget.onClose();
   }
@@ -234,8 +237,10 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
           shrinkWrap: true,
           children: filterList.map((customer) {
             return ListTile(
-              onTap: () {
-                saveCustomerTolocal(customer);
+              onTap: () async {
+                await SyncAPICalls.logActivity(
+                    "customer", "Select customer", "Order", 1);
+                await saveCustomerTolocal(customer);
               },
               leading: Text(
                 customer.name == null ? customer.firstName : customer.name,
