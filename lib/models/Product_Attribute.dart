@@ -26,9 +26,10 @@ class ProductAttribute {
     productId = json['product_id'];
     attributeId = json['attribute_id'];
     caId = json["ca_id"];
-    price = json['price'] is int
+    /* price = json['price'] is int
         ? (json['price'] as int).toDouble()
-        : json['price'];
+        : json['price']; */
+    price = double.tryParse(json['price'].toString());
     status = json['status'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];

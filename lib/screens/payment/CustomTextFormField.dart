@@ -13,6 +13,7 @@ class CustomTextFormField extends StatelessWidget {
     @required this.errorMSG,
     this.textInputFormatterList,
     this.validatorFunction,
+    this.maxLength = -1,
   }) : super(key: key);
 
   final TextEditingController inputController;
@@ -20,16 +21,17 @@ class CustomTextFormField extends StatelessWidget {
   final String hintText;
   Function validatorFunction = () {};
   String errorMSG;
+  int maxLength;
   List<TextInputFormatter> textInputFormatterList = [];
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController codeInput = new TextEditingController();
     return TextFormField(
       validator: validatorFunction,
-      controller: codeInput,
+      controller: inputController,
       keyboardType: textInputType,
       inputFormatters: textInputFormatterList,
+      maxLength: maxLength != -1 ? maxLength : 255,
       decoration: InputDecoration(
         errorStyle: TextStyle(
             color: Colors.red, fontSize: SizeConfig.safeBlockVertical * 2),

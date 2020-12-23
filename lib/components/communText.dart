@@ -241,6 +241,18 @@ class CommunFun {
     return value;
   }
 
+  static getDecimalFormat(String value) {
+    var s1 = value.replaceAll(".", "");
+    s1 = "000" + s1;
+    var position = s1.length - 2;
+    var output =
+        [s1.substring(0, position), ".", s1.substring(position)].join("");
+    print(output);
+    print(double.parse(output).toStringAsFixed(2));
+
+    return double.parse(output).toStringAsFixed(2);
+  }
+
   static deviceInfo() async {
     // Device Info
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -346,7 +358,7 @@ class CommunFun {
     await SyncAPICalls.sendShiftTable(context);
     await SyncAPICalls.sendShiftdetails(context);
     if (isClose && Navigator.of(context).canPop()) {
-      //Navigator.of(context).pop();
+      Navigator.of(context).pop();
     }
   }
 
@@ -708,7 +720,7 @@ class CommunFun {
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
     if (countrys != null) {
       var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print(result);
+      print('counry state city' + result);
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {
@@ -811,7 +823,7 @@ class CommunFun {
     //converttoserver tiem
     var timeZone =
         await Preferences.getStringValuesSF(Constant.SERVER_TIME_ZONE);
-    print(timeZone);
+    //print(timeZone);
     if (timeZone != null) {
       final detroitTime =
           new tz.TZDateTime.from(dateTime, tz.getLocation(timeZone));

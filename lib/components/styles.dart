@@ -41,6 +41,33 @@ class Styles {
         fontFamily: Strings.fontFamily);
   }
 
+  static redMediumBold() {
+    return TextStyle(
+        // White text
+        color: Color(0xFFB71C1C),
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        fontFamily: Strings.fontFamily);
+  }
+
+  static greenMediumBold() {
+    return TextStyle(
+        // White text
+        color: Color(0xFF2E7D32),
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        fontFamily: Strings.fontFamily);
+  }
+
+  static blueMediumBold() {
+    return TextStyle(
+        // White text
+        color: Color(0xFF0D47A1),
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        fontFamily: Strings.fontFamily);
+  }
+
   static drawerText() {
     return TextStyle(
         // White text

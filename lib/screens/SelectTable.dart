@@ -28,6 +28,7 @@ import '../components/communText.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
+import 'package:mcncashier/models/MST_Cart.dart';
 
 class SelectTablePage extends StatefulWidget {
   // PIN Enter PAGE
@@ -128,15 +129,38 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   getTables() async {
-    setState(() {
-      isLoading = true;
-    });
+    if (this.mounted) {
+      setState(() {
+        isLoading = true;
+      });
+    }
+
+    var currentCart = [];
+    MST_Cart cart;
+
     var branchid = await CommunFun.getbranchId();
     List<TablesDetails> tables = await localAPI.getTables(branchid);
-    setState(() {
-      tableList = tables;
-      isLoading = false;
-    });
+
+    for (int i = 0; i < tables.length; i++) {
+      currentCart = await localAPI.getSaveOrder(tables[i].saveorderid);
+
+      if (currentCart.isNotEmpty) {
+        cart = await localAPI.getCartData(currentCart[0].cartId);
+
+        if (cart != null) {
+          tables[i].currentAmount = cart.grand_total;
+        }
+      }
+
+      currentCart = [];
+    } 
+
+    if (this.mounted) {
+      setState(() {
+        tableList = tables;
+        isLoading = false;
+      });
+    }
   }
 
   viewOrder() async {
@@ -221,7 +245,7 @@ class _SelectTablePageState extends State<SelectTablePage>
         mergeInTable = null;
         isLoading = false;
       });
-      getTables();
+      await getTables();
       CommunFun.showToast(context, Strings.tableMeargedMsg);
       getTables();
     } catch (e) {
@@ -1337,19 +1361,19 @@ class _SelectTablePageState extends State<SelectTablePage>
                               "-",
                               style: Styles.whiteSimpleSmall(),
                             )
-                          : table.numberofpax != null
-                              ? Text(
-                                  Strings.occupied +
-                                      table.numberofpax.toString() +
-                                      "/" +
-                                      table.tableCapacity.toString(),
-                                  style: Styles.whiteSimpleSmall())
-                              : Text(
+                          : //table.numberofpax != null
+                            Text(
+                              Strings.amount + ' : ' +
+                              Strings.currency +
+                              table.currentAmount.toStringAsFixed(2),
+                              style: Styles.whiteSimpleSmall()
+                            )
+                              /* Text(
                                   Strings.vacant +
                                       "0" +
                                       "/" +
                                       table.tableCapacity.toString(),
-                                  style: Styles.whiteSimpleSmall())
+                                  style: Styles.whiteSimpleSmall()) */
                     ],
                   ),
                 ),

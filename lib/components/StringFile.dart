@@ -1,5 +1,6 @@
 class Strings {
-  static String print15line = "---------------";
+  static String print15line =
+      "------------------------------------------------";
   /*Only for set name */
   static String terminalName = "";
   static String fontFamily = "Roboto";
@@ -20,6 +21,7 @@ class Strings {
   static String headerName = "Name";
   static String qty = "QTY";
   static String amount = "Amount";
+  static String currency = "RM ";
   static String discount = "Discount";
 
   static String serviceCharge = "Service Charge";
@@ -102,7 +104,7 @@ class Strings {
   static String itemNotAvailable = "No item available";
   static String assetHeaderLogo = "assets/headerlogo.png";
   static String assetsBG = "assets/bg.jpg";
-  static String noImageAsset = 'assets/noImage.png';
+  static String noImageAsset = 'assets/no_image.png';
   static String enter = "E\nn\nt\ne\nr";
   static String invalidPinMsg = "Invalid PIN.";
   static String clear = "Clear";
@@ -149,6 +151,7 @@ class Strings {
   static String takeAway = "Take Away";
   static String dineIn = "Dine In";
   static String tableMeargedMsg = "Table merged.";
+  static String selectPayment = "Please select a payment option";
   static String rePrintKitchenPrint = "Reprint Kitchen Bill";
   static String pleaseSelectCountry = "Please select country!";
   static String pleaseSelectState = "Please select state!";

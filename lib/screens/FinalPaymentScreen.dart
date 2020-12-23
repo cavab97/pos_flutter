@@ -53,6 +53,7 @@ class FinalEndScreentate extends State<FinalEndScreen> {
               widget.onClose();
               await SyncAPICalls.logActivity(
                   "Order", "Place Order", "order", 1);
+              Navigator.of(context).pop();
             },
             child: Container(
               width: MediaQuery.of(context).size.width,

@@ -57,10 +57,14 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:expandable/expandable.dart';
 import '../components/communText.dart';
+import '../components/communText.dart';
+import '../models/MST_Cart_Details.dart';
 import '../models/ProductStoreInventoryLog.dart';
 import '../models/Product_Store_Inventory.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
+
+import '../services/LocalAPIs.dart';
 
 class DashboradPage extends StatefulWidget {
   // main Product list page
@@ -128,7 +132,6 @@ class _DashboradPageState extends State<DashboradPage>
   MSTCartdetails itemSelectedIndex = new MSTCartdetails();
   bool confirmOrder = false;
 
-  var vaucher;
   @override
   void initState() {
     super.initState();
@@ -137,11 +140,6 @@ class _DashboradPageState extends State<DashboradPage>
     });
     checkisInit();
     checkISlogin();
-    vaucher = allcartData != null &&
-            allcartData.voucher_detail != null &&
-            allcartData.voucher_detail != ""
-        ? json.decode(allcartData.voucher_detail)
-        : null;
   }
 
   refreshAfterAction(bool isClearCart) {
@@ -284,7 +282,7 @@ class _DashboradPageState extends State<DashboradPage>
   getCurrentCart() async {
     List<SaveOrder> currentOrder =
         await localAPI.getSaveOrder(selectedTable.save_order_id);
-    if (currentOrder.length != 0) {
+    if (currentOrder.length != 0 && this.mounted) {
       setState(() {
         currentCart = currentOrder[0].cartId;
       });
@@ -315,6 +313,9 @@ class _DashboradPageState extends State<DashboradPage>
 
   countTotals(cartId) async {
     MST_Cart cart = await localAPI.getCartData(cartId);
+    List<MSTCartdetails> cartdetails = await localAPI.getCartItem(cartId);
+
+    var currentSubtotal = 0.00;
 
     Voucher vaocher;
     if (cart.voucher_id != null && cart.voucher_id != 0) {
@@ -325,6 +326,21 @@ class _DashboradPageState extends State<DashboradPage>
     if (cart.id == null) {
       return;
     }
+
+    cartdetails.forEach((cartdetail) {
+      currentSubtotal += cartdetail.productDetailAmount != null &&
+              cartdetail.productDetailAmount != 0.00
+          ? cartdetail.productDetailAmount
+          : cartdetail.productPrice;
+    });
+
+    cart.sub_total = currentSubtotal;
+    cart.serviceCharge = currentSubtotal * (cart.serviceChargePercent / 100);
+    cart.grand_total = (cart.sub_total - cart.discount) +
+        cart.tax +
+        (cart.serviceCharge == null ? 0.00 : cart.serviceCharge);
+    await localAPI.updateWebCart(cart);
+
     if (this.mounted) {
       setState(() {
         allcartData = cart;
@@ -543,14 +559,14 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   changePromoCode() async {
-    if (vaucher != null) {
+    if (selectedvoucher != null) {
       CommonUtils.showAlertDialog(context, () {
         Navigator.of(context).pop();
       }, () {
         Navigator.of(context).pop();
-        removePromoCode(vaucher);
+        removePromoCode(selectedvoucher);
         setState(() {
-          vaucher = null;
+          selectedvoucher = null;
         });
       }, "Alert", "Are you sure you want to remove this promocode?", "Yes",
           "No", true);
@@ -579,7 +595,7 @@ class _DashboradPageState extends State<DashboradPage>
                     openPrinterPop(resendList, true);
                   } else {
                     await SyncAPICalls.logActivity(
-                        "Repritn Kitchen print",
+                        "Reprint Kitchen print",
                         "Cashier has no permission for reprint kitchen print",
                         "Order",
                         1);
@@ -638,9 +654,9 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
 /*this function used for remove promocode from cart*/
-  removePromoCode(voucherdata) async {
+  removePromoCode(Voucher voucher) async {
     //List<MSTCartdetails> cartListUpdate = [];
-    Voucher voucher = Voucher.fromJson(voucherdata);
+    //Voucher voucher = Voucher.fromJson(voucherdata);
     for (int i = 0; i < cartList.length; i++) {
       var cartitem = cartList[i];
       cartitem.discount = 0.0;
@@ -724,6 +740,7 @@ class _DashboradPageState extends State<DashboradPage>
       isLoading = true;
     });
     var branchid = await CommunFun.getbranchId();
+
     List<ProductDetails> product =
         await localAPI.getProduct(categoryId.toString(), branchid);
     if (product.length > 0) {
@@ -919,6 +936,7 @@ class _DashboradPageState extends State<DashboradPage>
         MSTCartdetails temp = MSTCartdetails();
 
         if (printerList[i].printerId == cartLists[j].printer_id) {
+          print(cartLists[j].remark);
           temp = cartLists[j];
           tempCart.add(temp);
         }
@@ -1078,6 +1096,7 @@ class _DashboradPageState extends State<DashboradPage>
                 issetMeal: isSetMeal,
                 cartID: currentCart,
                 onClose: () {
+                  getCurrentCart();
                   refreshAfterAction(false);
                   //cartList.add(cartitem);
                 });
@@ -1123,11 +1142,13 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   openPaymentMethod() async {
+    var roundingTotal =
+        await CommunFun.checkRoundData(grandTotal.toStringAsFixed(2));
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return PaymentAlertDialog(
-            totalAmount: grandTotal,
+            totalAmount: double.tryParse(roundingTotal),
             onClose: (mehtod) {
               CommunFun.processingPopup(context);
               paymentWithMethod(mehtod);
@@ -1471,15 +1492,17 @@ class _DashboradPageState extends State<DashboradPage>
           orderpayment.op_amount_change = payment[i].op_amount_change;
           orderpayment.op_method_response = '';
           orderpayment.op_status = 1;
-          orderpayment.is_split = 0;
+          /* orderpayment.is_split = 0;
           orderpayment.op_datetime =
-              await CommunFun.getCurrentDateTime(DateTime.now());
+              await CommunFun.getCurrentDateTime(DateTime.now()); */
           orderpayment.op_by = userdata.id;
           orderpayment.isSync = 0;
           orderpayment.server_id = 0;
+          orderpayment.updated_by = userdata.id;
+          orderpayment.op_datetime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
           orderpayment.updated_at =
               await CommunFun.getCurrentDateTime(DateTime.now());
-          orderpayment.updated_by = userdata.id;
           await localAPI.sendtoOrderPayment(orderpayment);
           if (payment[i].isCash == 1) {
             var shiftid =
@@ -1765,6 +1788,11 @@ class _DashboradPageState extends State<DashboradPage>
           });
         }
       }
+      if (this.mounted) {
+        setState(() {
+          itemSelectedIndex = new MSTCartdetails();
+        });
+      }
     } catch (e) {
       CommunFun.showToast(context, e.message.toString());
     }
@@ -1911,35 +1939,42 @@ class _DashboradPageState extends State<DashboradPage>
       padding: EdgeInsets.all(10),
       children: <Widget>[
         GestureDetector(
-          onTap: () {
-            if (permissions.contains(Constant.DISCOUNT_ITEM)) {
-              applyforFocProduct(itemSelectedIndex);
-              setState(() {
-                itemSelectedIndex = new MSTCartdetails();
-              });
-            } else {
-              CommonUtils.openPermissionPop(context, Constant.DISCOUNT_ITEM,
-                  () {
+            onTap: () {
+              if (permissions.contains(Constant.DISCOUNT_ITEM)) {
                 applyforFocProduct(itemSelectedIndex);
                 setState(() {
                   itemSelectedIndex = new MSTCartdetails();
                 });
-              }, () {});
-            }
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(Icons.free_breakfast),
-              SizedBox(height: 2),
-              Text(
-                'Make FOC',
-                textAlign: TextAlign.center,
-              )
-            ],
-          ),
-        ),
+              } else {
+                CommonUtils.openPermissionPop(context, Constant.DISCOUNT_ITEM,
+                    () {
+                  applyforFocProduct(itemSelectedIndex);
+                  setState(() {
+                    itemSelectedIndex = new MSTCartdetails();
+                  });
+                }, () {});
+              }
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.grey,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.free_breakfast,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 6),
+                  Text('Make FOC',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white))
+                ],
+              ),
+            )),
         GestureDetector(
           onTap: () {
             if (permissions.contains(Constant.EDIT_ITEM)) {
@@ -1956,86 +1991,116 @@ class _DashboradPageState extends State<DashboradPage>
               }, () {});
             }
           },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(Icons.insert_drive_file),
-              SizedBox(height: 2),
-              Text(
-                'Edit Detail',
-                textAlign: TextAlign.center,
-              )
-            ],
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.grey,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  Icons.insert_drive_file,
+                  color: Colors.white,
+                ),
+                SizedBox(height: 6),
+                Text('Edit Detail',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white))
+              ],
+            ),
           ),
         ),
         GestureDetector(
-          onTap: () {
-            setState(() {
-              itemSelectedIndex = new MSTCartdetails();
-            });
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(Icons.library_add),
-              SizedBox(height: 2),
-              Text(
-                'Set Quantity',
-                textAlign: TextAlign.center,
-              )
-            ],
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              itemSelectedIndex = new MSTCartdetails();
-            });
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(Icons.art_track),
-              SizedBox(height: 2),
-              Text(
-                'Set Remark',
-                textAlign: TextAlign.center,
-              )
-            ],
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            if (permissions.contains(Constant.DELETE_ITEM)) {
-              itememovefromCart(itemSelectedIndex);
+            onTap: () {
               setState(() {
                 itemSelectedIndex = new MSTCartdetails();
               });
-            } else {
-              CommonUtils.openPermissionPop(context, Constant.DELETE_ITEM, () {
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.grey,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.library_add,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 6),
+                  Text('Set Quantity',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white))
+                ],
+              ),
+            )),
+        GestureDetector(
+            onTap: () {
+              setState(() {
+                itemSelectedIndex = new MSTCartdetails();
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.grey,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.art_track,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 6),
+                  Text('Set Remark',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white))
+                ],
+              ),
+            )),
+        GestureDetector(
+            onTap: () {
+              if (permissions.contains(Constant.DELETE_ITEM)) {
                 itememovefromCart(itemSelectedIndex);
                 setState(() {
                   itemSelectedIndex = new MSTCartdetails();
                 });
-              }, () {});
-            }
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(Icons.delete),
-              SizedBox(height: 2),
-              Text(
-                'Delete',
-                textAlign: TextAlign.center,
-              )
-            ],
-          ),
-        ),
+              } else {
+                CommonUtils.openPermissionPop(context, Constant.DELETE_ITEM,
+                    () {
+                  itememovefromCart(itemSelectedIndex);
+                  setState(() {
+                    itemSelectedIndex = new MSTCartdetails();
+                  });
+                }, () {});
+              }
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.grey,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 6),
+                  Text('Delete',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white))
+                ],
+              ),
+            )),
         /* GestureDetector(
           onTap: () {
             print(itemSelectedIndex);
@@ -2090,7 +2155,7 @@ class _DashboradPageState extends State<DashboradPage>
         indicator: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             color: StaticColor.deepOrange),
-        tabs: List<Widget>.generate(tabsList.length, (int index) {
+        tabs: List<Widget>.generate(categoryFirstRow.length, (int index) {
           return new Tab(
             child: Container(
                 padding: EdgeInsets.symmetric(
@@ -2964,13 +3029,21 @@ class _DashboradPageState extends State<DashboradPage>
                   (product.hasRacManagemant == 1 && product.box_pId != null)) {
                 await SyncAPICalls.logActivity(
                     "product", "Clicked product item", "product", 1);
-                checkshiftopen(product);
-              } else {
-                CommunFun.showToast(
+                /* CommunFun.showToast(
                     context,
                     product.hasRacManagemant != 1
                         ? Strings.outOfStokeMsg
-                        : Strings.outOfBoxMsg);
+                        : Strings.outOfBoxMsg); */
+                //  if (permissions.contains(Constant.ADD_ORDER)) {
+                checkshiftopen(product);
+                // } else {
+                //   CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
+                //       () {
+                //     checkshiftopen(product);
+                //   }, () {});
+                // }
+              } else {
+                CommunFun.showToast(context, Strings.outOfStokeMsg);
               }
             },
             child: Container(
@@ -3440,13 +3513,15 @@ class _DashboradPageState extends State<DashboradPage>
     final cartTable = ListView(
       //physics: BouncingScrollPhysics(),
       shrinkWrap: true,
+
       // itemExtent:60.0,
       padding: EdgeInsets.only(bottom: 50),
       children: cartList.map((cart) {
         return Slidable(
           key: Key(cart.id.toString()),
+          enabled: false,
           controller: slidableController,
-          actionPane: SlidableDrawerActionPane(),
+          actionPane: SlidableDrawerDismissal(),
           actionExtentRatio: 0.15,
           direction: Axis.horizontal,
           child: GestureDetector(
@@ -3454,10 +3529,11 @@ class _DashboradPageState extends State<DashboradPage>
               if (currentQuantity > 0) {
                 currentProductQuantity = cart.productQty;
                 cart.productQty = currentQuantity.toDouble();
-                cart.productPrice = currentQuantity *
-                    (cart.productNetPrice == null
-                        ? cart.productDetailAmount
-                        : cart.productNetPrice);
+
+                cart.productDetailAmount = currentQuantity * cart.productPrice;
+                localAPI.addintoCartDetails(cart);
+                countTotals(cart.cartId);
+                //print(jsonEncode(cart));
                 currentQuantity = 0;
                 //_selectedQuantity(0);
               } else if (cart.id == itemSelectedIndex.id) {

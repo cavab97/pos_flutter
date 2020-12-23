@@ -2,11 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
+import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/screens/FinalPaymentScreen.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
@@ -42,6 +44,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
     super.initState();
     setState(() {});
     getPaymentMethods();
+    currentNumber = widget.totalAmount.toStringAsFixed(2);
   }
 
   getPaymentMethods() async {
@@ -57,22 +60,25 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   }
 
   List<Widget> setPaymentListTile(List<Payments> listTilePaymentType) {
-    var size = MediaQuery.of(context).size.width / 2.3;
+    var size = MediaQuery.of(context).size.width / 2.0;
     return listTilePaymentType.map((payment) {
-      if (payment.name.toUpperCase() == "CASH") return SizedBox();
+      if (payment.name.toUpperCase() == "CASH") {
+        if (this.mounted) {
+          seletedPayment = payment;
+        }
+      }
       return MaterialButton(
-          minWidth: (size / 3.5),
+          minWidth: (size / 3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
             side: BorderSide(color: Colors.grey),
           ),
           child: Text(payment.name, style: Styles.blackMediumBold()),
           textColor: Colors.black,
-          color: Colors.grey[100],
+          color:
+              seletedPayment == payment ? Colors.orange[200] : Colors.grey[100],
           onPressed: () async {
-            setState(() {
-              seletedPayment = payment;
-            });
+            seletedPayment = payment;
             List<Payments> subList = subPaymenttyppeList
                 .where((i) => i.isParent == payment.paymentId)
                 .toList();
@@ -89,7 +95,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
               /* setState(() {
                 isSubPayment = true;
               }); */
-            } else {
+            } else if (this.mounted) {
               setState(() {
                 seletedPayment = payment;
               });
@@ -118,6 +124,8 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   }
 
   insertPaymentOption(Payments payment) async {
+  /* insertPaymentOption(Payments payment) { */
+    if (seletedPayment.name == null) return;
     if (seletedPayment.name.toLowerCase().contains("wallet")) {
       setState(() {
         seletedPayment = payment;
@@ -223,7 +231,8 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                             ? ' (' + seletedPayment.name + ')'
                             : ''),
                     style: Styles.communBlack()),
-                Text(currentNumber, style: Styles.communBlack()),
+                Text(CommunFun.getDecimalFormat(currentNumber),
+                    style: Styles.communBlack()),
               ],
             ),
           ),
@@ -312,8 +321,8 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
             ? Text(number,
                 textAlign: TextAlign.center, style: Styles.blackMediumBold())
             : Icon(Icons.subdirectory_arrow_left, size: 30),
-        textColor: Colors.black,
-        color: Colors.grey[100],
+        textColor: Colors.white,
+        color: number == Strings.enter ? Colors.green[900] : Colors.grey[100],
         onPressed: f,
       ),
     );
@@ -332,10 +341,14 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
             side: BorderSide(color: Colors.grey)),
         child: number != Strings.enter
             ? Text(number,
-                textAlign: TextAlign.center, style: Styles.blackMediumBold())
-            : Icon(Icons.subdirectory_arrow_left, size: 30),
+                textAlign: TextAlign.center, style: Styles.whiteMediumBold())
+            : Icon(
+                Icons.subdirectory_arrow_left,
+                size: 30,
+                color: Colors.white,
+              ),
         textColor: Colors.black,
-        color: Colors.grey[100],
+        color: Colors.blue[900],
         onPressed: f,
       ),
     );
@@ -404,44 +417,62 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
         children: [
           TableRow(children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
+              padding: EdgeInsets.symmetric(horizontal: 1),
               child: Column(
                 children: [
                   Container(
                     width: double.infinity,
-                    child: Text(
-                      'Total :',
-                      style: Styles.blackMediumBold(),
-                    ),
+                    child: RichText(
+                        text: TextSpan(
+                            text: "Total",
+                            style: Styles.blueMediumBold(),
+                            children: <TextSpan>[
+                          TextSpan(
+                              text:
+                                  "\n" + widget.totalAmount.toStringAsFixed(2),
+                              style: TextStyle(fontSize: 30))
+                        ])),
                   ),
-                  Text(
-                    widget.totalAmount.toStringAsFixed(2),
-                    style: Styles.blackMediumBold(),
-                  ),
-                  SizedBox(height: 5),
+                  // Text(
+                  //   widget.totalAmount.toStringAsFixed(2),
+                  //   style: Styles.blackLarge(),
+                  // ),
+                  SizedBox(height: 15),
                   Container(
                     width: double.infinity,
-                    child: Text(
-                      'Amount Paid :',
-                      style: Styles.blackMediumBold(),
-                    ),
+                    child: RichText(
+                        text: TextSpan(
+                            text: "Amount Paid",
+                            style: Styles.greenMediumBold(),
+                            children: <TextSpan>[
+                          TextSpan(
+                              text: "\n" + (paidAmount).toStringAsFixed(2),
+                              style: TextStyle(fontSize: 30))
+                        ])),
                   ),
-                  Text(
-                    (paidAmount).toStringAsFixed(2),
-                    style: Styles.blackMediumBold(),
-                  ),
-                  SizedBox(height: 5),
+                  // Text(
+                  //   (paidAmount).toStringAsFixed(2),
+                  //   style: Styles.blackLarge(),
+                  // ),
+                  SizedBox(height: 15),
                   Container(
                     width: double.infinity,
-                    child: Text(
-                      'Remaining :',
-                      style: Styles.blackMediumBold(),
-                    ),
+                    child: RichText(
+                        text: TextSpan(
+                            text: "Remaining",
+                            style: Styles.redMediumBold(),
+                            children: <TextSpan>[
+                          TextSpan(
+                              text: "\n" +
+                                  (widget.totalAmount - paidAmount)
+                                      .toStringAsFixed(2),
+                              style: TextStyle(fontSize: 30))
+                        ])),
                   ),
-                  Text(
-                    (widget.totalAmount - paidAmount).toStringAsFixed(2),
-                    style: Styles.blackMediumBold(),
-                  ),
+                  // Text(
+                  //   (widget.totalAmount - paidAmount).toStringAsFixed(2),
+                  //   style: Styles.blackLarge(),
+                  // ),
                   /* SizedBox(height: 15),
                   Text('PaymentList :', style: Styles.blackMediumBold()),
                   Text(
@@ -593,26 +624,59 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                         isPaymented = false;
                       });
                       finalPayment();
+                      //paidAmount = widget.totalAmount;
+                      double currentPaidAmount =
+                          CommunFun.getDecimalFormat(currentNumber);
+                      if (currentPaidAmount < 0.01) return;
+                      if (seletedPayment.paymentId == null) {
+                        return CommunFun.showToast(
+                            context, Strings.selectPayment);
+                      }
+                      if (!isPaymented && this.mounted) {
+                        setState(() {
+                          currentPayment.op_amount = currentPaidAmount;
+                          currentPayment.op_method_id =
+                              seletedPayment.paymentId;
+                          totalPaymentList.add(currentPayment);
+                          paidAmount += currentPaidAmount;
+                          seletedPayment = new Payments();
+                          currentPayment = new OrderPayment();
+                        });
+                      }
+                      if (paidAmount < (widget.totalAmount) && this.mounted) {
+                        setState(() {
+                          isPaymented = false;
+                          currentNumber = "0";
+                        });
+                      } else {
+                        isPaymented = true;
+                        finalPayment();
+                      }
                       //widget.onEnter(currentNumber);
                     })
                   ]),
                   Row(
                     children: <Widget>[
-                      _totalbutton(widget.totalAmount.toStringAsFixed(2), () {
-                        if (double.parse(currentNumber) <
-                            (widget.totalAmount - paidAmount)) {
+                      _totalbutton(
+                          (widget.totalAmount - paidAmount).toStringAsFixed(2),
+                          () {
+                        if (!isPaymented && this.mounted) {
                           setState(() {
                             currentPayment.op_amount = currentNumber == "0"
                                 ? widget.totalAmount
                                 : double.parse(currentNumber);
+                            double currentPaidAmount =
+                                (widget.totalAmount - paidAmount);
+                            currentPayment.op_amount = currentPaidAmount;
                             currentPayment.op_method_id =
                                 seletedPayment.paymentId;
                             totalPaymentList.add(currentPayment);
-                            isPaymented = false;
+                            paidAmount += currentPaidAmount;
+                            seletedPayment = new Payments();
+                            currentPayment = new OrderPayment();
                           });
-                        } else {
-                          finalPayment();
                         }
+                        finalPayment();
                         //widget.onEnter(widget.totalAmount.toString());
                       }),
                     ],
@@ -628,23 +692,23 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
 
   finalPayment() async {
     //List<OrderPayment> totalPayment = [];
-    if (totalPaymentList.length > 0 &&
-        totalPaymentList[0].op_method_id != null) {
-      double change = paidAmount - widget.totalAmount;
-      await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return FinalEndScreen(
-                total: widget.totalAmount,
-                totalPaid: paidAmount,
-                change: change,
-                onClose: () {
-                  Navigator.of(context).pop();
-                  widget.onClose(totalPaymentList);
-                });
-          });
-    } else {
-      CommunFun.showToast(context, "Please select payment type");
+    double change = paidAmount - widget.totalAmount;
+    if (!(paidAmount >= (widget.totalAmount)) &&
+        (seletedPayment.paymentId == null ||
+            totalPaymentList[0].op_amount == 0.00)) {
+      return CommunFun.showToast(context, Strings.selectPayment);
     }
+    await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return FinalEndScreen(
+              total: widget.totalAmount,
+              totalPaid: paidAmount,
+              change: change,
+              onClose: () {
+                Navigator.of(context).pop();
+                widget.onClose(totalPaymentList);
+              });
+        });
   }
 }
