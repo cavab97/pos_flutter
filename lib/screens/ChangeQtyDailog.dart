@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
 
@@ -24,24 +25,34 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
     setState(() {
       productQty = widget.qty;
     });
+    qtydailog();
   }
 
-  increaseQty() {
+  qtydailog() async {
+    await SyncAPICalls.logActivity("foc product",
+        "Opened foc product qty popup for make item for free", "cart", 1);
+  }
+
+  increaseQty() async {
     if (productQty < widget.qty) {
       productQty = productQty + 1;
       setState(() {
         productQty = productQty;
       });
     }
+    await SyncAPICalls.logActivity(
+        "cart item", "foc product qty increased", "cart", 1);
   }
 
-  decreaseQty() {
+  decreaseQty() async {
     if (productQty > 1) {
       productQty = productQty - 1;
       setState(() {
         productQty = productQty;
       });
     }
+    await SyncAPICalls.logActivity(
+        "cart item", "foc product qty decreased", "cart", 1);
   }
 
   @override

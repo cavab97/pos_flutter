@@ -931,8 +931,8 @@ class PrintReceipt {
       isper) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
-
-    final PosPrintResult res = await printerManager.printTicket(await Receipt(
+    PosPrintResult res;
+    res = await printerManager.printTicket(await Receipt(
         pax,
         branchData,
         taxJson,
@@ -2370,14 +2370,30 @@ class PrintReceipt {
       String isFor, bool isper) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
+    //bool isper = await checkPermission(Constant.OPEN_DRAWER);
+    PosPrintResult res;
+    // if (isper) {
+    res = await printerManager.printTicket(
+        await testPrintReceipt(printerName, printerIp, isFor, ctx, isper));
+    // } else {
+    //   await CommonUtils.openPermissionPop(ctx, Constant.OPEN_DRAWER, () async {
+    //     res = await printerManager.printTicket(
+    //         await testPrintReceipt(printerName, printerIp, isFor, ctx, true));
+    //   }, () async {
+    //     res = await printerManager.printTicket(
+    //         await testPrintReceipt(printerName, printerIp, isFor, ctx, false));
+    //   });
+    // }
 
-    final PosPrintResult res = await printerManager
-        .printTicket(await testPrintReceipt(printerName, printerIp, isFor));
-    await CommunFun.showToast(ctx, res.msg);
+    // final PosPrintResult res = await printerManager.printTicket(
+    //     await testPrintReceipt(printerName, printerIp, isFor, ctx, isper));
+    if (res != null) {
+      await CommunFun.showToast(ctx, res.msg);
+    }
   }
 
-  Future<Ticket> testPrintReceipt(
-      String printerName, String printerIp, String isFor) async {
+  Future<Ticket> testPrintReceipt(String printerName, String printerIp,
+      String isFor, ctx, bool isper) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 

@@ -23,6 +23,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Order_Modifire.dart';
 import 'package:mcncashier/models/OrderAttributes.dart';
@@ -121,6 +122,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
     setState(() {
       permissions = permission;
     });
+    await SyncAPICalls.logActivity("transactions",
+        "cashier opened transactions list page", "transactions", 1);
   }
 
   getTansactionList() async {
@@ -192,14 +195,18 @@ class _TransactionsPageState extends State<TransactionsPage> {
     setState(() {
       isScreenLoad = false;
     });
+    await SyncAPICalls.logActivity(
+        "transactions", "clicked transaction details", "transactions", 1);
     //}
   }
 
-  startFilter() {
+  startFilter() async {
     setState(() {
       filterList = orderLists;
       isFiltering = true;
     });
+    await SyncAPICalls.logActivity(
+        "filter", "Filtering transactions", "transactions", 1);
   }
 
   filterOrders(val) {
@@ -212,10 +219,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
     });
   }
 
-  refundProcessStart() {
+  refundProcessStart() async {
     setState(() {
       isRefunding = true;
     });
+    await SyncAPICalls.logActivity(
+        "transactions", "clicked redund button", "transactions", 1);
   }
 
   showReasontypePop() {
@@ -406,14 +415,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
           drawer.localID = uuid;
           drawer.terminalid = int.parse(terminalId);
-          if (permissions.contains(Constant.CASH_OUT)) {
-            await localAPI.saveInOutDrawerData(drawer);
-          } else {
-            await CommonUtils.openPermissionPop(context, Constant.CASH_OUT,
-                () async {
-              await localAPI.saveInOutDrawerData(drawer);
-            }, () {});
-          }
+          await localAPI.saveInOutDrawerData(drawer);
         }
       }
     }
@@ -527,6 +529,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
           Strings.walkinCustomer,
           true,
           true);
+      await SyncAPICalls.logActivity(
+          "transactions",
+          "clicked reprint button for reprint duplicate bill print",
+          "transactions",
+          1);
     }
   }
 
@@ -853,12 +860,23 @@ class _TransactionsPageState extends State<TransactionsPage> {
           });
         }),
         CommunFun.horisontalSpace(10),
-        refundNextButton(() {
+        refundNextButton(() async {
           if (permissions.contains(Constant.PAYMENT)) {
             refundSelectedammout();
           } else {
-            CommonUtils.openPermissionPop(context, Constant.PAYMENT, () async {
-              refundSelectedammout();
+            await SyncAPICalls.logActivity(
+                "payment",
+                "chashier has no permission for payment while refund",
+                "payment",
+                1);
+            await CommonUtils.openPermissionPop(context, Constant.PAYMENT,
+                () async {
+              await refundSelectedammout();
+              await SyncAPICalls.logActivity(
+                  "payment",
+                  "Manager given permission for payment while refund",
+                  "payment",
+                  1);
             }, () {});
           }
         }),
@@ -914,19 +932,24 @@ class _TransactionsPageState extends State<TransactionsPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
-        refundButton(() {
+        refundButton(() async {
           if (permissions.contains(Constant.REFUND)) {
             if (orderpayment[0].op_status == 1) {
               refundProcessStart();
             }
           } else {
-            CommonUtils.openPermissionPop(context, Constant.REFUND, () {
-              refundProcessStart();
+            await SyncAPICalls.logActivity(
+                "refund", "chashier has no permission for Refund", "refund", 1);
+            await CommonUtils.openPermissionPop(context, Constant.REFUND,
+                () async {
+              await refundProcessStart();
+              await SyncAPICalls.logActivity(
+                  "refund", "Manager given permission for Refund", "refund", 1);
             }, () {});
           }
         }),
         CommunFun.horisontalSpace(10),
-        cancelButton(() {
+        cancelButton(() async {
           if (permissions.contains(Constant.CANCLE_TRANSACTION)) {
             if (orderpayment[0].op_status == 1) {
               CommonUtils.showAlertDialog(context, () {
@@ -942,10 +965,20 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   true);
             }
           } else {
-            CommonUtils.openPermissionPop(context, Constant.CANCLE_TRANSACTION,
-                () {
+            await SyncAPICalls.logActivity(
+                "cancel transaction",
+                "chashier has no permission for cancel transaction",
+                "order",
+                1);
+            await CommonUtils.openPermissionPop(
+                context, Constant.CANCLE_TRANSACTION, () async {
               if (orderpayment[0].op_status == 1) {
-                CommonUtils.showAlertDialog(context, () {
+                await SyncAPICalls.logActivity(
+                    "cancel transaction",
+                    "Manager given permission for cancel transaction",
+                    "order",
+                    1);
+                await CommonUtils.showAlertDialog(context, () {
                   Navigator.of(context).pop();
                 }, () {
                   Navigator.of(context).pop();
@@ -1348,12 +1381,22 @@ class _TransactionsPageState extends State<TransactionsPage> {
     return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
       RaisedButton(
         padding: EdgeInsets.only(left: 10, right: 10),
-        onPressed: () {
+        onPressed: () async {
           if (permissions.contains(Constant.REPRINT_PREVIOS_RECIEPT)) {
             reprintRecipt();
           } else {
+            await SyncAPICalls.logActivity(
+                "reprint previos receipt",
+                "chashier has permission for reprint previos receipt",
+                "transaction",
+                1);
             CommonUtils.openPermissionPop(
                 context, Constant.REPRINT_PREVIOS_RECIEPT, () async {
+              await SyncAPICalls.logActivity(
+                  "reprint previos receipt",
+                  "Manager given permission for reprint previos receipt",
+                  "transaction",
+                  1);
               reprintRecipt();
             }, () {});
           }

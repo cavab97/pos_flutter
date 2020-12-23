@@ -6,6 +6,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
 
@@ -54,16 +55,24 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
           if (permissions[0].posPermissionName != null &&
               permissions[0].posPermissionName.contains(widget.perFor)) {
             Navigator.of(context).pop();
+            await SyncAPICalls.logActivity(
+                "permission", "manager permission done", "permission", 1);
             widget.onEnter();
           } else {
-            CommunFun.showToast(context, Strings.permissionMsg);
+            await CommunFun.showToast(context, Strings.permissionMsg);
+            await SyncAPICalls.logActivity(
+                "permission", Strings.permissionMsg, "permission", 1);
           }
         }
       } else {
-        CommunFun.showToast(context, Strings.invalidPinMsg);
+        await CommunFun.showToast(context, Strings.invalidPinMsg);
+        await SyncAPICalls.logActivity(
+            "permission", "manager permission pin invalid", "permission", 1);
       }
     } else {
-      CommunFun.showToast(context, Strings.invalidPinMsg);
+      await CommunFun.showToast(context, Strings.invalidPinMsg);
+      await SyncAPICalls.logActivity(
+          "permission", "manager permission pin invalid", "permission", 1);
     }
   }
 
@@ -104,10 +113,11 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
       top: 0,
       right: 0,
       child: GestureDetector(
-        onTap: () {
+        onTap: () async {
           widget.onClose();
-
           Navigator.of(context).pop();
+          await SyncAPICalls.logActivity(
+              "permission", "Ignored permission pin enter", "permission", 1);
         },
         child: Container(
           width: 50.0,
@@ -116,9 +126,11 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
               color: StaticColor.colorRed,
               borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
-            onPressed: () {
+            onPressed: () async {
               widget.onClose();
               Navigator.of(context).pop();
+              await SyncAPICalls.logActivity("permission",
+                  "Ignored permission pin enter", "permission", 1);
             },
             icon: Icon(
               Icons.clear,

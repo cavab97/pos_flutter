@@ -3,6 +3,7 @@ import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class FinalEndScreen extends StatefulWidget {
   FinalEndScreen(
@@ -29,6 +30,12 @@ class FinalEndScreentate extends State<FinalEndScreen> {
       ammountPaid = widget.totalPaid;
       change = widget.change;
     });
+    getPaymentPage();
+  }
+
+  getPaymentPage() async {
+    await SyncAPICalls.logActivity("payment",
+        "Opened final payment screen for payment done", "payment", 1);
   }
 
   @override
@@ -42,8 +49,10 @@ class FinalEndScreentate extends State<FinalEndScreen> {
           width: double.infinity,
           height: double.infinity,
           child: new GestureDetector(
-            onTap: () {
+            onTap: () async {
               widget.onClose();
+              await SyncAPICalls.logActivity(
+                  "Order", "Place Order", "order", 1);
               Navigator.of(context).pop();
             },
             child: Container(

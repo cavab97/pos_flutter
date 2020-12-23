@@ -290,7 +290,7 @@ class CreateTables {
         "product_id INTEGER," +
         "attribute_id INTEGER," +
         "ca_id INTEGER," +
-        "price INTEGER," +
+        "price REAL," +
         "status INTEGER," +
         "updated_at TEXT," +
         "updated_by INTEGER" +
@@ -771,8 +771,8 @@ class CreateTables {
         "user_id INTEGER," +
         "app_id INTEGER," +
         "branch_id INTEGER," +
-        "start_amount INTEGER," +
-        "end_amount INTEGER," +
+        "start_amount REAL," +
+        "end_amount REAL," +
         "status INTEGER," +
         "updated_by INTEGER," +
         "updated_at TEXT," +

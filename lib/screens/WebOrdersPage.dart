@@ -9,6 +9,7 @@ import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class WebOrderPages extends StatefulWidget {
   // Transactions list
@@ -36,14 +37,6 @@ class _WebOrderPagesState extends State<WebOrderPages>
     );
     _tabController = new TabController(length: 2, vsync: this);
     getCartList();
-    setPermissons();
-  }
-
-  setPermissons() async {
-    var permission = await CommunFun.getPemission();
-    setState(() {
-      permissions = permission;
-    });
   }
 
   getCartList() async {
@@ -57,10 +50,14 @@ class _WebOrderPagesState extends State<WebOrderPages>
         onlineList = onlineListitem;
       });
     }
+    await SyncAPICalls.logActivity(
+        "web orders", "Cashier Opened web orders page", "web orders", 1);
   }
 
-  assignTable(cart) {
-    Navigator.pushNamedAndRemoveUntil(
+  assignTable(cart) async {
+    await SyncAPICalls.logActivity(
+        "web orders", "Select table for web order assing", "order", 1);
+    await Navigator.pushNamedAndRemoveUntil(
         context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
         arguments: {'isAssign': true, 'orderID': cart.id});
   }

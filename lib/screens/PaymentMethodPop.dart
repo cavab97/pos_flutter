@@ -14,6 +14,7 @@ import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class PaymentMethodPop extends StatefulWidget {
   // Opning ammount popup
@@ -70,6 +71,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         allPaymentTypes = result;
       });
     }
+    await SyncAPICalls.logActivity(
+        "payment", "Opened payments listing popup", "payment", 1);
   }
 
   insertPaymentOption(Payments payment) {
@@ -126,6 +129,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         orderpayment.op_amount_change = change;
       }
       totalPayment.add(orderpayment);
+      await SyncAPICalls.logActivity("payment",
+          "Select for payment" + payment.name.toString(), "payment", 1);
       await showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -146,6 +151,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
       if (splitedPayment > widget.grandTotal) {
         change = splitedPayment - widget.grandTotal;
       }
+      await SyncAPICalls.logActivity("payment",
+          "Select for payment" + payment.name.toString(), "payment", 1);
       await showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -187,6 +194,8 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         change = splitedPayment - widget.grandTotal;
         orderpayment.op_amount_change = change;
       }
+      await SyncAPICalls.logActivity("payment",
+          "Select for payment" + payment.name.toString(), "payment", 1);
       totalPayment.add(orderpayment);
       if (splitedPayment >= widget.grandTotal) {
         await showDialog(

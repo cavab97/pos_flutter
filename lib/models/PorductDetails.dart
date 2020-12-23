@@ -65,7 +65,6 @@ class ProductDetails {
     price = json['price'] is int
         ? (json['price'] as int).toDouble()
         : json['price'];
-
     oldPrice = json['old_price'] is int
         ? (json['old_price'] as int).toDouble()
         : json['old_price'];
@@ -81,6 +80,7 @@ class ProductDetails {
     base64 = json['base64'] != null ? json['base64'] : "";
     attrCat = json["attr_cat"];
     modifireName = json["modifire_Name"];
+    box_pId = json["box_pId"];
   }
 
   Map<String, dynamic> toJson() {
@@ -108,6 +108,7 @@ class ProductDetails {
     data['deleted_by'] = this.deletedBy;
     data['base64'] = this.base64;
     data['attr_cat'] = this.attrCat;
+    data['box_pId'] = this.box_pId;
     data["modifire_Name"] = this.modifireName;
     return data;
   }
