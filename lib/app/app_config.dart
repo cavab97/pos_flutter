@@ -47,7 +47,7 @@ class FlutterAppConfig {
 
   Future run() async {
     setEnvironment(environment);
-    WidgetsFlutterBinding.ensureInitialized();
+    //WidgetsFlutterBinding.ensureInitialized();
     WidgetsFlutterBinding.ensureInitialized();
     final bool isLogged = await CommunFun.isLogged();
     runApp(MyApp(islogin: isLogged));
