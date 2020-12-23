@@ -287,7 +287,7 @@ class PrintReceipt {
     final PosPrintResult res = await printerManager
         .printTicket(await KOTReceipt(tableName, cartList, pax, isReprint));
 
-    CommunFun.showToast(ctx, res.msg);
+    await CommunFun.showToast(ctx, res.msg);
   }
 
 /*========================================================================

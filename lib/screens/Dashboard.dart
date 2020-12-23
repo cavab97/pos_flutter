@@ -92,7 +92,7 @@ class _DashboradPageState extends State<DashboradPage>
   List<Printer> printerreceiptList = new List<Printer>();
   List<Category> subCatList = new List<Category>();
   List<ProductDetails> productList = new List<ProductDetails>();
-  List<ProductDetails> SearchProductList = new List<ProductDetails>();
+  List<ProductDetails> searchProductList = new List<ProductDetails>();
   List<MSTCartdetails> cartList = new List<MSTCartdetails>();
   List<SetMeal> mealsList = new List<SetMeal>();
   List<Payments> paymentTypeList = [];
@@ -127,13 +127,14 @@ class _DashboradPageState extends State<DashboradPage>
   List quantity = [2, 3, 4, 5, 6, 7, 8, 9];
   List categoryFirstRow = [];
   List categorySecondRow = [];
-  List temporaryCartList = [];
+  List<MSTCartdetails> originalCartList = [];
   var selectedCategory;
   var expandableController;
   int currentQuantity = 0;
   double currentProductQuantity = 0.0;
   MSTCartdetails itemSelectedIndex = new MSTCartdetails();
   bool confirmOrder = false;
+  bool isInit = true;
 
   @override
   void initState() {
@@ -167,8 +168,8 @@ class _DashboradPageState extends State<DashboradPage>
 
   checkisInit() async {
     await setPermissons();
-    var isInit = await CommunFun.checkDatabaseExit();
-    if (isInit == true) {
+    bool databaseExist = await CommunFun.checkDatabaseExit();
+    if (databaseExist == true) {
       await getCategoryList();
       //await checkidTableSelected();
       await getAllPrinter();
@@ -239,10 +240,11 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   checkidTableSelected() async {
-    var tableid = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
+    var constantTableData =
+        await Preferences.getStringValuesSF(Constant.TABLE_DATA);
     var branchid = await CommunFun.getbranchId();
-    if (tableid != null) {
-      var tableddata = json.decode(tableid);
+    if (constantTableData != null) {
+      var tableddata = json.decode(constantTableData);
       Table_order table = Table_order.fromJson(tableddata);
       List<TablesDetails> tabledata =
           await localAPI.getTableData(branchid, table.table_id);
@@ -302,12 +304,12 @@ class _DashboradPageState extends State<DashboradPage>
     });
   }
 
-  getCartItem(cartId) async {
-    List<MSTCartdetails> cartItem = await localAPI.getCartItem(cartId);
-    if (cartItem.length > 0) {
+  getCartItem(int cartId) async {
+    List<MSTCartdetails> cartItems = await localAPI.getCartItem(cartId);
+    if (cartItems.length > 0) {
       if (this.mounted) {
         setState(() {
-          cartList = cartItem;
+          cartList = cartItems;
         });
       }
       await countTotals(cartId);
@@ -317,7 +319,6 @@ class _DashboradPageState extends State<DashboradPage>
   countTotals(cartId) async {
     MST_Cart cart = await localAPI.getCartData(cartId);
     List<MSTCartdetails> cartdetails = await localAPI.getCartItem(cartId);
-    print(cartdetails);
     var currentSubtotal = 0.00;
 
     Voucher vaocher;
@@ -331,6 +332,7 @@ class _DashboradPageState extends State<DashboradPage>
     }
 
     cartdetails.forEach((cartdetail) {
+      if (isInit) originalCartList.add(cartdetail);
       currentSubtotal += cartdetail.productDetailAmount != null &&
               cartdetail.productDetailAmount != 0.00
           ? cartdetail.productDetailAmount
@@ -357,6 +359,7 @@ class _DashboradPageState extends State<DashboradPage>
         grandTotal =
             (subtotal - discount) + tax + serviceCharge; //cart.grand_total;
         selectedvoucher = vaocher;
+        if (isInit) isInit = false;
       });
     }
   }
@@ -717,7 +720,6 @@ class _DashboradPageState extends State<DashboradPage>
 
     List<ProductDetails> product =
         await localAPI.getProduct(categoryId.toString(), branchid);
-    print(product);
     if (product.length > 0) {
       setState(() {
         // productList = [];
@@ -727,8 +729,6 @@ class _DashboradPageState extends State<DashboradPage>
       });
     } else {
       setState(() {
-        print("product.length");
-        print(product.length);
         productList = [];
         isLoading = false;
         mealsList = [];
@@ -756,11 +756,11 @@ class _DashboradPageState extends State<DashboradPage>
         product.add(cartItemproduct);
       });
       setState(() {
-        SearchProductList = product.length > 0 ? product : [];
+        searchProductList = product.length > 0 ? product : [];
       });
     } else {
       setState(() {
-        SearchProductList = [];
+        searchProductList = [];
       });
     }
   }
@@ -921,7 +921,6 @@ class _DashboradPageState extends State<DashboradPage>
         MSTCartdetails temp = MSTCartdetails();
 
         if (printerList[i].printerId == cartLists[j].printer_id) {
-          print(cartLists[j].remark);
           temp = cartLists[j];
           tempCart.add(temp);
         }
@@ -1095,7 +1094,6 @@ class _DashboradPageState extends State<DashboradPage>
   addTocartItem(selectedProduct) async {
     await CommunFun.addItemToCart(selectedProduct, cartList, allcartData,
         (MSTCartdetails addedProduct) {
-      //temporaryCartList.add(addedProduct);
       if (selectedTable.save_order_id != null &&
           selectedTable.save_order_id != 0) {
         getCurrentCart();
@@ -1200,7 +1198,6 @@ class _DashboradPageState extends State<DashboradPage>
   sendPaymentByCash(List<OrderPayment> payment) async {
     var cartData = await getcartData();
     if (cartData.id == null) {
-      print("cart data empty");
       await clearCartAfterSuccess(0);
       return;
     }
@@ -1777,7 +1774,6 @@ class _DashboradPageState extends State<DashboradPage>
           });
         }
       }, () async {
-        print('enter clear cart');
         await clearCartAfterSuccess(orderid);
       });
     }
@@ -2018,16 +2014,16 @@ class _DashboradPageState extends State<DashboradPage>
     // }
   }
 
-  selectTable() {
+  selectTable() async {
+    var removeCartDetails = [];
     var diffCartDetails = [];
-    temporaryCartList.every((element) {
-      if (!cartList.contains(element)) {
-        diffCartDetails.add(element);
-      }
-      return true;
-    });
-    for (var index = 0; index < diffCartDetails.length; index++) {
-      itememovefromCart(diffCartDetails[index]);
+    if (originalCartList.length == 0) {
+      await localAPI.removeCartItem(cartList[0].cartId, selectedTable.table_id);
+      await localAPI.deleteTableOrder(selectedTable.table_id);
+      await Preferences.removeSinglePref(Constant.TABLE_DATA);
+    } else {
+      localAPI.updateCartListDetails(
+          originalCartList, originalCartList[0].cartId);
     }
     goToTableScreen();
   }
@@ -2713,19 +2709,19 @@ class _DashboradPageState extends State<DashboradPage>
                     fillColor: StaticColor.colorWhite),
               ),
               suggestionsCallback: (pattern) async {
-                return SearchProductList;
+                return searchProductList;
               },
-              itemBuilder: (context, SearchProductList) {
-                // var image_Arr = SearchProductList.base64
+              itemBuilder: (context, searchProductList) {
+                // var image_Arr = searchProductList.base64
                 //     .replaceAll("data:image/jpg;base64,", '');
                 return ListTile(
                     leading: Container(
                       color: StaticColor.colorGrey,
                       width: 40,
                       height: 40,
-                      child: SearchProductList.base64 != ""
+                      child: searchProductList.base64 != ""
                           ? CommonUtils.imageFromBase64String(
-                              SearchProductList.base64)
+                              searchProductList.base64)
                           : new Image.asset(
                               Strings.noImageAsset,
                               gaplessPlayback: true,
@@ -2733,13 +2729,13 @@ class _DashboradPageState extends State<DashboradPage>
                             ),
                     ),
                     title: Text(
-                      SearchProductList.name,
+                      searchProductList.name,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    subtitle: Text(SearchProductList.price.toString()),
-                    trailing: SearchProductList.qty != null &&
-                            SearchProductList.hasInventory == 1 &&
-                            SearchProductList.qty <= 0
+                    subtitle: Text(searchProductList.price.toString()),
+                    trailing: searchProductList.qty != null &&
+                            searchProductList.hasInventory == 1 &&
+                            searchProductList.qty <= 0
                         ? Text(Strings.outOfStoke,
                             style: Styles.orangesimpleSmall())
                         : SizedBox());
@@ -3625,10 +3621,7 @@ class _DashboradPageState extends State<DashboradPage>
                 cart.productDetailAmount = currentQuantity * cart.productPrice;
                 localAPI.addintoCartDetails(cart);
                 countTotals(cart.cartId);
-                print("here");
-                //print(jsonEncode(cart));
                 currentQuantity = 0;
-                //_selectedQuantity(0);
               } else if (cart.id == itemSelectedIndex.id) {
                 itemSelectedIndex = new MSTCartdetails();
               } else {

@@ -1531,6 +1531,39 @@ class LocalAPI {
     return result;
   }
 
+  Future<bool> updateCartListDetails(
+      List<MSTCartdetails> detailsList, int cartId) async {
+    //print(DateTime.now());
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    String selectQry =
+        "SELECT id from mst_cart_detail where cart_id = " + cartId.toString();
+    var selectRes = await db.rawQuery(selectQry);
+    List<int> originalIdList =
+        detailsList.isNotEmpty ? detailsList.map((ele) => ele.id).toList() : [];
+    List<int> returnList = selectRes.isNotEmpty
+        ? selectRes
+            .map((ele) => int.tryParse(ele.values.single.toString()))
+            .toList()
+        : [];
+    //print('Current  Cart detail Id List : ' + returnList.join(', '));
+    //print('Original Cart detail Id List : ' + originalIdList.join(', '));
+    if (originalIdList.length > 0) {
+      String deleteQry = "DELETE FROM mst_cart_detail WHERE id NOT IN (" +
+          originalIdList.join(",") +
+          ") AND cart_id = " +
+          cartId.toString();
+      for (var detail in detailsList) {
+        updateWebCartdetails(detail);
+      }
+      await db.rawQuery(deleteQry); //action delete new item added
+      return true;
+    }
+
+    //print(DateTime.now());
+    //await db.update("mst_cart_detail");
+    return false;
+  }
+
   Future updateWebCartdetails(MSTCartdetails details) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry =
