@@ -48,6 +48,7 @@ import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/screens/ChangeQtyDailog.dart';
+import 'package:mcncashier/screens/SetQuantityPad/SetQuantityPad.dart';
 import 'package:mcncashier/screens/SplitOrder.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/screens/ReprintPopup.dart';
@@ -66,6 +67,7 @@ import 'package:mcncashier/services/allTablesSync.dart';
 
 import '../services/LocalAPIs.dart';
 import '../screens/DiscountPad/DiscountPad.dart';
+import '../screens/SetQuantityPad/SetQuantityPad.dart';
 
 class DashboradPage extends StatefulWidget {
   // main Product list page
@@ -1888,7 +1890,6 @@ class _DashboradPageState extends State<DashboradPage>
 
     await showDialog(
         context: context,
-        barrierDismissible: false,
         builder: (BuildContext context) {
           return DiscountPad(
               selproduct: prod,
@@ -1896,6 +1897,7 @@ class _DashboradPageState extends State<DashboradPage>
               cartID: currentCart,
               cartItem: cart,
               onClose: () {
+                CommunFun.processingPopup(context);
                 refreshAfterAction(false);
               });
         });
@@ -1922,7 +1924,6 @@ class _DashboradPageState extends State<DashboradPage>
 
     await showDialog(
         context: context,
-        barrierDismissible: false,
         builder: (BuildContext context) {
           return ProductQuantityDailog(
               selproduct: prod,
@@ -1930,6 +1931,41 @@ class _DashboradPageState extends State<DashboradPage>
               cartID: currentCart,
               cartItem: cart,
               onClose: () {
+                CommunFun.processingPopup(context);
+                refreshAfterAction(false);
+              });
+        });
+    //     return false;
+    //   }
+    // }
+  }
+
+  setQuantityPad(cart) async {
+    var prod;
+
+    if (cart.issetMeal == 0) {
+      List<ProductDetails> productdt =
+          await localAPI.productdData(cart.productId);
+      if (productdt.length > 0) {
+        prod = productdt[0];
+      }
+    } else {
+      List<SetMeal> productdt = await localAPI.setmealData(cart.productId);
+      if (productdt.length > 0) {
+        prod = productdt[0];
+      }
+    }
+
+    await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return SetQuantityPad(
+              selproduct: prod,
+              issetMeal: cart.issetMeal == 1 ? true : false,
+              cartID: currentCart,
+              cartItem: cart,
+              onClose: () {
+                CommunFun.processingPopup(context);
                 refreshAfterAction(false);
               });
         });
@@ -2049,6 +2085,7 @@ class _DashboradPageState extends State<DashboradPage>
         ),
         GestureDetector(
             onTap: () {
+              setQuantityPad(itemSelectedIndex);
               setState(() {
                 itemSelectedIndex = new MSTCartdetails();
               });

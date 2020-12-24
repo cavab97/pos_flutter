@@ -905,7 +905,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               ],
             ),
           ),
-          //  closeButton(context), // close button
+          closeButton(context), // close button
         ],
       ),
       content: mainContent(),
@@ -951,34 +951,34 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     );
   }
 
-  // Widget closeButton(context) {
-  //   return Positioned(
-  //     top: 0,
-  //     right: 0,
-  //     child: GestureDetector(
-  //       onTap: () {
-  //         Navigator.of(context).pop();
-  //       },
-  //       child: Container(
-  //         width: 50.0,
-  //         height: 50.0,
-  //         decoration: BoxDecoration(
-  //             color: StaticColor.colorRed,
-  //             borderRadius: BorderRadius.circular(30.0)),
-  //         child: IconButton(
-  //           onPressed: () {
-  //             Navigator.of(context).pop();
-  //           },
-  //           icon: Icon(
-  //             Icons.clear,
-  //             color: StaticColor.colorWhite,
-  //             size: 30,
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
+  Widget closeButton(context) {
+    return Positioned(
+      top: 0,
+      right: 0,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          width: 50.0,
+          height: 50.0,
+          decoration: BoxDecoration(
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
+          child: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: Icon(
+              Icons.clear,
+              color: StaticColor.colorWhite,
+              size: 30,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget buttonContainer() {
     return Container(
