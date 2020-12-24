@@ -68,6 +68,15 @@ class Styles {
         fontFamily: Strings.fontFamily);
   }
 
+  static blueLargeBold() {
+    return TextStyle(
+        // White text
+        color: Color(0xFF0D47A1),
+        fontSize: 23,
+        fontWeight: FontWeight.w600,
+        fontFamily: Strings.fontFamily);
+  }
+
   static drawerText() {
     return TextStyle(
         // White text
