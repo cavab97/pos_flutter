@@ -1092,7 +1092,7 @@ class _DashboradPageState extends State<DashboradPage>
         selectedProduct.modifireName != null) {
       showDialog(
           context: context,
-          barrierDismissible: false,
+          // barrierDismissible: false,
           builder: (BuildContext context) {
             return ProductQuantityDailog(
                 selproduct: selectedProduct,
@@ -1111,6 +1111,41 @@ class _DashboradPageState extends State<DashboradPage>
       }); */
       await addTocartItem(selectedProduct);
     }
+  }
+
+  editCartItem(cart) async {
+    var prod;
+
+    if (cart.issetMeal == 0) {
+      List<ProductDetails> productdt =
+          await localAPI.productdData(cart.productId);
+      if (productdt.length > 0) {
+        prod = productdt[0];
+      }
+    } else {
+      List<SetMeal> productdt = await localAPI.setmealData(cart.productId);
+      if (productdt.length > 0) {
+        prod = productdt[0];
+      }
+    }
+
+    await showDialog(
+        context: context,
+        // barrierDismissible: false,
+        builder: (BuildContext context) {
+          return ProductQuantityDailog(
+              selproduct: prod,
+              issetMeal: cart.issetMeal == 1 ? true : false,
+              cartID: currentCart,
+              cartItem: cart,
+              onClose: () {
+                getCurrentCart();
+                refreshAfterAction(false);
+              });
+        });
+    //     return false;
+    //   }
+    // }
   }
 
   addTocartItem(selectedProduct) async {
@@ -1892,40 +1927,6 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         builder: (BuildContext context) {
           return DiscountPad(
-              selproduct: prod,
-              issetMeal: cart.issetMeal == 1 ? true : false,
-              cartID: currentCart,
-              cartItem: cart,
-              onClose: () {
-                CommunFun.processingPopup(context);
-                refreshAfterAction(false);
-              });
-        });
-    //     return false;
-    //   }
-    // }
-  }
-
-  editCartItem(cart) async {
-    var prod;
-
-    if (cart.issetMeal == 0) {
-      List<ProductDetails> productdt =
-          await localAPI.productdData(cart.productId);
-      if (productdt.length > 0) {
-        prod = productdt[0];
-      }
-    } else {
-      List<SetMeal> productdt = await localAPI.setmealData(cart.productId);
-      if (productdt.length > 0) {
-        prod = productdt[0];
-      }
-    }
-
-    await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return ProductQuantityDailog(
               selproduct: prod,
               issetMeal: cart.issetMeal == 1 ? true : false,
               cartID: currentCart,
@@ -3096,6 +3097,7 @@ class _DashboradPageState extends State<DashboradPage>
           final prodprice = product.price.toStringAsFixed(2);
           return InkWell(
             onTap: () async {
+              print("tapped");
               if ((product.qty == null ||
                       product.hasInventory != 1 ||
                       product.qty > 0.0) ||

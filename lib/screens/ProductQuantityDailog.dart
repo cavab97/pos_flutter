@@ -851,8 +851,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     await SyncAPICalls.logActivity(
         "product details", "Added items to cart", "cart", 1);
-    widget.onClose();
+    print("object");
     Navigator.of(context).pop();
+    widget.onClose();
   }
 
   @override
