@@ -516,7 +516,8 @@ class CreateTables {
         "isSync NUMERIC," +
         "order_by INTEGER," +
         "updated_at TEXT," +
-        "updated_by INTEGER" +
+        "updated_by INTEGER," +
+        "order_remark TEXT" +
         ")");
 
     // TABLE order_detail
@@ -546,7 +547,8 @@ class CreateTables {
         "detail_datetime TEXT," +
         'updated_at TEXT,' +
         'updated_by INTEGER,' +
-        "detail_by INTEGER" +
+        "detail_by INTEGER," +
+        "product_remark TEXT" +
         ")");
 
     // TABLE order_modifier
@@ -720,7 +722,8 @@ class CreateTables {
         'cart_order_number TEXT,' +
         'cart_payment_id INTEGER,' +
         'cart_payment_response TEXT,' +
-        'cart_payment_status NUMERIC' + //0 For Pending, 1 For complete
+        'cart_payment_status NUMERIC,' + //0 For Pending, 1 For complete
+        'discount_remark TEXT' +
         ')');
 
     datatables = db.execute("CREATE TABLE mst_cart_sub_detail (" +
@@ -762,7 +765,8 @@ class CreateTables {
         'created_at  TEXT,' +
         'is_send_kichen NUMERIC,' +
         'item_unit TEXT,' +
-        'has_composite_inventory NUMERIC' + //BOOLEAN
+        'has_composite_inventory NUMERIC,' + //BOOLEAN
+        'discount_remark TEXT' +
         ')');
 
     datatables = db.execute("CREATE TABLE shift(" +

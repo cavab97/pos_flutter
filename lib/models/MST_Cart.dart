@@ -27,36 +27,39 @@ class MST_Cart {
   int cart_payment_status;
   double serviceChargePercent;
   double serviceCharge;
+  String discountRemark;
 
-  MST_Cart(
-      {this.id,
-      this.localID,
-      this.user_id,
-      this.branch_id,
-      this.sub_total,
-      this.discount,
-      this.discount_type,
-      this.remark,
-      this.table_id,
-      this.tax,
-      this.tax_json,
-      this.voucher_id,
-      this.grand_total,
-      this.total_qty,
-      this.is_deleted,
-      this.created_by,
-      this.created_at,
-      this.customer_terminal,
-      this.voucher_detail,
-      this.sub_total_after_discount,
-      this.source,
-      this.total_item,
-      this.cart_order_number,
-      this.cart_payment_id,
-      this.cart_payment_response,
-      this.cart_payment_status,
-      this.serviceChargePercent,
-      this.serviceCharge});
+  MST_Cart({
+    this.id,
+    this.localID,
+    this.user_id,
+    this.branch_id,
+    this.sub_total,
+    this.discount,
+    this.discount_type,
+    this.remark,
+    this.table_id,
+    this.tax,
+    this.tax_json,
+    this.voucher_id,
+    this.grand_total,
+    this.total_qty,
+    this.is_deleted,
+    this.created_by,
+    this.created_at,
+    this.customer_terminal,
+    this.voucher_detail,
+    this.sub_total_after_discount,
+    this.source,
+    this.total_item,
+    this.cart_order_number,
+    this.cart_payment_id,
+    this.cart_payment_response,
+    this.cart_payment_status,
+    this.serviceChargePercent,
+    this.serviceCharge,
+    this.discountRemark
+  });
 
   MST_Cart.fromJson(Map<String, dynamic> json) {
     id = json["id"];
@@ -103,6 +106,7 @@ class MST_Cart {
     serviceCharge = json["service_charge"]is int
         ? (json['service_charge'] as int).toDouble()
         : json['service_charge'];
+    discountRemark = json['discount_remark'];
   }
 
   Map<String, dynamic> toJson() {
@@ -136,6 +140,7 @@ class MST_Cart {
     data["customer_terminal"] = this.customer_terminal;
     data["service_charge_percent"] = this.serviceChargePercent;
     data["service_charge"] = this.serviceCharge;
+    data["discount_remark"] = this.discountRemark;
     return data;
   }
 }

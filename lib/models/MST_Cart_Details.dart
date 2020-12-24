@@ -31,36 +31,39 @@ class MSTCartdetails {
   int createdBy;
   String attrName;
   String modiName;
+  String discountRemark;
 
-  MSTCartdetails(
-      {this.cartId,
-      this.localID,
-      this.productId,
-      this.printer_id,
-      this.productName,
-      this.productSecondName,
-      this.productPrice,
-      this.productDetailAmount,
-      this.productQty,
-      this.productNetPrice,
-      this.taxId,
-      this.taxValue,
-      this.discount,
-      this.discountType,
-      this.remark,
-      this.isDeleted,
-      this.issetMeal,
-      this.hasRacManagemant,
-      this.isSendKichen,
-      this.isFocProduct,
-      this.itemUnit,
-      this.hasCompositeInventory,
-      this.cart_detail,
-      this.setmeal_product_detail,
-      this.createdAt,
-      this.createdBy,
-      this.attrName,
-      this.modiName});
+  MSTCartdetails({
+    this.cartId,
+    this.localID,
+    this.productId,
+    this.printer_id,
+    this.productName,
+    this.productSecondName,
+    this.productPrice,
+    this.productDetailAmount,
+    this.productQty,
+    this.productNetPrice,
+    this.taxId,
+    this.taxValue,
+    this.discount,
+    this.discountType,
+    this.remark,
+    this.isDeleted,
+    this.issetMeal,
+    this.hasRacManagemant,
+    this.isSendKichen,
+    this.isFocProduct,
+    this.itemUnit,
+    this.hasCompositeInventory,
+    this.cart_detail,
+    this.setmeal_product_detail,
+    this.createdAt,
+    this.createdBy,
+    this.attrName,
+    this.modiName,
+    this.discountRemark
+  });
 
   MSTCartdetails.fromJson(Map<String, dynamic> json) {
     id = json["id"];
@@ -104,6 +107,7 @@ class MSTCartdetails {
     isFocProduct = json["isFoc_Product"];
     attrName = json["attrName"];
     modiName = json["modiName"];
+    discountRemark = json['discount_remark'];
   }
 
   Map<String, dynamic> toJson() {
@@ -137,6 +141,7 @@ class MSTCartdetails {
     data["isFoc_Product"] = this.isFocProduct;
     data["attrName"] = this.attrName;
     data["modiName"] = this.modiName;
+    data["discount_remark"] = this.discountRemark;
     return data;
   }
 }
