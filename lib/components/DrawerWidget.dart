@@ -427,19 +427,35 @@ class DrawerWidState extends State<DrawerWid> {
                 ),
                 title: Text(Strings.syncTxt, style: Styles.drawerText())),
             ListTile(
-                onTap: () async {
-                  Navigator.of(context).pop();
-                  await SyncAPICalls.logActivity(
-                      "drawer", "Select settings menu", "drawer", 1);
-                  Navigator.pushNamed(context, Constant.SettingsScreen)
-                      .then(backEvent);
-                },
-                leading: Icon(
-                  Icons.settings,
-                  color: Colors.black,
-                  size: SizeConfig.safeBlockVertical * 5,
-                ),
-                title: Text(Strings.settings, style: Styles.drawerText())),
+              onTap: () async {
+                Navigator.of(context).pop();
+                await SyncAPICalls.logActivity(
+                    "drawer", "Select settings menu", "drawer", 1);
+                Navigator.pushNamed(context, Constant.SettingsScreen)
+                    .then(backEvent);
+              },
+              leading: Icon(
+                Icons.settings,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 5,
+              ),
+              title: Text(Strings.settings, style: Styles.drawerText()),
+            ),
+            ListTile(
+              onTap: () async {
+                Navigator.of(context).pop();
+                await SyncAPICalls.logActivity(
+                    "drawer", "Select Out of stock", "drawer", 1);
+                Navigator.pushNamed(context, Constant.OutofStock)
+                    .then(backEvent);
+              },
+              leading: Icon(
+                Icons.border_all,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 5,
+              ),
+              title: Text(Strings.outOfStock, style: Styles.drawerText()),
+            ),
           ],
         ),
       ),

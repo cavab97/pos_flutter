@@ -115,6 +115,54 @@ class LocalAPI {
     return list;
   }
 
+  Future<List<ProductDetails>> getAllProduct(String branchID) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    String query =
+        "SELECT product.product_id, product.name, product.has_inventory, product_store_inventory.qty, product_branch.out_of_stock FROM `product` " +
+            " LEFT JOIN product_branch ON product_branch.product_id = product.product_id AND product_branch.status = 1" +
+            " LEFT JOIN product_store_inventory ON product_store_inventory.product_id = product.product_id AND product_store_inventory.status = 1 " +
+            " AND product_branch.branch_id = " +
+            branchID.toString();
+    var res = await db.rawQuery(query);
+    List<ProductDetails> list = res.length > 0
+        ? res.map((c) => ProductDetails.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<bool> updateProductWithStock(
+      List<int> idsWithStock, List<int> idsNoStock, String branchID) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    String updateProductToStock =
+        "UPDATE `product_branch` SET out_of_stock = 0 WHERE product_id IN (" +
+            idsWithStock.join(',') +
+            ") AND product_branch.branch_id = " +
+            branchID.toString();
+    String updateProductNoStock =
+        "UPDATE `product_branch` SET out_of_stock = 1 WHERE product_id IN (" +
+            idsNoStock.join(',') +
+            ") AND product_branch.branch_id = " +
+            branchID.toString();
+    /* String updateProductInventory =
+        "UPDATE `product_store_inventory` SET qty = 0 WHERE product_id IN (" +
+            idsNoStock.join(',') +
+            ")"; */
+    String selectQuery = "SELECT product.* FROM `product` WHERE out_of_stock = 1" +
+        " LEFT JOIN product_branch ON product_branch.product_id = product.product_id AND product_branch.status = 1" +
+        ") AND product_branch.branch_id = " +
+        branchID.toString();
+    await db.rawQuery(updateProductToStock);
+    await db.rawQuery(updateProductNoStock);
+    //await db.rawQuery(updateProductInventory);
+    var res = await db.rawQuery(selectQuery);
+
+    List<ProductDetails> list = res.length > 0
+        ? res.map((c) => ProductDetails.fromJson(c)).toList()
+        : [];
+    print(jsonEncode(list));
+    return true;
+  }
+
   Future<List<ProductDetails>> getSeachProduct(
       String searchText, String branchID) async {
     var query = "SELECT product.*,base64 ,product_store_inventory.qty, price_type.name as price_type_Name FROM `product` " +

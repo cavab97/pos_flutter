@@ -318,7 +318,8 @@ class CreateTables {
         "warningStockLevel INTEGER," +
         "display_order INTEGER," +
         "status INTEGER," +
-        "updated_at TEXT," +
+        "out_of_stock INTEGER"
+            "updated_at TEXT," +
         "updated_by INTEGER" +
         ")");
 

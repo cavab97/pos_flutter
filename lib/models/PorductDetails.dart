@@ -12,7 +12,7 @@ class ProductDetails {
   double price;
   double oldPrice;
   double qty;
-  int hasInventory;
+  int hasInventory; //0 For Off, 1 For On
   int status;
   int hasSetmeal;
   int hasRacManagemant;
@@ -24,6 +24,7 @@ class ProductDetails {
   String attrCat;
   int box_pId;
   String modifireName;
+  int outOfStock;
 
   ProductDetails(
       {this.productId,
@@ -49,7 +50,8 @@ class ProductDetails {
       this.base64,
       this.attrCat,
       this.box_pId,
-      this.modifireName});
+      this.modifireName,
+      this.outOfStock = 0});
 
   ProductDetails.fromJson(Map<String, dynamic> json) {
     productId = json['product_id'];
@@ -81,6 +83,7 @@ class ProductDetails {
     attrCat = json["attr_cat"];
     modifireName = json["modifire_Name"];
     box_pId = json["box_pId"];
+    outOfStock = json["out_of_stock"];
   }
 
   Map<String, dynamic> toJson() {
@@ -110,6 +113,7 @@ class ProductDetails {
     data['attr_cat'] = this.attrCat;
     data['box_pId'] = this.box_pId;
     data["modifire_Name"] = this.modifireName;
+    data["out_of_stock"] = this.outOfStock;
     return data;
   }
 }
