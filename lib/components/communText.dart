@@ -527,7 +527,7 @@ class CommunFun {
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
     var user = json.decode(loginUser);
     var id = user["id"];
-    checkUserPermission(id);
+    await checkUserPermission(id);
   }
 
   static checkUserDeleted(context) async {
@@ -823,7 +823,7 @@ class CommunFun {
     //converttoserver tiem
     var timeZone =
         await Preferences.getStringValuesSF(Constant.SERVER_TIME_ZONE);
-    print(timeZone);
+    //print(timeZone);
     if (timeZone != null) {
       final detroitTime =
           new tz.TZDateTime.from(dateTime, tz.getLocation(timeZone));
@@ -985,8 +985,14 @@ class CommunFun {
     LocalAPI localAPI = LocalAPI();
     List<PosPermission> permissions = await localAPI.getUserPermissions(userid);
     if (permissions.length > 0) {
-      await Preferences.setStringToSF(
-          Constant.USER_PERMISSION, permissions[0].posPermissionName);
+      if (permissions[0].posPermissionName != null) {
+        await Preferences.setStringToSF(
+            Constant.USER_PERMISSION, permissions[0].posPermissionName);
+      } else {
+        await Preferences.removeSinglePref(Constant.USER_PERMISSION);
+      }
+    } else {
+      await Preferences.removeSinglePref(Constant.USER_PERMISSION);
     }
   }
 
@@ -1227,11 +1233,12 @@ class CommunFun {
         orderData,
         table.table_id);
     ProductDetails cartItemproduct = new ProductDetails();
-    cartItemproduct = productItem;
-    cartItemproduct
-        .toJson()
-        .removeWhere((String key, dynamic value) => value == null);
-    var data = cartItemproduct;
+    cartItemproduct.qty = 1;
+    cartItemproduct.status = productItem.status;
+    cartItemproduct.productId = productItem.productId;
+    cartItemproduct.name = productItem.name;
+    cartItemproduct.uuid = productItem.uuid;
+    cartItemproduct.price = productItem.price;
     MSTCartdetails cartdetails = new MSTCartdetails();
     if (isEditing) {
       cartdetails.id = sameitem.id;
@@ -1248,7 +1255,7 @@ class CommunFun {
     cartdetails.productQty = isEditing ? sameitem.productQty + 1.0 : 1.0;
     cartdetails.productNetPrice = productItem.oldPrice;
     cartdetails.createdBy = loginUser.id;
-    cartdetails.cart_detail = jsonEncode(data);
+    cartdetails.cart_detail = jsonEncode(cartItemproduct);
     cartdetails.discount = isEditing ? sameitem.discount : 0;
     cartdetails.remark = isEditing ? sameitem.remark : "";
     cartdetails.issetMeal = 0;
@@ -1449,8 +1456,12 @@ class CommunFun {
           paymentMethods,
           ordersList.length);
     } else {
+      await SyncAPICalls.logActivity("print reciept",
+          "Cashier has no permission for print reciept", "print reciept", 1);
       await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
           () async {
+        await SyncAPICalls.logActivity("print reciept",
+            "Manager given permission for print reciept", "print reciept", 1);
         printKOT.shiftReportPrint(
             printerIP,
             context,

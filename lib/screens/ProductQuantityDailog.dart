@@ -23,6 +23,7 @@ import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
@@ -72,6 +73,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   var currency = "MYR";
   String attributeTitle = "";
   var permissions = "";
+  bool isFirstMod = false;
+  bool isFirstAttr = false;
+
   @override
   void initState() {
     super.initState();
@@ -89,6 +93,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     setState(() {
       permissions = permission;
     });
+    await SyncAPICalls.logActivity(
+        "product details", "Opened product details popup", "product", 1);
   }
 
   setInitstate() async {
@@ -471,9 +477,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         setPrice();
       }
     }
+    await SyncAPICalls.logActivity(
+        "product details", "Increased product qty", "product", 1);
   }
 
-  decreaseQty() {
+  decreaseQty() async {
     if (product_qty > 1) {
       var prevproductqty = product_qty;
       setState(() {
@@ -481,16 +489,18 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       });
       setPrice();
     }
+    await SyncAPICalls.logActivity(
+        "product details", "Decresed product qty", "product", 1);
   }
 
-  onSelectAttr(i, id, attribute, attrTypeIDs, attrPrice, setmealid, isDefault) {
+  onSelectAttr(
+      i, id, attribute, attrTypeIDs, attrPrice, setmealid, isDefault) async {
     var prvSeelected = selectedAttr;
     var isSelected = selectedAttr.any((item) => item['ca_id'] == id);
 
     if (isSelected) {
       var isarrSelected =
           selectedAttr.any((item) => item['attribute'] == attribute);
-      // if (isDefault == 0) {
       selectedAttr.removeWhere((item) => item['ca_id'] == id);
       if (!isarrSelected) {
         prvSeelected.add({
@@ -501,14 +511,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         });
       } else {
         selectedAttr.removeWhere((item) => item['attribute'] != attribute);
+        await SyncAPICalls.logActivity(
+            "change attributes", "removed selected attribute", "product", 1);
       }
-      // }
       setState(() {
         selectedAttr = selectedAttr;
       });
     } else if (selectedAttr.length < 1) {
-      // print("seconddddddddddddddddddddddddd");
-
       prvSeelected.add({
         'ca_id': id,
         'attribute': attribute,
@@ -529,6 +538,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       setState(() {
         selectedAttr = prvSeelected;
       });
+      await SyncAPICalls.logActivity(
+          "change attributes", "Added product attributes", "product", 1);
     }
     setPrice();
   }
@@ -556,18 +567,24 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     });
   }
 
-  setModifire(mod) {
+  setModifire(mod) async {
     var isSelected = selectedModifier.any((item) => item.pmId == mod.pmId);
     if (isSelected) {
-      if (mod.isDefault == 0) {
-        selectedModifier.removeWhere((item) => item.pmId == mod.pmId);
-      }
+      selectedModifier.removeWhere((item) => item.pmId == mod.pmId);
+      setState(() {
+        selectedModifier = selectedModifier;
+      });
+      await SyncAPICalls.logActivity(
+          "change modifire", "removed selected product modifire", "product", 1);
     } else {
       selectedModifier.add(mod);
+      await SyncAPICalls.logActivity(
+          "change modifire", "Added product modifire", "product", 1);
     }
     setState(() {
       selectedModifier = selectedModifier;
     });
+
     setPrice();
   }
 
@@ -628,7 +645,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return grandTotal;
   }
 
-  _setSelectUnselect(SetMealProduct product) {
+  _setSelectUnselect(SetMealProduct product) async {
     var isSelected = tempCart
         .any((item) => item.setmealProductId == product.setmealProductId);
     if (isSelected) {
@@ -637,11 +654,15 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       setState(() {
         tempCart = tempCart;
       });
+      await SyncAPICalls.logActivity("setmeal attributes",
+          "removed setmeal product attributes", "product", 1);
     } else {
       tempCart.add(product);
       setState(() {
         tempCart = tempCart;
       });
+      await SyncAPICalls.logActivity("setmeal attributes",
+          "removed added product attributes", "product", 1);
     }
   }
 
@@ -748,14 +769,19 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         currentCart.id, cart, productItem, orderData, tableData.table_id);
     ProductDetails cartItemproduct = new ProductDetails();
     if (!isSetMeal) {
-      cartItemproduct = productItem;
+      cartItemproduct.qty = product_qty;
+      cartItemproduct.status = productItem.status;
+      cartItemproduct.productId = productItem.productId;
+      cartItemproduct.name = productItem.name;
+      cartItemproduct.uuid = productItem.uuid;
+      cartItemproduct.price = productItem.price;
     } else {
       cartItemproduct.qty = product_qty;
       cartItemproduct.status = setmeal.status;
       cartItemproduct.productId = setmeal.setmealId;
-      cartItemproduct.base64 = setmeal.base64;
       cartItemproduct.name = setmeal.name;
       cartItemproduct.uuid = setmeal.uuid;
+      cartItemproduct.price = setmeal.price;
     }
     cartItemproduct
         .toJson()
@@ -805,7 +831,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     for (var i = 0; i < selectedAttr.length; i++) {
       var attr = selectedAttr[i];
-
       MSTSubCartdetails subCartData = new MSTSubCartdetails();
       subCartData.cartdetailsId = detailID;
       subCartData.localID = cart.localID;
@@ -824,6 +849,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         }
       }
     }
+    await SyncAPICalls.logActivity(
+        "product details", "Added items to cart", "cart", 1);
     widget.onClose();
     Navigator.of(context).pop();
   }
@@ -852,11 +879,33 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                       fontSize: SizeConfig.safeBlockVertical * 3,
                       color: StaticColor.colorWhite),
                 ),
+                /* GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Container(
+                    width: 50.0,
+                    height: 50.0,
+                    decoration: BoxDecoration(
+                        color: StaticColor.colorRed,
+                        borderRadius: BorderRadius.circular(30.0)),
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(
+                        Icons.clear,
+                        color: StaticColor.colorWhite,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ), */
                 //addbutton(context)
               ],
             ),
           ),
-          closeButton(context), // close button
+          //  closeButton(context), // close button
         ],
       ),
       content: mainContent(),
@@ -893,7 +942,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             ),
             Positioned(
               bottom: 10,
-              right: 30,
+              right: 20,
               child: addbutton(context),
             ),
           ],
@@ -902,57 +951,65 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     );
   }
 
-  Widget closeButton(context) {
-    return Positioned(
-      top: 0,
-      right: 0,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context).pop();
-        },
-        child: Container(
-          width: 50.0,
-          height: 50.0,
-          decoration: BoxDecoration(
-              color: StaticColor.colorRed,
-              borderRadius: BorderRadius.circular(30.0)),
-          child: IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: Icon(
-              Icons.clear,
-              color: StaticColor.colorWhite,
-              size: 30,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget closeButton(context) {
+  //   return Positioned(
+  //     top: 0,
+  //     right: 0,
+  //     child: GestureDetector(
+  //       onTap: () {
+  //         Navigator.of(context).pop();
+  //       },
+  //       child: Container(
+  //         width: 50.0,
+  //         height: 50.0,
+  //         decoration: BoxDecoration(
+  //             color: StaticColor.colorRed,
+  //             borderRadius: BorderRadius.circular(30.0)),
+  //         child: IconButton(
+  //           onPressed: () {
+  //             Navigator.of(context).pop();
+  //           },
+  //           icon: Icon(
+  //             Icons.clear,
+  //             color: StaticColor.colorWhite,
+  //             size: 30,
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget buttonContainer() {
     return Container(
       child: Row(
         children: <Widget>[
-          _button("-", () {
+          _button("-", () async {
             if (permissions.contains(Constant.CHANGE_QUANTITY)) {
               decreaseQty();
             } else {
+              await SyncAPICalls.logActivity("change Qty",
+                  "Cashier has no permission for change Qty", "change qty", 1);
               CommonUtils.openPermissionPop(context, Constant.CHANGE_QUANTITY,
                   () async {
-                increaseQty();
+                await increaseQty();
+                await SyncAPICalls.logActivity("change Qty",
+                    "manager given permission for change Qty", "change qty", 1);
               }, () {});
             }
           }),
           _quantityTextInput(),
-          _button("+", () {
+          _button("+", () async {
             if (permissions.contains(Constant.CHANGE_QUANTITY)) {
               increaseQty();
             } else {
-              CommonUtils.openPermissionPop(context, Constant.CHANGE_QUANTITY,
-                  () async {
-                increaseQty();
+              await SyncAPICalls.logActivity("change Qty",
+                  "Cashier has no permission for change Qty", "change qty", 1);
+              await CommonUtils.openPermissionPop(
+                  context, Constant.CHANGE_QUANTITY, () async {
+                await increaseQty();
+                await SyncAPICalls.logActivity("change Qty",
+                    "manager given permission for change Qty", "change qty", 1);
               }, () {});
             }
           }),
@@ -1251,15 +1308,18 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                 item['attribute'] == attr);
                             if (attributisDefault[i] == "1" &&
                                 !isadded &&
-                                selectedAttr.length < 1) {
-                              onSelectAttr(
-                                  i,
-                                  attribute.ca_id,
-                                  attr,
-                                  attrIDs[i],
-                                  attrtypesPrice[i],
-                                  null,
-                                  attributisDefault[i]);
+                                !isFirstAttr) {
+                              var prvSeelected = selectedAttr;
+                              prvSeelected.add({
+                                'ca_id': attribute.ca_id,
+                                'attribute': attr,
+                                'attrType_ID': attrIDs[i],
+                                'attr_price': attrtypesPrice[i]
+                              });
+                              setState(() {
+                                selectedAttr = prvSeelected;
+                                isFirstAttr = true;
+                              });
                             }
                             return MapEntry(
                                 i,
@@ -1330,8 +1390,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             children: modifireList.map((modifier) {
               var isadded =
                   selectedModifier.any((item) => item.pmId == modifier.pmId);
-              if (modifier.isDefault == 1 && !isadded) {
-                setModifire(modifier);
+              if (modifier.isDefault == 1 && !isadded && !isFirstMod) {
+                selectedModifier.add(modifier);
+                setState(() {
+                  selectedModifier = selectedModifier;
+                  isFirstMod = true;
+                });
               }
               return Padding(
                   padding: EdgeInsets.all(5),
@@ -1339,9 +1403,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                         side: BorderSide(
-                            color: selectedModifier.any((item) =>
-                                    item.pmId == modifier.pmId ||
-                                    modifier.isDefault == 1)
+                            color: selectedModifier
+                                    .any((item) => item.pmId == modifier.pmId)
                                 ? StaticColor.colorGreen
                                 : StaticColor.colorGrey300,
                             width: 4)),

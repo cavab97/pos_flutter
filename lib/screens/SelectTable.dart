@@ -27,6 +27,7 @@ import 'package:mcncashier/models/colorTable.dart';
 import '../components/communText.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 
 class SelectTablePage extends StatefulWidget {
@@ -128,9 +129,11 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   getTables() async {
-    setState(() {
-      isLoading = true;
-    });
+    if (this.mounted) {
+      setState(() {
+        isLoading = true;
+      });
+    }
 
     var currentCart = [];
     MST_Cart cart;
@@ -146,17 +149,18 @@ class _SelectTablePageState extends State<SelectTablePage>
 
         if (cart != null) {
           tables[i].currentAmount = cart.grand_total;
-          print(jsonEncode(tables[i]));
         }
       }
 
       currentCart = [];
     }
 
-    setState(() {
-      tableList = tables;
-      isLoading = false;
-    });
+    if (this.mounted) {
+      setState(() {
+        tableList = tables;
+        isLoading = false;
+      });
+    }
   }
 
   viewOrder() async {
@@ -249,7 +253,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     }
   }
 
-  mergeTable(table) {
+  mergeTable(table) async {
     if (table == null) {
       CommunFun.showToast(context, "Please select table first");
     } else {
@@ -261,6 +265,8 @@ class _SelectTablePageState extends State<SelectTablePage>
             mergeInTable = table;
           });
         } else {
+          await SyncAPICalls.logActivity("join table",
+              "Cashier has no permission for Join Table", "table", 1);
           CommonUtils.openPermissionPop(context, Constant.JOIN_TABLE, () async {
             setState(() {
               isMenuopen = true;
@@ -268,6 +274,8 @@ class _SelectTablePageState extends State<SelectTablePage>
               isMergeing = true;
               mergeInTable = table;
             });
+            await SyncAPICalls.logActivity("join table",
+                "Manager given permission for join table", "table", 1);
           }, () {});
         }
       } else {
@@ -295,12 +303,11 @@ class _SelectTablePageState extends State<SelectTablePage>
     if (!isChanging) {
       setState(() {
         isMenuopen = true;
-        //isMenuopen = false;
       });
       Navigator.pushNamed(context, Constant.DashboardScreen)
           .then(backToRefresh);
     }
-    //getTables();
+    await getTables();
   }
   /*   else {
       CommunFun.showToast(context, Strings.table_paxMsg);
@@ -359,6 +366,8 @@ class _SelectTablePageState extends State<SelectTablePage>
             );
           });
     } else {
+      await SyncAPICalls.logActivity("print Qr code",
+          "Cashier has no permission for print QR Code", "table", 1);
       await CommonUtils.openPermissionPop(context, Constant.PRINT_QR, () async {
         await showDialog(
             context: context,
@@ -369,6 +378,8 @@ class _SelectTablePageState extends State<SelectTablePage>
                 onClose: () {},
               );
             });
+        await SyncAPICalls.logActivity("print Qr code",
+            "Manager given permission for print QR Code", "table", 1);
       }, () {});
     }
   }
@@ -417,7 +428,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     } else {
       CommonUtils.showAlertDialog(context, () {
         Navigator.of(context).pop();
-      }, () {
+      }, () async {
         Navigator.of(context).pop();
         if (permissions.contains(Constant.CHANGE_TABLE)) {
           setState(() {
@@ -425,12 +436,16 @@ class _SelectTablePageState extends State<SelectTablePage>
             isChangingTable = true;
           });
         } else {
-          CommonUtils.openPermissionPop(context, Constant.CHANGE_TABLE,
+          await SyncAPICalls.logActivity("change table",
+              "Cashier has no permission for change table", "table", 1);
+          await CommonUtils.openPermissionPop(context, Constant.CHANGE_TABLE,
               () async {
             setState(() {
               isMenuopen = true;
               isChangingTable = true;
             });
+            await SyncAPICalls.logActivity("change table",
+                "Manager given permission for change table", "Order", 1);
           }, () {});
         }
       }, Strings.warning, Strings.changeTableMsg, Strings.yes, Strings.no,
@@ -468,18 +483,23 @@ class _SelectTablePageState extends State<SelectTablePage>
     });
   }
 
-  changePax() {
+  changePax() async {
     if (permissions.contains(Constant.CHANG_PAX)) {
       setState(() {
         isChanging = true;
       });
       opnPaxDailog();
     } else {
-      CommonUtils.openPermissionPop(context, Constant.CHANG_PAX, () async {
+      await SyncAPICalls.logActivity(
+          "change pax", "Cashier has no permission for change pax", "table", 1);
+      await CommonUtils.openPermissionPop(context, Constant.CHANG_PAX,
+          () async {
         setState(() {
           isChanging = true;
         });
-        opnPaxDailog();
+        await opnPaxDailog();
+        await SyncAPICalls.logActivity("change pax",
+            "Manager given permission for change pax", "table", 1);
       }, () {});
     }
   }
@@ -502,7 +522,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     });
   }
 
-  addNewOrder() {
+  addNewOrder() async {
     if (permissions.contains(Constant.NEW_ORDER)) {
       setState(() {
         isChanging = false;
@@ -510,11 +530,16 @@ class _SelectTablePageState extends State<SelectTablePage>
       selectTableForNewOrder();
       //opnPaxDailog();
     } else {
-      CommonUtils.openPermissionPop(context, Constant.NEW_ORDER, () async {
+      await SyncAPICalls.logActivity(
+          "New Order", "Cashier has no permission for new order", "table", 1);
+      await CommonUtils.openPermissionPop(context, Constant.NEW_ORDER,
+          () async {
         setState(() {
           isChanging = false;
         });
         selectTableForNewOrder();
+        await SyncAPICalls.logActivity(
+            "New Order", "Manager given permission for new order", "table", 1);
         //opnPaxDailog();
       }, () {});
     }
@@ -681,15 +706,25 @@ class _SelectTablePageState extends State<SelectTablePage>
                                   fontWeight: FontWeight.bold),
                             ),
                             SizedBox(height: 30),
-                            shiftbtn(() {
+                            shiftbtn(() async {
                               if (permissions.contains(Constant.OPENING)) {
                                 openOpningAmmountPop(
                                     Strings.titleOpeningAmount);
                               } else {
-                                CommonUtils.openPermissionPop(
+                                await SyncAPICalls.logActivity(
+                                    "Opning",
+                                    "Cashier has no permission for Open store",
+                                    "table",
+                                    1);
+                                await CommonUtils.openPermissionPop(
                                     context, Constant.OPENING, () async {
                                   openOpningAmmountPop(
                                       Strings.titleOpeningAmount);
+                                  await SyncAPICalls.logActivity(
+                                      "Opning",
+                                      "Manager given permission for Open store",
+                                      "table",
+                                      1);
                                 }, () {});
                               }
                             })
@@ -729,10 +764,10 @@ class _SelectTablePageState extends State<SelectTablePage>
     shift.status = 1;
     shift.serverId = 0;
     if (shiftid == null) {
-      shift.startAmount = int.parse(ammount);
+      shift.startAmount = double.parse(ammount);
       shift.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     } else {
-      shift.endAmount = int.parse(ammount);
+      shift.endAmount = double.parse(ammount);
       shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
     }
     shift.updatedBy = userdata.id;
@@ -761,24 +796,12 @@ class _SelectTablePageState extends State<SelectTablePage>
                 sendOpenShft(ammountext);
                 if (isopning == Strings.titleOpeningAmount) {
                   if (printerreceiptList.length > 0) {
-                    if (permissions.contains(Constant.OPEN_DRAWER)) {
-                      printKOT.testReceiptPrint(
-                          printerreceiptList[0].printerIp.toString(),
-                          context,
-                          "",
-                          Strings.openDrawer,
-                          true);
-                    } else {
-                      CommonUtils.openPermissionPop(
-                          context, Constant.OPEN_DRAWER, () async {
-                        printKOT.testReceiptPrint(
-                            printerreceiptList[0].printerIp.toString(),
-                            context,
-                            "",
-                            Strings.openDrawer,
-                            true);
-                      }, () {});
-                    }
+                    printKOT.testReceiptPrint(
+                        printerreceiptList[0].printerIp.toString(),
+                        context,
+                        "",
+                        Strings.openDrawer,
+                        true);
                   } else {
                     CommunFun.showToast(context, Strings.printerNotAvailable);
                   }
@@ -888,13 +911,24 @@ class _SelectTablePageState extends State<SelectTablePage>
               })
             : SizedBox(),
         selectedTable != null && selectedTable.numberofpax != null
-            ? neworder_button(Icons.cancel, Strings.cancleOrder, context, () {
+            ? neworder_button(Icons.cancel, Strings.cancleOrder, context,
+                () async {
                 if (permissions.contains(Constant.CANCEL_ORDER)) {
                   cancleTableOrder();
                 } else {
-                  CommonUtils.openPermissionPop(context, Constant.CANCEL_ORDER,
-                      () {
-                    cancleTableOrder();
+                  await SyncAPICalls.logActivity(
+                      "cancel table Order",
+                      "Cashier has no permission for cancel table order",
+                      "table",
+                      1);
+                  await CommonUtils.openPermissionPop(
+                      context, Constant.CANCEL_ORDER, () async {
+                    await cancleTableOrder();
+                    await SyncAPICalls.logActivity(
+                        "cancel table Order",
+                        "Manager given permission for cancel table order",
+                        "table",
+                        1);
                   }, () {});
                 }
               })

@@ -9,13 +9,13 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/helpers/CustomeIcons.dart';
-import 'package:mcncashier/models/Category.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/screens/PrinteTypeDailog.dart';
 import 'package:mcncashier/screens/SelectPrinterDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class SettingsPage extends StatefulWidget {
   // Transactions list
@@ -68,6 +68,8 @@ class _SettingsPageState extends State<SettingsPage> {
         isAutoSync = isSync == "true" ? true : false;
       });
     }
+    await SyncAPICalls.logActivity(
+        "settings", "Opened settigns page", "settings", 1);
   }
 
   setAutosync(issync) async {
@@ -77,9 +79,13 @@ class _SettingsPageState extends State<SettingsPage> {
     if (issync) {
       await Preferences.setStringToSF(Constant.IS_AUTO_SYNC, issync.toString());
       await CommunFun.checkisAutoSync(context);
+      await SyncAPICalls.logActivity(
+          "Settings", "auto sync Enabled", "setting", 1);
     } else {
       await Preferences.removeSinglePref(Constant.IS_AUTO_SYNC);
-      CommunFun.stopAutoSync();
+      await CommunFun.stopAutoSync();
+      await SyncAPICalls.logActivity(
+          "Settings", "auto sync disabled", "setting", 1);
     }
   }
 

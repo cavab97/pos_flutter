@@ -85,9 +85,6 @@ class LocalAPI {
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Category> list =
         res.isNotEmpty ? res.map((c) => Category.fromJson(c)).toList() : [];
-
-    await SyncAPICalls.logActivity(
-        "Product", "geting category List", "category", branchID);
     return list;
   }
 
@@ -114,8 +111,7 @@ class LocalAPI {
     List<ProductDetails> list = res.length > 0
         ? res.map((c) => ProductDetails.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Product", "Getting Product List", "product", id);
+
     return list;
   }
 
@@ -133,8 +129,7 @@ class LocalAPI {
     List<ProductDetails> list = res.isNotEmpty
         ? res.map((c) => ProductDetails.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Product", "geting Product List", "product", "1");
+
     return list;
   }
 
@@ -153,8 +148,7 @@ class LocalAPI {
     List<SetMeal> list = mealList.isNotEmpty
         ? mealList.map((c) => SetMeal.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Meals List", "get Meals List", "setmeal", branchid);
+
     return list;
   }
 
@@ -164,8 +158,7 @@ class LocalAPI {
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Customer> list =
         res.isNotEmpty ? res.map((c) => Customer.fromJson(c)).toList() : [];
-    await SyncAPICalls.logActivity(
-        "Customer", "geting customer list", "customer", teminalID);
+
     return list;
   }
 
@@ -189,8 +182,6 @@ class LocalAPI {
   Future<int> addCustomer(Customer customer) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var result = await db.insert("customer", customer.toJson());
-    await SyncAPICalls.logActivity(
-        "Customer", "add customer", "customer", result);
     return result;
   }
 
@@ -211,8 +202,7 @@ class LocalAPI {
     List<TablesDetails> list = res.isNotEmpty
         ? res.map((c) => TablesDetails.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Tables", "Getting Tables list", "tables", branchid);
+
     return list;
   }
 
@@ -223,8 +213,7 @@ class LocalAPI {
     var res = await db.rawQuery(query);
     List<ColorTable> list =
         res.isNotEmpty ? res.map((c) => ColorTable.fromJson(c)).toList() : [];
-    await SyncAPICalls.logActivity(
-        "Tables colors", "Getting Tables colors list", "tablescolor", 1);
+
     return list;
   }
 
@@ -304,11 +293,8 @@ class LocalAPI {
     }
 
     await insertTableOrder(table_order);
-    await SyncAPICalls.logActivity(
-        " Orders Tables",
-        list.length > 0 ? "Update table Order" : "Insert table Order",
-        "table_order",
-        table_order.table_id);
+    await SyncAPICalls.logActivity("Orders Tables", "Merged table order",
+        "table_order", table_order.table_id);
     return 1;
   }
 
@@ -388,7 +374,8 @@ class LocalAPI {
       await db.insert("shift", shift.toJson());
     }
     var dis = shiftId != null ? "Update shift" : "Insert shift";
-    await SyncAPICalls.logActivity("Product", dis, "shift", shift.appId);
+    await SyncAPICalls.logActivity(
+        "shift Opne/close", dis, "shift", shift.appId);
     return shift.appId;
   }
 
@@ -417,8 +404,7 @@ class LocalAPI {
     List<Attribute_Data> list = res.length > 0
         ? res.map((c) => Attribute_Data.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Product", "Getting Product details", "product", productId);
+
     return list;
   }
 
@@ -433,8 +419,7 @@ class LocalAPI {
     List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
     List<ModifireData> list =
         res.isNotEmpty ? res.map((c) => ModifireData.fromJson(c)).toList() : [];
-    await SyncAPICalls.logActivity(
-        "Product", "Getting Product modifire", "modifier", productId);
+
     return list;
   }
 
@@ -445,7 +430,7 @@ class LocalAPI {
     if (cartidd == null) {
       cartid = await db.insert("mst_cart", cartData.toJson());
       await SyncAPICalls.logActivity(
-          "product", "Product add in to cart", "mst_cart", cartid);
+          "cart", "Product add in to cart", "mst_cart", cartid);
       orderData.cartId = cartid; //cartid
       await insertSaveOrders(orderData, tableiD);
     } else {
@@ -454,7 +439,7 @@ class LocalAPI {
           where: 'id = ?', whereArgs: [cartidd]);
       cartid = cartidd;
       await SyncAPICalls.logActivity(
-          "product", "Product update in to cart", "mst_cart", res_cartid);
+          "cart", "Product update in to cart", "mst_cart", res_cartid);
     }
 
     return cartid;
@@ -571,9 +556,6 @@ class LocalAPI {
     list = res.isNotEmpty
         ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "product", "get cart list", "mst_cart_detail", cartId);
-    //}
     return list;
   }
 
@@ -664,8 +646,6 @@ class LocalAPI {
     List<TablesDetails> list = res.isNotEmpty
         ? res.map((c) => TablesDetails.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity("product", "get cart list", "mst_cart", 1);
-
     return list;
   }
 
@@ -674,7 +654,7 @@ class LocalAPI {
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<MST_Cart> list =
         res.isNotEmpty ? res.map((c) => MST_Cart.fromJson(c)).toList() : [];
-    await SyncAPICalls.logActivity("product", "get cart list", "mst_cart", 1);
+
     return list;
   }
 
@@ -685,8 +665,7 @@ class LocalAPI {
     List<MSTCartdetails> list = res.isNotEmpty
         ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "product", "get cart details list", "mst_cart_details", 1);
+
     return list;
   }
 
@@ -698,19 +677,14 @@ class LocalAPI {
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Payments> list =
         res.isNotEmpty ? res.map((c) => Payments.fromJson(c)).toList() : [];
-    await SyncAPICalls.logActivity("payment", "get payment list", "payment", 1);
+
     return list;
   }
 
   Future<Orders> getcurrentOrders(orderid, terminalID) async {
     var query =
         "SELECT * from orders WHERE app_id=$orderid AND terminal_id=$terminalID";
-    //var query = "SELECT *  from payment WHERE status = 1";
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
-
-    /* var db = DatabaseHelper.dbHelper.getDatabse();
-    var result =
-        await db.query('orders', where: "app_id = ?", whereArgs: [orderid]);*/
     Orders order;
     List<Orders> list =
         res.length > 0 ? res.map((c) => Orders.fromJson(c)).toList() : [];
@@ -815,7 +789,7 @@ class LocalAPI {
     data.remove("base64");
     var orderid = await db.insert("order_detail", data);
     await SyncAPICalls.logActivity(
-        "orders", "insert order details", "order_detail", orderid);
+        "orders", "Added peoduct items into Orders", "order_detail", orderid);
     return orderDetailData.app_id;
   }
 
@@ -824,8 +798,8 @@ class LocalAPI {
     var newObj = orderDetailData.toJson();
     newObj.remove("name");
     var orderid = await db.insert("order_modifier", newObj);
-    await SyncAPICalls.logActivity(
-        "orders", "insert order modifier", "order_modifier", orderid);
+    await SyncAPICalls.logActivity("orders",
+        "Added peoduct modifier into Orders", "order_modifier", orderid);
     return orderDetailData.app_id;
   }
 
@@ -834,8 +808,8 @@ class LocalAPI {
     var newObj = orderDetailData.toJson();
     newObj.remove("name");
     var orderid = await db.insert("order_attributes", newObj);
-    await SyncAPICalls.logActivity(
-        "orders", "insert order attributes", "order_attributes", orderid);
+    await SyncAPICalls.logActivity("orders",
+        "Added peoduct attributes into Orders", "order_attributes", orderid);
     return orderDetailData.app_id;
   }
 
@@ -843,7 +817,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var orderid = await db.insert("order_payment", paymentData.toJson());
     await SyncAPICalls.logActivity(
-        "orders", "insert order payment", "order_payment", orderid);
+        "orders", "Order ", "order_payment", orderid);
     return paymentData.app_id;
   }
 
@@ -865,8 +839,9 @@ class LocalAPI {
     await db.rawQuery(qry);
     var cartDetail = await db
         .query("mst_cart_detail", where: 'cart_id = ?', whereArgs: [cartid]);
-    await SyncAPICalls.logActivity(
-        "orders", "clear cart detail", "mst_cart_detail", cartid);
+    await SyncAPICalls.logActivity("Delete order",
+        "Cashier A clear an order items.", "mst_cart_detail", cartid);
+
     List<MSTCartdetails> list = cartDetail.isNotEmpty
         ? cartDetail.map((c) => MSTCartdetails.fromJson(c)).toList()
         : [];
@@ -876,7 +851,10 @@ class LocalAPI {
             where: 'cart_details_id = ?', whereArgs: [list[i].id]);
       }
       await SyncAPICalls.logActivity(
-          "orders", "clear cart detail", "mst_cart_sub_detail", cartid);
+          "Delete order",
+          "Cashier A clear an order items modifire and attributes",
+          "mst_cart_sub_detail",
+          cartid);
     }
     return cartid;
   }
@@ -963,8 +941,7 @@ class LocalAPI {
     List<MSTSubCartdetails> list = cartDetail.isNotEmpty
         ? cartDetail.map((c) => MSTSubCartdetails.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity("edit cart item",
-        "get modifire list mst_cart_sub_detail", "mst_cart_sub_detail", id);
+
     return list;
   }
 
@@ -1002,8 +979,6 @@ class LocalAPI {
     List<OrderDetail> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "invoice", "get Orders details list", "ProductDetails", orderid);
 
     // var qry1 = "SELECT * from order_detail WHERE terminal_id = " +
     //     terminalid.toString() +
@@ -1043,7 +1018,7 @@ class LocalAPI {
     List<Voucher> list = voucherList.isNotEmpty
         ? voucherList.map((c) => Voucher.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity("voucher", "get voucher list", "voucher", 1);
+
     return list;
   }
 
@@ -1064,8 +1039,7 @@ class LocalAPI {
     newObj.remove("modiName");
     var data = await db.update("mst_cart_detail", newObj,
         where: "id =?", whereArgs: [details.id]);
-    await SyncAPICalls.logActivity(
-        "voucher", "add voucher in cart", "voucher", voucherId);
+
     return data;
   }
 
@@ -1074,8 +1048,6 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var data1 = await db.update("mst_cart", details.toJson(),
         where: "id =?", whereArgs: [details.id]);
-    await SyncAPICalls.logActivity(
-        "voucher", "add voucher in cart", "voucher", voucherDetail.voucherId);
     return data1;
   }
 
@@ -1125,7 +1097,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var hitid = await db.insert("voucher_history", voucherHis.toJson());
     await SyncAPICalls.logActivity(
-        "order", "add voucher history in cart", "voucher_history", hitid);
+        "orders", "Added voucher history", "voucher_history", hitid);
     return hitid;
   }
 
@@ -1181,18 +1153,17 @@ class LocalAPI {
   Future<List<Orders>> getOrdersList(branchid, terminalid, int offset) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "SELECT * from orders  " +
-        " where branch_id = " +
-        branchid.toString() +
-        " AND terminal_id = " +
-        terminalid.toString() +
+        // " where branch_id = " +
+        // branchid.toString() +
+        // " AND terminal_id = " +
+        // terminalid.toString() +
         " ORDER By orders.order_date DESC LIMIT 10 OFFSET  " +
         offset.toString();
     var ordersList = await db.rawQuery(qry);
     List<Orders> list = ordersList.isNotEmpty
         ? ordersList.map((c) => Orders.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Transactions", "get Orders list", "Orders", branchid);
+
     return list;
   }
 
@@ -1211,8 +1182,7 @@ class LocalAPI {
     List<Orders> list = ordersList.isNotEmpty
         ? ordersList.map((c) => Orders.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Order sync", "get Orders list", "Orders", branchid);
+
     return list;
   }
 
@@ -1225,8 +1195,7 @@ class LocalAPI {
     List<OrderDetail> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Order sync", "get Orders detail list", "Orders", orderid);
+
     return list;
   }
 
@@ -1242,8 +1211,7 @@ class LocalAPI {
     List<OrderAttributes> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderAttributes.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Order sync", "get Orders_modifire list", "order_attribute", detailid);
+
     return list;
   }
 
@@ -1258,8 +1226,7 @@ class LocalAPI {
     List<OrderModifire> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderModifire.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Order sync", "get Orders Modifire Table", "order_modifier", detailid);
+
     return list;
   }
 
@@ -1273,8 +1240,7 @@ class LocalAPI {
     List<OrderPayment> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderPayment.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Order sync", "get Orders payment Table", "order_payment", orderid);
+
     return list;
   }
 
@@ -1289,19 +1255,18 @@ class LocalAPI {
     List<VoucherHistory> list = ordersList.isNotEmpty
         ? ordersList.map((c) => VoucherHistory.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity("Order voucherHistory sync",
-        "get Orders history Table", "voucher_history", orderid);
+
     return list;
   }
 
   Future<dynamic> sendToKitched(ids) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var qry = "update mst_cart_detail set is_send_kichen = 1 WHERE id in(" +
         ids.toString() +
         ")";
     var ordersList = await db.rawQuery(qry);
     await SyncAPICalls.logActivity(
-        "Send to kitchen", "send item to kitchen", "mst_cart_detail", 1);
+        "Send to kitchen", "Items send to kitchen", "mst_cart_detail", 1);
     return ordersList;
   }
 
@@ -1313,8 +1278,7 @@ class LocalAPI {
     List<ProductStoreInventory> list = inventoryProd.length > 0
         ? inventoryProd.map((c) => ProductStoreInventory.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity("check Item Available in Store",
-        "check Item Available in Store", "product_store_inventory", 1);
+
     return list;
   }
 
@@ -1384,8 +1348,6 @@ class LocalAPI {
     List<Branch> list =
         result.isNotEmpty ? result.map((c) => Branch.fromJson(c)).toList() : [];
 
-    await SyncAPICalls.logActivity(
-        "branch details", "branch details for invoice", "branch", branchID);
     return list[0];
   }
 
@@ -1413,8 +1375,8 @@ class LocalAPI {
         " AND order_app_id = " +
         orderid.toString();
     result = db.rawUpdate(qry);
-    await SyncAPICalls.logActivity("order payment status",
-        "update payment status", "order_paymemt", orderid);
+    await SyncAPICalls.logActivity(
+        "order payment", "Refunded Order payment", "order_paymemt", orderid);
     if (result != null) {
       return 1;
     } else {
@@ -1425,8 +1387,8 @@ class LocalAPI {
   Future<int> insertCancelOrder(CancelOrder order) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var result = db.insert('order_cancel', order.toJson());
-    await SyncAPICalls.logActivity(
-        "order cancel", "order cancel", "order_cancel", 1);
+    await SyncAPICalls.logActivity("cancel transaction",
+        "Chasier canceled transaction", "order_cancel", 1);
     return result;
   }
 
@@ -1531,6 +1493,42 @@ class LocalAPI {
     return result;
   }
 
+  Future<bool> updateCartListDetails(
+      List<MSTCartdetails> detailsList, int cartId) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    List<int> originalIdList =
+        detailsList.isNotEmpty ? detailsList.map((ele) => ele.id).toList() : [];
+
+    String deleteQry = "DELETE FROM mst_cart_detail WHERE id NOT IN (" +
+        originalIdList.join(",") +
+        ") AND cart_id = " +
+        cartId.toString();
+    /* String selectQry =
+        "SELECT id from mst_cart_detail where cart_id = " + cartId.toString();
+    var selectRes = await db.rawQuery(selectQry);
+    List<int> returnList = selectRes.isNotEmpty
+        ? selectRes
+            .map((ele) => int.tryParse(ele.values.single.toString()))
+            .toList()
+        : []; */
+    //print('Current  Cart detail Id List : ' + returnList.join(', '));
+    //print('Original Cart detail Id List : ' + originalIdList.join(', '));
+
+    if (originalIdList.length > 0) {
+      for (MSTCartdetails detail in detailsList) {
+        await updateWebCartdetails(detail);
+      }
+      try {
+        await db.rawQuery(deleteQry); //action delete new item added
+      } catch (e) {
+        print(e.toString());
+      }
+      return true;
+    }
+    //await db.update("mst_cart_detail");
+    return false;
+  }
+
   Future updateWebCartdetails(MSTCartdetails details) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var qry =
@@ -1619,8 +1617,7 @@ class LocalAPI {
     List<SetMeal> list = mealList.isNotEmpty
         ? mealList.map((c) => SetMeal.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Meals List", "get Meals List", "setmeal", mealid);
+
     return list;
   }
 
@@ -1693,7 +1690,7 @@ class LocalAPI {
 
   Future saveSyncOrderModifire(OrderModifire orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_modifier where terminal_id = " +
+    var checkisExitqry = "SELECT * FROM order_modifier where terminal_id = " +
         orderData.terminal_id.toString() +
         " AND app_id =" +
         orderData.app_id.toString();
@@ -1778,8 +1775,7 @@ class LocalAPI {
     List<PosPermission> list = permissionList.length > 0
         ? permissionList.map((c) => PosPermission.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity("get PosPermission",
-        "get PosPermission list", "pos_permission", userid);
+
     return list;
   }
 
@@ -1792,11 +1788,7 @@ class LocalAPI {
     List<ProductStoreInventory> list = ordersList.length > 0
         ? ordersList.map((c) => ProductStoreInventory.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "sync inventory",
-        "get product store inventory table",
-        "product_store_inventory",
-        branchid);
+
     return list;
   }
 
@@ -1810,11 +1802,7 @@ class LocalAPI {
     List<ProductStoreInventoryLog> list = inList.length > 0
         ? inList.map((c) => ProductStoreInventoryLog.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "sync inventory log",
-        "get product store inventory log table",
-        "product_store_inventory_log",
-        inventoryid);
+
     return list;
   }
 
@@ -1896,8 +1884,7 @@ class LocalAPI {
     List<SetMeal> list = mealList.isNotEmpty
         ? mealList.map((c) => SetMeal.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Meals List", "get Meals List", "setmeal", branchid);
+
     return list;
   }
 
@@ -1910,17 +1897,6 @@ class LocalAPI {
         setmealid.toString() +
         " AND setmeal_product.status = 1 " +
         " GROUP by setmeal_product.setmeal_product_id";
-    // var qry = "SELECT setmeal_product.*,group_concat(attributes. name, ',') as attr_name," +
-    //     " attributes.ca_id, group_concat(product_attribute.price) as attr_types_price," +
-    //     " category_attribute.name as cateAtt,group_concat(attributes.attribute_id) as attributeId, base64,product.name FROM setmeal_product" +
-    //     " LEFT JOIN product ON product.product_id = setmeal_product.product_id" +
-    //     " LEFT JOIN product_attribute on product_attribute.product_id = setmeal_product.product_id and product_attribute.status = 1" +
-    //     " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1" +
-    //     " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1" +
-    //     " LEFT JOIN asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id" +
-    //     " WHERE setmeal_product.setmeal_id = " +
-    //     setmealid.toString() +
-    //     " GROUP by setmeal_product.setmeal_product_id";
 
     var mealList = await db.rawQuery(qry);
     List<SetMealProduct> list = mealList.isNotEmpty
@@ -1956,8 +1932,7 @@ class LocalAPI {
     List<Drawerdata> list = mealList.isNotEmpty
         ? mealList.map((c) => Drawerdata.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "Meals product List", "Meals product List", "drawer", shiftid);
+
     return list;
   }
 
@@ -2030,8 +2005,6 @@ class LocalAPI {
     var res =
         await db.delete("orders", where: "app_id =?", whereArgs: [orderid]);
     print(res);
-    await SyncAPICalls.logActivity(
-        "delete order", "delete order", "orders", orderid);
   }
 
   Future<List<Countrys>> getCountrysList() async {
@@ -2068,8 +2041,7 @@ class LocalAPI {
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Customer> list =
         res.isNotEmpty ? res.map((c) => Customer.fromJson(c)).toList() : [];
-    await SyncAPICalls.logActivity(
-        "Customer", "geting customer list for sync", "customer", teminalID);
+
     return list;
   }
 
@@ -2101,11 +2073,6 @@ class LocalAPI {
 
   Future<List<Box>> getBoxList(branchID, racID, customerid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    // var qry = "SELECT * from box where branch_id = " +
-    //     branchID.toString() +
-    //     " AND rac_id = " +
-    //     racID.toString() +
-    //     "  AND status = 1";
     var qry = "SELECT * from box LEFT JOIN customer_liquor_inventory on" +
         " customer_liquor_inventory.cl_box_id = box.box_id" +
         " where box.branch_id = " +
@@ -2204,11 +2171,7 @@ class LocalAPI {
     List<Customer_Liquor_Inventory> list = res.isNotEmpty
         ? res.map((c) => Customer_Liquor_Inventory.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "customer_liquor_inventory",
-        "geting customer Wine inventory list for sync",
-        "customer_liquor_inventory",
-        branchID);
+
     return list;
   }
 
@@ -2222,11 +2185,7 @@ class LocalAPI {
     List<Customer_Liquor_Inventory_Log> list = res.isNotEmpty
         ? res.map((c) => Customer_Liquor_Inventory_Log.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "customer_liquor_inventory",
-        "geting customer Wine inventory Log list for sync",
-        "customer_liquor_inventory",
-        branchID);
+
     return list;
   }
 
@@ -2351,8 +2310,7 @@ class LocalAPI {
     List<Shift> list = shiftList.length > 0
         ? shiftList.map((c) => Shift.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "shift", "get shift table for sync", "shift", branchid);
+
     return list;
   }
 
@@ -2365,11 +2323,7 @@ class LocalAPI {
     List<ShiftInvoice> list = inList.length > 0
         ? inList.map((c) => ShiftInvoice.fromJson(c)).toList()
         : [];
-    await SyncAPICalls.logActivity(
-        "sync inventory log",
-        "get product store inventory log table",
-        "product_store_inventory_log",
-        termianlId);
+
     return list;
   }
 
@@ -2434,8 +2388,6 @@ class LocalAPI {
         ? shiftList.map((c) => TerminalLog.fromJson(c)).toList()
         : [];
 
-    await SyncAPICalls.logActivity("terminal log",
-        "terminal log table for sync", "terminal_log", branchid);
     return list;
   }
 

@@ -13,6 +13,7 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 
 class VoucherPop extends StatefulWidget {
   // Opning ammount popup
@@ -92,7 +93,6 @@ class VoucherPopState extends State<VoucherPop> {
     DateTime now = new DateTime.now();
     String nowDate = DateFormat('yyyy-MM-dd').format(now);
     String fromtonow = DateFormat('yyyy-MM-dd').format(toDate);
-
     if (now.isBefore(toDate) && now.isAfter(fromDate) || nowDate == fromtonow) {
       return true;
     } else {
@@ -169,17 +169,26 @@ class VoucherPopState extends State<VoucherPop> {
           isadded = true;
           selectedvoucher = vaocher;
           widget.onEnter(selectedvoucher);
+          await SyncAPICalls.logActivity(
+              "add promocode",
+              "Cashier Removed promocode form order",
+              "voucher",
+              vaocher.voucherId);
           Navigator.of(context).pop(); // close Pop
         } else {
-          CommunFun.showToast(
+          await CommunFun.showToast(
               context,
               "Voucher already used " +
                   vaocher.usesTotal.toString() +
                   " times.");
+          await SyncAPICalls.logActivity(
+              "Voucher", "cashier choosed voucher already used", "Voucher", 1);
         }
       }
     } else {
-      CommunFun.showToast(context, Strings.voucherExpired);
+      await CommunFun.showToast(context, Strings.voucherExpired);
+      await SyncAPICalls.logActivity(
+          "voucher", "voucher already expired", "voucher", 1);
     }
   }
 
@@ -199,6 +208,8 @@ class VoucherPopState extends State<VoucherPop> {
         errorMSG = Strings.voucherCodeMsg;
       });
     }
+    await SyncAPICalls.logActivity("apply promocode",
+        "Opened voucher popup for apply voucher", "voucher", 1);
   }
 
   @override

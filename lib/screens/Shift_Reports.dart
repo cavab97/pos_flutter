@@ -18,6 +18,7 @@ import 'package:mcncashier/screens/PayINOutDailog.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/models/Terminal.dart';
 import '../models/Shift.dart';
@@ -93,6 +94,8 @@ class _ShiftReportsState extends State<ShiftReports> {
     setState(() {
       permissions = permission;
     });
+    await SyncAPICalls.logActivity("Shift report",
+        "Opened shift report page for shift details", "Shift report", 1);
   }
 
   getAllPrinter() async {
@@ -732,10 +735,15 @@ class _ShiftReportsState extends State<ShiftReports> {
             Expanded(
               child: RaisedButton(
                 padding: EdgeInsets.all(20),
-                onPressed: () {
+                onPressed: () async {
                   setState(() {
                     isInAmmount = true;
                   });
+                  await SyncAPICalls.logActivity(
+                      "payIn/Out",
+                      "Opened In/Out popup for payin out amount enter",
+                      "payIn/Out",
+                      1);
                   openpayInOUTPop("Pay In Amount", "5.00");
                 },
                 child: Text(
@@ -758,10 +766,15 @@ class _ShiftReportsState extends State<ShiftReports> {
             Expanded(
               child: RaisedButton(
                 padding: EdgeInsets.all(20),
-                onPressed: () {
+                onPressed: () async {
                   setState(() {
                     isInAmmount = false;
                   });
+                  await SyncAPICalls.logActivity(
+                      "payIn/Out",
+                      "Opened In/Out popup for payin out amount enter",
+                      "payIn/Out",
+                      1);
                   openpayInOUTPop("Pay Out Amount", "5.00");
                 },
                 child: Text(
@@ -781,7 +794,7 @@ class _ShiftReportsState extends State<ShiftReports> {
             Expanded(
               child: RaisedButton(
                 padding: EdgeInsets.all(20),
-                onPressed: () {
+                onPressed: () async {
                   if (printerreceiptList.length > 0) {
                     if (permissions.contains(Constant.OPEN_DRAWER)) {
                       printKOT.testReceiptPrint(
@@ -791,8 +804,18 @@ class _ShiftReportsState extends State<ShiftReports> {
                           Strings.openDrawer,
                           true);
                     } else {
-                      CommonUtils.openPermissionPop(
+                      await SyncAPICalls.logActivity(
+                          "open drawer",
+                          "Chasier has no permission for open drawer",
+                          "drawer",
+                          1);
+                      await CommonUtils.openPermissionPop(
                           context, Constant.OPEN_DRAWER, () async {
+                        await SyncAPICalls.logActivity(
+                            "open drawer",
+                            "Manager given permission for open drawer",
+                            "drawer",
+                            1);
                         printKOT.testReceiptPrint(
                             printerreceiptList[0].printerIp.toString(),
                             context,
@@ -942,7 +965,6 @@ class AddOtherReasonState extends State<AddOtherReason> {
     List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
     var terminalid = await CommunFun.getTeminalKey();
     Terminal terminalData = await localAPI.getTerminalDetails(terminalid);
-
     setState(() {
       printerreceiptList = printerDraft;
       terminal = terminalData;
