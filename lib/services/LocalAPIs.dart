@@ -147,19 +147,19 @@ class LocalAPI {
         "UPDATE `product_store_inventory` SET qty = 0 WHERE product_id IN (" +
             idsNoStock.join(',') +
             ")"; */
-    String selectQuery = "SELECT product.* FROM `product` WHERE out_of_stock = 1" +
+    String selectQuery = "SELECT product.* FROM `product` " +
         " LEFT JOIN product_branch ON product_branch.product_id = product.product_id AND product_branch.status = 1" +
-        ") AND product_branch.branch_id = " +
+        " WHERE out_of_stock = 1 AND product_branch.branch_id = " +
         branchID.toString();
     await db.rawQuery(updateProductToStock);
     await db.rawQuery(updateProductNoStock);
     //await db.rawQuery(updateProductInventory);
-    var res = await db.rawQuery(selectQuery);
+    /* var res = await db.rawQuery(selectQuery);
 
     List<ProductDetails> list = res.length > 0
         ? res.map((c) => ProductDetails.fromJson(c)).toList()
         : [];
-    print(jsonEncode(list));
+    print(jsonEncode(list)); */
     return true;
   }
 

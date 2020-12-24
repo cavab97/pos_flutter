@@ -9,6 +9,7 @@ class ProductBranch {
   int status;
   String updatedAt;
   int updatedBy;
+  int outOfStock;
 
   ProductBranch(
       {this.pbId,
@@ -18,6 +19,7 @@ class ProductBranch {
       this.printerId,
       this.displayOrder,
       this.warningStockLevel,
+      this.outOfStock = 0,
       this.status,
       this.updatedAt,
       this.updatedBy});
@@ -34,6 +36,7 @@ class ProductBranch {
     status = json['status'];
     updatedAt = json['updated_at'];
     updatedBy = json['updated_by'];
+    outOfStock = json["out_of_stock"];
   }
 
   Map<String, dynamic> toJson() {
@@ -48,6 +51,7 @@ class ProductBranch {
     data['status'] = this.status;
     data['updated_at'] = this.updatedAt;
     data['updated_by'] = this.updatedBy;
+    data["out_of_stock"] = this.outOfStock;
     return data;
   }
 }

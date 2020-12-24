@@ -314,12 +314,12 @@ class CreateTables {
         "uuid TEXT," +
         "product_id INTEGER," +
         "branch_id INTEGER," +
-        "printer_id INTEGER," +
         "warningStockLevel INTEGER," +
         "display_order INTEGER," +
+        "printer_id INTEGER," +
+        "out_of_stock INTEGER," +
         "status INTEGER," +
-        "out_of_stock INTEGER"
-            "updated_at TEXT," +
+        "updated_at TEXT," +
         "updated_by INTEGER" +
         ")");
 
