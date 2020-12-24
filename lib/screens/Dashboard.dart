@@ -68,6 +68,7 @@ import '../models/Product_Store_Inventory.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 
 import '../services/LocalAPIs.dart';
+import '../screens/DiscountPad/DiscountPad.dart';
 
 class DashboradPage extends StatefulWidget {
   // main Product list page
@@ -1984,6 +1985,40 @@ class _DashboradPageState extends State<DashboradPage>
     await getCartItem(currentCart);
   }
 
+  discountItem(cart) async {
+    var prod;
+
+    if (cart.issetMeal == 0) {
+      List<ProductDetails> productdt =
+          await localAPI.productdData(cart.productId);
+      if (productdt.length > 0) {
+        prod = productdt[0];
+      }
+    } else {
+      List<SetMeal> productdt = await localAPI.setmealData(cart.productId);
+      if (productdt.length > 0) {
+        prod = productdt[0];
+      }
+    }
+
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return DiscountPad(
+              selproduct: prod,
+              issetMeal: cart.issetMeal == 1 ? true : false,
+              cartID: currentCart,
+              cartItem: cart,
+              onClose: () {
+                refreshAfterAction(false);
+              });
+        });
+    //     return false;
+    //   }
+    // }
+  }
+
   editCartItem(cart) async {
     var prod;
 
@@ -2153,6 +2188,7 @@ class _DashboradPageState extends State<DashboradPage>
             )),
         GestureDetector(
             onTap: () {
+              discountItem(itemSelectedIndex);
               setState(() {
                 itemSelectedIndex = new MSTCartdetails();
               });
@@ -2171,7 +2207,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.white,
                   ),
                   SizedBox(height: 6),
-                  Text('Set Remark',
+                  Text('Discount ',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white))
                 ],
@@ -2179,20 +2215,20 @@ class _DashboradPageState extends State<DashboradPage>
             )),
         GestureDetector(
             onTap: () {
-              if (permissions.contains(Constant.DELETE_ITEM)) {
-                itememovefromCart(itemSelectedIndex);
-                setState(() {
-                  itemSelectedIndex = new MSTCartdetails();
-                });
-              } else {
-                CommonUtils.openPermissionPop(context, Constant.DELETE_ITEM,
-                    () {
-                  itememovefromCart(itemSelectedIndex);
-                  setState(() {
-                    itemSelectedIndex = new MSTCartdetails();
-                  });
-                }, () {});
-              }
+              // if (permissions.contains(Constant.DELETE_ITEM)) {
+              //   itememovefromCart(itemSelectedIndex);
+              //   setState(() {
+              //     itemSelectedIndex = new MSTCartdetails();
+              //   });
+              // } else {
+              //   CommonUtils.openPermissionPop(context, Constant.DELETE_ITEM,
+              //       () {
+              //     itememovefromCart(itemSelectedIndex);
+              //     setState(() {
+              //       itemSelectedIndex = new MSTCartdetails();
+              //     });
+              //   }, () {});
+              // }
             },
             child: Container(
               decoration: BoxDecoration(
@@ -3165,7 +3201,7 @@ class _DashboradPageState extends State<DashboradPage>
             child: Container(
               height: itemHeight,
               decoration: BoxDecoration(
-                color: StaticColor.colorWhite,
+                color: StaticColor.colorBlack,
                 borderRadius: BorderRadius.circular(8),
               ),
               margin: EdgeInsets.all(0),
