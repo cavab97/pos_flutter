@@ -30,6 +30,7 @@ class Orders {
   String updated_at;
   int updated_by;
   int isSync;
+  String orderRemark;
 
   Orders(
       {this.order_id,
@@ -62,7 +63,9 @@ class Orders {
       this.updated_at,
       this.updated_by,
       this.serviceCharge,
-      this.serviceChargePercent});
+      this.serviceChargePercent,
+      this.orderRemark
+    });
 
   Orders.fromJson(Map<String, dynamic> json) {
     order_id = json["order_id"];
@@ -112,6 +115,7 @@ class Orders {
     serviceChargePercent = json["service_charge_percent"] is int
         ? (json['service_charge_percent'] as int).toDouble()
         : json['service_charge_percent'];
+    orderRemark = json["order_remark"];
   }
 
   Map<String, dynamic> toJson() {
@@ -147,6 +151,7 @@ class Orders {
     data["updated_by"] = this.updated_by;
     data["service_charge"] = this.serviceCharge;
     data["service_charge_percent "] = this.serviceChargePercent;
+    data["order_remark"] = this.orderRemark;
     return data;
   }
 }
