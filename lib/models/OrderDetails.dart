@@ -25,6 +25,7 @@ class OrderDetail {
   String base64;
   int isSync;
   int server_id;
+  String productRemark;
 
   OrderDetail({
     this.detailId,
@@ -52,6 +53,7 @@ class OrderDetail {
     this.base64,
     this.isSync,
     this.server_id,
+    this.productRemark
   });
 
   OrderDetail.fromJson(Map<String, dynamic> json) {
@@ -91,6 +93,7 @@ class OrderDetail {
     base64 = json["base64"];
     isSync = json["isSync"];
     server_id = json['server_id'];
+    productRemark = json['product_remark'];
   }
 
   Map<String, dynamic> toJson() {
@@ -122,6 +125,7 @@ class OrderDetail {
     data["base64"] = this.base64;
     data["isSync"] = this.isSync;
     data["server_id"] = this.server_id;
+    data["product_remark"] = this.productRemark;
     return data;
   }
 }
