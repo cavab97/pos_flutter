@@ -217,4 +217,9 @@ class Strings {
   static String syncTxt = "Sync";
   static String settings = "Settings";
   static String pleaseSelectCustomer = "Please select customer";
+  static String makeFoc = "'Make FOC'";
+  static String editDetail = "Edit Detail";
+  static String setQuantity = "Set Quantity";
+  static String outOfStock = "Out of Stock";
+  static String confirm = "Confirm";
 }

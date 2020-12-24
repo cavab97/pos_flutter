@@ -2041,7 +2041,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.white,
                   ),
                   SizedBox(height: 6),
-                  Text('Make FOC',
+                  Text(Strings.makeFoc,
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white))
                 ],
@@ -2077,7 +2077,7 @@ class _DashboradPageState extends State<DashboradPage>
                   color: Colors.white,
                 ),
                 SizedBox(height: 6),
-                Text('Edit Detail',
+                Text(Strings.editDetail,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white))
               ],
@@ -2105,7 +2105,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.white,
                   ),
                   SizedBox(height: 6),
-                  Text('Set Quantity',
+                  Text(Strings.setQuantity,
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white))
                 ],
@@ -2132,7 +2132,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.white,
                   ),
                   SizedBox(height: 6),
-                  Text('Discount ',
+                  Text(Strings.discount,
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white))
                 ],
@@ -2698,9 +2698,10 @@ class _DashboradPageState extends State<DashboradPage>
                       overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Text(searchProductList.price.toString()),
-                    trailing: searchProductList.qty != null &&
-                            searchProductList.hasInventory == 1 &&
-                            searchProductList.qty <= 0
+                    trailing: searchProductList.outOfStock == 1 ||
+                            (searchProductList.qty != null &&
+                                searchProductList.hasInventory == 1 &&
+                                searchProductList.qty <= 0)
                         ? Text(Strings.outOfStoke,
                             style: Styles.orangesimpleSmall())
                         : SizedBox());

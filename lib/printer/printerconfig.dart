@@ -948,7 +948,7 @@ class PrintReceipt {
         ctx,
         isFor,
         isper));
-    await CommunFun.showToast(ctx, res.msg);
+    CommunFun.showToast(ctx, res.msg);
   }
 
 /*========================================================================
@@ -2388,6 +2388,9 @@ class PrintReceipt {
     // final PosPrintResult res = await printerManager.printTicket(
     //     await testPrintReceipt(printerName, printerIp, isFor, ctx, isper));
     if (res != null) {
+      //ERROR
+      //To safely refer to a widget's ancestor in its dispose() method, save a reference to the ancestor by calling dependOnInheritedWidgetOfExactType() in the widget's didChangeDependencies() method.
+
       await CommunFun.showToast(ctx, res.msg);
     }
   }
