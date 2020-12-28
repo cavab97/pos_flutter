@@ -15,14 +15,14 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 
 class DiscountPad extends StatefulWidget {
   // Opning ammount popup
-  DiscountPad(
-      {Key key,
-      this.selproduct,
-      this.issetMeal,
-      this.cartID,
-      this.cartItem,
-      this.onClose})
-      : super(key: key);
+  DiscountPad({
+    Key key,
+    this.selproduct,
+    this.issetMeal,
+    this.cartID,
+    this.cartItem,
+    this.onClose
+  }) : super(key: key);
 
   final bool issetMeal;
   final selproduct;
@@ -54,11 +54,11 @@ class _DiscountPadState extends State<DiscountPad> {
   void initState() {
     super.initState();
     setState(() {});
-    getPaymentMethods();
+    // getPaymentMethods();
     currentNumber = totalAmount.toStringAsFixed(2);
   }
 
-  getPaymentMethods() async {
+  /* getPaymentMethods() async {
     var result = await localAPI.getPaymentMethods();
 
     if (result.length != 0) {
@@ -67,9 +67,9 @@ class _DiscountPadState extends State<DiscountPad> {
         subPaymenttyppeList = result.toList();
       });
     }
-  }
+  } */
 
-  List<Widget> setPaymentListTile(List<Payments> listTilePaymentType) {
+  List<Widget> setDiscountListTile(List<Payments> listTilePaymentType) {
     var size = MediaQuery.of(context).size.width / 2.0;
     return listTilePaymentType.map((payment) {
       if (payment.name.toUpperCase() == "CASH") {
@@ -124,47 +124,6 @@ class _DiscountPadState extends State<DiscountPad> {
             },
           );
         });
-  }
-
-  List<Widget> subPaymentListTile(List<Payments> listTilePaymentType) {
-    List<Widget> returnList = [];
-    returnList += [
-      MaterialButton(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-              side: BorderSide(color: Colors.grey)),
-          child: Icon(Icons.arrow_back),
-          textColor: Colors.black,
-          color: Colors.grey[100],
-          onPressed: () {
-            setState(() {
-              isSubPayment = false;
-            });
-          }),
-    ];
-    returnList += listTilePaymentType.map((payment) {
-      if (payment.name.toUpperCase() == "CASH") return SizedBox();
-      return MaterialButton(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-              side: BorderSide(color: Colors.grey)),
-          child: Text(payment.name, style: Styles.blackMediumBold()),
-          textColor: Colors.black,
-          color: Colors.grey[100],
-          onPressed: () {
-            seletedPayment = payment;
-            List<Payments> subList = mainPaymentList
-                .where((i) => i.isParent == payment.paymentId)
-                .toList();
-            if (subList.length > 0) {
-              subPaymenttyppeList = subList;
-            } else {
-              seletedPayment = payment;
-              //select payment
-            }
-          });
-    }).toList();
-    return returnList;
   }
 
   @override
@@ -473,62 +432,13 @@ class _DiscountPadState extends State<DiscountPad> {
                   ],
                 )),
             Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5),
-                child: Column(
-                  children: mainPaymentList.length > 0
-                      ? []
-                      // (isSubPayment
-                      //     ? subPaymentListTile(subPaymenttyppeList)
-                      //     : setPaymentListTile(mainPaymentList)
-                      //     )
-                      : [],
-                )),
+              padding: EdgeInsets.symmetric(horizontal: 5),
+            ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
               child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    // Row(
-                    //   // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    //   children: <Widget>[
-                    //     splshsButton("10", () {
-                    //       numberClick('10');
-                    //     }), // using custom widget button
-                    //   ],
-                    // ),
-                    // Row(
-                    //   // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    //   children: <Widget>[
-                    //     splshsButton("20", () {
-                    //       numberClick('20');
-                    //     }), // using custom widget button
-                    //   ],
-                    // ),
-                    // Row(
-                    //   // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    //   children: <Widget>[
-                    //     // using custom widget button
-                    //     splshsButton("50", () {
-                    //       numberClick('50');
-                    //     }),
-                    //   ],
-                    // ),
-                    // Row(
-                    //     // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    //     children: <Widget>[
-                    //       splshsButton("100", () {
-                    //         numberClick('100');
-                    //       }), //
-                    //     ]),
-                    // Row(
-                    //   // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    //   children: <Widget>[
-                    //     // using custom widget button
-                    //     splshsButton("150", () {
-                    //       numberClick('150');
-                    //     }),
-                    //   ],
-                    // ),
                     SizedBox(
                       height: 50,
                     ),
