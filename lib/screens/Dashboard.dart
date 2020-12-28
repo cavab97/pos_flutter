@@ -48,6 +48,7 @@ import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/screens/ChangeQtyDailog.dart';
+import 'package:mcncashier/screens/SetQuantityPad/SetQuantityPad.dart';
 import 'package:mcncashier/screens/SplitOrder.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/screens/ReprintPopup.dart';
@@ -66,6 +67,7 @@ import 'package:mcncashier/services/allTablesSync.dart';
 
 import '../services/LocalAPIs.dart';
 import '../screens/DiscountPad/DiscountPad.dart';
+import '../screens/SetQuantityPad/SetQuantityPad.dart';
 
 class DashboradPage extends StatefulWidget {
   // main Product list page
@@ -1090,7 +1092,7 @@ class _DashboradPageState extends State<DashboradPage>
         selectedProduct.modifireName != null) {
       showDialog(
           context: context,
-          barrierDismissible: false,
+          // barrierDismissible: false,
           builder: (BuildContext context) {
             return ProductQuantityDailog(
                 selproduct: selectedProduct,
@@ -1109,6 +1111,41 @@ class _DashboradPageState extends State<DashboradPage>
       }); */
       await addTocartItem(selectedProduct);
     }
+  }
+
+  editCartItem(cart) async {
+    var prod;
+
+    if (cart.issetMeal == 0) {
+      List<ProductDetails> productdt =
+          await localAPI.productdData(cart.productId);
+      if (productdt.length > 0) {
+        prod = productdt[0];
+      }
+    } else {
+      List<SetMeal> productdt = await localAPI.setmealData(cart.productId);
+      if (productdt.length > 0) {
+        prod = productdt[0];
+      }
+    }
+
+    await showDialog(
+        context: context,
+        // barrierDismissible: false,
+        builder: (BuildContext context) {
+          return ProductQuantityDailog(
+              selproduct: prod,
+              issetMeal: cart.issetMeal == 1 ? true : false,
+              cartID: currentCart,
+              cartItem: cart,
+              onClose: () {
+                getCurrentCart();
+                refreshAfterAction(false);
+              });
+        });
+    //     return false;
+    //   }
+    // }
   }
 
   addTocartItem(selectedProduct) async {
@@ -1888,7 +1925,6 @@ class _DashboradPageState extends State<DashboradPage>
 
     await showDialog(
         context: context,
-        barrierDismissible: false,
         builder: (BuildContext context) {
           return DiscountPad(
               selproduct: prod,
@@ -1896,6 +1932,7 @@ class _DashboradPageState extends State<DashboradPage>
               cartID: currentCart,
               cartItem: cart,
               onClose: () {
+                CommunFun.processingPopup(context);
                 refreshAfterAction(false);
               });
         });
@@ -1904,7 +1941,7 @@ class _DashboradPageState extends State<DashboradPage>
     // }
   }
 
-  editCartItem(cart) async {
+  setQuantityPad(cart) async {
     var prod;
 
     if (cart.issetMeal == 0) {
@@ -1922,14 +1959,14 @@ class _DashboradPageState extends State<DashboradPage>
 
     await showDialog(
         context: context,
-        barrierDismissible: false,
         builder: (BuildContext context) {
-          return ProductQuantityDailog(
+          return SetQuantityPad(
               selproduct: prod,
               issetMeal: cart.issetMeal == 1 ? true : false,
               cartID: currentCart,
               cartItem: cart,
               onClose: () {
+                CommunFun.processingPopup(context);
                 refreshAfterAction(false);
               });
         });
@@ -2004,7 +2041,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.white,
                   ),
                   SizedBox(height: 6),
-                  Text('Make FOC',
+                  Text(Strings.makeFoc,
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white))
                 ],
@@ -2040,7 +2077,7 @@ class _DashboradPageState extends State<DashboradPage>
                   color: Colors.white,
                 ),
                 SizedBox(height: 6),
-                Text('Edit Detail',
+                Text(Strings.editDetail,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white))
               ],
@@ -2049,6 +2086,7 @@ class _DashboradPageState extends State<DashboradPage>
         ),
         GestureDetector(
             onTap: () {
+              setQuantityPad(itemSelectedIndex);
               setState(() {
                 itemSelectedIndex = new MSTCartdetails();
               });
@@ -2067,7 +2105,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.white,
                   ),
                   SizedBox(height: 6),
-                  Text('Set Quantity',
+                  Text(Strings.setQuantity,
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white))
                 ],
@@ -2094,7 +2132,7 @@ class _DashboradPageState extends State<DashboradPage>
                     color: Colors.white,
                   ),
                   SizedBox(height: 6),
-                  Text('Discount ',
+                  Text(Strings.discount,
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white))
                 ],
@@ -2660,15 +2698,17 @@ class _DashboradPageState extends State<DashboradPage>
                       overflow: TextOverflow.ellipsis,
                     ),
                     subtitle: Text(searchProductList.price.toString()),
-                    trailing: searchProductList.qty != null &&
-                            searchProductList.hasInventory == 1 &&
-                            searchProductList.qty <= 0
+                    trailing: searchProductList.outOfStock == 1 ||
+                            (searchProductList.qty != null &&
+                                searchProductList.hasInventory == 1 &&
+                                searchProductList.qty <= 0)
                         ? Text(Strings.outOfStoke,
                             style: Styles.orangesimpleSmall())
                         : SizedBox());
               },
               onSuggestionSelected: (suggestion) {
-                if (suggestion.qty == null ||
+                if (suggestion.outOfStock != 1 ||
+                    suggestion.qty == null ||
                     suggestion.hasInventory != 1 ||
                     suggestion.qty > 0.0) {
                   if (isShiftOpen) {
@@ -3059,10 +3099,14 @@ class _DashboradPageState extends State<DashboradPage>
           final prodprice = product.price.toStringAsFixed(2);
           return InkWell(
             onTap: () async {
-              if ((product.qty == null ||
+              print("tapped");
+              if (product.outOfStock == 1) {
+                CommunFun.showToast(context, Strings.outOfStokeMsg);
+              } else if ((product.hasRacManagemant == 1 &&
+                      product.box_pId != null) ||
+                  (product.qty == null ||
                       product.hasInventory != 1 ||
-                      product.qty > 0.0) ||
-                  (product.hasRacManagemant == 1 && product.box_pId != null)) {
+                      product.qty > 0.0)) {
                 await SyncAPICalls.logActivity(
                     "product", "Clicked product item", "product", 1);
                 /* CommunFun.showToast(
@@ -3093,29 +3137,30 @@ class _DashboradPageState extends State<DashboradPage>
                 alignment: AlignmentDirectional.topCenter,
                 children: <Widget>[
                   Hero(
-                      tag: product.productId != null ? product.productId : 0,
-                      child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          decoration: BoxDecoration(
-                            color: StaticColor.colorGrey,
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(8),
-                                topRight: Radius.circular(8)),
-                          ),
-                          height: itemHeight / 2.2,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(8),
-                                topRight: Radius.circular(8)),
-                            child: product.base64 != ""
-                                ? CommonUtils.imageFromBase64String(
-                                    product.base64)
-                                : new Image.asset(
-                                    Strings.noImageAsset,
-                                    fit: BoxFit.cover,
-                                    gaplessPlayback: true,
-                                  ),
-                          ))),
+                    tag: product.productId != null ? product.productId : 0,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        color: StaticColor.colorGrey,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            topRight: Radius.circular(8)),
+                      ),
+                      height: itemHeight / 2.2,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            topRight: Radius.circular(8)),
+                        child: product.base64 != ""
+                            ? CommonUtils.imageFromBase64String(product.base64)
+                            : new Image.asset(
+                                Strings.noImageAsset,
+                                fit: BoxFit.cover,
+                                gaplessPlayback: true,
+                              ),
+                      ),
+                    ),
+                  ),
                   Container(
                     padding: EdgeInsets.all(2),
                     margin: EdgeInsets.only(top: itemHeight / 2.2),
@@ -3153,9 +3198,10 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                     ),
                   ),
-                  product.qty != null &&
-                          product.hasInventory == 1 &&
-                          product.qty <= 0
+                  product.outOfStock == 1 ||
+                          (product.qty != null &&
+                              product.hasInventory == 1 &&
+                              product.qty <= 0)
                       ? Positioned(
                           top: 0,
                           right: 0,

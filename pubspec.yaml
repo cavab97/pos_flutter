@@ -51,6 +51,7 @@ dependencies:
   ping_discover_network: ^0.2.0+1
   intl: ^0.16.1
   esc_pos_utils: ^0.4.9
+  alphabet_list_scroll_view: ^1.0.6
 
  
 dev_dependencies:

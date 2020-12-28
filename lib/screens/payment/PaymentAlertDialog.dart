@@ -124,7 +124,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   }
 
   insertPaymentOption(Payments payment) async {
-  /* insertPaymentOption(Payments payment) { */
+    /* insertPaymentOption(Payments payment) { */
     if (seletedPayment.name == null) return;
     if (seletedPayment.name.toLowerCase().contains("wallet")) {
       setState(() {

@@ -6,23 +6,19 @@ import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
-import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
-import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
-import 'package:mcncashier/screens/FinalPaymentScreen.dart';
-import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
-class DiscountPad extends StatefulWidget {
+class SetQuantityPad extends StatefulWidget {
   // Opning ammount popup
-  DiscountPad({
-    Key key,
-    this.selproduct,
-    this.issetMeal,
-    this.cartID,
-    this.cartItem,
-    this.onClose
-  }) : super(key: key);
+  SetQuantityPad(
+      {Key key,
+      this.selproduct,
+      this.issetMeal,
+      this.cartID,
+      this.cartItem,
+      this.onClose})
+      : super(key: key);
 
   final bool issetMeal;
   final selproduct;
@@ -31,10 +27,10 @@ class DiscountPad extends StatefulWidget {
   Function onClose;
 
   @override
-  _DiscountPadState createState() => _DiscountPadState();
+  _SetQuantityPadState createState() => _SetQuantityPadState();
 }
 
-class _DiscountPadState extends State<DiscountPad> {
+class _SetQuantityPadState extends State<SetQuantityPad> {
   double paidAmount = 0;
   List<OrderPayment> totalPaymentList = [];
   OrderPayment currentPayment = new OrderPayment();
@@ -47,84 +43,113 @@ class _DiscountPadState extends State<DiscountPad> {
   Payments seletedPayment = new Payments();
   List<Widget> paymentListTile = [];
   List<Payments> subPaymenttyppeList = [];
-  double totalAmount = 0;
+  int totalQuantity = 0;
   TextEditingController extraNotes = new TextEditingController();
 
   @override
   void initState() {
     super.initState();
     setState(() {});
-    // getPaymentMethods();
-    currentNumber = totalAmount.toStringAsFixed(2);
+    currentNumber = totalQuantity.toString();
   }
 
-  /* getPaymentMethods() async {
-    var result = await localAPI.getPaymentMethods();
+  // List<Widget> setPaymentListTile(List<Payments> listTilePaymentType) {
+  //   var size = MediaQuery.of(context).size.width / 2.0;
+  //   return listTilePaymentType.map((payment) {
+  //     if (payment.name.toUpperCase() == "CASH") {
+  //       if (this.mounted) {
+  //         seletedPayment = payment;
+  //       }
+  //     }
+  //     return MaterialButton(
+  //         minWidth: (size / 3),
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(10.0),
+  //           side: BorderSide(color: Colors.grey),
+  //         ),
+  //         child: Text(payment.name, style: Styles.blackMediumBold()),
+  //         textColor: Colors.black,
+  //         color:
+  //             seletedPayment == payment ? Colors.orange[200] : Colors.grey[100],
+  //         onPressed: () {
+  //           seletedPayment = payment;
+  //           List<Payments> subList = subPaymenttyppeList
+  //               .where((i) => i.isParent == payment.paymentId)
+  //               .toList();
+  //           if (subList.length > 0) {
+  //             openSubPaymentDialog(subList);
+  //             //subPaymenttyppeList = subList;
+  //             /* setState(() {
+  //               isSubPayment = true;
+  //             }); */
+  //           } else if (this.mounted) {
+  //             setState(() {
+  //               seletedPayment = payment;
+  //             });
+  //             //insertPaymentOption(payment);
+  //             //select payment
+  //           }
+  //         });
+  //   }).toList();
+  // }
 
-    if (result.length != 0) {
-      setState(() {
-        mainPaymentList = result.where((i) => i.isParent == 0).toList();
-        subPaymenttyppeList = result.toList();
-      });
-    }
-  } */
+  // openSubPaymentDialog(List<Payments> subList) {
+  //   showDialog(
+  //       // Opning Ammount Popup
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return SubPaymentMethodPop(
+  //           subList: subList,
+  //           subTotal: totalAmount,
+  //           grandTotal: totalAmount,
+  //           onClose: (mehtod) {
+  //             Navigator.of(context).pop();
+  //             // insertPaymentOption(mehtod);
+  //           },
+  //         );
+  //       });
+  // }
 
-  List<Widget> setDiscountListTile(List<Payments> listTilePaymentType) {
-    var size = MediaQuery.of(context).size.width / 2.0;
-    return listTilePaymentType.map((payment) {
-      if (payment.name.toUpperCase() == "CASH") {
-        if (this.mounted) {
-          seletedPayment = payment;
-        }
-      }
-      return MaterialButton(
-          minWidth: (size / 3),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            side: BorderSide(color: Colors.grey),
-          ),
-          child: Text(payment.name, style: Styles.blackMediumBold()),
-          textColor: Colors.black,
-          color:
-              seletedPayment == payment ? Colors.orange[200] : Colors.grey[100],
-          onPressed: () {
-            seletedPayment = payment;
-            List<Payments> subList = subPaymenttyppeList
-                .where((i) => i.isParent == payment.paymentId)
-                .toList();
-            if (subList.length > 0) {
-              openSubPaymentDialog(subList);
-              //subPaymenttyppeList = subList;
-              /* setState(() {
-                isSubPayment = true;
-              }); */
-            } else if (this.mounted) {
-              setState(() {
-                seletedPayment = payment;
-              });
-              //insertPaymentOption(payment);
-              //select payment
-            }
-          });
-    }).toList();
-  }
-
-  openSubPaymentDialog(List<Payments> subList) {
-    showDialog(
-        // Opning Ammount Popup
-        context: context,
-        builder: (BuildContext context) {
-          return SubPaymentMethodPop(
-            subList: subList,
-            subTotal: totalAmount,
-            grandTotal: totalAmount,
-            onClose: (mehtod) {
-              Navigator.of(context).pop();
-              // insertPaymentOption(mehtod);
-            },
-          );
-        });
-  }
+  // List<Widget> subPaymentListTile(List<Payments> listTilePaymentType) {
+  //   List<Widget> returnList = [];
+  //   returnList += [
+  //     MaterialButton(
+  //         shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(10.0),
+  //             side: BorderSide(color: Colors.grey)),
+  //         child: Icon(Icons.arrow_back),
+  //         textColor: Colors.black,
+  //         color: Colors.grey[100],
+  //         onPressed: () {
+  //           setState(() {
+  //             isSubPayment = false;
+  //           });
+  //         }),
+  //   ];
+  //   returnList += listTilePaymentType.map((payment) {
+  //     if (payment.name.toUpperCase() == "CASH") return SizedBox();
+  //     return MaterialButton(
+  //         shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(10.0),
+  //             side: BorderSide(color: Colors.grey)),
+  //         child: Text(payment.name, style: Styles.blackMediumBold()),
+  //         textColor: Colors.black,
+  //         color: Colors.grey[100],
+  //         onPressed: () {
+  //           seletedPayment = payment;
+  //           List<Payments> subList = mainPaymentList
+  //               .where((i) => i.isParent == payment.paymentId)
+  //               .toList();
+  //           if (subList.length > 0) {
+  //             subPaymenttyppeList = subList;
+  //           } else {
+  //             seletedPayment = payment;
+  //             //select payment
+  //           }
+  //         });
+  //   }).toList();
+  //   return returnList;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +170,7 @@ class _DiscountPadState extends State<DiscountPad> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                    "Discount" +
+                    "Quantity" +
                         (seletedPayment.name != null
                             ? ' (' + seletedPayment.name + ')'
                             : ''),
@@ -206,26 +231,30 @@ class _DiscountPadState extends State<DiscountPad> {
     }
   }
 
-  dicsountTypeClick(val) {
-    // add  value in prev value
-
-    if (val == "RM") {
-      setState(() {
-        currentDiscountType = val;
-        currentNumber = "0";
-      });
-    } else if (val == "%") {
-      setState(() {
-        currentDiscountType = val;
-        currentNumber = "0";
-      });
-    }
+  submitQuantity(val) {
+    print(val);
   }
+
+  // dicsountTypeClick(val) {
+  //   // add  value in prev value
+
+  //   if (val == "RM") {
+  //     setState(() {
+  //       currentDiscountType = val;
+  //       currentNumber = "0";
+  //     });
+  //   } else if (val == "%") {
+  //     setState(() {
+  //       currentDiscountType = val;
+  //       currentNumber = "0";
+  //     });
+  //   }
+  // }
 
   Widget closeButton(context) {
     return Positioned(
-      top: 0,
-      right: 0,
+      top: 10,
+      right: 10,
       child: GestureDetector(
         onTap: () {
           Navigator.of(context).pop();
@@ -258,9 +287,7 @@ class _DiscountPadState extends State<DiscountPad> {
     var size = MediaQuery.of(context).size.width / 2.3;
     double resize = size / 6;
     return Container(
-      width: (number == "00") || (number == "%") || (number == "Cash")
-          ? (resize * 2)
-          : resize,
+      width: (number == "0") ? (resize * 3) : resize,
       padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
       height: (number == Strings.enter) ? (resize * 2) : resize,
       child: MaterialButton(
@@ -279,32 +306,6 @@ class _DiscountPadState extends State<DiscountPad> {
                 : number == "%" && currentDiscountType == "%"
                     ? Colors.orange[200]
                     : Colors.grey[100],
-        onPressed: f,
-      ),
-    );
-  }
-
-  Widget _totalbutton(String number, Function() f) {
-    var size = MediaQuery.of(context).size.width / 2.3;
-    double resize = size / 6;
-    return Container(
-      width: (resize * 4),
-      padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
-      height: (number == Strings.enter) ? (resize * 2) : resize,
-      child: MaterialButton(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            side: BorderSide(color: Colors.grey)),
-        child: number != Strings.enter
-            ? Text(number,
-                textAlign: TextAlign.center, style: Styles.whiteMediumBold())
-            : Icon(
-                Icons.subdirectory_arrow_left,
-                size: 30,
-                color: Colors.white,
-              ),
-        textColor: Colors.black,
-        color: Colors.blue[900],
         onPressed: f,
       ),
     );
@@ -383,97 +384,29 @@ class _DiscountPadState extends State<DiscountPad> {
 
   Widget getNumbers(context) {
     return Container(
-      // height: MediaQuery.of(context).size.height / 1.2,
-      width: MediaQuery.of(context).size.width * .6,
+      width: MediaQuery.of(context).size.width * .4,
       child: SingleChildScrollView(
           child: Table(
         border: TableBorder.all(color: Colors.white, width: 0.6),
         columnWidths: {
-          0: FractionColumnWidth(.4),
-          1: FractionColumnWidth(.5),
+          0: FractionColumnWidth(.0),
+          1: FractionColumnWidth(.7),
         },
         children: [
           TableRow(children: [
             Padding(
                 padding: EdgeInsets.symmetric(horizontal: 1),
                 child: Column(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      child: RichText(
-                          maxLines: 4,
-                          text: TextSpan(
-                              text: "Amount",
-                              style: TextStyle(
-                                  color: Color(0xFF000000),
-                                  fontSize: SizeConfig.safeBlockVertical * 3,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: Strings.fontFamily),
-                              children: <TextSpan>[
-                                TextSpan(
-                                  text: currentDiscountType == "RM"
-                                      ? "\n" +
-                                          currentDiscountType +
-                                          CommunFun.getDecimalFormat(
-                                              currentNumber)
-                                      : "\n" +
-                                          CommunFun.getDecimalFormat(
-                                                  currentNumber)
-                                              .toString() +
-                                          currentDiscountType,
-                                  style: TextStyle(
-                                      color: Color(0xFF0D47A1),
-                                      fontSize:
-                                          SizeConfig.safeBlockVertical * 4,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: Strings.fontFamily),
-                                )
-                              ])),
-                    ),
-                    SizedBox(height: 15),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: _extraNotesTitle(),
-                    ),
-                    SizedBox(height: 5),
-                    inputNotesView()
-                  ],
+                  children: [],
                 )),
             Padding(
-<<<<<<< HEAD
-              padding: EdgeInsets.symmetric(horizontal: 5),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    SizedBox(
-                      height: 50,
-                    ),
-                  ]),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-=======
-              padding: EdgeInsets.symmetric(horizontal: 20),
->>>>>>> 52a926f442167f781763a847b640ee92758c3fa9
+              padding: EdgeInsets.symmetric(horizontal: 00),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      Row(
-                        // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          _button("Cash", () {
-                            dicsountTypeClick('RM');
-                          }), // using custom widget button
-                          _button("%", () {
-                            dicsountTypeClick('%');
-                          }),
-                        ],
-                      ),
+                      _totalbutton("x " + currentNumber, () {}),
                     ],
                   ),
                   Row(
@@ -533,43 +466,12 @@ class _DiscountPadState extends State<DiscountPad> {
                             _button("0", () {
                               numberClick('0');
                             }),
-                            _button("00", () {
-                              numberClick('00');
-                            }),
                           ],
                         ),
                       ],
                     ),
                     _button(Strings.enter, () {
-                      //paidAmount = widget.totalAmount;
-                      double currentPaidAmount =
-                          CommunFun.getDecimalFormat(currentNumber);
-                      if (currentPaidAmount < 0.01) return;
-                      if (seletedPayment.paymentId == null) {
-                        return CommunFun.showToast(
-                            context, Strings.selectPayment);
-                      }
-                      if (!isPaymented && this.mounted) {
-                        setState(() {
-                          currentPayment.op_amount = currentPaidAmount;
-                          currentPayment.op_method_id =
-                              seletedPayment.paymentId;
-                          totalPaymentList.add(currentPayment);
-                          paidAmount += currentPaidAmount;
-                          seletedPayment = new Payments();
-                          currentPayment = new OrderPayment();
-                        });
-                      }
-                      if (paidAmount < (totalAmount) && this.mounted) {
-                        setState(() {
-                          isPaymented = false;
-                          currentNumber = "0";
-                        });
-                      } else {
-                        isPaymented = true;
-                        finalPayment();
-                      }
-                      //widget.onEnter(currentNumber);
+                      submitQuantity(currentNumber);
                     }),
                   ]),
                 ],
@@ -579,28 +481,6 @@ class _DiscountPadState extends State<DiscountPad> {
         ],
       )),
     );
-  }
-
-  finalPayment() async {
-    //List<OrderPayment> totalPayment = [];
-    double change = paidAmount - totalAmount;
-    if (!(paidAmount >= (totalAmount)) &&
-        (seletedPayment.paymentId == null ||
-            totalPaymentList[0].op_amount == 0.00)) {
-      return CommunFun.showToast(context, Strings.selectPayment);
-    }
-    await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return FinalEndScreen(
-              total: totalAmount,
-              totalPaid: paidAmount,
-              change: change,
-              onClose: () {
-                Navigator.of(context).pop();
-                widget.onClose(totalPaymentList);
-              });
-        });
   }
 
   Widget notesInput() {
@@ -618,16 +498,8 @@ class _DiscountPadState extends State<DiscountPad> {
           style: TextStyle(
               fontSize: SizeConfig.safeBlockVertical * 3, height: 1.2),
           maxLines: 10,
-          // decoration: new InputDecoration(
-          //   border: OutlineInputBorder(
-          //     borderSide: BorderSide(color: Colors.greenAccent, width: 100.0),
-          //   ),
-          //   // hintText: product_qty.toDouble().toString(),
-          // ),
           decoration: new InputDecoration(
             border: InputBorder.none,
-
-            // hintText: product_qty.toDouble().toString(),
           ),
           onChanged: (val) {},
         ),
@@ -638,7 +510,6 @@ class _DiscountPadState extends State<DiscountPad> {
   Widget inputNotesView() {
     return Container(
         padding: EdgeInsets.all(0),
-        //height: 170, // MediaQuery.of(context).size.height / 4,
         width: MediaQuery.of(context).size.width,
         child: Card(
           color: StaticColor.lightGrey100,
@@ -660,6 +531,26 @@ class _DiscountPadState extends State<DiscountPad> {
           fontSize: SizeConfig.safeBlockVertical * 3,
           fontWeight: FontWeight.w400,
           color: StaticColor.colorGrey800),
+    );
+  }
+
+  Widget _totalbutton(String number, Function() f) {
+    var size = MediaQuery.of(context).size.width / 2.3;
+    double resize = size / 6;
+    return Container(
+      width: (resize * 4),
+      padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
+      height: (number == Strings.enter) ? (resize * 2) : resize,
+      child: MaterialButton(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            side: BorderSide(color: Colors.grey)),
+        child: Text(number,
+            textAlign: TextAlign.center, style: Styles.whiteMediumBold()),
+        textColor: Colors.black,
+        color: Colors.blue[900],
+        onPressed: f,
+      ),
     );
   }
 }

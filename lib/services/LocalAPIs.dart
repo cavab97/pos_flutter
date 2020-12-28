@@ -90,7 +90,7 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getProduct(String id, String branchID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,product_store_inventory.qty,box.product_id as box_pId,category_attribute.name as attr_cat ,modifier.name as modifire_Name FROM `product` " +
+    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,product_store_inventory.qty,box.product_id as box_pId,category_attribute.name as attr_cat ,modifier.name as modifire_Name, product_branch.out_of_stock as out_of_stock FROM `product` " +
         " LEFT JOIN product_category on product_category.product_id = product.product_id AND product_category.status = 1" +
         " LEFT JOIN product_branch on product_branch.product_id = product.product_id AND product_branch.status = 1" +
         " LEFT JOIN price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
@@ -113,6 +113,58 @@ class LocalAPI {
         : [];
 
     return list;
+  }
+
+  Future<List<ProductDetails>> getAllProduct(String branchID) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    String query =
+        "SELECT product.product_id, product.name, product.has_inventory, product_store_inventory.qty, product_branch.out_of_stock FROM `product` " +
+            " LEFT JOIN product_branch ON product_branch.product_id = product.product_id AND product_branch.status = 1" +
+            " LEFT JOIN product_store_inventory ON product_store_inventory.product_id = product.product_id AND product_store_inventory.status = 1 " +
+            " AND product_branch.branch_id = " +
+            branchID.toString();
+    var res = await db.rawQuery(query);
+    List<ProductDetails> list = res.length > 0
+        ? res.map((c) => ProductDetails.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<bool> updateProductWithStock(
+      List<int> idsWithStock, List<int> idsNoStock, String branchID) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    String updateProductToStock =
+        "UPDATE `product_branch` SET out_of_stock = 0 WHERE product_id IN (" +
+            idsWithStock.join(',') +
+            ") AND product_branch.branch_id = " +
+            branchID.toString();
+    String updateProductNoStock =
+        "UPDATE `product_branch` SET out_of_stock = 1 WHERE product_id IN (" +
+            idsNoStock.join(',') +
+            ") AND product_branch.branch_id = " +
+            branchID.toString();
+    /* String updateProductInventory =
+        "UPDATE `product_store_inventory` SET qty = 0 WHERE product_id IN (" +
+            idsNoStock.join(',') +
+            ")"; */
+    String selectQuery = "SELECT product.* FROM `product` " +
+        " LEFT JOIN product_branch ON product_branch.product_id = product.product_id AND product_branch.status = 1" +
+        " WHERE out_of_stock = 1 AND product_branch.branch_id = " +
+        branchID.toString();
+    if (idsWithStock.length > 0) {
+      await db.rawQuery(updateProductToStock);
+    }
+    if (idsNoStock.length > 0) {
+      await db.rawQuery(updateProductNoStock);
+    }
+    //await db.rawQuery(updateProductInventory);
+    /* var res = await db.rawQuery(selectQuery);
+
+    List<ProductDetails> list = res.length > 0
+        ? res.map((c) => ProductDetails.fromJson(c)).toList()
+        : [];
+    print(jsonEncode(list)); */
+    return true;
   }
 
   Future<List<ProductDetails>> getSeachProduct(
