@@ -90,7 +90,7 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getProduct(String id, String branchID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,product_store_inventory.qty,box.product_id as box_pId,category_attribute.name as attr_cat ,modifier.name as modifire_Name FROM `product` " +
+    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,product_store_inventory.qty,box.product_id as box_pId,category_attribute.name as attr_cat ,modifier.name as modifire_Name, product_branch.out_of_stock as out_of_stock FROM `product` " +
         " LEFT JOIN product_category on product_category.product_id = product.product_id AND product_category.status = 1" +
         " LEFT JOIN product_branch on product_branch.product_id = product.product_id AND product_branch.status = 1" +
         " LEFT JOIN price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
@@ -151,8 +151,12 @@ class LocalAPI {
         " LEFT JOIN product_branch ON product_branch.product_id = product.product_id AND product_branch.status = 1" +
         " WHERE out_of_stock = 1 AND product_branch.branch_id = " +
         branchID.toString();
-    await db.rawQuery(updateProductToStock);
-    await db.rawQuery(updateProductNoStock);
+    if (idsWithStock.length > 0) {
+      await db.rawQuery(updateProductToStock);
+    }
+    if (idsNoStock.length > 0) {
+      await db.rawQuery(updateProductNoStock);
+    }
     //await db.rawQuery(updateProductInventory);
     /* var res = await db.rawQuery(selectQuery);
 

@@ -2707,7 +2707,8 @@ class _DashboradPageState extends State<DashboradPage>
                         : SizedBox());
               },
               onSuggestionSelected: (suggestion) {
-                if (suggestion.qty == null ||
+                if (suggestion.outOfStock != 1 ||
+                    suggestion.qty == null ||
                     suggestion.hasInventory != 1 ||
                     suggestion.qty > 0.0) {
                   if (isShiftOpen) {
@@ -3099,10 +3100,13 @@ class _DashboradPageState extends State<DashboradPage>
           return InkWell(
             onTap: () async {
               print("tapped");
-              if ((product.qty == null ||
+              if (product.outOfStock == 1) {
+                CommunFun.showToast(context, Strings.outOfStokeMsg);
+              } else if ((product.hasRacManagemant == 1 &&
+                      product.box_pId != null) ||
+                  (product.qty == null ||
                       product.hasInventory != 1 ||
-                      product.qty > 0.0) ||
-                  (product.hasRacManagemant == 1 && product.box_pId != null)) {
+                      product.qty > 0.0)) {
                 await SyncAPICalls.logActivity(
                     "product", "Clicked product item", "product", 1);
                 /* CommunFun.showToast(
@@ -3133,29 +3137,30 @@ class _DashboradPageState extends State<DashboradPage>
                 alignment: AlignmentDirectional.topCenter,
                 children: <Widget>[
                   Hero(
-                      tag: product.productId != null ? product.productId : 0,
-                      child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          decoration: BoxDecoration(
-                            color: StaticColor.colorGrey,
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(8),
-                                topRight: Radius.circular(8)),
-                          ),
-                          height: itemHeight / 2.2,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(8),
-                                topRight: Radius.circular(8)),
-                            child: product.base64 != ""
-                                ? CommonUtils.imageFromBase64String(
-                                    product.base64)
-                                : new Image.asset(
-                                    Strings.noImageAsset,
-                                    fit: BoxFit.cover,
-                                    gaplessPlayback: true,
-                                  ),
-                          ))),
+                    tag: product.productId != null ? product.productId : 0,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        color: StaticColor.colorGrey,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            topRight: Radius.circular(8)),
+                      ),
+                      height: itemHeight / 2.2,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            topRight: Radius.circular(8)),
+                        child: product.base64 != ""
+                            ? CommonUtils.imageFromBase64String(product.base64)
+                            : new Image.asset(
+                                Strings.noImageAsset,
+                                fit: BoxFit.cover,
+                                gaplessPlayback: true,
+                              ),
+                      ),
+                    ),
+                  ),
                   Container(
                     padding: EdgeInsets.all(2),
                     margin: EdgeInsets.only(top: itemHeight / 2.2),
@@ -3193,9 +3198,10 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                     ),
                   ),
-                  product.qty != null &&
-                          product.hasInventory == 1 &&
-                          product.qty <= 0
+                  product.outOfStock == 1 ||
+                          (product.qty != null &&
+                              product.hasInventory == 1 &&
+                              product.qty <= 0)
                       ? Positioned(
                           top: 0,
                           right: 0,
