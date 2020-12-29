@@ -43,6 +43,7 @@ class _DiscountPadState extends State<DiscountPad> {
     super.initState();
     setState(() {});
     currentNumber = totalAmount.toStringAsFixed(2);
+    extraNotes.text = widget.seletedProduct.discountRemark ?? "";
     extraNotes.addListener(() {
       if (!isEnter) isEnter = true;
       if (!validNotes && extraNotes.text.trim().isNotEmpty && this.mounted) {
