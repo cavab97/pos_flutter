@@ -507,6 +507,9 @@ class CreateTables {
         "sub_total REAL," +
         "service_charge_percent REAL," +
         "service_charge REAL," +
+        "discount_type INTEGER," + //	0 for no discount, 1 for Percentage , 2 for Amount
+        "discount_amount REAL," +
+        "discount_remark TEXT," +
         "sub_total_after_discount REAL," +
         "grand_total REAL," +
         "order_source INTEGER," + // 1  web, 2  app
@@ -537,6 +540,9 @@ class CreateTables {
         "product_old_price INTEGER," +
         "product_discount REAL," +
         "product_detail TEXT," +
+        "discount_type INTEGER," + //	0 for no discount, 1 for Percentage , 2 for Amount
+        "discount_amount REAL," +
+        "discount_remark TEXT," +
         "issetMeal NUMERIC," +
         "has_rac_managemant NUMERIC," +
         "isSync NUMERIC," +
@@ -698,8 +704,6 @@ class CreateTables {
         'user_id INTEGER,' +
         'branch_id INTEGER,' +
         'sub_total REAL,' + //DOUBLE
-        'discount REAL,' +
-        'discount_type INTEGER,' +
         'remark TEXT,' +
         'table_id INTEGER,' +
         'tax REAL,' +
@@ -720,11 +724,13 @@ class CreateTables {
         'total_item REAL,' +
         'service_charge_percent  REAL,' +
         'service_charge  REAL,' +
+        "discount_type INTEGER," + //	0 for no discount, 1 for Percentage , 2 for Amount
+        "discount_amount REAL," +
+        "discount_remark TEXT," +
         'cart_order_number TEXT,' +
         'cart_payment_id INTEGER,' +
         'cart_payment_response TEXT,' +
-        'cart_payment_status NUMERIC,' + //0 For Pending, 1 For complete
-        'discount_remark TEXT' +
+        'cart_payment_status NUMERIC' + //0 For Pending, 1 For complete
         ')');
 
     datatables = db.execute("CREATE TABLE mst_cart_sub_detail (" +
@@ -739,7 +745,7 @@ class CreateTables {
         " ca_id INTEGER" +
         ")");
 
-    datatables = db.execute("CREATE TABLE mst_cart_detail( " +
+    datatables = db.execute("CREATE TABLE mst_cart_detail ( " +
         'id INTEGER PRIMARY KEY AUTOINCREMENT,' +
         'cart_id INTEGER,' +
         'localID INTEGER,' +
@@ -753,21 +759,21 @@ class CreateTables {
         'product_qty REAL,' +
         'tax_id INTEGER,' +
         'tax_value REAL,' + //varchar
-        'discount REAL,' + //DOUBLE
-        'discount_type  INTEGER,' + //int
         'remark TEXT,' +
+        "discount_type INTEGER," + //	0 for no discount, 1 for Percentage , 2 for Amount
+        "discount_amount REAL," +
+        "discount_remark TEXT," +
         'issetMeal NUMERIC,' +
         'has_rac_managemant NUMERIC,' +
         'isFoc_Product NUMERIC,' +
         'setmeal_product_detail TEXT,' +
         'cart_detail TEXT,' +
-        'is_deleted   INTEGER,' +
-        'created_by  INTEGER,' +
-        'created_at  TEXT,' +
+        'is_deleted INTEGER,' +
+        'created_by INTEGER,' +
+        'created_at TEXT,' +
         'is_send_kichen NUMERIC,' +
         'item_unit TEXT,' +
-        'has_composite_inventory NUMERIC,' + //BOOLEAN
-        'discount_remark TEXT' +
+        'has_composite_inventory NUMERIC' + //BOOLEAN
         ')');
 
     datatables = db.execute("CREATE TABLE shift(" +

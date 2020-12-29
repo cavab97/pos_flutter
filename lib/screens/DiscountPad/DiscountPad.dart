@@ -1,23 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/styles.dart';
-import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
-import 'package:mcncashier/screens/SubPaymentMethodPop.dart';
-import 'package:mcncashier/components/communText.dart';
-import 'package:mcncashier/models/OrderPayment.dart';
-import 'package:mcncashier/screens/FinalPaymentScreen.dart';
-import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/models/MST_Cart_Details.dart';
 
 class DiscountPad extends StatefulWidget {
   // Opning ammount popup
   DiscountPad(
       {Key key,
-      this.selproduct,
+      this.seletedProduct,
       this.issetMeal,
       this.cartID,
       this.cartItem,
@@ -25,7 +19,7 @@ class DiscountPad extends StatefulWidget {
       : super(key: key);
 
   final bool issetMeal;
-  final selproduct;
+  final MSTCartdetails seletedProduct;
   final int cartID;
   final cartItem;
   Function onClose;
@@ -36,135 +30,42 @@ class DiscountPad extends StatefulWidget {
 
 class _DiscountPadState extends State<DiscountPad> {
   double paidAmount = 0;
-  List<OrderPayment> totalPaymentList = [];
-  OrderPayment currentPayment = new OrderPayment();
   String currentNumber = "0";
   String currentDiscountType = "RM";
-  bool isSubPayment = false;
-  bool isPaymented = false;
-  List<Payments> mainPaymentList = [];
   LocalAPI localAPI = LocalAPI();
-  Payments seletedPayment = new Payments();
-  List<Widget> paymentListTile = [];
-  List<Payments> subPaymenttyppeList = [];
   double totalAmount = 0;
   TextEditingController extraNotes = new TextEditingController();
-
+  FocusNode myFocusNode = FocusNode();
+  bool validNotes = false;
+  bool isEnter = false;
   @override
   void initState() {
     super.initState();
     setState(() {});
-    getPaymentMethods();
     currentNumber = totalAmount.toStringAsFixed(2);
-  }
-
-  getPaymentMethods() async {
-    var result = await localAPI.getPaymentMethods();
-
-    if (result.length != 0) {
-      setState(() {
-        mainPaymentList = result.where((i) => i.isParent == 0).toList();
-        subPaymenttyppeList = result.toList();
-      });
-    }
-  }
-
-  List<Widget> setPaymentListTile(List<Payments> listTilePaymentType) {
-    var size = MediaQuery.of(context).size.width / 2.0;
-    return listTilePaymentType.map((payment) {
-      if (payment.name.toUpperCase() == "CASH") {
-        if (this.mounted) {
-          seletedPayment = payment;
-        }
-      }
-      return MaterialButton(
-          minWidth: (size / 3),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            side: BorderSide(color: Colors.grey),
-          ),
-          child: Text(payment.name, style: Styles.blackMediumBold()),
-          textColor: Colors.black,
-          color:
-              seletedPayment == payment ? Colors.orange[200] : Colors.grey[100],
-          onPressed: () {
-            seletedPayment = payment;
-            List<Payments> subList = subPaymenttyppeList
-                .where((i) => i.isParent == payment.paymentId)
-                .toList();
-            if (subList.length > 0) {
-              openSubPaymentDialog(subList);
-              //subPaymenttyppeList = subList;
-              /* setState(() {
-                isSubPayment = true;
-              }); */
-            } else if (this.mounted) {
-              setState(() {
-                seletedPayment = payment;
-              });
-              //insertPaymentOption(payment);
-              //select payment
-            }
-          });
-    }).toList();
-  }
-
-  openSubPaymentDialog(List<Payments> subList) {
-    showDialog(
-        // Opning Ammount Popup
-        context: context,
-        builder: (BuildContext context) {
-          return SubPaymentMethodPop(
-            subList: subList,
-            subTotal: totalAmount,
-            grandTotal: totalAmount,
-            onClose: (mehtod) {
-              Navigator.of(context).pop();
-              // insertPaymentOption(mehtod);
-            },
-          );
+    extraNotes.text = widget.seletedProduct.discountRemark ?? "";
+    extraNotes.addListener(() {
+      if (!isEnter) isEnter = true;
+      if (!validNotes && extraNotes.text.trim().isNotEmpty && this.mounted) {
+        setState(() {
+          validNotes = true;
         });
+      } else if (this.mounted &&
+          extraNotes.text.trim().isEmpty &&
+          extraNotes.text.length > 0) {
+        setState(() {
+          validNotes = false;
+        });
+      }
+    });
   }
 
-  List<Widget> subPaymentListTile(List<Payments> listTilePaymentType) {
-    List<Widget> returnList = [];
-    returnList += [
-      MaterialButton(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-              side: BorderSide(color: Colors.grey)),
-          child: Icon(Icons.arrow_back),
-          textColor: Colors.black,
-          color: Colors.grey[100],
-          onPressed: () {
-            setState(() {
-              isSubPayment = false;
-            });
-          }),
-    ];
-    returnList += listTilePaymentType.map((payment) {
-      if (payment.name.toUpperCase() == "CASH") return SizedBox();
-      return MaterialButton(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-              side: BorderSide(color: Colors.grey)),
-          child: Text(payment.name, style: Styles.blackMediumBold()),
-          textColor: Colors.black,
-          color: Colors.grey[100],
-          onPressed: () {
-            seletedPayment = payment;
-            List<Payments> subList = mainPaymentList
-                .where((i) => i.isParent == payment.paymentId)
-                .toList();
-            if (subList.length > 0) {
-              subPaymenttyppeList = subList;
-            } else {
-              seletedPayment = payment;
-              //select payment
-            }
-          });
-    }).toList();
-    return returnList;
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+    if (myFocusNode != null) myFocusNode.dispose();
+
+    super.dispose();
   }
 
   @override
@@ -186,11 +87,9 @@ class _DiscountPadState extends State<DiscountPad> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                    "Discount" +
-                        (seletedPayment.name != null
-                            ? ' (' + seletedPayment.name + ')'
-                            : ''),
-                    style: Styles.communBlack()),
+                  "Discount" + '',
+                  style: Styles.communBlack(),
+                ),
                 // Text(
                 //     currentDiscountType == "RM"
                 //         ? currentDiscountType +
@@ -210,41 +109,114 @@ class _DiscountPadState extends State<DiscountPad> {
 
   backspaceClick() {
     if (currentNumber != "0") {
-      var currentnumber = currentNumber;
-      if (currentnumber != null && currentnumber.length > 0) {
-        currentnumber = currentnumber.substring(0, currentnumber.length - 1);
-        if (currentnumber.length == 0) {
-          currentnumber = "0";
+      String currentnumber = currentNumber
+          .replaceAll('.', '')
+          .replaceAll(new RegExp(r'^0+(?=.)'), '');
+      currentnumber = currentnumber.substring(0, currentnumber.length - 1);
+      if (currentnumber.length == 0 && this.mounted) {
+        setState(() {
+          currentNumber = "0.00";
+        });
+      } else if (currentnumber != null && currentnumber.length > 0) {
+        switch (currentnumber.length) {
+          case 1:
+            currentnumber = "0.0" + currentnumber;
+            break;
+          case 2:
+            currentnumber = "0." + currentnumber;
+            break;
+          default:
+            String output = [
+              currentnumber.substring(0, currentnumber.length - 2),
+              ".",
+              currentnumber.substring(currentnumber.length - 2)
+            ].join("");
+            currentnumber = output;
+            break;
         }
         setState(() {
           currentNumber = currentnumber;
         });
-      } else {
-        currentNumber = "0";
       }
     }
   }
 
   clearClick() {
-    setState(() {
-      currentNumber = "0";
-    });
+    if (this.mounted) {
+      setState(() {
+        currentNumber = "0.00";
+      });
+    }
   }
 
   numberClick(val) {
     // add  value in prev value
-    int limit = currentDiscountType == "%" ? 3 : 8;
 
-    if (currentNumber.length <= limit) {
-      var currentnumber = currentNumber;
-      if (currentnumber == "0") {
-        currentnumber = "";
-      }
-      currentnumber += val;
+    String currentnumber = currentNumber
+        .replaceAll('.', '')
+        .replaceAll(new RegExp(r'^0+(?=.)'), '');
+    currentnumber = currentnumber == "0" ? "" : currentnumber;
+    switch (currentnumber.length + val.length) {
+      case 1:
+        if (currentnumber == "0" || currentnumber == "") {
+          currentnumber = "0.0" + val;
+        } else {
+          currentnumber = "0." + currentnumber + val;
+        }
+        break;
+      default:
+        currentnumber += val;
+        String output = [
+          currentnumber.substring(0, currentnumber.length - 2),
+          ".",
+          currentnumber.substring(currentnumber.length - 2)
+        ].join("");
+        currentnumber = output;
+        break;
+    }
+    double totalAmount = 0;
+    if (widget.seletedProduct.discountType == 1) {
+      totalAmount = widget.seletedProduct.productDetailAmount /
+          (1 - (widget.seletedProduct.discountAmount / 100));
+    } else {
+      totalAmount = widget.seletedProduct.discountAmount +
+          widget.seletedProduct.productDetailAmount;
+    }
+    if (currentDiscountType == "RM" &&
+        double.tryParse(currentnumber) > totalAmount) {
+      currentnumber = totalAmount.toString();
+    } else if (currentDiscountType == "%" &&
+        double.tryParse(currentnumber) > 100) {
+      currentnumber = "100.00";
+    }
+    if (this.mounted && currentNumber != currentnumber) {
       setState(() {
         currentNumber = currentnumber;
       });
     }
+  }
+
+  setItemDiscount() async {
+    if (extraNotes.text.isEmpty && this.mounted) {
+      setState(() {
+        isEnter = true;
+      });
+      if (myFocusNode != null) {
+        myFocusNode.requestFocus();
+      }
+    } else {
+      await localAPI.updateItemDiscount(widget.seletedProduct, widget.cartID,
+          currentNumber, currentDiscountType, extraNotes.text.trim());
+      Navigator.of(context).pop();
+      widget.onClose();
+    }
+  }
+
+  bool validateTextField(String userInput) {
+    if (userInput == null || (userInput.isEmpty)) {
+      return false;
+    }
+    return true;
   }
 
   dicsountTypeClick(val) {
@@ -455,12 +427,11 @@ class _DiscountPadState extends State<DiscountPad> {
                                   text: currentDiscountType == "RM"
                                       ? "\n" +
                                           currentDiscountType +
-                                          CommunFun.getDecimalFormat(
-                                              currentNumber)
+                                          double.parse(currentNumber)
+                                              .toStringAsFixed(2)
                                       : "\n" +
-                                          CommunFun.getDecimalFormat(
-                                                  currentNumber)
-                                              .toString() +
+                                          double.parse(currentNumber)
+                                              .toStringAsFixed(2) +
                                           currentDiscountType,
                                   style: TextStyle(
                                       color: Color(0xFF0D47A1),
@@ -564,37 +535,7 @@ class _DiscountPadState extends State<DiscountPad> {
                         ),
                       ],
                     ),
-                    _button(Strings.enter, () {
-                      //paidAmount = widget.totalAmount;
-                      double currentPaidAmount =
-                          CommunFun.getDecimalFormat(currentNumber);
-                      if (currentPaidAmount < 0.01) return;
-                      if (seletedPayment.paymentId == null) {
-                        return CommunFun.showToast(
-                            context, Strings.selectPayment);
-                      }
-                      if (!isPaymented && this.mounted) {
-                        setState(() {
-                          currentPayment.op_amount = currentPaidAmount;
-                          currentPayment.op_method_id =
-                              seletedPayment.paymentId;
-                          totalPaymentList.add(currentPayment);
-                          paidAmount += currentPaidAmount;
-                          seletedPayment = new Payments();
-                          currentPayment = new OrderPayment();
-                        });
-                      }
-                      if (paidAmount < (totalAmount) && this.mounted) {
-                        setState(() {
-                          isPaymented = false;
-                          currentNumber = "0";
-                        });
-                      } else {
-                        isPaymented = true;
-                        finalPayment();
-                      }
-                      //widget.onEnter(currentNumber);
-                    }),
+                    _button(Strings.enter, setItemDiscount),
                   ]),
                 ],
               ),
@@ -605,37 +546,18 @@ class _DiscountPadState extends State<DiscountPad> {
     );
   }
 
-  finalPayment() async {
-    //List<OrderPayment> totalPayment = [];
-    double change = paidAmount - totalAmount;
-    if (!(paidAmount >= (totalAmount)) &&
-        (seletedPayment.paymentId == null ||
-            totalPaymentList[0].op_amount == 0.00)) {
-      return CommunFun.showToast(context, Strings.selectPayment);
-    }
-    await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return FinalEndScreen(
-              total: totalAmount,
-              totalPaid: paidAmount,
-              change: change,
-              onClose: () {
-                Navigator.of(context).pop();
-                widget.onClose(totalPaymentList);
-              });
-        });
-  }
-
   Widget notesInput() {
     return Center(
       child: Container(
         decoration: BoxDecoration(
-            border: Border.all(color: Colors.black),
+            border: isEnter && !validNotes
+                ? Border.all(color: Colors.red)
+                : Border.all(color: Colors.black),
             borderRadius: BorderRadius.circular(10)),
         height: 200,
         padding: EdgeInsets.all(10),
         child: TextField(
+          focusNode: myFocusNode,
           controller: extraNotes,
           keyboardType: TextInputType.multiline,
           textAlignVertical: TextAlignVertical.center,
@@ -649,10 +571,12 @@ class _DiscountPadState extends State<DiscountPad> {
           //   // hintText: product_qty.toDouble().toString(),
           // ),
           decoration: new InputDecoration(
-            border: InputBorder.none,
-
-            // hintText: product_qty.toDouble().toString(),
-          ),
+              border: InputBorder.none,
+              errorText: isEnter && !validNotes
+                  ? "Please enter notes for this discount"
+                  : null
+              // hintText: product_qty.toDouble().toString(),
+              ),
           onChanged: (val) {},
         ),
       ),

@@ -689,7 +689,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
           orderDetail.detail_amount = cartItem.productDetailAmount;
           orderDetail.product_old_price = cartItem.productNetPrice;
           orderDetail.detail_qty = cartItem.productQty;
-          orderDetail.product_discount = cartItem.discount;
+          orderDetail.product_discount = cartItem.discountAmount;
           orderDetail.product_detail = json.encode(pdata);
           orderDetail.isSync = 0;
           orderDetail.server_id = 0;

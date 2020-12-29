@@ -90,7 +90,7 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getProduct(String id, String branchID) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,product_store_inventory.qty,box.product_id as box_pId,category_attribute.name as attr_cat ,modifier.name as modifire_Name FROM `product` " +
+    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,product_store_inventory.qty,box.product_id as box_pId,category_attribute.name as attr_cat ,modifier.name as modifire_Name, product_branch.out_of_stock as out_of_stock FROM `product` " +
         " LEFT JOIN product_category on product_category.product_id = product.product_id AND product_category.status = 1" +
         " LEFT JOIN product_branch on product_branch.product_id = product.product_id AND product_branch.status = 1" +
         " LEFT JOIN price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
@@ -151,8 +151,12 @@ class LocalAPI {
         " LEFT JOIN product_branch ON product_branch.product_id = product.product_id AND product_branch.status = 1" +
         " WHERE out_of_stock = 1 AND product_branch.branch_id = " +
         branchID.toString();
-    await db.rawQuery(updateProductToStock);
-    await db.rawQuery(updateProductNoStock);
+    if (idsWithStock.length > 0) {
+      await db.rawQuery(updateProductToStock);
+    }
+    if (idsNoStock.length > 0) {
+      await db.rawQuery(updateProductNoStock);
+    }
     //await db.rawQuery(updateProductInventory);
     /* var res = await db.rawQuery(selectQuery);
 
@@ -607,6 +611,48 @@ class LocalAPI {
     return list;
   }
 
+  Future<bool> updateItemDiscount(MSTCartdetails product, int cartid,
+      String discountAmount, String discountType, String discountRemark) async {
+    int discountT = discountType == "%" ? 1 : 2;
+    double discountA = double.tryParse(discountAmount);
+    double totalPrice = product.productPrice;
+    String selectAttribute =
+        "SELECT SUM(mst_cart_sub_detail.attr_price) as attr_total, SUM(mst_cart_sub_detail.modifier_price) as modifier_total FROM mst_cart_sub_detail WHERE mst_cart_sub_detail.cart_details_id = " +
+            product.cartId.toString();
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    var res = await db.rawQuery(selectAttribute);
+
+    double attributesPrice =
+        res.isNotEmpty ? res.map((c) => c['attr_total']).first : 0.00;
+    double modifierPrice =
+        res.isNotEmpty ? res.map((c) => c['modifier_total']).first : 0.00;
+    attributesPrice = attributesPrice == null ? 0.00 : attributesPrice;
+    modifierPrice = modifierPrice == null ? 0.00 : modifierPrice;
+    totalPrice += attributesPrice + modifierPrice;
+    totalPrice = totalPrice * product.productQty;
+
+    if (discountType == "%") {
+      totalPrice = totalPrice * (1 - (discountA / 100));
+    } else {
+      totalPrice = totalPrice - discountA;
+    }
+    String updatePrice = "UPDATE `mst_cart_detail` SET discount_amount = '" +
+        discountAmount +
+        "', discount_type = '" +
+        discountT.toString() +
+        "', discount_remark = '" +
+        discountRemark +
+        "', product_detail_amount = '" +
+        totalPrice.toString() +
+        "' WHERE cart_id = '" +
+        cartid.toString() +
+        "' AND product_id = '" +
+        product.productId.toString() +
+        "'";
+    print(updatePrice);
+    await db.rawQuery(updatePrice);
+    return true;
+  }
   /*Future<List<MSTCartdetails>> getSplitBillData(cartId) async {
     var qry =
         "SELECT mst_cart_detail.*, replace(asset.base64,'data:image/jpg;base64,','') as base64  FROM `mst_cart_detail` LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = mst_cart_detail.product_id  where cart_id =  " +
@@ -982,7 +1028,7 @@ class LocalAPI {
   }
 
   Future<List<MSTSubCartdetails>> getItemModifire(id) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
 
     var cartDetail = await db.query("mst_cart_sub_detail",
         where: 'cart_details_id = ?', whereArgs: [id]);
@@ -1100,7 +1146,7 @@ class LocalAPI {
   }
 
   Future<MST_Cart> getCartData(cartid) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var cartdata =
         await db.query('mst_cart', where: 'id = ?', whereArgs: [cartid]);
     List<MST_Cart> list = cartdata.isNotEmpty
@@ -1123,7 +1169,7 @@ class LocalAPI {
   }
 
   Future<Voucher> getvoucher(voucherid) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var voucher = await db.query('voucher',
         where: 'voucher_id = ?', whereArgs: [voucherid.toString()]);
     List<Voucher> list = voucher.isNotEmpty
@@ -1320,7 +1366,7 @@ class LocalAPI {
 
   Future<List<ProductStoreInventory>> checkItemAvailableinStore(
       productId) async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     var inventoryProd = await db.query("product_store_inventory",
         where: 'product_id = ?', whereArgs: [productId]);
     List<ProductStoreInventory> list = inventoryProd.length > 0

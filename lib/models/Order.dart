@@ -19,6 +19,9 @@ class Orders {
   double rounding_amount;
   double serviceCharge;
   double serviceChargePercent;
+  double discountAmount;
+  int discountType;
+  String discountRemark;
   int order_source;
   int order_status;
   int order_item_count;
@@ -32,40 +35,43 @@ class Orders {
   int isSync;
   String orderRemark;
 
-  Orders(
-      {this.order_id,
-      this.uuid,
-      this.branch_id,
-      this.terminal_id,
-      this.app_id,
-      this.table_no,
-      this.table_id,
-      this.invoice_no,
-      this.customer_id,
-      this.tax_percent,
-      this.tax_amount,
-      this.voucher_id,
-      this.voucher_amount,
-      this.sub_total,
-      this.sub_total_after_discount,
-      this.grand_total,
-      this.rounding_amount,
-      this.order_source,
-      this.order_status,
-      this.order_item_count,
-      this.order_date,
-      this.order_by,
-      this.pax,
-      this.isSync,
-      this.voucher_detail,
-      this.server_id,
-      this.tax_json,
-      this.updated_at,
-      this.updated_by,
-      this.serviceCharge,
-      this.serviceChargePercent,
-      this.orderRemark
-    });
+  Orders({
+    this.order_id,
+    this.uuid,
+    this.branch_id,
+    this.terminal_id,
+    this.app_id,
+    this.table_no,
+    this.table_id,
+    this.invoice_no,
+    this.customer_id,
+    this.tax_percent,
+    this.tax_amount,
+    this.voucher_id,
+    this.voucher_amount,
+    this.sub_total,
+    this.sub_total_after_discount,
+    this.grand_total,
+    this.rounding_amount,
+    this.order_source,
+    this.order_status,
+    this.order_item_count,
+    this.order_date,
+    this.order_by,
+    this.pax,
+    this.isSync,
+    this.voucher_detail,
+    this.server_id,
+    this.tax_json,
+    this.updated_at,
+    this.updated_by,
+    this.serviceCharge,
+    this.serviceChargePercent,
+    this.orderRemark,
+    this.discountAmount,
+    this.discountType,
+    this.discountRemark,
+  });
 
   Orders.fromJson(Map<String, dynamic> json) {
     order_id = json["order_id"];
@@ -116,6 +122,11 @@ class Orders {
         ? (json['service_charge_percent'] as int).toDouble()
         : json['service_charge_percent'];
     orderRemark = json["order_remark"];
+    discountAmount = json["discount_amount"] is int
+        ? (json['discount_amount'] as int).toDouble()
+        : json["discount_amount"];
+    discountType = json["discount_type"];
+    discountRemark = json['discount_remark'];
   }
 
   Map<String, dynamic> toJson() {
@@ -152,6 +163,9 @@ class Orders {
     data["service_charge"] = this.serviceCharge;
     data["service_charge_percent "] = this.serviceChargePercent;
     data["order_remark"] = this.orderRemark;
+    data["discount_amount"] = this.discountAmount;
+    data["discount_type"] = this.discountType;
+    data["discount_remark"] = this.discountRemark;
     return data;
   }
 }

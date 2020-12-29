@@ -15,6 +15,9 @@ class OrderDetail {
   double detail_qty;
   int detail_status;
   String product_detail;
+  double discountAmount;
+  int discountType;
+  String discountRemark;
   int issetMeal;
   int hasRacManagemant;
   String setmeal_product_detail;
@@ -53,7 +56,10 @@ class OrderDetail {
     this.base64,
     this.isSync,
     this.server_id,
-    this.productRemark
+    this.productRemark,
+    this.discountAmount,
+    this.discountType,
+    this.discountRemark,
   });
 
   OrderDetail.fromJson(Map<String, dynamic> json) {
@@ -94,6 +100,11 @@ class OrderDetail {
     isSync = json["isSync"];
     server_id = json['server_id'];
     productRemark = json['product_remark'];
+    discountAmount = json["discount_amount"] is int
+        ? (json['discount_amount'] as int).toDouble()
+        : json["discount_amount"];
+    discountType = json["discount_type"];
+    discountRemark = json['discount_remark'];
   }
 
   Map<String, dynamic> toJson() {
@@ -126,6 +137,9 @@ class OrderDetail {
     data["isSync"] = this.isSync;
     data["server_id"] = this.server_id;
     data["product_remark"] = this.productRemark;
+    data["discount_amount"] = this.discountAmount;
+    data["discount_type"] = this.discountType;
+    data["discount_remark"] = this.discountRemark;
     return data;
   }
 }

@@ -714,8 +714,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   countDiscount() {
-    return currentCart.discount != null
-        ? double.parse(currentCart.discount.toStringAsFixed(2))
+    return currentCart.discountAmount != null
+        ? double.parse(currentCart.discountAmount.toStringAsFixed(2))
         : 0.00;
   }
 
@@ -750,7 +750,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
     if (currentCart != null) {
       cart.id = currentCart.id;
-      cart.discount_type = currentCart.discount_type;
+      cart.discountType = currentCart.discountType;
       cart.voucher_detail = currentCart.voucher_detail;
       cart.voucher_id = cart.voucher_id;
     }
@@ -759,7 +759,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
     cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
     cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
-    cart.discount = disc;
+    cart.discountAmount = disc;
     cart.table_id = tableData.table_id;
     cart.total_qty = qty;
     cart.tax = double.parse(taxvalues.toStringAsFixed(2));
@@ -815,7 +815,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         productItem.oldPrice != null ? productItem.oldPrice : 0.0;
     cartdetails.createdBy = loginData["id"];
     cartdetails.cart_detail = jsonEncode(data);
-    cartdetails.discount = 0;
+    cartdetails.discountAmount = 0;
     cartdetails.localID = await CommunFun.getLocalID();
     cartdetails.remark =
         extraNotes.text.trim().isNotEmpty ? extraNotes.text.trim() : "";

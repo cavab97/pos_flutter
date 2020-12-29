@@ -4,8 +4,6 @@ class MST_Cart {
   int user_id;
   int branch_id;
   double sub_total;
-  double discount;
-  int discount_type;
   String remark;
   int table_id;
   double tax;
@@ -27,6 +25,8 @@ class MST_Cart {
   int cart_payment_status;
   double serviceChargePercent;
   double serviceCharge;
+  double discountAmount;
+  int discountType;
   String discountRemark;
 
   MST_Cart({
@@ -35,8 +35,6 @@ class MST_Cart {
     this.user_id,
     this.branch_id,
     this.sub_total,
-    this.discount,
-    this.discount_type,
     this.remark,
     this.table_id,
     this.tax,
@@ -58,7 +56,9 @@ class MST_Cart {
     this.cart_payment_status,
     this.serviceChargePercent,
     this.serviceCharge,
-    this.discountRemark
+    this.discountAmount,
+    this.discountType,
+    this.discountRemark,
   });
 
   MST_Cart.fromJson(Map<String, dynamic> json) {
@@ -69,10 +69,6 @@ class MST_Cart {
     sub_total = json["sub_total"] is int
         ? (json['sub_total'] as int).toDouble()
         : json['sub_total'];
-    discount = json["discount"] is int
-        ? (json['discount'] as int).toDouble()
-        : json['discount'];
-    discount_type = json["discount_type"];
     table_id = json["table_id"];
     remark = json["remark"];
     tax = json["tax"] is int ? (json['tax'] as int).toDouble() : json['tax'];
@@ -103,9 +99,13 @@ class MST_Cart {
     serviceChargePercent = json["service_charge_percent"] is int
         ? (json['service_charge_percent'] as int).toDouble()
         : json['service_charge_percent'];
-    serviceCharge = json["service_charge"]is int
+    serviceCharge = json["service_charge"] is int
         ? (json['service_charge'] as int).toDouble()
         : json['service_charge'];
+    discountAmount = json["discount_amount"] is int
+        ? (json['discount_amount'] as int).toDouble()
+        : json["discount_amount"];
+    discountType = json["discount_type"];
     discountRemark = json['discount_remark'];
   }
 
@@ -117,8 +117,6 @@ class MST_Cart {
     data["user_id"] = this.user_id;
     data["branch_id"] = this.branch_id;
     data["sub_total"] = this.sub_total;
-    data["discount"] = this.discount;
-    data["discount_type "] = this.discount_type;
     data["remark"] = this.remark;
     data["table_id"] = this.table_id;
     data["tax"] = this.tax;
@@ -140,6 +138,8 @@ class MST_Cart {
     data["customer_terminal"] = this.customer_terminal;
     data["service_charge_percent"] = this.serviceChargePercent;
     data["service_charge"] = this.serviceCharge;
+    data["discount_amount"] = this.discountAmount;
+    data["discount_type"] = this.discountType;
     data["discount_remark"] = this.discountRemark;
     return data;
   }
