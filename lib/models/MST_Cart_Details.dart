@@ -12,9 +12,10 @@ class MSTCartdetails {
   double productNetPrice;
   int taxId;
   double taxValue;
-  double discount;
-  int discountType;
   String remark;
+  double discountAmount;
+  int discountType;
+  String discountRemark;
   int isDeleted;
   int sync;
   int isSendKichen;
@@ -31,7 +32,6 @@ class MSTCartdetails {
   int createdBy;
   String attrName;
   String modiName;
-  String discountRemark;
 
   MSTCartdetails({
     this.cartId,
@@ -46,8 +46,9 @@ class MSTCartdetails {
     this.productNetPrice,
     this.taxId,
     this.taxValue,
-    this.discount,
+    this.discountAmount,
     this.discountType,
+    this.discountRemark,
     this.remark,
     this.isDeleted,
     this.issetMeal,
@@ -62,7 +63,6 @@ class MSTCartdetails {
     this.createdBy,
     this.attrName,
     this.modiName,
-    this.discountRemark
   });
 
   MSTCartdetails.fromJson(Map<String, dynamic> json) {
@@ -89,10 +89,11 @@ class MSTCartdetails {
     taxValue = json["tax_value"] is int
         ? (json['tax_value'] as int).toDouble()
         : json["tax_value"];
-    discount = json["discount"] is int
-        ? (json['discount'] as int).toDouble()
-        : json["discount"];
+    discountAmount = json["discount_amount"] is int
+        ? (json['discount_amount'] as int).toDouble()
+        : json["discount_amount"];
     discountType = json["discount_type"];
+    discountRemark = json['discount_remark'];
     remark = json["remark"];
     isDeleted = json["is_deleted"];
     cart_detail = json['cart_detail'];
@@ -107,7 +108,6 @@ class MSTCartdetails {
     isFocProduct = json["isFoc_Product"];
     attrName = json["attrName"];
     modiName = json["modiName"];
-    discountRemark = json['discount_remark'];
   }
 
   Map<String, dynamic> toJson() {
@@ -125,8 +125,9 @@ class MSTCartdetails {
     data["product_net_price"] = this.productNetPrice;
     data["tax_id"] = this.taxId;
     data["tax_value"] = this.taxValue;
-    data["discount"] = this.discount;
+    data["discount_amount"] = this.discountAmount;
     data["discount_type"] = this.discountType;
+    data["discount_remark"] = this.discountRemark;
     data["remark"] = this.remark;
     data["is_deleted"] = this.isDeleted;
     data["is_send_kichen"] = this.isSendKichen;
@@ -141,7 +142,6 @@ class MSTCartdetails {
     data["isFoc_Product"] = this.isFocProduct;
     data["attrName"] = this.attrName;
     data["modiName"] = this.modiName;
-    data["discount_remark"] = this.discountRemark;
     return data;
   }
 }

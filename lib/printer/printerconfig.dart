@@ -500,7 +500,7 @@ class PrintReceipt {
     ticket.setStyles(PosStyles(align: PosAlign.left));
 
     for (var i = 0; i < orderdetail.length; i++) {
-      var item = orderdetail[i];
+      OrderDetail item = orderdetail[i];
 
       var name = jsonDecode(item.product_detail);
       double price =
@@ -647,16 +647,38 @@ class PrintReceipt {
       for (var m = 0; m < modiList.length; m++) {
         ticket.row([
           PosColumn(
-              text: "  " +
-                  modiList[m].name.trim() +
-                  "@" +
-                  modiList[m].om_amount.toStringAsFixed(2),
-              width: 12,
-              containsChinese: true,
-              styles: PosStyles(
-                align: PosAlign.left,
-                fontType: PosFontType.fontA,
-              ))
+            text: "  " +
+                modiList[m].name.trim() +
+                "@" +
+                modiList[m].om_amount.toStringAsFixed(2),
+            width: 12,
+            containsChinese: true,
+            styles: PosStyles(
+              align: PosAlign.left,
+              fontType: PosFontType.fontA,
+            ),
+          ),
+        ]);
+      }
+      if (!item.discountAmount.isNaN &&
+          item.discountAmount != null &&
+          item.discountAmount > 0) {
+        String discountText = item.discountType == 1
+            ? "Discount " +
+                item.discountAmount.toStringAsFixed(2) +
+                "% OFF@RM " +
+                (item.product_price - item.detail_amount).toStringAsFixed(2)
+            : "Discount RM " + item.discountAmount.toStringAsFixed(2);
+        ticket.row([
+          PosColumn(
+            text: "  " + discountText,
+            width: 12,
+            containsChinese: true,
+            styles: PosStyles(
+              align: PosAlign.left,
+              fontType: PosFontType.fontA,
+            ),
+          ),
         ]);
       }
     }

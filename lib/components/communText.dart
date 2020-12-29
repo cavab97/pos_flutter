@@ -242,15 +242,13 @@ class CommunFun {
   }
 
   static getDecimalFormat(String value) {
-    var s1 = value.replaceAll(".", "");
+    /* var s1 = value.replaceAll(".", "");
     s1 = "000" + s1;
     var position = s1.length - 2;
     var output =
-        [s1.substring(0, position), ".", s1.substring(position)].join("");
-    print(output);
-    print(double.parse(output).toStringAsFixed(2));
+        [s1.substring(0, position), ".", s1.substring(position)].join(""); */
 
-    return double.parse(output).toStringAsFixed(2);
+    return double.parse(value).toStringAsFixed(2);
   }
 
   static deviceInfo() async {
@@ -773,7 +771,7 @@ class CommunFun {
   }
 
   static checkDatabaseExit() async {
-    var db = await DatabaseHelper.dbHelper.getDatabse();
+    var db = DatabaseHelper.dbHelper.getDatabse();
     if (db != null) {
       return true;
     } else {
@@ -1134,8 +1132,8 @@ class CommunFun {
   }
 
   static countDiscount(MST_Cart currentCart) {
-    return currentCart != null && currentCart.discount != null
-        ? double.parse(currentCart.discount.toStringAsFixed(2))
+    return currentCart != null && currentCart.discountAmount != null
+        ? double.parse(currentCart.discountAmount.toStringAsFixed(2))
         : 0.00;
   }
 
@@ -1201,11 +1199,11 @@ class CommunFun {
     cart.user_id = customerData.customerId;
     cart.branch_id = int.parse(branchid);
     cart.sub_total = double.parse(subtotal.toStringAsFixed(2));
-    cart.discount = disc;
+    cart.discountAmount = disc;
     cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
     cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
     cart.table_id = table.table_id;
-    cart.discount_type = allcartData != null ? allcartData.discount_type : 0;
+    cart.discountType = allcartData != null ? allcartData.discountType : 0;
     cart.total_qty = qty;
     cart.tax = double.parse(taxvalues.toStringAsFixed(2));
     cart.source = 2;
@@ -1256,7 +1254,7 @@ class CommunFun {
     cartdetails.productNetPrice = productItem.oldPrice;
     cartdetails.createdBy = loginUser.id;
     cartdetails.cart_detail = jsonEncode(cartItemproduct);
-    cartdetails.discount = isEditing ? sameitem.discount : 0;
+    cartdetails.discountAmount = isEditing ? sameitem.discountAmount : 0;
     cartdetails.remark = isEditing ? sameitem.remark : "";
     cartdetails.issetMeal = 0;
     cartdetails.hasRacManagemant = productItem.hasRacManagemant;

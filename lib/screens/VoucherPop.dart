@@ -123,10 +123,10 @@ class VoucherPopState extends State<VoucherPop> {
               vaocher.voucherProducts.split(',').forEach((tag) {
                 if (cartitem.productId.toString() == tag) {
                   if (vaocher.voucherDiscountType == 1) {
-                    cartitem.discount = vaocher.voucherDiscount;
+                    cartitem.discountAmount = vaocher.voucherDiscount;
                     cartitem.discountType = vaocher.voucherDiscountType;
                   } else {
-                    cartitem.discount =
+                    cartitem.discountAmount =
                         (cartitem.productPrice * vaocher.voucherDiscount) / 100;
                     cartitem.discountType = vaocher.voucherDiscountType;
                   }
@@ -141,14 +141,15 @@ class VoucherPopState extends State<VoucherPop> {
                 for (int j = 0; j < produtCategory.length; j++) {
                   ProductCategory cat = produtCategory[j];
                   if (cat.categoryId.toString() == tag) {
-                    cartitem.discount = vaocher.voucherDiscount;
+                    cartitem.discountAmount = vaocher.voucherDiscount;
                     cartitem.discountType = vaocher.voucherDiscountType;
                   }
                 }
               });
             }
-            if (cartitem.discount != null && cartitem.discount != 0.0) {
-              totaldiscount += cartitem.discount;
+            if (cartitem.discountAmount != null &&
+                cartitem.discountAmount != 0.0) {
+              totaldiscount += cartitem.discountAmount;
               await localAPI.addVoucherIndetail(
                 cartitem,
                 vaocher.voucherId,
@@ -157,11 +158,11 @@ class VoucherPopState extends State<VoucherPop> {
               totaldiscount = vaocher.voucherDiscount;
             }
           }
-          cartData.grand_total = cartData.grand_total + cartData.discount;
-          cartData.discount = totaldiscount;
-          cartData.discount_type = vaocher.voucherDiscountType;
-          cartData.grand_total =
-              cartData.grand_total = cartData.grand_total - cartData.discount;
+          cartData.grand_total = cartData.grand_total + cartData.discountAmount;
+          cartData.discountAmount = totaldiscount;
+          cartData.discountType = vaocher.voucherDiscountType;
+          cartData.grand_total = cartData.grand_total =
+              cartData.grand_total - cartData.discountAmount;
           cartData.voucher_detail = json.encode(vaocher);
           cartData.voucher_id = vaocher.voucherId;
           await localAPI.addVoucherInOrder(cartData, vaocher);

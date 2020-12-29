@@ -53,6 +53,13 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
       setState(() {
         mainPaymentList = result.where((i) => i.isParent == 0).toList();
         subPaymenttyppeList = result.toList();
+        Payments gotCash = mainPaymentList
+            .firstWhere((element) => element.name.toUpperCase() == "CASH");
+        if (gotCash.paymentId > 0 && this.mounted) {
+          setState(() {
+            seletedPayment = gotCash;
+          });
+        }
       });
     }
     await SyncAPICalls.logActivity(
@@ -62,11 +69,6 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   List<Widget> setPaymentListTile(List<Payments> listTilePaymentType) {
     var size = MediaQuery.of(context).size.width / 2.0;
     return listTilePaymentType.map((payment) {
-      if (payment.name.toUpperCase() == "CASH") {
-        if (this.mounted) {
-          seletedPayment = payment;
-        }
-      }
       return MaterialButton(
           minWidth: (size / 3),
           shape: RoundedRectangleBorder(
@@ -78,7 +80,11 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
           color:
               seletedPayment == payment ? Colors.orange[200] : Colors.grey[100],
           onPressed: () async {
-            seletedPayment = payment;
+            if (this.mounted) {
+              setState(() {
+                seletedPayment = payment;
+              });
+            }
             List<Payments> subList = subPaymenttyppeList
                 .where((i) => i.isParent == payment.paymentId)
                 .toList();
@@ -95,12 +101,6 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
               /* setState(() {
                 isSubPayment = true;
               }); */
-            } else if (this.mounted) {
-              setState(() {
-                seletedPayment = payment;
-              });
-              //insertPaymentOption(payment);
-              //select payment
             }
           });
     }).toList();

@@ -170,6 +170,12 @@ class _OutofStockState extends State<OutofStock> {
                       children: [
                         //SizedBox(width: 10),
                         backButton(),
+                        SizedBox(width: 10),
+                        Text(
+                          'Out of Stock',
+                          style: TextStyle(
+                              fontSize: 50, color: StaticColor.colorWhite),
+                        ),
                         Spacer(),
                         confirmButton(),
                         //SizedBox(width: 10),
@@ -185,7 +191,7 @@ class _OutofStockState extends State<OutofStock> {
                           child: Container(
                               decoration: BoxDecoration(
                                 border: Border.all(width: 1),
-                                color: Colors.white70,
+                                color: StaticColor.colorWhite,
                               ),
                               child: aplhabetList(filterItemWithStock,
                                   withStockSearchController, "WithStock")
@@ -204,12 +210,20 @@ class _OutofStockState extends State<OutofStock> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               MaterialButton(
-                                child: Icon(Icons.arrow_back, size: 70),
+                                child: Icon(
+                                  Icons.arrow_back,
+                                  size: 70,
+                                  color: StaticColor.colorWhite,
+                                ),
                                 onPressed: makeProductWithStock,
                               ),
                               SizedBox(height: 20),
                               MaterialButton(
-                                child: Icon(Icons.arrow_forward, size: 70),
+                                child: Icon(
+                                  Icons.arrow_forward,
+                                  size: 70,
+                                  color: StaticColor.colorWhite,
+                                ),
                                 onPressed: addToNoStock,
                               ),
                             ],
@@ -220,7 +234,7 @@ class _OutofStockState extends State<OutofStock> {
                           child: Container(
                               decoration: BoxDecoration(
                                 border: Border.all(width: 1),
-                                color: Colors.white70,
+                                color: StaticColor.colorWhite,
                               ),
                               child: aplhabetList(filterItemNoStock,
                                   noStockSearchController, "NoStock")
@@ -284,7 +298,7 @@ class _OutofStockState extends State<OutofStock> {
       },
       icon: Icon(
         Icons.arrow_back,
-        color: StaticColor.colorBlack,
+        color: StaticColor.colorWhite,
         size: 40,
       ),
     );
@@ -322,7 +336,7 @@ class _OutofStockState extends State<OutofStock> {
     return AlphabetListScrollView(
       strList: strList,
       highlightTextStyle: TextStyle(
-        color: Colors.yellow,
+        color: StaticColor.deepOrange,
       ),
       showPreview: true,
       itemBuilder: (context, index) {

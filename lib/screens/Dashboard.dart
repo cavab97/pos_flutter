@@ -338,7 +338,7 @@ class _DashboradPageState extends State<DashboradPage>
 
     cart.sub_total = currentSubtotal;
     cart.serviceCharge = currentSubtotal * (cart.serviceChargePercent / 100);
-    cart.grand_total = (cart.sub_total - cart.discount) +
+    cart.grand_total = (cart.sub_total - cart.discountAmount) +
         cart.tax +
         (cart.serviceCharge == null ? 0.00 : cart.serviceCharge);
     await localAPI.updateWebCart(cart);
@@ -350,7 +350,7 @@ class _DashboradPageState extends State<DashboradPage>
         serviceCharge = cart.serviceCharge == null ? 0.00 : cart.serviceCharge;
         serviceChargePer =
             cart.serviceChargePercent == null ? 0 : cart.serviceChargePercent;
-        discount = cart.discount;
+        discount = cart.discountAmount;
         tax = cart.tax;
         isWebOrder = cart.source == 1 ? true : false;
         grandTotal =
@@ -662,14 +662,15 @@ class _DashboradPageState extends State<DashboradPage>
     //Voucher voucher = Voucher.fromJson(voucherdata);
     for (int i = 0; i < cartList.length; i++) {
       var cartitem = cartList[i];
-      cartitem.discount = 0.0;
+      cartitem.discountAmount = 0.0;
       cartitem.discountType = 0;
       await localAPI.addVoucherIndetail(cartitem, voucher.voucherId);
     }
-    allcartData.grand_total = allcartData.grand_total + allcartData.discount;
+    allcartData.grand_total =
+        allcartData.grand_total + allcartData.discountAmount;
     allcartData.voucher_detail = "";
-    allcartData.discount = 0.0;
-    allcartData.discount_type = 0;
+    allcartData.discountAmount = 0.0;
+    allcartData.discountType = 0;
     allcartData.voucher_id = null;
     await localAPI.addVoucherInOrder(allcartData, voucher);
     await countTotals(currentCart);
@@ -1253,7 +1254,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   sendPaymentByCash(List<OrderPayment> payment) async {
-    var cartData = await getcartData();
+    MST_Cart cartData = await getcartData();
     if (cartData.id == null) {
       await clearCartAfterSuccess(0);
       return;
@@ -1313,7 +1314,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.order_by = userdata.id;
     order.voucher_detail = cartData.voucher_detail;
     order.voucher_id = cartData.voucher_id;
-    order.voucher_amount = cartData.discount;
+    order.voucher_amount = cartData.discountAmount;
     order.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
     order.updated_by = userdata.id;
     int orderId = await localAPI.placeOrder(order);
@@ -1327,7 +1328,7 @@ class _DashboradPageState extends State<DashboradPage>
         history.app_id = 1;
       }
       history.voucher_id = cartData.voucher_id;
-      history.amount = cartData.discount;
+      history.amount = cartData.discountAmount;
       history.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
       history.app_order_id = orderId;
       history.uuid = uuid;
@@ -1376,7 +1377,7 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.product_old_price = cartItem.productNetPrice;
           orderDetail.detail_amount = cartItem.productDetailAmount;
           orderDetail.detail_qty = cartItem.productQty;
-          orderDetail.product_discount = cartItem.discount;
+          orderDetail.product_discount = cartItem.discountAmount;
           orderDetail.product_detail = json.encode(productdata);
           orderDetail.updated_at =
               await CommunFun.getCurrentDateTime(DateTime.now());
@@ -1389,6 +1390,9 @@ class _DashboradPageState extends State<DashboradPage>
           orderDetail.detail_by = userdata.id;
           orderDetail.issetMeal = cartItem.issetMeal;
           orderDetail.hasRacManagemant = cartItem.hasRacManagemant;
+          orderDetail.discountAmount = cartItem.discountAmount;
+          orderDetail.discountType = cartItem.discountType;
+          orderDetail.discountRemark = cartItem.discountRemark;
           if (cartItem.issetMeal == 1) {
             orderDetail.setmeal_product_detail =
                 cartItem.setmeal_product_detail;
@@ -1765,14 +1769,14 @@ class _DashboradPageState extends State<DashboradPage>
       MSTCartdetails cartitemdata = cartitem;
       var subt = allcartData.sub_total - cartitemdata.productPrice;
       var taxjson = await countTax(subt);
-      var disc = allcartData.discount != null
-          ? allcartData.discount - cartitemdata.discount
+      var disc = allcartData.discountAmount != null
+          ? allcartData.discountAmount - cartitemdata.discountAmount
           : 0;
       if (cartList.length == 1) {
         cart = allcartData;
         cart.sub_total = 0.0;
         cart.serviceCharge = 0.0;
-        cart.discount = 0.0;
+        cart.discountAmount = 0.0;
         cart.total_qty = 0.0;
         cart.grand_total = 0.0;
         cart.tax_json = "";
@@ -1781,7 +1785,7 @@ class _DashboradPageState extends State<DashboradPage>
       } else {
         cart = allcartData;
         cart.sub_total = subt;
-        cart.discount = disc;
+        cart.discountAmount = disc;
         cart.serviceCharge =
             await CommunFun.countServiceCharge(cart.serviceChargePercent, subt);
         cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
@@ -1877,7 +1881,7 @@ class _DashboradPageState extends State<DashboradPage>
     focProduct.productNetPrice = cartitem.productNetPrice;
     focProduct.createdBy = userdata.id;
     focProduct.cart_detail = cartitem.cart_detail;
-    focProduct.discount = 0.0;
+    focProduct.discountAmount = 0.0;
     focProduct.remark = remark;
     focProduct.issetMeal = cartitem.issetMeal;
     focProduct.taxValue = 0.0;
@@ -1885,20 +1889,21 @@ class _DashboradPageState extends State<DashboradPage>
     focProduct.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     focProduct.setmeal_product_detail = cartitem.setmeal_product_detail;
     var realprice = (cartitem.productDetailAmount / cartitem.productQty);
-    var dis = (cartitem.discount / cartitem.productQty);
+    var dis = (cartitem.discountAmount / cartitem.productQty);
     cartitem.productQty = cartitem.productQty - qty;
     cartitem.productDetailAmount = (realprice * cartitem.productQty);
-    cartitem.discount = (realprice * dis);
+    cartitem.discountAmount = (realprice * dis);
     MST_Cart cart = new MST_Cart();
     cart = allcartData;
 
     //here price no correct, checkpoint
     var subt = allcartData.sub_total - (realprice * qty);
     var taxjson = await countTax(subt);
-    var disc =
-        allcartData.discount != null ? allcartData.discount - (dis * qty) : 0;
+    var disc = allcartData.discountAmount != null
+        ? allcartData.discountAmount - (dis * qty)
+        : 0;
     cart.sub_total = subt;
-    cart.discount = disc;
+    cart.discountAmount = disc;
     cart.total_qty = allcartData.total_qty - qty;
     cart.grand_total = (cart.sub_total - disc) + taxvalues;
     cart.tax_json = json.encode(taxjson);
@@ -1927,13 +1932,16 @@ class _DashboradPageState extends State<DashboradPage>
         context: context,
         builder: (BuildContext context) {
           return DiscountPad(
-              selproduct: prod,
+              seletedProduct: itemSelectedIndex,
               issetMeal: cart.issetMeal == 1 ? true : false,
               cartID: currentCart,
               cartItem: cart,
               onClose: () {
-                CommunFun.processingPopup(context);
+                // CommunFun.processingPopup(context);
                 refreshAfterAction(false);
+                setState(() {
+                  itemSelectedIndex = new MSTCartdetails();
+                });
               });
         });
     //     return false;
@@ -2114,9 +2122,6 @@ class _DashboradPageState extends State<DashboradPage>
         GestureDetector(
             onTap: () {
               discountItem(itemSelectedIndex);
-              setState(() {
-                itemSelectedIndex = new MSTCartdetails();
-              });
             },
             child: Container(
               decoration: BoxDecoration(
@@ -2333,8 +2338,8 @@ class _DashboradPageState extends State<DashboradPage>
                             Container(
                               // color: Colors.white,
                               child: SizedBox(
-                                  height: MediaQuery.of(context).size.height -
-                                      SizeConfig.safeBlockVertical * 10,
+                                  height:
+                                      MediaQuery.of(context).size.height * .9,
                                   width: SizeConfig.safeBlockHorizontal * 50,
                                   child: cartITems()),
                             ),
@@ -2354,7 +2359,7 @@ class _DashboradPageState extends State<DashboradPage>
                       ),
                       TableCell(
                         child: Container(
-                          height: MediaQuery.of(context).size.height,
+                          height: MediaQuery.of(context).size.height * .9,
                           padding:
                               EdgeInsets.all(SizeConfig.safeBlockVertical * 1),
                           child: itemSelectedIndex.productQty != null &&
@@ -2519,8 +2524,8 @@ class _DashboradPageState extends State<DashboradPage>
                                         child: SizedBox(
                                           height: MediaQuery.of(context)
                                                   .size
-                                                  .height /
-                                              1.6,
+                                                  .height *
+                                              .7,
                                           child: Column(
                                             mainAxisSize: MainAxisSize.max,
                                             crossAxisAlignment:
@@ -2537,7 +2542,7 @@ class _DashboradPageState extends State<DashboradPage>
                                                       ? Expanded(
                                                           flex: 1,
                                                           child: porductsList())
-                                                      : SizedBox()
+                                                      : SizedBox(),
                                             ],
                                           ),
                                         ),
@@ -2571,7 +2576,7 @@ class _DashboradPageState extends State<DashboradPage>
   Widget tableHeader1() {
     // products Header part 1
     return Container(
-      height: SizeConfig.safeBlockVertical * 11,
+      height: MediaQuery.of(context).size.height * .1,
       padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
       width: MediaQuery.of(context).size.width / 3,
       child: ListView.builder(
@@ -3077,15 +3082,16 @@ class _DashboradPageState extends State<DashboradPage>
 
   Widget porductsList() {
     // products List
-    var size = MediaQuery.of(context).size;
+    Size size = MediaQuery.of(context).size;
     /*24 is for notification bar on Android*/
     //final double itemHeight = (size.height - kToolbarHeight - 24) / 1.8;
     final double itemHeight = size.width / 4.2;
     final double itemWidth = size.width / 4.2;
     return Container(
       //color: Colors.lightBlue,
-      height: MediaQuery.of(context).size.height / 1.45 -
-          (SizeConfig.safeBlockVertical * 7),
+      height: size.height * .7
+      //- (SizeConfig.safeBlockVertical * 7)
+      ,
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.only(top: 10, bottom: 20, left: 0, right: 0),
       child: GridView.count(
@@ -3637,7 +3643,20 @@ class _DashboradPageState extends State<DashboradPage>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(cart.productName.toUpperCase(),
+                        Text(
+                            cart.productName.toUpperCase() +
+                                (cart.discountAmount > 0
+                                    ? ' ' +
+                                        (cart.discountType == 1
+                                            ? '(' +
+                                                cart.discountAmount
+                                                    .toStringAsFixed(2) +
+                                                '% OFF)'
+                                            : '( -' +
+                                                cart.discountAmount
+                                                    .toStringAsFixed(2) +
+                                                ')')
+                                    : ''),
                             maxLines: 2,
                             overflow: TextOverflow.clip,
                             style: Styles.greysmall()),
@@ -4101,8 +4120,9 @@ class _DashboradPageState extends State<DashboradPage>
     return Column(
       children: <Widget>[
         Container(
-          height: MediaQuery.of(context).size.height * .8 -
-              SizeConfig.safeBlockVertical * 3,
+          height: MediaQuery.of(context).size.height * .8
+          //- SizeConfig.safeBlockVertical * 3,
+          ,
           color: Colors.grey[300],
           padding: EdgeInsets.all(0),
           child: Stack(
