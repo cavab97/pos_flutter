@@ -1,29 +1,36 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Payment.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/models/OrderPayment.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
+import 'package:mcncashier/models/Voucher.dart';
+import 'package:mcncashier/models/MST_Cart.dart';
+import 'package:mcncashier/screens/Dashboard.dart';
+import 'package:mcncashier/models/ModifireData.dart';
+import 'package:mcncashier/models/Attribute_data.dart';
+import 'package:mcncashier/models/PorductDetails.dart';
 
 class SetQuantityPad extends StatefulWidget {
   // Opning ammount popup
   SetQuantityPad(
       {Key key,
       this.selproduct,
-      this.issetMeal,
       this.cartID,
       this.cartItem,
+      this.focusCart,
       this.onClose})
       : super(key: key);
-
-  final bool issetMeal;
   final selproduct;
   final int cartID;
   final cartItem;
+  final MSTCartdetails focusCart;
   Function onClose;
 
   @override
@@ -31,125 +38,87 @@ class SetQuantityPad extends StatefulWidget {
 }
 
 class _SetQuantityPadState extends State<SetQuantityPad> {
-  double paidAmount = 0;
-  List<OrderPayment> totalPaymentList = [];
-  OrderPayment currentPayment = new OrderPayment();
-  String currentNumber = "0";
+  ProductDetails productItem = new ProductDetails();
+  String currentNumber;
   String currentDiscountType = "RM";
-  bool isSubPayment = false;
-  bool isPaymented = false;
-  List<Payments> mainPaymentList = [];
+  MSTCartdetails focusCartPad = new MSTCartdetails();
   LocalAPI localAPI = LocalAPI();
-  Payments seletedPayment = new Payments();
-  List<Widget> paymentListTile = [];
-  List<Payments> subPaymenttyppeList = [];
   int totalQuantity = 0;
+  double currentProductQuantity = 0.0;
   TextEditingController extraNotes = new TextEditingController();
-
+  List<MSTCartdetails> originalCartList = [];
+  List<ModifireData> selectedModifier = [];
+  List<ModifireData> modifireList = [];
+  List<Attribute_Data> attributeList = [];
+  List selectedAttr = [];
+  bool isInit = true;
+  MST_Cart allcartData = new MST_Cart();
+  double serviceChargePer = 0;
+  double subtotal = 0;
+  double serviceCharge = 0;
+  double discount = 0;
+  double tax = 0;
+  bool isWebOrder = false;
+  double grandTotal = 0;
+  Voucher selectedvoucher;
+  double price = 0.00;
+  var productnetprice = 0.00;
   @override
   void initState() {
     super.initState();
-    setState(() {});
-    currentNumber = totalQuantity.toString();
+    print(widget.focusCart.productQty.toString());
+    setState(() {
+      focusCartPad = widget.focusCart;
+      currentNumber = widget.focusCart.productQty.toStringAsFixed(0);
+      productItem = widget.selproduct;
+      print(productItem.name);
+      price = productItem.price;
+      productnetprice = productItem.price;
+    });
+    getAttributes(productItem.productId);
+    //currentNumber = totalQuantity.toString();
   }
 
-  // List<Widget> setPaymentListTile(List<Payments> listTilePaymentType) {
-  //   var size = MediaQuery.of(context).size.width / 2.0;
-  //   return listTilePaymentType.map((payment) {
-  //     if (payment.name.toUpperCase() == "CASH") {
-  //       if (this.mounted) {
-  //         seletedPayment = payment;
-  //       }
-  //     }
-  //     return MaterialButton(
-  //         minWidth: (size / 3),
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(10.0),
-  //           side: BorderSide(color: Colors.grey),
-  //         ),
-  //         child: Text(payment.name, style: Styles.blackMediumBold()),
-  //         textColor: Colors.black,
-  //         color:
-  //             seletedPayment == payment ? Colors.orange[200] : Colors.grey[100],
-  //         onPressed: () {
-  //           seletedPayment = payment;
-  //           List<Payments> subList = subPaymenttyppeList
-  //               .where((i) => i.isParent == payment.paymentId)
-  //               .toList();
-  //           if (subList.length > 0) {
-  //             openSubPaymentDialog(subList);
-  //             //subPaymenttyppeList = subList;
-  //             /* setState(() {
-  //               isSubPayment = true;
-  //             }); */
-  //           } else if (this.mounted) {
-  //             setState(() {
-  //               seletedPayment = payment;
-  //             });
-  //             //insertPaymentOption(payment);
-  //             //select payment
-  //           }
-  //         });
-  //   }).toList();
-  // }
+  setAttrData(productData) {
+    if (productData["Attributes"].length > 0) {
+      setState(() {
+        attributeList.addAll(productData["Attributes"]);
+      });
+    }
+  }
 
-  // openSubPaymentDialog(List<Payments> subList) {
-  //   showDialog(
-  //       // Opning Ammount Popup
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return SubPaymentMethodPop(
-  //           subList: subList,
-  //           subTotal: totalAmount,
-  //           grandTotal: totalAmount,
-  //           onClose: (mehtod) {
-  //             Navigator.of(context).pop();
-  //             // insertPaymentOption(mehtod);
-  //           },
-  //         );
-  //       });
-  // }
+  setModifireData(productData) {
+    if (productData["Modifire"].length > 0) {
+      setState(() {
+        modifireList.addAll(productData["Modifire"]);
+      });
+    }
+    // if (isEditing) {
+    //   setProductEditingData();
+    // }
+  }
 
-  // List<Widget> subPaymentListTile(List<Payments> listTilePaymentType) {
-  //   List<Widget> returnList = [];
-  //   returnList += [
-  //     MaterialButton(
-  //         shape: RoundedRectangleBorder(
-  //             borderRadius: BorderRadius.circular(10.0),
-  //             side: BorderSide(color: Colors.grey)),
-  //         child: Icon(Icons.arrow_back),
-  //         textColor: Colors.black,
-  //         color: Colors.grey[100],
-  //         onPressed: () {
-  //           setState(() {
-  //             isSubPayment = false;
-  //           });
-  //         }),
-  //   ];
-  //   returnList += listTilePaymentType.map((payment) {
-  //     if (payment.name.toUpperCase() == "CASH") return SizedBox();
-  //     return MaterialButton(
-  //         shape: RoundedRectangleBorder(
-  //             borderRadius: BorderRadius.circular(10.0),
-  //             side: BorderSide(color: Colors.grey)),
-  //         child: Text(payment.name, style: Styles.blackMediumBold()),
-  //         textColor: Colors.black,
-  //         color: Colors.grey[100],
-  //         onPressed: () {
-  //           seletedPayment = payment;
-  //           List<Payments> subList = mainPaymentList
-  //               .where((i) => i.isParent == payment.paymentId)
-  //               .toList();
-  //           if (subList.length > 0) {
-  //             subPaymenttyppeList = subList;
-  //           } else {
-  //             seletedPayment = payment;
-  //             //select payment
-  //           }
-  //         });
-  //   }).toList();
-  //   return returnList;
-  // }
+  getAttributes(productid) async {
+    List<Attribute_Data> productAttr =
+        await localAPI.getProductDetails(productid);
+    // if (productAttr.length > 0) {
+    //   setState(() {
+    //
+    //   });
+    // }
+
+    List<ModifireData> productModifeir =
+        await localAPI.getProductModifeir(productid);
+    //if (productModifeir.length > 0) {
+    setState(() {
+      modifireList = productModifeir;
+      attributeList = productAttr;
+    });
+    //}
+    // if (isEditing) {
+    //   setProductEditingData();
+    // }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -169,12 +138,7 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(
-                    "Quantity" +
-                        (seletedPayment.name != null
-                            ? ' (' + seletedPayment.name + ')'
-                            : ''),
-                    style: Styles.communBlack()),
+                Text("Quantity", style: Styles.communBlack()),
                 // Text(
                 //     currentDiscountType == "RM"
                 //         ? currentDiscountType +
@@ -231,8 +195,96 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
     }
   }
 
+  // countTotals(cartId) async {
+  //   MST_Cart cart = await localAPI.getCartData(cartId);
+
+  //   List<MSTCartdetails> cartdetails = await localAPI.getCartItem(cartId);
+  //   var currentSubtotal = 0.00;
+
+  //   Voucher vaocher;
+  //   if (cart.voucher_id != null && cart.voucher_id != 0) {
+  //     var voucherdetail = jsonDecode(cart.voucher_detail);
+  //     vaocher = Voucher.fromJson(voucherdetail);
+  //   }
+  //   // taxJson = json.decode(cart.tax_json);
+  //   if (cart.id == null) {
+  //     return;
+  //   }
+
+  //   cartdetails.forEach((cartdetail) {
+  //     if (isInit) originalCartList.add(cartdetail);
+  //     currentSubtotal += cartdetail.productDetailAmount != null &&
+  //             cartdetail.productDetailAmount != 0.00
+  //         ? cartdetail.productDetailAmount
+  //         : cartdetail.productPrice;
+  //   });
+
+  //   cart.sub_total = currentSubtotal;
+  //   cart.serviceCharge = currentSubtotal * (cart.serviceChargePercent / 100);
+  //   cart.grand_total = (cart.sub_total - cart.discount) +
+  //       cart.tax +
+  //       (cart.serviceCharge == null ? 0.00 : cart.serviceCharge);
+  //   await localAPI.updateWebCart(cart);
+
+  //   if (this.mounted) {
+  //     setState(() {
+  //       allcartData = cart;
+  //       subtotal = cart.sub_total;
+  //       serviceCharge = cart.serviceCharge == null ? 0.00 : cart.serviceCharge;
+  //       serviceChargePer =
+  //           cart.serviceChargePercent == null ? 0 : cart.serviceChargePercent;
+  //       discount = cart.discount;
+  //       tax = cart.tax;
+  //       isWebOrder = cart.source == 1 ? true : false;
+  //       grandTotal =
+  //           (subtotal - discount) + tax + serviceCharge; //cart.grand_total;
+  //       selectedvoucher = vaocher;
+  //       if (isInit) isInit = false;
+  //     });
+  //   }
+  //   print(grandTotal);
+  // }
+
   submitQuantity(val) {
-    print(val);
+    var newPrice = focusCartPad.productPrice;
+
+    if (focusCartPad.attrName.length > 0) {
+      if (attributeList.length > 0) {
+        for (var i = 0; i < attributeList.length; i++) {
+          var attribute = attributeList[i];
+          var attributType = attribute.attr_types.split(',');
+
+          var attrtypesPrice = attribute.attr_types_price.split(',');
+
+          for (var a = 0; a < attributType.length; a++) {
+            if (focusCartPad.attrName == attributType[a]) {
+              newPrice += double.parse(attrtypesPrice[a]);
+              print("tureeeeeeeeee");
+            }
+          }
+        }
+      }
+    }
+
+    if (focusCartPad.modiName.length > 0) {
+      for (var a = 0; a < modifireList.length; a++) {
+        if (focusCartPad.modiName == modifireList[a].name) {
+          newPrice += modifireList[a].price;
+          print("tureeeeeeeeee");
+        }
+      }
+    }
+
+    currentProductQuantity = focusCartPad.productQty;
+    focusCartPad.productQty = double.parse(currentNumber.toString());
+    focusCartPad.productDetailAmount =
+        double.parse(currentNumber.toString()) * newPrice;
+    localAPI.addintoCartDetails(focusCartPad);
+    print("focusCartPad");
+    print(focusCartPad.productDetailAmount);
+    // countTotals(focusCartPad.cartId);
+    //  countTotals(focusCartPad.cartId);
+    widget.onClose(focusCartPad.cartId);
   }
 
   // dicsountTypeClick(val) {
@@ -299,13 +351,7 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
                 textAlign: TextAlign.center, style: Styles.blackMediumBold())
             : Icon(Icons.save, size: 30),
         textColor: Colors.white,
-        color: number == Strings.enter
-            ? Colors.green[900]
-            : number == "Cash" && currentDiscountType == "RM"
-                ? Colors.orange[200]
-                : number == "%" && currentDiscountType == "%"
-                    ? Colors.orange[200]
-                    : Colors.grey[100],
+        color: number == Strings.enter ? Colors.green[900] : Colors.grey[100],
         onPressed: f,
       ),
     );
@@ -406,20 +452,20 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      _totalbutton("x " + currentNumber, () {}),
+                      _totalbutton(currentNumber, () {}),
                     ],
                   ),
                   Row(
                     // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      _button("1", () {
-                        numberClick('1');
+                      _button("7", () {
+                        numberClick('7');
                       }), // using custom widget button
-                      _button("2", () {
-                        numberClick('2');
+                      _button("8", () {
+                        numberClick('8');
                       }),
-                      _button("3", () {
-                        numberClick('3');
+                      _button("9", () {
+                        numberClick('9');
                       }),
                       _backbutton(() {
                         backspaceClick();
@@ -450,14 +496,14 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _button("7", () {
-                              numberClick('7');
+                            _button("1", () {
+                              numberClick('1');
                             }),
-                            _button("8", () {
-                              numberClick('8');
+                            _button("2", () {
+                              numberClick('2');
                             }),
-                            _button("9", () {
-                              numberClick('9');
+                            _button("3", () {
+                              numberClick('3');
                             }),
                           ],
                         ),

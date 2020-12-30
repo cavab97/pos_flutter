@@ -99,6 +99,7 @@ class _DashboradPageState extends State<DashboradPage>
   List<Payments> paymentTypeList = [];
   SlidableController slidableController = SlidableController();
   List<BranchTax> taxlist = [];
+  MSTCartdetails focusCart = new MSTCartdetails();
   double taxvalues = 0.00;
   bool isDrawerOpen = false;
   bool isShiftOpen = true;
@@ -135,6 +136,7 @@ class _DashboradPageState extends State<DashboradPage>
   double currentProductQuantity = 0.0;
   MSTCartdetails itemSelected = new MSTCartdetails();
   bool isInit = true;
+  String cartListTemp;
 
   @override
   void initState() {
@@ -1160,7 +1162,8 @@ class _DashboradPageState extends State<DashboradPage>
 
   editCartItem(cart) async {
     var prod;
-
+    print("cart.modiName");
+    print(cart.modiName);
     if (cart.issetMeal == 0) {
       List<ProductDetails> productdt =
           await localAPI.productdData(cart.productId);
@@ -1997,12 +2000,13 @@ class _DashboradPageState extends State<DashboradPage>
         builder: (BuildContext context) {
           return SetQuantityPad(
               selproduct: prod,
-              issetMeal: cart.issetMeal == 1 ? true : false,
               cartID: currentCartID,
               cartItem: cart,
-              onClose: () {
-                CommunFun.processingPopup(context);
+              focusCart: focusCart,
+              onClose: (cartID) {
+                countTotals(cartID);
                 refreshAfterAction(false);
+                Navigator.of(context).pop();
               });
         });
     //     return false;
@@ -2085,6 +2089,8 @@ class _DashboradPageState extends State<DashboradPage>
         GestureDetector(
           onTap: () {
             if (permissions.contains(Constant.EDIT_ITEM)) {
+              print("itemSelectedIndex");
+              print(itemSelected.productDetailAmount);
               editCartItem(itemSelected);
               setState(() {
                 itemSelected = new MSTCartdetails();
@@ -2121,6 +2127,8 @@ class _DashboradPageState extends State<DashboradPage>
         ),
         GestureDetector(
             onTap: () {
+              print("itemSelectedIndex");
+              print(itemSelected);
               setQuantityPad(itemSelected);
               setState(() {
                 itemSelected = new MSTCartdetails();
@@ -3616,7 +3624,11 @@ class _DashboradPageState extends State<DashboradPage>
           direction: Axis.horizontal,
           child: GestureDetector(
             onTap: () => setState(() {
+              // cartListTemp = ;
+              focusCart = cart;
+              print(cart);
               if (currentQuantity > 0) {
+                print(focusCart.productName);
                 currentProductQuantity = cart.productQty;
                 cart.productQty = currentQuantity.toDouble();
 

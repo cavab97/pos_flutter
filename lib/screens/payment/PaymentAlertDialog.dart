@@ -550,14 +550,14 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                   Row(
                     // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      _button("1", () {
-                        numberClick('1');
+                      _button("7", () {
+                        numberClick('7');
                       }), // using custom widget button
-                      _button("2", () {
-                        numberClick('2');
+                      _button("8", () {
+                        numberClick('8');
                       }),
-                      _button("3", () {
-                        numberClick('3');
+                      _button("9", () {
+                        numberClick('9');
                       }),
                       _backbutton(() {
                         backspaceClick();
@@ -590,14 +590,14 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _button("7", () {
-                              numberClick('7');
+                            _button("1", () {
+                              numberClick('1');
                             }),
-                            _button("8", () {
-                              numberClick('8');
+                            _button("2", () {
+                              numberClick('2');
                             }),
-                            _button("9", () {
-                              numberClick('9');
+                            _button("3", () {
+                              numberClick('3');
                             }),
                           ],
                         ),
