@@ -1131,6 +1131,9 @@ class _DashboradPageState extends State<DashboradPage>
       if (productdt.length > 0) {
         prod = productdt[0];
       }
+      print("prod");
+      print(productdt[0].base64);
+      print(prod);
     }
 
     await showDialog(
@@ -3939,7 +3942,7 @@ class _DashboradPageState extends State<DashboradPage>
             thickness: 1,
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 5, bottom: 5, right: 10),
+            padding: const EdgeInsets.only(left: 5, bottom: 15, right: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[

@@ -75,6 +75,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   var permissions = "";
   bool isFirstMod = false;
   bool isFirstAttr = false;
+  bool isFirstAttrSet = true;
 
   @override
   void initState() {
@@ -151,6 +152,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   getMealProducts() async {
     List<SetMealProduct> mealProductList =
         await localAPI.getMealsProductData(setmeal.setmealId);
+    print(mealProductList[1]);
     if (mealProductList.length > 0) {
       setState(() {
         mealProducts = mealProductList;
@@ -236,7 +238,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   setSetMealData() {
     if (cartitem != null) {
-      dynamic cartData = jsonDecode(cartitem.setmeal_product_detail);
+      var cartData = jsonDecode(cartitem.setmeal_product_detail);
+      print("cartData");
+      print(cartData[0].attributeDetails);
       List<SetMealProduct> tCartData = cartData.isNotEmpty
           ? cartData.map((c) => SetMealProduct.fromJson(c)).toList()
           : [];
@@ -294,6 +298,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             : cartitem.productQty;
         price = cartitem.productPrice;
       });
+    } else {
+      print("setProductEditingData!!!!!!!!!!!");
     }
   }
 
@@ -422,26 +428,45 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   onSelectSetmealAttr(
       i, id, attribute, attrTypeIDs, attrPrice, setmealproduct) {
     var prvSeelected = selectedSetMealAttr;
+    print(attrTypeIDs);
     var isSelected = selectedSetMealAttr.any((item) =>
         item['ca_id'] == id && item["setmeal_productID"] == setmealproduct);
-    if (isSelected) {
-      var isarrSelected =
-          selectedSetMealAttr.any((item) => item['attribute'] == attribute);
-      selectedSetMealAttr.removeWhere((item) =>
-          item['ca_id'] == id && item["setmeal_productID"] == setmealproduct);
-      if (!isarrSelected) {
-        prvSeelected.add({
-          'setmeal_productID': setmealproduct,
-          'ca_id': id,
-          'attribute': attribute,
-          'attrType_ID': attrTypeIDs,
-          'attr_price': attrPrice
+    var isSelectedType =
+        selectedSetMealAttr.any((item) => item["attribute"] == attribute);
+    print(attribute);
+    if (isSelectedType) {
+    } else {
+      if (isSelected) {
+        var isarrSelected =
+            selectedSetMealAttr.any((item) => item['attribute'] == attribute);
+        selectedSetMealAttr.removeWhere((item) =>
+            item['ca_id'] == id && item["setmeal_productID"] == setmealproduct);
+        if (!isarrSelected) {
+          prvSeelected.add({
+            'setmeal_productID': setmealproduct,
+            'ca_id': id,
+            'attribute': attribute,
+            'attrType_ID': attrTypeIDs,
+            'attr_price': attrPrice
+          });
+        } else {
+          selectedSetMealAttr.removeWhere((item) =>
+              item['ca_id'] != id &&
+              item["setmeal_productID"] != setmealproduct);
+        }
+        setState(() {
+          selectedSetMealAttr = selectedSetMealAttr;
+          isFirstAttrSet = false;
+        });
+      } else if (selectedSetMealAttr.length < 1) {
+        setState(() {
+          selectedSetMealAttr = selectedSetMealAttr;
+          isFirstAttrSet = true;
         });
       }
-      setState(() {
-        selectedSetMealAttr = selectedSetMealAttr;
-      });
     }
+
+    setPrice();
   }
 
   increaseQty() async {
@@ -501,51 +526,47 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       i, id, attribute, attrTypeIDs, attrPrice, setmealid, isDefault) async {
     var prvSeelected = selectedAttr;
     var isSelected = selectedAttr.any((item) => item['ca_id'] == id);
+    var isSelectedType =
+        selectedAttr.any((item) => item['attribute'] == attribute);
+    if (isSelectedType) {
+    } else {
+      if (isSelected) {
+        var isarrSelected =
+            selectedAttr.any((item) => item['attribute'] == attribute);
 
-    if (isSelected) {
-      var isarrSelected =
-          selectedAttr.any((item) => item['attribute'] == attribute);
-      selectedAttr.removeWhere((item) => item['ca_id'] == id);
-      if (!isarrSelected) {
+        selectedAttr.removeWhere((item) => item['ca_id'] == id);
+        if (!isarrSelected) {
+          prvSeelected.add({
+            'ca_id': id,
+            'attribute': attribute,
+            'attrType_ID': attrTypeIDs,
+            'attr_price': attrPrice,
+          });
+        } else {
+          selectedAttr.removeWhere((item) => item['attribute'] != attribute);
+          await SyncAPICalls.logActivity(
+              "change attributes", "removed selected attribute", "product", 1);
+        }
+        setState(() {
+          selectedAttr = selectedAttr;
+          isFirstAttr = true;
+        });
+      } else {
         prvSeelected.add({
           'ca_id': id,
           'attribute': attribute,
           'attrType_ID': attrTypeIDs,
-          'attr_price': attrPrice,
+          'attr_price': attrPrice
         });
-      } else {
-        selectedAttr.removeWhere((item) => item['attribute'] != attribute);
+        setState(() {
+          selectedAttr = prvSeelected;
+          isFirstAttr = false;
+        });
         await SyncAPICalls.logActivity(
-            "change attributes", "removed selected attribute", "product", 1);
+            "change attributes", "Added product attributes", "product", 1);
       }
-      setState(() {
-        selectedAttr = selectedAttr;
-      });
-    } else if (selectedAttr.length < 1) {
-      prvSeelected.add({
-        'ca_id': id,
-        'attribute': attribute,
-        'attrType_ID': attrTypeIDs,
-        'attr_price': attrPrice,
-      });
-      print(selectedAttr.length);
-
-      setState(() {
-        selectedAttr = prvSeelected;
-      });
-    } else {
-      prvSeelected.add({
-        'ca_id': id,
-        'attribute': attribute,
-        'attrType_ID': attrTypeIDs,
-        'attr_price': attrPrice
-      });
-      setState(() {
-        selectedAttr = prvSeelected;
-      });
-      await SyncAPICalls.logActivity(
-          "change attributes", "Added product attributes", "product", 1);
     }
+
     setPrice();
   }
 
@@ -567,6 +588,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           newPrice += mprice;
         }
         print("hello" + newPrice.toString());
+      }
+    } else {
+      if (selectedSetMealAttr.length > 0) {
+        for (int i = 0; i < selectedSetMealAttr.length; i++) {
+          var price = selectedSetMealAttr[i]["attr_price"];
+          newPrice += double.parse(price);
+        }
       }
     }
 
@@ -1182,8 +1210,12 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   Widget getsetMealAttrList(SetMealProduct product) {
     List<Attribute_Data> attrList = [];
+    print("product.setmealProductId");
+    print(product.setmealProductId);
     if (product.attributeDetails != "" && product.attributeDetails != null) {
       List<dynamic> attrdata = jsonDecode(product.attributeDetails);
+      print("attrdata.length");
+      print(product.attributeDetails);
       attrList = attrdata.isNotEmpty
           ? attrdata.map((c) => Attribute_Data.fromJson(c)).toList()
           : [];
@@ -1201,11 +1233,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           var attributType = [];
           Map attrIDs;
           Map attrtypesPrice;
+          Map attrDefault;
           if (attribute.ca_id != null) {
+            attrDefault = attribute.is_default.split(',').asMap();
             attributType = attribute.attr_types.split(',');
             attrIDs = attribute.attributeId.split(',').asMap();
             attrtypesPrice = attribute.attr_types_price.split(',').asMap();
           }
+
           /*Set attribute name for selection toast*/
           attributeTitle = attribute.attr_name;
           return attribute.ca_id != null
@@ -1229,6 +1264,52 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                             children: attributType
                                 .asMap()
                                 .map((i, attr) {
+                                  var isadded = selectedSetMealAttr.any(
+                                      (item) =>
+                                          item['ca_id'] == attribute.ca_id &&
+                                          item['attribute'] == attr);
+                                  if (!isEditing) {
+                                    if (attrDefault[i] == "1" &&
+                                        !isadded &&
+                                        isFirstAttrSet) {
+                                      var prvSeelectedSetMeal =
+                                          selectedSetMealAttr;
+                                      prvSeelectedSetMeal.add({
+                                        'setmeal_productID':
+                                            product.setmealProductId,
+                                        'ca_id': attribute.ca_id,
+                                        'attribute': attr,
+                                        'attrType_ID': attrIDs[i],
+                                        'attr_price': attrtypesPrice[i]
+                                      });
+                                      setState(() {
+                                        selectedSetMealAttr =
+                                            prvSeelectedSetMeal;
+                                        // isFirstAttrSet = false;
+                                        setPrice();
+                                      });
+                                    }
+                                  } else {
+                                    if (!isFirstAttrSet && isadded) {
+                                      var prvSeelectedSetMeal =
+                                          selectedSetMealAttr;
+                                      prvSeelectedSetMeal.add({
+                                        'setmeal_productID':
+                                            product.setmealProductId,
+                                        'ca_id': attribute.ca_id,
+                                        'attribute': attr,
+                                        'attrType_ID': attrIDs[i],
+                                        'attr_price': attrtypesPrice[i]
+                                      });
+                                      setState(() {
+                                        selectedSetMealAttr =
+                                            prvSeelectedSetMeal;
+                                        setPrice();
+                                        // isFirstAttrSet = false;
+                                      });
+                                    }
+                                  }
+
                                   return MapEntry(
                                       i,
                                       Padding(
@@ -1238,25 +1319,40 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                                 borderRadius:
                                                     BorderRadius.circular(10.0),
                                                 side: BorderSide(
-                                                  color: selectedSetMealAttr.any((item) =>
-                                                          item['ca_id'] ==
-                                                              attribute.ca_id &&
-                                                          item['attribute'] ==
-                                                              attr &&
-                                                          product.setmealProductId ==
-                                                              item[
-                                                                  "setmeal_productID"])
+                                                  color: selectedSetMealAttr
+                                                          .any((item) =>
+                                                              item['ca_id'] ==
+                                                                  attribute
+                                                                      .ca_id &&
+                                                              item['attribute'] ==
+                                                                  attr)
                                                       ? StaticColor.colorGreen
                                                       : StaticColor
                                                           .colorGrey400,
                                                   width: 4,
                                                 )),
                                             minWidth: 50,
-                                            child: Text(attr.toString(),
-                                                style:
-                                                    Styles.blackMediumBold()),
-                                            textColor: StaticColor.colorBlack,
-                                            color: StaticColor.colorGrey400,
+                                            child: Row(
+                                              children: <Widget>[
+                                                Text(
+                                                  attr.toString(),
+                                                  style:
+                                                      Styles.blackMediumBold(),
+                                                ),
+                                                SizedBox(width: 10),
+                                                Text(
+                                                  double.parse(
+                                                          attrtypesPrice[i])
+                                                      .toStringAsFixed(2),
+                                                  style: TextStyle(
+                                                      color: StaticColor
+                                                          .deepOrange,
+                                                      fontSize: SizeConfig
+                                                              .safeBlockVertical *
+                                                          2.5),
+                                                ),
+                                              ],
+                                            ),
                                             onPressed: () {
                                               onSelectSetmealAttr(
                                                   i,
@@ -1317,8 +1413,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                       children: attributType
                           .asMap()
                           .map((i, attr) {
-                            print("selectedAttr");
-                            print(selectedAttr);
                             var isadded = selectedAttr.any(
                               (item) =>
                                   item['ca_id'] == attribute.ca_id &&
@@ -1337,21 +1431,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                 });
                                 setState(() {
                                   selectedAttr = prvSeelected;
-                                  isFirstAttr = true;
+                                  // isFirstAttr = true;
                                   // setPrice();
                                 });
                               }
                             } else {
                               if (isadded && isFirstAttr) {
-                                var prvSeelected = selectedAttr;
-                                prvSeelected.add({
-                                  'ca_id': attribute.ca_id,
-                                  'attribute': attr,
-                                  'attrType_ID': attrIDs[i],
-                                  'attr_price': attrtypesPrice[i]
-                                });
                                 setState(() {
-                                  selectedAttr = prvSeelected;
                                   isFirstAttr = true;
                                   // setPrice();
                                 });
