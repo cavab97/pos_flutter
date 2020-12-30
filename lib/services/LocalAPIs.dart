@@ -595,7 +595,7 @@ class LocalAPI {
             : [];
       }
     } else { */
-    var qry = " SELECT mst_cart_detail.* ,group_concat(attributes.name) as attrName ,group_concat(modifier.name) as modiName from mst_cart_detail " +
+    String qry = " SELECT mst_cart_detail.* ,group_concat(attributes.name) as attrName ,group_concat(modifier.name) as modiName from mst_cart_detail " +
         " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  (mst_cart_sub_detail.attribute_id != '' OR mst_cart_sub_detail.modifier_id != '' )" +
         " LEFT JOIN attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != " +
         " '' " +
@@ -611,7 +611,7 @@ class LocalAPI {
     return list;
   }
 
-  Future<bool> updateItemDiscount(MSTCartdetails product, int cartid,
+  Future<bool> updateItemDiscount(MSTCartdetails product, int cartID,
       String discountAmount, String discountType, String discountRemark) async {
     int discountT = discountType == "%" ? 1 : 2;
     double discountA = double.tryParse(discountAmount);
@@ -619,7 +619,7 @@ class LocalAPI {
     String selectAttribute =
         "SELECT SUM(mst_cart_sub_detail.attr_price) as attr_total, SUM(mst_cart_sub_detail.modifier_price) as modifier_total FROM mst_cart_sub_detail WHERE mst_cart_sub_detail.cart_details_id = " +
             product.cartId.toString();
-    var db = DatabaseHelper.dbHelper.getDatabse();
+    Database db = DatabaseHelper.dbHelper.getDatabse();
     var res = await db.rawQuery(selectAttribute);
 
     double attributesPrice =
@@ -645,12 +645,50 @@ class LocalAPI {
         "', product_detail_amount = '" +
         totalPrice.toString() +
         "' WHERE cart_id = '" +
-        cartid.toString() +
+        cartID.toString() +
         "' AND product_id = '" +
         product.productId.toString() +
         "'";
-    print(updatePrice);
     await db.rawQuery(updatePrice);
+    return true;
+  }
+
+  Future<bool> applyBillDiscount(int cartID, String discountAmount,
+      String discountType, String discountRemark) async {
+    MST_Cart currentCart = await getCartData(cartID);
+    int discountT = discountType == "%" ? 1 : 2;
+    double totalDiscountAmount = 0;
+    double currentDiscountAmount = 0;
+    double cartSubTotal = 0;
+    List<MSTCartdetails> cartdetails = await getCartItem(cartID);
+    /* if (currentCart.voucher_id != null && currentCart.voucher_id > 0) {
+      Voucher voucher = await getvoucher(currentCart.voucher_id);
+      double voucherAmount = voucher.voucherDiscountType == 2
+          ? (currentCart.sub_total * (voucher.voucherDiscount / 100))
+          : voucher.voucherDiscount;
+      totalDiscountAmount = voucherAmount;
+    } */
+    if (discountT == 1) {
+      currentDiscountAmount =
+          (currentCart.sub_total * (double.tryParse(discountAmount) / 100));
+    } else {
+      currentDiscountAmount = double.tryParse(discountAmount);
+    }
+    totalDiscountAmount += currentDiscountAmount;
+    cartdetails.forEach((cartdetail) {
+      cartSubTotal += cartdetail.productDetailAmount != null &&
+              cartdetail.productDetailAmount != 0.00
+          ? cartdetail.productDetailAmount
+          : cartdetail.productPrice;
+    });
+    currentCart.sub_total = cartSubTotal - totalDiscountAmount;
+    currentCart.discountAmount = double.tryParse(discountAmount);
+    currentCart.discountType = discountT;
+    currentCart.discountRemark = discountRemark;
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+
+    await db.update("mst_cart", currentCart.toJson(),
+        where: 'id = ?', whereArgs: [cartID]);
     return true;
   }
   /*Future<List<MSTCartdetails>> getSplitBillData(cartId) async {

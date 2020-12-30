@@ -3,25 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 
 class DiscountPad extends StatefulWidget {
   // Opning ammount popup
-  DiscountPad(
-      {Key key,
-      this.seletedProduct,
-      this.issetMeal,
-      this.cartID,
-      this.cartItem,
-      this.onClose})
-      : super(key: key);
+  DiscountPad({
+    Key key,
+    this.selectedProduct,
+    this.issetMeal,
+    this.cartID,
+    this.onClose,
+  }) : super(key: key);
 
   final bool issetMeal;
-  final MSTCartdetails seletedProduct;
+  final MSTCartdetails selectedProduct;
   final int cartID;
-  final cartItem;
   Function onClose;
 
   @override
@@ -35,6 +34,7 @@ class _DiscountPadState extends State<DiscountPad> {
   LocalAPI localAPI = LocalAPI();
   double totalAmount = 0;
   TextEditingController extraNotes = new TextEditingController();
+  MST_Cart currentCart = new MST_Cart();
   FocusNode myFocusNode = FocusNode();
   bool validNotes = false;
   bool isEnter = false;
@@ -43,7 +43,13 @@ class _DiscountPadState extends State<DiscountPad> {
     super.initState();
     setState(() {});
     currentNumber = totalAmount.toStringAsFixed(2);
-    extraNotes.text = widget.seletedProduct.discountRemark ?? "";
+    if (widget.selectedProduct != null) {
+      extraNotes.text = widget.selectedProduct.discountRemark ?? "";
+      dicsountTypeClick(widget.selectedProduct.discountType == 1 ? "%" : "RM");
+      currentNumber = widget.selectedProduct.discountAmount.toStringAsFixed(2);
+    } else {
+      getCart();
+    }
     extraNotes.addListener(() {
       if (!isEnter) isEnter = true;
       if (!validNotes && extraNotes.text.trim().isNotEmpty && this.mounted) {
@@ -64,7 +70,6 @@ class _DiscountPadState extends State<DiscountPad> {
   void dispose() {
     // Clean up the focus node when the Form is disposed.
     if (myFocusNode != null) myFocusNode.dispose();
-
     super.dispose();
   }
 
@@ -72,39 +77,53 @@ class _DiscountPadState extends State<DiscountPad> {
   Widget build(BuildContext context) {
     return AlertDialog(
       titlePadding: EdgeInsets.all(0),
-      title: Stack(
-        // popup header
-        overflow: Overflow.visible,
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.symmetric(
-                horizontal: SizeConfig.safeBlockVertical * 5),
-            height: SizeConfig.safeBlockVertical * 9,
-            decoration: BoxDecoration(
-                color: Colors.white, border: Border.all(color: Colors.black)),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(
-                  "Discount" + '',
-                  style: Styles.communBlack(),
-                ),
-                // Text(
-                //     currentDiscountType == "RM"
-                //         ? currentDiscountType +
-                //             CommunFun.getDecimalFormat(currentNumber)
-                //         : CommunFun.getDecimalFormat(currentNumber) +
-                //             currentDiscountType,
-                //     style: Styles.communBlack()),
-              ],
-            ),
+      title: Container(
+        padding: EdgeInsets.symmetric(
+            horizontal: SizeConfig.safeBlockHorizontal,
+            vertical: SizeConfig.safeBlockVertical),
+        height: SizeConfig.safeBlockVertical * 9,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            bottom: BorderSide(color: Colors.black),
           ),
-          closeButton(context), //popup close btn
-        ],
+        ),
+        child: Stack(
+          // popup header
+          overflow: Overflow.visible,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.safeBlockHorizontal,
+                  vertical: SizeConfig.safeBlockVertical),
+              child: Text(
+                "Discount" + (widget.selectedProduct == null ? ' Bill' : ''),
+                style: Styles.communBlack(),
+              ),
+              // Text(
+              //     currentDiscountType == "RM"
+              //         ? currentDiscountType +
+              //             CommunFun.getDecimalFormat(currentNumber)
+              //         : CommunFun.getDecimalFormat(currentNumber) +
+              //             currentDiscountType,
+              //     style: Styles.communBlack()),
+            ),
+            closeButton(context), //popup close btn
+          ],
+        ),
       ),
-      content: mainContent(), // Popup body contents
+      content: getNumbers(context), // Popup body contents
     );
+  }
+
+  getCart() async {
+    MST_Cart getCart = await localAPI.getCartData(widget.cartID);
+    dicsountTypeClick(getCart.discountType == 1 ? "%" : "RM");
+    setState(() {
+      currentNumber = getCart.discountAmount.toStringAsFixed(2);
+      extraNotes.text = getCart.discountRemark;
+      currentCart = getCart;
+    });
   }
 
   backspaceClick() {
@@ -175,13 +194,18 @@ class _DiscountPadState extends State<DiscountPad> {
         break;
     }
     double totalAmount = 0;
-    if (widget.seletedProduct.discountType == 1) {
-      totalAmount = widget.seletedProduct.productDetailAmount /
-          (1 - (widget.seletedProduct.discountAmount / 100));
+    if (widget.selectedProduct != null) {
+      if (widget.selectedProduct.discountType == 1) {
+        totalAmount = widget.selectedProduct.productDetailAmount /
+            (1 - (widget.selectedProduct.discountAmount / 100));
+      } else {
+        totalAmount = widget.selectedProduct.discountAmount +
+            widget.selectedProduct.productDetailAmount;
+      }
     } else {
-      totalAmount = widget.seletedProduct.discountAmount +
-          widget.seletedProduct.productDetailAmount;
+      totalAmount = currentCart.sub_total;
     }
+
     if (currentDiscountType == "RM" &&
         double.tryParse(currentnumber) > totalAmount) {
       currentnumber = totalAmount.toString();
@@ -196,7 +220,7 @@ class _DiscountPadState extends State<DiscountPad> {
     }
   }
 
-  setItemDiscount() async {
+  setDiscount() async {
     if (extraNotes.text.isEmpty && this.mounted) {
       setState(() {
         isEnter = true;
@@ -205,8 +229,13 @@ class _DiscountPadState extends State<DiscountPad> {
         myFocusNode.requestFocus();
       }
     } else {
-      await localAPI.updateItemDiscount(widget.seletedProduct, widget.cartID,
-          currentNumber, currentDiscountType, extraNotes.text.trim());
+      if (widget.selectedProduct != null) {
+        await localAPI.updateItemDiscount(widget.selectedProduct, widget.cartID,
+            currentNumber, currentDiscountType, extraNotes.text.trim());
+      } else {
+        await localAPI.applyBillDiscount(widget.cartID, currentNumber,
+            currentDiscountType, extraNotes.text.trim());
+      }
       Navigator.of(context).pop();
       widget.onClose();
     }
@@ -222,16 +251,13 @@ class _DiscountPadState extends State<DiscountPad> {
   dicsountTypeClick(val) {
     // add  value in prev value
 
-    if (val == "RM") {
+    if (this.mounted) {
       setState(() {
         currentDiscountType = val;
         currentNumber = "0";
       });
-    } else if (val == "%") {
-      setState(() {
-        currentDiscountType = val;
-        currentNumber = "0";
-      });
+      if (val == "RM") {
+      } else if (val == "%") {}
     }
   }
 
@@ -270,6 +296,13 @@ class _DiscountPadState extends State<DiscountPad> {
   Widget _button(String number, Function() f) {
     var size = MediaQuery.of(context).size.width / 2.3;
     double resize = size / 6;
+    Color buttonColor = Colors.grey[100];
+    if (number == Strings.enter) {
+      buttonColor = Colors.green[900];
+    } else if ((number == "%" && currentDiscountType == "%") ||
+        (number == "Cash" && currentDiscountType != "%")) {
+      buttonColor = Colors.orange[200];
+    }
     return Container(
       width: (number == "00") || (number == "%") || (number == "Cash")
           ? (resize * 2)
@@ -285,13 +318,7 @@ class _DiscountPadState extends State<DiscountPad> {
                 textAlign: TextAlign.center, style: Styles.blackMediumBold())
             : Icon(Icons.save, size: 30),
         textColor: Colors.white,
-        color: number == Strings.enter
-            ? Colors.green[900]
-            : number == "Cash" && currentDiscountType == "RM"
-                ? Colors.orange[200]
-                : number == "%" && currentDiscountType == "%"
-                    ? Colors.orange[200]
-                    : Colors.grey[100],
+        color: buttonColor,
         onPressed: f,
       ),
     );
@@ -535,7 +562,7 @@ class _DiscountPadState extends State<DiscountPad> {
                         ),
                       ],
                     ),
-                    _button(Strings.enter, setItemDiscount),
+                    _button(Strings.enter, setDiscount),
                   ]),
                 ],
               ),

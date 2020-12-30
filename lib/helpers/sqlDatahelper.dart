@@ -105,6 +105,7 @@ class DatabaseHelper {
 
   Future<dynamic> insertWineStoragedata(tablesData) async {
     Database db = await this.database;
+    print('insertWineStoragedata sqlDatahelper');
     var result = await tableDataHelper.insertWineStorageData(db, tablesData);
     return result;
   }

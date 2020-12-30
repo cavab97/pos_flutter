@@ -50,30 +50,30 @@ class VoucherPopState extends State<VoucherPop> {
     );
   }
 
-  checkMinMaxValue(vaocher) async {
+  checkMinMaxValue(voucher) async {
     // Check in minimum  max value with cart value
     bool isReturn = false;
-    if (vaocher.voucherDiscount < cartData.sub_total) {
-      if (vaocher.minimumAmount == 0.0 ||
-          vaocher.minimumAmount <= cartData.sub_total) {
+    if (voucher.voucherDiscount < cartData.sub_total) {
+      if (voucher.minimumAmount == 0.0 ||
+          voucher.minimumAmount <= cartData.sub_total) {
         isReturn = true;
       } else {
         isReturn = false;
         CommunFun.showToast(
             context,
             "Required minimum cart amount " +
-                vaocher.minimumAmount.toString() +
+                voucher.minimumAmount.toString() +
                 " for this voucher.");
       }
-      if (vaocher.maximumAmount == 0.0 ||
-          vaocher.maximumAmount >= cartData.sub_total) {
+      if (voucher.maximumAmount == 0.0 ||
+          voucher.maximumAmount >= cartData.sub_total) {
         isReturn = true;
       } else {
         isReturn = false;
         CommunFun.showToast(
             context,
             "Required maximum cart amount " +
-                vaocher.maximumAmount.toString() +
+                voucher.maximumAmount.toString() +
                 " for this voucher.");
       }
     } else {
@@ -81,15 +81,15 @@ class VoucherPopState extends State<VoucherPop> {
       CommunFun.showToast(
           context,
           "Required cart amount more than discount ammount " +
-              vaocher.voucherDiscount.toString() +
+              voucher.voucherDiscount.toString() +
               ".");
     }
     return isReturn;
   }
 
-  checkisExpired(vaocher) {
-    DateTime fromDate = DateTime.parse(vaocher.voucherApplicableFrom);
-    DateTime toDate = DateTime.parse(vaocher.voucherApplicableTo);
+  checkisExpired(voucher) {
+    DateTime fromDate = DateTime.parse(voucher.voucherApplicableFrom);
+    DateTime toDate = DateTime.parse(voucher.voucherApplicableTo);
     DateTime now = new DateTime.now();
     String nowDate = DateFormat('yyyy-MM-dd').format(now);
     String fromtonow = DateFormat('yyyy-MM-dd').format(toDate);
@@ -100,87 +100,84 @@ class VoucherPopState extends State<VoucherPop> {
     }
   }
 
-  checkitsUsableorNot(vaocher) async {
-    var count = await localAPI.getVoucherusecount(vaocher.voucherId);
+  checkitsUsableorNot(voucher) async {
+    var count = await localAPI.getVoucherusecount(voucher.voucherId);
     return count;
   }
 
-  checkValidVoucher(vaocher) async {
+  checkValidVoucher(Voucher voucher) async {
     Voucher selectedvoucher;
-    var chheckIsExpired = await checkisExpired(vaocher);
+    var chheckIsExpired = await checkisExpired(voucher);
     if (chheckIsExpired == true) {
-      var isminmaxValid = await checkMinMaxValue(vaocher);
+      var isminmaxValid = await checkMinMaxValue(voucher);
       if (isminmaxValid == true) {
-        var count = await checkitsUsableorNot(vaocher);
-        if (vaocher.usesTotal == 0 || count < vaocher.usesTotal) {
+        var count = await checkitsUsableorNot(voucher);
+        if (voucher.usesTotal == 0 || count < voucher.usesTotal) {
           //check product
           bool isadded = false;
           double totaldiscount = 0;
-          for (int i = 0; i < widget.cartList.length; i++) {
+          for (int i = 0;
+              i < widget.cartList.length && voucher.voucherDiscountType == 1;
+              i++) {
             var cartitem = widget.cartList[i];
             // product
-            if (vaocher.voucherProducts != "") {
-              vaocher.voucherProducts.split(',').forEach((tag) {
+            if (voucher.voucherProducts != "") {
+              voucher.voucherProducts.split(',').forEach((tag) {
                 if (cartitem.productId.toString() == tag) {
-                  if (vaocher.voucherDiscountType == 1) {
-                    cartitem.discountAmount = vaocher.voucherDiscount;
-                    cartitem.discountType = vaocher.voucherDiscountType;
-                  } else {
-                    cartitem.discountAmount =
-                        (cartitem.productPrice * vaocher.voucherDiscount) / 100;
-                    cartitem.discountType = vaocher.voucherDiscountType;
-                  }
+                  cartitem.discountAmount = voucher.voucherDiscount;
+                  cartitem.discountType = voucher.voucherDiscountType;
+                  cartitem.discountRemark = voucher.voucherName;
                 }
               });
             }
             // categorys
-            if (vaocher.voucherCategories != "") {
+            if (voucher.voucherCategories != "") {
               List<ProductCategory> produtCategory =
                   await localAPI.getProductCategory(cartitem.productId);
-              vaocher.voucherCategories.split(',').forEach((tag) {
+              voucher.voucherCategories.split(',').forEach((tag) {
                 for (int j = 0; j < produtCategory.length; j++) {
                   ProductCategory cat = produtCategory[j];
                   if (cat.categoryId.toString() == tag) {
-                    cartitem.discountAmount = vaocher.voucherDiscount;
-                    cartitem.discountType = vaocher.voucherDiscountType;
+                    cartitem.discountAmount = voucher.voucherDiscount;
+                    cartitem.discountType = voucher.voucherDiscountType;
+                    cartitem.discountRemark = voucher.voucherName;
                   }
                 }
               });
             }
             if (cartitem.discountAmount != null &&
                 cartitem.discountAmount != 0.0) {
-              totaldiscount += cartitem.discountAmount;
+              double discountAmount =
+                  cartitem.productPrice * (cartitem.discountAmount / 100);
+              totaldiscount += discountAmount;
+
               await localAPI.addVoucherIndetail(
                 cartitem,
-                vaocher.voucherId,
+                voucher.voucherId,
               );
-            } else {
-              totaldiscount = vaocher.voucherDiscount;
             }
           }
-          cartData.grand_total = cartData.grand_total + cartData.discountAmount;
-          cartData.discountAmount = totaldiscount;
-          cartData.discountType = vaocher.voucherDiscountType;
-          cartData.grand_total = cartData.grand_total =
-              cartData.grand_total - cartData.discountAmount;
-          cartData.voucher_detail = json.encode(vaocher);
-          cartData.voucher_id = vaocher.voucherId;
-          await localAPI.addVoucherInOrder(cartData, vaocher);
-          selectedvoucher = vaocher;
+          //cartData.discountAmount = totaldiscount;
+          cartData.discountType = voucher.voucherDiscountType;
+          cartData.discountRemark = voucher.voucherName;
+          cartData.voucher_detail = json.encode(voucher);
+          cartData.voucher_id = voucher.voucherId;
+          await localAPI.addVoucherInOrder(cartData, voucher);
+          selectedvoucher = voucher;
           isadded = true;
-          selectedvoucher = vaocher;
+          selectedvoucher = voucher;
           widget.onEnter(selectedvoucher);
           await SyncAPICalls.logActivity(
               "add promocode",
               "Cashier Removed promocode form order",
               "voucher",
-              vaocher.voucherId);
+              voucher.voucherId);
           Navigator.of(context).pop(); // close Pop
         } else {
           await CommunFun.showToast(
               context,
               "Voucher already used " +
-                  vaocher.usesTotal.toString() +
+                  voucher.usesTotal.toString() +
                   " times.");
           await SyncAPICalls.logActivity(
               "Voucher", "cashier choosed voucher already used", "Voucher", 1);
@@ -195,10 +192,10 @@ class VoucherPopState extends State<VoucherPop> {
 
   validateCode() async {
     if (codeConteroller.text.length != 0) {
-      List<Voucher> vaocher =
+      List<Voucher> voucher =
           await localAPI.checkVoucherIsExit(codeConteroller.text);
-      if (vaocher.length > 0) {
-        checkValidVoucher(vaocher[0]);
+      if (voucher.length > 0) {
+        checkValidVoucher(voucher[0]);
       } else {
         setState(() {
           errorMSG = Strings.voucherNotExit;
