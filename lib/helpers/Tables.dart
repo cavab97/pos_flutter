@@ -957,6 +957,18 @@ class CreateTables {
         "updated_at INTEGERT" +
         ")");
 
+    datatables = db.execute("CREATE TABLE setmeal_attribute ( " +
+        "setmeal_att_id  INTEGER," +
+        "uuid TEXT," +
+        "setmeal_id INTEGER," +
+        "ca_id INTEGER," +
+        "attribute_id INTEGER," +
+        "price REAL," +
+        "status NUMERIC," +
+        "updated_at TEXT," +
+        "updated_by INTEGER" +
+        ")");
+
     // Drawer table
 
     datatables = db.execute("CREATE TABLE drawer ( " +

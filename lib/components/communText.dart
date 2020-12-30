@@ -469,6 +469,7 @@ class CommunFun {
 
     var wineStorageData = await SyncAPICalls.getWineStorageData(context);
     if (wineStorageData != null) {
+      print('getDataTables472');
       var result =
           await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
       if (result == 1) {
@@ -632,6 +633,7 @@ class CommunFun {
     }
     var wineStorageData = await SyncAPICalls.getWineStorageData(context);
     if (wineStorageData != null) {
+      print('getDataTables636');
       var result =
           await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
       if (result == 1) {
@@ -684,6 +686,7 @@ class CommunFun {
     }
     var wineStorageData = await SyncAPICalls.getWineStorageData(context);
     if (wineStorageData != null) {
+      print('getDataTables689');
       var result =
           await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
       if (result == 1) {
@@ -729,6 +732,7 @@ class CommunFun {
     }
     var wineStorageData = await SyncAPICalls.getWineStorageData(context);
     if (wineStorageData != null) {
+      print('getDataTables735');
       var result =
           await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
       if (result == 1) {
@@ -757,6 +761,7 @@ class CommunFun {
     }
     var wineStorageData = await SyncAPICalls.getWineStorageData(context);
     if (wineStorageData != null) {
+      print('getDataTables5');
       var result =
           await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
       if (result == 1) {

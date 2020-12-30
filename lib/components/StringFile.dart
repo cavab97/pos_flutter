@@ -23,6 +23,7 @@ class Strings {
   static String amount = "Amount";
   static String currency = "RM ";
   static String discount = "Discount";
+  static String totalDiscount = "Total Bill Discount";
 
   static String serviceCharge = "Service Charge";
   static String tax = "TAX";
@@ -217,7 +218,7 @@ class Strings {
   static String syncTxt = "Sync";
   static String settings = "Settings";
   static String pleaseSelectCustomer = "Please select customer";
-  static String makeFoc = "'Make FOC'";
+  static String makeFoc = "Make FOC";
   static String editDetail = "Edit Detail";
   static String setQuantity = "Set Quantity";
   static String outOfStock = "Out of Stock";
