@@ -2038,7 +2038,7 @@ class LocalAPI {
         "Meals product List", "get Meals product List", "setmeal", setmealid);
     for (var i = 0; i < list.length; i++) {
       var attrQry = "SELECT product.product_id, category_attribute.name as attr_name,attributes.ca_id, " +
-          " group_concat(product_attribute.price) as attr_types_price,group_concat(attributes.name) as attr_types ,group_concat(attributes.attribute_id) as attributeId " +
+          " group_concat(product_attribute.price) as attr_types_price,group_concat(attributes.name) as attr_types ,group_concat(attributes.attribute_id) as attributeId,group_concat(attributes.is_default) as is_default " +
           " FROM product LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1 " +
           " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1 " +
           " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1 " +
