@@ -613,12 +613,14 @@ class LocalAPI {
 
   Future<bool> updateItemDiscount(MSTCartdetails product, int cartID,
       String discountAmount, String discountType, String discountRemark) async {
+    MST_Cart getCart = await localAPI.getCartData(cartID);
+
     int discountT = discountType == "%" ? 1 : 2;
     double discountA = double.tryParse(discountAmount);
     double totalPrice = product.productPrice;
     String selectAttribute =
         "SELECT SUM(mst_cart_sub_detail.attr_price) as attr_total, SUM(mst_cart_sub_detail.modifier_price) as modifier_total FROM mst_cart_sub_detail WHERE mst_cart_sub_detail.cart_details_id = " +
-            product.cartId.toString();
+            product.id.toString();
     Database db = DatabaseHelper.dbHelper.getDatabse();
     var res = await db.rawQuery(selectAttribute);
 
@@ -631,7 +633,8 @@ class LocalAPI {
     totalPrice += attributesPrice + modifierPrice;
     totalPrice = totalPrice * product.productQty;
 
-    if (discountType == "%") {
+    if (getCart.voucher_id > 0 && discountType == "%") {
+    } else if (discountType == "%") {
       totalPrice = totalPrice * (1 - (discountA / 100));
     } else {
       totalPrice = totalPrice - discountA;

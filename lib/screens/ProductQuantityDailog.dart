@@ -571,30 +571,25 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   setPrice() {
-    print("setPrice");
     var productPrice = productnetprice;
     var newPrice = productPrice;
-    print(selectedAttr.length);
     if (!isSetMeal) {
-      if (selectedAttr.length > 0) {
-        for (int i = 0; i < selectedAttr.length; i++) {
-          var price = selectedAttr[i]["attr_price"];
-          newPrice += double.parse(price);
-        }
+      for (int i = 0; selectedAttr.length > 0 && i < selectedAttr.length; i++) {
+        var price = selectedAttr[i]["attr_price"];
+        newPrice += double.parse(price);
       }
-      if (selectedModifier.length > 0) {
-        for (int i = 0; i < selectedModifier.length; i++) {
-          var mprice = selectedModifier[i].price;
-          newPrice += mprice;
-        }
-        print("hello" + newPrice.toString());
+      for (int i = 0;
+          selectedModifier.length > 0 && i < selectedModifier.length;
+          i++) {
+        var mprice = selectedModifier[i].price;
+        newPrice += mprice;
       }
     } else {
-      if (selectedSetMealAttr.length > 0) {
-        for (int i = 0; i < selectedSetMealAttr.length; i++) {
-          var price = selectedSetMealAttr[i]["attr_price"];
-          newPrice += double.parse(price);
-        }
+      for (int i = 0;
+          selectedSetMealAttr.length > 0 && i < selectedSetMealAttr.length;
+          i++) {
+        var price = selectedSetMealAttr[i]["attr_price"];
+        newPrice += double.parse(price);
       }
     }
 
@@ -865,6 +860,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         subCartData.localID = cart.localID;
         subCartData.productId = productItem.productId;
         subCartData.modifierId = modifire.modifierId;
+        subCartData.caId = cart.id;
         subCartData.modifirePrice = modifire.price;
         await localAPI.addsubCartData(subCartData);
       }
