@@ -43,6 +43,8 @@ class VoucherPopState extends State<VoucherPop> {
     setState(() {
       cartData = widget.cartData;
     });
+    codeConteroller.clear();
+
     KeyboardVisibilityNotification().addNewListener(
       onHide: () {
         FocusScope.of(context).requestFocus(new FocusNode());
@@ -119,7 +121,17 @@ class VoucherPopState extends State<VoucherPop> {
           for (int i = 0;
               i < widget.cartList.length && voucher.voucherDiscountType == 1;
               i++) {
-            var cartitem = widget.cartList[i];
+            MSTCartdetails cartitem = widget.cartList[i];
+            //reverse discount item
+            if (cartitem.discountAmount > 0) {
+              if (cartitem.discountType == 1) {
+                cartitem.productDetailAmount = cartitem.productDetailAmount /
+                    (1 - (cartitem.discountAmount / 100));
+              } else {
+                cartitem.productDetailAmount =
+                    cartitem.discountAmount + cartitem.productDetailAmount;
+              }
+            }
             // product
             if (voucher.voucherProducts != "") {
               voucher.voucherProducts.split(',').forEach((tag) {
@@ -296,6 +308,7 @@ class VoucherPopState extends State<VoucherPop> {
               height: 20,
             ),
             TextField(
+              autofocus: true,
               controller: codeConteroller,
               keyboardType: TextInputType.text,
               decoration: InputDecoration(
