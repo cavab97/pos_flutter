@@ -128,9 +128,8 @@ class _DiscountPadState extends State<DiscountPad> {
 
   backspaceClick() {
     if (currentNumber != "0") {
-      String currentnumber = currentNumber
-          .replaceAll('.', '')
-          .replaceAll(new RegExp(r'^0+(?=.)'), '');
+      String currentnumber =
+          currentNumber.replaceAll('.', '').replaceAll("^0+", "");
       currentnumber = currentnumber.substring(0, currentnumber.length - 1);
       if (currentnumber.length == 0 && this.mounted) {
         setState(() {
@@ -171,9 +170,8 @@ class _DiscountPadState extends State<DiscountPad> {
   numberClick(val) {
     // add  value in prev value
 
-    String currentnumber = currentNumber
-        .replaceAll('.', '')
-        .replaceAll(new RegExp(r'^0+(?=.)'), '');
+    String currentnumber =
+        currentNumber.replaceAll('.', '').replaceAll("^0+", "");
     currentnumber = currentnumber == "0" ? "" : currentnumber;
     switch (currentnumber.length + val.length) {
       case 1:

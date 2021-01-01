@@ -333,16 +333,19 @@ class _DashboradPageState extends State<DashboradPage>
 
     cartdetails.forEach((cartdetail) {
       if (isInit) originalCartList.add(cartdetail);
-      currentSubtotal += cartdetail.productDetailAmount != null &&
-              cartdetail.productDetailAmount != 0.00
-          ? cartdetail.productDetailAmount
-          : cartdetail.productPrice;
-      if (cart.voucher_id != null) {
-        if (cart.voucher_id > 0 && cartdetail.discountType == 1) {
-          itemDiscount +=
-              cartdetail.productPrice * (cartdetail.discountAmount / 100);
-        } else if (cart.voucher_id > 0) {
-          itemDiscount += cartdetail.discountAmount;
+      if (cartdetail.isFocProduct != 1) {
+        currentSubtotal += cartdetail.productDetailAmount != null &&
+                cartdetail.productDetailAmount != 0.00
+            ? cartdetail.productDetailAmount
+            : cartdetail.productPrice;
+        if (cart.voucher_id != null) {
+          if (cart.voucher_id > 0 && cartdetail.discountType == 1) {
+            double originalPrice = cartdetail.productDetailAmount;
+            // (1 - (cartdetail.discountAmount / 100));
+            itemDiscount += originalPrice * (cartdetail.discountAmount / 100);
+          } else if (cart.voucher_id > 0) {
+            itemDiscount += cartdetail.discountAmount;
+          }
         }
       }
     });
@@ -1908,6 +1911,8 @@ class _DashboradPageState extends State<DashboradPage>
               onClose: (qty, remark) {
                 Navigator.of(context).pop();
                 splitproductfromItem(qty, cartitem, remark);
+
+                countTotals(currentCartID);
               });
         });
   }

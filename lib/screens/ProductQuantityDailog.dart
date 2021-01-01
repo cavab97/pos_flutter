@@ -604,11 +604,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var newPrice = productPrice;
     // print(selectedAttr.length);
     if (!isSetMeal) {
-      if (selectedAttr.length > 0) {
-        for (int i = 0; i < selectedAttr.length; i++) {
-          var price = selectedAttr[i]["attr_price"];
-          newPrice += double.parse(price);
-        }
+      for (int i = 0; selectedAttr.length > 0 && i < selectedAttr.length; i++) {
+        var price = selectedAttr[i]["attr_price"];
+        newPrice += double.parse(price);
       }
       if (selectedModifier.length > 0) {
         for (int i = 0; i < selectedModifier.length; i++) {
@@ -618,11 +616,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         // print("hello" + newPrice.toString());
       }
     } else {
-      if (selectedSetMealAttr.length > 0) {
-        for (int i = 0; i < selectedSetMealAttr.length; i++) {
-          var price = selectedSetMealAttr[i]["attr_price"];
-          newPrice += double.parse(price);
-        }
+      for (int i = 0;
+          selectedSetMealAttr.length > 0 && i < selectedSetMealAttr.length;
+          i++) {
+        var price = selectedSetMealAttr[i]["attr_price"];
+        newPrice += double.parse(price);
       }
     }
 
@@ -935,6 +933,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         subCartData.localID = cart.localID;
         subCartData.productId = productItem.productId;
         subCartData.modifierId = modifire.modifierId;
+        subCartData.caId = cart.id;
         subCartData.modifirePrice = modifire.price;
         await localAPI.addsubCartData(subCartData);
       }

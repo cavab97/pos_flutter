@@ -221,6 +221,12 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
   }
 
   Widget _quantityTextInput() {
+    String qtyString = "";
+    if (widget.type == null) {
+      qtyString = productQty.toInt().toString();
+    } else {
+      qtyString = productQty.toString();
+    }
     return Container(
       height: 40,
       width: 100,
@@ -228,8 +234,7 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
           border: Border.all(width: 1, color: StaticColor.colorGrey)),
       child: Center(
           child: Text(
-              productQty.toString() +
-                  (widget.type != null ? " " + widget.type : ""),
+              qtyString + (widget.type != null ? " " + widget.type : ""),
               style: TextStyle(color: StaticColor.colorGrey, fontSize: 20))),
     );
   }
