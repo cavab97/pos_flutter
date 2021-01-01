@@ -46,6 +46,7 @@ class ProductQuantityDailog extends StatefulWidget {
 }
 
 class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
+  List<dynamic> obj = [];
   TextEditingController productController = new TextEditingController();
   TextEditingController extraNotes = new TextEditingController();
   LocalAPI localAPI = LocalAPI();
@@ -76,6 +77,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   bool isFirstMod = false;
   bool isFirstAttr = false;
   bool isFirstAttrSet = true;
+  List<dynamic> attrdata;
 
   @override
   void initState() {
@@ -110,7 +112,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     } else {
       setState(() {
         productItem = widget.selproduct;
-        print(productItem.name);
+        // print(productItem.name);
         price = productItem.price;
         productnetprice = productItem.price;
       });
@@ -150,12 +152,31 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   getMealProducts() async {
+    List<SetMealProduct> mealCartList = [];
     List<SetMealProduct> mealProductList =
         await localAPI.getMealsProductData(setmeal.setmealId);
-    print(mealProductList[1]);
+    List<MSTCartdetails> cartMealList =
+        await localAPI.getCurrentCartItems(widget.cartID);
+
+    if (isEditing) {
+      var jsonString = cartMealList[0].setmeal_product_detail;
+      // print((json.decode(jsonString) as List).toList());
+      mealCartList = (json.decode(jsonString) as List)
+          .map((e) => SetMealProduct.fromJson(e))
+          .toList();
+      print("mealCartList[0].attributeDetails");
+      print(mealCartList[0].attributeDetails);
+    }
+
+    // for (MSTCartdetails item in cartMealList) {
+    //   json.decode(item.setmeal_product_detail);
+    // }
+    // print("mealCartList[0].attributeDetails");
+
+    // print(mealProductList[1]);
     if (mealProductList.length > 0) {
       setState(() {
-        mealProducts = mealProductList;
+        mealProducts = isEditing ? mealCartList : mealProductList;
       });
       await setSetMealData();
     }
@@ -183,7 +204,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   setAttrData(productData) {
     if (productData["Attributes"].length > 0) {
-      print(productData["Attributes"].length);
+      // print(productData["Attributes"].length);
       setState(() {
         attributeList.addAll(productData["Attributes"]);
       });
@@ -237,10 +258,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   setSetMealData() {
-    if (cartitem != null) {
+    print("pASSSSSSSS");
+    if (cartitem != null && !isEditing) {
       var cartData = jsonDecode(cartitem.setmeal_product_detail);
-      print("cartData");
-      print(cartData[0].attributeDetails);
+      // print("cartData");
+      // print(cartData[0].attributeDetails);
       List<SetMealProduct> tCartData = cartData.isNotEmpty
           ? cartData.map((c) => SetMealProduct.fromJson(c)).toList()
           : [];
@@ -298,9 +320,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             : cartitem.productQty;
         price = cartitem.productPrice;
       });
-    } else {
-      print("setProductEditingData!!!!!!!!!!!");
-    }
+    } else {}
   }
 
   getAttributes(productid) async {
@@ -426,14 +446,21 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   onSelectSetmealAttr(
-      i, id, attribute, attrTypeIDs, attrPrice, setmealproduct) {
+    setmealproduct,
+    productId,
+    i,
+    id,
+    attribute,
+    attrTypeIDs,
+    attrPrice,
+  ) {
     var prvSeelected = selectedSetMealAttr;
-    print(attrTypeIDs);
+    // print(attrTypeIDs);
     var isSelected = selectedSetMealAttr.any((item) =>
         item['ca_id'] == id && item["setmeal_productID"] == setmealproduct);
     var isSelectedType =
         selectedSetMealAttr.any((item) => item["attribute"] == attribute);
-    print(attribute);
+    // print(attribute);
     if (isSelectedType) {
     } else {
       if (isSelected) {
@@ -443,6 +470,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             item['ca_id'] == id && item["setmeal_productID"] == setmealproduct);
         if (!isarrSelected) {
           prvSeelected.add({
+            'product_id': productId,
             'setmeal_productID': setmealproduct,
             'ca_id': id,
             'attribute': attribute,
@@ -571,10 +599,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   setPrice() {
-    print("setPrice");
+    // print("setPrice");
     var productPrice = productnetprice;
     var newPrice = productPrice;
-    print(selectedAttr.length);
+    // print(selectedAttr.length);
     if (!isSetMeal) {
       if (selectedAttr.length > 0) {
         for (int i = 0; i < selectedAttr.length; i++) {
@@ -587,7 +615,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           var mprice = selectedModifier[i].price;
           newPrice += mprice;
         }
-        print("hello" + newPrice.toString());
+        // print("hello" + newPrice.toString());
       }
     } else {
       if (selectedSetMealAttr.length > 0) {
@@ -600,7 +628,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
     var pricewithQty = newPrice * product_qty;
     // print(pricewithQty);
-    print(newPrice);
+    // print(newPrice);
     // print(product_qty);
     setState(() {
       price = pricewithQty;
@@ -749,6 +777,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   produtAddTocart() async {
     MST_Cart cart = new MST_Cart();
+
     //MSTSubCartdetails subCartData = new MSTSubCartdetails();
     SaveOrder orderData = new SaveOrder();
 
@@ -851,7 +880,48 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.taxValue = taxvalues;
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
-    if (isSetMeal) {
+    // print(tempCart[].);
+    var ctn;
+
+    if (isSetMeal && !isEditing) {
+      for (var i = 0; i < tempCart.length; i++) {
+        // print("tempCart.length");
+        // print(tempCart[i].name);
+        ctn = tempCart[i].attributeDetails;
+
+        attrdata = jsonDecode(ctn);
+        // var data = ctn["product_id"];
+        // print(tempCart[0].attributeDetails);
+        // obj = tempCart[0].attributeDetails;[]
+        // var tagObjsJson = jsonDecode(ctn) as List;
+        for (var v = 0; v < selectedSetMealAttr.length; v++) {
+          // print(attrdata[i]["product_id"]);
+
+          if (attrdata[i]["product_id"] ==
+              selectedSetMealAttr[v]["product_id"]) {
+            attrdata[i] = selectedSetMealAttr[v];
+            tempCart[i].attributeDetails = json.encode(attrdata[i]);
+
+            // print(tempCart[i].attributeDetails);
+
+            // print("true");
+          } else {
+            tempCart[i].attributeDetails = json.encode(attrdata[i]);
+            // print(tempCart[i].attributeDetails);
+          }
+        }
+        cartdetails.setmeal_product_detail = json.encode(tempCart);
+        print("tempCart[1].attributeDetails");
+        print(tempCart[1].attributeDetails);
+        // setState(() {
+        //   tempCart = tempCart;
+        //   // isFirstAttrSet = false;
+        // });
+      }
+
+      // print(tempCart);
+
+    } else {
       cartdetails.setmeal_product_detail = json.encode(tempCart);
     }
     var detailID = await localAPI.addintoCartDetails(cartdetails);
@@ -891,7 +961,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     await SyncAPICalls.logActivity(
         "product details", "Added items to cart", "cart", 1);
-    print("object");
+    // print("object");
     Navigator.of(context).pop();
     widget.onClose();
   }
@@ -1098,7 +1168,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   Widget getMealsProductList() {
-    return isSetMeal
+    return isSetMeal && !isEditing
         ? Container(
             // color: StaticColor.colorGreen,
             height: MediaQuery.of(context).size.height / 2.1,
@@ -1205,13 +1275,118 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                   }).toList()),
             ),
           )
-        : SizedBox();
+        : Container(
+            // color: StaticColor.colorGreen,
+            height: MediaQuery.of(context).size.height / 2.1,
+            child: SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
+              child: ListView(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  children: mealProducts.map((product) {
+                    //var index = mealProducts.indexOf(product);
+                    return InkWell(
+                        onTap: () {
+                          _setSelectUnselect(product);
+                          //  getAttributes(product.productId);
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(top: 8),
+                          decoration: new BoxDecoration(
+                              color: StaticColor.lightGrey100,
+                              borderRadius: BorderRadius.circular(8.0)),
+                          /* color: tempCart
+                              .where((element) =>
+                                  element.setmealProductId ==
+                                  product.setmealProductId)
+                              .isNotEmpty
+                          ? StaticColor.colorGrey[100]
+                          : StaticColor.colorWhite,*/
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  Hero(
+                                    tag: product.productId,
+                                    child: new Stack(
+                                      children: [
+                                        Container(
+                                          height:
+                                              SizeConfig.safeBlockVertical * 8,
+                                          width:
+                                              SizeConfig.safeBlockVertical * 9,
+                                          child: product.base64 != "" &&
+                                                  product.base64 != null
+                                              ? CommonUtils
+                                                  .imageFromBase64String(
+                                                      product.base64)
+                                              : new Image.asset(
+                                                  Strings.noImageAsset,
+                                                  fit: BoxFit.cover,
+                                                  gaplessPlayback: true,
+                                                ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(width: 15),
+                                  Flexible(
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Text(product.name.toUpperCase(),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 2,
+                                                  style: Styles.smallBlack())
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 8,
+                                        ),
+                                        Text(product.quantity.toString(),
+                                            style: Styles.smallBlack()),
+                                        SizedBox(width: 90),
+                                        Icon(
+                                          tempCart
+                                                  .where((element) =>
+                                                      element
+                                                          .setmealProductId ==
+                                                      product.setmealProductId)
+                                                  .isNotEmpty
+                                              ? Icons.check_circle
+                                              : Icons.check_circle_outline,
+                                          color: StaticColor.colorGreen,
+                                          size: 40,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              getsetMealAttrList(product),
+                            ],
+                          ),
+                        ));
+                  }).toList()),
+            ),
+          );
   }
 
   Widget getsetMealAttrList(SetMealProduct product) {
     List<Attribute_Data> attrList = [];
-    print("product.setmealProductId");
-    print(product.setmealProductId);
+    print("product.setmealProductIdEditing!!!!!!!!!!!!!!!");
+    print(product);
     if (product.attributeDetails != "" && product.attributeDetails != null) {
       List<dynamic> attrdata = jsonDecode(product.attributeDetails);
       print("attrdata.length");
@@ -1275,6 +1450,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                       var prvSeelectedSetMeal =
                                           selectedSetMealAttr;
                                       prvSeelectedSetMeal.add({
+                                        'product_id': attribute.productId,
                                         'setmeal_productID':
                                             product.setmealProductId,
                                         'ca_id': attribute.ca_id,
@@ -1294,6 +1470,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                       var prvSeelectedSetMeal =
                                           selectedSetMealAttr;
                                       prvSeelectedSetMeal.add({
+                                        'product_id': attribute.productId,
                                         'setmeal_productID':
                                             product.setmealProductId,
                                         'ca_id': attribute.ca_id,
@@ -1355,12 +1532,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                             ),
                                             onPressed: () {
                                               onSelectSetmealAttr(
-                                                  i,
-                                                  attribute.ca_id,
-                                                  attr,
-                                                  attrIDs[i],
-                                                  attrtypesPrice[i],
-                                                  product.setmealProductId);
+                                                product.setmealProductId,
+                                                product.productId,
+                                                i,
+                                                attribute.ca_id,
+                                                attr,
+                                                attrIDs[i],
+                                                attrtypesPrice[i],
+                                              );
                                             },
                                           )));
                                 })

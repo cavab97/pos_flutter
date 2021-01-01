@@ -1,4 +1,4 @@
-class SetMealBranch {
+class SetMealAttribute {
   int setmealAttId;
   String uuid;
   int setmealId;
@@ -9,7 +9,7 @@ class SetMealBranch {
   String updatedAt;
   int updatedBy;
 
-  SetMealBranch(
+  SetMealAttribute(
       {this.setmealAttId,
       this.uuid,
       this.setmealId,
@@ -20,7 +20,7 @@ class SetMealBranch {
       this.updatedAt,
       this.updatedBy});
 
-  SetMealBranch.fromJson(Map<String, dynamic> json) {
+  SetMealAttribute.fromJson(Map<String, dynamic> json) {
     setmealAttId = json['setmeal_att_id'];
     uuid = json['uuid'];
     setmealId = json['setmeal_id'];

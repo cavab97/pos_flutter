@@ -25,7 +25,6 @@ class Attribute_Data {
     attributeId = json["attributeId"].toString();
     ca_id = json["ca_id"];
     is_default = json["is_default"];
-    print(json["is_default"].toString());
   }
 
   Map<String, dynamic> toJson() {
