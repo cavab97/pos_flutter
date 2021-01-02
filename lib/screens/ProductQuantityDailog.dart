@@ -47,6 +47,7 @@ class ProductQuantityDailog extends StatefulWidget {
 }
 
 class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
+  List<dynamic> obj = [];
   TextEditingController productController = new TextEditingController();
   TextEditingController extraNotes = new TextEditingController();
   LocalAPI localAPI = LocalAPI();
@@ -79,6 +80,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   bool isFirstMod = false;
   bool isFirstAttr = false;
   bool isFirstAttrSet = true;
+  List<dynamic> attrdata;
 
   @override
   void initState() {
@@ -152,6 +154,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   getMealProducts() async {
+    List<SetMealProduct> mealCartList = [];
     List<SetMealProduct> mealProductList =
         await localAPI.getMealsProductData(setmeal.setmealId);
     List<MSTSubCartdetails> subCartDetails = [];
@@ -160,7 +163,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     if (mealProductList.length > 0) {
       setState(() {
-        mealProducts = mealProductList;
+        mealProducts = isEditing ? mealCartList : mealProductList;
       });
       getSetMealAttributeList(mealProductList, subCartDetails);
       //await setSetMealData();
@@ -297,7 +300,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   setSetMealData() {
-    if (cartitem != null) {
+    print("pASSSSSSSS");
+    if (cartitem != null && !isEditing) {
       var cartData = jsonDecode(cartitem.setmeal_product_detail);
       List<SetMealProduct> tCartData = cartData.isNotEmpty
           ? cartData
@@ -569,6 +573,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             item['ca_id'] == id && item["setmeal_productID"] == setmealproduct);
         if (!isarrSelected) {
           prvSeelected.add({
+            'product_id': productId,
             'setmeal_productID': setmealproduct,
             'ca_id': id,
             'attribute': attribute,
@@ -698,6 +703,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   setPrice() {
+    // print("setPrice");
     var productPrice = productnetprice;
     var newPrice = productPrice;
     for (int i = 0; selectedAttr.length > 0 && i < selectedAttr.length; i++) {
@@ -861,6 +867,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   produtAddTocart() async {
     MST_Cart cart = new MST_Cart();
+
     //MSTSubCartdetails subCartData = new MSTSubCartdetails();
     SaveOrder orderData = new SaveOrder();
 
@@ -1181,7 +1188,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   Widget getMealsProductList() {
-    return isSetMeal
+    return isSetMeal && !isEditing
         ? Container(
             // color: StaticColor.colorGreen,
             height: MediaQuery.of(context).size.height / 2.1,
@@ -1288,7 +1295,112 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                   }).toList()),
             ),
           )
-        : SizedBox();
+        : Container(
+            // color: StaticColor.colorGreen,
+            height: MediaQuery.of(context).size.height / 2.1,
+            child: SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
+              child: ListView(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  children: mealProducts.map((product) {
+                    //var index = mealProducts.indexOf(product);
+                    return InkWell(
+                        onTap: () {
+                          _setSelectUnselect(product);
+                          //  getAttributes(product.productId);
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(top: 8),
+                          decoration: new BoxDecoration(
+                              color: StaticColor.lightGrey100,
+                              borderRadius: BorderRadius.circular(8.0)),
+                          /* color: tempCart
+                              .where((element) =>
+                                  element.setmealProductId ==
+                                  product.setmealProductId)
+                              .isNotEmpty
+                          ? StaticColor.colorGrey[100]
+                          : StaticColor.colorWhite,*/
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  Hero(
+                                    tag: product.productId,
+                                    child: new Stack(
+                                      children: [
+                                        Container(
+                                          height:
+                                              SizeConfig.safeBlockVertical * 8,
+                                          width:
+                                              SizeConfig.safeBlockVertical * 9,
+                                          child: product.base64 != "" &&
+                                                  product.base64 != null
+                                              ? CommonUtils
+                                                  .imageFromBase64String(
+                                                      product.base64)
+                                              : new Image.asset(
+                                                  Strings.noImageAsset,
+                                                  fit: BoxFit.cover,
+                                                  gaplessPlayback: true,
+                                                ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(width: 15),
+                                  Flexible(
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Text(product.name.toUpperCase(),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 2,
+                                                  style: Styles.smallBlack())
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: 8,
+                                        ),
+                                        Text(product.quantity.toString(),
+                                            style: Styles.smallBlack()),
+                                        SizedBox(width: 90),
+                                        Icon(
+                                          tempCart
+                                                  .where((element) =>
+                                                      element
+                                                          .setmealProductId ==
+                                                      product.setmealProductId)
+                                                  .isNotEmpty
+                                              ? Icons.check_circle
+                                              : Icons.check_circle_outline,
+                                          color: StaticColor.colorGreen,
+                                          size: 40,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              getsetMealAttrList(product),
+                            ],
+                          ),
+                        ));
+                  }).toList()),
+            ),
+          );
   }
 
   Widget getsetMealAttrList(SetMealProduct product) {
