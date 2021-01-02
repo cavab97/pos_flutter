@@ -375,6 +375,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
     List<ModifireData> productModifeir =
         await localAPI.getProductModifeir(productid);
+    if (productModifeir.length > 0 && this.mounted) {
+      setState(() {
+        modifireList = productModifeir;
+      });
+    }
     /* for (var item in productAttr) {
       if (item.is_default == "1") {
         print('enter is default');
@@ -398,11 +403,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         }
       }
     } */
-    if (productModifeir.length > 0 && this.mounted) {
-      setState(() {
-        modifireList = productModifeir;
-      });
-    }
     if (isEditing) {
       setProductEditingData();
     }
@@ -717,7 +717,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     });
   }
 
-  setModifire(mod) async {
+  setModifire(ModifireData mod) async {
     var isSelected = selectedModifier.any((item) => item.pmId == mod.pmId);
     if (isSelected) {
       selectedModifier.removeWhere((item) => item.pmId == mod.pmId);
@@ -1152,23 +1152,18 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            isSetMeal ? SizedBox() : getAttributeList(),
-            getMealsProductList(),
-            isSetMeal
+            isSetMeal ? getMealsProductList() : getAttributeList(),
+            (isSetMeal || modifireList.length == 0)
                 ? SizedBox()
-                : modifireList.length != 0
-                    ? Text(
-                        Strings.modifier,
-                        style: TextStyle(
-                            fontSize: SizeConfig.safeBlockVertical * 3),
-                      )
-                    : SizedBox(),
+                : Text(
+                    Strings.modifier,
+                    style:
+                        TextStyle(fontSize: SizeConfig.safeBlockVertical * 3),
+                  ),
             SizedBox(height: 5),
-            isSetMeal
+            (isSetMeal || modifireList.length == 0)
                 ? SizedBox()
-                : modifireList.length != 0
-                    ? modifireItmeList()
-                    : SizedBox(),
+                : modifireItmeList(),
             SizedBox(height: 10),
             _extraNotesTitle(),
             SizedBox(height: 5),
@@ -1679,68 +1674,73 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   Widget modifireItmeList() {
     return Container(
-        height: SizeConfig.safeBlockVertical * 9,
-        child: ListView(
-            shrinkWrap: true,
-            physics: BouncingScrollPhysics(),
-            scrollDirection: Axis.horizontal,
-            children: modifireList.map((modifier) {
-              var isadded =
-                  selectedModifier.any((item) => item.pmId == modifier.pmId);
-              if (!isEditing) {
-                if (modifier.isDefault == 1 && !isadded && !isFirstMod) {
-                  selectedModifier.add(modifier);
-                  setState(() {
-                    setPrice();
-                    selectedModifier = selectedModifier;
-                    isFirstMod = true;
-                  });
-                }
-              } else {
-                if (isadded && isFirstMod) {
-                  selectedModifier.add(modifier);
-                  setState(() {
-                    setPrice();
-                    selectedModifier = selectedModifier;
-                    isFirstMod = true;
-                  });
-                }
+      height: SizeConfig.safeBlockVertical * 9,
+      child: ListView(
+        shrinkWrap: true,
+        physics: BouncingScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        children: modifireList.map(
+          (modifier) {
+            var isadded =
+                selectedModifier.any((item) => item.pmId == modifier.pmId);
+            if (!isEditing) {
+              if (modifier.isDefault == 1 && !isadded && !isFirstMod) {
+                selectedModifier.add(modifier);
+                setState(() {
+                  setPrice();
+                  selectedModifier = selectedModifier;
+                  isFirstMod = true;
+                });
               }
-
-              return Padding(
-                  padding: EdgeInsets.all(5),
-                  child: MaterialButton(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        side: BorderSide(
-                            color: selectedModifier
-                                    .any((item) => item.pmId == modifier.pmId)
-                                ? StaticColor.colorGreen
-                                : StaticColor.colorGrey300,
-                            width: 4)),
-                    minWidth: 50,
-                    child: Row(
-                      children: <Widget>[
-                        Text(
-                          modifier.name.toString(),
-                          style: Styles.blackMediumBold(),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          modifier.price.toStringAsFixed(2).toString(),
-                          style: TextStyle(
-                              color: StaticColor.deepOrange,
-                              fontSize: SizeConfig.safeBlockVertical * 2.5),
-                        ),
-                      ],
+            } else {
+              if (isadded && isFirstMod) {
+                selectedModifier.add(modifier);
+                setState(() {
+                  setPrice();
+                  selectedModifier = selectedModifier;
+                  isFirstMod = true;
+                });
+              }
+            }
+            print(json.encode(modifier));
+            return Padding(
+              padding: EdgeInsets.all(5),
+              child: MaterialButton(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    side: BorderSide(
+                        color: selectedModifier
+                                .any((item) => item.pmId == modifier.pmId)
+                            ? StaticColor.colorGreen
+                            : StaticColor.colorGrey300,
+                        width: 4)),
+                minWidth: 50,
+                child: Row(
+                  children: <Widget>[
+                    Text(
+                      modifier.name.toString(),
+                      style: Styles.blackMediumBold(),
                     ),
-                    textColor: StaticColor.colorBlack,
-                    color: StaticColor.colorGrey300,
-                    onPressed: () {
-                      setModifire(modifier);
-                    },
-                  ));
-            }).toList()));
+                    SizedBox(width: 10),
+                    Text(
+                      modifier.price.toStringAsFixed(2).toString(),
+                      style: TextStyle(
+                          color: StaticColor.deepOrange,
+                          fontSize: SizeConfig.safeBlockVertical * 2.5),
+                    ),
+                  ],
+                ),
+                textColor: StaticColor.colorBlack,
+                color: StaticColor.colorGrey300,
+                onPressed: () {
+                  setModifire(modifier);
+                },
+              ),
+            );
+          },
+        ).toList(),
+      ),
+    );
   }
 
   Widget _sizeTitle() {
