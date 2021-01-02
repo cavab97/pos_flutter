@@ -281,7 +281,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           List<String> optionIds = attribute.attributeId.split(',');
           List<String> optionPrices = attribute.attr_types_price.split(',');
           for (int i = 0; i < optionIds.length; i++) {
-            print(optionIds.join(','));
             if (i < optionPrices.length &&
                 cartDetailsIds.contains(int.tryParse(optionIds[i]))) {
               updateAttribute(
@@ -300,7 +299,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   setSetMealData() {
-    print("pASSSSSSSS");
     if (cartitem != null && !isEditing) {
       var cartData = jsonDecode(cartitem.setmeal_product_detail);
       List<SetMealProduct> tCartData = cartData.isNotEmpty
@@ -363,12 +361,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             : cartitem.productQty;
         price = cartitem.productPrice;
       });
-    } else {
-      print(cartitem.id);
-      List<MSTSubCartdetails> details =
-          await localAPI.getItemModifire(cartitem.id);
-      print(details.join(','));
-      print("else setProductEditingData!!!!!!!!!!!");
     }
   }
 
