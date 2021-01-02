@@ -24,6 +24,7 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
+import 'package:mcncashier/widget/CloseButtonWidget.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
@@ -50,6 +51,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   TextEditingController extraNotes = new TextEditingController();
   LocalAPI localAPI = LocalAPI();
   List<Attribute_Data> attributeList = [];
+  Map<int, List<Attribute_Data>> setMealAttributeList = new Map();
+  Map<int, double> selectedAttrPrice = new Map();
   ProductDetails productItem = new ProductDetails();
   SetMeal setmeal;
   MSTCartdetails cartitem;
@@ -110,7 +113,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     } else {
       setState(() {
         productItem = widget.selproduct;
-        print(productItem.name);
         price = productItem.price;
         productnetprice = productItem.price;
       });
@@ -152,12 +154,16 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   getMealProducts() async {
     List<SetMealProduct> mealProductList =
         await localAPI.getMealsProductData(setmeal.setmealId);
-    print(mealProductList[1]);
+    List<MSTSubCartdetails> subCartDetails = [];
+    if (isEditing) {
+      subCartDetails = await localAPI.getItemModifire(cartitem.id);
+    }
     if (mealProductList.length > 0) {
       setState(() {
         mealProducts = mealProductList;
       });
-      await setSetMealData();
+      getSetMealAttributeList(mealProductList, subCartDetails);
+      //await setSetMealData();
     }
   }
 
@@ -183,7 +189,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   setAttrData(productData) {
     if (productData["Attributes"].length > 0) {
-      print(productData["Attributes"].length);
       setState(() {
         attributeList.addAll(productData["Attributes"]);
       });
@@ -236,13 +241,69 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
+  getSetMealAttributeList(List<SetMealProduct> mealProductList,
+      List<MSTSubCartdetails> subCartDetails) {
+    for (SetMealProduct product in mealProductList) {
+      var attrData = jsonDecode(product.attributeDetails);
+      attrData.removeWhere((attr) =>
+          attr['attributeId'] == "null" || attr['attributeId'] == null);
+      List<Attribute_Data> attributeList =
+          (attrData != null && attrData.isNotEmpty)
+              ? attrData
+                  .map((c) => Attribute_Data.fromJson(c))
+                  .whereType<Attribute_Data>()
+                  .toList()
+              : [];
+      if (!isEditing) {
+        for (Attribute_Data attribute in attributeList) {
+          List<String> optionIds = attribute.attributeId.split(',');
+          List<String> optionPrices = attribute.attr_types_price.split(',');
+          for (var i = 0; i < optionIds.length; i++) {
+            if (i < optionPrices.length) {
+              updateAttribute(
+                product.productId,
+                attribute,
+                attribute.attributeId.split(','),
+                int.tryParse(optionIds[i]),
+                optionPrices[i],
+              );
+            }
+          }
+        }
+      } else {
+        List<int> cartDetailsIds = new List();
+        subCartDetails
+            .forEach((subCart) => cartDetailsIds.add(subCart.attributeId));
+        for (Attribute_Data attribute in attributeList) {
+          List<String> optionIds = attribute.attributeId.split(',');
+          List<String> optionPrices = attribute.attr_types_price.split(',');
+          for (int i = 0; i < optionIds.length; i++) {
+            print(optionIds.join(','));
+            if (i < optionPrices.length &&
+                cartDetailsIds.contains(int.tryParse(optionIds[i]))) {
+              updateAttribute(
+                product.productId,
+                attribute,
+                attribute.attributeId.split(','),
+                int.tryParse(optionIds[i]),
+                optionPrices[i],
+              );
+            }
+          }
+        }
+      }
+      setMealAttributeList[product.productId] = attributeList;
+    }
+  }
+
   setSetMealData() {
     if (cartitem != null) {
       var cartData = jsonDecode(cartitem.setmeal_product_detail);
-      print("cartData");
-      print(cartData[0].attributeDetails);
       List<SetMealProduct> tCartData = cartData.isNotEmpty
-          ? cartData.map((c) => SetMealProduct.fromJson(c)).toList()
+          ? cartData
+              .map((c) => SetMealProduct.fromJson(c))
+              .whereType<SetMealProduct>()
+              .toList()
           : [];
       setState(() {
         tempCart = tCartData;
@@ -299,27 +360,53 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         price = cartitem.productPrice;
       });
     } else {
-      print("setProductEditingData!!!!!!!!!!!");
+      print(cartitem.id);
+      List<MSTSubCartdetails> details =
+          await localAPI.getItemModifire(cartitem.id);
+      print(details.join(','));
+      print("else setProductEditingData!!!!!!!!!!!");
     }
   }
 
   getAttributes(productid) async {
     List<Attribute_Data> productAttr =
         await localAPI.getProductDetails(productid);
-    // if (productAttr.length > 0) {
-    //   setState(() {
-    //
-    //   });
-    // }
+    if (productAttr.length > 0 && this.mounted) {
+      setState(() {
+        attributeList = productAttr;
+      });
+    }
 
     List<ModifireData> productModifeir =
         await localAPI.getProductModifeir(productid);
-    //if (productModifeir.length > 0) {
-    setState(() {
-      modifireList = productModifeir;
-      attributeList = productAttr;
-    });
-    //}
+    /* for (var item in productAttr) {
+      if (item.is_default == "1") {
+        print('enter is default');
+        var isadded = selectedSetMealAttr.any((item) =>
+            item['ca_id'] == attribute.ca_id && item['attribute'] == attr);
+        if ((attrDefault[i] == "1" && !isadded && isFirstAttrSet) ||
+            !isFirstAttrSet && isadded) {
+          var prvSeelectedSetMeal = selectedSetMealAttr;
+          prvSeelectedSetMeal.add({
+            'setmeal_productID': product.setmealProductId,
+            'ca_id': attribute.ca_id,
+            'attribute': attr,
+            'attrType_ID': attrIDs[i],
+            'attr_price': attrtypesPrice[i]
+          });
+          setState(() {
+            selectedSetMealAttr = prvSeelectedSetMeal;
+            // isFirstAttrSet = false;
+          });
+          setPrice();
+        }
+      }
+    } */
+    if (productModifeir.length > 0 && this.mounted) {
+      setState(() {
+        modifireList = productModifeir;
+      });
+    }
     if (isEditing) {
       setProductEditingData();
     }
@@ -425,15 +512,54 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
   }
 
-  onSelectSetmealAttr(
-      i, id, attribute, attrTypeIDs, attrPrice, setmealproduct) {
+  updateAttribute(int productID, Attribute_Data attribute,
+      List<String> listAttrId, int attrID, String attrPrice) {
+    bool isSelectedType =
+        selectedAttr.any((item) => item['attrType_ID'] == attrID);
+    if (!isSelectedType) {
+      selectedAttr.removeWhere((ele) => ele['ca_id'] == attribute.ca_id);
+      if (this.mounted) {
+        setState(() {
+          selectedAttr.add({
+            'ca_id': attribute.ca_id,
+            'attribute': attribute,
+            'attrType_ID': attrID,
+            'attr_price': attrPrice,
+          });
+        });
+      }
+    }
+    /*
+    String changeDefault = "";
+    if (attribute.attributeId != null) {
+      for (int i = 0; i < listAttrId.length; i++) {
+        if (listAttrId[i] == attrID.toString()) {
+          changeDefault += "1";
+        } else
+          changeDefault += "0";
+      }
+    }
+    attribute.is_default = changeDefault.split('').join(',');
+    if (this.mounted) {
+      setState(() {
+        setMealAttributeList[productID].map((attr) {
+          if (attr.attributeId == attribute.attributeId) {
+            return attribute;
+          }
+          return attr;
+        });
+      });
+    }
+ */
+    setPrice();
+  }
+
+  /*  onSelectSetmealAttr(id, attribute, attrTypeIDs, attrPrice, setmealproduct) {
     var prvSeelected = selectedSetMealAttr;
-    print(attrTypeIDs);
     var isSelected = selectedSetMealAttr.any((item) =>
         item['ca_id'] == id && item["setmeal_productID"] == setmealproduct);
     var isSelectedType =
         selectedSetMealAttr.any((item) => item["attribute"] == attribute);
-    print(attribute);
     if (isSelectedType) {
     } else {
       if (isSelected) {
@@ -454,6 +580,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               item['ca_id'] != id &&
               item["setmeal_productID"] != setmealproduct);
         }
+        print(selectedSetMealAttr);
         setState(() {
           selectedSetMealAttr = selectedSetMealAttr;
           isFirstAttrSet = false;
@@ -467,7 +594,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
 
     setPrice();
-  }
+  } */
 
   increaseQty() async {
     if (isSetMeal) {
@@ -573,30 +700,20 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   setPrice() {
     var productPrice = productnetprice;
     var newPrice = productPrice;
+    for (int i = 0; selectedAttr.length > 0 && i < selectedAttr.length; i++) {
+      var price = selectedAttr[i]["attr_price"];
+      newPrice += double.parse(price);
+    }
     if (!isSetMeal) {
-      for (int i = 0; selectedAttr.length > 0 && i < selectedAttr.length; i++) {
-        var price = selectedAttr[i]["attr_price"];
-        newPrice += double.parse(price);
-      }
       for (int i = 0;
           selectedModifier.length > 0 && i < selectedModifier.length;
           i++) {
         var mprice = selectedModifier[i].price;
         newPrice += mprice;
       }
-    } else {
-      for (int i = 0;
-          selectedSetMealAttr.length > 0 && i < selectedSetMealAttr.length;
-          i++) {
-        var price = selectedSetMealAttr[i]["attr_price"];
-        newPrice += double.parse(price);
-      }
     }
 
     var pricewithQty = newPrice * product_qty;
-    // print(pricewithQty);
-    print(newPrice);
-    // print(product_qty);
     setState(() {
       price = pricewithQty;
     });
@@ -831,7 +948,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         isSetMeal ? setmeal.setmealId : productItem.productId;
     cartdetails.productName = isSetMeal ? setmeal.name : productItem.name;
     cartdetails.productSecondName = isSetMeal ? "" : productItem.name_2;
-    cartdetails.productPrice = productItem.price;
+    cartdetails.productPrice = isSetMeal ? setmeal.price : productItem.price;
     cartdetails.productDetailAmount = double.parse(price.toStringAsFixed(2));
     cartdetails.productQty = product_qty.toDouble();
     cartdetails.productNetPrice =
@@ -847,7 +964,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.printer_id = printer != null ? printer.printerId : 0;
     cartdetails.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     if (isSetMeal) {
-      cartdetails.setmeal_product_detail = json.encode(tempCart);
+      cartdetails.setmeal_product_detail = json.encode(mealProducts);
     }
     var detailID = await localAPI.addintoCartDetails(cartdetails);
     await localAPI.deletesubcartDetail(detailID);
@@ -872,7 +989,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       subCartData.localID = cart.localID;
       subCartData.productId = productItem.productId;
       subCartData.caId = attr["ca_id"];
-      subCartData.attributeId = int.parse(attr["attrType_ID"]);
+      subCartData.attributeId = attr["attrType_ID"] is int
+          ? attr["attrType_ID"]
+          : int.parse(attr["attrType_ID"]);
       subCartData.attrPrice = double.parse(attr["attr_price"]).toDouble();
       await localAPI.addsubCartData(subCartData);
     }
@@ -887,7 +1006,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     }
     await SyncAPICalls.logActivity(
         "product details", "Added items to cart", "cart", 1);
-    print("object");
     Navigator.of(context).pop();
     widget.onClose();
   }
@@ -898,25 +1016,25 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     return AlertDialog(
       contentPadding: EdgeInsets.all(0),
       titlePadding: EdgeInsets.all(0),
-      title: Stack(
-        overflow: Overflow.visible,
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.only(left: 30, right: 70, top: 10, bottom: 10),
-            height: SizeConfig.safeBlockVertical * 9,
-            color: StaticColor.colorBlack,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(
-                  isSetMeal
-                      ? setmeal.name.toUpperCase()
-                      : productItem.name.toUpperCase(),
-                  style: TextStyle(
-                      fontSize: SizeConfig.safeBlockVertical * 3,
-                      color: StaticColor.colorWhite),
-                ),
-                /* GestureDetector(
+      title: Container(
+        padding: EdgeInsets.only(left: 30, right: 10, top: 10, bottom: 10),
+        height: SizeConfig.safeBlockVertical * 9,
+        color: StaticColor.colorBlack,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Text(
+              isSetMeal
+                  ? setmeal.name.toUpperCase()
+                  : productItem.name.toUpperCase(),
+              style: TextStyle(
+                  fontSize: SizeConfig.safeBlockVertical * 3,
+                  color: StaticColor.colorWhite),
+            ),
+            Spacer(),
+
+            CloseButtonWidget(inputContext: context),
+            /* GestureDetector(
                   onTap: () {
                     Navigator.of(context).pop();
                   },
@@ -938,82 +1056,51 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                     ),
                   ),
                 ), */
-                //addbutton(context)
-              ],
-            ),
-          ),
-          closeButton(context), // close button
-        ],
-      ),
+            //addbutton(context)
+          ],
+        ),
+      ), // close button
+
       content: mainContent(),
       //main part of the popup
       actions: <Widget>[
         // Button div + - buttons
-        Stack(
-          children: <Widget>[
-            Positioned(
-              bottom: 10,
-              left: 30,
-              child: Text(
-                isSetMeal
-                    ? currency != null
-                        ? currency + " " + price.toStringAsFixed(2).toString()
-                        : price.toStringAsFixed(2).toString()
-                    : currency != null
-                        ? currency + " " + price.toStringAsFixed(2).toString()
-                        : price.toStringAsFixed(2).toString(),
-                style: Styles.orangeLarge(),
+        Container(
+          width: MediaQuery.of(context).size.width / 1.4,
+          child: Column(
+            children: <Widget>[
+              CommunFun.divider(),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      isSetMeal
+                          ? currency != null
+                              ? currency +
+                                  " " +
+                                  price.toStringAsFixed(2).toString()
+                              : price.toStringAsFixed(2).toString()
+                          : currency != null
+                              ? currency +
+                                  " " +
+                                  price.toStringAsFixed(2).toString()
+                              : price.toStringAsFixed(2).toString(),
+                      style: Styles.orangeLarge(),
+                    ),
+                    Spacer(),
+                    buttonContainer(),
+                    Spacer(),
+                    addbutton(context),
+                  ],
+                ),
               ),
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width / 1.4,
-              child: Column(children: <Widget>[
-                CommunFun.divider(),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      buttonContainer(),
-                    ]),
-              ]),
-            ),
-            Positioned(
-              bottom: 10,
-              right: 20,
-              child: addbutton(context),
-            ),
-          ],
-        )
-      ],
-    );
-  }
-
-  Widget closeButton(context) {
-    return Positioned(
-      top: 0,
-      right: 0,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context).pop();
-        },
-        child: Container(
-          width: 50.0,
-          height: 50.0,
-          decoration: BoxDecoration(
-              color: StaticColor.colorRed,
-              borderRadius: BorderRadius.circular(30.0)),
-          child: IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: Icon(
-              Icons.clear,
-              color: StaticColor.colorWhite,
-              size: 30,
-            ),
+            ],
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -1107,7 +1194,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                     //var index = mealProducts.indexOf(product);
                     return InkWell(
                         onTap: () {
-                          _setSelectUnselect(product);
+                          //_setSelectUnselect(product);
                           //  getAttributes(product.productId);
                         },
                         child: Container(
@@ -1205,169 +1292,157 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   Widget getsetMealAttrList(SetMealProduct product) {
-    List<Attribute_Data> attrList = [];
-    print("product.setmealProductId");
-    print(product.setmealProductId);
-    if (product.attributeDetails != "" && product.attributeDetails != null) {
+    List<Attribute_Data> attrList = setMealAttributeList[product.productId];
+    /* if (product.attributeDetails != "" && product.attributeDetails != null) {
       List<dynamic> attrdata = jsonDecode(product.attributeDetails);
-      print("attrdata.length");
-      print(product.attributeDetails);
       attrList = attrdata.isNotEmpty
           ? attrdata.map((c) => Attribute_Data.fromJson(c)).toList()
           : [];
-    }
+    } */
 
-    return Container(
-      //color: StaticColor.colorWhite,
-      margin: EdgeInsets.only(bottom: isSetMeal ? 0 : 10, top: 0),
-      // MediaQuery.of(context).size.height /8,
-      child: ListView(
-        shrinkWrap: true,
-        scrollDirection: Axis.vertical,
-        physics: BouncingScrollPhysics(),
-        children: attrList.map((attribute) {
-          var attributType = [];
-          Map attrIDs;
-          Map attrtypesPrice;
-          Map attrDefault;
-          if (attribute.ca_id != null) {
-            attrDefault = attribute.is_default.split(',').asMap();
-            attributType = attribute.attr_types.split(',');
-            attrIDs = attribute.attributeId.split(',').asMap();
-            attrtypesPrice = attribute.attr_types_price.split(',').asMap();
-          }
+    return attrList == null
+        ? Container()
+        : Container(
+            //color: StaticColor.colorWhite,
+            margin: EdgeInsets.only(bottom: isSetMeal ? 0 : 10, top: 0),
+            // MediaQuery.of(context).size.height /8,
+            child: ListView(
+              shrinkWrap: true,
+              scrollDirection: Axis.vertical,
+              physics: BouncingScrollPhysics(),
+              children: attrList.map(
+                (attribute) {
+                  Map<int, Map<String, dynamic>> attrOption = new Map();
+                  if (attribute.attributeId != null) {
+                    List<String> listAttrId = attribute.attributeId.split(',');
+                    List<String> listIsDefault =
+                        attribute.is_default.split(',');
+                    List<String> listAttrTypes =
+                        attribute.attr_types.split(',');
+                    List<String> listAttrPrice =
+                        attribute.attr_types_price.split(',');
+                    for (int i = 0; i < listAttrId.length; i++) {
+                      int attrIds = int.tryParse(listAttrId[i]);
+                      attrOption[attrIds] = new Map();
+                      attrOption[attrIds]["selected"] = i < listIsDefault.length
+                          ? int.tryParse(listIsDefault[i])
+                          : 0;
+                      attrOption[attrIds]["types"] =
+                          i < listAttrTypes.length ? listAttrTypes[i] : "";
+                      attrOption[attrIds]["price"] =
+                          i < listAttrPrice.length ? listAttrPrice[i] : "";
+                    }
+                  }
+                  /* var attributType = [];
 
-          /*Set attribute name for selection toast*/
-          attributeTitle = attribute.attr_name;
-          return attribute.ca_id != null
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      attribute.attr_name != null ? attribute.attr_name : "",
-                      style:
-                          TextStyle(fontSize: SizeConfig.safeBlockVertical * 3),
-                    ),
-                    Container(
-                        margin:
-                            EdgeInsets.symmetric(horizontal: 0, vertical: 8.0),
-                        height: SizeConfig.safeBlockVertical * 9,
-                        child: ListView(
-                            physics: BouncingScrollPhysics(),
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            children: attributType
-                                .asMap()
-                                .map((i, attr) {
-                                  var isadded = selectedSetMealAttr.any(
-                                      (item) =>
-                                          item['ca_id'] == attribute.ca_id &&
-                                          item['attribute'] == attr);
-                                  if (!isEditing) {
-                                    if (attrDefault[i] == "1" &&
-                                        !isadded &&
-                                        isFirstAttrSet) {
-                                      var prvSeelectedSetMeal =
-                                          selectedSetMealAttr;
-                                      prvSeelectedSetMeal.add({
-                                        'setmeal_productID':
-                                            product.setmealProductId,
-                                        'ca_id': attribute.ca_id,
-                                        'attribute': attr,
-                                        'attrType_ID': attrIDs[i],
-                                        'attr_price': attrtypesPrice[i]
-                                      });
-                                      setState(() {
-                                        selectedSetMealAttr =
-                                            prvSeelectedSetMeal;
-                                        // isFirstAttrSet = false;
-                                        setPrice();
-                                      });
-                                    }
-                                  } else {
-                                    if (!isFirstAttrSet && isadded) {
-                                      var prvSeelectedSetMeal =
-                                          selectedSetMealAttr;
-                                      prvSeelectedSetMeal.add({
-                                        'setmeal_productID':
-                                            product.setmealProductId,
-                                        'ca_id': attribute.ca_id,
-                                        'attribute': attr,
-                                        'attrType_ID': attrIDs[i],
-                                        'attr_price': attrtypesPrice[i]
-                                      });
-                                      setState(() {
-                                        selectedSetMealAttr =
-                                            prvSeelectedSetMeal;
-                                        setPrice();
-                                        // isFirstAttrSet = false;
-                                      });
-                                    }
-                                  }
+            Map attrIDs;
+            Map attrtypesPrice;
+            Map attrDefault;
+            if (attribute.ca_id != null) {
+              attrDefault = attribute.is_default.split(',').asMap();
+              attributType = attribute.attr_types.split(',');
+              attrIDs = attribute.attributeId.split(',').asMap();
+              attrtypesPrice = attribute.attr_types_price.split(',').asMap();
+            } */
 
-                                  return MapEntry(
-                                      i,
-                                      Padding(
-                                          padding: EdgeInsets.all(5),
-                                          child: MaterialButton(
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                                side: BorderSide(
-                                                  color: selectedSetMealAttr
-                                                          .any((item) =>
-                                                              item['ca_id'] ==
-                                                                  attribute
-                                                                      .ca_id &&
-                                                              item['attribute'] ==
-                                                                  attr)
-                                                      ? StaticColor.colorGreen
-                                                      : StaticColor
-                                                          .colorGrey400,
-                                                  width: 4,
-                                                )),
-                                            minWidth: 50,
-                                            child: Row(
-                                              children: <Widget>[
-                                                Text(
-                                                  attr.toString(),
-                                                  style:
-                                                      Styles.blackMediumBold(),
-                                                ),
-                                                SizedBox(width: 10),
-                                                Text(
-                                                  double.parse(
-                                                          attrtypesPrice[i])
-                                                      .toStringAsFixed(2),
-                                                  style: TextStyle(
-                                                      color: StaticColor
-                                                          .deepOrange,
-                                                      fontSize: SizeConfig
-                                                              .safeBlockVertical *
-                                                          2.5),
-                                                ),
-                                              ],
+                  /*Set attribute name for selection toast*/
+                  return attribute.ca_id != null
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              attribute.attr_name != null
+                                  ? attribute.attr_name
+                                  : "",
+                              style: TextStyle(
+                                  fontSize: SizeConfig.safeBlockVertical * 3),
+                            ),
+                            Container(
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: 0, vertical: 8.0),
+                              height: SizeConfig.safeBlockVertical * 9,
+                              child: ListView(
+                                physics: BouncingScrollPhysics(),
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                children: attrOption.entries.map(
+                                  (entry) {
+                                    return Padding(
+                                      padding: EdgeInsets.all(5),
+                                      child: MaterialButton(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                          side: BorderSide(
+                                            //entry.value["selected"] == 1
+                                            color: selectedAttr.any((ele) =>
+                                                    ele["attrType_ID"] ==
+                                                    entry.key)
+                                                ? StaticColor.colorGreen
+                                                : StaticColor.colorGrey400,
+                                            width: 4,
+                                          ),
+                                        ),
+                                        minWidth: 50,
+                                        child: Row(
+                                          children: <Widget>[
+                                            Text(
+                                              entry.value["types"].toString(),
+                                              style: Styles.blackMediumBold(),
                                             ),
-                                            onPressed: () {
-                                              onSelectSetmealAttr(
-                                                  i,
-                                                  attribute.ca_id,
-                                                  attr,
-                                                  attrIDs[i],
-                                                  attrtypesPrice[i],
-                                                  product.setmealProductId);
-                                            },
-                                          )));
-                                })
-                                .values
-                                .toList()))
-                  ],
-                )
-              : SizedBox();
-        }).toList(),
-      ),
-    );
+                                            SizedBox(width: 10),
+                                            Text(
+                                              double.parse(entry.value["price"])
+                                                  .toStringAsFixed(2),
+                                              style: TextStyle(
+                                                  color: StaticColor.deepOrange,
+                                                  fontSize: SizeConfig
+                                                          .safeBlockVertical *
+                                                      2.5),
+                                            ),
+                                          ],
+                                        ),
+                                        onPressed: () {
+                                          updateAttribute(
+                                            product.productId,
+                                            attribute,
+                                            attribute.attributeId.split(','),
+                                            entry.key,
+                                            entry.value["price"],
+                                          );
+                                          /* onSelectSetmealAttr(
+                                        attribute.ca_id,
+                                        entry.value["types"],
+                                        entry.key,
+                                        entry.value["price"],
+                                        product.setmealProductId); */
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ).toList(),
+
+                                /* attributType
+                              .asMap()
+                              .map(
+                                (i, attr) {
+                                  return MapEntry(
+                                    i,
+                                    
+                                },
+                              )
+                              .values
+                              .toList(), */
+                              ),
+                            )
+                          ],
+                        )
+                      : SizedBox();
+                },
+              ).toList(),
+            ),
+          );
   }
 
   Widget getAttributeList() {
@@ -1384,7 +1459,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           var attrIDs = attribute.attributeId.split(',').asMap();
           var attrtypesPrice = attribute.attr_types_price.split(',').asMap();
           var attributisDefault = attribute.is_default.split(',');
-          // print(attributisDefault);
           /*Set attribute name for selection toast*/
           attributeTitle = attribute.attr_name;
           return Column(
@@ -1664,29 +1738,29 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   Widget addbutton(context) {
-    return Container(
-      height: SizeConfig.safeBlockVertical * 7,
-      width: MediaQuery.of(context).size.width / 8.5,
-      child: RaisedButton(
-        onPressed: () {
-          if (attributeList.length > 0) {
-            if (selectedAttr.length > 0) {
-              if (isEditing) {
-                updateCartItem();
-              } else {
-                produtAddTocart();
-              }
-            } else {
-              CommunFun.showToast(context, "Please select " + attributeTitle);
-            }
-          } else {
+    return MaterialButton(
+      height: 40,
+      onPressed: () {
+        if (attributeList.length > 0) {
+          if (selectedAttr.length > 0) {
             if (isEditing) {
               updateCartItem();
             } else {
               produtAddTocart();
             }
+          } else {
+            CommunFun.showToast(context, "Please select " + attributeTitle);
           }
-        },
+        } else {
+          if (isEditing) {
+            updateCartItem();
+          } else {
+            produtAddTocart();
+          }
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -1709,11 +1783,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                 )),
           ],
         ),
-        color: StaticColor.deepOrange,
-        textColor: StaticColor.colorWhite,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(50.0),
-        ),
+      ),
+      color: StaticColor.deepOrange,
+      textColor: StaticColor.colorWhite,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50.0),
       ),
     );
   }

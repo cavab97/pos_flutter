@@ -11,6 +11,7 @@ import 'package:mcncashier/screens/AddCustomer.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/widget/CloseButtonWidget.dart';
 
 class SearchCustomerPage extends StatefulWidget {
   SearchCustomerPage({Key key, this.onClose, this.isFor}) : super(key: key);
@@ -84,78 +85,40 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
     SizeConfig().init(context);
     return AlertDialog(
       titlePadding: EdgeInsets.all(0),
-      title: Stack(
-        overflow: Overflow.visible,
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-            height: SizeConfig.safeBlockVertical * 9,
-            color: StaticColor.colorBlack,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(Strings.searchCustomer, style: Styles.whiteBoldsmall()),
-              ],
-            ),
-          ),
-          Positioned(
-            left: 15,
-            //  top: 0,
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  RaisedButton(
-                    padding:
-                        EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
-                    onPressed: () {
-                      addCustomer();
-                    },
-                    child: Text(Strings.addNew, style: Styles.whiteBoldsmall()),
-                    color: StaticColor.deepOrange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50.0),
-                    ),
-                  )
-                ]), /*GestureDetector(
-              onTap: () {
-                addCustomer();
-              },
-              child: Text(
-                Strings.add_new.toUpperCase(),
-                style: Styles.whiteSimpleSmall(),
-              ),
-            ),*/
-          ),
-          closeButton(context),
-        ],
+      title: Container(
+        padding: EdgeInsets.only(left: 20, right: 10, top: 10, bottom: 10),
+        height: SizeConfig.safeBlockVertical * 9,
+        color: StaticColor.colorBlack,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Spacer(),
+            Text(Strings.searchCustomer, style: Styles.whiteBoldsmall()),
+            Spacer(),
+            CloseButtonWidget(inputContext: context),
+          ],
+        ),
       ),
-      content: mainContent(),
-    );
-  }
-
-  Widget closeButton(context) {
-    return Positioned(
-        top: -30,
-        right: -20,
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).pop();
-          },
-          child: Container(
-            width: 50.0,
-            height: 50.0,
-            decoration: BoxDecoration(
-                color: StaticColor.colorRed,
-                borderRadius: BorderRadius.circular(30.0)),
-            child: Icon(
-              Icons.clear,
-              color: StaticColor.colorWhite,
-              size: 30,
+      content: Stack(children: [
+        mainContent(),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: FloatingActionButton(
+            onPressed: () {
+              addCustomer();
+            },
+            tooltip: "Add Customer",
+            child: Icon(Icons.add),
+            backgroundColor: StaticColor.deepOrange,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(50.0),
             ),
           ),
-        ));
+        )
+      ]),
+    );
   }
 
   Widget mainContent() {

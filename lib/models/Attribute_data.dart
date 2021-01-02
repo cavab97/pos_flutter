@@ -20,12 +20,11 @@ class Attribute_Data {
     productId = json['product_id'];
     attr_name = json["attr_name"];
     qty = json["qty"];
-    attr_types = json["attr_types"].toString();
-    attr_types_price = json["attr_types_price"];
-    attributeId = json["attributeId"].toString();
+    attr_types = json["attr_types"];
+    attr_types_price = json["attr_types_price"].toString();
+    attributeId = json["attributeId"];
     ca_id = json["ca_id"];
     is_default = json["is_default"];
-    print(json["is_default"].toString());
   }
 
   Map<String, dynamic> toJson() {

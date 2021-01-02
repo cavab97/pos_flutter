@@ -5,6 +5,7 @@ import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/widget/CloseButtonWidget.dart';
 
 class ChangeQtyDailog extends StatefulWidget {
   ChangeQtyDailog({Key key, this.type, this.qty, this.onClose})
@@ -61,26 +62,20 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
     return AlertDialog(
       contentPadding: EdgeInsets.all(0),
       titlePadding: EdgeInsets.all(0),
-      title: Stack(
-        overflow: Overflow.visible,
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-            height: SizeConfig.safeBlockVertical * 9,
-            color: StaticColor.colorBlack,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(Strings.enterQty,
-                    style: TextStyle(
-                        fontSize: SizeConfig.safeBlockVertical * 3,
-                        color: StaticColor.colorWhite)),
-                addbutton(context)
-              ],
-            ),
-          ),
-          closeButton(context), // close button
-        ],
+      title: Container(
+        padding: EdgeInsets.only(left: 30, right: 10, top: 10, bottom: 10),
+        height: SizeConfig.safeBlockVertical * 9,
+        color: StaticColor.colorBlack,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Text(Strings.enterQty,
+                style: TextStyle(
+                    fontSize: SizeConfig.safeBlockVertical * 3,
+                    color: StaticColor.colorWhite)),
+            CloseButtonWidget(inputContext: context),
+          ],
+        ),
       ),
       content: Container(
         width: MediaQuery.of(context).size.width / 2,
@@ -107,9 +102,8 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
         Container(
           width: MediaQuery.of(context).size.width / 2,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
+              Spacer(),
               _button("-", () {
                 decreaseQty();
               }),
@@ -117,6 +111,8 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
               _button("+", () {
                 increaseQty();
               }),
+              Spacer(),
+              addbutton(context)
             ],
           ),
         )
@@ -148,56 +144,26 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
         ));
   }
 
-  Widget closeButton(context) {
-    return Positioned(
-      top: -30,
-      right: -20,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context).pop();
-        },
-        child: Container(
-          width: 50.0,
-          height: 50.0,
-          decoration: BoxDecoration(
-              color: StaticColor.colorRed,
-              borderRadius: BorderRadius.circular(30.0)),
-          child: IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: Icon(
-              Icons.clear,
-              color: StaticColor.colorWhite,
-              size: 30,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget addbutton(context) {
-    return RaisedButton(
+    return MaterialButton(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18.0),
+      ),
+      height: 40,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(Strings.done,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: StaticColor.colorWhite,
+                fontWeight: FontWeight.bold,
+                fontSize: 25.0)),
+      ),
+      textColor: StaticColor.colorBlack,
+      color: StaticColor.deepOrange,
       onPressed: () {
         widget.onClose(productQty, remarkText.text);
       },
-      child: Row(
-        children: <Widget>[
-          Text(
-            Strings.done,
-            style: TextStyle(
-              color: StaticColor.colorWhite,
-              fontSize: SizeConfig.safeBlockVertical * 3,
-            ),
-          ),
-        ],
-      ),
-      color: StaticColor.deepOrange,
-      textColor: StaticColor.colorWhite,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50.0),
-      ),
     );
   }
 

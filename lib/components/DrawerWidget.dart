@@ -315,7 +315,8 @@ class DrawerWidState extends State<DrawerWid> {
                 style: Styles.drawerText(),
               ),
             ),
-            ListTile(
+            /* ListTile(
+              
               onTap: () async {
                 await SyncAPICalls.logActivity(
                     "drawer", "Select wine storage menu", "drawer", 1);
@@ -330,7 +331,7 @@ class DrawerWidState extends State<DrawerWid> {
                 Strings.wineStorage,
                 style: Styles.drawerText(),
               ),
-            ),
+            ), */
             ListTile(
                 onTap: () async {
                   if (isShiftOpen) {

@@ -14,6 +14,7 @@ import 'package:mcncashier/screens/FinalPaymentScreen.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'ShowEnterCardDetailPop.dart';
 import 'ShowEnterEwalletDetailPop.dart';
+import 'package:mcncashier/widget/CloseButtonWidget.dart';
 
 class PaymentAlertDialog extends StatefulWidget {
   // Opning ammount popup
@@ -220,19 +221,26 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                 horizontal: SizeConfig.safeBlockVertical * 5),
             height: SizeConfig.safeBlockVertical * 9,
             decoration: BoxDecoration(
-                color: Colors.white, border: Border.all(color: Colors.black)),
+              color: Colors.white,
+              border: Border(
+                bottom: BorderSide(color: Colors.black),
+              ),
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                    "Paid" +
-                        (seletedPayment.name != null
-                            ? ' (' + seletedPayment.name + ')'
-                            : ''),
-                    style: Styles.communBlack()),
-                Text(CommunFun.getDecimalFormat(currentNumber),
-                    style: Styles.communBlack()),
+                  "Paid" +
+                      (seletedPayment.name != null
+                          ? ' (' + seletedPayment.name + ')'
+                          : ''),
+                  style: Styles.communBlack(),
+                ),
+                Text(
+                  CommunFun.getDecimalFormat(currentNumber),
+                  style: Styles.communBlack(),
+                ),
               ],
             ),
           ),
@@ -278,26 +286,8 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
     return Positioned(
       top: -30,
       right: -20,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context).pop();
-        },
-        child: Container(
-          width: 50.0,
-          height: 50.0,
-          decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
-          child: IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: Icon(
-              Icons.clear,
-              color: Colors.white,
-              size: 30,
-            ),
-          ),
-        ),
+      child: CloseButtonWidget(
+        inputContext: context,
       ),
     );
   }

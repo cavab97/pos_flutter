@@ -321,27 +321,23 @@ class _WineStorageState extends State<WineStorage>
               ],
             ),
             customer == null
-                ? Container(
-                    child: RaisedButton(
-                      onPressed: () {
-                        openShowAddCustomerDailog();
-                      },
-                      child: Row(
-                        children: <Widget>[
-                          Icon(
-                            Icons.add_circle_outline,
-                            color: StaticColor.colorWhite,
-                            size: SizeConfig.safeBlockVertical * 4,
-                          ),
-                          SizedBox(width: 5),
-                          Text(Strings.selectCustomer,
-                              style: Styles.whiteBoldsmall()),
-                        ],
-                      ),
-                      color: StaticColor.deepOrange,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50.0),
-                      ),
+                ? RaisedButton.icon(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    onPressed: () {
+                      openShowAddCustomerDailog();
+                    },
+                    icon: Icon(
+                      Icons.add_circle_outline,
+                      color: StaticColor.colorWhite,
+                      size: SizeConfig.safeBlockVertical * 4,
+                    ),
+                    label: Text(
+                      Strings.selectCustomer,
+                      style: Styles.whiteBoldsmall(),
+                    ),
+                    color: StaticColor.deepOrange,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50.0),
                     ),
                   )
                 : InkWell(

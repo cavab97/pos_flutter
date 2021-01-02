@@ -31,6 +31,7 @@ import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/models/Branch.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/widget/CloseButtonWidget.dart';
 
 class TransactionsPage extends StatefulWidget {
   // Transactions list
@@ -1561,106 +1562,103 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
   Widget build(BuildContext context) {
     return AlertDialog(
       titlePadding: EdgeInsets.all(0),
-      title: Stack(
-        overflow: Overflow.visible,
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-            height: 70,
-            color: StaticColor.colorBlack,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text("Choose Reason", style: Styles.whiteBold()),
-              ],
-            ),
-          ),
-          Positioned(left: 10, top: 15, child: confirmBtn(context)),
-          closeButton(context), // close button
-        ],
-      ),
+      title: Container(
+        padding: EdgeInsets.only(left: 30, right: 10, top: 10, bottom: 10),
+        height: 70,
+        color: StaticColor.colorBlack,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Text("Choose Reason", style: Styles.whiteBold()),
+            CloseButtonWidget(inputContext: context)
+          ],
+        ),
+      ), // close button
+      contentPadding: EdgeInsets.only(bottom: 10, left: 20, right: 20, top: 10),
       content: Container(
         width: MediaQuery.of(context).size.width / 2.4,
         child: ListView(
           physics: BouncingScrollPhysics(),
           shrinkWrap: true,
           children: <Widget>[
-            ListTileTheme(
-              tileColor: reason == "Incorrect Item"
-                  ? Colors.orange[200]
-                  : Colors.white10,
-              child: ListTile(
-                  focusColor: Colors.blue,
-                  onTap: () {
-                    setState(() {
-                      reason = "Incorrect Item";
-                    });
-                    // widget.onClose("Incorrect Item");
-                  },
-                  title: Text(
-                    "Incorrect Item",
-                    style: Styles.communBlacksmall(),
-                  )),
+            ListTile(
+              selectedTileColor: Colors.orange[200],
+              tileColor: Colors.white10,
+              selected: reason == "Incorrect Item",
+              onTap: () {
+                setState(() {
+                  reason = "Incorrect Item";
+                });
+                // widget.onClose("Incorrect Item");
+              },
+              title: Text(
+                "Incorrect Item",
+                style: Styles.communBlacksmall(),
+              ),
             ),
-            ListTileTheme(
-              tileColor: reason == "Incorrect variant"
-                  ? Colors.orange[200]
-                  : Colors.white10,
-              child: ListTile(
-                  onTap: () {
-                    setState(() {
-                      reason = "Incorrect variant";
-                    });
-                  },
-                  title: Text(
-                    "Incorrect variant",
-                    style: Styles.communBlacksmall(),
-                  )),
+            ListTile(
+              selected: reason == "Incorrect variant",
+              selectedTileColor: Colors.orange[200],
+              tileColor: Colors.white10,
+              onTap: () {
+                setState(() {
+                  reason = "Incorrect variant";
+                });
+              },
+              title: Text(
+                "Incorrect variant",
+                style: Styles.communBlacksmall(),
+              ),
             ),
-            ListTileTheme(
-              tileColor: reason == "Incorrect payment type"
-                  ? Colors.orange[200]
-                  : Colors.white10,
-              child: ListTile(
-                  onTap: () {
-                    setState(() {
-                      reason = "Incorrect payment type";
-                    });
-                  },
-                  title: Text(
-                    "Incorrect payment type",
-                    style: Styles.communBlacksmall(),
-                  )),
+            ListTile(
+              selectedTileColor: Colors.orange[200],
+              tileColor: Colors.white10,
+              selected: reason == "Incorrect payment type",
+              onTap: () {
+                setState(() {
+                  reason = "Incorrect payment type";
+                });
+              },
+              title: Text(
+                "Incorrect payment type",
+                style: Styles.communBlacksmall(),
+              ),
             ),
-            ListTileTheme(
-              tileColor: reason == "Incorrect quantity"
-                  ? Colors.orange[200]
-                  : Colors.white10,
-              child: ListTile(
-                  onTap: () {
-                    setState(() {
-                      reason = "Incorrect quantity";
-                    });
-                  },
-                  title: Text(
-                    "Incorrect quantity",
-                    style: Styles.communBlacksmall(),
-                  )),
+            ListTile(
+              selectedTileColor: Colors.orange[200],
+              tileColor: Colors.white10,
+              selected: reason == "Incorrect quantity",
+              onTap: () {
+                setState(() {
+                  reason = "Incorrect quantity";
+                });
+              },
+              title: Text(
+                "Incorrect quantity",
+                style: Styles.communBlacksmall(),
+              ),
             ),
-            ListTileTheme(
-              tileColor:
-                  reason == "Other" ? Colors.orange[200] : Colors.white10,
-              child: ListTile(
-                  onTap: () {
-                    setState(() {
-                      reason = "Other";
-                    });
-                  },
-                  title: Text(
-                    "Other",
-                    style: Styles.communBlacksmall(),
-                  )),
+            ListTile(
+              selectedTileColor: Colors.orange[200],
+              tileColor: Colors.white10,
+              selected: reason == "Other",
+              onTap: () {
+                setState(() {
+                  reason = "Other";
+                });
+              },
+              title: Text(
+                "Other",
+                style: Styles.communBlacksmall(),
+              ),
             ),
+            Padding(
+              padding: const EdgeInsets.only(top: 10, right: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [confirmBtn(context)],
+              ),
+            )
           ],
         ),
       ),

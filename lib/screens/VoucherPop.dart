@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
+import 'package:mcncashier/widget/CloseButtonWidget.dart';
 
 class VoucherPop extends StatefulWidget {
   // Opning ammount popup
@@ -123,7 +124,7 @@ class VoucherPopState extends State<VoucherPop> {
               i++) {
             MSTCartdetails cartitem = widget.cartList[i];
             //reverse discount item
-            if (cartitem.discountAmount > 0) {
+            /* if (cartitem.discountAmount > 0) {
               if (cartitem.discountType == 1) {
                 cartitem.productDetailAmount = cartitem.productDetailAmount /
                     (1 - (cartitem.discountAmount / 100));
@@ -131,7 +132,7 @@ class VoucherPopState extends State<VoucherPop> {
                 cartitem.productDetailAmount =
                     cartitem.discountAmount + cartitem.productDetailAmount;
               }
-            }
+            } */
             // product
             if (voucher.voucherProducts != "") {
               voucher.voucherProducts.split(',').forEach((tag) {
@@ -226,27 +227,25 @@ class VoucherPopState extends State<VoucherPop> {
   Widget build(BuildContext context) {
     return AlertDialog(
         titlePadding: EdgeInsets.all(0),
-        title: Stack(
-          // popup header
-          overflow: Overflow.visible,
-          children: <Widget>[
-            Container(
-              height: SizeConfig.safeBlockVertical * 9,
-              color: StaticColor.colorBlack,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(Strings.applycoupen,
-                      style: TextStyle(
-                          fontSize: SizeConfig.safeBlockVertical * 3,
-                          color: StaticColor.colorWhite)),
-                ],
+        title: Container(
+          padding: EdgeInsets.only(left: 30, right: 10, top: 10, bottom: 10),
+          height: SizeConfig.safeBlockVertical * 9,
+          color: StaticColor.colorBlack,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                Strings.applycoupen,
+                style: TextStyle(
+                    fontSize: SizeConfig.safeBlockVertical * 3,
+                    color: StaticColor.colorWhite),
               ),
-            ),
-            closeButton(context), //popup close btn
-          ],
-        ),
+              Spacer(),
+              CloseButtonWidget(inputContext: context),
+            ],
+          ),
+        ), //popup close btn
+
         content: mainContent(),
         actions: <Widget>[
           isLoading ? CommunFun.loader(context) : SizedBox(),

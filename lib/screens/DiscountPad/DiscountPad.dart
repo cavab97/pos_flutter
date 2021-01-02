@@ -7,6 +7,7 @@ import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/widget/CloseButtonWidget.dart';
 
 class DiscountPad extends StatefulWidget {
   // Opning ammount popup
@@ -88,9 +89,7 @@ class _DiscountPadState extends State<DiscountPad> {
             bottom: BorderSide(color: Colors.black),
           ),
         ),
-        child: Stack(
-          // popup header
-          overflow: Overflow.visible,
+        child: Row(
           children: <Widget>[
             Container(
               padding: EdgeInsets.symmetric(
@@ -108,7 +107,8 @@ class _DiscountPadState extends State<DiscountPad> {
               //             currentDiscountType,
               //     style: Styles.communBlack()),
             ),
-            closeButton(context), //popup close btn
+            Spacer(),
+            CloseButtonWidget(inputContext: context),
           ],
         ),
       ),
@@ -257,34 +257,6 @@ class _DiscountPadState extends State<DiscountPad> {
       if (val == "RM") {
       } else if (val == "%") {}
     }
-  }
-
-  Widget closeButton(context) {
-    return Positioned(
-      top: 0,
-      right: 0,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context).pop();
-        },
-        child: Container(
-          width: 50.0,
-          height: 50.0,
-          decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
-          child: IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: Icon(
-              Icons.clear,
-              color: Colors.white,
-              size: 30,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   Widget mainContent() {
@@ -497,16 +469,15 @@ class _DiscountPadState extends State<DiscountPad> {
                     ],
                   ),
                   Row(
-                    // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      _button("1", () {
-                        numberClick('1');
-                      }), // using custom widget button
-                      _button("2", () {
-                        numberClick('2');
+                    children: [
+                      _button("7", () {
+                        numberClick('7');
                       }),
-                      _button("3", () {
-                        numberClick('3');
+                      _button("8", () {
+                        numberClick('8');
+                      }),
+                      _button("9", () {
+                        numberClick('9');
                       }),
                       _backbutton(() {
                         backspaceClick();
@@ -532,19 +503,19 @@ class _DiscountPadState extends State<DiscountPad> {
                   ),
                   Row(children: [
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _button("7", () {
-                              numberClick('7');
+                          // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            _button("1", () {
+                              numberClick('1');
+                            }), // using custom widget button
+                            _button("2", () {
+                              numberClick('2');
                             }),
-                            _button("8", () {
-                              numberClick('8');
-                            }),
-                            _button("9", () {
-                              numberClick('9');
+                            _button("3", () {
+                              numberClick('3');
                             }),
                           ],
                         ),

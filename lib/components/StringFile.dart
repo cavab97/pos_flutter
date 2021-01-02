@@ -193,6 +193,7 @@ class Strings {
   static String reprintAll = "Reprint All";
   static String reprint = "Reprint";
   static String scanPrinter = "Scan Printer";
+  static String selectedItem = "selected item";
   static String scan = "Scan";
   static String list = "List";
   static String tablePaxMsg = "Please enter pax minimum table capcity.";

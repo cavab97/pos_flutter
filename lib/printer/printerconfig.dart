@@ -153,7 +153,7 @@ class PrintReceipt {
         }
 
         /*For set meal product*/
-        if (item.issetMeal == 1) {
+        if (item.issetMeal == 1 && item.setmeal_product_detail != null) {
           List<dynamic> setmealproduct =
               json.decode(item.setmeal_product_detail);
           List<SetMealProduct> setMealProducts = [];

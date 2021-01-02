@@ -1819,8 +1819,10 @@ class _DashboradPageState extends State<DashboradPage>
   itememovefromCart(cartitem) async {
     try {
       MST_Cart cart = new MST_Cart();
+      bool isSetMeal = cartitem is SetMeal;
       MSTCartdetails cartitemdata = cartitem;
-      var subt = allcartData.sub_total - cartitemdata.productPrice;
+      var subt = allcartData.sub_total - cartitemdata.productPrice ??
+          cartitemdata.productDetailAmount;
       var taxjson = await countTax(subt);
       var disc = allcartData.discountAmount != null
           ? allcartData.discountAmount - cartitemdata.discountAmount
@@ -2135,12 +2137,23 @@ class _DashboradPageState extends State<DashboradPage>
         ),
         GestureDetector(
             onTap: () {
-              print("itemSelectedIndex");
-              print(itemSelected);
-              setQuantityPad(itemSelected);
-              setState(() {
-                itemSelected = new MSTCartdetails();
-              });
+              if (currentQuantity > 0) {
+                print(focusCart.productName);
+                currentProductQuantity = itemSelected.productQty;
+                itemSelected.productQty = currentQuantity.toDouble();
+
+                itemSelected.productDetailAmount =
+                    currentQuantity * itemSelected.productPrice;
+                localAPI.addintoCartDetails(itemSelected);
+                countTotals(itemSelected.cartId);
+                //print(jsonEncode(cart));
+                currentQuantity = 0;
+              } else {
+                setQuantityPad(itemSelected);
+                setState(() {
+                  itemSelected = new MSTCartdetails();
+                });
+              }
             },
             child: Container(
               decoration: BoxDecoration(
@@ -2629,8 +2642,8 @@ class _DashboradPageState extends State<DashboradPage>
                       size: SizeConfig.safeBlockVertical * 4,
                     ),
                     SizedBox(width: 5),
-                    Container(
-                      width: SizeConfig.safeBlockHorizontal * 12,
+                    FittedBox(
+                      fit: BoxFit.contain,
                       child: Text(
                         tableName +
                             " (" +
@@ -2642,6 +2655,7 @@ class _DashboradPageState extends State<DashboradPage>
                         style: Styles.whiteBoldsmall(),
                       ),
                     ),
+                    SizedBox(width: 15)
                   ],
                 )
               : SizedBox(),
@@ -3259,7 +3273,7 @@ class _DashboradPageState extends State<DashboradPage>
                   //margin: EdgeInsets.only(top: MediaQuery.of(context).size.height / 1.3),
                   height: SizeConfig.safeBlockVertical * 7,
                   width: MediaQuery.of(context).size.width / 7,
-                  child: RaisedButton(
+                  child: RaisedButton.icon(
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () async {
                       if (cartList.length == 0) {
@@ -3288,20 +3302,15 @@ class _DashboradPageState extends State<DashboradPage>
                         }, () {});
                       }
                     },
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(
-                            Icons.check,
-                            color: Colors.white,
-                            size: SizeConfig.safeBlockVertical * 3,
-                          ),
-                          SizedBox(width: 5),
-                          Text(
-                            Strings.send.toUpperCase(),
-                            style: Styles.whiteBoldsmall(),
-                          ),
-                        ]),
+                    icon: Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: SizeConfig.safeBlockVertical * 3,
+                    ),
+                    label: Text(
+                      Strings.send.toUpperCase(),
+                      style: Styles.whiteBoldsmall(),
+                    ),
                     color: Colors.deepOrange,
                     textColor: Colors.white,
                     shape: RoundedRectangleBorder(
@@ -3315,7 +3324,7 @@ class _DashboradPageState extends State<DashboradPage>
                 top: MediaQuery.of(context).size.height / 1.3 + 10),*/
             height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 7,
-            child: RaisedButton(
+            child: RaisedButton.icon(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () async {
                 if (!isWebOrder) {
@@ -3326,20 +3335,15 @@ class _DashboradPageState extends State<DashboradPage>
                 await SyncAPICalls.logActivity(
                     "payment", "Clicked pay and perform payment", "voucher", 1);
               },
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(
-                      Icons.payment,
-                      color: Colors.white,
-                      size: SizeConfig.safeBlockVertical * 3,
-                    ),
-                    SizedBox(width: 5),
-                    Text(
-                      !isWebOrder ? Strings.titlePay : Strings.checkout,
-                      style: Styles.whiteBoldsmall(),
-                    ),
-                  ]),
+              icon: Icon(
+                Icons.payment,
+                color: Colors.white,
+                size: SizeConfig.safeBlockVertical * 3,
+              ),
+              label: Text(
+                !isWebOrder ? Strings.titlePay : Strings.checkout,
+                style: Styles.whiteBoldsmall(),
+              ),
               color: StaticColor.deepOrange,
               textColor: StaticColor.colorWhite,
               shape: RoundedRectangleBorder(
@@ -3350,25 +3354,20 @@ class _DashboradPageState extends State<DashboradPage>
           Container(
             height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 7,
-            child: RaisedButton(
+            child: RaisedButton.icon(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () async {
                 printCheckList();
                 await SyncAPICalls.logActivity("print check list",
                     "Cashier clicked print check list", "print check list", 1);
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    Icons.check_circle_outline_outlined,
-                    color: Colors.white,
-                    size: SizeConfig.safeBlockVertical * 3,
-                  ),
-                  SizedBox(width: 5),
-                  Text(Strings.checkList.toUpperCase(),
-                      style: Styles.whiteBoldsmall()),
-                ],
+              icon: Icon(
+                Icons.check_circle_outline_outlined,
+                color: Colors.white,
+              ),
+              label: Text(
+                Strings.checkList.toUpperCase(),
+                style: Styles.whiteBoldsmall(),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50.0),
@@ -3378,25 +3377,20 @@ class _DashboradPageState extends State<DashboradPage>
           Container(
             height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 7,
-            child: RaisedButton(
+            child: RaisedButton.icon(
               padding: EdgeInsets.only(top: 5, bottom: 5),
               onPressed: () async {
                 draftreciptPrint();
                 await SyncAPICalls.logActivity("print draft",
                     "Cashier clicked print draft reciept", "print draft", 1);
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    Icons.print,
-                    color: Colors.white,
-                    size: SizeConfig.safeBlockVertical * 3,
-                  ),
-                  SizedBox(width: 5),
-                  Text(Strings.draftReport.toUpperCase(),
-                      style: Styles.whiteBoldsmall()),
-                ],
+              icon: Icon(
+                Icons.print,
+                color: Colors.white,
+              ),
+              label: Text(
+                Strings.draftReport.toUpperCase(),
+                style: Styles.whiteBoldsmall(),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50.0),
@@ -3406,25 +3400,20 @@ class _DashboradPageState extends State<DashboradPage>
           Container(
             height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 5,
-            child: RaisedButton(
-              padding: EdgeInsets.only(top: 5, bottom: 5),
+            child: RaisedButton.icon(
+              padding: EdgeInsets.symmetric(vertical: 5),
               onPressed: () async {
                 resendToKitchen();
                 await SyncAPICalls.logActivity("reprint kitchen",
                     "Clicked  resend to kitchen button", "reprint kitchen", 1);
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    Icons.send,
-                    color: Colors.white,
-                    size: SizeConfig.safeBlockVertical * 3,
-                  ),
-                  SizedBox(width: 5),
-                  Text(Strings.reprintOrder.toUpperCase(),
-                      style: Styles.whiteBoldsmall()),
-                ],
+              icon: Icon(
+                Icons.send,
+                color: Colors.white,
+              ),
+              label: Text(
+                Strings.reprintOrder.toUpperCase(),
+                style: Styles.whiteBoldsmall(),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50.0),
@@ -3434,25 +3423,21 @@ class _DashboradPageState extends State<DashboradPage>
           Container(
             height: SizeConfig.safeBlockVertical * 7,
             width: MediaQuery.of(context).size.width / 7,
-            child: RaisedButton(
-              padding: EdgeInsets.only(top: 5, bottom: 5),
+            child: RaisedButton.icon(
+              padding: EdgeInsets.symmetric(vertical: 5),
               onPressed: () async {
                 await SyncAPICalls.logActivity(
                     "select table", "Clicked select table", "select table", 1);
                 selectTable();
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    Icons.select_all,
-                    color: Colors.white,
-                    size: SizeConfig.safeBlockVertical * 3,
-                  ),
-                  SizedBox(width: 5),
-                  Text(Strings.selectTable.toUpperCase(),
-                      style: Styles.whiteBoldsmall()),
-                ],
+              icon: Icon(
+                Icons.select_all,
+                color: Colors.white,
+                size: SizeConfig.safeBlockVertical * 3,
+              ),
+              label: Text(
+                Strings.selectTable.toUpperCase(),
+                style: Styles.whiteBoldsmall(),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50.0),

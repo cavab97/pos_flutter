@@ -133,7 +133,11 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
                 horizontal: SizeConfig.safeBlockVertical * 5),
             height: SizeConfig.safeBlockVertical * 9,
             decoration: BoxDecoration(
-                color: Colors.white, border: Border.all(color: Colors.black)),
+              color: Colors.white,
+              border: Border(
+                bottom: BorderSide(color: Colors.black),
+              ),
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -315,7 +319,8 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: Colors.red, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();
