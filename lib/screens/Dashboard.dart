@@ -1137,6 +1137,14 @@ class _DashboradPageState extends State<DashboradPage>
         selectedProduct = cartItemproduct;
       }
     }
+    if (currentQuantity > 0) {
+      selectedProduct.qty = currentQuantity.toDouble();
+      if (this.mounted) {
+        setState(() {
+          currentQuantity = 0;
+        });
+      }
+    }
     if (isSetMeal ||
         selectedProduct.attrCat != null ||
         selectedProduct.modifireName != null) {
@@ -3132,9 +3140,13 @@ class _DashboradPageState extends State<DashboradPage>
         mainAxisSpacing: 9.0,
         children: productList.map((product) {
           final prodprice = product.price.toStringAsFixed(2);
+          try {
+            CommonUtils.imageFromBase64String(product.base64);
+          } catch (e) {
+            print(e);
+          }
           return InkWell(
             onTap: () async {
-              print("tapped");
               if (product.outOfStock == 1) {
                 CommunFun.showToast(context, Strings.outOfStokeMsg);
               } else if ((product.hasRacManagemant == 1 &&
@@ -3201,10 +3213,16 @@ class _DashboradPageState extends State<DashboradPage>
                     margin: EdgeInsets.only(top: itemHeight / 2.2),
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
-                      color: StaticColor.colorGrey600,
+                      color: product.outOfStock == 1 ||
+                              (product.qty != null &&
+                                  product.hasInventory == 1 &&
+                                  product.qty <= 0)
+                          ? StaticColor.colorGrey400
+                          : StaticColor.colorGrey600,
                       borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(8),
-                          bottomRight: Radius.circular(8)),
+                        bottomLeft: Radius.circular(8),
+                        bottomRight: Radius.circular(8),
+                      ),
                     ),
                     child: Center(
                       child: Text(
@@ -3277,6 +3295,8 @@ class _DashboradPageState extends State<DashboradPage>
                     padding: EdgeInsets.only(top: 5, bottom: 5),
                     onPressed: () async {
                       if (cartList.length == 0) {
+                        CommunFun.showToast(context, Strings.cartEmpty);
+
                         return false;
                       }
                       await SyncAPICalls.logActivity("send to kitchen",
@@ -3403,6 +3423,10 @@ class _DashboradPageState extends State<DashboradPage>
             child: RaisedButton.icon(
               padding: EdgeInsets.symmetric(vertical: 5),
               onPressed: () async {
+                if (cartList.length == 0) {
+                  CommunFun.showToast(context, Strings.cartEmpty);
+                  return false;
+                }
                 resendToKitchen();
                 await SyncAPICalls.logActivity("reprint kitchen",
                     "Clicked  resend to kitchen button", "reprint kitchen", 1);
@@ -3602,11 +3626,11 @@ class _DashboradPageState extends State<DashboradPage>
         ]);
 
     final cartTable = ListView(
-      //physics: BouncingScrollPhysics(),
+      physics: BouncingScrollPhysics(),
       shrinkWrap: true,
 
-      // itemExtent:60.0,
-      padding: EdgeInsets.only(bottom: 50),
+      //itemExtent: 30,
+      padding: EdgeInsets.only(bottom: 0), //50
       children: cartList.map((cart) {
         return Slidable(
           key: Key(cart.id.toString()),
@@ -4142,12 +4166,12 @@ class _DashboradPageState extends State<DashboradPage>
           Container(
               //  color: Colors.amber,
               //color: Colors.red,
-              /* height:
-                      /* expandableController != null &&
+              height:
+                  /* expandableController != null &&
                           expandableController.expanded
                       ? MediaQuery.of(context).size.height * .8 / 2
                       :  */
-                      MediaQuery.of(context).size.height * .45, */
+                  MediaQuery.of(context).size.height * .5,
               margin: EdgeInsets.only(top: customer != null ? 85 : 35),
               child: cartTable),
           cartList.length != 0

@@ -4,11 +4,10 @@ import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/app/app_config.dart';
 
 class Configrations {
-  // static String base_URL =
-  //     "http://192.168.1.39/laravel-admin-panel/api/v1/en/"; // local
-  //static String base_URL = "https://mcnpos.com.my/api/v1/en/"; // live
   static String base_URL =
-      "https://staging.mcnpos.com.my/api/v1/en/"; // staging
+      "http://192.168.1.39/laravel-admin-panel/api/v1/en/"; // local
+  //"https://mcnpos.com.my/api/v1/en/"; // live
+  //"https://staging.mcnpos.com.my/api/v1/en/"; // staging
   static String terminalKey = "verifyTerminalkey";
   static String login = "login";
   static String config = "configs";

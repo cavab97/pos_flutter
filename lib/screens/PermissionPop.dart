@@ -9,6 +9,7 @@ import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
+import 'package:mcncashier/widget/CloseButtonWidget.dart';
 
 class OpenPermissionPop extends StatefulWidget {
   // Opning ammount popup
@@ -85,23 +86,20 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
     return WillPopScope(
         child: AlertDialog(
           titlePadding: EdgeInsets.all(0),
-          title: Stack(
-            overflow: Overflow.visible,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.all(SizeConfig.safeBlockVertical * 3),
-                height: SizeConfig.safeBlockVertical * 9,
-                color: StaticColor.colorBlack,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(Strings.invalidPinMsg, style: Styles.whiteBoldsmall()),
-                  ],
+          title: Container(
+            padding: EdgeInsets.only(left: 30, right: 10, top: 10, bottom: 10),
+            height: SizeConfig.safeBlockVertical * 9,
+            color: StaticColor.colorBlack,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  Strings.invalidPinMsg,
+                  style: Styles.whiteBoldsmall(),
                 ),
-              ),
-              closeButton(context), //popup close btn
-            ],
+                CloseButtonWidget(inputContext: context),
+              ],
+            ),
           ),
           content: mainContent(), // Popup body contents
         ),

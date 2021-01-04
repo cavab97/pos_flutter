@@ -5,20 +5,28 @@ import 'package:flutter/widgets.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/PermissionPop.dart';
+import 'package:mcncashier/components/StringFile.dart';
+import 'package:http/http.dart' as http;
 
 class CommonUtils {
   /*load image from base64*/
   static Image imageFromBase64String(String base64) {
-    if (base64 != null) {
-      if (base64.isNotEmpty) {
-        var strImage = base64;
-        if (base64.contains("base64,")) {
-          strImage = base64.split("base64,")[1];
-        }
-        return Image.memory(base64Decode(strImage),
+    if (base64 != null && base64.isNotEmpty) {
+      /* String strImage = base64;
+      if (base64.contains("base64,")) {
+        strImage = base64.split("base64,")[1];
+      } */
+      final UriData data = Uri.parse(base64).data;
+      if (data.isBase64) {
+        return Image.memory(data.contentAsBytes(),
             fit: BoxFit.cover, gaplessPlayback: true);
       }
     }
+    return Image.asset(
+      Strings.noImageAsset,
+      fit: BoxFit.cover,
+      gaplessPlayback: true,
+    );
   }
 
   Uint8List dataFromBase64String(String base64String) {

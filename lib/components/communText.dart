@@ -486,7 +486,14 @@ class CommunFun {
   static getAssetsData(context, isOpen) async {
     var offset = await CommunFun.getOffset();
     var aceets = await SyncAPICalls.getAssets(context);
-    if (aceets != null) {
+    if (aceets != null && aceets["status"] == 500) {
+      print("Error when getting product image data");
+      await checkUserDeleted(context);
+      await checkpermission();
+      await Navigator.pushNamed(context, Constant.SelectTableScreen,
+          arguments: {"isAssign": false});
+      isOpen = false;
+    } else if (aceets != null) {
       await databaseHelper.accetsData(aceets["data"]);
       await Preferences.setStringToSF(
           Constant.OFFSET, aceets["data"]["next_offset"].toString());
@@ -519,6 +526,12 @@ class CommunFun {
     } else {
       // handle Exaption
       print("Error when getting product image data");
+      print("Error when getting product image data");
+      await checkUserDeleted(context);
+      await checkpermission();
+      await Navigator.pushNamed(context, Constant.SelectTableScreen,
+          arguments: {"isAssign": false});
+      isOpen = false;
     }
   }
 
@@ -1061,15 +1074,15 @@ class CommunFun {
     timer?.cancel();
   }
 
-  static countTotalQty(
-      List<MSTCartdetails> cartItems, productItem, productQty) {
+  static countTotalQty(List<MSTCartdetails> cartItems, productItem,
+      [productQty = 1.0]) {
     double qty = 0;
     if (cartItems.length > 0) {
       for (var i = 0; i < cartItems.length; i++) {
         var item = cartItems[i];
-        if (item.productId == productItem.productId) {
+        /* if (item.productId == productItem.productId) {
           item.productQty = productQty;
-        }
+        } */
         qty += item.productQty;
       }
     } else {
@@ -1175,7 +1188,7 @@ class CommunFun {
       sameitem = myModels[0];
     } */
     if (productItem.hasInventory == 1) {
-      var qty = 1.0;
+      var qty = productItem.qty ?? 1.0;
       if (isEditing) {
         qty = sameitem.productQty + qty;
       }
@@ -1190,7 +1203,7 @@ class CommunFun {
         }
       }
     }
-    var qty = await CommunFun.countTotalQty(cartItems, productItem, 1.0);
+    var qty = await CommunFun.countTotalQty(cartItems, productItem);
     var disc = await CommunFun.countDiscount(allcartData);
     var subtotal = await CommunFun.countSubtotal(cartItems, productItem.price);
     var serviceCharge =
@@ -1236,7 +1249,7 @@ class CommunFun {
         orderData,
         table.table_id);
     ProductDetails cartItemproduct = new ProductDetails();
-    cartItemproduct.qty = 1;
+    cartItemproduct.qty = productItem.qty ?? 1;
     cartItemproduct.status = productItem.status;
     cartItemproduct.productId = productItem.productId;
     cartItemproduct.name = productItem.name;
@@ -1255,7 +1268,8 @@ class CommunFun {
         ? double.parse(productItem.price.toStringAsFixed(2)) +
             sameitem.productPrice
         : double.parse(productItem.price.toStringAsFixed(2));
-    cartdetails.productQty = isEditing ? sameitem.productQty + 1.0 : 1.0;
+    cartdetails.productQty =
+        isEditing ? sameitem.productQty + 1.0 : productItem.qty ?? 1.0;
     cartdetails.productNetPrice = productItem.oldPrice;
     cartdetails.createdBy = loginUser.id;
     cartdetails.cart_detail = jsonEncode(cartItemproduct);

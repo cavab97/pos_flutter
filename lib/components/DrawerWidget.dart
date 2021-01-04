@@ -49,6 +49,8 @@ class DrawerWidState extends State<DrawerWid> {
 
   getUserData() async {
     var user = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+
+    User userdata = await CommunFun.getuserDetails();
     if (user != null) {
       user = json.decode(user);
       setState(() {
@@ -277,9 +279,9 @@ class DrawerWidState extends State<DrawerWid> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                checkoutbtn(),
+                nameBtn(),
                 SizedBox(width: SizeConfig.safeBlockVertical * 3),
-                nameBtn()
+                checkoutbtn(),
               ],
             ),
             CommunFun.divider(),
@@ -484,20 +486,20 @@ class DrawerWidState extends State<DrawerWid> {
 
   Widget nameBtn() {
     return Expanded(
-        child: RaisedButton(
-      padding: EdgeInsets.all(10),
-      onPressed: () {
-        //Navigator.pushNamed(context, Constant.PINScreen).then(backEvent);
-      },
-      child: Text(
-        userDetails != null ? userDetails["name"] : "",
-        style: Styles.whiteBoldsmall(),
+      child: FlatButton(
+        /* shape: RoundedRectangleBorder(
+          side: BorderSide(color: Colors.deepOrange, width: 1),
+          borderRadius: BorderRadius.circular(50.0),
+        ), */
+        onPressed: null,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            userDetails != null ? userDetails["name"] : "",
+            style: Styles.blackBoldsmall(),
+          ),
+        ),
       ),
-      color: Colors.deepOrange,
-      textColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50.0),
-      ),
-    ));
+    );
   }
 }

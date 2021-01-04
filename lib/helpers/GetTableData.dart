@@ -1103,6 +1103,7 @@ class TableData {
   }
 
   Future<dynamic> insertProductImage(Database db, dynamic tablesData) async {
+    if (tablesData == null) return 1;
     var imageData = tablesData["product_image"];
     try {
       if (imageData.length != 0) {

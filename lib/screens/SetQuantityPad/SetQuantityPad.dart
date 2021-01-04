@@ -75,7 +75,7 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
       price = productItem.price;
       productnetprice = productItem.price;
     });
-    getAttributes(productItem.productId);
+    //getAttributes(productItem.productId);
     //currentNumber = totalQuantity.toString();
   }
 
@@ -185,9 +185,9 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
 
   numberClick(val) {
     // add  value in prev value
-    int limit = currentDiscountType == "%" ? 3 : 8;
+    int limit = 3;
 
-    if (currentNumber.length <= limit) {
+    if ((currentNumber + val).length <= limit) {
       var currentnumber = currentNumber;
       if (currentnumber == "0") {
         currentnumber = "";
@@ -252,7 +252,7 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
   submitQuantity(val) {
     var newPrice = focusCartPad.productPrice;
 
-    if (focusCartPad.attrName.length > 0) {
+    /*    if (focusCartPad.attrName.length > 0) {
       if (attributeList.length > 0) {
         for (var i = 0; i < attributeList.length; i++) {
           var attribute = attributeList[i];
@@ -277,7 +277,7 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
           print("tureeeeeeeeee");
         }
       }
-    }
+    } */
 
     currentProductQuantity = focusCartPad.productQty;
     focusCartPad.productQty = double.parse(currentNumber.toString());

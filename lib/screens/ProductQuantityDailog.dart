@@ -90,6 +90,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       isEditing = widget.cartItem != null;
       cartitem = widget.cartItem;
     });
+    if (widget.selproduct.qty != null && widget.selproduct.qty > 0) {
+      setState(() {
+        product_qty = widget.selproduct.qty;
+      });
+    }
     setInitstate();
     setPermissons();
   }
@@ -104,7 +109,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   setInitstate() async {
-    setPrice();
     if (isSetMeal) {
       setState(() {
         setmeal = widget.selproduct;
@@ -121,6 +125,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       getAttributes(productItem.productId);
     }
 
+    setPrice();
     getTaxs();
     getPrinter();
 
@@ -696,8 +701,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   setPrice() {
     // print("setPrice");
-    var productPrice = productnetprice;
-    var newPrice = productPrice;
+    double productPrice = productnetprice;
+    double newPrice = productPrice ?? price;
     for (int i = 0; selectedAttr.length > 0 && i < selectedAttr.length; i++) {
       var price = selectedAttr[i]["attr_price"];
       newPrice += double.parse(price);
@@ -706,12 +711,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       for (int i = 0;
           selectedModifier.length > 0 && i < selectedModifier.length;
           i++) {
-        var mprice = selectedModifier[i].price;
+        double mprice = selectedModifier[i].price;
         newPrice += mprice;
       }
     }
-
-    var pricewithQty = newPrice * product_qty;
+    double pricewithQty = newPrice * product_qty;
+    if (widget.selproduct.qty != null && widget.selproduct.qty > 0) {
+      pricewithQty = newPrice * widget.selproduct.qty;
+    }
     setState(() {
       price = pricewithQty;
     });
