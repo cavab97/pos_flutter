@@ -31,6 +31,7 @@ class _SettingsPageState extends State<SettingsPage> {
   PrintReceipt testPrint = PrintReceipt();
   List<Printer> printerList = new List<Printer>();
   bool isAutoSync = false;
+  bool isPausePrint = true;
   bool isPrinterSettings = false;
   bool isGeneralSettings = true;
   bool isChangeTheme = false;
@@ -59,17 +60,27 @@ class _SettingsPageState extends State<SettingsPage> {
       });
     }
     checkisAutoSync();
+    checkisAlwaysPrint();
+    await SyncAPICalls.logActivity(
+        "settings", "Opened settigns page", "settings", 1);
   }
 
   checkisAutoSync() async {
-    var isSync = await Preferences.getStringValuesSF(Constant.IS_AUTO_SYNC);
+    String isSync = await Preferences.getStringValuesSF(Constant.IS_AUTO_SYNC);
     if (isSync != null) {
       setState(() {
         isAutoSync = isSync == "true" ? true : false;
       });
     }
-    await SyncAPICalls.logActivity(
-        "settings", "Opened settigns page", "settings", 1);
+  }
+
+  checkisAlwaysPrint() async {
+    String isOn = await Preferences.getStringValuesSF(Constant.isPausePrint);
+    if (isOn != null) {
+      setState(() {
+        isPausePrint = isOn == "true" ? true : false;
+      });
+    }
   }
 
   setAutosync(issync) async {
@@ -84,6 +95,21 @@ class _SettingsPageState extends State<SettingsPage> {
     } else {
       await Preferences.removeSinglePref(Constant.IS_AUTO_SYNC);
       await CommunFun.stopAutoSync();
+      await SyncAPICalls.logActivity(
+          "Settings", "auto sync disabled", "setting", 1);
+    }
+  }
+
+  setPausePrint(isOn) async {
+    setState(() {
+      isPausePrint = isOn;
+    });
+    if (isOn) {
+      await Preferences.removeSinglePref(Constant.isPausePrint);
+      await SyncAPICalls.logActivity(
+          "Settings", "auto sync Enabled", "setting", 1);
+    } else {
+      await Preferences.setStringToSF(Constant.isPausePrint, isOn.toString());
       await SyncAPICalls.logActivity(
           "Settings", "auto sync disabled", "setting", 1);
     }
@@ -296,7 +322,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               style: Styles.blackBoldsmall(),
                             ),
                           ),
-                          ListTile(
+                          /* ListTile(
                             contentPadding: EdgeInsets.only(left: 0, top: 10),
                             selected: isChangeLanguage,
                             onTap: () {},
@@ -313,7 +339,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               Strings.changeTheme,
                               style: Styles.blackBoldsmall(),
                             ),
-                          )
+                          ) */
                         ],
                       ),
                     ),
@@ -373,7 +399,7 @@ class _SettingsPageState extends State<SettingsPage> {
         SizedBox(
           height: 10,
         ),
-        Container(
+        /* Container(
           decoration:
               new BoxDecoration(border: new Border.all(color: Colors.white)),
           child: ListTile(
@@ -492,6 +518,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
         )
+       */
       ],
     );
   }
@@ -527,8 +554,9 @@ class _SettingsPageState extends State<SettingsPage> {
                     trailing: Transform.scale(
                       scale: 1,
                       child: CupertinoSwitch(
-                        value: false,
+                        value: isPausePrint,
                         onChanged: (bool value) {
+                          setPausePrint(value);
                           // setState(() {
                           //   _switchValue = value;
                           // });

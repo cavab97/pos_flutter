@@ -209,7 +209,7 @@ class SyncAPICalls {
       var apiurl = Configrations.order_sync;
       List<Orders> orders =
           await localAPI.getOrdersListTable(branchid, terminalId);
-      if (orders.length > 0) {
+      if (orders != null && orders.length > 0) {
         List ordersList = [];
         for (var i = 0; i < orders.length; i++) {
           var order = orders[i];
@@ -318,7 +318,7 @@ class SyncAPICalls {
     LocalAPI localAPI = LocalAPI();
     try {
       var orders = data["orders"];
-      if (orders.length > 0) {
+      if (orders != null && orders.length > 0) {
         for (var i = 0; i < orders.length; i++) {
           var orderdata = orders[i];
           Orders order = new Orders();
@@ -970,9 +970,11 @@ class SyncAPICalls {
           'terminal_id': terminalId,
           'terminal_log': json.encode(storeData)
         };
+        localAPI.deleteTerminalLogAfterSync(storeData);
         var res = await APICalls.apiCall(apiurl, context, stringParams);
         if (res.length > 0 && res["status"] == Constant.STATUS200) {
-          saveTerminalLogTable(context, storeData);
+          //receive terminal log to app for why?
+          //await localAPI.saveTerminalLogFromSync(storeData);
         } else {
           print('sendTerminalLogTable api error');
         }

@@ -248,7 +248,7 @@ class CommunFun {
     var output =
         [s1.substring(0, position), ".", s1.substring(position)].join(""); */
 
-    return double.parse(value).toStringAsFixed(2);
+    return double.tryParse(value).toStringAsFixed(2);
   }
 
   static deviceInfo() async {
@@ -296,6 +296,7 @@ class CommunFun {
 
   static showToast(context, message) {
     try {
+      //Navigator.of(context).pop();
       Toast.show(
         message,
         context,
@@ -469,7 +470,6 @@ class CommunFun {
 
     var wineStorageData = await SyncAPICalls.getWineStorageData(context);
     if (wineStorageData != null) {
-      print('getDataTables472');
       var result =
           await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
       if (result == 1) {
@@ -505,11 +505,11 @@ class CommunFun {
         var serverTime =
             await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
         if (serverTime == null) {
-          Navigator.pushNamed(context, Constant.PINScreen);
+          Navigator.popAndPushNamed(context, Constant.PINScreen);
         } else {
           await checkUserDeleted(context);
           await checkpermission();
-          await Navigator.pushNamed(context, Constant.SelectTableScreen,
+          await Navigator.popAndPushNamed(context, Constant.SelectTableScreen,
               arguments: {"isAssign": false});
           isOpen = false;
         }
@@ -1369,7 +1369,6 @@ class CommunFun {
     Shift shifittem = new Shift();
     var branchid = await CommunFun.getbranchId();
     var terminalID = await CommunFun.getTeminalKey();
-    List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
     var grosssale = 0.00;
     var netsale = 0.00;
     var discountval = 0.00;
@@ -1387,6 +1386,15 @@ class CommunFun {
     double expectedVal = 0.00;
     int totalPax = 0;
 
+    if (shiftid != null) {
+      List<Shift> shift = await localAPI.getShiftData(shiftid);
+      if (shift.length > 0) {
+        shifittem = shift[0];
+        //statringAmount = shifittem.startAmount !=nu shifittem.startAmount.toDouble();
+      }
+    }
+    List<Orders> ordersList =
+        await localAPI.getShiftInvoiceData(branchid, shifittem.createdAt);
     // Summery
     if (ordersList.length > 0) {
       for (var i = 0; i < ordersList.length; i++) {
@@ -1397,7 +1405,7 @@ class CommunFun {
         taxval += order.tax_amount;
         totalPax += order.pax ?? 0;
         roundingAmount += order.rounding_amount;
-        textService += order.serviceCharge;
+        textService += order.serviceCharge ?? 0;
         discountval += order.voucher_amount != null ? order.voucher_amount : 0;
         totalRend = (netsale + taxval + textService) - discountval;
       }
@@ -1405,13 +1413,6 @@ class CommunFun {
 
     // cash drawer summery
 
-    if (shiftid != null) {
-      List<Shift> shift = await localAPI.getShiftData(shiftid);
-      if (shift.length > 0) {
-        shifittem = shift[0];
-        //statringAmount = shifittem.startAmount !=nu shifittem.startAmount.toDouble();
-      }
-    }
     List<Drawerdata> result =
         await localAPI.getPayinOutammount(shifittem.appId);
     if (result.length > 0) {

@@ -923,7 +923,9 @@ class _ShiftReportsState extends State<ShiftReports> {
             ),
             SizedBox(height: 5),
             Text(
-              (netSale / orders.length).toStringAsFixed(2),
+              orders.length > 0
+                  ? (netSale / orders.length).toStringAsFixed(2)
+                  : 0.toString(),
               style: Styles.orangeLarge(),
             )
           ],

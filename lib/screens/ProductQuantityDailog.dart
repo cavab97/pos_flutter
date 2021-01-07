@@ -1709,7 +1709,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                 });
               }
             }
-            print(json.encode(modifier));
             return Padding(
               padding: EdgeInsets.all(5),
               child: MaterialButton(

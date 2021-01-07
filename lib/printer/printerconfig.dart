@@ -59,7 +59,7 @@ class PrintReceipt {
 
     ticket.setStyles(PosStyles(align: PosAlign.left));
     final now = DateTime.now();
-    final formatter = DateFormat('MM/dd/yyyy H:m');
+    final formatter = DateFormat('MM/dd/yyyy HH:mm');
     final String timestamp = formatter.format(now);
     ticket.text("Date : " + timestamp,
         styles: PosStyles(
@@ -333,8 +333,10 @@ class PrintReceipt {
       }
       bytes = base64Decode(strImage);
     }
-
-    ticket.image(decodeImage(bytes));
+    var logo = decodeImage(bytes);
+    if (logo != null) {
+      ticket.image(logo);
+    }
 
     ticket.emptyLines(1);
 
@@ -392,7 +394,7 @@ class PrintReceipt {
     ]);
 
     final now = DateTime.now();
-    final formatter = DateFormat('MM/dd/yyyy H:m');
+    final formatter = DateFormat('MM/dd/yyyy HH:mm');
     final String timestamp = formatter.format(now);
     ticket.row([
       PosColumn(
@@ -1007,7 +1009,10 @@ class PrintReceipt {
       }
       bytes = base64Decode(strImage);
     }
-    ticket.image(decodeImage(bytes));
+    var logo = decodeImage(bytes);
+    if (logo != null) {
+      ticket.image(logo);
+    }
     ticket.emptyLines(1);
     ticket.text(branchData.address,
         styles: PosStyles(
@@ -1043,7 +1048,7 @@ class PrintReceipt {
           )),
     ]);
     final now = DateTime.now();
-    final formatter = DateFormat('MM/dd/yyyy H:m');
+    final formatter = DateFormat('MM/dd/yyyy HH:mm');
     final String timestamp = formatter.format(now);
     ticket.row([
       PosColumn(
@@ -1659,7 +1664,7 @@ class PrintReceipt {
           )),
     ]);
     final now = DateTime.now();
-    final formatter = DateFormat('MM/dd/yyyy H:m');
+    final formatter = DateFormat('MM/dd/yyyy HH:mm');
     final String timestamp = formatter.format(now);
     ticket.row([
       PosColumn(
@@ -2007,7 +2012,7 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: " : " + shift.createdAt,
+          text: " : " + shift.createdAt ?? shift.updatedAt,
           width: 8,
           styles: PosStyles(
             align: PosAlign.left,
@@ -2228,6 +2233,8 @@ class PrintReceipt {
     ticket.setStyles(PosStyles(align: PosAlign.left));
     /*For Case 48 char*/
     var data = 0.0;
+    orderPayments.removeWhere(
+        (elem) => elem.op_method_id == null || elem.op_method_id == 0);
     for (var i = 0; i < orderPayments.length; i++) {
       String caseTitle = printColumnWitSpace(38, paymentMethods[i].name, false);
       String caseTitleAmt = printColumnWitSpace(
@@ -2313,7 +2320,8 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: (netsale / totalPax).toStringAsFixed(2),
+          text: (totalPax > 0 ? (netsale / totalPax) : netsale)
+              .toStringAsFixed(2),
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,
@@ -2381,7 +2389,9 @@ class PrintReceipt {
             paymentMethods,
             ordersCount));
 
-    CommunFun.showToast(ctx, res.msg);
+    if (Navigator.of(ctx).mounted) {
+      CommunFun.showToast(ctx, res.msg);
+    }
   }
 
 /*========================================================================
@@ -2409,12 +2419,12 @@ class PrintReceipt {
 
     // final PosPrintResult res = await printerManager.printTicket(
     //     await testPrintReceipt(printerName, printerIp, isFor, ctx, isper));
-    if (res != null) {
+    /* if (res != null) {
       //ERROR
       //To safely refer to a widget's ancestor in its dispose() method, save a reference to the ancestor by calling dependOnInheritedWidgetOfExactType() in the widget's didChangeDependencies() method.
 
       await CommunFun.showToast(ctx, res.msg);
-    }
+    } */
   }
 
   Future<Ticket> testPrintReceipt(String printerName, String printerIp,
@@ -2437,7 +2447,7 @@ class PrintReceipt {
               align: PosAlign.center, bold: true, width: PosTextSize.size1));
 
       final now = DateTime.now();
-      final formatter = DateFormat('MM/dd/yyyy H:m');
+      final formatter = DateFormat('MM/dd/yyyy HH:mm');
       final String timestamp = formatter.format(now);
 
       ticket.text("Test Date time : " + timestamp,

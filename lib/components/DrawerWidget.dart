@@ -16,6 +16,7 @@ import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
+import 'package:mcncashier/services/Config.dart' as repo;
 
 class DrawerWid extends StatefulWidget {
   DrawerWid({Key key, this.onClose}) : super(key: key);
@@ -244,6 +245,7 @@ class DrawerWidState extends State<DrawerWid> {
       await CommunFun.openSyncPop(context);
       await CommunFun.syncOrdersANDStore(context, false);
       await CommunFun.syncAfterSuccess(context, false);
+      getconfigdata();
     } else {
       await SyncAPICalls.logActivity("Sync tables",
           "chashier has permission for Sync tables", "all tables", 1);
@@ -256,7 +258,20 @@ class DrawerWidState extends State<DrawerWid> {
         await CommunFun.syncAfterSuccess(context, false);
         await SyncAPICalls.logActivity("Sync tables",
             "Manager given permission for Sync tables", "all tables", 1);
+        getconfigdata();
       }, () {});
+    }
+  }
+
+  getconfigdata() async {
+    var res = await repo.getCongigData();
+    if (res["status"] == Constant.STATUS200) {
+      await Preferences.setStringToSF(
+          Constant.SYNC_TIMER, res["data"]["sync_timer"]);
+      await Preferences.setStringToSF(
+          Constant.CURRENCY, res["data"]["currency"]);
+    } else {
+      CommunFun.showToast(context, res["message"]);
     }
   }
 
@@ -300,6 +315,21 @@ class DrawerWidState extends State<DrawerWid> {
                 Strings.transaction,
                 style: Styles.drawerText(),
               ),
+            ),
+            ListTile(
+              onTap: () async {
+                Navigator.of(context).pop();
+                await SyncAPICalls.logActivity(
+                    "drawer", "Select Out of stock", "drawer", 1);
+                Navigator.pushNamed(context, Constant.OutofStock)
+                    .then(backEvent);
+              },
+              leading: Icon(
+                Icons.border_all,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 5,
+              ),
+              title: Text(Strings.outOfStock, style: Styles.drawerText()),
             ),
             ListTile(
               onTap: () async {
@@ -443,21 +473,6 @@ class DrawerWidState extends State<DrawerWid> {
                 size: SizeConfig.safeBlockVertical * 5,
               ),
               title: Text(Strings.settings, style: Styles.drawerText()),
-            ),
-            ListTile(
-              onTap: () async {
-                Navigator.of(context).pop();
-                await SyncAPICalls.logActivity(
-                    "drawer", "Select Out of stock", "drawer", 1);
-                Navigator.pushNamed(context, Constant.OutofStock)
-                    .then(backEvent);
-              },
-              leading: Icon(
-                Icons.border_all,
-                color: Colors.black,
-                size: SizeConfig.safeBlockVertical * 5,
-              ),
-              title: Text(Strings.outOfStock, style: Styles.drawerText()),
             ),
           ],
         ),

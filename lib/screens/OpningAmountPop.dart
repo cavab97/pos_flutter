@@ -49,34 +49,34 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
   }
 
   backspaceClick() {
-    if (currentNumber != "00" && currentNumber != "0") {
-      var currentnumber = currentNumber;
-      if (currentnumber != null && currentnumber.length > 0) {
-        currentnumber = currentnumber.substring(0, currentnumber.length - 1);
-        if (currentnumber.length == 0) {
-          currentnumber = "00";
-        }
-        setState(() {
-          currentNumber = currentnumber;
-        });
-      } else {
-        currentNumber = "00";
-      }
+    String currentnumber = currentNumber;
+    currentnumber = currentnumber.substring(0, currentnumber.length - 1);
+    if (currentnumber != null &&
+        currentnumber.length > 0 &&
+        currentnumber.isNotEmpty) {
+      setState(() {
+        currentNumber = currentnumber;
+      });
+    } else if (this.mounted) {
+      setState(() {
+        currentNumber = "0";
+      });
     }
   }
 
   numberClick(val) {
-    // add  value in prev value
-    if (currentNumber.length <= 8) {
-      var currentnumber = currentNumber;
-      if (currentnumber == "0") {
-        currentnumber = "";
-      }
-      currentnumber += val;
-      setState(() {
-        currentNumber = currentnumber;
-      });
+    String currentnumber = currentNumber.replaceAll("^0+", "");
+    if (double.tryParse(currentnumber) == 0) {
+      currentnumber = "";
     }
+    if (currentnumber == "" && (val == "00" || val == "0")) {
+      currentnumber = "0";
+    } else {
+      currentnumber += val;
+    }
+    setState(() {
+      currentNumber = currentnumber;
+    });
   }
 
   Widget closeButton(context) {

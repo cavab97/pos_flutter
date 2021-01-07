@@ -30,6 +30,7 @@ class Constant {
   // static final String USER_ROLE = "Roledata";
   static final String USER_PERMISSION = "user_permission";
   static final String IS_AUTO_SYNC = "is_Ayto_Sync";
+  static final String isPausePrint = "isPausePrint";
 
   /*==============================================================================
                               Manage Permission  status

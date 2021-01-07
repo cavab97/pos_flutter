@@ -123,9 +123,11 @@ class _SelectTablePageState extends State<SelectTablePage>
     }
 
     var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
-    setState(() {
-      isShiftOpen = isOpen != null && isOpen == "true" ? true : false;
-    });
+    if (this.mounted) {
+      setState(() {
+        isShiftOpen = isOpen != null && isOpen == "true" ? true : false;
+      });
+    }
   }
 
   getTables() async {
@@ -765,7 +767,8 @@ class _SelectTablePageState extends State<SelectTablePage>
     shift.serverId = 0;
     if (shiftid == null) {
       shift.startAmount = double.parse(ammount);
-      shift.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+      shift.updatedAt =
+          shift.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     } else {
       shift.endAmount = double.parse(ammount);
       shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());

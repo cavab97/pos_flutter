@@ -99,10 +99,12 @@ class CloseShiftPageState extends State<CloseShiftPage> {
               ),
               SizedBox(height: 30),
               Text(
-                DateFormat(Strings.dateFormat).format(DateTime.parse(
-                    shifittem.updatedAt != null
-                        ? shifittem.updatedAt
-                        : DateTime.now().toString())),
+                DateFormat(Strings.dateFormat).format(
+                  DateTime.parse((shifittem.createdAt == null &&
+                          shifittem.updatedAt == null)
+                      ? DateTime.now().toString()
+                      : shifittem.createdAt ?? shifittem.updatedAt),
+                ),
                 textAlign: TextAlign.center,
                 style: Styles.whiteSimpleSmall(),
               ),

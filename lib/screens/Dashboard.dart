@@ -1667,7 +1667,14 @@ class _DashboradPageState extends State<DashboradPage>
       shiftinvoice.serverId = 0;
       shiftinvoice.terminal_id = int.parse(terminalId);
       await localAPI.sendtoShiftInvoice(shiftinvoice);
-      await printReceipt(orderId);
+
+      String isPausePrint =
+          await Preferences.getStringValuesSF(Constant.isPausePrint);
+      if (isPausePrint == null) {
+        await printReceipt(orderId);
+      } else {
+        await clearCartAfterSuccess(orderId);
+      }
     }
   }
 
