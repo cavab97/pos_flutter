@@ -563,10 +563,13 @@ class _SelectTablePageState extends State<SelectTablePage>
 
     final Map arguments = ModalRoute.of(context).settings.arguments as Map;
     SizeConfig().init(context);
-    setState(() {
-      isAssigning = arguments['isAssign'];
-      orderid = arguments['orderID'];
-    });
+    if (arguments != null && this.mounted) {
+      setState(() {
+        isAssigning = arguments['isAssign'];
+        orderid = arguments['orderID'];
+      });
+    }
+
     return WillPopScope(
       child: Scaffold(
         key: scaffoldKey,
@@ -816,10 +819,12 @@ class _SelectTablePageState extends State<SelectTablePage>
   getAllPrinter() async {
     List<Printer> printer = await localAPI.getAllPrinterForKOT();
     List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
-    setState(() {
-      printerList = printer;
-      printerreceiptList = printerDraft;
-    });
+    if (this.mounted) {
+      setState(() {
+        printerList = printer;
+        printerreceiptList = printerDraft;
+      });
+    }
   }
 
   Widget shiftbtn(Function onPress) {

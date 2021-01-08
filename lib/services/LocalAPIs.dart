@@ -949,9 +949,35 @@ class LocalAPI {
     return orderDetailData.app_id;
   }
 
+  Future<int> getOPIdFromOrderPayment() async {
+    var qey =
+        "SELECT order_payment.op_id from order_payment WHERE op_id != '' ORDER BY op_id DESC";
+    //where order_app_id =" +paymentData.order_app_id.toString();
+    var checkisExit = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
+    List<OrderPayment> list = checkisExit.length > 0
+        ? checkisExit.map((c) => OrderPayment.fromJson(c)).toList()
+        : [];
+    return list.length > 0 ? list[0].op_id + 1 : 1;
+  }
+
   Future<int> sendtoOrderPayment(OrderPayment paymentData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var orderid = await db.insert("order_payment", paymentData.toJson());
+    try {
+      var orderid = await db.insert("order_payment", paymentData.toJson());
+
+      var qey = "SELECT order_payment.* from order_payment ";
+      //where order_app_id =" +paymentData.order_app_id.toString();
+      var checkisExit =
+          await DatabaseHelper.dbHelper.getDatabse().rawQuery(qey);
+      List<OrderPayment> list = checkisExit.length > 0
+          ? checkisExit.map((c) => OrderPayment.fromJson(c)).toList()
+          : [];
+      for (OrderPayment item in list) {
+        print(item.toJson());
+      }
+    } catch (e) {
+      print(e.toString());
+    }
     /*  await SyncAPICalls.logActivity(
         "orders", "Order ", "order_payment", orderid); */
     return paymentData.app_id;

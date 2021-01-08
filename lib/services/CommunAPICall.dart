@@ -16,7 +16,7 @@ class APICalls {
         final client = new http.Client();
         final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
         var params = json.encode(stringParams);
-        print(params);
+        //print(params);
         final response = await client.post(
           url,
           headers: headers,

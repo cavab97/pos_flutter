@@ -185,6 +185,14 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
     );
   }
 
+  clearClick() {
+    if (this.mounted) {
+      setState(() {
+        currentNumber = "0.00";
+      });
+    }
+  }
+
   showCardOptionPop() {
     showDialog(
       context: context,
@@ -280,43 +288,71 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   }
 
   backspaceClick() {
-    if (currentNumber == widget.totalAmount.toStringAsFixed(2)) {
-      setState(() {
-        currentNumber = "0";
-      });
-    }
     if (currentNumber != "0") {
-      var currentnumber = currentNumber;
-      if (currentnumber != null && currentnumber.length > 0) {
-        currentnumber = currentnumber.substring(0, currentnumber.length - 1);
-        if (currentnumber.length == 0) {
-          currentnumber = "0";
+      String currentnumber =
+          currentNumber.replaceAll('.', '').replaceAll("^0+", "");
+      currentnumber = currentnumber.substring(0, currentnumber.length - 1);
+      if (currentnumber.length == 0 && this.mounted) {
+        setState(() {
+          currentNumber = "0.00";
+        });
+      } else if (currentnumber != null && currentnumber.length > 0) {
+        switch (currentnumber.length) {
+          case 1:
+            currentnumber = "0.0" + currentnumber;
+            break;
+          case 2:
+            currentnumber = "0." + currentnumber;
+            break;
+          default:
+            String output = [
+              currentnumber.substring(0, currentnumber.length - 2),
+              ".",
+              currentnumber.substring(currentnumber.length - 2)
+            ].join("");
+            currentnumber = output;
+            break;
         }
         setState(() {
           currentNumber = currentnumber;
-        });
-      } else {
-        setState(() {
-          currentNumber = "0";
         });
       }
     }
   }
 
   numberClick(val) {
-    if (currentNumber == widget.totalAmount.toStringAsFixed(2) &&
-        this.mounted) {
-      setState(() {
-        currentNumber = "";
-      });
-    }
     // add  value in prev value
-    if (currentNumber.length <= 8) {
-      var currentnumber = currentNumber;
-      if (currentnumber == "0") {
-        currentnumber = "";
+
+    String currentnumber =
+        currentNumber.replaceAll('.', '').replaceAll("^0+", "");
+    currentnumber = currentnumber == "0" ? "" : currentnumber;
+    if (val.length > 3) {
+      currentnumber = val;
+    } else {
+      switch (currentnumber.length + val.length) {
+        case 1:
+          if (currentnumber == "0" || currentnumber == "") {
+            currentnumber = "0.0" + val;
+          } else {
+            currentnumber = "0." + currentnumber + val;
+          }
+          break;
+        default:
+          currentnumber += val;
+          String output = [
+            currentnumber.substring(0, currentnumber.length - 2),
+            ".",
+            currentnumber.substring(currentnumber.length - 2)
+          ].join("");
+          currentnumber = output;
+          break;
       }
-      currentnumber += val;
+    }
+    /* double totalAmount = widget.totalAmount ?? 0;
+    if (double.tryParse(currentnumber) > totalAmount) {
+      currentnumber = totalAmount.toString();
+    } */
+    if (this.mounted && currentNumber != currentnumber) {
       setState(() {
         currentNumber = currentnumber;
       });
@@ -432,6 +468,30 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
     );
   }
 
+  Widget _clearbutton(String number, Function() f) {
+    var size = MediaQuery.of(context).size.width / 2.3;
+    double resize = size / 6;
+    return Container(
+      width: resize,
+      padding: EdgeInsets.all(5),
+      height: resize,
+      child: MaterialButton(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+            side: BorderSide(color: Colors.grey)),
+        // child: Icon(
+        //   Icons.highlight_remove_sharp,
+        //   color: Colors.black,
+        //   size: SizeConfig.safeBlockVertical * 4,
+        // ),
+        child: Text(number),
+        textColor: Colors.black,
+        color: Colors.grey[100],
+        onPressed: f,
+      ),
+    );
+  }
+
   Widget getNumbers(context) {
     return Stack(children: [
       Container(
@@ -516,7 +576,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                         // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           splshsButton("10", () {
-                            numberClick('10');
+                            numberClick('10.00');
                           }), // using custom widget button
                         ],
                       ),
@@ -524,7 +584,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                         // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           splshsButton("20", () {
-                            numberClick('20');
+                            numberClick('20.00');
                           }), // using custom widget button
                         ],
                       ),
@@ -533,7 +593,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                         children: <Widget>[
                           // using custom widget button
                           splshsButton("50", () {
-                            numberClick('50');
+                            numberClick('50.00');
                           }),
                         ],
                       ),
@@ -541,7 +601,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                           // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
                             splshsButton("100", () {
-                              numberClick('100');
+                              numberClick('100.00');
                             }), //
                           ]),
                       Row(
@@ -549,7 +609,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                         children: <Widget>[
                           // using custom widget button
                           splshsButton("150", () {
-                            numberClick('150');
+                            numberClick('150.00');
                           }),
                         ],
                       ),
@@ -592,11 +652,15 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                         _button("6", () {
                           numberClick('6');
                         }),
+
+                        _clearbutton("CLR", () {
+                          clearClick();
+                        }), /* 
                         _button(".", () {
                           if (!currentNumber.contains(".")) {
                             numberClick('.');
                           }
-                        }),
+                        }), */
                       ],
                     ),
                     Row(children: [
@@ -678,6 +742,10 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                                 .toStringAsFixed(2), () {
                           if (!isPaymented && this.mounted) {
                             setState(() {
+                              if (seletedPayment.paymentId == null) {
+                                return CommunFun.showToast(
+                                    context, Strings.selectPayment);
+                              }
                               currentPayment.op_amount = currentNumber == "0"
                                   ? widget.totalAmount
                                   : double.parse(currentNumber);

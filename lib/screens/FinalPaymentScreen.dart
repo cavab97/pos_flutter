@@ -51,11 +51,10 @@ class FinalEndScreentate extends State<FinalEndScreen> {
           height: double.infinity,
           child: new GestureDetector(
             onTap: () async {
-              Navigator.of(context).pushNamed(Constant.SelectTableScreen);
               widget.onClose();
               await SyncAPICalls.logActivity(
                   "Order", "Place Order", "order", 1);
-              Navigator.of(context).pop();
+              Navigator.of(context).popAndPushNamed(Constant.SelectTableScreen);
             },
             child: Container(
               width: MediaQuery.of(context).size.width,

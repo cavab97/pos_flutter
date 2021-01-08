@@ -497,7 +497,8 @@ class CommunFun {
       await databaseHelper.accetsData(aceets["data"]);
       await Preferences.setStringToSF(
           Constant.OFFSET, aceets["data"]["next_offset"].toString());
-      print(aceets["data"]["product_image"]);
+      //print assets product image
+      //print(aceets["data"]["product_image"]);
       if (offset == null) {
         if (aceets["data"]["next_offset"] != 0) {
           getAssetsData(context, isOpen);
@@ -1032,13 +1033,17 @@ class CommunFun {
     await Preferences.removeSinglePref(Constant.LastSync_Table);
     await Preferences.removeSinglePref(Constant.OFFSET);
     await CommunFun.syncAfterSuccess(context, false);
+
+    print(DateTime.now());
   }
 
   static getsetWebOrders(context) async {
     var res = await SyncAPICalls.getWebOrders(context);
-    if (res.length < 1 || res["data"] == null) {
+    if (res != null && res.length < 1 || res["data"] == null) {
       print('getsetWebOrders api error');
       return;
+    } else if (res == null) {
+      print('get web orders response null');
     }
     var sertvertime = res["data"]["serverdatetime"];
     await Preferences.setStringToSF(
@@ -1265,9 +1270,10 @@ class CommunFun {
     cartdetails.productSecondName = productItem.name_2;
     cartdetails.productPrice = productItem.price;
     cartdetails.productDetailAmount = isEditing
-        ? double.parse(productItem.price.toStringAsFixed(2)) +
+        ? double.tryParse(productItem.price.toStringAsFixed(2)) +
             sameitem.productPrice
-        : double.parse(productItem.price.toStringAsFixed(2));
+        : (cartItemproduct.qty *
+            double.tryParse(productItem.price.toStringAsFixed(2)));
     cartdetails.productQty =
         isEditing ? sameitem.productQty + 1.0 : productItem.qty ?? 1.0;
     cartdetails.productNetPrice = productItem.oldPrice;

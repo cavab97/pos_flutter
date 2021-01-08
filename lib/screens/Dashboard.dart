@@ -137,6 +137,7 @@ class _DashboradPageState extends State<DashboradPage>
   MSTCartdetails itemSelected = new MSTCartdetails();
   bool isInit = true;
   String cartListTemp;
+  bool isCounting = false;
 
   @override
   void initState() {
@@ -317,6 +318,9 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   countTotals(int cartId) async {
+    setState(() {
+      isCounting = true;
+    });
     MST_Cart cart = await localAPI.getCartData(cartId);
     List<MSTCartdetails> cartdetails = await localAPI.getCartItem(cartId);
     double currentSubtotal = 0.00;
@@ -379,6 +383,7 @@ class _DashboradPageState extends State<DashboradPage>
             (subtotal - discount) + tax + serviceCharge; //cart.grand_total;
         selectedvoucher = vaocher;
         if (isInit) isInit = false;
+        isCounting = false;
       });
     }
   }
@@ -1367,7 +1372,7 @@ class _DashboradPageState extends State<DashboradPage>
     order.tax_amount = cartData.tax;
     order.tax_json = cartData.tax_json;
     order.order_date = await CommunFun.getCurrentDateTime(DateTime.now());
-    order.order_status = 1;
+    order.order_status = 4;
     order.server_id = 0;
     order.isSync = 0;
     order.pax = selectedTable.number_of_pax;
@@ -1587,8 +1592,7 @@ class _DashboradPageState extends State<DashboradPage>
           orderpayment.last_digits = payment[i].last_digits;
           orderpayment.reference_number = payment[i].reference_number;
           orderpayment.approval_code = payment[i].approval_code;
-          orderpayment.isCash =
-              payment[i].isCash != null ? payment[i].isCash : 0;
+          orderpayment.isCash = payment[i].isCash ?? 0;
           orderpayment.op_amount = payment[i].op_amount.toDouble();
           orderpayment.op_amount_change = payment[i].op_amount_change;
           orderpayment.op_method_response = '';
@@ -3353,15 +3357,17 @@ class _DashboradPageState extends State<DashboradPage>
             width: MediaQuery.of(context).size.width / 7,
             child: RaisedButton.icon(
               padding: EdgeInsets.only(top: 5, bottom: 5),
-              onPressed: () async {
-                if (!isWebOrder) {
-                  sendPayment();
-                } else {
-                  checkoutWebOrder();
-                }
-                await SyncAPICalls.logActivity(
-                    "payment", "Clicked pay and perform payment", "voucher", 1);
-              },
+              onPressed: isCounting
+                  ? null
+                  : () async {
+                      if (!isWebOrder) {
+                        sendPayment();
+                      } else {
+                        checkoutWebOrder();
+                      }
+                      await SyncAPICalls.logActivity("payment",
+                          "Clicked pay and perform payment", "voucher", 1);
+                    },
               icon: Icon(
                 Icons.payment,
                 color: Colors.white,
@@ -3371,6 +3377,7 @@ class _DashboradPageState extends State<DashboradPage>
                 !isWebOrder ? Strings.titlePay : Strings.checkout,
                 style: Styles.whiteBoldsmall(),
               ),
+              disabledColor: StaticColor.deepOrange,
               color: StaticColor.deepOrange,
               textColor: StaticColor.colorWhite,
               shape: RoundedRectangleBorder(

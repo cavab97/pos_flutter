@@ -18,10 +18,16 @@ import 'package:mcncashier/services/allTablesSync.dart';
 
 class PaymentMethodPop extends StatefulWidget {
   // Opning ammount popup
-  PaymentMethodPop({Key key, this.subTotal, this.grandTotal, this.onClose})
+  PaymentMethodPop(
+      {Key key,
+      this.subTotal,
+      this.grandTotal,
+      this.onClose,
+      this.currentMode = ""})
       : super(key: key);
   final double grandTotal;
   final double subTotal;
+  final String currentMode;
   Function onClose;
 
   @override
@@ -62,9 +68,9 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
 
   getPaymentMethods() async {
     var result = await localAPI.getPaymentMethods();
-    List<Payments> mainPaymentList =
-        result.where((i) => i.isParent == 0).toList();
-
+    List<Payments> mainPaymentList = result
+        .where((i) => i.isParent == 0 && i.name.toLowerCase().contains('cash'))
+        .toList();
     if (result.length != 0) {
       setState(() {
         paymenttyppeList = mainPaymentList;
@@ -91,7 +97,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
     }
   }
 
-  cashPayment(payment) {
+  cashPayment(Payments payment) {
     showDialog(
         // Opning Ammount Popup
         context: context,
@@ -101,18 +107,55 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
               ammountext: updatedAmmount,
               onEnter: (ammount) {
                 Navigator.of(context).pop();
-                if (double.parse(ammount) < widget.grandTotal) {
+                if (widget.currentMode == "refund") {
+                  showFinalScreenDialog(payment, double.parse(ammount));
+                  return true;
+                } else if (double.parse(ammount) < widget.grandTotal) {
                   setState(() {
                     isSpliting = true;
                     ispaymented = false;
                   });
+                } else {
+                  finalPayment(payment, double.parse(ammount));
                 }
-                finalPayment(payment, double.parse(ammount));
               });
         });
   }
 
-  finalPayment(payment, ammount) async {
+  showFinalScreenDialog(payment, ammount) async {
+    List<OrderPayment> totalPayment = [];
+    OrderPayment orderpayment = new OrderPayment();
+    orderpayment.op_method_id = payment.paymentId;
+    orderpayment.remark = remarkInputController.text;
+    orderpayment.approval_code = codeInput.text;
+    orderpayment.last_digits = digitController.text;
+    orderpayment.reference_number = refInputController.text;
+    orderpayment.is_split = isSpliting ? 1 : 0;
+    orderpayment.op_amount = (ammount * -1);
+    double change = 0.0;
+    if (ammount > widget.grandTotal) {
+      change = ammount - widget.grandTotal;
+      orderpayment.op_amount_change = change;
+    }
+    totalPayment.add(orderpayment);
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return FinalEndScreen(
+          total: widget.grandTotal,
+          totalPaid: 0,
+          change: ammount, //* -1),
+          onClose: () {
+            Navigator.of(context).pop();
+            widget.onClose(totalPayment);
+          },
+        );
+      },
+    );
+  }
+
+  finalPayment(Payments payment, ammount) async {
     List<OrderPayment> totalPayment = [];
     if (!isSpliting) {
       OrderPayment orderpayment = new OrderPayment();
@@ -128,6 +171,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
         change = ammount - widget.grandTotal;
         orderpayment.op_amount_change = change;
       }
+      orderpayment.isCash = payment.name.toLowerCase() == "cash" ? 1 : 0;
       totalPayment.add(orderpayment);
       await SyncAPICalls.logActivity("payment",
           "Select for payment" + payment.name.toString(), "payment", 1);
@@ -290,8 +334,11 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
             padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
             height: SizeConfig.safeBlockVertical * 9,
             decoration: BoxDecoration(
-                color: StaticColor.colorWhite,
-                border: Border.all(color: StaticColor.colorBlack)),
+              color: StaticColor.colorWhite,
+              border: Border(
+                bottom: BorderSide(color: StaticColor.colorBlack),
+              ),
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -369,7 +416,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                     ));
               }).toList(),
             ),
-            Container(
+            /* Container(
               decoration: BoxDecoration(
                   border: Border.all(
                     color: StaticColor.colorGrey,
@@ -402,7 +449,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
                   style: Styles.blackMediumBold(),
                 ),
               ),
-            )
+            ) */
           ],
         ),
       ),

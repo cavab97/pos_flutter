@@ -102,8 +102,11 @@ class _CashPaymentState extends State<CashPaymentPage> {
                 horizontal: SizeConfig.safeBlockVertical * 5),
             height: SizeConfig.safeBlockVertical * 9,
             decoration: BoxDecoration(
-                color: StaticColor.colorWhite,
-                border: Border.all(color: StaticColor.colorBlack)),
+              color: StaticColor.colorWhite,
+              border: Border(
+                bottom: BorderSide(color: Colors.black),
+              ),
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -193,8 +196,9 @@ class _CashPaymentState extends State<CashPaymentPage> {
       height: (number == Strings.enter) ? (resize * 2) : resize,
       child: MaterialButton(
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-            side: BorderSide(color: StaticColor.colorGrey)),
+          borderRadius: BorderRadius.circular(10.0),
+          side: BorderSide(color: StaticColor.colorGrey),
+        ),
         child: number != Strings.enter
             ? Text(number,
                 textAlign: TextAlign.center, style: Styles.blackMediumBold())
@@ -424,12 +428,14 @@ class _CashPaymentState extends State<CashPaymentPage> {
                     ),
                     _button(Strings.enter, () {
                       widget.onEnter(currentNumber);
+                      //Navigator.of(context).pop();
                     })
                   ]),
                   Row(
                     children: <Widget>[
                       _totalbutton(widget.ammountext.toStringAsFixed(2), () {
                         widget.onEnter(widget.ammountext.toString());
+                        //Navigator.of(context).pop();
                       }),
                     ],
                   ),

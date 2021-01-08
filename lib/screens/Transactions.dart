@@ -128,13 +128,25 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   getTansactionList() async {
-    setState(() {
-      isScreenLoad = true;
-    });
+    if (this.mounted) {
+      setState(() {
+        isScreenLoad = true;
+      });
+    }
     var terminalid = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     List<Orders> orderList =
         await localAPI.getOrdersList(branchid, terminalid, currentOffset);
+    // convert each item to a string by using JSON encoding
+    final jsonList = orderList.map((item) => jsonEncode(item)).toList();
+
+    // using toSet - toList strategy
+    final uniqueJsonList = jsonList.toSet().toList();
+
+    // convert each item back to the original form using JSON decoding
+    orderList = uniqueJsonList
+        .map((item) => Orders.fromJson(jsonDecode(item)))
+        .toList();
     if (orderList.length > 0) {
       setState(() {
         orderLists.addAll(orderList);
@@ -142,9 +154,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
       });
       getOrderDetails(orderLists[0]);
     }
-    setState(() {
-      isScreenLoad = false;
-    });
+    if (this.mounted) {
+      setState(() {
+        isScreenLoad = false;
+      });
+    }
   }
 
   getOrderDetails(Orders order) async {
@@ -268,6 +282,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           return PaymentMethodPop(
             subTotal: selectedOrder.sub_total,
             grandTotal: selectedOrder.grand_total,
+            currentMode: "refund",
             onClose: (mehtod) {
               cancleTransactionWithMethod(mehtod, reason);
             },
@@ -282,6 +297,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   cancleTransation(reason) async {
     //:Cancle Transation Pop // 1 for  cancle
+
     Orders orderData = Orders();
     User userdata = await CommunFun.getuserDetails();
     orderData = selectedOrder;
@@ -293,6 +309,16 @@ class _TransactionsPageState extends State<TransactionsPage> {
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
+    await SyncAPICalls.logActivity(
+        "Cancel Transaction",
+        "Cashier (" +
+            userdata.name +
+            ') cancel order : ' +
+            orderData.invoice_no +
+            ' on ' +
+            orderData.updated_at,
+        "Order",
+        1);
     CancelOrder order = new CancelOrder();
     order.orderId = selectedOrder.order_id;
     order.order_app_id = selectedOrder.app_id;
@@ -378,6 +404,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           return PaymentMethodPop(
             subTotal: selectedOrder.sub_total,
             grandTotal: selectedOrder.grand_total,
+            currentMode: "refund",
             onClose: (mehtod) {
               Navigator.of(context).pop();
               returnPayment(mehtod);
@@ -387,19 +414,21 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   returnPayment(paymentMehtod) async {
+    var currentDateTime = await CommunFun.getCurrentDateTime(DateTime.now());
     Orders orderData = Orders();
     User userdata = await CommunFun.getuserDetails();
     orderData = selectedOrder;
     orderData.order_status = 5;
     orderData.isSync = 0;
-    orderData.updated_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    orderData.updated_at = currentDateTime;
     orderData.updated_by = userdata.id;
-    await localAPI.updateOrderStatus(orderData);
-    var upDate = await CommunFun.getCurrentDateTime(DateTime.now());
-    await localAPI.updatePaymentStatus(selectedOrder.app_id,
-        selectedOrder.terminal_id, 5, upDate, userdata.id);
+
+    localAPI.updateOrderStatus(orderData);
+    //var upDate = await CommunFun.getCurrentDateTime(DateTime.now());
+    //double totalPay = 0;
     var terminalId = await CommunFun.getTeminalKey();
     var uuid = await CommunFun.getLocalID();
+    var branchid = await CommunFun.getbranchId();
     if (paymentMehtod.length > 0) {
       for (var i = 0; i < paymentMehtod.length; i++) {
         OrderPayment orderpayment = paymentMehtod[i];
@@ -413,15 +442,37 @@ class _TransactionsPageState extends State<TransactionsPage> {
           drawer.reason = "refundOrder";
           drawer.status = 1;
           drawer.createdBy = userdata.id;
-          drawer.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+          drawer.createdAt = currentDateTime;
           drawer.localID = uuid;
           drawer.terminalid = int.parse(terminalId);
-          await localAPI.saveInOutDrawerData(drawer);
+          localAPI.saveInOutDrawerData(drawer);
         }
+        orderpayment.op_status = 5;
+
+        List<OrderPayment> lapPpid =
+            await localAPI.getLastOrderPaymentAppid(terminalId);
+        if (lapPpid.length > 0) {
+          orderpayment.app_id = lapPpid[0].app_id + 1;
+        } else {
+          orderpayment.app_id = 1;
+        }
+        orderpayment.op_id = await localAPI.getOPIdFromOrderPayment();
+        orderpayment.uuid = uuid;
+        orderpayment.order_app_id = orderData.order_id;
+        orderpayment.branch_id = int.parse(branchid);
+        orderpayment.terminal_id = int.parse(terminalId);
+        orderpayment.updated_by = userdata.id;
+        orderpayment.updated_at = currentDateTime;
+        orderpayment.isSync = 0;
+        orderpayment.isSync = 1;
+        localAPI.sendtoOrderPayment(orderpayment);
+        //totalPay += orderpayment.op_amount;
       }
+      /* await localAPI.updatePaymentStatus(selectedOrder.app_id,
+            selectedOrder.terminal_id, 5, upDate, userdata.id); */
+
     }
     List<OrderDetail> orderItem = orderItemList;
-    var branchid = await CommunFun.getbranchId();
     if (orderItem.length > 0) {
       for (var i = 0; i < orderItem.length; i++) {
         OrderDetail productDetail = orderItem[i];
@@ -436,11 +487,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
             ProductStoreInventory invData;
             invData = inventory[0];
             invData.qty = invData.qty + productDetail.detail_qty;
-            invData.updatedAt =
-                await CommunFun.getCurrentDateTime(DateTime.now());
+            invData.updatedAt = currentDateTime;
             invData.updatedBy = userdata.id;
             updatedInt.add(invData);
-            await localAPI.updateInvetory(updatedInt);
+            localAPI.updateInvetory(updatedInt);
             ProductStoreInventoryLog log = new ProductStoreInventoryLog();
             if (inventory.length > 0) {
               log.uuid = uuid;
@@ -452,11 +502,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
               log.qty = invData.qty;
               log.qty_before_change = invData.qty;
               log.qty_after_change = invData.qty + productDetail.detail_qty;
-              log.updated_at =
-                  await CommunFun.getCurrentDateTime(DateTime.now());
+              log.updated_at = currentDateTime;
               log.updated_by = userdata.id;
               updatedIntLog.add(log);
-              await localAPI.updateStoreInvetoryLogTable(updatedIntLog);
+              localAPI.updateStoreInvetoryLogTable(updatedIntLog);
             }
           }
         }
@@ -748,7 +797,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 top: 0,
               ),
               child: Text(
-                paymentMethod.length > 0
+                paymentMethod.length > index
                     ? paymentMethod[index].name.toUpperCase()
                     : "",
                 textAlign: TextAlign.end,
@@ -915,7 +964,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         child: Text(
           "Next",
           style: TextStyle(
-              color: orderpayment[0].op_status == 1
+              color: orderpayment[orderpayment.length - 1].op_status == 1
                   ? StaticColor.colorWhite
                   : StaticColor.colorwhite38,
               fontSize: 20),
@@ -935,7 +984,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       children: <Widget>[
         refundButton(() async {
           if (permissions.contains(Constant.REFUND)) {
-            if (orderpayment[0].op_status == 1) {
+            if (orderpayment[orderpayment.length - 1].op_status == 1) {
               refundProcessStart();
             }
           } else {
@@ -952,7 +1001,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
         CommunFun.horisontalSpace(10),
         cancelButton(() async {
           if (permissions.contains(Constant.CANCLE_TRANSACTION)) {
-            if (orderpayment[0].op_status == 1) {
+            if (orderpayment[orderpayment.length - 1].op_status == 1) {
               CommonUtils.showAlertDialog(context, () {
                 Navigator.of(context).pop();
               }, () {
@@ -973,7 +1022,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 1);
             await CommonUtils.openPermissionPop(
                 context, Constant.CANCLE_TRANSACTION, () async {
-              if (orderpayment[0].op_status == 1) {
+              if (orderpayment[orderpayment.length - 1].op_status == 1) {
                 await SyncAPICalls.logActivity(
                     "cancel transaction",
                     "Manager given permission for cancel transaction",
@@ -1056,7 +1105,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                         '0.0'
                                 ? selectedOrder.voucher_amount
                                     .toStringAsFixed(2)
-                                : "00.00",
+                                : "0.00",
                             textAlign: TextAlign.end,
                             style: TextStyle(
                                 fontSize: SizeConfig.safeBlockVertical * 2.8,
@@ -1097,7 +1146,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     selectedOrder.serviceCharge.toString() !=
                                         '0.0'
                                 ? selectedOrder.serviceCharge.toStringAsFixed(2)
-                                : "00.00",
+                                : "0.00",
                             textAlign: TextAlign.end,
                             style: TextStyle(
                                 fontSize: SizeConfig.safeBlockVertical * 2.8,
@@ -1237,7 +1286,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
         child: Text(
           "Refund",
           style: TextStyle(
-              color: orderpayment.length > 0 && orderpayment[0].op_status == 1
+              color: orderpayment.length > 0 &&
+                      orderpayment[orderpayment.length - 1].op_status == 1
                   ? StaticColor.colorWhite
                   : StaticColor.colorwhite38,
               fontSize: 20),
@@ -1260,7 +1310,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
           Strings.cancelTransaction,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-              color: orderpayment.length > 0 && orderpayment[0].op_status == 1
+              color: orderpayment.length > 0 &&
+                      orderpayment[orderpayment.length - 1].op_status == 1
                   ? StaticColor.colorWhite
                   : StaticColor.colorwhite38,
               fontSize: 20),
