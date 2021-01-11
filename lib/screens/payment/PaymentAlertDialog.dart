@@ -416,7 +416,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
               ),
         textColor: Colors.black,
         color: Colors.blue[900],
-        onPressed: f,
+        onPressed: isPaymented ? null : f,
       ),
     );
   }
@@ -741,11 +741,12 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                             (widget.totalAmount - paidAmount)
                                 .toStringAsFixed(2), () {
                           if (!isPaymented && this.mounted) {
+                            if (seletedPayment.paymentId == null) {
+                              return CommunFun.showToast(
+                                  context, Strings.selectPayment);
+                            }
                             setState(() {
-                              if (seletedPayment.paymentId == null) {
-                                return CommunFun.showToast(
-                                    context, Strings.selectPayment);
-                              }
+                              isPaymented = true;
                               currentPayment.op_amount = currentNumber == "0"
                                   ? widget.totalAmount
                                   : double.parse(currentNumber);
@@ -814,8 +815,8 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
               totalPaid: paidAmount,
               change: change,
               onClose: () {
-                Navigator.of(context).pop();
                 widget.onClose(totalPaymentList);
+                Navigator.of(context).pop();
               });
         });
   }

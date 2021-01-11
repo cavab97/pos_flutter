@@ -727,7 +727,7 @@ class LocalAPI {
         "mst_cart_sub_detail",
         cartItem.id); */
 
-    if (isLast) {
+    /* if (isLast) {
       await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartID]);
       /*  */
       await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartID]);
@@ -737,9 +737,9 @@ class LocalAPI {
           "delete cart all item from save_order", "save_order", cartItem.id);
     } else {
       //Update cart
-      await db.update("mst_cart", mainCart.toJson(),
-          where: 'id = ?', whereArgs: [cartID]);
-    }
+    } */
+    await db.update("mst_cart", mainCart.toJson(),
+        where: 'id = ?', whereArgs: [cartID]);
     return cartID;
   }
 
@@ -914,9 +914,15 @@ class LocalAPI {
 
   Future<int> placeOrder(Orders orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var orderid = await db.insert("orders", orderData.toJson());
+    if (orderData.order_id != null) {
+      orderData.app_id = orderData.order_id;
+      await db.delete("orders",
+          where: "order_id=? OR app_id=?",
+          whereArgs: [orderData.order_id, orderData.order_id]);
+    }
+    await db.insert("orders", orderData.toJson());
     /*  await SyncAPICalls.logActivity("orders", "place order", "orders", orderid); */
-    return orderData.app_id;
+    return orderData.order_id ?? orderData.app_id;
   }
 
   Future<int> sendOrderDetails(OrderDetail orderDetailData) async {
@@ -950,6 +956,8 @@ class LocalAPI {
   }
 
   Future<int> getOPIdFromOrderPayment() async {
+    var db = DatabaseHelper.dbHelper.getDatabse();
+    db.delete("order_payment", where: "order_app_id<0 OR order_app_id=''");
     var qey =
         "SELECT order_payment.op_id from order_payment WHERE op_id != '' ORDER BY op_id DESC";
     //where order_app_id =" +paymentData.order_app_id.toString();
@@ -963,7 +971,7 @@ class LocalAPI {
   Future<int> sendtoOrderPayment(OrderPayment paymentData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     try {
-      var orderid = await db.insert("order_payment", paymentData.toJson());
+      await db.insert("order_payment", paymentData.toJson());
 
       var qey = "SELECT order_payment.* from order_payment ";
       //where order_app_id =" +paymentData.order_app_id.toString();
@@ -972,9 +980,6 @@ class LocalAPI {
       List<OrderPayment> list = checkisExit.length > 0
           ? checkisExit.map((c) => OrderPayment.fromJson(c)).toList()
           : [];
-      for (OrderPayment item in list) {
-        print(item.toJson());
-      }
     } catch (e) {
       print(e.toString());
     }
@@ -1064,7 +1069,7 @@ class LocalAPI {
   Future<int> deleteCartItem(cartItem, cartID, mainCart, isLast) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     await db
-        .delete("mst_cart_Detail", where: 'id = ?', whereArgs: [cartItem.id]);
+        .delete("mst_cart_detail", where: 'id = ?', whereArgs: [cartItem.id]);
     /*  await SyncAPICalls.logActivity(
         "cart",
         "delete cart item from mst_cart_Detail",
@@ -1079,19 +1084,19 @@ class LocalAPI {
         "mst_cart_sub_detail",
         cartItem.id); */
 
-    // if (isLast) {
-    //   await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartID]);
-    //   await SyncAPICalls.logActivity(
-    //       "cart", "delete cart all item", "mst_Cart", cartItem.id);
-    //   await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartID]);
-
-    //   await SyncAPICalls.logActivity("cart",
-    //       "delete cart all item from save_order", "save_order", cartItem.id);
-    // } else {
-    //Update cart
     await db.update("mst_cart", mainCart.toJson(),
         where: 'id = ?', whereArgs: [cartID]);
-    // }
+    /* if (isLast) {
+      await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartID]);
+      /* await SyncAPICalls.logActivity(
+          "cart", "delete cart all item", "mst_Cart", cartItem.id);
+      await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartID]);
+
+      await SyncAPICalls.logActivity("cart",
+          "delete cart all item from save_order", "save_order", cartItem.id); */
+    } else {
+      //Update cart
+    } */
     return cartID;
   }
 
@@ -1128,10 +1133,10 @@ class LocalAPI {
 
   Future<List<OrderDetail>> getOrderDetailsList(orderid, terminalid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-
-    var qry = "SELECT DISTINCT order_detail.*,asset.base64 from order_detail LEFT JOIN" +
+    /* order_detail.* */
+    var qry = "SELECT DISTINCT order_detail.*, asset.base64 from order_detail LEFT JOIN" +
         " asset on asset.base64 =(SELECT base64 from asset WHERE asset.asset_type_id = order_detail.product_id AND asset.status = 1 AND " +
-        " asset.asset_type = CASE WHEN order_detail.issetMeal == 1 THEN  2 ELSE  1 END ORDER By asset.asset_id DESC LIMIT 1) " +
+        " asset.asset_type = CASE WHEN order_detail.issetMeal == 1 THEN 2 ELSE 1 END ORDER By asset.asset_id DESC LIMIT 1) " +
         " WHERE terminal_id =  " +
         terminalid.toString() +
         " AND order_app_id = " +
@@ -1141,7 +1146,9 @@ class LocalAPI {
     List<OrderDetail> list = ordersList.isNotEmpty
         ? ordersList.map((c) => OrderDetail.fromJson(c)).toList()
         : [];
-
+    for (OrderDetail item in list) {
+      print(item.toJson());
+    }
     // var qry1 = "SELECT * from order_detail WHERE terminal_id = " +
     //     terminalid.toString() +
     //     " AND order_app_id = " +
@@ -1314,12 +1321,12 @@ class LocalAPI {
   // }
   Future<List<Orders>> getOrdersList(branchid, terminalid, int offset) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from orders  " +
+    var qry = "SELECT * from orders" +
         // " where branch_id = " +
         // branchid.toString() +
         // " AND terminal_id = " +
         // terminalid.toString() +
-        " ORDER By orders.order_date DESC LIMIT 10 OFFSET  " +
+        " GROUP BY invoice_no ORDER By orders.order_date DESC, isSync DESC LIMIT 10 OFFSET  " +
         offset.toString();
     var ordersList = await db.rawQuery(qry);
     List<Orders> list = ordersList.isNotEmpty
@@ -1331,20 +1338,19 @@ class LocalAPI {
 
   Future<List<Orders>> getOrdersListTable(branchid, terminalId) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var qry = "SELECT * from orders where (branch_id = " +
+    var qry = "SELECT * from orders WHERE branch_id = " +
         branchid.toString() +
-        " AND order_source = 2 AND server_id = 0 AND terminal_id = " +
+        " AND order_source = 2 AND terminal_id = " +
         terminalId.toString() +
-        ") OR (branch_id = " +
-        branchid.toString() +
-        " AND order_source = 2 AND isSync = 0 AND terminal_id = " +
-        terminalId.toString() +
-        ")";
+        " AND (isSync = 0 OR  server_id = 0)";
     var ordersList = await db.rawQuery(qry);
     List<Orders> list = ordersList.isNotEmpty
         ? ordersList.map((c) => Orders.fromJson(c)).toList()
         : [];
-
+    List<int> orderIds = [];
+    list.forEach((ele) => orderIds.add(ele.order_id));
+    //print(orderIds);
+    //db.delete('orders', where: 'server_id = ?', whereArgs: [0]);
     return list;
   }
 
@@ -1577,8 +1583,8 @@ class LocalAPI {
 
   Future<int> deleteOrderItem(detailid) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var result =
-        db.rawDelete("DELETE FROM order_detail WHERE app_id = ?", [detailid]);
+    var result = await db
+        .rawDelete("DELETE FROM order_detail WHERE app_id = ?", [detailid]);
     /* await SyncAPICalls.logActivity(
         "delete order item", "delete order items", "order_detail", detailid); */
     return result;
@@ -1797,16 +1803,26 @@ class LocalAPI {
 
   Future saveSyncOrder(Orders orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT * FROM orders where terminal_id = " +
+    /* var checkisExitqry = "SELECT * FROM orders where terminal_id = " +
         orderData.terminal_id.toString() +
-        " AND app_id =" +
-        orderData.app_id.toString();
-    var checkisExit = await db.rawQuery(checkisExitqry);
+        " AND order_id =" +
+        orderData.order_id.toString();
+        await db.rawQuery(checkisExitqry); */
+    var checkisExit = await db.query('order',
+        where: 'app_id =? AND terminal_id =? AND branch_id=?',
+        whereArgs: [
+          orderData.app_id,
+          orderData.terminal_id,
+          orderData.branch_id,
+        ]);
 
-    if (checkisExit.length > 0) {
+    if (checkisExit != null && checkisExit.length > 0) {
       await db.update("orders", orderData.toJson(),
-          where: "app_id =? AND terminal_id =?",
-          whereArgs: [orderData.app_id, orderData.terminal_id]);
+          where: "order_id =? AND terminal_id =?",
+          whereArgs: [
+            orderData.order_id,
+            orderData.terminal_id,
+          ]);
     } else {
       await db.insert("orders", orderData.toJson());
     }
@@ -1818,15 +1834,15 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var checkisExitqry = "SELECT *  FROM order_detail where terminal_id = " +
         orderData.terminal_id.toString() +
-        " AND app_id =" +
-        orderData.app_id.toString();
+        " AND order_app_id =" +
+        orderData.order_id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var newObj = orderData.toJson();
     newObj.remove("base64");
-    if (checkisExit.length > 0) {
+    if (checkisExit != null && checkisExit.length > 0) {
       await db.update("order_detail", newObj,
-          where: "app_id =?  AND terminal_id =? ",
-          whereArgs: [orderData.app_id, orderData.terminal_id]);
+          where: "order_app_id =?  AND terminal_id =? ",
+          whereArgs: [orderData.order_id, orderData.terminal_id]);
     } else {
       await db.insert("order_detail", newObj);
     }
@@ -1836,16 +1852,23 @@ class LocalAPI {
 
   Future saveSyncOrderPaymet(OrderPayment paymentdata) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT *  FROM order_payment where terminal_id = " +
+    var checkisExit = await db.query('order_payment',
+        where: 'terminal_id =? AND order_app_id =? AND branch_id=?',
+        whereArgs: [
+          paymentdata.terminal_id,
+          paymentdata.order_app_id,
+          paymentdata.branch_id
+        ]);
+    /* "SELECT *  FROM order_payment where terminal_id = " +
         paymentdata.terminal_id.toString() +
-        " AND app_id =" +
-        paymentdata.app_id.toString();
-    var checkisExit = await db.rawQuery(checkisExitqry);
+        " AND app =" +
+        paymentdata.order_id.toString();
+    var checkisExit = await db.rawQuery(checkisExitqry); */
 
-    if (checkisExit.length > 0) {
+    if (checkisExit != null && checkisExit.length > 0) {
       await db.update("order_payment", paymentdata.toJson(),
-          where: "app_id =? AND terminal_id =?",
-          whereArgs: [paymentdata.app_id, paymentdata.terminal_id]);
+          where: "order_app_id =? AND terminal_id =?",
+          whereArgs: [paymentdata.order_id, paymentdata.terminal_id]);
     } else {
       await db.insert("order_payment", paymentdata.toJson());
     }
@@ -1855,11 +1878,17 @@ class LocalAPI {
 
   Future saveSyncOrderModifire(OrderModifire orderData) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry = "SELECT * FROM order_modifier where terminal_id = " +
+    /* var checkisExitqry = "SELECT * FROM order_modifier where terminal_id = " +
         orderData.terminal_id.toString() +
         " AND app_id =" +
         orderData.app_id.toString();
-    var checkisExit = await db.rawQuery(checkisExitqry);
+        await db.rawQuery(checkisExitqry); */
+    var checkisExit = await db.query('order_modifier',
+        where: 'terminal_id=? AND app_id=?',
+        whereArgs: [
+          orderData.terminal_id,
+          orderData.app_id,
+        ]);
     var newObj = orderData.toJson();
     newObj.remove("name");
     if (checkisExit.length > 0) {
@@ -2176,7 +2205,7 @@ class LocalAPI {
     var db = DatabaseHelper.dbHelper.getDatabse();
     var res =
         await db.delete("orders", where: "app_id =?", whereArgs: [orderid]);
-    print(res);
+    //print(res);
   }
 
   Future<List<Countrys>> getCountrysList() async {
@@ -2592,7 +2621,7 @@ class LocalAPI {
   Future<int> deleteTerminalLogAfterSync(List<TerminalLog> logList) async {
     var db = DatabaseHelper.dbHelper.getDatabse();
     for (TerminalLog log in logList) {
-      db.delete("terminal_log", where: "id =?", whereArgs: [log.id]);
+      await db.delete("terminal_log", where: "id =?", whereArgs: [log.id]);
     }
   }
 }

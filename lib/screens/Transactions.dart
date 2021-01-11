@@ -147,7 +147,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     orderList = uniqueJsonList
         .map((item) => Orders.fromJson(jsonDecode(item)))
         .toList();
-    if (orderList.length > 0) {
+    if (orderList.length > 0 && this.mounted) {
       setState(() {
         orderLists.addAll(orderList);
         currentOffset += 10;
@@ -162,27 +162,27 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   getOrderDetails(Orders order) async {
-    setState(() {
-      isScreenLoad = true;
-    });
     var date = await CommunFun.getCurrentDateTime(DateTime.parse(
         order.order_date != null
             ? order.order_date
             : DateTime.now().toString()));
     var orderDateF =
         DateFormat('EEE, MMM d yyyy, hh:mm aaa').format(DateTime.parse(date));
-    setState(() {
-      selectedOrder = order;
-      orderDate = orderDateF;
-      isWeborder = order.order_source == 1 ? true : false;
-      taxJson = json.decode(selectedOrder.tax_json);
-    });
+    if (this.mounted) {
+      setState(() {
+        isScreenLoad = true;
+        selectedOrder = order;
+        orderDate = orderDateF;
+        isWeborder = order.order_source == 1 ? true : false;
+        taxJson = json.decode(selectedOrder.tax_json);
+      });
+    }
 
     List<OrderDetail> orderItem =
         await localAPI.getOrderDetailsList(order.app_id, order.terminal_id);
     // List<ProductDetails> details =
     //     await localAPI.getOrderDetails(order.app_id, order.terminal_id);
-    if (orderItem.length > 0) {
+    if (orderItem.length > 0 && this.mounted) {
       setState(() {
         orderItemList = orderItem;
       });
@@ -191,13 +191,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
     //  if (order.order_source == 2) {
     List<OrderPayment> orderpaymentdata =
         await localAPI.getOrderpaymentData(order.app_id, order.terminal_id);
-    setState(() {
-      orderpayment = orderpaymentdata;
-    });
-    if (orderpayment.length > 0) {
+    if (orderpayment.length > 0 && this.mounted) {
       List<Payments> payMethod =
           await localAPI.getOrderpaymentmethod(order.app_id, order.terminal_id);
       setState(() {
+        orderpayment = orderpaymentdata;
         paymentMethod = payMethod;
       });
       User user = await localAPI.getPaymentUser(orderpayment[0].op_by);
@@ -207,11 +205,14 @@ class _TransactionsPageState extends State<TransactionsPage> {
         });
       }
     }
-    setState(() {
-      isScreenLoad = false;
-    });
-    await SyncAPICalls.logActivity(
-        "transactions", "clicked transaction details", "transactions", 1);
+    if (this.mounted) {
+      setState(() {
+        isScreenLoad = false;
+        SyncAPICalls.logActivity(
+            "transactions", "clicked transaction details", "transactions", 1);
+      });
+    }
+
     //}
   }
 
@@ -232,14 +233,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
     setState(() {
       filterList = list;
     });
-  }
-
-  refundProcessStart() async {
-    setState(() {
-      isRefunding = true;
-    });
-    await SyncAPICalls.logActivity(
-        "transactions", "clicked redund button", "transactions", 1);
   }
 
   showReasontypePop() {
@@ -413,6 +406,32 @@ class _TransactionsPageState extends State<TransactionsPage> {
         });
   }
 
+  requestRefund() async {
+    var alertRefund = CommonUtils.showAlertDialog(context, () {
+      Navigator.of(context).pop();
+    }, () {
+      Navigator.of(context).pop();
+      refundSelectedammout();
+      SyncAPICalls.logActivity(
+          "payment", "Cashier request reund", "payment", 1);
+    }, "Warning", "Do you want to request refund for this transaction?", "Yes",
+        "No", true);
+    if (permissions.contains(Constant.PAYMENT)) {
+      await alertRefund;
+    } else {
+      await CommonUtils.openPermissionPop(context, Constant.PAYMENT, () async {
+        await alertRefund;
+        SyncAPICalls.logActivity("payment",
+            "Manager given permission for payment while refund", "payment", 1);
+      }, () {});
+    }
+    /* setState(() {
+      isRefunding = true;
+    });
+    SyncAPICalls.logActivity(
+        "transactions", "clicked redund button", "transactions", 1); */
+  }
+
   returnPayment(paymentMehtod) async {
     var currentDateTime = await CommunFun.getCurrentDateTime(DateTime.now());
     Orders orderData = Orders();
@@ -456,15 +475,23 @@ class _TransactionsPageState extends State<TransactionsPage> {
         } else {
           orderpayment.app_id = 1;
         }
-        orderpayment.op_id = await localAPI.getOPIdFromOrderPayment();
+        //await localAPI.getOPIdFromOrderPayment();
+        //orderpayment.op_id = await localAPI.getOPIdFromOrderPayment();
         orderpayment.uuid = uuid;
-        orderpayment.order_app_id = orderData.order_id;
+        orderpayment.order_app_id = orderData.order_id ?? orderData.app_id;
         orderpayment.branch_id = int.parse(branchid);
         orderpayment.terminal_id = int.parse(terminalId);
         orderpayment.updated_by = userdata.id;
         orderpayment.updated_at = currentDateTime;
         orderpayment.isSync = 0;
-        orderpayment.isSync = 1;
+        orderpayment.op_datetime = currentDateTime;
+        orderpayment.op_by = userdata.id;
+        orderpayment.reference_number = null;
+        orderpayment.remark = null;
+        orderpayment.last_digits = null;
+        orderpayment.approval_code = null;
+        orderpayment.server_id = 0;
+        orderpayment.isCash = 1;
         localAPI.sendtoOrderPayment(orderpayment);
         //totalPay += orderpayment.op_amount;
       }
@@ -515,7 +542,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       isRefunding = false;
     });
     Navigator.of(context).pop();
-    getTansactionList();
+    //getTansactionList();
   }
 
   deleteItemFormList(product) async {
@@ -690,9 +717,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                                   Divider(),
                                                   paymentDetails(),
                                                   changeText(),
-                                                  isRefunding
-                                                      ? refundButtons(context)
-                                                      : transationsButton()
+                                                  /* isRefunding ? refundButtons(context) : */
+                                                  transationsButton()
                                                 ]),
                                               ),
                                             )
@@ -983,66 +1009,53 @@ class _TransactionsPageState extends State<TransactionsPage> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         refundButton(() async {
-          if (permissions.contains(Constant.REFUND)) {
-            if (orderpayment[orderpayment.length - 1].op_status == 1) {
-              refundProcessStart();
+          if (orderpayment[orderpayment.length - 1].op_status == 1) {
+            if (permissions.contains(Constant.REFUND)) {
+              requestRefund();
+              SyncAPICalls.logActivity("refund",
+                  "chashier has no permission for Refund", "refund", 1);
+            } else {
+              await CommonUtils.openPermissionPop(context, Constant.REFUND, () {
+                requestRefund();
+                SyncAPICalls.logActivity("refund",
+                    "Manager given permission for Refund", "refund", 1);
+              }, () {});
             }
-          } else {
-            await SyncAPICalls.logActivity(
-                "refund", "chashier has no permission for Refund", "refund", 1);
-            await CommonUtils.openPermissionPop(context, Constant.REFUND,
-                () async {
-              await refundProcessStart();
-              await SyncAPICalls.logActivity(
-                  "refund", "Manager given permission for Refund", "refund", 1);
-            }, () {});
           }
         }),
         CommunFun.horisontalSpace(10),
-        cancelButton(() async {
-          if (permissions.contains(Constant.CANCLE_TRANSACTION)) {
+        cancelButton(
+          () async {
+            var alertTransaction = CommonUtils.showAlertDialog(context, () {
+              Navigator.of(context).pop();
+            }, () {
+              Navigator.of(context).pop();
+              showReasontypePop();
+            },
+                "Warning",
+                "This action can not be undone. Do you want to cancel this transaction?",
+                "Yes",
+                "No",
+                true);
             if (orderpayment[orderpayment.length - 1].op_status == 1) {
-              CommonUtils.showAlertDialog(context, () {
-                Navigator.of(context).pop();
-              }, () {
-                Navigator.of(context).pop();
-                showReasontypePop();
-              },
-                  "Warning",
-                  "This action can not be undone. Do you want to avoid this transaction?",
-                  "Yes",
-                  "No",
-                  true);
-            }
-          } else {
-            await SyncAPICalls.logActivity(
-                "cancel transaction",
-                "chashier has no permission for cancel transaction",
-                "order",
-                1);
-            await CommonUtils.openPermissionPop(
-                context, Constant.CANCLE_TRANSACTION, () async {
-              if (orderpayment[orderpayment.length - 1].op_status == 1) {
-                await SyncAPICalls.logActivity(
-                    "cancel transaction",
-                    "Manager given permission for cancel transaction",
-                    "order",
-                    1);
-                await CommonUtils.showAlertDialog(context, () {
-                  Navigator.of(context).pop();
-                }, () {
-                  Navigator.of(context).pop();
-                  showReasontypePop();
-                },
-                    "Warning",
-                    "This action can not be undone. Do you want to avoid this transaction?",
-                    "Yes",
-                    "No",
-                    true);
+              if (permissions.contains(Constant.CANCLE_TRANSACTION)) {
+                await alertTransaction;
+                SyncAPICalls.logActivity("cancel transaction",
+                    "chashier has request for cancel transaction", "order", 1);
+              } else {
+                await CommonUtils.openPermissionPop(
+                    context, Constant.CANCLE_TRANSACTION, () async {
+                  SyncAPICalls.logActivity(
+                      "cancel transaction",
+                      "Manager given permission for cancel transaction",
+                      "order",
+                      1);
+                  await alertTransaction;
+                }, () {});
               }
-            }, () {});
-          }
-        }),
+            }
+          },
+        ),
       ],
     );
   }
@@ -1344,7 +1357,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 //  mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Hero(
-                    tag: product.product_id,
+                    tag: index,
                     child: Container(
                       height: SizeConfig.safeBlockVertical * 8,
                       width: SizeConfig.safeBlockVertical * 9,
@@ -1397,28 +1410,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                     fontSize:
                                         SizeConfig.safeBlockVertical * 2.8,
                                     color: Theme.of(context).primaryColor))),
-                        // isRefunding
-                        //     ? IconButton(
-                        //         icon: Icon(
-                        //           Icons.remove_circle_outline,
-                        //           color: Colors.red,
-                        //           size: SizeConfig.safeBlockVertical * 5,
-                        //         ),
-                        //         onPressed: () {
-                        //           CommonUtils.showAlertDialog(context, () {
-                        //             Navigator.of(context).pop();
-                        //           }, () {
-                        //             Navigator.of(context).pop();
-                        //             deleteItemFormList(product);
-                        //           },
-                        //               "Alert",
-                        //               "Are you sure you want to delete this item?",
-                        //               "Yes",
-                        //               "No",
-                        //               true);
-                        //           //deleteItemFormList(product);
-                        //         })
-                        //     : SizedBox(),
                       ],
                     ),
                   )

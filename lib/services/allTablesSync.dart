@@ -25,6 +25,27 @@ import 'package:intl/intl.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 
 class SyncAPICalls {
+  static getOrderId(context) async {
+    var apiurl = Configrations.getOrderId;
+    var terminalId = await CommunFun.getTeminalKey();
+    var branchid = await CommunFun.getbranchId();
+    var stringParams = {'branch_id': branchid, 'terminal_id': terminalId};
+    Map orderId = await APICalls.getDataCall(apiurl, context, stringParams);
+    int order_id = null;
+    if (orderId is List || orderId == null) {
+      var settingOrderId =
+          await Preferences.getStringValuesSF(Constant.lastOrderId);
+      return settingOrderId != null ? settingOrderId + 1 : null;
+    } else {
+      if (orderId["order_id"] != null) {
+        order_id = int.tryParse(orderId["order_id"].toString());
+        Preferences.setStringToSF(Constant.lastOrderId, order_id.toString());
+        order_id += 1;
+      }
+    }
+    return order_id;
+  }
+
   static getDataServerBulk1(context) async {
     var apiurl = Configrations.appdata1;
     var terminalId = await CommunFun.getTeminalKey();
@@ -363,7 +384,7 @@ class SyncAPICalls {
           order.updated_at = orderdata["updated_at"];
           order.updated_by = orderdata["updated_by"];
           order.isSync = 1;
-          await localAPI.saveSyncOrder(order);
+          localAPI.saveSyncOrder(order);
 
           var orderdetail = orderdata["order_detail"];
           if (orderdetail.length > 0) {
@@ -405,7 +426,7 @@ class SyncAPICalls {
               o_details.updated_by = detail["updated_by"];
               o_details.isSync = 1;
               o_details.server_id = detail["server_id"];
-              await localAPI.saveSyncOrderDetails(o_details);
+              localAPI.saveSyncOrderDetails(o_details);
 
               var modifire = detail["order_modifier"];
               if (modifire.length > 0) {
@@ -432,7 +453,7 @@ class SyncAPICalls {
                   m_data.updated_by = modifiredata["updated_by"];
                   m_data.isSync = 1;
                   m_data.server_id = modifiredata["server_id"];
-                  await localAPI.saveSyncOrderModifire(m_data);
+                  localAPI.saveSyncOrderModifire(m_data);
                 }
               }
               var attribute = detail["order_attributes"];
@@ -461,7 +482,7 @@ class SyncAPICalls {
                   attr.updated_by = attributeDt["updated_by"];
                   attr.isSync = 1;
                   attr.server_id = attributeDt["server_id"];
-                  await localAPI.saveSyncOrderAttribute(attr);
+                  localAPI.saveSyncOrderAttribute(attr);
                 }
               }
             }
@@ -498,7 +519,7 @@ class SyncAPICalls {
               paymentdat.updated_by = paydat["updated_by"];
               paymentdat.isSync = 1;
               paymentdat.server_id = paydat["server_id"];
-              await localAPI.saveSyncOrderPaymet(paymentdat);
+              localAPI.saveSyncOrderPaymet(paymentdat);
             }
           }
 
@@ -518,7 +539,7 @@ class SyncAPICalls {
               history.created_at = voucherH["app_id"];
               history.created_at = voucherH["terminal_id"];
               history.server_id = voucherH['server_id'];
-              await localAPI.saveVoucherHistoryTable(history);
+              localAPI.saveVoucherHistoryTable(history);
             }
           }
         }

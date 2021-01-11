@@ -972,7 +972,9 @@ class PrintReceipt {
         ctx,
         isFor,
         isper));
-    CommunFun.showToast(ctx, res.msg);
+    if (Navigator.of(ctx).mounted) {
+      CommunFun.showToast(ctx, res.msg);
+    }
   }
 
 /*========================================================================

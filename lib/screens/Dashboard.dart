@@ -323,16 +323,17 @@ class _DashboradPageState extends State<DashboradPage>
     });
     MST_Cart cart = await localAPI.getCartData(cartId);
     List<MSTCartdetails> cartdetails = await localAPI.getCartItem(cartId);
+    if (cart.id == null) {
+      cart.id = cartId;
+      checkidTableSelected();
+      return;
+    }
     double currentSubtotal = 0.00;
     double itemDiscount = 0.00;
     Voucher vaocher;
     if (cart.voucher_id != null && cart.voucher_id != 0) {
       var voucherdetail = jsonDecode(cart.voucher_detail);
       vaocher = Voucher.fromJson(voucherdetail);
-    }
-    // taxJson = json.decode(cart.tax_json);
-    if (cart.id == null) {
-      return;
     }
 
     cartdetails.forEach((cartdetail) {
@@ -355,7 +356,17 @@ class _DashboradPageState extends State<DashboradPage>
     });
 
     cart.sub_total = currentSubtotal;
-    cart.serviceCharge = currentSubtotal * (cart.serviceChargePercent / 100);
+    cart.serviceCharge = 0.00;
+    if (cart.serviceChargePercent != null) {
+      cart.serviceCharge = currentSubtotal * (cart.serviceChargePercent / 100);
+    }
+    double taxval = 0.00;
+    for (BranchTax tax in taxlist) {
+      taxval += tax.rate != null
+          ? currentSubtotal * (double.tryParse(tax.rate) / 100)
+          : 0.00;
+    }
+    cart.tax = taxval;
     cart.grand_total = (cart.sub_total - cart.discountAmount) +
         cart.tax +
         (cart.serviceCharge == null ? 0.00 : cart.serviceCharge);
@@ -1261,24 +1272,6 @@ class _DashboradPageState extends State<DashboradPage>
         });
   }
 
-  // opnePaymentMethod() async {
-  //   var roundingTotal =
-  //       await CommunFun.checkRoundData(grandTotal.toStringAsFixed(2));
-  //   showDialog(
-  //       // Opning Ammount Popup
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return PaymentMethodPop(
-  //           subTotal: subtotal,
-  //           grandTotal: double.tryParse(roundingTotal),
-  //           onClose: (mehtod) {
-  //             CommunFun.processingPopup(context);
-  //             paymentWithMethod(mehtod);
-  //           },
-  //         );
-  //       });
-  // }
-
   Future<Table_order> getTableData() async {
     Table_order tables = new Table_order();
     var tabledata = await Preferences.getStringValuesSF(Constant.TABLE_DATA);
@@ -1341,7 +1334,15 @@ class _DashboradPageState extends State<DashboradPage>
     List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
     int length = branchData.invoiceStart.length;
     var invoiceNo;
-    if (lastappid.length > 0) {
+    order.order_id = await SyncAPICalls.getOrderId(context);
+    if (order.order_id != null) {
+      invoiceNo = branchData.orderPrefix +
+          order.order_id.toString().padLeft(
+              order.order_id.toString().length < 5
+                  ? 5 - order.order_id.toString().length
+                  : 1,
+              "0");
+    } else if (lastappid.length > 0) {
       order.app_id = lastappid[0].app_id + 1;
       invoiceNo =
           branchData.orderPrefix + order.app_id.toString().padLeft(length, "0");
@@ -1464,68 +1465,68 @@ class _DashboradPageState extends State<DashboradPage>
                 cartItem.setmeal_product_detail;
           }
           orderDetailid = await localAPI.sendOrderDetails(orderDetail);
-          if (orderDetailid != null) {
+          /*  if (orderDetailid != null) {
             detaislist.add(orderDetail);
-            List<MSTSubCartdetails> modifireList =
-                await getmodifireList(cartItem.id);
-            if (modifireList.length > 0) {
-              for (var i = 0; i < modifireList.length; i++) {
-                OrderModifire modifireData = new OrderModifire();
-                var modifire = modifireList[i];
-                if (modifire.caId == null) {
-                  List<OrderModifire> lapMpid =
-                      await localAPI.getLastOrderModifireAppid(terminalId);
-                  if (lapMpid.length > 0) {
-                    modifireData.app_id = lapMpid[0].app_id + 1;
-                  } else {
-                    modifireData.app_id = 1;
-                  }
-                  modifireData.uuid = uuid;
-                  modifireData.order_app_id = orderId;
-                  modifireData.detail_app_id = orderDetailid;
-                  modifireData.terminal_id = int.parse(terminalId);
-                  modifireData.product_id = modifire.productId;
-                  modifireData.modifier_id = modifire.modifierId;
-                  modifireData.om_amount = modifire.modifirePrice;
-                  modifireData.om_by = userdata.id;
-                  modifireData.isSync = 0;
-                  modifireData.server_id = 0;
-                  modifireData.om_datetime =
-                      await CommunFun.getCurrentDateTime(DateTime.now());
-                  modifireData.om_status = 1;
-                  modifireData.updated_at =
-                      await CommunFun.getCurrentDateTime(DateTime.now());
-                  modifireData.updated_by = userdata.id;
-                  await localAPI.sendModifireData(modifireData);
+            } */
+          List<MSTSubCartdetails> modifireList =
+              await getmodifireList(cartItem.id);
+          if (modifireList.length > 0) {
+            for (var i = 0; i < modifireList.length; i++) {
+              OrderModifire modifireData = new OrderModifire();
+              var modifire = modifireList[i];
+              if (modifire.caId == null) {
+                List<OrderModifire> lapMpid =
+                    await localAPI.getLastOrderModifireAppid(terminalId);
+                if (lapMpid.length > 0) {
+                  modifireData.app_id = lapMpid[0].app_id + 1;
                 } else {
-                  OrderAttributes attributes = new OrderAttributes();
-                  List<OrderAttributes> lapApid =
-                      await localAPI.getLastOrderAttrAppid(terminalId);
-                  if (lapApid.length > 0) {
-                    attributes.app_id = lapApid[0].app_id + 1;
-                  } else {
-                    attributes.app_id = int.parse(terminalId);
-                  }
-                  attributes.uuid = uuid;
-                  attributes.order_app_id = orderId;
-                  attributes.detail_app_id = orderDetailid;
-                  attributes.terminal_id = int.parse(terminalId);
-                  attributes.product_id = modifire.productId;
-                  attributes.attribute_id = modifire.attributeId;
-                  attributes.attr_price = modifire.attrPrice;
-                  attributes.ca_id = modifire.caId;
-                  attributes.isSync = 0;
-                  attributes.server_id = 0;
-                  attributes.oa_datetime =
-                      await CommunFun.getCurrentDateTime(DateTime.now());
-                  attributes.oa_by = userdata.id;
-                  attributes.oa_status = 1;
-                  attributes.updated_at =
-                      await CommunFun.getCurrentDateTime(DateTime.now());
-                  attributes.updated_by = userdata.id;
-                  orderAttributes.add(attributes);
-                  await localAPI.sendAttrData(attributes);
+                  modifireData.app_id = 1;
                 }
+                modifireData.uuid = uuid;
+                modifireData.order_app_id = orderId;
+                modifireData.detail_app_id = orderDetailid;
+                modifireData.terminal_id = int.parse(terminalId);
+                modifireData.product_id = modifire.productId;
+                modifireData.modifier_id = modifire.modifierId;
+                modifireData.om_amount = modifire.modifirePrice;
+                modifireData.om_by = userdata.id;
+                modifireData.isSync = 0;
+                modifireData.server_id = 0;
+                modifireData.om_datetime =
+                    await CommunFun.getCurrentDateTime(DateTime.now());
+                modifireData.om_status = 1;
+                modifireData.updated_at =
+                    await CommunFun.getCurrentDateTime(DateTime.now());
+                modifireData.updated_by = userdata.id;
+                await localAPI.sendModifireData(modifireData);
+              } else {
+                OrderAttributes attributes = new OrderAttributes();
+                List<OrderAttributes> lapApid =
+                    await localAPI.getLastOrderAttrAppid(terminalId);
+                if (lapApid.length > 0) {
+                  attributes.app_id = lapApid[0].app_id + 1;
+                } else {
+                  attributes.app_id = int.parse(terminalId);
+                }
+                attributes.uuid = uuid;
+                attributes.order_app_id = orderId;
+                attributes.detail_app_id = orderDetailid;
+                attributes.terminal_id = int.parse(terminalId);
+                attributes.product_id = modifire.productId;
+                attributes.attribute_id = modifire.attributeId;
+                attributes.attr_price = modifire.attrPrice;
+                attributes.ca_id = modifire.caId;
+                attributes.isSync = 0;
+                attributes.server_id = 0;
+                attributes.oa_datetime =
+                    await CommunFun.getCurrentDateTime(DateTime.now());
+                attributes.oa_by = userdata.id;
+                attributes.oa_status = 1;
+                attributes.updated_at =
+                    await CommunFun.getCurrentDateTime(DateTime.now());
+                attributes.updated_by = userdata.id;
+                orderAttributes.add(attributes);
+                await localAPI.sendAttrData(attributes);
               }
             }
             if (cartItem.issetMeal == 0 || cartItem.hasRacManagemant == 0) {
@@ -1570,6 +1571,7 @@ class _DashboradPageState extends State<DashboradPage>
         }
       }
 
+      await localAPI.getOrderDetailsList(orderId, terminalId);
       if (payment.length > 0) {
         for (var i = 0; i < payment.length; i++) {
           OrderPayment orderpayment = payment[i];
@@ -1838,7 +1840,7 @@ class _DashboradPageState extends State<DashboradPage>
   itememovefromCart(cartitem) async {
     try {
       MST_Cart cart = new MST_Cart();
-      bool isSetMeal = cartitem is SetMeal;
+      //bool isSetMeal = cartitem is SetMeal;
       MSTCartdetails cartitemdata = cartitem;
       var subt = allcartData.sub_total - cartitemdata.productPrice ??
           cartitemdata.productDetailAmount;

@@ -1311,7 +1311,9 @@ class _SelectTablePageState extends State<SelectTablePage>
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          SizedBox(height: 30),
+                          table.tableName.isEmpty
+                              ? SizedBox(height: 0)
+                              : SizedBox(height: 30),
                           Text(
                             table.merged_table_id != null
                                 ? table.tableName +
@@ -1374,7 +1376,9 @@ class _SelectTablePageState extends State<SelectTablePage>
                               Strings.amount +
                                   ' : ' +
                                   Strings.currency +
-                                  table.currentAmount.toStringAsFixed(2),
+                                  (table.currentAmount == null
+                                      ? "0.00"
+                                      : table.currentAmount.toStringAsFixed(2)),
                               style: Styles.whiteSimpleSmall())
                       /* Text(
                                   Strings.vacant +

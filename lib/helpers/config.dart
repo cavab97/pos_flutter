@@ -24,6 +24,7 @@ class Configrations {
   static String web_orders = "web-order-table-data";
   static String cancle_order = "create-cancel-order-data";
   static String update_inventory_table = "update-product-inventory-data";
+  static String getOrderId = "get-order-id";
   static String products = "Products";
   static String categories = "Categories";
   static String printers = "printer";
