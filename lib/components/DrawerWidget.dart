@@ -13,6 +13,7 @@ import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/CloseShiftPage.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
+import 'package:mcncashier/screens/shift/Closing.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/commanutils.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
@@ -106,6 +107,24 @@ class DrawerWidState extends State<DrawerWid> {
   }
 
   closeShift(context) {
+    Navigator.of(context).pop();
+    showDialog(
+        // Opning Ammount Popup
+        context: context,
+        builder: (BuildContext context) {
+          return ClosingPage(onClose: () {
+            printKOT.testReceiptPrint(
+                printerreceiptList[0].printerIp.toString(),
+                context,
+                "",
+                Strings.openDrawer,
+                true);
+            openOpningAmmountPop(context, Strings.titleClosingAmount);
+          });
+        });
+  }
+
+  closeShiftA(context) {
     showDialog(
         // Opning Ammount Popup
         context: context,
@@ -173,7 +192,8 @@ class DrawerWidState extends State<DrawerWid> {
     shift.serverId = 0;
     if (shiftid == null) {
       shift.startAmount = double.parse(ammount);
-      shift.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+      shift.updatedAt =
+          shift.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     } else {
       shift.endAmount = double.parse(ammount);
       shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
@@ -239,26 +259,27 @@ class DrawerWidState extends State<DrawerWid> {
 
   syncAllTables() async {
     //Navigator.of(context).pop();
-    if (permissions.contains(Constant.VIEW_SYNC)) {
+    Function syncAction = () async {
       await Preferences.removeSinglePref(Constant.LastSync_Table);
       await Preferences.removeSinglePref(Constant.OFFSET);
       await CommunFun.openSyncPop(context);
       await CommunFun.syncOrdersANDStore(context, false);
       await CommunFun.syncAfterSuccess(context, false);
       getconfigdata();
+    };
+    if (permissions == "") {
+      await syncAction();
+    }
+    if (permissions.contains(Constant.VIEW_SYNC)) {
+      await syncAction();
     } else {
       await SyncAPICalls.logActivity("Sync tables",
           "chashier has permission for Sync tables", "all tables", 1);
       await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
           () async {
-        await Preferences.removeSinglePref(Constant.LastSync_Table);
-        await Preferences.removeSinglePref(Constant.OFFSET);
-        await CommunFun.openSyncPop(context);
-        await CommunFun.syncOrdersANDStore(context, false);
-        await CommunFun.syncAfterSuccess(context, false);
+        await syncAction();
         await SyncAPICalls.logActivity("Sync tables",
             "Manager given permission for Sync tables", "all tables", 1);
-        getconfigdata();
       }, () {});
     }
   }

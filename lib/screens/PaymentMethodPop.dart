@@ -56,6 +56,16 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   TextEditingController codeInput = new TextEditingController();
   TextEditingController remarkInputController = new TextEditingController();
   TextEditingController refInputController = new TextEditingController();
+  List walletList = [
+    "ewallet",
+    "e-wallet",
+    "e wallet",
+    "ipay88",
+    "i-pay88",
+    "i pay88",
+    "i-pay 88",
+    "i pay 88"
+  ];
   @override
   void initState() {
     super.initState();
@@ -82,7 +92,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   }
 
   insertPaymentOption(Payments payment) {
-    if (seletedPayment.name.toLowerCase().contains("wallet")) {
+    if (walletList.contains(seletedPayment.name.toLowerCase())) {
       setState(() {
         seletedPayment = payment;
       });

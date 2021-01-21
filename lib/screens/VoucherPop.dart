@@ -5,6 +5,7 @@ import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/styles.dart';
+import 'package:mcncashier/models/BranchTax.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/Product_Categroy.dart';
@@ -18,12 +19,21 @@ import 'package:mcncashier/widget/CloseButtonWidget.dart';
 
 class VoucherPop extends StatefulWidget {
   // Opning ammount popup
-  VoucherPop({Key key, this.cartList, this.cartData, this.cartId, this.onEnter})
-      : super(key: key);
+  VoucherPop({
+    Key key,
+    this.cartList,
+    this.cartData,
+    this.cartId,
+    this.taxlist,
+    this.onEnter,
+    this.onClose,
+  }) : super(key: key);
   final cartId;
+  final Function onClose;
   Function onEnter;
   MST_Cart cartData;
   List<MSTCartdetails> cartList;
+  final List<BranchTax> taxlist;
 
   @override
   VoucherPopState createState() => VoucherPopState();
@@ -31,6 +41,7 @@ class VoucherPop extends StatefulWidget {
 
 class VoucherPopState extends State<VoucherPop> {
   TextEditingController codeConteroller = new TextEditingController();
+  FocusNode fcNode = new FocusNode();
   LocalAPI localAPI = LocalAPI();
   bool isLoading = false;
   var productIDs = '';
@@ -51,6 +62,13 @@ class VoucherPopState extends State<VoucherPop> {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
     );
+  }
+
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+    if (fcNode != null) fcNode.dispose();
+    super.dispose();
   }
 
   checkMinMaxValue(voucher) async {
@@ -118,11 +136,13 @@ class VoucherPopState extends State<VoucherPop> {
         if (voucher.usesTotal == 0 || count < voucher.usesTotal) {
           //check product
           bool isadded = false;
-          double totaldiscount = 0;
+          double totaldiscount = 0.00;
+          double currentSubtotal = 0.00;
           for (int i = 0;
               i < widget.cartList.length && voucher.voucherDiscountType == 1;
               i++) {
             MSTCartdetails cartitem = widget.cartList[i];
+
             //reverse discount item
             /* if (cartitem.discountAmount > 0) {
               if (cartitem.discountType == 1) {
@@ -170,17 +190,51 @@ class VoucherPopState extends State<VoucherPop> {
               );
             }
           }
-          //cartData.discountAmount = totaldiscount;
           cartData.discountType = voucher.voucherDiscountType;
           cartData.discountRemark = voucher.voucherName;
           cartData.voucher_detail = json.encode(voucher);
           cartData.voucher_id = voucher.voucherId;
-          await localAPI.addVoucherInOrder(cartData, voucher);
+          double itemDiscount = 0.00;
+          widget.cartList.forEach((cartdetail) {
+            if (cartdetail.isFocProduct != 1) {
+              currentSubtotal += cartdetail.productDetailAmount != null &&
+                      cartdetail.productDetailAmount != 0.00
+                  ? cartdetail.productDetailAmount
+                  : cartdetail.productPrice;
+              if (cartData.voucher_id != null) {
+                if (cartData.voucher_id > 0 && cartdetail.discountType == 1) {
+                  double originalPrice = cartdetail.productDetailAmount;
+                  // (1 - (cartdetail.discountAmount / 100));
+                  itemDiscount +=
+                      originalPrice * (cartdetail.discountAmount / 100);
+                } else if (cartData.voucher_id > 0) {
+                  itemDiscount += cartdetail.discountAmount;
+                }
+              }
+            }
+          });
+          cartData.serviceCharge = 0.00;
+          if (cartData.serviceChargePercent != null) {
+            cartData.serviceCharge =
+                currentSubtotal * (cartData.serviceChargePercent / 100);
+          }
+          double taxval = 0.00;
+          for (BranchTax tax in widget.taxlist) {
+            taxval += tax.rate != null
+                ? currentSubtotal * (double.tryParse(tax.rate) / 100)
+                : 0.00;
+          }
+          cartData.tax = taxval;
+          //cartData.discountAmount = totaldiscount;
+          cartData.grand_total = (currentSubtotal - itemDiscount) +
+              cartData.tax +
+              cartData.serviceCharge;
           selectedvoucher = voucher;
           isadded = true;
           selectedvoucher = voucher;
           widget.onEnter(selectedvoucher);
-          await SyncAPICalls.logActivity(
+          widget.onClose(cartData);
+          SyncAPICalls.logActivity(
               "add promocode",
               "Cashier Removed promocode form order",
               "voucher",
@@ -192,7 +246,7 @@ class VoucherPopState extends State<VoucherPop> {
               "Voucher already used " +
                   voucher.usesTotal.toString() +
                   " times.");
-          await SyncAPICalls.logActivity(
+          SyncAPICalls.logActivity(
               "Voucher", "cashier choosed voucher already used", "Voucher", 1);
         }
       }
@@ -210,11 +264,17 @@ class VoucherPopState extends State<VoucherPop> {
       if (voucher.length > 0) {
         checkValidVoucher(voucher[0]);
       } else {
+        fcNode.requestFocus();
+        codeConteroller.selection = TextSelection(
+            baseOffset: 0, extentOffset: codeConteroller.text.length);
         setState(() {
           errorMSG = Strings.voucherNotExit;
         });
       }
     } else {
+      fcNode.requestFocus();
+      codeConteroller.selection = TextSelection(
+          baseOffset: 0, extentOffset: codeConteroller.text.length);
       setState(() {
         errorMSG = Strings.voucherCodeMsg;
       });
@@ -241,7 +301,10 @@ class VoucherPopState extends State<VoucherPop> {
                     color: StaticColor.colorWhite),
               ),
               Spacer(),
-              CloseButtonWidget(inputContext: context),
+              CloseButtonWidget(
+                inputContext: context,
+                callback: widget.onClose,
+              ),
             ],
           ),
         ), //popup close btn
@@ -252,6 +315,7 @@ class VoucherPopState extends State<VoucherPop> {
           FlatButton(
             child: Text(Strings.cancel, style: Styles.orangeSmall()),
             onPressed: () {
+              widget.onClose();
               Navigator.of(context).pop();
             },
           ),
@@ -307,6 +371,7 @@ class VoucherPopState extends State<VoucherPop> {
               height: 20,
             ),
             TextField(
+              focusNode: fcNode,
               autofocus: true,
               controller: codeConteroller,
               keyboardType: TextInputType.text,
@@ -337,6 +402,9 @@ class VoucherPopState extends State<VoucherPop> {
                 setState(() {
                   errorMSG = "";
                 });
+              },
+              onSubmitted: (String text) async {
+                await validateCode();
               },
             )
           ],

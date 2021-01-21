@@ -66,12 +66,10 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
   @override
   void initState() {
     super.initState();
-    print(widget.focusCart.productQty.toString());
     setState(() {
       focusCartPad = widget.focusCart;
       currentNumber = widget.focusCart.productQty.toStringAsFixed(0);
       productItem = widget.selproduct;
-      print(productItem.name);
       price = productItem.price;
       productnetprice = productItem.price;
     });
@@ -284,8 +282,6 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
     focusCartPad.productDetailAmount =
         double.parse(currentNumber.toString()) * newPrice;
     localAPI.addintoCartDetails(focusCartPad);
-    print("focusCartPad");
-    print(focusCartPad.productDetailAmount);
     // countTotals(focusCartPad.cartId);
     //  countTotals(focusCartPad.cartId);
     widget.onClose(focusCartPad.cartId);

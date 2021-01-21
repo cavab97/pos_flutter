@@ -30,17 +30,20 @@ class SyncAPICalls {
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var stringParams = {'branch_id': branchid, 'terminal_id': terminalId};
-    Map orderId = await APICalls.getDataCall(apiurl, context, stringParams);
+    var orderId = await APICalls.getDataCall(apiurl, context, stringParams);
+    var settingOrderId =
+        await Preferences.getStringValuesSF(Constant.lastOrderId);
     int order_id = null;
     if (orderId is List || orderId == null) {
-      var settingOrderId =
-          await Preferences.getStringValuesSF(Constant.lastOrderId);
-      return settingOrderId != null ? settingOrderId + 1 : null;
+      return null;
+    } else if (settingOrderId != null) {
+      order_id = int.tryParse(settingOrderId) + 1;
+      Preferences.setStringToSF(Constant.lastOrderId, order_id.toString());
     } else {
       if (orderId["order_id"] != null) {
         order_id = int.tryParse(orderId["order_id"].toString());
-        Preferences.setStringToSF(Constant.lastOrderId, order_id.toString());
         order_id += 1;
+        Preferences.setStringToSF(Constant.lastOrderId, order_id.toString());
       }
     }
     return order_id;
@@ -52,8 +55,13 @@ class SyncAPICalls {
     var branchid = await CommunFun.getbranchId();
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+
+    var permission =
+        await Preferences.getStringValuesSF(Constant.USER_PERMISSION);
     var stringParams = {
-      'datetime': serverTime != null ? serverTime : '',
+      'datetime': serverTime != null && (permission != null && permission != '')
+          ? serverTime
+          : '',
       'branch_id': branchid,
       'terminal_id': terminalId
     };
@@ -122,11 +130,14 @@ class SyncAPICalls {
     var branchid = await CommunFun.getbranchId();
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+    print('serverTime ');
+    print(serverTime);
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
       'branch_id': branchid,
       'terminal_id': terminalId
     };
+    print('getDataServerBulk4_1');
     return await APICalls.apiCall(apiurl, context, stringParams);
   }
 
@@ -275,6 +286,7 @@ class SyncAPICalls {
           }
           List<OrderPayment> ordersPayment =
               await localAPI.getOrderPaymentTable(order.app_id, terminalId);
+
           List<VoucherHistory> voucherHistory =
               await localAPI.getVoucherHistoryTable(order.app_id, terminalId);
           var orderMap = {
@@ -488,7 +500,7 @@ class SyncAPICalls {
             }
           }
           var paymentdetail = orderdata["order_payment"];
-          if (paymentdetail.length > 0) {
+          if (paymentdetail != null && paymentdetail.length > 0) {
             for (var p = 0; p < paymentdetail.length; p++) {
               var paydat = paymentdetail[p];
               OrderPayment paymentdat = new OrderPayment();
@@ -524,7 +536,7 @@ class SyncAPICalls {
           }
 
           var voucherHistory = orderdata["voucher_history"];
-          if (voucherHistory.length > 0) {
+          if (voucherHistory != null && voucherHistory.length > 0) {
             for (var v = 0; v < voucherHistory.length; v++) {
               var voucherH = voucherHistory[v];
               VoucherHistory history = new VoucherHistory();
@@ -534,10 +546,10 @@ class SyncAPICalls {
               history.voucher_id = voucherH["voucher_id"];
               history.order_id = voucherH["order_id"];
               history.user_id = voucherH["user_id"];
-              history.amount = voucherH["amount"];
+              history.amount = double.tryParse(voucherH["amount"].toString());
               history.created_at = voucherH["created_at"];
-              history.created_at = voucherH["app_id"];
-              history.created_at = voucherH["terminal_id"];
+              history.app_id = voucherH["app_id"];
+              history.terminal_id = voucherH["terminal_id"];
               history.server_id = voucherH['server_id'];
               localAPI.saveVoucherHistoryTable(history);
             }

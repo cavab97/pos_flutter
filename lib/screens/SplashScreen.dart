@@ -4,6 +4,7 @@ import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/services/Config.dart' as repo;
 import 'package:mcncashier/components/colors.dart';
+
 class SplashScreen extends StatefulWidget {
 // PIN Enter PAGE
   SplashScreen({Key key}) : super(key: key);
@@ -27,7 +28,7 @@ class SplashScreenstate extends State<SplashScreen> {
           Constant.SYNC_TIMER, res["data"]["sync_timer"]);
       await Preferences.setStringToSF(
           Constant.CURRENCY, res["data"]["currency"]);
-    } else {
+    } else if (context != null) {
       CommunFun.showToast(context, res["message"]);
     }
   }

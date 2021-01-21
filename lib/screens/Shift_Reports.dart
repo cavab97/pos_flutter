@@ -111,7 +111,18 @@ class _ShiftReportsState extends State<ShiftReports> {
   getOrders() async {
     var branchid = await CommunFun.getbranchId();
     var terminalid = await CommunFun.getTeminalKey();
-    List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid);
+    var currentDay = await CommunFun.getCurrentDateTime(DateTime.now());
+    var formatter = new DateFormat('yyyy-MM-dd');
+    var branch = await localAPI.getbranchData(branchid);
+    String formattedDate = formatter.format(DateTime.parse(currentDay));
+    if (DateTime.parse(formattedDate + ' ' + branch.openFrom).hour > 18) {
+      formattedDate = formatter.format(
+          DateTime.parse(formattedDate + ' ' + currentDay)
+              .subtract(Duration(days: 1)));
+    }
+    var dateTime = DateTime.parse(formattedDate + ' ' + branch.openFrom);
+    String now = dateTime.toString();
+    List<Orders> ordersList = await localAPI.getShiftInvoiceData(branchid, now);
     dynamic payments =
         await localAPI.getTotalPayment(terminalid.toString(), branchid);
     if (ordersList.length > 0) {
@@ -582,7 +593,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
-                  "openning Amount",
+                  "Openning Amount",
                   style: Styles.whiteMediumBold(),
                 ),
                 trailing: Text(
@@ -649,7 +660,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               color: StaticColor.colorWhite,
               child: ListTile(
                 title: Text(
-                  "Pay In",
+                  "Cash In",
                   style: Styles.blackMediumBold(),
                 ),
                 trailing: Text(
@@ -662,7 +673,7 @@ class _ShiftReportsState extends State<ShiftReports> {
               color: StaticColor.colorGrey,
               child: ListTile(
                 title: Text(
-                  "Pay Out",
+                  "Cash Out",
                   style: Styles.whiteMediumBold(),
                 ),
                 trailing: Text(
@@ -747,7 +758,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                   openpayInOUTPop("Pay In Amount", "5.00");
                 },
                 child: Text(
-                  "Pay In",
+                  "Cash In",
                   style: TextStyle(
                     color: StaticColor.colorWhite,
                     fontSize: 20,
@@ -778,7 +789,7 @@ class _ShiftReportsState extends State<ShiftReports> {
                   openpayInOUTPop("Pay Out Amount", "5.00");
                 },
                 child: Text(
-                  "Pay Out",
+                  "Cash Out",
                   style: TextStyle(color: StaticColor.colorWhite, fontSize: 20),
                 ),
                 color: Colors.transparent,

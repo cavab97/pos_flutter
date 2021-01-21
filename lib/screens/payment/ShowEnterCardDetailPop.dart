@@ -17,12 +17,21 @@ class ShowEnterCardDetailPop extends StatefulWidget {
 
 class _ShowEnterCardDetailPopState extends State<ShowEnterCardDetailPop> {
   final _formKey = GlobalKey<FormState>();
+  FocusScopeNode node;
+  @override
+  void dispose() {
+    if (node != null) {
+      node.unfocus();
+    }
+    super.dispose();
+  }
 
   TextEditingController digitController = new TextEditingController();
   TextEditingController codeInput = new TextEditingController();
   TextEditingController remarkInputController = new TextEditingController();
   @override
   Widget build(BuildContext context) {
+    node = FocusScope.of(context);
     var errorMSG = "";
     return AlertDialog(
       shape: RoundedRectangleBorder(
@@ -48,12 +57,13 @@ class _ShowEnterCardDetailPopState extends State<ShowEnterCardDetailPop> {
                 hintText: Strings.enterDigit,
                 errorMSG: errorMSG,
                 maxLength: 4,
-                validatorFunction: (value) {
+                controllerNode: node,
+                /* validatorFunction: (value) {
                   if (value.isEmpty) {
                     return Strings.referenceNumMsg;
                   } else
                     return null;
-                },
+                }, */
               ),
               SizedBox(height: 10),
               Text(Strings.approvalCode, style: Styles.blackMediumBold()),
@@ -69,6 +79,7 @@ class _ShowEnterCardDetailPopState extends State<ShowEnterCardDetailPop> {
                   } else
                     return null;
                 },
+                controllerNode: node,
               ),
               SizedBox(height: 10),
               Text(Strings.remark, style: Styles.blackMediumBold()),
@@ -78,6 +89,11 @@ class _ShowEnterCardDetailPopState extends State<ShowEnterCardDetailPop> {
                 textInputType: TextInputType.text,
                 hintText: Strings.enterRemark,
                 errorMSG: errorMSG,
+                controllerNode: node,
+                submittedFunction: (_) {
+                  node.requestFocus(new FocusNode());
+                  checkPIN();
+                },
               ),
             ],
           ),
@@ -86,6 +102,7 @@ class _ShowEnterCardDetailPopState extends State<ShowEnterCardDetailPop> {
       actions: <Widget>[
         FlatButton(
           onPressed: () {
+            node.requestFocus(new FocusNode());
             Navigator.of(context).pop();
           },
           child: Text(Strings.cancel, style: Styles.orangeSmall()),

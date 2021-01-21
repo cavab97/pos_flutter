@@ -22,6 +22,7 @@ class ReprintKitchenPirntPop extends StatefulWidget {
 
 class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
   List<MSTCartdetails> cartList = new List<MSTCartdetails>();
+  Map<int, double> qtyList = new Map();
   List<MSTCartdetails> tempCart = new List<MSTCartdetails>();
   @override
   void initState() {
@@ -29,6 +30,9 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
     setState(() {
       cartList = widget.cartList;
     });
+    for (MSTCartdetails cart in widget.cartList) {
+      qtyList[cart.id] = cart.productQty;
+    }
   }
 
   _setSelectUnselect(MSTCartdetails product) {
@@ -95,9 +99,12 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
           height: (MediaQuery.of(context).size.height / 1.8 * 0.9),
           child: SingleChildScrollView(
             physics: BouncingScrollPhysics(),
-            padding: EdgeInsets.only(bottom: 200),
+            padding: EdgeInsets.only(bottom: 20),
             child: Column(
               children: cartList.map((product) {
+                double minQty = 1;
+                double maxQty = product.productQty;
+                double currentQty = qtyList[product.cartId];
                 return InkWell(
                   onTap: () {
                     _setSelectUnselect(product);
@@ -140,9 +147,16 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
                                     Icons.remove_circle,
                                     color: StaticColor.deepOrange,
                                   ),
-                                  onPressed: null),
+                                  onPressed: () {
+                                    if (qtyList[product.id] > minQty &&
+                                        this.mounted) {
+                                      setState(() {
+                                        qtyList[product.id]--;
+                                      });
+                                    }
+                                  }),
                               Text(
-                                product.productQty.toString(),
+                                qtyList[product.id].toString(),
                                 style: Styles.smallBlack(),
                               ),
                               IconButton(
@@ -150,7 +164,14 @@ class _ReprintKitchenPirntPopState extends State<ReprintKitchenPirntPop> {
                                     Icons.add_circle,
                                     color: StaticColor.deepOrange,
                                   ),
-                                  onPressed: null),
+                                  onPressed: () {
+                                    if (maxQty > qtyList[product.id] &&
+                                        this.mounted) {
+                                      setState(() {
+                                        qtyList[product.id]++;
+                                      });
+                                    }
+                                  }),
                             ],
                           ),
                         ),

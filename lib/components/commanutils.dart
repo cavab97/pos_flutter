@@ -17,7 +17,7 @@ class CommonUtils {
         strImage = base64.split("base64,")[1];
       } */
       final UriData data = Uri.parse(base64).data;
-      if (data.isBase64) {
+      if (data != null && data.isBase64) {
         return Image.memory(data.contentAsBytes(),
             fit: BoxFit.cover, gaplessPlayback: true);
       }

@@ -136,6 +136,7 @@ class Strings {
   static String voucherExpired = "Voucher already expired.";
   static String stockNotValilable = "Product is Out of stock.";
   static String procesing = "Processing";
+  static String confirmOrder = "CONFIRM";
   static String send = "SEND";
   static String open = "OPEN";
   static String internetConnectionLost = "Internet Connection Lost";

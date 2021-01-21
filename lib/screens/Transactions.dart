@@ -61,7 +61,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   bool isWeborder = true;
   var permissions = "";
   var orderDate = "";
-  double change = 0.0;
+  double change = 0.00;
   int currentOffset = 0;
   bool isScreenLoad = false;
   Customer customer;
@@ -191,12 +191,17 @@ class _TransactionsPageState extends State<TransactionsPage> {
     //  if (order.order_source == 2) {
     List<OrderPayment> orderpaymentdata =
         await localAPI.getOrderpaymentData(order.app_id, order.terminal_id);
-    if (orderpayment.length > 0 && this.mounted) {
+    if (orderpaymentdata.length > 0 && this.mounted) {
+      double totalPay = 0.00;
       List<Payments> payMethod =
           await localAPI.getOrderpaymentmethod(order.app_id, order.terminal_id);
+      for (OrderPayment paymentData in orderpaymentdata) {
+        totalPay += paymentData.op_amount;
+      }
       setState(() {
         orderpayment = orderpaymentdata;
         paymentMethod = payMethod;
+        change = totalPay - selectedOrder.grand_total;
       });
       User user = await localAPI.getPaymentUser(orderpayment[0].op_by);
       if (user != null) {
@@ -773,46 +778,44 @@ class _TransactionsPageState extends State<TransactionsPage> {
   }
 
   Widget changeText() {
-    return change != null
-        ? Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              new Expanded(
-                flex: 7,
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    top: 0,
-                  ),
-                  child: Text(
-                    "Change",
-                    textAlign: TextAlign.end,
-                    style: Styles.darkGray(),
-                  ),
-                ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        new Expanded(
+          flex: 7,
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: 0,
+            ),
+            child: Text(
+              "Change",
+              textAlign: TextAlign.end,
+              style: Styles.darkGray(),
+            ),
+          ),
+        ),
+        new Expanded(
+          flex: 3,
+          child: Padding(
+              padding: EdgeInsets.only(
+                top: 0,
               ),
-              new Expanded(
-                flex: 3,
-                child: Padding(
-                    padding: EdgeInsets.only(
-                      top: 0,
-                    ),
-                    child: Text(
-                      change.toStringAsFixed(2),
-                      textAlign: TextAlign.end,
-                      style: Styles.darkGray(),
-                    )),
-              )
-            ],
-          )
-        : SizedBox();
+              child: Text(
+                change > 0 ? change.toStringAsFixed(2) : "0.00",
+                textAlign: TextAlign.end,
+                style: Styles.darkGray(),
+              )),
+        )
+      ],
+    );
   }
 
   Widget paymentDetails() {
     return Column(
         children: orderpayment.map((payment) {
       var index = orderpayment.indexOf(payment);
-      change =
-          payment.op_amount_change != null ? payment.op_amount_change : 0.0;
+      /* change =
+          payment.op_amount_change != null ? payment.op_amount_change : 0.0; */
       return Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
@@ -1172,7 +1175,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
           ]),
           TableRow(children: [
             TableCell(
-              child: taxJson.length != 0
+              child:
+                  /* taxJson.length != 0
                   ? Column(
                       children: taxJson.map((taxitem) {
                       return Row(
@@ -1205,30 +1209,30 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                 ))
                           ]);
                     }).toList())
-                  : Row(
+                  :  */
+                  Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
-                          new Expanded(
-                            flex: 7,
-                            child: Text(
-                              Strings.tax.toUpperCase(),
+                    new Expanded(
+                      flex: 7,
+                      child: Text(
+                        Strings.tax.toUpperCase(),
+                        textAlign: TextAlign.end,
+                        style: Styles.darkGray(),
+                      ),
+                    ),
+                    new Expanded(
+                        flex: 3,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 5),
+                          child: Text(
+                              selectedOrder != null
+                                  ? selectedOrder.tax_amount.toStringAsFixed(2)
+                                  : 0.00,
                               textAlign: TextAlign.end,
-                              style: Styles.darkGray(),
-                            ),
-                          ),
-                          new Expanded(
-                              flex: 3,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 5),
-                                child: Text(
-                                    selectedOrder != null
-                                        ? selectedOrder.tax_amount
-                                            .toStringAsFixed(2)
-                                        : 0.00,
-                                    textAlign: TextAlign.end,
-                                    style: Styles.darkGray()),
-                              ))
-                        ]),
+                              style: Styles.darkGray()),
+                        ))
+                  ]),
             ),
           ]),
           TableRow(children: [

@@ -427,8 +427,17 @@ class _CashPaymentState extends State<CashPaymentPage> {
                       ],
                     ),
                     _button(Strings.enter, () {
-                      widget.onEnter(currentNumber);
-                      //Navigator.of(context).pop();
+                      if (double.tryParse(currentNumber) > widget.ammountext &&
+                          this.mounted) {
+                        CommunFun.showToast(
+                            context, "Amount greater than total.");
+                        setState(() {
+                          currentNumber = widget.ammountext.toStringAsFixed(2);
+                        });
+                      } else {
+                        widget.onEnter(currentNumber);
+                        //Navigator.of(context).pop();
+                      }
                     })
                   ]),
                   Row(

@@ -974,7 +974,7 @@ class CreateTables {
     datatables = db.execute("CREATE TABLE drawer ( " +
         "id INTEGERT PRIMARYKEY AUTOINCREAMENT," +
         "shift_id INTEGERT," +
-        "Amount REAL," +
+        "amount REAL," +
         "is_amount_in NUMERIC," +
         "reason TEXT," +
         "status NUMERIC," +

@@ -31,9 +31,9 @@ class Drawerdata {
   Drawerdata.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     shiftId = json['shift_id'];
-    amount = json['Amount'] is int
-        ? (json['Amount'] as int).toDouble()
-        : json['Amount'];
+    amount = json['amount'] is int
+        ? (json['amount'] as int).toDouble()
+        : json['amount'];
     isAmountIn = json['is_amount_in'];
     reason = json['reason'];
     status = json['status'];
@@ -50,7 +50,7 @@ class Drawerdata {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['shift_id'] = this.shiftId;
-    data['Amount'] = this.amount;
+    data['amount'] = this.amount;
     data['is_amount_in'] = this.isAmountIn;
     data['reason'] = this.reason;
     data['status'] = this.status;

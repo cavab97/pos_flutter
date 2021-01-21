@@ -14,6 +14,8 @@ class CustomTextFormField extends StatelessWidget {
     this.textInputFormatterList,
     this.validatorFunction,
     this.maxLength = -1,
+    this.submittedFunction,
+    @required this.controllerNode,
   }) : super(key: key);
 
   final TextEditingController inputController;
@@ -23,6 +25,8 @@ class CustomTextFormField extends StatelessWidget {
   String errorMSG;
   int maxLength;
   List<TextInputFormatter> textInputFormatterList = [];
+  Function submittedFunction;
+  FocusScopeNode controllerNode;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +58,9 @@ class CustomTextFormField extends StatelessWidget {
       onChanged: (e) {
         errorMSG = "";
       },
+      onEditingComplete:
+          submittedFunction != null ? null : () => controllerNode.nextFocus(),
+      onFieldSubmitted: submittedFunction ?? null,
     );
   }
 }

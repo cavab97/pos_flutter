@@ -90,7 +90,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       isEditing = widget.cartItem != null;
       cartitem = widget.cartItem;
     });
-    if (widget.selproduct.qty != null && widget.selproduct.qty > 0) {
+    if (!isSetMeal &&
+        widget.selproduct.qty != null &&
+        widget.selproduct.qty > 0) {
       setState(() {
         product_qty = widget.selproduct.qty;
       });

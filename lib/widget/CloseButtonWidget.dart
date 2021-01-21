@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 class CloseButtonWidget extends StatelessWidget {
-  const CloseButtonWidget({
+  CloseButtonWidget({
     Key key,
     @required this.inputContext,
+    this.callback,
   }) : super(key: key);
 
   final BuildContext inputContext;
+  Function callback;
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +16,9 @@ class CloseButtonWidget extends StatelessWidget {
       backgroundColor: Colors.redAccent[700],
       onPressed: () {
         Navigator.of(inputContext).pop();
+        if (this.callback != null) {
+          this.callback();
+        }
       },
       tooltip: 'Close',
       child: Icon(

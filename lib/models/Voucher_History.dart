@@ -31,8 +31,7 @@ class VoucherHistory {
     voucher_id = json["voucher_id"];
     order_id = json["order_id"];
     user_id = json["user_id"];
-    amount =
-        json["amount"] ? (json['amount'] as int).toDouble() : json['amount'];
+    amount = double.tryParse(json["amount"].toString());
     created_at = json["created_at"];
     app_id = json["app_id"];
     terminal_id = json["terminal_id"];

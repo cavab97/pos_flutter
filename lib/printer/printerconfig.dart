@@ -1929,7 +1929,8 @@ class PrintReceipt {
       var expectedVal,
       List<OrderPayment> orderPayments,
       List<Payments> paymentMethods,
-      var ordersCount) async {
+      var ordersCount,
+      [Map<int, double> variance]) async {
     final profile = await CapabilityProfile.load();
     final Ticket ticket = Ticket(paper, profile);
 
@@ -2059,6 +2060,152 @@ class PrintReceipt {
           )),
     ]);
 
+    if (variance != null) {
+      /*
+    *For Payment Type Summary
+    */
+      ticket.setStyles(PosStyles(align: PosAlign.center));
+      ticket.emptyLines(2);
+      ticket.row([
+        PosColumn(
+          text: "Payment Type",
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          ),
+        ),
+        PosColumn(
+          text: "Collected",
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          ),
+        ),
+        PosColumn(
+          text: "Actual",
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          ),
+        ),
+        PosColumn(
+          text: "Variance",
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          ),
+        ),
+      ]);
+      Map<int, double> total = new Map();
+      total[0] = 0;
+      total[1] = 0;
+      total[2] = 0;
+      for (int index = 0; index < orderPayments.length; index++) {
+        int paymentID = orderPayments[index].op_method_id;
+        Payments currentPayment =
+            paymentMethods.firstWhere((ele) => ele.paymentId == paymentID);
+        total[0] += orderPayments[index].op_amount;
+        total[1] += total[0] + variance[paymentID];
+        total[2] += variance[paymentID];
+        ticket.row([
+          PosColumn(
+            text: currentPayment.name,
+            width: 3,
+            styles: PosStyles(
+              align: PosAlign.left,
+              fontType: PosFontType.fontA,
+              bold: true,
+            ),
+          ),
+          PosColumn(
+            text: orderPayments[index].op_amount.toStringAsFixed(2),
+            width: 3,
+            styles: PosStyles(
+              align: PosAlign.right,
+              fontType: PosFontType.fontA,
+              bold: false,
+            ),
+          ),
+          PosColumn(
+            text: (orderPayments[index].op_amount + variance[paymentID])
+                .toStringAsFixed(2),
+            width: 3,
+            styles: PosStyles(
+              align: PosAlign.right,
+              fontType: PosFontType.fontA,
+              bold: false,
+            ),
+          ),
+          PosColumn(
+            text: variance[paymentID].toStringAsFixed(2),
+            width: 3,
+            styles: PosStyles(
+              align: PosAlign.right,
+              fontType: PosFontType.fontA,
+              bold: false,
+            ),
+          ),
+        ]);
+      }
+
+      ticket.hr();
+      ticket.row([
+        PosColumn(
+          text: "Total",
+          width: 2,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          ),
+        ),
+        PosColumn(
+          text: ":",
+          width: 1,
+          styles: PosStyles(
+            align: PosAlign.left,
+            fontType: PosFontType.fontA,
+            bold: true,
+          ),
+        ),
+        PosColumn(
+          text: total[0].toStringAsFixed(2),
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          ),
+        ),
+        PosColumn(
+          text: total[1].toStringAsFixed(2),
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          ),
+        ),
+        PosColumn(
+          text: total[2].toStringAsFixed(2),
+          width: 3,
+          styles: PosStyles(
+            align: PosAlign.right,
+            fontType: PosFontType.fontA,
+            bold: false,
+          ),
+        ),
+      ]);
+      ticket.hr();
+    }
     /*
     *For Print summery
     */
@@ -2362,34 +2509,38 @@ class PrintReceipt {
       var expectedVal,
       List<OrderPayment> orderPayments,
       List<Payments> paymentMethods,
-      var ordersCount) async {
+      var ordersCount,
+      [Map<int, double> variance]) async {
     final PrinterNetworkManager printerManager = PrinterNetworkManager();
     printerManager.selectPrinter(printerIp, port: 9100);
 
     final PosPrintResult res = await printerManager.printTicket(
-        await shiftReportReceipt(
-            branchData,
-            totalPax,
-            terminalData,
-            grosssale,
-            refundval,
-            discountval,
-            netsale,
-            taxval,
-            serviceTax,
-            roundingAmount,
-            totalRend,
-            shifittem,
-            cashSale,
-            cashDeposit,
-            cashRefund,
-            cashRounding,
-            payInAmmount,
-            payOutAmmount,
-            expectedVal,
-            orderPayments,
-            paymentMethods,
-            ordersCount));
+      await shiftReportReceipt(
+        branchData,
+        totalPax,
+        terminalData,
+        grosssale,
+        refundval,
+        discountval,
+        netsale,
+        taxval,
+        serviceTax,
+        roundingAmount,
+        totalRend,
+        shifittem,
+        cashSale,
+        cashDeposit,
+        cashRefund,
+        cashRounding,
+        payInAmmount,
+        payOutAmmount,
+        expectedVal,
+        orderPayments,
+        paymentMethods,
+        ordersCount,
+        variance,
+      ),
+    );
 
     if (Navigator.of(ctx).mounted) {
       CommunFun.showToast(ctx, res.msg);

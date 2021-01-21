@@ -356,6 +356,8 @@ class CommunFun {
     await SyncAPICalls.sendTerminalLogTable(context);
     await SyncAPICalls.sendShiftTable(context);
     await SyncAPICalls.sendShiftdetails(context);
+
+    //await CommunFun.syncAfterSuccess(context, false);
     if (isClose && Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
     }
@@ -1013,13 +1015,13 @@ class CommunFun {
     }
   }
 
-  static getPemission() async {
+  static Future<String> getPemission() async {
     var permission =
         await Preferences.getStringValuesSF(Constant.USER_PERMISSION);
     if (permission != null) {
       return permission;
     } else {
-      print("error");
+      print("permission empty");
       return "";
     }
   }
@@ -1366,6 +1368,130 @@ class CommunFun {
       return calRound;
     } else {
       return calRound = total - oldTotal;
+    }
+  }
+
+  static printClosingData(
+      printerIP,
+      context,
+      Shift shifittem,
+      String permissions,
+      List<Payments> paymentMethods,
+      List<OrderPayment> orderPayments,
+      Branch branchData,
+      Map<int, double> variance) async {
+    PrintReceipt printKOT = PrintReceipt();
+
+    var terminalID = await CommunFun.getTeminalKey();
+    var grosssale = 0.00;
+    var netsale = 0.00;
+    var discountval = 0.00;
+    var refundval = 0.00;
+    var taxval = 0.00;
+    var totalRend = 0.00;
+    var textService = 0.00;
+    double cashSale = 0.00;
+    double roundingAmount = 0.00;
+    double cashDeposit = 0.00;
+    double cashRefund = 0.00;
+    double cashRounding = 0.00;
+    double payInAmmount = 0.00;
+    double payOutAmmount = 0.00;
+    double expectedVal = 0.00;
+    int totalPax = 0;
+
+    List<Orders> ordersList = await localAPI.getShiftInvoiceData(
+        branchData.branchId, shifittem.createdAt);
+    // Summery
+    if (ordersList.length > 0) {
+      for (var i = 0; i < ordersList.length; i++) {
+        Orders order = ordersList[i];
+        grosssale += order.sub_total;
+        refundval += 0;
+        netsale = grosssale - refundval;
+        taxval += order.tax_amount;
+        totalPax += order.pax ?? 0;
+        roundingAmount += order.rounding_amount;
+        textService += order.serviceCharge ?? 0;
+        discountval += order.voucher_amount != null ? order.voucher_amount : 0;
+        totalRend = (netsale + taxval + textService) - discountval;
+      }
+    }
+
+    // cash drawer summery
+
+    List<Drawerdata> result =
+        await localAPI.getPayinOutammount(shifittem.appId);
+    if (result.length > 0) {
+      var drawerAmm = 0.00;
+      for (var i = 0; i < result.length; i++) {
+        Drawerdata drawer = result[i];
+        if (drawer.amount != null) {
+          drawerAmm += drawer.amount;
+          cashSale += drawer.amount;
+          cashDeposit = 0.00;
+          cashRefund += drawer.isAmountIn == 0 ? drawer.amount : 0.00;
+          cashRounding += 0.00;
+          payInAmmount += drawer.isAmountIn == 1 ? drawer.amount : 0.00;
+          payOutAmmount += drawer.isAmountIn == 2 ? drawer.amount : 0.00;
+        }
+      }
+      expectedVal = drawerAmm;
+    }
+
+    /// Payment summery
+    /* dynamic payments = await localAPI.getTotalPayment(terminalID, branchid);
+    List<Payments> paymentMethods = payments["payment_method"];
+    List<OrderPayment> orderPayments = payments["payments"];
+    var branchID = await getbranchId();
+    Branch branchData = await localAPI.getBranchData(branchID);
+     */
+    // branch Data
+
+    // terminal Data
+    Terminal terminalData = await localAPI.getTerminalDetails(terminalID);
+    Function printShiftReport = () => printKOT.shiftReportPrint(
+          printerIP,
+          context,
+          // Branch data
+          branchData,
+          totalPax,
+          // terminal data
+          terminalData,
+          //Summery Sales data
+          grosssale,
+          refundval,
+          discountval,
+          netsale,
+          taxval,
+          textService,
+          roundingAmount,
+          totalRend,
+          // Drawer Data
+          shifittem,
+          cashSale,
+          cashDeposit,
+          cashRefund,
+          cashRounding,
+          payInAmmount,
+          payOutAmmount,
+          expectedVal,
+          // Paymemts Data
+          orderPayments,
+          paymentMethods,
+          ordersList.length, variance,
+        );
+    if (permissions.contains(Constant.PRINT_RECIEPT)) {
+      printShiftReport();
+    } else {
+      await SyncAPICalls.logActivity("print reciept",
+          "Cashier has no permission for print reciept", "print reciept", 1);
+      await CommonUtils.openPermissionPop(context, Constant.PRINT_RECIEPT,
+          () async {
+        await SyncAPICalls.logActivity("print reciept",
+            "Manager given permission for print reciept", "print reciept", 1);
+        printShiftReport();
+      }, () {});
     }
   }
 

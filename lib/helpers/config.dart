@@ -5,7 +5,7 @@ import 'package:mcncashier/app/app_config.dart';
 
 class Configrations {
   static String base_URL =
-      //"http://192.168.1.39/laravel-admin-panel/api/v1/en/"; // local
+      //"http://localhost/laravel-admin-panel/api/v1/en/"; // local
       //"https://mcnpos.com.my/api/v1/en/"; // live
       "https://staging.mcnpos.com.my/api/v1/en/"; // staging
   static String terminalKey = "verifyTerminalkey";

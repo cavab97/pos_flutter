@@ -45,11 +45,12 @@ import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/CloseShiftPage.dart';
+import 'package:mcncashier/screens/DiscountPad.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:mcncashier/screens/ChangeQtyDailog.dart';
-import 'package:mcncashier/screens/SetQuantityPad/SetQuantityPad.dart';
+import 'package:mcncashier/screens/SetQuantityPad.dart';
 import 'package:mcncashier/screens/SplitOrder.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/screens/ReprintPopup.dart';
@@ -67,8 +68,6 @@ import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
 
 import '../services/LocalAPIs.dart';
-import '../screens/DiscountPad/DiscountPad.dart';
-import '../screens/SetQuantityPad/SetQuantityPad.dart';
 
 class DashboradPage extends StatefulWidget {
   // main Product list page
@@ -313,7 +312,7 @@ class _DashboradPageState extends State<DashboradPage>
       setState(() {
         cartList = cartItems;
       });
-      await countTotals(cartId);
+      return await countTotals(cartId);
     }
   }
 
@@ -367,11 +366,6 @@ class _DashboradPageState extends State<DashboradPage>
           : 0.00;
     }
     cart.tax = taxval;
-    cart.grand_total = (cart.sub_total - cart.discountAmount) +
-        cart.tax +
-        (cart.serviceCharge == null ? 0.00 : cart.serviceCharge);
-    await localAPI.updateWebCart(cart);
-
     if (this.mounted) {
       setState(() {
         allcartData = cart;
@@ -397,6 +391,11 @@ class _DashboradPageState extends State<DashboradPage>
         isCounting = false;
       });
     }
+    cart.grand_total = grandTotal;
+    cart.grand_total = double.tryParse(
+        await CommunFun.checkRoundData(grandTotal.toStringAsFixed(2)));
+    await localAPI.updateWebCart(cart);
+    return cart;
   }
 
   removeCutomer() async {
@@ -504,29 +503,37 @@ class _DashboradPageState extends State<DashboradPage>
     switch (choice) {
       case 0:
         //selectTable();
-        await SyncAPICalls.logActivity(
+        SyncAPICalls.logActivity(
             "menu", "clicked add customer menu item", "menu", 1);
         openShowAddCustomerDailog();
         break;
       case 1:
         if (permissions.contains(Constant.CLOSE_TABLE)) {
-          await SyncAPICalls.logActivity(
+          SyncAPICalls.logActivity(
               "menu", "clicked closed table menu item", "menu", 1);
-          closeTable();
+          if (cartList.length > 0) {
+            closeTable();
+          } else {
+            selectTable();
+          }
         } else {
-          await SyncAPICalls.logActivity("Close Table",
+          SyncAPICalls.logActivity("Close Table",
               "Cashier has no permission for close table", "Product", 1);
           await CommonUtils.openPermissionPop(context, Constant.CLOSE_TABLE,
               () async {
-            await closeTable();
-            await SyncAPICalls.logActivity("Close Table",
+            SyncAPICalls.logActivity("Close Table",
                 "Manager given permission for close table", "Product", 1);
+            if (cartList.length > 0) {
+              closeTable();
+            } else {
+              selectTable();
+            }
           }, () {});
         }
 
         break;
       case 2:
-        await SyncAPICalls.logActivity(
+        SyncAPICalls.logActivity(
             "menu", "clicked split order menu item", "menu", 1);
         await showDialog(
             // Opning Ammount Popup
@@ -553,28 +560,28 @@ class _DashboradPageState extends State<DashboradPage>
             });
         break;
       case 3:
-        await SyncAPICalls.logActivity(
+        SyncAPICalls.logActivity(
             "menu", "clicked close shift menu item", "menu", 1);
         if (permissions.contains(Constant.CLOSING)) {
           closeShift();
         } else {
-          await SyncAPICalls.logActivity("Close shift",
+          SyncAPICalls.logActivity("Close shift",
               "Cashier has no permission for close store", "shift", 1);
           await CommonUtils.openPermissionPop(context, Constant.CLOSING,
               () async {
-            await closeShift();
-            await SyncAPICalls.logActivity("Close shift",
+            SyncAPICalls.logActivity("Close shift",
                 "Manager given permission for close store", "shift", 1);
+            await closeShift();
           }, () {});
         }
         break;
       case 4:
-        await SyncAPICalls.logActivity(
+        SyncAPICalls.logActivity(
             "menu", "clicked delete order menu item", "menu", 1);
         if (permissions.contains(Constant.DELETE_ORDER)) {
           deleteCurrentCart();
         } else {
-          await SyncAPICalls.logActivity(
+          SyncAPICalls.logActivity(
               "Delete table Order",
               "Cashier has no permission for delete order from table",
               "Order",
@@ -582,7 +589,7 @@ class _DashboradPageState extends State<DashboradPage>
           await CommonUtils.openPermissionPop(context, Constant.DELETE_ORDER,
               () async {
             deleteCurrentCart();
-            await SyncAPICalls.logActivity(
+            SyncAPICalls.logActivity(
                 "Deletetable Order",
                 "Manager given permission for delete order from table",
                 "Order",
@@ -591,19 +598,19 @@ class _DashboradPageState extends State<DashboradPage>
         }
         break;
       case 5:
-        await SyncAPICalls.logActivity(
+        SyncAPICalls.logActivity(
             "menu", "clicked apply promocode menu item", "menu", 1);
         changePromoCode();
         break;
       case 6:
-        await SyncAPICalls.logActivity(
+        SyncAPICalls.logActivity(
             "menu", "clicked apply total bill discount", "menu", 1);
         applyDiscount();
         break;
     }
   }
 
-  applyDiscount() async {
+  applyDiscount([Function callback]) async {
     if (this.mounted) {
       setState(() {
         itemSelected = new MSTCartdetails();
@@ -617,9 +624,16 @@ class _DashboradPageState extends State<DashboradPage>
           selectedProduct: null,
           issetMeal: false,
           cartID: currentCartID,
-          onClose: () {
-            getCartItem(currentCartID);
+          onClose: () async {
+            if (callback != null) {
+              /* MST_Cart cart = await localAPI.getCartData(currentCartID);
+              print(cart.grand_total); */
+              callback(await getCartItem(currentCartID));
+            } else {
+              getCartItem(currentCartID);
+            }
           },
+          discard: callback,
         );
       },
     );
@@ -721,7 +735,7 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
 /*this function used for remove promocode from cart*/
-  removePromoCode(Voucher voucher) async {
+  removePromoCode(Voucher voucher, [Function callback]) async {
     //List<MSTCartdetails> cartListUpdate = [];
     //Voucher voucher = Voucher.fromJson(voucherdata);
     for (int i = 0; i < cartList.length; i++) {
@@ -733,9 +747,12 @@ class _DashboradPageState extends State<DashboradPage>
     allcartData.grand_total =
         allcartData.grand_total + allcartData.discountAmount;
     allcartData.voucher_detail = "";
+    allcartData.discountRemark =
+        allcartData.discountRemark.replaceAll(voucher.voucherName, '');
     allcartData.discountAmount = 0.0;
     allcartData.discountType = 0;
     allcartData.voucher_id = null;
+    callback(allcartData);
     await localAPI.addVoucherInOrder(allcartData, voucher);
     await countTotals(currentCartID);
     await SyncAPICalls.logActivity("promocode",
@@ -974,7 +991,7 @@ class _DashboradPageState extends State<DashboradPage>
         });
   }
 
-  openVoucherPop() {
+  openVoucherPop([Function onCloseFunction]) {
     showDialog(
       // Opning Ammount Popup
       context: context,
@@ -983,6 +1000,7 @@ class _DashboradPageState extends State<DashboradPage>
           cartList: cartList,
           cartData: allcartData,
           cartId: currentCartID,
+          taxlist: taxlist,
           onEnter: (voucher) {
             if (voucher != null) {
               setState(() {
@@ -991,6 +1009,7 @@ class _DashboradPageState extends State<DashboradPage>
             }
             getCartItem(currentCartID);
           },
+          onClose: onCloseFunction,
         );
       },
     );
@@ -1098,7 +1117,8 @@ class _DashboradPageState extends State<DashboradPage>
     shift.serverId = 0;
     if (shiftid == null) {
       shift.startAmount = double.parse(ammount);
-      shift.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+      shift.updatedAt =
+          shift.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
     } else {
       shift.endAmount = double.parse(ammount);
       shift.updatedAt = await CommunFun.getCurrentDateTime(DateTime.now());
@@ -1189,8 +1209,6 @@ class _DashboradPageState extends State<DashboradPage>
 
   editCartItem(cart) async {
     var prod;
-    print("cart.modiName");
-    print(cart.modiName);
     if (cart.issetMeal == 0) {
       List<ProductDetails> productdt =
           await localAPI.productdData(cart.productId);
@@ -1202,9 +1220,6 @@ class _DashboradPageState extends State<DashboradPage>
       if (productdt.length > 0) {
         prod = productdt[0];
       }
-      print("prod");
-      print(productdt[0].base64);
-      print(prod);
     }
 
     await showDialog(
@@ -1264,9 +1279,22 @@ class _DashboradPageState extends State<DashboradPage>
         builder: (BuildContext context) {
           return PaymentAlertDialog(
             totalAmount: double.tryParse(roundingTotal),
-            onClose: (mehtod) {
-              CommunFun.processingPopup(context);
-              paymentWithMethod(mehtod);
+            selectedVoucher: selectedvoucher,
+            voucherFunction: (Function onCloseFunction) =>
+                openVoucherPop(onCloseFunction),
+            removeVoucherFunction: removePromoCode,
+            applyDiscount: applyDiscount,
+            permissions: permissions,
+            currentCartID: currentCartID,
+            taxlists: taxlist,
+            onClose: (bool isContinue, List<OrderPayment> mehtod) {
+              if (isContinue) {
+                countTotals(currentCartID);
+                openPaymentMethod();
+              } else {
+                CommunFun.processingPopup(context);
+                paymentWithMethod(mehtod);
+              }
             },
           );
         });
@@ -1328,34 +1356,33 @@ class _DashboradPageState extends State<DashboradPage>
     Table_order tables = await getTableData();
     User userdata = await CommunFun.getuserDetails();
     List<MSTCartdetails> cartList = await getcartDetails(currentCartID);
+    sendTokitched(cartList);
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
     var uuid = await CommunFun.getLocalID();
     List<Orders> lastappid = await localAPI.getLastOrderAppid(terminalId);
     int length = branchData.invoiceStart.length;
     var invoiceNo;
-    order.order_id = await SyncAPICalls.getOrderId(context);
-    if (order.order_id != null) {
-      invoiceNo = branchData.orderPrefix +
-          order.order_id.toString().padLeft(
-              order.order_id.toString().length < 5
-                  ? 5 - order.order_id.toString().length
-                  : 1,
-              "0");
+    order.app_id = await SyncAPICalls.getOrderId(context);
+    if (order.app_id != null) {
     } else if (lastappid.length > 0) {
       order.app_id = lastappid[0].app_id + 1;
-      invoiceNo =
-          branchData.orderPrefix + order.app_id.toString().padLeft(length, "0");
+      Preferences.setStringToSF(Constant.lastOrderId, order.app_id.toString());
     } else {
       order.app_id = 1;
-      invoiceNo =
-          branchData.orderPrefix + order.app_id.toString().padLeft(length, "0");
+      Preferences.setStringToSF(Constant.lastOrderId, 1.toString());
     }
+    invoiceNo = branchData.orderPrefix +
+        order.app_id.toString().padLeft(
+            order.app_id.toString().length < 5
+                ? 5 - order.app_id.toString().length
+                : 1,
+            "0");
+    grandTotal = (subtotal - discount) + tax + serviceCharge;
     var convertGrand = await CommunFun.checkRoundData(
         (cartData.grand_total ?? 0).toStringAsFixed(2));
     double newGtotal = double.parse(convertGrand);
-    var roundingVal =
-        await CommunFun.calRounded(newGtotal, cartData.grand_total);
+    var roundingVal = await CommunFun.calRounded(newGtotal, grandTotal);
     double rounding = double.parse(roundingVal.toStringAsFixed(2));
     order.uuid = uuid;
     order.branch_id = int.parse(branchid);
@@ -1401,6 +1428,7 @@ class _DashboradPageState extends State<DashboradPage>
       history.uuid = uuid;
       history.server_id = 0;
       history.terminal_id = int.parse(terminalId);
+      history.user_id = userdata.id;
       await localAPI.saveVoucherHistory(history);
     }
     var orderDetailid;
@@ -1752,11 +1780,12 @@ class _DashboradPageState extends State<DashboradPage>
     List<OrderAttributes> attributes =
         await localAPI.getOrderAttributes(orderid);
     List<OrderModifire> modifires = await localAPI.getOrderModifire(orderid);
-    Function asyncFunc = () {
+
+    Function asyncFunc = (currentContext) {
       printKOT.checkReceiptPrint(
           selectedTable.number_of_pax.toString(),
           printerreceiptList[0].printerIp,
-          context,
+          currentContext,
           branchData,
           taxJson,
           orderitem,
@@ -1772,19 +1801,18 @@ class _DashboradPageState extends State<DashboradPage>
           true); //"  ? :"
     };
     //temporary print receipt, cannot print if no permission, pop out dirently close
-    asyncFunc();
-    await clearCartAfterSuccess(orderid);
+    //asyncFunc();
+    await clearCartAfterSuccess(orderid, asyncFunc);
   }
 
-  clearCartAfterSuccess(orderid) async {
+  clearCartAfterSuccess(orderid, [Function callback]) async {
     Table_order tables = await getTableData();
     await localAPI.removeCartItem(currentCartID, tables.table_id);
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
     await Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
-    if (context != null)
-      await Navigator.pushNamedAndRemoveUntil(
-          context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
-          arguments: {"isAssign": false});
+    await Navigator.pushNamedAndRemoveUntil(
+        context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
+        arguments: {"isAssign": false, "callbackFunction": callback});
   }
 
   getTaxs() async {
@@ -1944,7 +1972,7 @@ class _DashboradPageState extends State<DashboradPage>
     MSTCartdetails focProduct = new MSTCartdetails();
     User userdata = await CommunFun.getuserDetails();
     bool isupdate = false;
-    if (cartitem.productQty == 1) {
+    if (qty == cartitem.productQty) {
       isupdate = true;
       focProduct.id = cartitem.id;
     }
@@ -1982,7 +2010,7 @@ class _DashboradPageState extends State<DashboradPage>
         : 0;
     cart.sub_total = subt;
     cart.discountAmount = disc;
-    cart.total_qty = allcartData.total_qty - qty;
+    //cart.total_qty = allcartData.total_qty - qty;
     cart.grand_total = (cart.sub_total - disc) + taxvalues;
     cart.tax_json = json.encode(taxjson);
     await localAPI.makeAsFocProduct(focProduct, isupdate, cart, cartitem);
@@ -2054,17 +2082,25 @@ class _DashboradPageState extends State<DashboradPage>
       localAPI.deleteTableOrder(selectedTable.table_id);
       Preferences.removeSinglePref(Constant.TABLE_DATA);
     } else {
-      localAPI.updateCartListDetails(
+      await localAPI.updateCartListDetails(
           originalCartList, originalCartList[0].cartId);
+      await countTotals(currentCartID);
     }
     //print(DateTime.now());
-    goToTableScreen(selectedTable.table_id);
+    goToTableScreen(selectedTable.table_id, originalCartList);
   }
 
-  goToTableScreen([int updatedTableId = 0]) {
+  goToTableScreen([
+    int updatedTableId = 0,
+    List<MSTCartdetails> cartLists,
+  ]) async {
     Navigator.pushNamedAndRemoveUntil(
         context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
-        arguments: {"isAssign": false, "updatedTableId": updatedTableId});
+        arguments: {
+          "isAssign": false,
+          "updatedTableId": updatedTableId,
+          'cartLists': cartLists,
+        });
   }
 
   @override
@@ -2081,26 +2117,30 @@ class _DashboradPageState extends State<DashboradPage>
       padding: EdgeInsets.all(10),
       children: <Widget>[
         GestureDetector(
-            onTap: () {
-              if (permissions.contains(Constant.DISCOUNT_ITEM)) {
-                applyforFocProduct(itemSelected);
-                setState(() {
-                  itemSelected = new MSTCartdetails();
-                });
-              } else {
-                CommonUtils.openPermissionPop(context, Constant.DISCOUNT_ITEM,
-                    () {
-                  applyforFocProduct(itemSelected);
-                  setState(() {
-                    itemSelected = new MSTCartdetails();
-                  });
-                }, () {});
-              }
-            },
+            onTap: itemSelected.isFocProduct == 1
+                ? null
+                : () {
+                    if (permissions.contains(Constant.DISCOUNT_ITEM)) {
+                      applyforFocProduct(itemSelected);
+                      setState(() {
+                        itemSelected = new MSTCartdetails();
+                      });
+                    } else {
+                      CommonUtils.openPermissionPop(
+                          context, Constant.DISCOUNT_ITEM, () {
+                        applyforFocProduct(itemSelected);
+                        setState(() {
+                          itemSelected = new MSTCartdetails();
+                        });
+                      }, () {});
+                    }
+                  },
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Colors.grey,
+                color: itemSelected.isFocProduct == 1
+                    ? Colors.grey[400]
+                    : Colors.grey,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -2120,8 +2160,6 @@ class _DashboradPageState extends State<DashboradPage>
         GestureDetector(
           onTap: () {
             if (permissions.contains(Constant.EDIT_ITEM)) {
-              print("itemSelectedIndex");
-              print(itemSelected.productDetailAmount);
               editCartItem(itemSelected);
               setState(() {
                 itemSelected = new MSTCartdetails();
@@ -2159,7 +2197,6 @@ class _DashboradPageState extends State<DashboradPage>
         GestureDetector(
             onTap: () {
               if (currentQuantity > 0) {
-                print(focusCart.productName);
                 currentProductQuantity = itemSelected.productQty;
                 itemSelected.productQty = currentQuantity.toDouble();
 
@@ -2964,10 +3001,9 @@ class _DashboradPageState extends State<DashboradPage>
           ),
         ),
         PopupMenuItem(
-          enabled:
-              ((!(selectedvoucher == null && allcartData.discountAmount > 0)) &&
-                  permissions.contains(Constant.DISCOUNT_ORDER) &&
-                  cartList.length > 0),
+          enabled: (cartList.length > 0 &&
+              (!(selectedvoucher == null && allcartData.discountAmount > 0)) &&
+              permissions.contains(Constant.DISCOUNT_ORDER)),
           value: 5,
           child: Padding(
             padding: EdgeInsets.all(10),
@@ -3315,23 +3351,20 @@ class _DashboradPageState extends State<DashboradPage>
                       await SyncAPICalls.logActivity("send to kitchen",
                           "Clicked sent to kitchen", "send to kitchen", 1);
                       if (permissions.contains(Constant.SEND_KITCHEN)) {
-                        sendTokitched(cartList);
-                        goToTableScreen();
+                        await countTotals(currentCartID);
+                        //sendTokitched(cartList);
+                        goToTableScreen(selectedTable.table_id, cartList);
                       } else {
-                        await SyncAPICalls.logActivity(
-                            "send to kitchen",
-                            "Cashier has no permission for send items to kitchen",
-                            "send to kitchen",
-                            1);
                         await CommonUtils.openPermissionPop(
                             context, Constant.SEND_KITCHEN, () async {
-                          sendTokitched(cartList);
-                          goToTableScreen();
+                          await countTotals(currentCartID);
+                          //sendTokitched(cartList);
                           await SyncAPICalls.logActivity(
                               "send to kitchen",
                               "Manager given permission for send items to kitchen",
                               "send to kitchen",
                               1);
+                          goToTableScreen(selectedTable.table_id, cartList);
                         }, () {});
                       }
                     },
@@ -3341,7 +3374,9 @@ class _DashboradPageState extends State<DashboradPage>
                       size: SizeConfig.safeBlockVertical * 3,
                     ),
                     label: Text(
-                      Strings.send.toUpperCase(),
+                      originalCartList.length > 0
+                          ? Strings.send.toUpperCase()
+                          : Strings.confirmOrder.toUpperCase(),
                       style: Styles.whiteBoldsmall(),
                     ),
                     color: Colors.deepOrange,
@@ -3659,9 +3694,7 @@ class _DashboradPageState extends State<DashboradPage>
             onTap: () => setState(() {
               // cartListTemp = ;
               focusCart = cart;
-              print(cart);
               if (currentQuantity > 0) {
-                print(focusCart.productName);
                 currentProductQuantity = cart.productQty;
                 cart.productQty = currentQuantity.toDouble();
 

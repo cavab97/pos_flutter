@@ -767,6 +767,14 @@ class TableData {
             'value': order.order_id,
           };
           var count = await ifExists(db, data);
+          if (count == 0) {
+            data = {
+              'table': "orders",
+              'key': "invoice_no",
+              'value': order.invoice_no,
+            };
+            count = await ifExists(db, data);
+          }
           order.server_id = order.order_id;
           order.isSync = 1;
           if (count == 0) {

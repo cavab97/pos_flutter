@@ -17,12 +17,14 @@ class DiscountPad extends StatefulWidget {
     this.issetMeal,
     this.cartID,
     this.onClose,
+    this.discard,
   }) : super(key: key);
 
   final bool issetMeal;
   final MSTCartdetails selectedProduct;
   final int cartID;
   Function onClose;
+  Function discard;
 
   @override
   _DiscountPadState createState() => _DiscountPadState();
@@ -108,7 +110,7 @@ class _DiscountPadState extends State<DiscountPad> {
               //     style: Styles.communBlack()),
             ),
             Spacer(),
-            CloseButtonWidget(inputContext: context),
+            CloseButtonWidget(inputContext: context, callback: widget.discard),
           ],
         ),
       ),
@@ -227,6 +229,9 @@ class _DiscountPadState extends State<DiscountPad> {
         myFocusNode.requestFocus();
       }
     } else {
+      if (double.tryParse(currentNumber) == 0) {
+        extraNotes.text = "";
+      }
       if (widget.selectedProduct != null) {
         await localAPI.updateItemDiscount(widget.selectedProduct, widget.cartID,
             currentNumber, currentDiscountType, extraNotes.text.trim());
@@ -234,8 +239,8 @@ class _DiscountPadState extends State<DiscountPad> {
         await localAPI.applyBillDiscount(widget.cartID, currentNumber,
             currentDiscountType, extraNotes.text.trim());
       }
-      Navigator.of(context).pop();
       widget.onClose();
+      Navigator.of(context).pop();
     }
   }
 

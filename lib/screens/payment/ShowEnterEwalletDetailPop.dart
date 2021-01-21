@@ -23,8 +23,25 @@ TextEditingController refInputController = new TextEditingController();
 TextEditingController remarkInputController = new TextEditingController();
 
 class _ShowEnterEwalletDetailPopState extends State<ShowEnterEwalletDetailPop> {
+  FocusScopeNode node;
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+/* 
+    refInputController.dispose();
+    remarkInputController.dispose(); */
+    if (node != null) {
+      //FocusScope.of(context).requestFocus(new FocusNode());
+      node.unfocus();
+      //node.dispose();
+    }
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    node = FocusScope.of(context);
+
     var errorMSG = "";
     return AlertDialog(
       shape: RoundedRectangleBorder(
@@ -57,6 +74,7 @@ class _ShowEnterEwalletDetailPopState extends State<ShowEnterEwalletDetailPop> {
                   }
                   return null;
                 },
+                controllerNode: node,
               ),
               SizedBox(
                 height: 20,
@@ -70,11 +88,16 @@ class _ShowEnterEwalletDetailPopState extends State<ShowEnterEwalletDetailPop> {
                 textInputType: TextInputType.text,
                 hintText: Strings.enterRemark,
                 errorMSG: errorMSG,
-                validatorFunction: (value) {
+                /* validatorFunction: (value) {
                   if (value.isEmpty) {
                     return Strings.referenceNumMsg;
                   }
                   return null;
+                }, */
+                controllerNode: node,
+                submittedFunction: (_) {
+                  node.requestFocus(new FocusNode());
+                  checkRefNum();
                 },
               ),
             ],
@@ -84,6 +107,7 @@ class _ShowEnterEwalletDetailPopState extends State<ShowEnterEwalletDetailPop> {
       actions: <Widget>[
         FlatButton(
           onPressed: () {
+            node.requestFocus(new FocusNode());
             Navigator.of(context).pop();
           },
           child: Text(Strings.cancel, style: Styles.orangeSmall()),
@@ -99,7 +123,7 @@ class _ShowEnterEwalletDetailPopState extends State<ShowEnterEwalletDetailPop> {
   }
 
   checkRefNum() {
-    if (_formKey.currentState.validate()) {
+    if (_formKey.currentState != null && _formKey.currentState.validate()) {
       widget.currentPayment.remark = remarkInputController.text;
       widget.currentPayment.reference_number = refInputController.text;
       Navigator.of(context).pop();
