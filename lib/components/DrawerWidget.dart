@@ -46,7 +46,8 @@ class DrawerWidState extends State<DrawerWid> {
     setState(() {
       permissions = permission;
     });
-    await SyncAPICalls.logActivity("drawer", "Opened drawer menu", "drawer", 1);
+    await SyncAPICalls.logActivity(
+        "sidebar", "Opened drawer menu", "sidebar", 1);
   }
 
   getUserData() async {
@@ -241,7 +242,7 @@ class DrawerWidState extends State<DrawerWid> {
 
   syncOrdersTodatabase() async {
     if (permissions.contains(Constant.SYNC_ORDER)) {
-      var syncAlert = await CommunFun.openSyncPop(context);
+      await CommunFun.openSyncPop(context);
       await CommunFun.syncOrdersANDStore(context, true);
       //Navigator.of(context).pop(syncAlert);
     } else {
@@ -259,29 +260,30 @@ class DrawerWidState extends State<DrawerWid> {
 
   syncAllTables() async {
     //Navigator.of(context).pop();
-    Function syncAction = () async {
-      await Preferences.removeSinglePref(Constant.LastSync_Table);
-      await Preferences.removeSinglePref(Constant.OFFSET);
-      await CommunFun.openSyncPop(context);
-      await CommunFun.syncOrdersANDStore(context, false);
-      await CommunFun.syncAfterSuccess(context, false);
-      getconfigdata();
-    };
-    if (permissions == "") {
-      await syncAction();
+    //Function syncAction = () async {
+    await Preferences.removeSinglePref(Constant.LastSync_Table);
+    await Preferences.removeSinglePref(Constant.OFFSET);
+    await CommunFun.openSyncPop(context);
+    await CommunFun.syncOrdersANDStore(context, false);
+    await CommunFun.syncAfterSuccess(context, false);
+    getconfigdata();
+    //};
+
+    await SyncAPICalls.logActivity(
+        "Sync tables", "Cashier click sync", "all tables", 1);
+    //await syncAction();
+    /* if (permissions == "") {
     }
     if (permissions.contains(Constant.VIEW_SYNC)) {
       await syncAction();
     } else {
-      await SyncAPICalls.logActivity("Sync tables",
-          "chashier has permission for Sync tables", "all tables", 1);
       await CommonUtils.openPermissionPop(context, Constant.VIEW_SYNC,
           () async {
         await syncAction();
         await SyncAPICalls.logActivity("Sync tables",
             "Manager given permission for Sync tables", "all tables", 1);
       }, () {});
-    }
+    } */
   }
 
   getconfigdata() async {
@@ -324,7 +326,7 @@ class DrawerWidState extends State<DrawerWid> {
             ListTile(
               onTap: () async {
                 await SyncAPICalls.logActivity(
-                    "drawer", "Select transaction menu", "drawer", 1);
+                    "sidebar", "Select transaction menu", "sidebar", 1);
                 gotoTansactionPage();
               },
               leading: Icon(
@@ -341,7 +343,7 @@ class DrawerWidState extends State<DrawerWid> {
               onTap: () async {
                 Navigator.of(context).pop();
                 await SyncAPICalls.logActivity(
-                    "drawer", "Select Out of stock", "drawer", 1);
+                    "sidebar", "Select Out of stock", "sidebar", 1);
                 Navigator.pushNamed(context, Constant.OutofStock)
                     .then(backEvent);
               },
@@ -355,7 +357,7 @@ class DrawerWidState extends State<DrawerWid> {
             ListTile(
               onTap: () async {
                 await SyncAPICalls.logActivity(
-                    "drawer", "Select web Orders menu", "drawer", 1);
+                    "sidebar", "Select web Orders menu", "sidebar", 1);
                 gotoWebCart();
               },
               leading: Icon(
@@ -372,7 +374,7 @@ class DrawerWidState extends State<DrawerWid> {
               
               onTap: () async {
                 await SyncAPICalls.logActivity(
-                    "drawer", "Select wine storage menu", "drawer", 1);
+                    "sidebar", "Select wine storage menu", "sidebar", 1);
                 gotoWineStorage();
               },
               leading: Icon(
@@ -440,7 +442,7 @@ class DrawerWidState extends State<DrawerWid> {
             ListTile(
               onTap: () async {
                 await SyncAPICalls.logActivity(
-                    "drawer", "Select shift report menu", "drawer", 1);
+                    "sidebar", "Select shift report menu", "sidebar", 1);
                 gotoShiftReport();
               },
               leading: Icon(
@@ -455,36 +457,44 @@ class DrawerWidState extends State<DrawerWid> {
             ),
 
             ListTile(
-                onTap: () async {
-                  Navigator.of(context).pop();
-                  await SyncAPICalls.logActivity(
-                      "drawer", "Select sync orders menu", "drawer", 1);
-                  syncOrdersTodatabase();
-                },
-                leading: Icon(
-                  Icons.transform,
-                  color: Colors.black,
-                  size: SizeConfig.safeBlockVertical * 5,
-                ),
-                title: Text(Strings.syncOrders, style: Styles.drawerText())),
+              onTap: () async {
+                Navigator.of(context).pop();
+                await SyncAPICalls.logActivity(
+                    "sidebar", "Select sync orders menu", "sidebar", 1);
+                syncOrdersTodatabase();
+              },
+              leading: Icon(
+                Icons.transform,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 5,
+              ),
+              title: Text(
+                Strings.syncOrders,
+                style: Styles.drawerText(),
+              ),
+            ),
             // : SizedBox(),
             ListTile(
-                onTap: () async {
-                  await SyncAPICalls.logActivity(
-                      "drawer", "Select sync menu item", "drawer", 1);
-                  syncAllTables();
-                },
-                leading: Icon(
-                  Icons.sync,
-                  color: Colors.black,
-                  size: SizeConfig.safeBlockVertical * 5,
-                ),
-                title: Text(Strings.syncTxt, style: Styles.drawerText())),
+              onTap: () async {
+                await SyncAPICalls.logActivity(
+                    "sidebar", "Select sync menu item", "sidebar", 1);
+                syncAllTables();
+              },
+              leading: Icon(
+                Icons.sync,
+                color: Colors.black,
+                size: SizeConfig.safeBlockVertical * 5,
+              ),
+              title: Text(
+                Strings.syncTxt,
+                style: Styles.drawerText(),
+              ),
+            ),
             ListTile(
               onTap: () async {
                 Navigator.of(context).pop();
                 await SyncAPICalls.logActivity(
-                    "drawer", "Select settings menu", "drawer", 1);
+                    "sidebar", "Select settings menu", "sidebar", 1);
                 Navigator.pushNamed(context, Constant.SettingsScreen)
                     .then(backEvent);
               },

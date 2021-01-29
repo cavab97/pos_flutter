@@ -10,6 +10,7 @@ class Constant {
   static final String IS_USER_LOGIN = "isUserLogin";
   static final String LAGUAGE_CODE = 'languageCode';
   static final String LastSync_Table = "LastSync_Table";
+  static final String lastAppVersion = "lastAppVersion";
   static final String IS_SHIFT_OPEN = "IS_SHIFT_OPENE";
   static final String IS_FIRST_TIME_SYNC = "firsttimeSync";
   static final String SERVER_DATE_TIME = "ServertDateTime";
@@ -58,6 +59,9 @@ class Constant {
   static final String DELETE_ITEM = "delete_item";
   static final String DELETE_ORDER = "delete_order";
   static final String OPEN_DRAWER = "open_drawer";
+  static final String viewSystemAmount = "view_system_amount";
+  static final String viewSalesAmount = "view_sales_amount";
+  static final String addReservation = "add_reservation";
   static final String CASH_IN = "cash_in";
   static final String CASH_OUT = "cash_out";
   static final String PAYMENT = "payment";

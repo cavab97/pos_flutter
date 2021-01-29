@@ -117,12 +117,13 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getAllProduct(String branchID) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
-    String query =
-        "SELECT product.product_id, product.name, product.has_inventory, product_store_inventory.qty, product_branch.out_of_stock FROM `product` " +
-            " LEFT JOIN product_branch ON product_branch.product_id = product.product_id AND product_branch.status = 1" +
-            " LEFT JOIN product_store_inventory ON product_store_inventory.product_id = product.product_id AND product_store_inventory.status = 1 " +
-            " AND product_branch.branch_id = " +
-            branchID.toString();
+    String query = "SELECT product.product_id, product.name, product.has_inventory, product.price, product.sku, base64, product_store_inventory.qty, product_branch.out_of_stock FROM `product` " +
+        " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
+        " LEFT JOIN product_branch ON product_branch.product_id = product.product_id AND product_branch.status = 1" +
+        " LEFT JOIN product_store_inventory ON product_store_inventory.product_id = product.product_id AND product_store_inventory.status = 1 " +
+        " AND product_branch.branch_id = " +
+        branchID.toString() +
+        " GROUP By product.product_id";
     var res = await db.rawQuery(query);
     List<ProductDetails> list = res.length > 0
         ? res.map((c) => ProductDetails.fromJson(c)).toList()
@@ -618,6 +619,24 @@ class LocalAPI {
     return list;
   }
 
+  Future<List<MSTCartdetails>> getReservationItems(String reservationId) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    List<MSTCartdetails> list = [];
+
+    String qry = " SELECT mst_cart_detail.* ,group_concat(attributes.name) as attrName ,group_concat(modifier.name) as modiName from mst_cart_detail " +
+        " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  (mst_cart_sub_detail.attribute_id != '' OR mst_cart_sub_detail.modifier_id != '' )" +
+        " LEFT JOIN attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != '' " +
+        " LEFT JOIN modifier on modifier.modifier_id = mst_cart_sub_detail.modifier_id AND mst_cart_sub_detail.modifier_id != '' " +
+        " where cart_id ='" +
+        reservationId +
+        "' group by mst_cart_detail.id";
+    var res = await db.rawQuery(qry);
+    list = res.isNotEmpty
+        ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
   Future<bool> updateItemDiscount(MSTCartdetails product, int cartID,
       String discountAmount, String discountType, String discountRemark) async {
     MST_Cart getCart = await localAPI.getCartData(cartID);
@@ -817,7 +836,7 @@ class LocalAPI {
   Future<List<Payments>> getPaymentMethods() async {
     var query = "SELECT payment.* , base64  from payment " +
         " LEFT join asset on asset.asset_type = 3 AND asset.asset_type_id = payment.payment_id " +
-        " WHERE payment.status = 1";
+        " WHERE payment.status = 1 GROUP BY payment.payment_id";
     //var query = "SELECT *  from payment WHERE status = 1";
     var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(query);
     List<Payments> list =
@@ -1009,6 +1028,7 @@ class LocalAPI {
   Future<int> clearCartItem(cartid, tableID) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
     await db.delete("mst_cart", where: 'id = ?', whereArgs: [cartid]);
+
     /* await SyncAPICalls.logActivity("orders", "clear cart", "mst_cart", 1); */
     await db.delete("save_order", where: 'cart_id = ?', whereArgs: [cartid]);
     String qry = "Update table_order set save_order_id = 0 where table_id =" +
@@ -2110,7 +2130,7 @@ class LocalAPI {
       Map<String, dynamic> firstRow = orderList[0];
       data["sales_total"] = double.tryParse((firstRow["total"] ?? 0).toString())
           .toStringAsFixed(2);
-      data["sub_total"] =
+      data["net_total"] =
           double.tryParse((firstRow["sub_total"] ?? 0).toString())
               .toStringAsFixed(2);
       data["service_charge"] =
@@ -2563,13 +2583,18 @@ class LocalAPI {
 
   Future<dynamic> getTotalPayment(terminalid, branchid, [filtertime]) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
-    String qry = "SELECT * from order_payment WHERE terminal_id = " +
-        terminalid +
-        " AND branch_id = " +
-        branchid.toString();
+    String qry =
+        "SELECT *, SUM(op_amount-COALESCE(op_amount_change,0)) AS op_amount from order_payment WHERE terminal_id = " +
+            terminalid +
+            " AND branch_id = " +
+            branchid.toString();
     if (filtertime != null) {
       qry += " AND updated_at > '" + filtertime + "' ";
     }
+    /*  result = await db.rawQuery(qry);
+    list = result.length > 0
+        ? result.map((c) => OrderPayment.fromJson(c)).toList()
+        : []; */
     qry += " GROUP by op_method_id";
     var result = await db.rawQuery(qry);
     List<OrderPayment> list = result.length > 0

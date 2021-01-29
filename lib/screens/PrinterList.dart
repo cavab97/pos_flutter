@@ -45,7 +45,7 @@ class _PrinterListDailogState extends State<PrinterListDailog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       title: Stack(
         overflow: Overflow.visible,
         children: <Widget>[

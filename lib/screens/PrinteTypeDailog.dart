@@ -23,7 +23,7 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       title: Stack(
         overflow: Overflow.visible,
         children: <Widget>[
@@ -95,7 +95,7 @@ class ChoosePrinterDailogState extends State<ChoosePrinterDailog> {
           Container(
               child: ListView(
             physics: BouncingScrollPhysics(),
-            padding: EdgeInsets.all(0),
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
             children: <Widget>[
               ListTile(

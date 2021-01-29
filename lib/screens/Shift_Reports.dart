@@ -857,7 +857,7 @@ class _ShiftReportsState extends State<ShiftReports> {
 
   Widget shiftbtn() {
     return RaisedButton(
-      padding: EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       onPressed: () {},
       child: Text(
         Strings.open,
@@ -996,7 +996,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(15.0),

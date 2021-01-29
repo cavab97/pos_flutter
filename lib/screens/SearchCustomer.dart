@@ -84,7 +84,7 @@ class _SearchCustomerPageState extends State<SearchCustomerPage> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       title: Container(
         padding: EdgeInsets.only(left: 20, right: 10, top: 10, bottom: 10),
         height: SizeConfig.safeBlockVertical * 9,

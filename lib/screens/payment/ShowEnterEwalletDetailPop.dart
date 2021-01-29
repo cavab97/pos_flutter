@@ -32,6 +32,8 @@ class _ShowEnterEwalletDetailPopState extends State<ShowEnterEwalletDetailPop> {
     remarkInputController.dispose(); */
     if (node != null) {
       //FocusScope.of(context).requestFocus(new FocusNode());
+      refInputController.text = "";
+      remarkInputController.text = "";
       node.unfocus();
       //node.dispose();
     }

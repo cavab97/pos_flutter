@@ -95,13 +95,17 @@ class _PINPageState extends State<PINPage> {
           await Navigator.pushNamedAndRemoveUntil(context,
               Constant.SelectTableScreen, (Route<dynamic> route) => false,
               arguments: {"isAssign": false});
-          setState(() {
-            isLoading = false;
-          });
+          if (this.mounted) {
+            setState(() {
+              isLoading = false;
+            });
+          }
         } else {
-          setState(() {
-            isLoading = false;
-          });
+          if (this.mounted) {
+            setState(() {
+              isLoading = false;
+            });
+          }
           CommunFun.showToast(context, Strings.invalidPinMsg);
         }
       } else {
@@ -477,7 +481,7 @@ class _PINPageState extends State<PINPage> {
   Widget _buttonCN(String number, Function() f) {
     // Creating a method of return type Widget with number and function f as a parameter
     return MaterialButton(
-      padding: EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18.0),
           side: BorderSide(

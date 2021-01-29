@@ -8,6 +8,7 @@ import 'package:mcncashier/screens/OpningAmountPop.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/components/colors.dart';
+
 class SubPaymentMethodPop extends StatefulWidget {
   // Opning ammount popup
   SubPaymentMethodPop(
@@ -59,7 +60,7 @@ class _SubPaymentMethodPop extends State<SubPaymentMethodPop> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       title: Stack(
         // popup header
         overflow: Overflow.visible,
@@ -139,7 +140,8 @@ class _SubPaymentMethodPop extends State<SubPaymentMethodPop> {
           width: 50.0,
           height: 50.0,
           decoration: BoxDecoration(
-              color: StaticColor.colorRed, borderRadius: BorderRadius.circular(30.0)),
+              color: StaticColor.colorRed,
+              borderRadius: BorderRadius.circular(30.0)),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();

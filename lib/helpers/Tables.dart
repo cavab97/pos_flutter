@@ -948,13 +948,13 @@ class CreateTables {
         ")");
 
     datatables = db.execute("CREATE TABLE setmeal_product ( " +
-        "setmeal_product_id INTEGERT," +
-        "setmeal_id INTEGERT," +
-        "product_id INTEGERT," +
+        "setmeal_product_id INTEGER," +
+        "setmeal_id INTEGER," +
+        "product_id INTEGER," +
         "quantity REAL," +
         "status NUMERIC," +
         "created_at TEXT," +
-        "updated_at INTEGERT" +
+        "updated_at INTEGER" +
         ")");
 
     datatables = db.execute("CREATE TABLE setmeal_attribute ( " +
@@ -972,19 +972,19 @@ class CreateTables {
     // Drawer table
 
     datatables = db.execute("CREATE TABLE drawer ( " +
-        "id INTEGERT PRIMARYKEY AUTOINCREAMENT," +
-        "shift_id INTEGERT," +
+        "id INTEGER PRIMARYKEY AUTOINCREAMENT," +
+        "shift_id INTEGER," +
         "amount REAL," +
         "is_amount_in NUMERIC," +
         "reason TEXT," +
         "status NUMERIC," +
-        "created_by INTEGERT," +
-        "updated_by INTEGERT," +
+        "created_by INTEGER," +
+        "updated_by INTEGER," +
         "created_at TEXT," +
         "updated_at TEXT," +
-        "serverId INTEGERT," +
+        "serverId INTEGER," +
         "localID TEXT," +
-        "terminalid INTEGERT" +
+        "terminalid INTEGER" +
         ")");
 
     // country
@@ -1033,7 +1033,7 @@ class CreateTables {
   }
 }
 
-// DAtaType For flutter
+// DataType For flutter
 // **** INTEGER
 // INT
 // INTEGER

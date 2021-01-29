@@ -2068,7 +2068,7 @@ class PrintReceipt {
       ticket.emptyLines(2);
       ticket.row([
         PosColumn(
-          text: "Payment Type",
+          text: "Payment",
           width: 3,
           styles: PosStyles(
             align: PosAlign.left,
@@ -2113,7 +2113,9 @@ class PrintReceipt {
         Payments currentPayment =
             paymentMethods.firstWhere((ele) => ele.paymentId == paymentID);
         total[0] += orderPayments[index].op_amount;
-        total[1] += total[0] + variance[paymentID];
+        total[1] += variance[paymentID] > 0
+            ? orderPayments[index].op_amount + variance[paymentID]
+            : orderPayments[index].op_amount;
         total[2] += variance[paymentID];
         ticket.row([
           PosColumn(
@@ -2155,19 +2157,18 @@ class PrintReceipt {
           ),
         ]);
       }
-
       ticket.hr();
       ticket.row([
         PosColumn(
           text: "Total",
-          width: 2,
+          width: 3,
           styles: PosStyles(
             align: PosAlign.left,
             fontType: PosFontType.fontA,
             bold: true,
           ),
         ),
-        PosColumn(
+        /* PosColumn(
           text: ":",
           width: 1,
           styles: PosStyles(
@@ -2175,7 +2176,7 @@ class PrintReceipt {
             fontType: PosFontType.fontA,
             bold: true,
           ),
-        ),
+        ), */
         PosColumn(
           text: total[0].toStringAsFixed(2),
           width: 3,
@@ -2206,6 +2207,7 @@ class PrintReceipt {
       ]);
       ticket.hr();
     }
+
     /*
     *For Print summery
     */

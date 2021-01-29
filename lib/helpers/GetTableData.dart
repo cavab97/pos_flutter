@@ -56,13 +56,28 @@ class TableData {
               data['table'] +
               " WHERE " +
               data['key'] +
-              " = " +
+              " = '" +
               data['value'].toString() +
-              ""));
+              "'"));
       return count;
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<int> insertDataToTable(
+      Database db, String tableName, Map<String, dynamic> tablesData) async {
+    try {
+      await db.insert(tableName, tablesData);
+      return 1;
+    } catch (e) {
+      print(e);
+      return 0;
+    }
+  }
+
+  Future executeQuery(Database db, String query) async {
+    await db.execute(query);
   }
 
   Future<dynamic> insertDatatable1(Database db, dynamic tablesData) async {
@@ -232,6 +247,7 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable2_1(Database db, dynamic tablesData) async {
+    if (tablesData == null) return 0;
     var categoryData = tablesData["category"];
     var attributeData = tablesData["attributes"];
     var productData = tablesData["product"];

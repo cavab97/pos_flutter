@@ -232,8 +232,12 @@ class VoucherPopState extends State<VoucherPop> {
           selectedvoucher = voucher;
           isadded = true;
           selectedvoucher = voucher;
-          widget.onEnter(selectedvoucher);
-          widget.onClose(cartData);
+          if (widget.onEnter != null) {
+            widget.onEnter(selectedvoucher);
+          }
+          if (widget.onClose != null) {
+            widget.onClose(cartData);
+          }
           SyncAPICalls.logActivity(
               "add promocode",
               "Cashier Removed promocode form order",
@@ -286,7 +290,7 @@ class VoucherPopState extends State<VoucherPop> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-        titlePadding: EdgeInsets.all(0),
+        titlePadding: EdgeInsets.zero,
         title: Container(
           padding: EdgeInsets.only(left: 30, right: 10, top: 10, bottom: 10),
           height: SizeConfig.safeBlockVertical * 9,

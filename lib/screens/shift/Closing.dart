@@ -101,11 +101,13 @@ class _ClosingPageState extends State<ClosingPage> {
   getBranch() async {
     String brandID = await CommunFun.getbranchId();
     Branch currentBranch = await localAPI.getbranchData(brandID);
-    String lastUpdatedAt = DateTime.parse(currentShift.updatedAt).toString();
+    String lastCreatedAt =
+        DateTime.parse(currentShift.createdAt ?? currentShift.updatedAt)
+            .toString();
     if (this.mounted) {
       setState(() {
         branch = currentBranch;
-        openShiftDateTime = lastUpdatedAt;
+        openShiftDateTime = lastCreatedAt;
       });
     }
   }
@@ -130,8 +132,8 @@ class _ClosingPageState extends State<ClosingPage> {
   }
 
   getPayments() async {
-    final payments =
-        await localAPI.getTotalPayment(terminalID, branch.branchId);
+    final payments = await localAPI.getTotalPayment(
+        terminalID, branch.branchId, openShiftDateTime);
     if (this.mounted) {
       setState(() {
         paymentList = payments["payment_method"];
@@ -167,6 +169,14 @@ class _ClosingPageState extends State<ClosingPage> {
     User userdata = await CommunFun.getuserDetails();
     Shift updateShift = currentShift;
     double calculateAmount = 0;
+    if (this.mounted) {
+      setState(() {
+        isClosing = true;
+        currentQtyIndex = 0;
+        currentEditPaymentId = 0;
+        currentNumber = "0.00";
+      });
+    }
     for (var i = 0; i < orderPaymentList.length; i++) {
       int paymentId = orderPaymentList[i].op_method_id;
       calculateAmount += (orderPaymentList[i].op_amount + variance[paymentId]);
@@ -306,8 +316,8 @@ class _ClosingPageState extends State<ClosingPage> {
         children: [
           Text(payment.name, style: TextStyle(fontSize: defaultFontSize)),
           Text(
-            permissions.contains(Constant.OPEN_DRAWER)
-                ? orderPayment.op_amount.toStringAsFixed(2)
+            permissions.contains(Constant.viewSystemAmount)
+                ? (orderPayment.op_amount ?? 0).toStringAsFixed(2)
                 : "**.**",
             style: TextStyle(fontSize: defaultFontSize),
             textAlign: TextAlign.right,
@@ -318,7 +328,7 @@ class _ClosingPageState extends State<ClosingPage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      permissions.contains(Constant.OPEN_DRAWER)
+                      permissions.contains(Constant.viewSystemAmount)
                           ? (orderPayment.op_amount +
                                   variance[payment.paymentId])
                               .toStringAsFixed(2)
@@ -381,7 +391,9 @@ class _ClosingPageState extends State<ClosingPage> {
       return TableRow(children: [
         Text(data, style: TextStyle(fontSize: defaultFontSize)),
         Text(
-          permissions.contains(Constant.OPEN_DRAWER) ? dataVal[index] : '**.**',
+          permissions.contains(Constant.viewSalesAmount)
+              ? dataVal[index]
+              : '**.**',
           style: TextStyle(fontSize: defaultFontSize),
           textAlign: TextAlign.right,
         ),
@@ -622,193 +634,191 @@ class _ClosingPageState extends State<ClosingPage> {
     OrderPayment currentOrderPayment = orderPaymentList.firstWhere(
         (ele) => ele.op_method_id == currentEditPaymentId,
         orElse: () => null);
-    return Table(
+    return Column(
       children: [
         //TableRow(children: [Text('height: 10,')]),
-        TableRow(children: [
-          Table(columnWidths: {
-            0: FlexColumnWidth(3),
-            1: FlexColumnWidth(3),
-            2: FlexColumnWidth(3),
-            3: FixedColumnWidth(1),
-          }, children: [
-            TableRow(children: [
-              SizedBox(),
-              Text('System Amount',
-                  style: TextStyle(fontSize: defaultFontSize)),
-              Text(
-                (currentOrderPayment != null
-                    ? currentOrderPayment.op_amount.toStringAsFixed(2)
-                    : "0.00"),
-                style: TextStyle(fontSize: defaultFontSize),
-                textAlign: TextAlign.right,
+        Table(columnWidths: {
+          0: FlexColumnWidth(3),
+          1: FlexColumnWidth(3),
+          2: FlexColumnWidth(3),
+          3: FixedColumnWidth(1),
+        }, children: [
+          TableRow(children: [
+            SizedBox(),
+            Text('System Amount', style: TextStyle(fontSize: defaultFontSize)),
+            Text(
+              (currentOrderPayment != null
+                  ? currentOrderPayment.op_amount.toStringAsFixed(2)
+                  : "0.00"),
+              style: TextStyle(fontSize: defaultFontSize),
+              textAlign: TextAlign.right,
+            ),
+            SizedBox(),
+          ])
+        ]),
+        SizedBox(
+          height: 10,
+        ),
+        Divider(
+          height: 10,
+          thickness: 3,
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Table(columnWidths: {
+          0: FlexColumnWidth(4),
+          1: FlexColumnWidth(2),
+          2: FlexColumnWidth(3),
+          3: FixedColumnWidth(1),
+        }, children: [
+          TableRow(children: [
+            Text(
+              'Charge',
+              style: TextStyle(fontSize: defaultFontSize),
+              textAlign: TextAlign.right,
+            ),
+            Text(
+              'Quantity',
+              style: TextStyle(fontSize: defaultFontSize),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              'Amount',
+              style: TextStyle(fontSize: defaultFontSize),
+              textAlign: TextAlign.right,
+            ),
+            SizedBox(),
+          ])
+        ]),
+        SizedBox(
+          height: 10,
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            child: Column(children: [
+              Table(
+                defaultColumnWidth: IntrinsicColumnWidth(),
+                columnWidths: {
+                  0: FlexColumnWidth(4),
+                  1: FlexColumnWidth(2),
+                  2: FlexColumnWidth(3),
+                  3: FixedColumnWidth(1),
+                },
+                children: cashTypeWidgetList(),
               ),
-              SizedBox(),
-            ])
-          ]),
-        ]),
-        TableRow(children: [
-          SizedBox(
-            height: 10,
-          )
-        ]),
-        TableRow(children: [
-          Divider(
-            height: 10,
-            thickness: 3,
-          )
-        ]),
-        TableRow(children: [
-          SizedBox(
-            height: 10,
-          )
-        ]),
-        TableRow(children: [
-          Table(columnWidths: {
-            0: FlexColumnWidth(4),
-            1: FlexColumnWidth(2),
-            2: FlexColumnWidth(3),
-            3: FixedColumnWidth(1),
-          }, children: [
-            TableRow(children: [
-              Text(
-                'Charge',
-                style: TextStyle(fontSize: defaultFontSize),
-                textAlign: TextAlign.right,
-              ),
-              Text(
-                'Quantity',
-                style: TextStyle(fontSize: defaultFontSize),
-                textAlign: TextAlign.center,
-              ),
-              Text(
-                'Amount',
-                style: TextStyle(fontSize: defaultFontSize),
-                textAlign: TextAlign.right,
-              ),
-              SizedBox(),
-            ])
-          ]),
-        ]),
-        TableRow(children: [
-          SizedBox(
-            height: 10,
-          )
-        ]),
-        TableRow(children: [
-          Table(
-            defaultColumnWidth: IntrinsicColumnWidth(),
-            columnWidths: {
-              0: FlexColumnWidth(4),
-              1: FlexColumnWidth(2),
-              2: FlexColumnWidth(3),
-              3: FixedColumnWidth(1),
-            },
-            children: cashTypeWidgetList(),
+            ]),
           ),
-        ]),
-        TableRow(children: [
-          SizedBox(
-            height: 10,
-          )
-        ]),
-        TableRow(children: [
-          Divider(
-            height: 10,
-            thickness: 3,
-          )
-        ]),
-        TableRow(children: [
-          SizedBox(
-            height: 10,
-          )
-        ]),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Divider(
+          height: 10,
+          thickness: 3,
+        ),
+        SizedBox(
+          height: 10,
+        ),
 
-        TableRow(children: [
-          Table(columnWidths: {
-            0: FlexColumnWidth(3),
-            1: FlexColumnWidth(3),
-            2: FlexColumnWidth(3),
-            3: FixedColumnWidth(1),
-          }, children: [
-            TableRow(children: [
-              SizedBox(),
-              Container(
-                color: qtyEveryType.length == currentQtyIndex
-                    ? Colors.yellow[200]
-                    : Colors.transparent,
-                child: Text('Total',
-                    style: TextStyle(
-                      fontSize: defaultFontSize,
-                    )),
+        Table(columnWidths: {
+          0: FlexColumnWidth(3),
+          1: FlexColumnWidth(3),
+          2: FlexColumnWidth(3),
+          3: FixedColumnWidth(1),
+        }, children: [
+          TableRow(children: [
+            SizedBox(),
+            Container(
+              color: qtyEveryType.length == currentQtyIndex
+                  ? Colors.yellow[200]
+                  : Colors.transparent,
+              child: Text('Total',
+                  style: TextStyle(
+                    fontSize: defaultFontSize,
+                  )),
+            ),
+            Container(
+              color: qtyEveryType.length == currentQtyIndex
+                  ? Colors.yellow[200]
+                  : Colors.transparent,
+              child: Text(
+                totalCalcAmount.toStringAsFixed(2),
+                style: TextStyle(fontSize: defaultFontSize),
+                textAlign: TextAlign.right,
               ),
-              Container(
-                color: qtyEveryType.length == currentQtyIndex
-                    ? Colors.yellow[200]
-                    : Colors.transparent,
-                child: Text(
-                  totalCalcAmount.toStringAsFixed(2),
-                  style: TextStyle(fontSize: defaultFontSize),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-              SizedBox(),
-            ])
-          ]),
+            ),
+            SizedBox(),
+          ])
         ]),
       ],
     );
   }
 
   Widget paymentTypes() {
-    return Table(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        TableRow(children: [
-          Table(columnWidths: {
-            0: FixedColumnWidth(200),
-            1: FixedColumnWidth(120),
-            4: FixedColumnWidth(1),
-          }, children: [
-            TableRow(children: [
-              Text('Payment Type', style: TextStyle(fontSize: defaultFontSize)),
-              Text(
-                'System Amount',
-                style: TextStyle(fontSize: defaultFontSize),
-                textAlign: TextAlign.right,
-              ),
-              Text(
-                'Collected',
-                style: TextStyle(fontSize: defaultFontSize),
-                textAlign: TextAlign.right,
-              ),
-              Text(
-                'Variance',
-                style: TextStyle(fontSize: defaultFontSize),
-                textAlign: TextAlign.right,
-              ),
-              SizedBox(),
-            ])
-          ]),
+        Table(defaultColumnWidth: FixedColumnWidth(120), columnWidths: {
+          0: FixedColumnWidth(200),
+          4: FixedColumnWidth(1),
+        }, children: [
+          TableRow(children: [
+            Text('Payment Type', style: TextStyle(fontSize: defaultFontSize)),
+            Text(
+              'System Amount',
+              style: TextStyle(fontSize: defaultFontSize),
+              textAlign: TextAlign.right,
+            ),
+            Text(
+              'Collected',
+              style: TextStyle(fontSize: defaultFontSize),
+              textAlign: TextAlign.right,
+            ),
+            Text(
+              'Variance',
+              style: TextStyle(fontSize: defaultFontSize),
+              textAlign: TextAlign.right,
+            ),
+            SizedBox(),
+          ])
         ]),
-        TableRow(children: [
-          SizedBox(
-            height: 10,
-          )
-        ]),
-        TableRow(children: [
-          Table(columnWidths: {
-            0: FixedColumnWidth(200),
-            1: FixedColumnWidth(120),
-            4: FixedColumnWidth(1),
-          }, children: otherAmountWidgetList()),
-        ]),
-        TableRow(children: [
-          Table(columnWidths: {
-            0: FixedColumnWidth(200),
-            1: FixedColumnWidth(120),
-            4: FixedColumnWidth(1),
-          }, children: paymentWidgetList()),
-        ]),
+        SizedBox(
+          height: 10,
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Table(
+                        defaultColumnWidth: FixedColumnWidth(120),
+                        columnWidths: {
+                          0: FixedColumnWidth(200),
+                          4: FixedColumnWidth(1),
+                        },
+                        children: otherAmountWidgetList()),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Table(
+                        defaultColumnWidth: FixedColumnWidth(120),
+                        columnWidths: {
+                          0: FixedColumnWidth(200),
+                          4: FixedColumnWidth(1),
+                        },
+                        children: paymentWidgetList()),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        )
       ],
     );
   }
@@ -877,8 +887,8 @@ class _ClosingPageState extends State<ClosingPage> {
                             color: Colors.brown[200],
                             child: InkWell(
                               onTap: () async {
-                                await SyncAPICalls.logActivity("drawer",
-                                    "Click view Transaction", "drawer", 1);
+                                await SyncAPICalls.logActivity("transaction",
+                                    "Click view Transaction", "transaction", 1);
                                 Navigator.pushNamed(
                                     context, Constant.TransactionScreen);
                               },
@@ -997,7 +1007,13 @@ class _ClosingPageState extends State<ClosingPage> {
                             color: Colors.red[400],
                             child: InkWell(
                               onTap: () {
-                                Navigator.of(context).pop();
+                                if (isClosing) {
+                                  Navigator.of(context).popAndPushNamed(
+                                      Constant.SelectTableScreen,
+                                      arguments: {"isAssign": false});
+                                } else {
+                                  Navigator.of(context).pop();
+                                }
                               },
                               child: Padding(
                                 padding: EdgeInsets.symmetric(
@@ -1033,22 +1049,21 @@ class _ClosingPageState extends State<ClosingPage> {
                       child: Row(
                         children: [
                           Expanded(
-                              child: Column(
-                                  //mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
+                            child: Column(
+                              //mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
                                 Flexible(flex: 1, child: Text('')),
                                 Expanded(
                                   flex: 5,
-                                  child: SingleChildScrollView(
-                                    controller: _scrollController,
-                                    child: isCalculateCash
-                                        ? calculateCash()
-                                        : paymentTypes(),
-                                  ),
+                                  child: isCalculateCash
+                                      ? calculateCash()
+                                      : paymentTypes(),
                                 )
-                              ])),
+                              ],
+                            ),
+                          ),
                           Expanded(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -1163,8 +1178,9 @@ class _ClosingPageState extends State<ClosingPage> {
                                                 ele.paymentId ==
                                                 currentEditPaymentId);
                                         if (isCalculateCash &&
-                                            qtyEveryType.length - 1 ==
-                                                currentQtyIndex) {
+                                            currentQtyIndex >
+                                                ((qtyEveryType.length - 1) /
+                                                    2)) {
                                           _scrollController.animateTo(
                                             _scrollController
                                                 .position.maxScrollExtent,
@@ -1173,6 +1189,9 @@ class _ClosingPageState extends State<ClosingPage> {
                                             curve: Curves.ease,
                                           );
                                         }
+                                        /* if (isCalculateCash &&
+                                            qtyEveryType.length - 1 ==
+                                                currentQtyIndex) {} */
                                         setState(() {
                                           if (isCalculateCash) {
                                             if (qtyEveryType.length ==

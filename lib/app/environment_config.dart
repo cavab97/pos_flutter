@@ -6,7 +6,7 @@ class Config {
 
   static Map<String, dynamic> localConstants = {
     CURRENT_ENVIRONMENT: "local",
-    SERVER_URL: "http://192.168.0.121/laravel-admin-panel/api/v1/en/",
+    SERVER_URL: "http://192.168.68.109/laravel-admin-panel/api/v1/en/",
   };
 
   static Map<String, dynamic> developmentConstants = {

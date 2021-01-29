@@ -23,7 +23,7 @@ class _OpeningAmmountPageState extends State<OpeningAmmountPage> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       title: Stack(
         // popup header
         overflow: Overflow.visible,

@@ -66,6 +66,7 @@ class Strings {
   static String changeTable = "Change Table";
   static String cancelChangeTable = "Cancel Change Table";
   static String cancleOrder = "Cancel Order";
+  static String createReservation = "Create Reservation";
   static String mergeOrder = "Merge Order";
   static String cancelMergeOrder = "Cancel Merge Order";
   static String enterPax = "Enter Pax";
@@ -225,4 +226,16 @@ class Strings {
   static String setQuantity = "Set Quantity";
   static String outOfStock = "Out of Stock";
   static String confirm = "Confirm";
+  static String reservation = "Reservation";
+  static String withManagement = " Management";
+  static String reservationNo = "Reservation No.";
+  static String memberNo = "Member No.";
+  static String customerName = "Name";
+  static String customerPhone = "Phone";
+  static String reserveFrom = "Reserve From";
+  static String reserveUntil = "Reserve Until";
+  static String tableNo = "Table No.";
+  static String pax = "Pax.";
+  static String enterWith = "Enter ";
+  static String enterMemberNum = "Enter member number";
 }

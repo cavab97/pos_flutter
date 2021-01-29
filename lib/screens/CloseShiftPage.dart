@@ -59,7 +59,7 @@ class CloseShiftPageState extends State<CloseShiftPage> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Colors.transparent.withOpacity(0.7),
-      contentPadding: EdgeInsets.all(0),
+      contentPadding: EdgeInsets.zero,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[

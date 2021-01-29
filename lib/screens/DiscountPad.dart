@@ -79,7 +79,7 @@ class _DiscountPadState extends State<DiscountPad> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       title: Container(
         padding: EdgeInsets.symmetric(
             horizontal: SizeConfig.safeBlockHorizontal,
@@ -586,7 +586,7 @@ class _DiscountPadState extends State<DiscountPad> {
 
   Widget inputNotesView() {
     return Container(
-        padding: EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         //height: 170, // MediaQuery.of(context).size.height / 4,
         width: MediaQuery.of(context).size.width,
         child: Card(

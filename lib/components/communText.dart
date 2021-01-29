@@ -16,6 +16,7 @@ import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/PosPermission.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Product_Store_Inventory.dart';
+import 'package:mcncashier/models/Reservation.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/Tax.dart';
@@ -41,6 +42,7 @@ import 'package:mcncashier/services/allTablesSync.dart';
 import 'package:toast/toast.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:intl/intl.dart';
+import 'package:package_info/package_info.dart';
 
 DatabaseHelper databaseHelper = DatabaseHelper();
 LocalAPI localAPI = LocalAPI();
@@ -346,8 +348,36 @@ class CommunFun {
     );
   }
 
+  static compareTable(context) async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    String versionString =
+        packageInfo.version.split("")[0] + '+' + packageInfo.buildNumber;
+    String lastAppVersion =
+        await Preferences.getStringValuesSF(Constant.lastAppVersion);
+    if (lastAppVersion == versionString)
+      return;
+    else {
+      await Preferences.setStringToSF(Constant.lastAppVersion, versionString);
+    }
+    List<Map<String, String>> updateTableMaps =
+        await SyncAPICalls.getCompareTableQuery(context, versionString);
+    for (Map<String, String> tableObject in updateTableMaps) {
+      await databaseHelper.runQuery(tableObject["delete"]);
+      await databaseHelper.runQuery(tableObject["create"]);
+      //await databaseHelper.getTableExist(tableObject['table_name']);
+      List<Map<String, dynamic>> dataList =
+          await SyncAPICalls.getTableData(context, tableObject['table_name']);
+      if (dataList != null && dataList.length > 0) {
+        for (Map<String, dynamic> data in dataList) {
+          await databaseHelper.insertData(tableObject['table_name'], data);
+        }
+      }
+    }
+  }
+
   static syncOrdersANDStore(context, isClose) async {
-    await CommunFun.getsetWebOrders(context);
+    await compareTable(context);
+    /* await CommunFun.getsetWebOrders(context);
     await SyncAPICalls.sendCustomerTable(context);
     await SyncAPICalls.syncOrderstoDatabase(context);
     await SyncAPICalls.sendInvenotryTable(context);
@@ -355,9 +385,9 @@ class CommunFun {
     await SyncAPICalls.sendCancledOrderTable(context);
     await SyncAPICalls.sendTerminalLogTable(context);
     await SyncAPICalls.sendShiftTable(context);
-    await SyncAPICalls.sendShiftdetails(context);
+    await SyncAPICalls.sendShiftdetails(context); */
 
-    //await CommunFun.syncAfterSuccess(context, false);
+    await CommunFun.syncAfterSuccess(context, false);
     if (isClose && Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
     }
@@ -382,7 +412,9 @@ class CommunFun {
       CommunFun.getDataTables5(context, isOpen);
     } else {
       Navigator.of(context).pop();
-      Navigator.pushNamed(context, Constant.PINScreen);
+      Navigator.pushNamedAndRemoveUntil(
+          context, Constant.SelectTableScreen, (Route<dynamic> route) => false,
+          arguments: {"isAssign": false});
     }
   }
 
@@ -649,7 +681,7 @@ class CommunFun {
     }
     var wineStorageData = await SyncAPICalls.getWineStorageData(context);
     if (wineStorageData != null) {
-      print('getDataTables636');
+      print('getwineStorageData');
       var result =
           await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
       if (result == 1) {
@@ -1179,8 +1211,8 @@ class CommunFun {
     SaveOrder orderData = new SaveOrder();
     var branchid = await CommunFun.getbranchId();
     Table_order table = await CommunFun.getTableData();
-    User loginUser = await CommunFun.getuserDetails();
     Customer customerData = await CommunFun.getCustomerData();
+    User loginUser = await CommunFun.getuserDetails();
     Printer printer = await CommunFun.getPrinter(productItem);
     bool isEditing = false;
     MSTCartdetails sameitem;
@@ -1291,6 +1323,31 @@ class CommunFun {
     await localAPI.addintoCartDetails(cartdetails);
     //print(detailID);
     callback(cartdetails);
+  }
+
+  static addReservationItem(ProductDetails productItem) async {
+    User loginUser = await CommunFun.getuserDetails();
+    Printer printer = await CommunFun.getPrinter(productItem);
+    MSTCartdetails cartdetails = new MSTCartdetails();
+    cartdetails.productId = productItem.productId;
+    cartdetails.productName = productItem.name;
+    cartdetails.productSecondName = productItem.name_2;
+    cartdetails.productPrice = productItem.price;
+    cartdetails.productDetailAmount = productItem.price;
+    cartdetails.productQty = 1.0;
+    cartdetails.productNetPrice = productItem.oldPrice;
+    cartdetails.createdBy = loginUser.id;
+    cartdetails.cart_detail = jsonEncode(productItem);
+    cartdetails.discountAmount = 0;
+    cartdetails.remark = "";
+    cartdetails.issetMeal = 0;
+    cartdetails.hasRacManagemant = productItem.hasRacManagemant;
+    cartdetails.taxValue = taxvalues;
+    cartdetails.printer_id = printer != null ? printer.printerId : 0;
+    cartdetails.createdAt = await CommunFun.getLocalID();
+    //await localAPI.addintoCartDetails(cartdetails);
+    //print(detailID);
+    return cartdetails;
   }
 
   static getCustomer() async {

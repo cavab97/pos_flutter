@@ -60,8 +60,8 @@ class ChangeQtyDailogState extends State<ChangeQtyDailog> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return AlertDialog(
-      contentPadding: EdgeInsets.all(0),
-      titlePadding: EdgeInsets.all(0),
+      contentPadding: EdgeInsets.zero,
+      titlePadding: EdgeInsets.zero,
       title: Container(
         padding: EdgeInsets.only(left: 30, right: 10, top: 10, bottom: 10),
         height: SizeConfig.safeBlockVertical * 9,

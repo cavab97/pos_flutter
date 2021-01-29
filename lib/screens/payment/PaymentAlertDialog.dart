@@ -169,7 +169,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                 .toList();
             await SyncAPICalls.logActivity(
                 "payment",
-                "Cashier selected payment type" +
+                "Cashier selected payment type " +
                     seletedPayment.name.toString(),
                 "payment",
                 1);
@@ -220,7 +220,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
     }
     await SyncAPICalls.logActivity(
         "payment",
-        "chasier selected payment option" + seletedPayment.name.toString(),
+        "Cashier selected payment option " + seletedPayment.name.toString(),
         "payment",
         1);
   }
@@ -297,7 +297,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       title: Stack(
         // popup header
         overflow: Overflow.visible,
@@ -805,7 +805,7 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                                         Navigator.of(context).pop();
                                         // widget.onClose(true, totalPaymentList);
                                       },
-                                      "Alert",
+                                      "Remove Voucher",
                                       "Are you sure you want to remove this promocode?",
                                       "Yes",
                                       "No",
@@ -1075,8 +1075,12 @@ class _PaymentAlertDialogState extends State<PaymentAlertDialog> {
                             currentPayment.op_amount = currentPaidAmount;
                             currentPayment.op_method_id =
                                 seletedPayment.paymentId;
-                            totalPaymentList.add(currentPayment);
                             paidAmount += currentPaidAmount;
+                            if (paidAmount > totalNeedPaid) {
+                              currentPayment.op_amount_change =
+                                  paidAmount - totalNeedPaid;
+                            }
+                            totalPaymentList.add(currentPayment);
                             seletedPayment = new Payments();
                             currentPayment = new OrderPayment();
                           });

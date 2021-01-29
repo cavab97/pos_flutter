@@ -121,7 +121,7 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       title: Stack(
         // popup header
         overflow: Overflow.visible,
@@ -556,7 +556,7 @@ class _SetQuantityPadState extends State<SetQuantityPad> {
 
   Widget inputNotesView() {
     return Container(
-        padding: EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         width: MediaQuery.of(context).size.width,
         child: Card(
           color: StaticColor.lightGrey100,

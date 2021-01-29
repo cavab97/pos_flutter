@@ -122,6 +122,9 @@ class _ShowEnterCardDetailPopState extends State<ShowEnterCardDetailPop> {
       widget.currentPayment.remark = remarkInputController.text;
       widget.currentPayment.approval_code = codeInput.text;
       widget.currentPayment.last_digits = digitController.text;
+      digitController.text = "";
+      codeInput.text = "";
+      remarkInputController.text = "";
       Navigator.of(context).pop();
       //cashPayment(seletedPayment);
     }

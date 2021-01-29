@@ -108,7 +108,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       title: Stack(
         overflow: Overflow.visible,
         children: <Widget>[
@@ -158,7 +158,7 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
               "Pay In", "Added Pay in amount", "drawer", 1);
         } else {
           await SyncAPICalls.logActivity(
-              "Pay OUT", "Added Pay Out amount", "drawer", 1);
+              "Pay Out", "Added Pay Out amount", "drawer", 1);
         }
       },
       child: Text(
@@ -219,8 +219,11 @@ class PayInOutDailogstate extends State<PayInOutDailog> {
                     !widget.isIn && permissions.contains(Constant.CASH_OUT)) {
                   openAmmountPop();
                 } else {
-                  await SyncAPICalls.logActivity("cash In",
-                      "Cashier has no permission for cash in/out", "drawer", 1);
+                  await SyncAPICalls.logActivity(
+                      "cash In",
+                      "Cashier has no permission for cash in/out",
+                      "sidebar",
+                      1);
                   CommonUtils.openPermissionPop(context,
                       widget.isIn ? Constant.CASH_IN : Constant.CASH_OUT,
                       () async {

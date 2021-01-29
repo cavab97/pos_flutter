@@ -108,4 +108,6 @@ class Configrations {
   static String createShiftdata = "create-shift-data";
   static String createShiftdetaildata = "create-shift-detail-data";
   static String create_terminal_log_data = "create-terminal-log-data";
+  static String getTableUpdate = "get-table-update";
+  static String getTableData = "get-table-insert";
 }

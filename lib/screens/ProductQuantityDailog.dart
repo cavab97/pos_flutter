@@ -28,19 +28,21 @@ import 'package:mcncashier/widget/CloseButtonWidget.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
-  ProductQuantityDailog(
-      {Key key,
-      this.selproduct,
-      this.issetMeal,
-      this.cartID,
-      this.cartItem,
-      this.onClose})
-      : super(key: key);
+  ProductQuantityDailog({
+    Key key,
+    this.selproduct,
+    this.issetMeal,
+    this.cartID,
+    this.cartItem,
+    this.onClose,
+    this.addReservation,
+  }) : super(key: key);
   final bool issetMeal;
   final selproduct;
   final int cartID;
   final cartItem;
   Function onClose;
+  Function addReservation;
 
   @override
   _ProductQuantityDailogState createState() => _ProductQuantityDailogState();
@@ -866,7 +868,87 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         : 0.00;
   }
 
+  addToReservation() async {
+    var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var loginData = await json.decode(loginUser);
+    ProductDetails cartItemproduct = new ProductDetails();
+    if (!isSetMeal) {
+      cartItemproduct.qty = product_qty;
+      cartItemproduct.status = productItem.status;
+      cartItemproduct.productId = productItem.productId;
+      cartItemproduct.name = productItem.name;
+      cartItemproduct.uuid = productItem.uuid;
+      cartItemproduct.price = productItem.price;
+    } else {
+      cartItemproduct.qty = product_qty;
+      cartItemproduct.status = setmeal.status;
+      cartItemproduct.productId = setmeal.setmealId;
+      cartItemproduct.name = setmeal.name;
+      cartItemproduct.uuid = setmeal.uuid;
+      cartItemproduct.price = setmeal.price;
+    }
+    MSTCartdetails cartdetails = new MSTCartdetails();
+    if (isEditing) {
+      cartdetails.id = cartitem.id;
+    }
+    //cartdetails.cartId = cartid;
+    cartdetails.productId =
+        isSetMeal ? setmeal.setmealId : productItem.productId;
+    cartdetails.productName = isSetMeal ? setmeal.name : productItem.name;
+    cartdetails.productSecondName = isSetMeal ? "" : productItem.name_2;
+    cartdetails.productPrice = isSetMeal ? setmeal.price : productItem.price;
+    cartdetails.productDetailAmount = double.parse(price.toStringAsFixed(2));
+    cartdetails.productQty = product_qty.toDouble();
+    cartdetails.productNetPrice =
+        productItem.oldPrice != null ? productItem.oldPrice : 0.0;
+    cartdetails.createdBy = loginData["id"];
+    cartdetails.cart_detail = jsonEncode(cartItemproduct);
+    cartdetails.discountAmount = 0;
+    cartdetails.localID = await CommunFun.getLocalID();
+    cartdetails.remark =
+        extraNotes.text.trim().isNotEmpty ? extraNotes.text.trim() : "";
+    cartdetails.issetMeal = isSetMeal ? 1 : 0;
+    cartdetails.taxValue = taxvalues;
+    cartdetails.printer_id = printer != null ? printer.printerId : 0;
+    cartdetails.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    if (isSetMeal) {
+      cartdetails.setmeal_product_detail = json.encode(mealProducts);
+    }
+    List<MSTSubCartdetails> modifierSelected = [];
+    List<MSTSubCartdetails> attrSelected = [];
+    if (selectedModifier != null && selectedModifier.length > 0) {
+      for (var i = 0; i < selectedModifier.length; i++) {
+        MSTSubCartdetails subCartData = new MSTSubCartdetails();
+        var modifire = selectedModifier[i];
+        subCartData.productId = productItem.productId;
+        subCartData.modifierId = modifire.modifierId;
+        subCartData.modifirePrice = modifire.price;
+        modifierSelected.add(subCartData);
+        //await localAPI.addsubCartData(subCartData);
+      }
+    }
+    for (var i = 0; i < selectedAttr.length; i++) {
+      var attr = selectedAttr[i];
+      MSTSubCartdetails subCartData = new MSTSubCartdetails();
+      subCartData.productId = productItem.productId;
+      subCartData.caId = attr["ca_id"];
+      subCartData.attributeId = attr["attrType_ID"] is int
+          ? attr["attrType_ID"]
+          : int.parse(attr["attrType_ID"]);
+      subCartData.attrPrice = double.parse(attr["attr_price"]).toDouble();
+      attrSelected.add(subCartData);
+      //await localAPI.addsubCartData(subCartData);
+    }
+    await SyncAPICalls.logActivity(
+        "product details", "Added items to cart", "cart", 1);
+    Navigator.of(context).pop();
+    widget.addReservation(cartdetails, modifierSelected, attrSelected);
+  }
+
   produtAddTocart() async {
+    if (widget.cartID == null) {
+      return addToReservation();
+    }
     MST_Cart cart = new MST_Cart();
 
     //MSTSubCartdetails subCartData = new MSTSubCartdetails();
@@ -874,13 +956,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
     var branchid = await CommunFun.getbranchId();
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    var loginData = await json.decode(loginUser);
     var customerData =
         await Preferences.getStringValuesSF(Constant.CUSTOMER_DATA);
     var customer =
         customerData != null ? json.decode(customerData) : customerData;
     var customerid = customer != null ? customer["customer_id"] : 0;
     Table_order tableData = await CommunFun.getTableData(); // table data
-    var loginData = await json.decode(loginUser);
     var qty = await countTotalQty();
     var disc = await countDiscount();
     var subtotal = await countSubtotal();
@@ -1022,8 +1104,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return AlertDialog(
-      contentPadding: EdgeInsets.all(0),
-      titlePadding: EdgeInsets.all(0),
+      contentPadding: EdgeInsets.zero,
+      titlePadding: EdgeInsets.zero,
       title: Container(
         padding: EdgeInsets.only(left: 30, right: 10, top: 10, bottom: 10),
         height: SizeConfig.safeBlockVertical * 9,

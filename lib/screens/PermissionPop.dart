@@ -57,18 +57,26 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
               permissions[0].posPermissionName.contains(widget.perFor)) {
             Navigator.of(context).pop();
             await SyncAPICalls.logActivity(
-                "permission", "manager permission done", "permission", 1);
+                "permission",
+                "manager permission done",
+                "permission",
+                1,
+                checkUserExit[0].id);
             widget.onEnter();
           } else {
             await CommunFun.showToast(context, Strings.permissionMsg);
-            await SyncAPICalls.logActivity(
-                "permission", Strings.permissionMsg, "permission", 1);
+            await SyncAPICalls.logActivity("permission", Strings.permissionMsg,
+                "permission", 1, checkUserExit[0].id);
           }
         }
       } else {
         await CommunFun.showToast(context, Strings.invalidPinMsg);
         await SyncAPICalls.logActivity(
-            "permission", "manager permission pin invalid", "permission", 1);
+            "permission",
+            "manager permission pin invalid",
+            "permission",
+            1,
+            checkUserExit[0].id);
       }
     } else {
       await CommunFun.showToast(context, Strings.invalidPinMsg);
@@ -85,7 +93,7 @@ class OpenPermissionPopState extends State<OpenPermissionPop> {
 
     return WillPopScope(
         child: AlertDialog(
-          titlePadding: EdgeInsets.all(0),
+          titlePadding: EdgeInsets.zero,
           title: Container(
             padding: EdgeInsets.only(left: 30, right: 10, top: 10, bottom: 10),
             height: SizeConfig.safeBlockVertical * 9,

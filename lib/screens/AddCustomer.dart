@@ -192,7 +192,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       title: Stack(
         overflow: Overflow.visible,
         children: <Widget>[

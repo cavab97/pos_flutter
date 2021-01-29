@@ -762,7 +762,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         IconButton(
-          padding: EdgeInsets.all(0),
+          padding: EdgeInsets.zero,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -1607,7 +1607,7 @@ class ChooseReasonTypeState extends State<ChooseReasonType> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       title: Container(
         padding: EdgeInsets.only(left: 30, right: 10, top: 10, bottom: 10),
         height: 70,
@@ -1779,7 +1779,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       content: Container(
         height: MediaQuery.of(context).size.height / 3.5,
         width: MediaQuery.of(context).size.width / 3.4,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mcncashier/components/DrawerWidget.dart';
 import 'package:mcncashier/components/QrScanAndGenrate.dart';
 import 'package:mcncashier/components/StringFile.dart';
@@ -21,6 +22,8 @@ import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/printer/printerconfig.dart';
 import 'package:mcncashier/screens/OpningAmountPop.dart';
+import 'package:mcncashier/screens/reservation/addEditReservation.dart';
+import 'package:mcncashier/screens/reservation/reservationManagement.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
@@ -104,7 +107,10 @@ class _SelectTablePageState extends State<SelectTablePage>
     checkshift();
     await getAllPrinter();
     setPermissons();
-    final Map arguments = ModalRoute.of(context).settings.arguments as Map;
+    Map arguments = new Map();
+    if (this.mounted) {
+      arguments = ModalRoute.of(context).settings.arguments as Map;
+    }
     if (arguments != null) {
       int updatedTableId = arguments['updatedTableId'];
       Function callbackFunction = arguments['callbackFunction'];
@@ -121,9 +127,11 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   setPermissons() async {
     var permission = await CommunFun.getPemission();
-    setState(() {
-      permissions = permission;
-    });
+    if (this.mounted) {
+      setState(() {
+        permissions = permission;
+      });
+    }
   }
 
   checkshift() async {
@@ -463,6 +471,29 @@ class _SelectTablePageState extends State<SelectTablePage>
     }
   }
 
+  openReservationList() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return ReservationMgmt();
+      },
+    );
+  }
+
+  openReservationDialog() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return ReservationDetail(
+          isUpdate: false,
+          selTable: selectedTable,
+        );
+      },
+    );
+  }
+
   cancleTableOrder() async {
     CommonUtils.showAlertDialog(context, () {
       Navigator.of(context).pop();
@@ -595,10 +626,12 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   getTablesColor() async {
     List<ColorTable> tables = await localAPI.getTablesColor();
-    setState(() {
-      tableColors = tables;
-      isLoading = false;
-    });
+    if (this.mounted) {
+      setState(() {
+        tableColors = tables;
+        isLoading = false;
+      });
+    }
   }
 
   addNewOrder() async {
@@ -926,14 +959,36 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   Widget menuItemDiv() {
     return isMenuopen
-        ? Container(
-            margin: EdgeInsets.all(10),
-            padding: EdgeInsets.all(10),
-            width: MediaQuery.of(context).size.width / 3.5,
-            decoration: BoxDecoration(
-              border: Border.all(color: StaticColor.colorGrey),
-            ),
-            child: optionsList(context))
+        ? Column(
+            children: [
+              Container(
+                margin: EdgeInsets.all(10),
+                padding: EdgeInsets.all(10),
+                width: MediaQuery.of(context).size.width / 3.5,
+                decoration: BoxDecoration(
+                  border: Border.all(color: StaticColor.colorGrey),
+                ),
+                child: optionsList(context),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    if (selectedTable != null && this.mounted) {
+                      setState(() {
+                        isChangingTable = false;
+                        changeInTable = null;
+                        selectedTable = null;
+                      });
+                    }
+                  },
+                  child: Container(
+                    width: MediaQuery.of(context).size.width / 3.5,
+                  ),
+                ),
+              ),
+            ],
+          )
         : SizedBox();
   }
 
@@ -941,10 +996,14 @@ class _SelectTablePageState extends State<SelectTablePage>
     return ListView(
       physics: BouncingScrollPhysics(),
       shrinkWrap: true,
-      children: [
-        selectedTable == null
-            ? Container(
-                height: MediaQuery.of(context).size.height * .6,
+      children: selectedTable == null
+          ? [
+              tableButton(FontAwesomeIcons.conciergeBell,
+                  Strings.reservation + Strings.withManagement, context, () {
+                openReservationList();
+              }),
+              Container(
+                height: MediaQuery.of(context).size.height * .1,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -955,85 +1014,95 @@ class _SelectTablePageState extends State<SelectTablePage>
                     ),
                   ],
                 ),
-              )
-            : SizedBox(),
-        selectedTable != null
-            ? Text(
-                selectedTable != null && selectedTable.numberofpax == null
-                    ? selectedTable.tableName
-                    : selectedTable.tableName +
-                        " : " +
-                        selectedTable.numberofpax.toString(),
-                textAlign: TextAlign.center,
-                style: Styles.whiteMediumBold(),
-              )
-            : SizedBox(),
-        selectedTable != null && selectedTable.numberofpax == null
-            ? neworder_button(
-                Icons.supervised_user_circle, Strings.newOrder, context, () {
-                addNewOrder();
-              })
-            : SizedBox(),
-        selectedTable != null && selectedTable.numberofpax != null
-            ? neworder_button(
-                Icons.supervised_user_circle, Strings.changePax, context, () {
-                changePax();
-              })
-            : SizedBox(),
-        selectedTable != null && selectedTable.numberofpax != null
-            ? neworder_button(Icons.remove_red_eye, Strings.viewOrder, context,
-                () {
-                viewOrder();
-              })
-            : SizedBox(),
-        selectedTable != null && selectedTable.numberofpax != null
-            ? neworder_button(
-                Icons.change_history,
-                !isChangingTable
-                    ? Strings.changeTable
-                    : Strings.cancelChangeTable,
-                context, () {
-                changeTablePop();
-              })
-            : SizedBox(),
-        selectedTable != null && selectedTable.numberofpax != null
-            ? neworder_button(Icons.cancel, Strings.cancleOrder, context,
-                () async {
-                if (permissions.contains(Constant.CANCEL_ORDER)) {
-                  cancleTableOrder();
-                } else {
-                  await SyncAPICalls.logActivity(
-                      "cancel table Order",
-                      "Cashier has no permission for cancel table order",
-                      "table",
-                      1);
-                  await CommonUtils.openPermissionPop(
-                      context, Constant.CANCEL_ORDER, () async {
-                    await cancleTableOrder();
-                    await SyncAPICalls.logActivity(
-                        "cancel table Order",
-                        "Manager given permission for cancel table order",
-                        "table",
-                        1);
-                  }, () {});
-                }
-              })
-            : SizedBox(),
-        selectedTable != null
-            ? neworder_button(
-                Icons.call_merge,
-                isMergeing ? Strings.cancelMergeOrder : Strings.mergeOrder,
-                context, () {
-                mergeTable(selectedTable);
-              })
-            : SizedBox(),
-        false && selectedTable != null && selectedTable.tableQr != null
-            ? neworder_button(Icons.cancel, Strings.scanQRcode, context, () {
-                openQrcodePop();
-              })
-            : SizedBox(),
-      ],
+              ),
+            ]
+          : tableOption(selectedTable),
     );
+  }
+
+  List<Widget> tableOption(TablesDetails selectedTable) {
+    List<Widget> tableOptionWidget = [];
+    tableOptionWidget.add(Text(
+      selectedTable != null && selectedTable.numberofpax == null
+          ? selectedTable.tableName
+          : selectedTable.tableName +
+              " : " +
+              selectedTable.numberofpax.toString(),
+      textAlign: TextAlign.center,
+      style: Styles.whiteMediumBold(),
+    ));
+    if (selectedTable.numberofpax == null) {
+      tableOptionWidget.addAll([
+        tableButton(Icons.supervised_user_circle, Strings.newOrder, context,
+            () {
+          addNewOrder();
+        }),
+      ]);
+    }
+    tableOptionWidget.add(tableButton(
+        Icons.call_merge,
+        isMergeing ? Strings.cancelMergeOrder : Strings.mergeOrder,
+        context, () {
+      mergeTable(selectedTable);
+    }));
+    if (false && selectedTable.tableQr != null) {
+      tableOptionWidget
+          .add(tableButton(Icons.cancel, Strings.scanQRcode, context, () {
+        openQrcodePop();
+      }));
+    }
+
+    if (selectedTable.numberofpax != null) {
+      tableOptionWidget.addAll([
+        tableButton(Icons.supervised_user_circle, Strings.changePax, context,
+            () {
+          changePax();
+        }),
+        tableButton(Icons.remove_red_eye, Strings.viewOrder, context, () {
+          viewOrder();
+        }),
+        tableButton(
+            Icons.change_history,
+            !isChangingTable ? Strings.changeTable : Strings.cancelChangeTable,
+            context, () {
+          changeTablePop();
+        }),
+        tableButton(Icons.cancel, Strings.cancleOrder, context, () async {
+          if (permissions.contains(Constant.CANCEL_ORDER)) {
+            cancleTableOrder();
+          } else {
+            await SyncAPICalls.logActivity("cancel table Order",
+                "Cashier has no permission for cancel table order", "table", 1);
+            await CommonUtils.openPermissionPop(context, Constant.CANCEL_ORDER,
+                () async {
+              await cancleTableOrder();
+              await SyncAPICalls.logActivity(
+                  "cancel table Order",
+                  "Manager given permission for cancel table order",
+                  "table",
+                  1);
+            }, () {});
+          }
+        }),
+      ]);
+    }
+    if (selectedTable.status == 1) {
+      tableOptionWidget.add(tableButton(
+          FontAwesomeIcons.conciergeBell, Strings.createReservation, context,
+          () async {
+        if (true || permissions.contains(Constant.addReservation)) {
+          openReservationDialog();
+        } else {
+          await CommonUtils.openPermissionPop(context, Constant.addReservation,
+              () async {
+            await openReservationDialog();
+            await SyncAPICalls.logActivity("reservation",
+                "Manager given permission for make reservation", "table", 1);
+          }, () {});
+        }
+      }));
+    }
+    return tableOptionWidget;
   }
 
   Widget closeButton(context) {
@@ -1075,7 +1144,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     );
   }
 
-  Widget neworder_button(icon, name, context, onclick) {
+  Widget tableButton(icon, name, context, onclick) {
     return new OutlineButton(
         padding: EdgeInsets.all(10),
         child: Row(
@@ -1215,7 +1284,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     return AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10.0))),
-        titlePadding: EdgeInsets.all(0),
+        titlePadding: EdgeInsets.zero,
         title: Stack(
           // popup header
           overflow: Overflow.visible,
@@ -1228,7 +1297,7 @@ class _SelectTablePageState extends State<SelectTablePage>
                   topRight: Radius.circular(10.0),
                 ),
               ),
-              padding: EdgeInsets.all(0),
+              padding: EdgeInsets.zero,
               height: SizeConfig.safeBlockVertical * 9,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,

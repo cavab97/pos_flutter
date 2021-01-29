@@ -55,6 +55,7 @@ import 'package:mcncashier/screens/SplitOrder.dart';
 import 'package:mcncashier/screens/VoucherPop.dart';
 import 'package:mcncashier/screens/ReprintPopup.dart';
 import 'package:mcncashier/screens/payment/PaymentAlertDialog.dart';
+import 'package:mcncashier/screens/shift/Closing.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
@@ -427,7 +428,7 @@ class _DashboradPageState extends State<DashboradPage>
         // Opning Ammount Popup
         context: context,
         builder: (BuildContext context) {
-          return CloseShiftPage(onClose: () {
+          return ClosingPage(onClose: () {
             printKOT.testReceiptPrint(
                 printerreceiptList[0].printerIp.toString(),
                 context,
@@ -955,7 +956,7 @@ class _DashboradPageState extends State<DashboradPage>
       currentQuantity = quantity;
     });
     await SyncAPICalls.logActivity(
-        "qauntity", "Clicked current quantity", "qauntity", 1);
+        "quantity", "Clicked current quantity", "quantity", 1);
   }
 
   @override
@@ -2398,7 +2399,7 @@ class _DashboradPageState extends State<DashboradPage>
       unselectedLabelColor: StaticColor.colorWhite,
       labelColor: StaticColor.colorWhite,
       labelPadding: EdgeInsets.all(1),
-      indicatorPadding: EdgeInsets.all(0),
+      indicatorPadding: EdgeInsets.zero,
       isScrollable: true,
       indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
@@ -2749,7 +2750,7 @@ class _DashboradPageState extends State<DashboradPage>
               suggestionsCallback: (pattern) async {
                 return searchProductList;
               },
-              itemBuilder: (context, searchProductList) {
+              itemBuilder: (context, ProductDetails searchProductList) {
                 // var image_Arr = searchProductList.base64
                 //     .replaceAll("data:image/jpg;base64,", '');
                 return ListTile(
@@ -2770,7 +2771,8 @@ class _DashboradPageState extends State<DashboradPage>
                       searchProductList.name,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    subtitle: Text(searchProductList.price.toString()),
+                    subtitle: Text(
+                        searchProductList.price.toStringAsFixed(2) ?? "0.00"),
                     trailing: searchProductList.outOfStock == 1 ||
                             (searchProductList.qty != null &&
                                 searchProductList.hasInventory == 1 &&
@@ -2858,7 +2860,7 @@ class _DashboradPageState extends State<DashboradPage>
 
   Widget menubutton(Function _onPress) {
     return PopupMenuButton(
-      padding: EdgeInsets.all(0),
+      padding: EdgeInsets.zero,
       icon: Icon(Icons.arrow_drop_down,
           color: Colors.white, size: SizeConfig.safeBlockVertical * 5),
       offset: Offset(0, MediaQuery.of(context).size.height * .1), //100
@@ -3228,7 +3230,7 @@ class _DashboradPageState extends State<DashboradPage>
                 color: StaticColor.colorBlack,
                 borderRadius: BorderRadius.circular(8),
               ),
-              margin: EdgeInsets.all(0),
+              margin: EdgeInsets.zero,
               child: Stack(
                 alignment: AlignmentDirectional.topCenter,
                 children: <Widget>[

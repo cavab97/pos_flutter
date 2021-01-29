@@ -335,7 +335,7 @@ class PaymentMethodPopState extends State<PaymentMethodPop> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       title: Stack(
         // popup header
         overflow: Overflow.visible,

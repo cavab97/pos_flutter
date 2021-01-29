@@ -25,7 +25,7 @@ class QRCodesImagePopState extends State<QRCodesImagePop> {
     return new WillPopScope(
         onWillPop: _onBackPressed,
         child: AlertDialog(
-          titlePadding: EdgeInsets.all(0),
+          titlePadding: EdgeInsets.zero,
           title: Stack(
             overflow: Overflow.visible,
             children: <Widget>[

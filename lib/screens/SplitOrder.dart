@@ -118,7 +118,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
   Widget build(BuildContext context) {
     SizeConfig().init(context);
     return AlertDialog(
-      titlePadding: EdgeInsets.all(0),
+      titlePadding: EdgeInsets.zero,
       title: Stack(
         overflow: Overflow.visible,
         children: <Widget>[
@@ -140,7 +140,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                 ),
                 widget.customer.isEmpty
                     ? IconButton(
-                        padding: EdgeInsets.all(0),
+                        padding: EdgeInsets.zero,
                         onPressed: () {
                           openShowAddCustomerDailog();
                         },
@@ -150,7 +150,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                           size: 30,
                         ))
                     : IconButton(
-                        padding: EdgeInsets.all(0),
+                        padding: EdgeInsets.zero,
                         onPressed: () {
                           CommonUtils.showAlertDialog(context, () {
                             Navigator.of(context).pop();
@@ -368,7 +368,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
       width: MediaQuery.of(context).size.width / 1.5,
       height: MediaQuery.of(context).size.height / 1.5,
       child: Container(
-        padding: EdgeInsets.all(0),
+        padding: EdgeInsets.zero,
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         color: StaticColor.colorWhite,
@@ -433,7 +433,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                                 ),
                                 SizedBox(width: 70),
                                 Padding(
-                                  padding: EdgeInsets.all(0),
+                                  padding: EdgeInsets.zero,
                                   child: Text(taxitem["taxAmount"].toString(),
                                       style: Styles.blackMediumbold()),
                                 )
@@ -443,7 +443,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: <Widget>[
                               Padding(
-                                padding: EdgeInsets.all(0),
+                                padding: EdgeInsets.zero,
                                 child: Text(
                                   Strings.tax.toUpperCase(),
                                   style: Styles.darkGray(),
@@ -451,7 +451,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
                               ),
                               SizedBox(width: 70),
                               Padding(
-                                padding: EdgeInsets.all(0),
+                                padding: EdgeInsets.zero,
                                 child: Text(
                                   taxValues.toStringAsFixed(2),
                                   style: Styles.blackMediumBold(),

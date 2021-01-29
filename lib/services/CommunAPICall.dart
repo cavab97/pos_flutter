@@ -43,7 +43,8 @@ class APICalls {
     }
   }
 
-  static getDataCall(apiurl, context, stringParams) async {
+  static getDataCall(apiurl, context, stringParams,
+      [int timeoutSeconds]) async {
     try {
       var connected = await CommunFun.checkConnectivity();
       if (connected) {
@@ -59,12 +60,15 @@ class APICalls {
               headers: headers,
               body: params,
             )
-            .timeout(const Duration(seconds: 3));
+            .timeout(Duration(seconds: (timeoutSeconds ?? 3)));
         if (response.statusCode == 500) {
           print('code error in laravel, check log in laravel');
           return [];
         } else if (response.statusCode == 404) {
           print(apiurl + ' no found');
+          return [];
+        } else if (response.statusCode == 405) {
+          print('get/post, method no allow');
           return [];
         } else {
           var data = json.decode(response.body);

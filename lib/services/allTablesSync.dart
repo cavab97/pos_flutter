@@ -130,14 +130,11 @@ class SyncAPICalls {
     var branchid = await CommunFun.getbranchId();
     var serverTime =
         await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
-    print('serverTime ');
-    print(serverTime);
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
       'branch_id': branchid,
       'terminal_id': terminalId
     };
-    print('getDataServerBulk4_1');
     return await APICalls.apiCall(apiurl, context, stringParams);
   }
 
@@ -206,7 +203,8 @@ class SyncAPICalls {
     return await APICalls.apiCall(apiurl, context, stringParams);
   }
 
-  static logActivity(moduleName, disc, tablename, eId) async {
+  static logActivity(String moduleName, String disc, String tablename, eId,
+      [int updateBy]) async {
     TerminalLog log = new TerminalLog();
     LocalAPI localAPI = LocalAPI();
     var uuid = await CommunFun.getLocalID();
@@ -222,14 +220,16 @@ class SyncAPICalls {
     log.branch_id = int.parse(branchid);
     log.isSync = 0;
     log.module_name = moduleName;
-    log.description = disc;
+    log.description = (updateBy != null
+        ? disc + '\n granted access to ' + userdata.id.toString()
+        : disc);
     log.activity_date = date;
     log.activity_time = time;
     log.table_name = tablename;
     log.entity_id = eId is int ? eId : int.parse(eId);
     log.status = 1;
     log.updated_at = datetime;
-    log.updated_by = userdata.id;
+    log.updated_by = updateBy ?? userdata.id;
     await localAPI.terminalLog(log);
   }
 
@@ -1041,6 +1041,69 @@ class SyncAPICalls {
         terminalLog.updated_by = logint.updated_by;
         await localAPI.saveTerminalLogFromSync(terminalLog);
       }
+    }
+  }
+
+  static getCompareTableQuery(context, String packageVersion) async {
+    try {
+      String apiurl = Configrations.getTableUpdate;
+      String terminalId = await CommunFun.getTeminalKey();
+      String branchid = await CommunFun.getbranchId();
+      var stringParams = {
+        'branch_id': branchid,
+        'terminal_id': terminalId,
+        'version': packageVersion
+      };
+      var res = await APICalls.getDataCall(apiurl, context, stringParams, 10);
+      if (res == null) {
+        return [];
+      } else if (res.length > 0 && res["status"] == Constant.STATUS200) {
+        List<Map<String, String>> listMapObject = [];
+        for (var data in res["data"]) {
+          Map<String, String> myMap = new Map<String, String>.from(data);
+          listMapObject.add(myMap);
+        }
+        return listMapObject;
+      } else {
+        print('get Comparing Table api error');
+      }
+    } catch (e) {
+      print(e);
+      CommunFun.showToast(context, e.message);
+    }
+  }
+
+  static getTableData(context, String tableName) async {
+    try {
+      String apiurl = Configrations.getTableData;
+      String terminalId = await CommunFun.getTeminalKey();
+      String branchid = await CommunFun.getbranchId();
+      User userdata = await CommunFun.getuserDetails();
+      Map<String, Object> stringParams = {
+        'branch_id': branchid,
+        'terminal_id': terminalId,
+        'pin': userdata.userPin,
+        'user_uuid': userdata.uuid,
+        'table': tableName
+      };
+      var res = await APICalls.getDataCall(apiurl, context, stringParams, 15);
+      if (res == null) {
+        return [];
+      } else if (res.length > 0 && res["status"] == Constant.STATUS200) {
+        List<Map<String, dynamic>> listMapObject = [];
+        for (var data in res["data"]) {
+          Map<String, dynamic> myMap = new Map<String, dynamic>.from(data);
+          listMapObject.add(myMap);
+        }
+        return listMapObject;
+      } else if (res["status"] != 200) {
+        CommunFun.showToast(context, res["message"]);
+      } else {
+        print('get Comparing Table api error');
+      }
+    } catch (e) {
+      print(e);
+      CommunFun.showToast(context, e.message);
     }
   }
 }

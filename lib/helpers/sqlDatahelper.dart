@@ -55,6 +55,28 @@ class DatabaseHelper {
     await createTablehelper.createTable(db);
   }
 
+  Future runQuery(String query) async {
+    Database db = await this.database;
+    await tableDataHelper.executeQuery(db, query);
+  }
+
+  Future<int> insertData(
+      String tableName, Map<String, dynamic> tablesData) async {
+    Database db = await this.database;
+    int result =
+        await tableDataHelper.insertDataToTable(db, tableName, tablesData);
+    return result;
+  }
+
+  Future getTableExist(String tableName) async {
+    Database db = await this.database;
+    List<Map<String, dynamic>> result = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='" +
+            tableName +
+            "'");
+    print(result[0]);
+  }
+
   Future<dynamic> insertData1(tablesData) async {
     Database db = await this.database;
     var result = await tableDataHelper.insertDatatable1(db, tablesData);
