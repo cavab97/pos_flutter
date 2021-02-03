@@ -354,7 +354,7 @@ class CommunFun {
         packageInfo.version.split("")[0] + '+' + packageInfo.buildNumber;
     String lastAppVersion =
         await Preferences.getStringValuesSF(Constant.lastAppVersion);
-    if (lastAppVersion == versionString && false)
+    if (lastAppVersion == versionString)
       return;
     else {
       await Preferences.setStringToSF(Constant.lastAppVersion, versionString);

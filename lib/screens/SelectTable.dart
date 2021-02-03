@@ -1171,16 +1171,14 @@ class _SelectTablePageState extends State<SelectTablePage>
         ],
       );
     }
-    /* &&
-            DateTime.now()
-                    .difference(DateTime.tryParse(ele.resFrom))
-                    .inMinutes <
-                30 */
     if (selectedTable.numberofpax == null &&
         reservationList.any((ele) =>
             ele.tableID == selectedTable.tableId && ele.isArr != true)) {
-      Reservation reservation = reservationList.firstWhere(
-          (ele) => ele.tableID == selectedTable.tableId && ele.isArr != true);
+      Reservation reservation = reservationList.firstWhere((ele) =>
+          ele.tableID == selectedTable.tableId &&
+          ele.isArr != true &&
+          DateTime.now().difference(DateTime.tryParse(ele.resFrom)).inMinutes <
+              30);
       tableOptionWidget.add(
         tableButton(
           FontAwesomeIcons.utensils,
