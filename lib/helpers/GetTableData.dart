@@ -81,6 +81,7 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable1(Database db, dynamic tablesData) async {
+    if(tablesData == null || tablesData == []) return;
     var branchData = tablesData["branch"];
     var userData = tablesData["user"];
     var roleData = tablesData["role"];
@@ -447,6 +448,7 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable2_2(Database db, dynamic tablesData) async {
+    if(tablesData == null || tablesData == []) return;
     var productattributeData = tablesData["product_attribute"];
     var productmodifireData = tablesData["product_modifier"];
     var productcategoryData = tablesData["product_category"];
@@ -587,6 +589,7 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable2_3(Database db, dynamic tablesData) async {
+    if(tablesData == null || tablesData == []) return;
     var pricetypeData = tablesData["price_type"];
     var printerData = tablesData["printer"];
     try {
@@ -744,6 +747,7 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable4_1(Database db, dynamic tablesData) async {
+    if(tablesData == null || tablesData == []) return;
     var voucherData = tablesData["voucher"];
     var orders = tablesData["order"];
     var orderdetail = tablesData["order_detail"];
@@ -942,6 +946,7 @@ class TableData {
   }
 
   Future<dynamic> insertDatatable4_2(Database db, dynamic tablesData) async {
+    if(tablesData == null || tablesData == []) return;
     var shiftdata = tablesData["shift"];
     try {
       if (shiftdata.length != 0) {
@@ -970,6 +975,7 @@ class TableData {
   }
 
   Future<dynamic> insertAdressData(Database db, dynamic tablesData) async {
+    if(tablesData == null || tablesData == []) return;
     var countrys = tablesData["country"];
     var states = tablesData["state"];
     var citys = tablesData["city"];

@@ -104,7 +104,8 @@ class _SelectTablePageState extends State<SelectTablePage>
     if (shift.length > 0) {
       Shift shiftItem = shift[0];
       dateFrom = shiftItem.createdAt ?? shiftItem.updatedAt;
-    } else {
+    } 
+    if (dateFrom == null) {
       today = DateTime.now();
       dateFrom = DateTime(today.year, today.month, 1).toString();
     }

@@ -3722,7 +3722,7 @@ class _DashboradPageState extends State<DashboradPage>
                       children: <Widget>[
                         Text(
                             cart.productName.toUpperCase() +
-                                (cart.discountAmount > 0
+                                (cart.discountAmount != null && cart.discountAmount > 0
                                     ? ' ' +
                                         (cart.discountType == 1
                                             ? '(' +

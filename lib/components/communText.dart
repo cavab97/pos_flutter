@@ -181,7 +181,7 @@ class CommunFun {
   }
 
   /*Cal Service Charge*/
-  static countServiceCharge(serviceCharge, subtotal) async {
+  static Future<double> countServiceCharge(serviceCharge, subtotal) async {
     if (serviceCharge == null) {
       var branchid = await getbranchId();
       Branch branchData = await localAPI.getBranchData(branchid);
@@ -378,7 +378,7 @@ class CommunFun {
 
   static syncOrdersANDStore(context, isClose) async {
     await compareTable(context);
-    /* await CommunFun.getsetWebOrders(context);
+    await CommunFun.getsetWebOrders(context);
     await SyncAPICalls.sendCustomerTable(context);
     await SyncAPICalls.syncOrderstoDatabase(context);
     await SyncAPICalls.sendInvenotryTable(context);
@@ -386,7 +386,7 @@ class CommunFun {
     await SyncAPICalls.sendCancledOrderTable(context);
     await SyncAPICalls.sendTerminalLogTable(context);
     await SyncAPICalls.sendShiftTable(context);
-    await SyncAPICalls.sendShiftdetails(context); */
+    await SyncAPICalls.sendShiftdetails(context);
 
     await CommunFun.syncAfterSuccess(context, false);
     if (isClose && Navigator.of(context).canPop()) {
