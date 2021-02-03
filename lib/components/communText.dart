@@ -354,7 +354,7 @@ class CommunFun {
         packageInfo.version.split("")[0] + '+' + packageInfo.buildNumber;
     String lastAppVersion =
         await Preferences.getStringValuesSF(Constant.lastAppVersion);
-    if (lastAppVersion == versionString)
+    if (lastAppVersion == versionString && false)
       return;
     else {
       await Preferences.setStringToSF(Constant.lastAppVersion, versionString);
@@ -362,6 +362,7 @@ class CommunFun {
     List<Map<String, String>> updateTableMaps =
         await SyncAPICalls.getCompareTableQuery(context, versionString);
     for (Map<String, String> tableObject in updateTableMaps) {
+      print("update table : " + tableObject['table_name']);
       await databaseHelper.runQuery(tableObject["delete"]);
       await databaseHelper.runQuery(tableObject["create"]);
       //await databaseHelper.getTableExist(tableObject['table_name']);
@@ -658,7 +659,7 @@ class CommunFun {
     var data4_2 =
         await SyncAPICalls.getDataServerBulk4_2(context); //api call 4_2
     if (data4_2 != null) {
-      var result = databaseHelper.insertData4_2(data4_2["data"]);
+      var result = await databaseHelper.insertData4_2(data4_2["data"]);
       if (result == 1) {
         CommunFun.setServerTime(null, "4");
       } else {
@@ -869,7 +870,7 @@ class CommunFun {
     return offset;
   }
 
-  static getCurrentDateTime(dateTime) async {
+  static getCurrentDateTime(DateTime dateTime) async {
     tz.initializeTimeZones();
     //converttoserver tiem
     var timeZone =
@@ -1323,6 +1324,65 @@ class CommunFun {
     await localAPI.addintoCartDetails(cartdetails);
     //print(detailID);
     callback(cartdetails);
+  }
+
+  static addReservationToCart(Reservation reservation, Table_order tableOrder,
+      SaveOrder orderData) async {
+    String branchid = await CommunFun.getbranchId();
+    MST_Cart cart = new MST_Cart();
+    User loginUser = await CommunFun.getuserDetails();
+    Customer customer = await CommunFun.getCustomerData();
+    //Customer customer = await localAPI.getCustomerData(reservation.customerID);
+    List<MSTCartdetails> reservationProductList =
+        await localAPI.getReservationItems(reservation.resNo);
+
+    List<MSTSubCartdetails> subDetail =
+        await localAPI.getSubDetail(reservation.resNo);
+    double subTotal = 0.00;
+    double qty = 0;
+    for (int i = 0; i < reservationProductList.length; i++) {
+      subTotal += reservationProductList[i].productDetailAmount;
+      qty += reservationProductList[i].productQty;
+    }
+    var serviceCharge =
+        await CommunFun.countServiceCharge(tableOrder.service_charge, subTotal);
+    var serviceChargePer = tableOrder.service_charge == null
+        ? await CommunFun.getServiceChargePer()
+        : tableOrder.service_charge;
+    var totalTax = await CommunFun.countTax(subTotal);
+    var grandTotal =
+        await CommunFun.countGrandtotal(subTotal, serviceCharge, taxvalues, 0);
+    cart.user_id = customer.customerId;
+    cart.branch_id = int.parse(branchid);
+    cart.sub_total = subTotal;
+    cart.discountAmount = 0;
+    cart.serviceCharge = CommunFun.getDoubleValue(serviceCharge);
+    cart.serviceChargePercent = CommunFun.getDoubleValue(serviceChargePer);
+    cart.table_id = tableOrder.table_id;
+    cart.discountType = 0;
+    cart.total_qty = qty;
+    cart.tax = double.parse(taxvalues.toStringAsFixed(2));
+    cart.source = 2;
+    cart.tax_json = json.encode(totalTax);
+    cart.grand_total = double.parse(grandTotal.toStringAsFixed(2));
+    cart.customer_terminal = customer != null ? customer.terminalId : 0;
+    cart.created_at = await CommunFun.getCurrentDateTime(DateTime.now());
+    cart.created_by = loginUser.id;
+    cart.localID = await CommunFun.getLocalID();
+    int cartID = await localAPI.insertReservationToCart(cart);
+    for (int i = 0; i < reservationProductList.length; i++) {
+      reservationProductList[i].cartId = cartID;
+      reservationProductList[i].cart_detail = jsonEncode(cart);
+    }
+    orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    orderData.numberofPax = reservation.pax;
+    orderData.cartId = cartID;
+    await localAPI.insertSaveOrders(orderData, tableOrder.table_id);
+    await localAPI.reservationToCartProduct(
+      reservationProductList,
+      subDetail,
+      reservation.resNo,
+    );
   }
 
   static addReservationItem(ProductDetails productItem) async {

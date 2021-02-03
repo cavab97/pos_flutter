@@ -13,7 +13,9 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Printer.dart';
+import 'package:mcncashier/models/Reservation.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/Terminal.dart';
@@ -52,7 +54,6 @@ class _SelectTablePageState extends State<SelectTablePage>
   List<Printer> printerList = new List<Printer>();
   List<Printer> printerreceiptList = new List<Printer>();
   TablesDetails selectedTable;
-  int number_of_pax = 0;
   var orderid;
   TablesDetails mergeInTable;
   TablesDetails changeInTable;
@@ -69,6 +70,7 @@ class _SelectTablePageState extends State<SelectTablePage>
   TabController _tabController;
   MaterialColor tableSelectedColor = Colors.orange;
   List<ColorTable> tableColors = new List<ColorTable>();
+  List<Reservation> reservationList = [];
 
   @override
   void initState() {
@@ -92,6 +94,31 @@ class _SelectTablePageState extends State<SelectTablePage>
       await databaseHelper.initializeDatabase();
       afterInit();
     }
+  }
+
+  getReservationList() async {
+    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+    List<Shift> shift = await localAPI.getShiftData(shiftid);
+    DateTime today;
+    String dateFrom;
+    if (shift.length > 0) {
+      Shift shiftItem = shift[0];
+      dateFrom = shiftItem.createdAt ?? shiftItem.updatedAt;
+    } else {
+      today = DateTime.now();
+      dateFrom = DateTime(today.year, today.month, 1).toString();
+    }
+    int tID = int.tryParse(await CommunFun.getTeminalKey());
+    List<Reservation> resList = await localAPI.getReservationList(
+      tID,
+      dateFrom,
+      (today != null ? today : DateTime.tryParse(dateFrom))
+          .add(Duration(days: 1))
+          .toString(),
+    );
+    setState(() {
+      reservationList = resList;
+    });
   }
 
   checkISlogin() async {
@@ -123,6 +150,8 @@ class _SelectTablePageState extends State<SelectTablePage>
         callbackFunction(context);
       }
     }
+
+    getReservationList();
   }
 
   setPermissons() async {
@@ -147,7 +176,7 @@ class _SelectTablePageState extends State<SelectTablePage>
     var isOpen = await Preferences.getStringValuesSF(Constant.IS_SHIFT_OPEN);
     if (this.mounted) {
       setState(() {
-        isShiftOpen = isOpen != null && isOpen == "true" ? true : false;
+        isShiftOpen = (isOpen != null && isOpen == "true") ? true : false;
       });
     }
   }
@@ -196,7 +225,9 @@ class _SelectTablePageState extends State<SelectTablePage>
       isMenuopen = true;
       //isMenuopen = false;
     });
-    Navigator.pushNamed(context, Constant.DashboardScreen).then(backToRefresh);
+    Navigator.of(context).pushNamedAndRemoveUntil(
+        Constant.DashboardScreen, (Route<dynamic> route) => false,
+        arguments: {"isAssign": false}).then(backToRefresh);
   }
 
   backToRefresh(value) {
@@ -280,17 +311,19 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   changeColors() {
     Future.delayed(Duration(seconds: 1), () {
-      setState(() {
-        tableSelectedColor =
-            (tableSelectedColor == null || tableSelectedColor == Colors.orange)
-                ? Colors.grey
-                : Colors.orange;
-        if (isMergeing || isChangingTable) {
-          changeColors();
-          changingColors = true;
-        } else
-          changingColors = false;
-      });
+      if (this.mounted) {
+        setState(() {
+          tableSelectedColor = (tableSelectedColor == null ||
+                  tableSelectedColor == Colors.orange)
+              ? Colors.grey
+              : Colors.orange;
+          if (isMergeing || isChangingTable) {
+            changeColors();
+            changingColors = true;
+          } else
+            changingColors = false;
+        });
+      }
     });
   }
 
@@ -379,8 +412,35 @@ class _SelectTablePageState extends State<SelectTablePage>
     if (!isChanging) {
       Navigator.popAndPushNamed(context, Constant.DashboardScreen)
           .then(backToRefresh);
-    }
-    await getTables();
+    } else
+      await getTables();
+  }
+
+  reservationToOrder(Reservation reservation) async {
+    reservation.isArr = true;
+    localAPI.addReservation(reservation, reservation.id);
+    SaveOrder orderData = new SaveOrder();
+    orderData.orderName = selectedTable.tableName;
+    orderData.createdAt = await CommunFun.getCurrentDateTime(DateTime.now());
+    orderData.numberofPax = (int.tryParse(paxController.text)) ?? 0;
+    orderData.cartId = orderid;
+    Table_order tableOrder = new Table_order();
+    tableOrder.table_id = selectedTable.tableId;
+    tableOrder.number_of_pax = int.tryParse(paxController.text) ?? 0;
+    tableOrder.save_order_id = selectedTable.saveorderid;
+    tableOrder.service_charge =
+        await CommunFun.getDoubleValue(selectedTable.tableServiceCharge);
+    tableOrder.assignTime = await CommunFun.getCurrentDateTime(DateTime.now());
+    await localAPI.insertTableOrder(tableOrder);
+    await CommunFun.addReservationToCart(reservation, tableOrder, orderData);
+    await Preferences.setStringToSF(
+        Constant.TABLE_DATA, json.encode(tableOrder));
+
+    Navigator.of(context).pushNamedAndRemoveUntil(
+        Constant.DashboardScreen, (Route<dynamic> route) => false,
+        arguments: {"isAssign": false}).then(backToRefresh);
+    /* Navigator.popAndPushNamed(context, Constant.DashboardScreen)
+        .then(backToRefresh); */
   }
 
   changePaxForCurrentOrder() async {
@@ -1007,11 +1067,11 @@ class _SelectTablePageState extends State<SelectTablePage>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text(
+                    /* Text(
                       'Select a Table',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 20),
-                    ),
+                    ), */
                   ],
                 ),
               ),
@@ -1032,75 +1092,121 @@ class _SelectTablePageState extends State<SelectTablePage>
       style: Styles.whiteMediumBold(),
     ));
     if (selectedTable.numberofpax == null) {
-      tableOptionWidget.addAll([
-        tableButton(Icons.supervised_user_circle, Strings.newOrder, context,
-            () {
-          addNewOrder();
-        }),
-      ]);
+      tableOptionWidget.addAll(
+        [
+          tableButton(
+            Icons.supervised_user_circle,
+            Strings.newOrder,
+            context,
+            addNewOrder,
+          ),
+        ],
+      );
     }
-    tableOptionWidget.add(tableButton(
+    tableOptionWidget.add(
+      tableButton(
         Icons.call_merge,
         isMergeing ? Strings.cancelMergeOrder : Strings.mergeOrder,
-        context, () {
-      mergeTable(selectedTable);
-    }));
+        context,
+        () => mergeTable(selectedTable),
+      ),
+    );
     if (false && selectedTable.tableQr != null) {
-      tableOptionWidget
-          .add(tableButton(Icons.cancel, Strings.scanQRcode, context, () {
-        openQrcodePop();
-      }));
+      tableOptionWidget.add(
+        tableButton(
+          Icons.cancel,
+          Strings.scanQRcode,
+          context,
+          openQrcodePop,
+        ),
+      );
     }
 
     if (selectedTable.numberofpax != null) {
-      tableOptionWidget.addAll([
-        tableButton(Icons.supervised_user_circle, Strings.changePax, context,
-            () {
-          changePax();
-        }),
-        tableButton(Icons.remove_red_eye, Strings.viewOrder, context, () {
-          viewOrder();
-        }),
-        tableButton(
+      tableOptionWidget.addAll(
+        [
+          tableButton(
+            Icons.supervised_user_circle,
+            Strings.changePax,
+            context,
+            changePax,
+          ),
+          tableButton(
+            Icons.remove_red_eye,
+            Strings.viewOrder,
+            context,
+            viewOrder,
+          ),
+          tableButton(
             Icons.change_history,
             !isChangingTable ? Strings.changeTable : Strings.cancelChangeTable,
-            context, () {
-          changeTablePop();
-        }),
-        tableButton(Icons.cancel, Strings.cancleOrder, context, () async {
-          if (permissions.contains(Constant.CANCEL_ORDER)) {
-            cancleTableOrder();
+            context,
+            changeTablePop,
+          ),
+          tableButton(
+            Icons.cancel,
+            Strings.cancleOrder,
+            context,
+            () async {
+              if (permissions.contains(Constant.CANCEL_ORDER)) {
+                cancleTableOrder();
+              } else {
+                await SyncAPICalls.logActivity(
+                    "cancel table Order",
+                    "Cashier has no permission for cancel table order",
+                    "table",
+                    1);
+                await CommonUtils.openPermissionPop(
+                    context, Constant.CANCEL_ORDER, () async {
+                  await cancleTableOrder();
+                  await SyncAPICalls.logActivity(
+                      "cancel table Order",
+                      "Manager given permission for cancel table order",
+                      "table",
+                      1);
+                }, () {});
+              }
+            },
+          ),
+        ],
+      );
+    }
+    /* &&
+            DateTime.now()
+                    .difference(DateTime.tryParse(ele.resFrom))
+                    .inMinutes <
+                30 */
+    if (selectedTable.numberofpax == null &&
+        reservationList.any((ele) =>
+            ele.tableID == selectedTable.tableId && ele.isArr != true)) {
+      Reservation reservation = reservationList.firstWhere(
+          (ele) => ele.tableID == selectedTable.tableId && ele.isArr != true);
+      tableOptionWidget.add(
+        tableButton(
+          FontAwesomeIcons.utensils,
+          Strings.reservationArrived,
+          context,
+          () => reservationToOrder(reservation),
+        ),
+      );
+    }
+    if (selectedTable.status == 1) {
+      tableOptionWidget.add(
+        tableButton(
+            FontAwesomeIcons.conciergeBell, Strings.createReservation, context,
+            () async {
+          if (permissions.contains(Constant.addReservation)) {
+            openReservationDialog();
           } else {
-            await SyncAPICalls.logActivity("cancel table Order",
-                "Cashier has no permission for cancel table order", "table", 1);
-            await CommonUtils.openPermissionPop(context, Constant.CANCEL_ORDER,
-                () async {
-              await cancleTableOrder();
-              await SyncAPICalls.logActivity(
-                  "cancel table Order",
-                  "Manager given permission for cancel table order",
-                  "table",
-                  1);
+            await CommonUtils.openPermissionPop(
+                context, Constant.addReservation, () async {
+              await openReservationDialog();
+              await SyncAPICalls.logActivity("reservation",
+                  "Manager given permission for make reservation", "table", 1);
             }, () {});
           }
         }),
-      ]);
-    }
-    if (selectedTable.status == 1) {
-      tableOptionWidget.add(tableButton(
-          FontAwesomeIcons.conciergeBell, Strings.createReservation, context,
-          () async {
-        if (true || permissions.contains(Constant.addReservation)) {
-          openReservationDialog();
-        } else {
-          await CommonUtils.openPermissionPop(context, Constant.addReservation,
-              () async {
-            await openReservationDialog();
-            await SyncAPICalls.logActivity("reservation",
-                "Manager given permission for make reservation", "table", 1);
-          }, () {});
-        }
-      }));
+      );
     }
     return tableOptionWidget;
   }
@@ -1146,25 +1252,28 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   Widget tableButton(icon, name, context, onclick) {
     return new OutlineButton(
-        padding: EdgeInsets.all(10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Icon(icon, color: StaticColor.colorWhite),
-            SizedBox(width: 20),
-            Text(name,
-                textAlign: TextAlign.center, style: Styles.whiteSimpleSmall())
-          ],
-        ),
-        borderSide: BorderSide(
+      padding: EdgeInsets.all(10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Icon(icon, color: StaticColor.colorWhite),
+          SizedBox(width: 20),
+          Text(
+            name,
+            textAlign: TextAlign.center,
+            style: Styles.whiteSimpleSmall(),
+          )
+        ],
+      ),
+      borderSide: BorderSide(
+          color: StaticColor.colorBlack, width: 1, style: BorderStyle.solid),
+      onPressed: onclick,
+      shape: new RoundedRectangleBorder(
+        side: BorderSide(
             color: StaticColor.colorBlack, width: 1, style: BorderStyle.solid),
-        onPressed: onclick,
-        shape: new RoundedRectangleBorder(
-            side: BorderSide(
-                color: StaticColor.colorBlack,
-                width: 1,
-                style: BorderStyle.solid),
-            borderRadius: new BorderRadius.circular(0.0)));
+        borderRadius: new BorderRadius.circular(0.0),
+      ),
+    );
   }
 
   Widget changePaxbtn(context) {

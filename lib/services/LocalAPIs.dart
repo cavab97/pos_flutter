@@ -12,6 +12,7 @@ import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Customer_Liquor_Inventory.dart';
 import 'package:mcncashier/models/Customer_Liquor_Inventory_Log.dart';
 import 'package:mcncashier/models/MST_Cart.dart';
+import 'package:mcncashier/models/Reservation.dart';
 import 'package:mcncashier/models/colorTable.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
 import 'package:mcncashier/models/ModifireData.dart';
@@ -90,7 +91,7 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getProduct(String id, String branchID) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
-    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,product_store_inventory.qty,box.product_id as box_pId,category_attribute.name as attr_cat ,modifier.name as modifire_Name, product_branch.out_of_stock as out_of_stock FROM `product` " +
+    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,product_store_inventory.qty,box.product_id as box_pId, category_attribute.name as attr_cat ,modifier.name as modifire_Name, product_branch.out_of_stock as out_of_stock FROM `product` " +
         " LEFT JOIN product_category on product_category.product_id = product.product_id AND product_category.status = 1" +
         " LEFT JOIN product_branch on product_branch.product_id = product.product_id AND product_branch.status = 1" +
         " LEFT JOIN price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
@@ -117,10 +118,12 @@ class LocalAPI {
 
   Future<List<ProductDetails>> getAllProduct(String branchID) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
-    String query = "SELECT product.product_id, product.name, product.has_inventory, product.price, product.sku, base64, product_store_inventory.qty, product_branch.out_of_stock FROM `product` " +
+    String query = "SELECT product.product_id, product.name, product.has_inventory, product.price, product.sku, base64, category_attribute.name as attr_cat, product_store_inventory.qty, product_branch.out_of_stock FROM `product` " +
         " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id " +
         " LEFT JOIN product_branch ON product_branch.product_id = product.product_id AND product_branch.status = 1" +
         " LEFT JOIN product_store_inventory ON product_store_inventory.product_id = product.product_id AND product_store_inventory.status = 1 " +
+        " LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1" +
+        " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1" +
         " AND product_branch.branch_id = " +
         branchID.toString() +
         " GROUP By product.product_id";
@@ -504,6 +507,11 @@ class LocalAPI {
     return cartid;
   }
 
+  Future<int> insertReservationToCart(MST_Cart cartData) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    return await db.insert("mst_cart", cartData.toJson());
+  }
+
   Future<int> insertSaveOrders(orderData, tableiD) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
     var response = await db.insert("save_order", orderData.toJson());
@@ -538,8 +546,8 @@ class LocalAPI {
     Database db = DatabaseHelper.dbHelper.getDatabse();
     var cartdetailid;
     var newObj = cartdetails.toJson();
-    newObj.remove("attrName");
-    newObj.remove("modiName");
+    newObj.remove("attr_name");
+    newObj.remove("modi_name");
     if (cartdetails.id != null) {
       cartdetailid = await db.update("mst_cart_detail", newObj,
           where: 'id = ?', whereArgs: [cartdetails.id]);
@@ -612,24 +620,6 @@ class LocalAPI {
         " where cart_id =" +
         cartId.toString() +
         " group by mst_cart_detail.id";
-    var res = await db.rawQuery(qry);
-    list = res.isNotEmpty
-        ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
-        : [];
-    return list;
-  }
-
-  Future<List<MSTCartdetails>> getReservationItems(String reservationId) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    List<MSTCartdetails> list = [];
-
-    String qry = " SELECT mst_cart_detail.* ,group_concat(attributes.name) as attrName ,group_concat(modifier.name) as modiName from mst_cart_detail " +
-        " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  (mst_cart_sub_detail.attribute_id != '' OR mst_cart_sub_detail.modifier_id != '' )" +
-        " LEFT JOIN attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != '' " +
-        " LEFT JOIN modifier on modifier.modifier_id = mst_cart_sub_detail.modifier_id AND mst_cart_sub_detail.modifier_id != '' " +
-        " where cart_id ='" +
-        reservationId +
-        "' group by mst_cart_detail.id";
     var res = await db.rawQuery(qry);
     list = res.isNotEmpty
         ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
@@ -1232,8 +1222,8 @@ class LocalAPI {
   Future<dynamic> addVoucherIndetail(MSTCartdetails details, voucherId) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
     var newObj = details.toJson();
-    newObj.remove("attrName");
-    newObj.remove("modiName");
+    newObj.remove("attr_name");
+    newObj.remove("modi_name");
     var data = await db.update("mst_cart_detail", newObj,
         where: "id =?", whereArgs: [details.id]);
 
@@ -1462,7 +1452,7 @@ class LocalAPI {
     Database db = DatabaseHelper.dbHelper.getDatabse();
     Map<String, dynamic> newUpdate = new Map();
     newUpdate['user_id'] = userId;
-    db.update("voucher_history", newUpdate);
+    await db.update("voucher_history", newUpdate);
   }
 
   Future<List<VoucherHistory>> getVoucherHistoryTable(
@@ -1762,8 +1752,8 @@ class LocalAPI {
         : [];
     var result;
     var newObj = details.toJson();
-    newObj.remove("attrName");
-    newObj.remove("modiName");
+    newObj.remove("attr_name");
+    newObj.remove("modi_name");
     if (list.length > 0) {
       result = await db.update("mst_cart_detail", newObj,
           where: "id =?", whereArgs: [details.id]);
@@ -2321,8 +2311,8 @@ class LocalAPI {
       MSTCartdetails cartitem) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
     var newObj = focProduct.toJson();
-    newObj.remove("attrName");
-    newObj.remove("modiName");
+    newObj.remove("attr_name");
+    newObj.remove("modi_name");
     if (isUpdate) {
       await db.update("mst_cart_detail", newObj,
           where: "id =?", whereArgs: [focProduct.id]);
@@ -2332,8 +2322,8 @@ class LocalAPI {
         newObj,
       );
       var existObj = cartitem.toJson();
-      existObj.remove("attrName");
-      existObj.remove("modiName");
+      existObj.remove("attr_name");
+      existObj.remove("modi_name");
       await db.update("mst_cart_detail", existObj,
           where: "id =?", whereArgs: [cartitem.id]);
     }
@@ -2345,8 +2335,7 @@ class LocalAPI {
 
   Future deleteOrderid(orderid) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
-    var res =
-        await db.delete("orders", where: "app_id =?", whereArgs: [orderid]);
+    await db.delete("orders", where: "app_id =?", whereArgs: [orderid]);
     //print(res);
   }
 
@@ -2748,7 +2737,7 @@ class LocalAPI {
 
   Future<int> saveTerminalLogFromSync(TerminalLog log) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
-    var checkisExitqry =
+    String checkisExitqry =
         "SELECT *  FROM terminal_log where id =" + log.id.toString();
     var checkisExit = await db.rawQuery(checkisExitqry);
     var result;
@@ -2770,5 +2759,219 @@ class LocalAPI {
     for (TerminalLog log in logList) {
       await db.delete("terminal_log", where: "id =?", whereArgs: [log.id]);
     }
+  }
+
+  //Reservation
+  Future<int> addReservation(Reservation reservation,
+      [int reservationID]) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    try {
+      if (reservationID != null) {
+        return await db.update("reservation", reservation.toJson(),
+            where: "id=?", whereArgs: [reservationID]);
+      } else {
+        return await db.insert("reservation", reservation.toJson());
+      }
+    } catch (e) {
+      print(e);
+      return 0;
+    }
+  }
+
+  Future<List<Reservation>> getReservationList(int terminalID,
+      [String startFrom, String endOn]) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    try {
+      String query = "SELECT *  FROM reservation WHERE terminal_id = " +
+          terminalID.toString();
+      if (startFrom != null && startFrom.isNotEmpty) {
+        query += " AND created_at >= '" + startFrom + "'";
+      }
+      if (endOn != null && endOn.isNotEmpty) {
+        query += " AND updated_at <= '" + endOn + "'";
+      }
+      query += " ORDER BY updated_at DESC";
+      var result = await db.rawQuery(query);
+      List<Reservation> list = result.length > 0
+          ? result.map((c) => Reservation.fromJson(c)).toList()
+          : [];
+      return list;
+    } catch (e) {
+      print(e);
+      return [];
+    }
+  }
+
+  Future<List<MSTCartdetails>> getReservationItems(String reservationNo) async {
+    reservationNo = reservationNo.trim();
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    List<MSTCartdetails> list = [];
+    var test = await db.query("mst_cart_detail");
+    list = test.isNotEmpty
+        ? test.map((c) => MSTCartdetails.fromJson(c)).toList()
+        : [];
+    String qry = " SELECT mst_cart_detail.* ,group_concat(attributes.name) as attrName ,group_concat(modifier.name) as modiName from mst_cart_detail " +
+        " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  (mst_cart_sub_detail.attribute_id != '' OR mst_cart_sub_detail.modifier_id != '' )" +
+        " LEFT JOIN attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != '' " +
+        " LEFT JOIN modifier on modifier.modifier_id = mst_cart_sub_detail.modifier_id AND mst_cart_sub_detail.modifier_id != '' " +
+        " where mst_cart_detail.res_no ='" +
+        reservationNo +
+        "' group by mst_cart_detail.id";
+    var res = await db.rawQuery(qry);
+    list = res.isNotEmpty
+        ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
+        : [];
+    return list;
+  }
+
+  Future<int> removeReservationItems(int reservationId) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    return db.delete("reservation", where: "id=?", whereArgs: [reservationId]);
+  }
+
+  Future<int> reservationToCartProduct(List<MSTCartdetails> productList,
+      List<MSTSubCartdetails> subDetails, String reservationNo) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    int cartDetailID;
+    int result = 0;
+    for (MSTCartdetails product in productList) {
+      List<MSTSubCartdetails> selectedProductModiferList = subDetails
+          .where((ele) => ele.cartdetailsId == product.cartId)
+          .toList();
+      List<MSTSubCartdetails> selectedProductAttList = subDetails
+          .where((ele) => ele.cartdetailsId == product.cartId)
+          .toList();
+      Map<String, dynamic> jsonDetail = new Map();
+      try {
+        jsonDetail = product.toJson();
+        jsonDetail.remove("attr_name");
+        jsonDetail.remove("modi_name");
+        cartDetailID = await db.update(
+          "mst_cart_detail",
+          jsonDetail,
+          where: "id=? AND res_no=?",
+          whereArgs: [product.id, reservationNo],
+        );
+        result = 1;
+      } catch (e) {
+        print(e);
+      }
+      try {
+        for (MSTSubCartdetails productDetail in selectedProductModiferList) {
+          productDetail.cartdetailsId = cartDetailID;
+          jsonDetail = productDetail.toJson();
+          jsonDetail.remove("id");
+          result = await db.update(
+            "mst_cart_sub_detail",
+            productDetail.toJson(),
+            where: "id=? AND res_no=?",
+            whereArgs: [productDetail.id, reservationNo],
+          );
+        }
+      } catch (e) {
+        print(e);
+      }
+      try {
+        for (MSTSubCartdetails productDetail in selectedProductAttList) {
+          productDetail.cartdetailsId = cartDetailID;
+          jsonDetail = productDetail.toJson();
+          jsonDetail.remove("id");
+          result = await db.update(
+            "mst_cart_sub_detail",
+            productDetail.toJson(),
+            where: "id=? AND res_no=?",
+            whereArgs: [productDetail.id, reservationNo],
+          );
+        }
+      } catch (e) {
+        print(e);
+      }
+    }
+    return result;
+  }
+
+  Future<List<MSTSubCartdetails>> getSubDetail(String resNo) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    List<Map<String, dynamic>> result = await db
+        .query("mst_cart_sub_detail", where: "res_no=?", whereArgs: [resNo]);
+
+    return result.isNotEmpty
+        ? result.map((c) => MSTSubCartdetails.fromJson(c)).toList()
+        : [];
+  }
+
+  Future<int> insertReservationProduct(
+      List<MSTCartdetails> productList,
+      String resNo,
+      List<MSTSubCartdetails> itemModifierList,
+      List<MSTSubCartdetails> itemAttributesList,
+      [String reservationNo]) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    int cartDetailID;
+    Map<String, dynamic> jsonDetail = new Map();
+    try {
+      for (MSTCartdetails product in productList) {
+        List<MSTSubCartdetails> selectedProductModiferList = itemModifierList
+            .where((ele) => ele.cartdetailsId == product.cartId)
+            .toList();
+        List<MSTSubCartdetails> selectedProductAttList = itemAttributesList
+            .where((ele) => ele.cartdetailsId == product.cartId)
+            .toList();
+
+        if (reservationNo != null) {
+          product.resNo = reservationNo;
+        } else {
+          product.resNo = resNo;
+        }
+        jsonDetail = product.toJson();
+        jsonDetail.remove("attr_name");
+        jsonDetail.remove("modi_name");
+        jsonDetail.remove("cart_id");
+        if (reservationNo != null) {
+          jsonDetail.remove("id");
+          cartDetailID = await db.update("mst_cart_detail", jsonDetail,
+              where: "id=? AND res_no=?", whereArgs: [product.id, resNo]);
+        } else {
+          cartDetailID = await db.insert("mst_cart_detail", jsonDetail);
+        }
+        if (cartDetailID > 0) {
+          for (MSTSubCartdetails productDetail in selectedProductModiferList) {
+            productDetail.cartdetailsId = cartDetailID;
+            if (reservationNo != null) {
+              jsonDetail = productDetail.toJson();
+              jsonDetail.remove("id");
+              await db.update("mst_cart_sub_detail", productDetail.toJson(),
+                  where: "id=? AND res_no=?",
+                  whereArgs: [productDetail.id, resNo]);
+            } else {
+              await db.insert("mst_cart_sub_detail", productDetail.toJson());
+            }
+          }
+          for (MSTSubCartdetails productDetail in selectedProductAttList) {
+            productDetail.cartdetailsId = cartDetailID;
+            if (reservationNo != null) {
+              jsonDetail = productDetail.toJson();
+              jsonDetail.remove("id");
+              await db.update("mst_cart_sub_detail", productDetail.toJson(),
+                  where: "id=? AND res_no=?",
+                  whereArgs: [productDetail.id, resNo]);
+            } else {
+              await db.insert("mst_cart_sub_detail", productDetail.toJson());
+            }
+          }
+        }
+      }
+      return 1;
+    } catch (e) {
+      print(e);
+      return 0;
+    }
+  }
+
+  Future<Customer> getCustomerData(String memberID) async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    var result = await db
+        .query("customer", where: "memeber_id=?", whereArgs: [memberID]);
+    return Customer.fromJson(result[0]);
   }
 }

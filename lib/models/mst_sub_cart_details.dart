@@ -24,7 +24,7 @@ class MSTSubCartdetails {
   MSTSubCartdetails.fromJson(Map<String, dynamic> json) {
     id = json["id"];
     cartdetailsId = json["cart_details_id"];
-    localID = json["localID"];
+    localID = json["local_id"];
     productId = json["product_id"];
     modifierId = json["modifier_id"];
     modifirePrice = json["modifier_price"] is int
@@ -40,7 +40,7 @@ class MSTSubCartdetails {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data["id"] = this.id;
     data["cart_details_id"] = this.cartdetailsId;
-    data["localID"] = this.localID;
+    data["local_id"] = this.localID;
     data["product_id"] = this.productId;
     data["modifier_id"] = this.modifierId;
     data["modifier_price"] = this.modifirePrice;

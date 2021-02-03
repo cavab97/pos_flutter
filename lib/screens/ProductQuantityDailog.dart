@@ -28,19 +28,21 @@ import 'package:mcncashier/widget/CloseButtonWidget.dart';
 
 class ProductQuantityDailog extends StatefulWidget {
   // quantity Dailog
-  ProductQuantityDailog({
-    Key key,
-    this.selproduct,
-    this.issetMeal,
-    this.cartID,
-    this.cartItem,
-    this.onClose,
-    this.addReservation,
-  }) : super(key: key);
+  ProductQuantityDailog(
+      {Key key,
+      this.selproduct,
+      this.issetMeal,
+      this.cartID,
+      this.cartItem,
+      this.onClose,
+      this.addReservation,
+      this.extraSubDetail})
+      : super(key: key);
   final bool issetMeal;
   final selproduct;
   final int cartID;
-  final cartItem;
+  final MSTCartdetails cartItem;
+  final List<MSTSubCartdetails> extraSubDetail;
   Function onClose;
   Function addReservation;
 
@@ -67,7 +69,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   List<MSTCartdetails> cartItems = [];
   List<SetMealProduct> mealProducts = [];
   List<ModifireData> selectedModifier = [];
-  double product_qty = 1.0;
+  double productQty = 1.0;
   double price = 0.00;
   Printer printer;
   bool isEditing = false;
@@ -96,7 +98,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         widget.selproduct.qty != null &&
         widget.selproduct.qty > 0) {
       setState(() {
-        product_qty = widget.selproduct.qty;
+        productQty = widget.selproduct.qty;
+      });
+    } else if (!isSetMeal &&
+        widget.cartItem != null &&
+        cartitem.productQty != null &&
+        cartitem.productQty > 0) {
+      setState(() {
+        productQty = widget.cartItem.productQty;
       });
     }
     setInitstate();
@@ -108,8 +117,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     setState(() {
       permissions = permission;
     });
-    await SyncAPICalls.logActivity(
-        "product details", "Opened product details popup", "product", 1);
+    /* await SyncAPICalls.logActivity(
+        "product details", "Opened product details popup", "product", 1); */
   }
 
   setInitstate() async {
@@ -325,52 +334,55 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   setProductEditingData() async {
-    if (!isSetMeal) {
-      List<MSTSubCartdetails> details =
-          await localAPI.getItemModifire(cartitem.id);
-      if (details.length > 0) {
-        for (var i = 0; i < details.length; i++) {
-          var item = details[i];
-          if (item.caId != null) {
-            //Attr
-            if (attributeList.length > 0) {
-              for (var i = 0; i < attributeList.length; i++) {
-                var attribute = attributeList[i];
-                var attributType = attribute.attr_types.split(',');
-                var attrIDs = attribute.attributeId.split(',');
-                var isdef = attribute.is_default.split(',');
-                var attrtypesPrice = attribute.attr_types_price.split(',');
-                for (var a = 0; a < attributType.length; a++) {
-                  var aattrid = int.parse(attrIDs[a]);
-                  if (item.attributeId == aattrid) {
-                    onSelectAttr(a, attribute.ca_id, attributType[a],
-                        attrIDs[a], attrtypesPrice[a], null, isdef[a]);
-                  }
+    List<MSTSubCartdetails> details;
+    if (!isSetMeal && cartitem.id != null) {
+      details = await localAPI.getItemModifire(cartitem.id);
+    } else if (widget.extraSubDetail != null) {
+      details = widget.extraSubDetail;
+    }
+
+    if (details.length > 0) {
+      for (var i = 0; i < details.length; i++) {
+        var item = details[i];
+        if (item.caId != null) {
+          //Attr
+          if (attributeList.length > 0) {
+            for (var i = 0; i < attributeList.length; i++) {
+              var attribute = attributeList[i];
+              var attributType = attribute.attr_types.split(',');
+              var attrIDs = attribute.attributeId.split(',');
+              var isdef = attribute.is_default.split(',');
+              var attrtypesPrice = attribute.attr_types_price.split(',');
+              for (var a = 0; a < attributType.length; a++) {
+                var aattrid = int.parse(attrIDs[a]);
+                if (item.attributeId == aattrid) {
+                  onSelectAttr(a, attribute.ca_id, attributType[a], attrIDs[a],
+                      attrtypesPrice[a], null, isdef[a]);
                 }
               }
             }
-          } else {
-            // Modifier
-            if (modifireList.length > 0) {
-              for (var j = 0; j < modifireList.length; j++) {
-                if (modifireList[j].modifierId == item.modifierId) {
-                  setModifire(modifireList[j]);
-                }
+          }
+        } else {
+          // Modifier
+          if (modifireList.length > 0) {
+            for (var j = 0; j < modifireList.length; j++) {
+              if (modifireList[j].modifierId == item.modifierId) {
+                setModifire(modifireList[j]);
               }
             }
           }
         }
       }
-      if (cartitem.remark != null && cartitem.remark.isNotEmpty) {
-        extraNotes.text = cartitem.remark;
-      }
-      setState(() {
-        product_qty = cartitem.productQty is int
-            ? cartitem.productQty.toDouble()
-            : cartitem.productQty;
-        price = cartitem.productPrice;
-      });
     }
+    if (cartitem.remark != null && cartitem.remark.isNotEmpty) {
+      extraNotes.text = cartitem.remark;
+    }
+    setState(() {
+      productQty = cartitem.productQty is int
+          ? cartitem.productQty.toDouble()
+          : cartitem.productQty;
+      price = cartitem.productPrice;
+    });
   }
 
   getAttributes(productid) async {
@@ -481,8 +493,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         }
         if (isEditing && cartitem != null) {
           setState(() {
-            product_qty =
-                isEditing ? product_qty + cartitem.productQty : product_qty;
+            productQty =
+                isEditing ? productQty + cartitem.productQty : productQty;
             price = isEditing ? price + cartitem.productPrice : price;
           });
         }
@@ -509,7 +521,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           isEditing = true;
           setmeal = setmeal;
           price = setmeal.price;
-          product_qty = prodData[0].productQty;
+          productQty = prodData[0].productQty;
           tempCart = tCartData;
           cartitem = prodData[0];
         });
@@ -604,9 +616,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
 
   increaseQty() async {
     if (isSetMeal) {
-      var prevproductqty = product_qty;
+      var prevproductqty = productQty;
       setState(() {
-        product_qty = prevproductqty + 1;
+        productQty = prevproductqty + 1;
       });
       setPrice();
     } else {
@@ -615,26 +627,26 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
             await localAPI.checkItemAvailableinStore(productItem.productId);
         if (cartval.length > 0) {
           double storeqty = cartval[0].qty;
-          if (storeqty > product_qty) {
-            var prevproductqty = product_qty;
+          if (storeqty > productQty) {
+            var prevproductqty = productQty;
             setState(() {
-              product_qty = prevproductqty + 1;
+              productQty = prevproductqty + 1;
             });
             setPrice();
           } else {
             CommunFun.showToast(context, Strings.stockNotValilable);
           }
         } else {
-          var prevproductqty = product_qty;
+          var prevproductqty = productQty;
           setState(() {
-            product_qty = prevproductqty + 1;
+            productQty = prevproductqty + 1;
           });
           setPrice();
         }
       } else {
-        var prevproductqty = product_qty;
+        var prevproductqty = productQty;
         setState(() {
-          product_qty = prevproductqty + 1;
+          productQty = prevproductqty + 1;
         });
         setPrice();
       }
@@ -644,10 +656,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   decreaseQty() async {
-    if (product_qty > 1) {
-      var prevproductqty = product_qty;
+    if (productQty > 1) {
+      var prevproductqty = productQty;
       setState(() {
-        product_qty = prevproductqty - 1;
+        productQty = prevproductqty - 1;
       });
       setPrice();
     }
@@ -719,7 +731,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         newPrice += mprice;
       }
     }
-    double pricewithQty = newPrice * product_qty;
+    double pricewithQty = newPrice * productQty;
     if (widget.selproduct.qty != null && widget.selproduct.qty > 0) {
       pricewithQty = newPrice * widget.selproduct.qty;
     }
@@ -760,20 +772,20 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         var item = cartItems[i];
         if (isSetMeal) {
           if (item.productId == setmeal.setmealId) {
-            item.productQty = product_qty;
+            item.productQty = productQty;
           }
         } else {
           if (item.productId == productItem.productId) {
-            item.productQty = product_qty;
+            item.productQty = productQty;
           }
         }
         qty += item.productQty;
       }
       if (!isEditing) {
-        qty += product_qty;
+        qty += productQty;
       }
     } else {
-      qty += product_qty;
+      qty += productQty;
     }
     return qty;
   }
@@ -873,14 +885,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     var loginData = await json.decode(loginUser);
     ProductDetails cartItemproduct = new ProductDetails();
     if (!isSetMeal) {
-      cartItemproduct.qty = product_qty;
+      cartItemproduct.qty = productQty;
       cartItemproduct.status = productItem.status;
       cartItemproduct.productId = productItem.productId;
       cartItemproduct.name = productItem.name;
       cartItemproduct.uuid = productItem.uuid;
       cartItemproduct.price = productItem.price;
     } else {
-      cartItemproduct.qty = product_qty;
+      cartItemproduct.qty = productQty;
       cartItemproduct.status = setmeal.status;
       cartItemproduct.productId = setmeal.setmealId;
       cartItemproduct.name = setmeal.name;
@@ -898,7 +910,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.productSecondName = isSetMeal ? "" : productItem.name_2;
     cartdetails.productPrice = isSetMeal ? setmeal.price : productItem.price;
     cartdetails.productDetailAmount = double.parse(price.toStringAsFixed(2));
-    cartdetails.productQty = product_qty.toDouble();
+    cartdetails.productQty = productQty.toDouble();
     cartdetails.productNetPrice =
         productItem.oldPrice != null ? productItem.oldPrice : 0.0;
     cartdetails.createdBy = loginData["id"];
@@ -1011,14 +1023,14 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         currentCart.id, cart, productItem, orderData, tableData.table_id);
     ProductDetails cartItemproduct = new ProductDetails();
     if (!isSetMeal) {
-      cartItemproduct.qty = product_qty;
+      cartItemproduct.qty = productQty;
       cartItemproduct.status = productItem.status;
       cartItemproduct.productId = productItem.productId;
       cartItemproduct.name = productItem.name;
       cartItemproduct.uuid = productItem.uuid;
       cartItemproduct.price = productItem.price;
     } else {
-      cartItemproduct.qty = product_qty;
+      cartItemproduct.qty = productQty;
       cartItemproduct.status = setmeal.status;
       cartItemproduct.productId = setmeal.setmealId;
       cartItemproduct.name = setmeal.name;
@@ -1040,7 +1052,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     cartdetails.productSecondName = isSetMeal ? "" : productItem.name_2;
     cartdetails.productPrice = isSetMeal ? setmeal.price : productItem.price;
     cartdetails.productDetailAmount = double.parse(price.toStringAsFixed(2));
-    cartdetails.productQty = product_qty.toDouble();
+    cartdetails.productQty = productQty.toDouble();
     cartdetails.productNetPrice =
         productItem.oldPrice != null ? productItem.oldPrice : 0.0;
     cartdetails.createdBy = loginData["id"];
@@ -1728,16 +1740,24 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                             attr.toString(),
                                             style: Styles.blackMediumBold(),
                                           ),
-                                          SizedBox(width: 10),
-                                          Text(
-                                            double.parse(attrtypesPrice[i])
-                                                .toStringAsFixed(2),
-                                            style: TextStyle(
-                                                color: StaticColor.deepOrange,
-                                                fontSize: SizeConfig
-                                                        .safeBlockVertical *
-                                                    2.5),
-                                          ),
+                                          double.tryParse(attrtypesPrice[i]) !=
+                                                  0
+                                              ? SizedBox(width: 10)
+                                              : SizedBox(),
+                                          double.tryParse(attrtypesPrice[i]) !=
+                                                  0
+                                              ? Text(
+                                                  double.parse(
+                                                          attrtypesPrice[i])
+                                                      .toStringAsFixed(2),
+                                                  style: TextStyle(
+                                                      color: StaticColor
+                                                          .deepOrange,
+                                                      fontSize: SizeConfig
+                                                              .safeBlockVertical *
+                                                          2.5),
+                                                )
+                                              : SizedBox(),
                                         ],
                                       ),
                                       textColor: StaticColor.colorBlack,
@@ -1884,7 +1904,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
           maxLines: 2,
           decoration: new InputDecoration(
             border: InputBorder.none,
-            // hintText: product_qty.toDouble().toString(),
+            // hintText: productQty.toDouble().toString(),
           ),
           onChanged: (val) {},
         ),
@@ -1899,7 +1919,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       decoration: BoxDecoration(
           border: Border.all(width: 1, color: StaticColor.colorGrey)),
       child: Center(
-        child: Text(product_qty.toStringAsFixed(0),
+        child: Text(productQty.toStringAsFixed(0),
             // " " +
             // (!isSetMeal
             //     ? productItem.priceTypeName != null

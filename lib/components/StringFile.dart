@@ -67,6 +67,7 @@ class Strings {
   static String cancelChangeTable = "Cancel Change Table";
   static String cancleOrder = "Cancel Order";
   static String createReservation = "Create Reservation";
+  static String reservationArrived = "Reservation Arrived";
   static String mergeOrder = "Merge Order";
   static String cancelMergeOrder = "Cancel Merge Order";
   static String enterPax = "Enter Pax";

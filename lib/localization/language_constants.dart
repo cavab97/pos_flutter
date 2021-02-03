@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/localization/LocalizationMain.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 
 //languages code
 const String ENGLISH = 'en';
@@ -12,7 +10,7 @@ const String ARABIC = 'ar';
 const String HINDI = 'hi';
 
 Future<Locale> setLocale(String languageCode) async {
-  Preferences.setStringToSF(Constant.LAGUAGE_CODE,languageCode);
+  Preferences.setStringToSF(Constant.LAGUAGE_CODE, languageCode);
   return _locale(languageCode);
 }
 

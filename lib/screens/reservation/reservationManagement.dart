@@ -5,8 +5,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mcncashier/components/StringFile.dart';
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:mcncashier/components/communText.dart';
+import 'package:mcncashier/models/Reservation.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/screens/reservation/addEditReservation.dart';
+import 'package:timezone/timezone.dart';
 
 class ReservationMgmt extends StatefulWidget {
   @override
@@ -37,13 +39,14 @@ class _ReservationMgmtState extends State<ReservationMgmt> {
   bool test = false;
   List<SampleRes> sampleRes = [];
   List<TablesDetails> tableList = [];
-  SampleRes selectedReservation;
+  Reservation selectedReservation;
   String _chars =
       'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890 ';
   Random _rnd = Random();
   String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
       length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
-
+  List<Reservation> reservationList = [];
+  int terminalID;
   @override
   void initState() {
     super.initState();
@@ -51,10 +54,18 @@ class _ReservationMgmtState extends State<ReservationMgmt> {
   }
 
   afterInit() async {
+    int tID = int.tryParse(await CommunFun.getTeminalKey());
     String branchID = await CommunFun.getbranchId();
     List<TablesDetails> tables = await localAPI.getTables(branchID);
+    List<Reservation> resList = await localAPI.getReservationList(
+      tID,
+      DateFormat('yyyy-MM-dd HH:mm:ss').format(fromDateTime),
+      DateFormat('yyyy-MM-dd HH:mm:ss').format(toDateTime),
+    );
     setState(() {
+      terminalID = tID;
       tableList = tables;
+      reservationList = resList;
     });
 
     generateSampleData();
@@ -97,19 +108,29 @@ class _ReservationMgmtState extends State<ReservationMgmt> {
     });
   }
 
-  openReservationScreen([SampleRes reservation]) async {
+  openReservationScreen([Reservation reservation]) async {
     TablesDetails tb = tableList.first;
     await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         if (reservation != null) {
-          tb = tableList.firstWhere(
-              (ele) => ele.tableId == int.tryParse(reservation.tableNo));
+          tb =
+              tableList.firstWhere((ele) => ele.tableId == reservation.tableID);
           return ReservationDetail(
             isUpdate: true,
             selTable: tb,
             reservationID: reservation.resNo,
+            reservation: reservation,
+            onClose: (Reservation res) {
+              if (this.mounted) {
+                int indexOf =
+                    reservationList.indexWhere((ele) => ele.id == res.id);
+                setState(() {
+                  reservationList[indexOf] = res;
+                });
+              }
+            },
           );
         } else {
           return ReservationDetail(isUpdate: false);
@@ -133,7 +154,7 @@ class _ReservationMgmtState extends State<ReservationMgmt> {
 
   @override
   Widget build(BuildContext context) {
-    final DateFormat formatter = DateFormat('hh:MM a, dd/MM/yyyy');
+    final DateFormat formatter = DateFormat('hh:mm a, dd/MM/yyyy');
     return AlertDialog(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -171,7 +192,8 @@ class _ReservationMgmtState extends State<ReservationMgmt> {
                     : Text('Arrive ?'),
                 onPressed: selectedReservation != null
                     ? () {
-                        int indexOf = sampleRes.indexOf(selectedReservation);
+                        int indexOf =
+                            reservationList.indexOf(selectedReservation);
                         if (sampleRes[indexOf].isArr) {
                         } else {
                           setState(() {
@@ -190,10 +212,13 @@ class _ReservationMgmtState extends State<ReservationMgmt> {
                 onPressed: selectedReservation != null
                     ? () {
                         //int index = sampleRes.indexOf(selectedReservation);
-                        setState(() {
-                          sampleRes.remove(selectedReservation);
-                          selectedReservation = null;
-                        });
+                        localAPI.removeReservationItems(selectedReservation.id);
+                        if (this.mounted) {
+                          setState(() {
+                            reservationList.remove(selectedReservation);
+                            selectedReservation = null;
+                          });
+                        }
                       }
                     : null,
               ),
@@ -357,22 +382,29 @@ class _ReservationMgmtState extends State<ReservationMgmt> {
                         DataColumn(label: Text('Remark')),
                         DataColumn(label: Text("Is Arrived?")),
                       ],
-                      rows: sampleRes.map((SampleRes reservation) {
+                      rows: reservationList.map((Reservation reservation) {
+                        TablesDetails table = tableList.firstWhere(
+                            (ele) => ele.tableId == reservation.tableID);
+                        print((DateTime.tryParse(reservation.resTo).toLocal()));
+                        print(formatter
+                            .format((DateTime.tryParse(reservation.resTo))));
+                        print(reservation.resTo);
                         return DataRow(
                           cells: [
                             DataCell(Text(reservation.resNo)),
-                            DataCell(Text(reservation.memNo)),
-                            DataCell(Text(reservation.cusName)),
-                            DataCell(
-                                Text(formatter.format(reservation.resFrom))),
-                            DataCell(Text(formatter.format(reservation.resTo))),
-                            DataCell(Text(reservation.tableNo)),
+                            DataCell(Text(reservation.customerID)),
+                            DataCell(Text(reservation.customerName)),
+                            DataCell(Text(formatter.format(
+                                DateTime.tryParse(reservation.resFrom)))),
+                            DataCell(Text(formatter.format(
+                                (DateTime.tryParse(reservation.resTo))))),
+                            DataCell(Text(table.tableName)),
                             DataCell(Text(reservation.pax.toString())),
                             DataCell(Container(
                                 width: 200,
                                 child: SingleChildScrollView(
                                   child: Text(
-                                    reservation.remark,
+                                    reservation.remark ?? "",
                                     maxLines: 10,
                                     overflow: TextOverflow.ellipsis,
                                   ),

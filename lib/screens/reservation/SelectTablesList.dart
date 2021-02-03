@@ -17,11 +17,19 @@ class _SelectTablesState extends State<SelectTablesList> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('Select Table'),
-      content: SingleChildScrollView(
-        child: Column(
+      content: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: GridView.count(
+          physics: BouncingScrollPhysics(),
+          shrinkWrap: true,
+          crossAxisSpacing: 15,
+          mainAxisSpacing: 15,
+          childAspectRatio: 1.8,
+          crossAxisCount: 5,
           children: widget.tableList.map(
             (table) {
-              String time = "";
+              String time = "00:00";
               if (table.occupiedMinute != null) {
                 var d = Duration(
                     minutes:
@@ -49,13 +57,17 @@ class _SelectTablesState extends State<SelectTablesList> {
                             : Colors.white,
                         border: Border.all(width: 1)),
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(table.tableName),
                             Text(time),
                           ],
+                        ),
+                        Text(
+                          table.tableName,
+                          style: TextStyle(fontSize: 25),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,

@@ -732,7 +732,7 @@ class CreateTables {
         'cart_payment_response TEXT,' +
         'cart_payment_status NUMERIC' + //0 For Pending, 1 For complete
         ')');
-
+/* 
     datatables = db.execute("CREATE TABLE mst_cart_sub_detail (" +
         " id INTEGER PRIMARY KEY AUTOINCREMENT," +
         " cart_details_id INTEGER," +
@@ -774,7 +774,7 @@ class CreateTables {
         'is_send_kichen NUMERIC,' +
         'item_unit TEXT,' +
         'has_composite_inventory NUMERIC' + //BOOLEAN
-        ')');
+        ')'); */
 
     datatables = db.execute("CREATE TABLE shift(" +
         "shift_id INTEGER," +

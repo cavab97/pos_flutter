@@ -83,6 +83,7 @@ class QRCodesImagePopState extends State<QRCodesImagePop> {
   Future<bool> _onBackPressed() async {
     // Navigator.of(context).pop();
     widget.onClose();
+    return true;
   }
 
   Widget mainContent() {

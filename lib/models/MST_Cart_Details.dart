@@ -32,6 +32,7 @@ class MSTCartdetails {
   int createdBy;
   String attrName;
   String modiName;
+  String resNo;
 
   MSTCartdetails({
     this.cartId,
@@ -50,7 +51,6 @@ class MSTCartdetails {
     this.discountType,
     this.discountRemark,
     this.remark,
-    this.isDeleted,
     this.issetMeal,
     this.hasRacManagemant,
     this.isSendKichen,
@@ -63,12 +63,13 @@ class MSTCartdetails {
     this.createdBy,
     this.attrName,
     this.modiName,
+    this.resNo,
   });
 
   MSTCartdetails.fromJson(Map<String, dynamic> json) {
     id = json["id"];
     cartId = json["cart_id"];
-    localID = json["localID"];
+    localID = json["local_id"];
     productId = json["product_id"];
     printer_id = json["printer_id"];
     productName = json["product_name"];
@@ -89,32 +90,32 @@ class MSTCartdetails {
     taxValue = json["tax_value"] is int
         ? (json['tax_value'] as int).toDouble()
         : json["tax_value"];
+    remark = json["remark"];
     discountAmount = json["discount_amount"] is int
         ? (json['discount_amount'] as int).toDouble()
         : json["discount_amount"];
     discountType = json["discount_type"];
     discountRemark = json['discount_remark'];
-    remark = json["remark"];
-    isDeleted = json["is_deleted"];
+    itemUnit = json["item_unit"];
     cart_detail = json['cart_detail'];
     setmeal_product_detail = json['setmeal_product_detail'];
+    issetMeal = json["is_set_meal"];
+    isFocProduct = json["is_foc_product"];
     isSendKichen = json["is_send_kichen"];
-    itemUnit = json["item_unit"];
-    issetMeal = json["issetMeal"];
     hasRacManagemant = json["has_rac_managemant"];
     hasCompositeInventory = json["has_composite_inventory"];
+    attrName = json["attr_name"];
+    modiName = json["modi_name"];
     createdAt = json["created_at"];
     createdBy = json["created_by"];
-    isFocProduct = json["isFoc_Product"];
-    attrName = json["attrName"];
-    modiName = json["modiName"];
+    resNo = json["res_no"];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data["id"] = this.id;
     data["cart_id"] = this.cartId;
-    data["localID"] = this.localID;
+    data["local_id"] = this.localID;
     data["product_id"] = this.productId;
     data["printer_id"] = this.printer_id;
     data["product_name"] = this.productName;
@@ -129,19 +130,19 @@ class MSTCartdetails {
     data["discount_type"] = this.discountType;
     data["discount_remark"] = this.discountRemark;
     data["remark"] = this.remark;
-    data["is_deleted"] = this.isDeleted;
-    data["is_send_kichen"] = this.isSendKichen;
     data["cart_detail"] = this.cart_detail;
     data["setmeal_product_detail"] = this.setmeal_product_detail;
-    data["has_composite_inventory"] = this.hasCompositeInventory;
     data["item_unit"] = this.itemUnit;
-    data["issetMeal"] = this.issetMeal;
+    data["is_set_meal"] = this.issetMeal;
+    data["is_foc_product"] = this.isFocProduct;
+    data["is_send_kichen"] = this.isSendKichen;
     data["has_rac_managemant"] = this.hasRacManagemant;
+    data["has_composite_inventory"] = this.hasCompositeInventory;
+    data["attr_name"] = this.attrName;
+    data["modi_name"] = this.modiName;
     data["created_by"] = this.createdBy;
     data["created_at"] = this.createdAt;
-    data["isFoc_Product"] = this.isFocProduct;
-    data["attrName"] = this.attrName;
-    data["modiName"] = this.modiName;
+    data["res_no"] = this.resNo;
     return data;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/commanutils.dart';
@@ -8,7 +9,9 @@ import 'package:mcncashier/components/colors.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/PorductDetails.dart';
 import 'package:mcncashier/models/MST_Cart_Details.dart';
+import 'package:mcncashier/models/Reservation.dart';
 import 'package:mcncashier/models/SetMeal.dart';
+import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/models/mst_sub_cart_details.dart';
 import 'package:mcncashier/screens/ProductQuantityDailog.dart';
 import 'package:mcncashier/screens/reservation/SelectTablesList.dart';
@@ -17,15 +20,21 @@ import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/screens/SearchCustomer.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:date_time_picker/date_time_picker.dart';
-import 'package:timezone/timezone.dart';
 
 class ReservationDetail extends StatefulWidget {
-  ReservationDetail(
-      {Key key, this.selTable, this.reservationID, @required this.isUpdate})
-      : super(key: key);
+  ReservationDetail({
+    Key key,
+    this.selTable,
+    this.reservationID,
+    this.reservation,
+    @required this.isUpdate,
+    this.onClose,
+  }) : super(key: key);
   final TablesDetails selTable;
   final String reservationID;
   final bool isUpdate;
+  final Reservation reservation;
+  final Function onClose;
   @override
   _ReservationDetailState createState() => _ReservationDetailState();
 }
@@ -35,14 +44,16 @@ class _ReservationDetailState extends State<ReservationDetail> {
   List<FocusNode> enterFocusNode = List<FocusNode>.generate(
       10, (index) => new FocusNode()); //List.filled(4,  new FocusNode());
 
+  final key = new GlobalKey<ScaffoldState>();
   int currentFocus = 0;
   String branchID;
+  int tableID;
   List<ProductDetails> productList = [];
   List<ProductDetails> searchProductList = [];
   List<MSTCartdetails> cartItems = [];
   List<TablesDetails> tableList = [];
-  List<MSTSubCartdetails> cartModifierList;
-  List<MSTSubCartdetails> cartAttributesList;
+  List<MSTSubCartdetails> cartModifierList = [];
+  List<MSTSubCartdetails> cartAttributesList = [];
   TablesDetails currentResTable;
   TextEditingController _searchController = TextEditingController();
   TextEditingController _resNoController = TextEditingController();
@@ -50,6 +61,10 @@ class _ReservationDetailState extends State<ReservationDetail> {
   TextEditingController _memeberNoController = TextEditingController();
   TextEditingController _memberNameController = TextEditingController();
   TextEditingController _memberPhoneController = TextEditingController();
+  TextEditingController _paxController = TextEditingController();
+  TextEditingController _remarkController = TextEditingController();
+  TextEditingController _dateFromController = TextEditingController();
+  TextEditingController _dateToController = TextEditingController();
   List<bool> cartItemSelected = [];
   int tempCartID = 0;
 
@@ -62,12 +77,37 @@ class _ReservationDetailState extends State<ReservationDetail> {
   afterInit() async {
     await getBranchID();
     getItem();
-    getTables();
+    await getTables();
     if (widget.isUpdate) {
       getReservationDetail();
       getReservationItemList();
+
+      if (widget.reservation != null) {
+        Reservation currentReservation = widget.reservation;
+        TablesDetails tb = tableList
+            .firstWhere((ele) => ele.tableId == currentReservation.tableID);
+        setState(() {
+          _dateFromController.text =
+              DateTime.tryParse(currentReservation.resFrom).toString();
+          _dateToController.text =
+              DateTime.tryParse(currentReservation.resTo).toString();
+          _memberPhoneController.text = currentReservation.customerPhone;
+          _memberNameController.text = currentReservation.customerName;
+          _memeberNoController.text = currentReservation.customerID;
+          _paxController.text = currentReservation.pax.toString();
+          _tableNameController.text = tb.tableName;
+          _remarkController.text = currentReservation.remark;
+          tableID = tb.tableId;
+        });
+      }
     } else {
       setResNoController();
+      setState(() {
+        _dateFromController.text =
+            DateTime.now().add(Duration(minutes: 15)).toString();
+        _dateToController.text =
+            DateTime.now().add(Duration(hours: 1, minutes: 15)).toString();
+      });
     }
     if (widget.selTable != null) {
       setTableName();
@@ -83,6 +123,7 @@ class _ReservationDetailState extends State<ReservationDetail> {
     setState(() {
       currentResTable = widget.selTable;
       _tableNameController.text = widget.selTable.tableName;
+      tableID = widget.selTable.tableId;
     });
   }
 
@@ -128,10 +169,65 @@ class _ReservationDetailState extends State<ReservationDetail> {
     });
   }
 
+  editProduct(MSTCartdetails cartDetails) async {
+    var product;
+    bool isSetMeal = false;
+    if (cartDetails.issetMeal > 0) {
+      List<SetMeal> productdt =
+          await localAPI.setmealData(cartDetails.productId);
+      product = productdt[0];
+      isSetMeal = true;
+    } else {
+      product = productList
+          .firstWhere((ele) => ele.productId == cartDetails.productId);
+    }
+    int selecteCartID = cartItemSelected.indexOf(true);
+    List<MSTSubCartdetails> extraSubDetail = [];
+    extraSubDetail.addAll(cartModifierList
+        .where((ele) => ele.cartdetailsId == selecteCartID)
+        .toList());
+    extraSubDetail.addAll(cartAttributesList
+        .where((ele) => ele.cartdetailsId == selecteCartID)
+        .toList());
+    showDialog(
+      context: context,
+      // barrierDismissible: false,
+      builder: (BuildContext context) {
+        return ProductQuantityDailog(
+            selproduct: product,
+            issetMeal: isSetMeal,
+            cartItem: cartDetails,
+            extraSubDetail: extraSubDetail,
+            addReservation: (MSTCartdetails itemWithDetail,
+                List<MSTSubCartdetails> modifierSelected,
+                List<MSTSubCartdetails> attrSelected) {
+              itemWithDetail.cartId = tempCartID;
+              for (int i = 0; i < modifierSelected.length; i++) {
+                modifierSelected[i].cartdetailsId = tempCartID;
+              }
+              for (int i = 0; i < attrSelected.length; i++) {
+                attrSelected[i].cartdetailsId = tempCartID;
+              }
+              for (int i = 0; i < cartModifierList.length; i++) {
+                if (cartModifierList[i].cartdetailsId == selecteCartID) {
+                  cartModifierList.removeAt(i);
+                }
+              }
+              for (int i = 0; i < cartAttributesList.length; i++) {
+                if (cartAttributesList[i].cartdetailsId == selecteCartID) {
+                  cartAttributesList.removeAt(i);
+                }
+              }
+              cartItems[selecteCartID] = itemWithDetail;
+              cartAttributesList.addAll(attrSelected);
+              cartModifierList.addAll(modifierSelected);
+            });
+      },
+    );
+  }
+
   selectProduct(ProductDetails product) async {
     MSTCartdetails item = new MSTCartdetails();
-    List<MSTSubCartdetails> itemModifierList = [];
-    List<MSTSubCartdetails> itemAttributesList = [];
     bool isSetMeal = product.isSetMeal ?? false;
     if (isSetMeal || product.attrCat != null) {
       showDialog(
@@ -151,28 +247,32 @@ class _ReservationDetailState extends State<ReservationDetail> {
                   for (int i = 0; i < attrSelected.length; i++) {
                     attrSelected[i].cartdetailsId = tempCartID;
                   }
-                  itemModifierList.addAll(modifierSelected);
-                  itemAttributesList.addAll(attrSelected);
                   item = itemWithDetail;
+                  addItemToCart(item, modifierSelected, attrSelected);
                 });
           });
     } else {
       item = await CommunFun.addReservationItem(product);
+      addItemToCart(item);
     }
+  }
+
+  addItemToCart(MSTCartdetails item,
+      [List<MSTSubCartdetails> itemModifierList,
+      List<MSTSubCartdetails> itemAttributesList]) {
     if (this.mounted) {
       setState(() {
         cartItems.add(item);
-        if (itemModifierList.length > 0) {
+        if (itemModifierList != null && itemModifierList.length > 0) {
           cartModifierList.addAll(itemModifierList);
         }
-        if (itemAttributesList.length > 0) {
+        if (itemAttributesList != null && itemAttributesList.length > 0) {
           cartAttributesList.addAll(itemAttributesList);
         }
         tempCartID++;
         cartItemSelected.add(false);
       });
     }
-    print(product.name);
   }
 
   getSearchList(String seachText) async {
@@ -251,6 +351,7 @@ class _ReservationDetailState extends State<ReservationDetail> {
                 if (this.mounted) {
                   setState(() {
                     currentResTable = selectedTable;
+                    tableID = selectedTable.tableId;
                     _tableNameController.text = selectedTable.tableName;
                   });
                 }
@@ -262,21 +363,91 @@ class _ReservationDetailState extends State<ReservationDetail> {
     Customer customerData = await CommunFun.getCustomer();
     setState(() {
       _memeberNoController.text = customerData.phonecode.toString();
+      _memeberNoController.value =
+          TextEditingValue(text: customerData.customerId.toString());
       _memberPhoneController.text = customerData.phonecode.toString();
       _memberNameController.text = customerData.name;
     });
   }
 
   createReservation() async {
+    Reservation reservation = new Reservation();
+    User userdata = await CommunFun.getuserDetails();
+    String dateString = await CommunFun.getCurrentDateTime(DateTime.now());
+    reservation.updatedBy = reservation.createdBy = userdata.id;
     String resNo = "";
-    String tableName = _tableNameController.text;
+    String tableName = _tableNameController.text.trim();
     int lastResNo = 1;
     if (_resNoController.text == "{New}") {
       resNo = tableName.substring(tableName.length - 3) +
           '-RS' +
           lastResNo.toString().padLeft(6, "0");
+    } else
+      resNo = _resNoController.text.trim();
+    resNo = resNo.trim();
+    reservation.resNo = resNo;
+    reservation.pax = _paxController.text.trim().isNotEmpty
+        ? int.tryParse(_paxController.text)
+        : 0;
+    reservation.customerID = _memeberNoController.text.trim();
+    reservation.customerName = _memberNameController.text.trim();
+    reservation.customerPhone = _memberPhoneController.text.trim();
+    reservation.terminalID = int.tryParse(await CommunFun.getTeminalKey());
+    reservation.tableID = tableID;
+    reservation.updatedAt = reservation.createdAt = dateString;
+    dateString = DateFormat('yyyy-MM-dd HH:mm:ss')
+        .format(DateTime.tryParse(_dateFromController.text));
+    reservation.resFrom = dateString;
+    dateString = DateFormat('yyyy-MM-dd HH:mm:ss')
+        .format(DateTime.tryParse(_dateToController.text));
+    reservation.resTo = dateString;
+    reservation.remark = _remarkController.text.trim();
+    int lastResID = await localAPI.addReservation(reservation);
+    if (lastResID != 0) {
+      //success;
+      localAPI.insertReservationProduct(
+        cartItems,
+        resNo,
+        cartModifierList,
+        cartAttributesList,
+      );
+      Navigator.of(context).pop();
     }
-    print(lastResNo);
+  }
+
+  updateReservation() async {
+    Reservation reservation = widget.reservation;
+    User userdata = await CommunFun.getuserDetails();
+    String dateString = await CommunFun.getCurrentDateTime(DateTime.now());
+    String oldResNo = reservation.resNo;
+    reservation.pax = _paxController.text.trim().isNotEmpty
+        ? int.tryParse(_paxController.text)
+        : 0;
+    reservation.resNo = _resNoController.text.trim();
+    reservation.customerID = _memeberNoController.text.trim();
+    reservation.customerName = _memberNameController.text.trim();
+    reservation.customerPhone = _memberPhoneController.text.trim();
+    reservation.tableID = tableID;
+    reservation.updatedBy = userdata.id;
+    reservation.updatedAt = dateString;
+    dateString = DateFormat('yyyy-MM-dd HH:mm:ss')
+        .format(DateTime.tryParse(_dateFromController.text));
+    reservation.resFrom = dateString;
+    dateString = DateFormat('yyyy-MM-dd HH:mm:ss')
+        .format(DateTime.tryParse(_dateToController.text));
+    reservation.resTo = dateString;
+
+    await localAPI.addReservation(reservation, reservation.id);
+
+    await localAPI.insertReservationProduct(
+      cartItems,
+      oldResNo,
+      cartModifierList,
+      cartAttributesList,
+      reservation.resNo,
+    );
+    widget.onClose(reservation);
+    Navigator.of(context).pop();
   }
 
   @override
@@ -299,7 +470,7 @@ class _ReservationDetailState extends State<ReservationDetail> {
           : Container(
               padding:
                   EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-              width: MediaQuery.of(context).size.width * .9,
+              width: MediaQuery.of(context).size.width * 0.95,
               child: Text(Strings.reservation),
               decoration: BoxDecoration(
                 border: Border(
@@ -396,7 +567,13 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                       ),
                                     ),
                                     TextFormField(
+                                      controller: _paxController,
                                       focusNode: enterFocusNode[0],
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.allow(
+                                            RegExp(r'[0-9]')),
+                                      ],
                                       decoration: InputDecoration(
                                         hintText:
                                             Strings.enterWith + Strings.pax,
@@ -415,7 +592,7 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                             .requestFocus(enterFocusNode[1]);
                                         if (this.mounted) {
                                           setState(() {
-                                            currentFocus++;
+                                            currentFocus = 2;
                                           });
                                         }
                                       },
@@ -497,6 +674,11 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                     TextFormField(
                                       focusNode: enterFocusNode[2],
                                       controller: _memberPhoneController,
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: <TextInputFormatter>[
+                                        FilteringTextInputFormatter.allow(
+                                            RegExp(r'[0-9]')),
+                                      ],
                                       decoration: InputDecoration(
                                         hintText: Strings.enterWith +
                                             Strings.customerPhone,
@@ -518,6 +700,14 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                           });
                                         }
                                       },
+                                      validator: (value) {
+                                        if (value.trim().isEmpty) {
+                                          return 'Please enter ' +
+                                              Strings.customerPhone +
+                                              '.';
+                                        }
+                                        return null;
+                                      },
                                     ),
                                   ],
                                 ),
@@ -530,35 +720,15 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                         textAlign: TextAlign.right,
                                       ),
                                     ),
-                                    /* GestureDetector(
-                                onTap: () {
-                                  DatePicker.showDatePicker(context,
-                                showTitleActions: true,
-                                minTime: DateTime(2018, 3, 5),
-                                maxTime: DateTime(2019, 6, 7), onChanged: (date) {
-                              print('change $date');
-                            }, onConfirm: (date) {
-                              print('confirm $date');
-                            }, currentTime: DateTime.now(), locale: LocaleType.zh);
-                                },
-                                child: Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.black)),
-                                ),
-                              ) */
                                     DateTimePicker(
                                       //textAlignVertical: TextAlignVertical.center,
                                       type: DateTimePickerType.dateTime,
+                                      controller: _dateFromController,
                                       dateMask: 'dd/MM hh:mm a',
-                                      initialValue: DateTime.now()
-                                          .add(Duration(minutes: 15))
-                                          .toString(),
                                       firstDate: DateTime.now(),
                                       lastDate: DateTime.now()
                                           .add(Duration(days: 14)),
                                       //dateLabelText: 'Select a time',
-                                      onChanged: (val) => print(val),
                                       validator: (val) {
                                         print(val);
                                         return null;
@@ -580,15 +750,12 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                     DateTimePicker(
                                       //textAlignVertical: TextAlignVertical.center,
                                       type: DateTimePickerType.dateTime,
+                                      controller: _dateToController,
                                       dateMask: 'dd/MM hh:mm a',
-                                      initialValue: DateTime.now()
-                                          .add(Duration(hours: 1, minutes: 15))
-                                          .toString(),
                                       firstDate: DateTime.now(),
                                       lastDate: DateTime.now()
                                           .add(Duration(days: 14)),
                                       //dateLabelText: 'Select a time',
-                                      onChanged: (val) => print(val),
                                       validator: (val) {
                                         print(val);
                                         return null;
@@ -621,6 +788,7 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                     Text('Remark' + ' :'),
                                     SizedBox(height: 10),
                                     TextFormField(
+                                      controller: _remarkController,
                                       focusNode: enterFocusNode[3],
                                       keyboardType: TextInputType.multiline,
                                       minLines: 5,
@@ -717,8 +885,6 @@ class _ReservationDetailState extends State<ReservationDetail> {
                               },
                               itemBuilder:
                                   (context, ProductDetails searchProductList) {
-                                // var image_Arr = searchProductList.base64
-                                //     .replaceAll("data:image/jpg;base64,", '');
                                 return ListTile(
                                     leading: Container(
                                       color: StaticColor.colorGrey,
@@ -753,7 +919,6 @@ class _ReservationDetailState extends State<ReservationDetail> {
                               },
                               onSuggestionSelected:
                                   (ProductDetails selectedProduct) async {
-                                print('enter');
                                 _searchController.text = "";
                                 if (selectedProduct.outOfStock != 1 ||
                                     (selectedProduct.hasInventory == 1 &&
@@ -766,14 +931,6 @@ class _ReservationDetailState extends State<ReservationDetail> {
                               },
                             ),
                           ),
-                          /* IconButton(
-                            icon: Icon(Icons.add),
-                            onPressed: () {},
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.remove),
-                            onPressed: () {},
-                          ), */
                         ],
                       ),
                       Row(
@@ -833,7 +990,10 @@ class _ReservationDetailState extends State<ReservationDetail> {
                               onPressed:
                                   cartItemSelected.where((ele) => ele).length ==
                                           1
-                                      ? () {}
+                                      ? () {
+                                          editProduct(cartItems[
+                                              cartItemSelected.indexOf(true)]);
+                                        }
                                       : null,
                             ),
                           ),
@@ -841,20 +1001,7 @@ class _ReservationDetailState extends State<ReservationDetail> {
                       ),
                     ],
                   ),
-                  // titleColumn - List<String> (title column)
-// titleColumn - List<String> (title row)
-// titleColumn - List<List<String>> (data)
                   SizedBox(height: 10),
-                  /* Table(
-                    children: [
-                      TableRow(children: [
-                        Text('Item Code'),
-                        Text('Item Name'),
-                        Text('Qty'),
-                        Text('Remark'),
-                      ])
-                    ],
-                  ), */
                   Expanded(
                     child: SingleChildScrollView(
                       child: DataTable(
@@ -867,26 +1014,6 @@ class _ReservationDetailState extends State<ReservationDetail> {
                           DataColumn(label: Text('Qty')),
                           DataColumn(label: Text('Remark')),
                         ],
-                        /* rows: List<DataRow>.generate(
-                          cartItems.length,
-                          (index) => DataRow(cells: [
-                            DataCell(
-                              Text(
-                                productList
-                                    .firstWhere((ele) =>
-                                        ele.productId ==
-                                        cartItems[index].productId)
-                                    .sku
-                                    .toUpperCase()
-                                    .toString(),
-                              ),
-                            ),
-                            DataCell(Text(cartItems[index].productName)),
-                            DataCell(
-                                Text(cartItems[index].productQty.toString())),
-                            DataCell(Text(cartItems[index].remark)),
-                          ]), ), 
-                          */
                         rows: cartItems.map((item) {
                           int index = cartItems.indexOf(item);
                           ProductDetails product = productList.firstWhere(
@@ -917,27 +1044,6 @@ class _ReservationDetailState extends State<ReservationDetail> {
                       ),
                     ),
                   ),
-                  /* SingleChildScrollView(
-                    child: Table(
-                      children: cartItems.map((item) {
-                        ProductDetails product = productList.firstWhere(
-                            (ele) => ele.productId == item.productId);
-                        return TableRow(children: [
-                          Container(
-                            color: Colors.blue,
-                            child: Row(
-                              children: [
-                                Text(product.sku.toUpperCase().toString()),
-                                Text(item.productName),
-                                Text(item.productQty.toString()),
-                                Text(item.remark),
-                              ],
-                            ),
-                          ),
-                        ]);
-                      }).toList(),
-                    ),
-                  ) */
                 ],
               ),
             ),
@@ -952,16 +1058,14 @@ class _ReservationDetailState extends State<ReservationDetail> {
                 color: Colors.green,
                 icon: Icon(Icons.check),
                 label: Text(widget.isUpdate ? Strings.update : Strings.add),
-                onPressed: createReservation,
+                onPressed:
+                    widget.isUpdate ? updateReservation : createReservation,
               ),
               FlatButton.icon(
-                color: Colors.red,
-                icon: Icon(Icons.close),
-                label: Text(Strings.cancel),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
+                  color: Colors.red,
+                  icon: Icon(Icons.close),
+                  label: Text(Strings.cancel),
+                  onPressed: () => Navigator.of(context).pop()),
             ],
     );
   }

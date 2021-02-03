@@ -763,10 +763,12 @@ class _DashboradPageState extends State<DashboradPage>
   getCategoryList() async {
     List<Category> categorys = await localAPI.getAllCategory();
     List<Category> catList = categorys.where((i) => i.parentId == 0).toList();
-    setState(() {
-      tabsList = catList;
-      allCaterories = categorys;
-    });
+    if (this.mounted) {
+      setState(() {
+        tabsList = catList;
+        allCaterories = categorys;
+      });
+    }
 
     for (var i = 0; i < tabsList.length; i++) {
       if (i % 2 == 0) {
@@ -802,10 +804,12 @@ class _DashboradPageState extends State<DashboradPage>
   getAllPrinter() async {
     List<Printer> printer = await localAPI.getAllPrinterForKOT();
     List<Printer> printerDraft = await localAPI.getAllPrinterForecipt();
-    setState(() {
-      printerList = printer;
-      printerreceiptList = printerDraft;
-    });
+    if (this.mounted) {
+      setState(() {
+        printerList = printer;
+        printerreceiptList = printerDraft;
+      });
+    }
   }
 
   _backtoMainCat() {
@@ -961,9 +965,8 @@ class _DashboradPageState extends State<DashboradPage>
 
   @override
   void dispose() {
-    _tabController.dispose();
-    _secondTabController.dispose();
-    if (_subtabController != null) _subtabController.dispose();
+    if (_tabController != null) _tabController.dispose();
+    if (_secondTabController != null) _secondTabController.dispose();
     super.dispose();
   }
 
@@ -1243,18 +1246,23 @@ class _DashboradPageState extends State<DashboradPage>
   }
 
   addTocartItem(selectedProduct) async {
-    await CommunFun.addItemToCart(selectedProduct, cartList, allcartData,
-        (MSTCartdetails addedProduct) {
-      if (selectedTable.save_order_id != null &&
-          selectedTable.save_order_id != 0) {
-        getCurrentCart();
-      } else {
-        checkidTableSelected();
-      }
-      setState(() {
-        isScreenLoad = false;
-      });
-    }, context);
+    await CommunFun.addItemToCart(
+      selectedProduct,
+      cartList,
+      allcartData,
+      (MSTCartdetails addedProduct) {
+        if (selectedTable.save_order_id != null &&
+            selectedTable.save_order_id != 0) {
+          getCurrentCart();
+        } else {
+          checkidTableSelected();
+        }
+        setState(() {
+          isScreenLoad = false;
+        });
+      },
+      context,
+    );
   }
 
   openShowAddCustomerDailog() {
@@ -3207,19 +3215,7 @@ class _DashboradPageState extends State<DashboradPage>
                       product.qty > 0.0)) {
                 await SyncAPICalls.logActivity(
                     "product", "Clicked product item", "product", 1);
-                /* CommunFun.showToast(
-                    context,
-                    product.hasRacManagemant != 1
-                        ? Strings.outOfStokeMsg
-                        : Strings.outOfBoxMsg); */
-                //  if (permissions.contains(Constant.ADD_ORDER)) {
                 checkshiftopen(product);
-                // } else {
-                //   CommonUtils.openPermissionPop(context, Constant.ADD_ORDER,
-                //       () {
-                //     checkshiftopen(product);
-                //   }, () {});
-                // }
               } else {
                 CommunFun.showToast(context, Strings.outOfStokeMsg);
               }
@@ -3241,14 +3237,16 @@ class _DashboradPageState extends State<DashboradPage>
                       decoration: BoxDecoration(
                         color: StaticColor.colorGrey,
                         borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8),
-                            topRight: Radius.circular(8)),
+                          topLeft: Radius.circular(8),
+                          topRight: Radius.circular(8),
+                        ),
                       ),
                       height: itemHeight / 2.2,
                       child: ClipRRect(
                         borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8),
-                            topRight: Radius.circular(8)),
+                          topLeft: Radius.circular(8),
+                          topRight: Radius.circular(8),
+                        ),
                         child: product.base64 != ""
                             ? CommonUtils.imageFromBase64String(product.base64)
                             : new Image.asset(
