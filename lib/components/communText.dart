@@ -351,20 +351,17 @@ class CommunFun {
   static compareTable(context) async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     String versionString =
-        packageInfo.version.split("")[0] + '+' + packageInfo.buildNumber;
+        packageInfo.version.split(" ")[0] + '+' + packageInfo.buildNumber;
     String lastAppVersion =
         await Preferences.getStringValuesSF(Constant.lastAppVersion);
-    if (lastAppVersion == versionString)
-      return;
-    else {
-      await Preferences.setStringToSF(Constant.lastAppVersion, versionString);
-    }
+    if (lastAppVersion == versionString) return;
     List<Map<String, String>> updateTableMaps =
         await SyncAPICalls.getCompareTableQuery(context, versionString);
+    int excuted = 0;
     for (Map<String, String> tableObject in updateTableMaps) {
       print("update table : " + tableObject['table_name']);
-      await databaseHelper.runQuery(tableObject["delete"]);
-      await databaseHelper.runQuery(tableObject["create"]);
+      excuted = await databaseHelper.runQuery(tableObject["delete"]);
+      excuted = await databaseHelper.runQuery(tableObject["create"]);
       //await databaseHelper.getTableExist(tableObject['table_name']);
       List<Map<String, dynamic>> dataList =
           await SyncAPICalls.getTableData(context, tableObject['table_name']);
@@ -373,6 +370,11 @@ class CommunFun {
           await databaseHelper.insertData(tableObject['table_name'], data);
         }
       }
+    }
+    if (excuted == 1) {
+      Preferences.setStringToSF(Constant.lastAppVersion, versionString);
+    } else {
+      Preferences.removeSinglePref(Constant.lastAppVersion);
     }
   }
 

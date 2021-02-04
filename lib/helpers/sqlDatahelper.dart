@@ -55,9 +55,9 @@ class DatabaseHelper {
     await createTablehelper.createTable(db);
   }
 
-  Future runQuery(String query) async {
+  Future<int> runQuery(String query) async {
     Database db = await this.database;
-    await tableDataHelper.executeQuery(db, query);
+    return await tableDataHelper.executeQuery(db, query);
   }
 
   Future<int> insertData(

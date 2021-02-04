@@ -442,6 +442,7 @@ class LocalAPI {
   }
 
   Future<List<Shift>> getShiftData(shiftId) async {
+    if (shiftId == null) return [];
     Database db = DatabaseHelper.dbHelper.getDatabse();
     var result =
         await db.query('shift', where: "app_id = ?", whereArgs: [shiftId]);

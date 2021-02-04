@@ -98,13 +98,16 @@ class _SelectTablePageState extends State<SelectTablePage>
 
   getReservationList() async {
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
-    List<Shift> shift = await localAPI.getShiftData(shiftid);
+    List<Shift> shift = [];
+    if (shiftid != null) {
+      shift = await localAPI.getShiftData(shiftid);
+    }
     DateTime today;
     String dateFrom;
     if (shift.length > 0) {
       Shift shiftItem = shift[0];
       dateFrom = shiftItem.createdAt ?? shiftItem.updatedAt;
-    } 
+    }
     if (dateFrom == null) {
       today = DateTime.now();
       dateFrom = DateTime(today.year, today.month, 1).toString();

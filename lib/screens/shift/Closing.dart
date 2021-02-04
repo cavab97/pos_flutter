@@ -91,7 +91,10 @@ class _ClosingPageState extends State<ClosingPage> {
 
   getShift() async {
     String shiftID = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
-    Shift cShift = (await localAPI.getShiftData(shiftID))[0];
+    Shift cShift;
+    if (shiftID != null) {
+      cShift = (await localAPI.getShiftData(shiftID))[0];
+    }
     if (this.mounted) {
       currentShift = cShift;
       drawerData["intial_cash"] = cShift.startAmount.toStringAsFixed(2);
