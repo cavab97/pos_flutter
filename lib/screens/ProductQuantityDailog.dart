@@ -362,7 +362,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
               }
             }
           }
-        } else {
           // Modifier
           if (modifireList.length > 0) {
             for (var j = 0; j < modifireList.length; j++) {
@@ -1081,7 +1080,8 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         subCartData.modifierId = modifire.modifierId;
         subCartData.caId = cart.id;
         subCartData.modifirePrice = modifire.price;
-        await localAPI.addsubCartData(subCartData);
+        int addedID = await localAPI.addsubCartData(subCartData);
+        print(addedID);
       }
     }
     for (var i = 0; i < selectedAttr.length; i++) {
@@ -1792,26 +1792,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         scrollDirection: Axis.horizontal,
         children: modifireList.map(
           (modifier) {
-            var isadded =
-                selectedModifier.any((item) => item.pmId == modifier.pmId);
-            if (!isEditing) {
-              if (modifier.isDefault == 1 && !isadded && !isFirstMod) {
+            //bool isadded = selectedModifier.any((item) => item.pmId == modifier.pmId);
+            if (modifier.isDefault == 1 && selectedModifier.length == 0) {
+              setState(() {
+                setPrice();
                 selectedModifier.add(modifier);
-                setState(() {
-                  setPrice();
-                  selectedModifier = selectedModifier;
-                  isFirstMod = true;
-                });
-              }
-            } else {
-              if (isadded && isFirstMod) {
-                selectedModifier.add(modifier);
-                setState(() {
-                  setPrice();
-                  selectedModifier = selectedModifier;
-                  isFirstMod = true;
-                });
-              }
+                isFirstMod = true;
+              });
             }
             return Padding(
               padding: EdgeInsets.all(5),
@@ -1990,11 +1977,13 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                     size: SizeConfig.safeBlockVertical * 3.5,
                   ),
             SizedBox(width: 6),
-            Text(isEditing ? Strings.update : Strings.add,
-                style: TextStyle(
-                  color: StaticColor.colorWhite,
-                  fontSize: SizeConfig.safeBlockVertical * 3,
-                )),
+            Text(
+              isEditing ? Strings.update : Strings.add,
+              style: TextStyle(
+                color: StaticColor.colorWhite,
+                fontSize: SizeConfig.safeBlockVertical * 3,
+              ),
+            ),
           ],
         ),
       ),

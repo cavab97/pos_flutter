@@ -276,6 +276,7 @@ class _ReservationDetailState extends State<ReservationDetail> {
   }
 
   getSearchList(String seachText) async {
+    seachText = seachText.trim();
     if (seachText != "") {
       var branchid = await CommunFun.getbranchId();
       List<ProductDetails> product =
@@ -377,11 +378,14 @@ class _ReservationDetailState extends State<ReservationDetail> {
     reservation.updatedBy = reservation.createdBy = userdata.id;
     String resNo = "";
     String tableName = _tableNameController.text.trim();
-    int lastResNo = 1;
+    String lastResNo = await localAPI.getLastReservationID();
     if (_resNoController.text == "{New}") {
-      resNo = tableName.substring(tableName.length - 3) +
-          '-RS' +
-          lastResNo.toString().padLeft(6, "0");
+      String prefix = tableName.toUpperCase() + '-RS';
+      lastResNo =
+          lastResNo.split('-').length > 1 ? lastResNo.split('-')[1] : lastResNo;
+      lastResNo = lastResNo.replaceAll(new RegExp(r'[^0-9]'), "");
+      lastResNo = ((int.tryParse(lastResNo) ?? 0) + 1).toString();
+      resNo = prefix + lastResNo.padLeft(6, "0");
     } else
       resNo = _resNoController.text.trim();
     resNo = resNo.trim();
@@ -411,6 +415,9 @@ class _ReservationDetailState extends State<ReservationDetail> {
         cartModifierList,
         cartAttributesList,
       );
+      if (widget.onClose != null) {
+        widget.onClose(reservation);
+      }
       Navigator.of(context).pop();
     }
   }
@@ -538,20 +545,24 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                         textAlign: TextAlign.right,
                                       ),
                                     ),
-                                    TextField(
-                                      controller: _tableNameController,
-                                      readOnly: true,
-                                      enableInteractiveSelection: true,
-                                      onTap: () => openSelectTable(),
-                                      /* focusNode: new FocusNode(),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8),
+                                      child: TextField(
+                                        controller: _tableNameController,
+                                        readOnly: true,
+                                        enableInteractiveSelection: true,
+                                        onTap: () => openSelectTable(),
+                                        /* focusNode: new FocusNode(),
                                 enabled: false, */
-                                      decoration: InputDecoration(
-                                        hintText: Strings.selectTable,
-                                        focusedBorder: OutlineInputBorder(),
-                                        border: OutlineInputBorder(),
-                                        suffixIcon: InkWell(
-                                          child: Icon(Icons.add, size: 18),
-                                          //onTap: () => openShowAddCustomerDailog(),
+                                        decoration: InputDecoration(
+                                          hintText: Strings.selectTable,
+                                          focusedBorder: OutlineInputBorder(),
+                                          border: OutlineInputBorder(),
+                                          suffixIcon: InkWell(
+                                            child: Icon(Icons.add, size: 18),
+                                            //onTap: () => openShowAddCustomerDailog(),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -566,36 +577,38 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                         textAlign: TextAlign.right,
                                       ),
                                     ),
-                                    TextFormField(
-                                      controller: _paxController,
-                                      focusNode: enterFocusNode[0],
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: <TextInputFormatter>[
-                                        FilteringTextInputFormatter.allow(
-                                            RegExp(r'[0-9]')),
-                                      ],
-                                      decoration: InputDecoration(
-                                        hintText:
-                                            Strings.enterWith + Strings.pax,
-                                        fillColor: Colors.white,
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(25.0),
-                                          borderSide: BorderSide(
-                                            color: Colors.blue,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8),
+                                      child: TextFormField(
+                                        controller: _paxController,
+                                        maxLength: 2,
+                                        focusNode: enterFocusNode[0],
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: <TextInputFormatter>[
+                                          FilteringTextInputFormatter.allow(
+                                              RegExp(r'[0-9]')),
+                                        ],
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              Strings.enterWith + Strings.pax,
+                                          fillColor: Colors.white,
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide:
+                                                BorderSide(color: Colors.blue),
                                           ),
+                                          border: OutlineInputBorder(),
                                         ),
-                                        border: OutlineInputBorder(),
+                                        onFieldSubmitted: (_) {
+                                          FocusScope.of(context)
+                                              .requestFocus(enterFocusNode[1]);
+                                          if (this.mounted) {
+                                            setState(() {
+                                              currentFocus = 2;
+                                            });
+                                          }
+                                        },
                                       ),
-                                      onFieldSubmitted: (_) {
-                                        FocusScope.of(context)
-                                            .requestFocus(enterFocusNode[1]);
-                                        if (this.mounted) {
-                                          setState(() {
-                                            currentFocus = 2;
-                                          });
-                                        }
-                                      },
                                     )
                                   ],
                                 ),
@@ -608,19 +621,24 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                         textAlign: TextAlign.right,
                                       ),
                                     ),
-                                    TextField(
-                                      readOnly: true,
-                                      enableInteractiveSelection: true,
-                                      onTap: () => openShowAddCustomerDailog(),
-                                      controller: _memeberNoController,
-                                      decoration: InputDecoration(
-                                        hintText: Strings.enterMemberNum,
-                                        focusedBorder: OutlineInputBorder(),
-                                        border: OutlineInputBorder(),
-                                        suffixIcon: InkWell(
-                                          child: Icon(Icons.add, size: 18),
-                                          onTap: () =>
-                                              openShowAddCustomerDailog(),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8),
+                                      child: TextField(
+                                        readOnly: true,
+                                        enableInteractiveSelection: true,
+                                        onTap: () =>
+                                            openShowAddCustomerDailog(),
+                                        controller: _memeberNoController,
+                                        decoration: InputDecoration(
+                                          hintText: Strings.enterMemberNum,
+                                          focusedBorder: OutlineInputBorder(),
+                                          border: OutlineInputBorder(),
+                                          suffixIcon: InkWell(
+                                            child: Icon(Icons.add, size: 18),
+                                            onTap: () =>
+                                                openShowAddCustomerDailog(),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -635,30 +653,32 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                         textAlign: TextAlign.right,
                                       ),
                                     ),
-                                    TextFormField(
-                                      focusNode: enterFocusNode[1],
-                                      controller: _memberNameController,
-                                      decoration: InputDecoration(
-                                        hintText: Strings.enterWith +
-                                            Strings.customerName,
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(25.0),
-                                          borderSide: BorderSide(
-                                            color: Colors.blue,
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8),
+                                      child: TextFormField(
+                                        focusNode: enterFocusNode[1],
+                                        controller: _memberNameController,
+                                        decoration: InputDecoration(
+                                          hintText: Strings.enterWith +
+                                              Strings.customerName,
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.blue,
+                                            ),
                                           ),
+                                          border: OutlineInputBorder(),
                                         ),
-                                        border: OutlineInputBorder(),
+                                        onFieldSubmitted: (_) {
+                                          FocusScope.of(context).requestFocus(
+                                              enterFocusNode[currentFocus]);
+                                          if (this.mounted) {
+                                            setState(() {
+                                              currentFocus++;
+                                            });
+                                          }
+                                        },
                                       ),
-                                      onFieldSubmitted: (_) {
-                                        FocusScope.of(context).requestFocus(
-                                            enterFocusNode[currentFocus]);
-                                        if (this.mounted) {
-                                          setState(() {
-                                            currentFocus++;
-                                          });
-                                        }
-                                      },
                                     ),
                                   ],
                                 ),
@@ -672,6 +692,7 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                       ),
                                     ),
                                     TextFormField(
+                                      maxLength: 15,
                                       focusNode: enterFocusNode[2],
                                       controller: _memberPhoneController,
                                       keyboardType: TextInputType.number,
@@ -683,8 +704,6 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                         hintText: Strings.enterWith +
                                             Strings.customerPhone,
                                         focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(25.0),
                                           borderSide: BorderSide(
                                             color: Colors.blue,
                                           ),
@@ -788,6 +807,7 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                     Text('Remark' + ' :'),
                                     SizedBox(height: 10),
                                     TextFormField(
+                                      maxLength: 255,
                                       controller: _remarkController,
                                       focusNode: enterFocusNode[3],
                                       keyboardType: TextInputType.multiline,
@@ -957,9 +977,13 @@ class _ReservationDetailState extends State<ReservationDetail> {
                                           for (int index = 0;
                                               index < cartItems.length;
                                               index++) {
-                                            if (cartItemSelected[index]) {
-                                              cartItems.removeAt(index);
-                                              cartItemSelected.removeAt(index);
+                                            if (cartItemSelected[index] &&
+                                                this.mounted) {
+                                              setState(() {
+                                                cartItems.removeAt(index);
+                                                cartItemSelected
+                                                    .removeAt(index);
+                                              });
                                             }
                                           }
                                           Navigator.of(context).pop();
@@ -1009,8 +1033,16 @@ class _ReservationDetailState extends State<ReservationDetail> {
                         columnSpacing:
                             (MediaQuery.of(context).size.width * .85 / 4),
                         columns: const <DataColumn>[
-                          DataColumn(label: Text('Item Code')),
-                          DataColumn(label: Text('Item Name')),
+                          DataColumn(
+                              label: Text(
+                            'Item Code',
+                            overflow: TextOverflow.ellipsis,
+                          )),
+                          DataColumn(
+                              label: Text(
+                            'Item Name',
+                            overflow: TextOverflow.ellipsis,
+                          )),
                           DataColumn(label: Text('Qty')),
                           DataColumn(label: Text('Remark')),
                         ],

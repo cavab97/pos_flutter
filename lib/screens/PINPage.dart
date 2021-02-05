@@ -122,6 +122,10 @@ class _PINPageState extends State<PINPage> {
 
   clockOutwithPIN() async {
     var loginUser = await Preferences.getStringValuesSF(Constant.LOIGN_USER);
+    if (loginUser == null) {
+      CommunFun.showToast(context, Strings.noUserClockIn);
+      return;
+    }
     var user = json.decode(loginUser);
     var pin = user["user_pin"];
     if (isCheckIn) {

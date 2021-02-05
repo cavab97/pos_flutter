@@ -63,6 +63,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
             Preferences.setStringToSF(
                 Constant.BRANCH_ID, value["branch_id"].toString());
             await Preferences.setStringToSF(Constant.IS_LOGIN, "true");
+            await CommunFun.compareandUpdateTable(context);
             await CommunFun.syncAfterSuccess(context, true);
             /* Navigator.pushNamedAndRemoveUntil(
                 context, Constant.LoginScreen, (Route<dynamic> route) => false,

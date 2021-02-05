@@ -7,10 +7,18 @@ import 'package:date_time_picker/date_time_picker.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/models/Reservation.dart';
 import 'package:mcncashier/models/TableDetails.dart';
+import 'package:mcncashier/models/Table_order.dart';
+import 'package:mcncashier/models/saveOrder.dart';
 import 'package:mcncashier/screens/reservation/addEditReservation.dart';
 import 'package:timezone/timezone.dart';
 
 class ReservationMgmt extends StatefulWidget {
+  ReservationMgmt({
+    this.onClose,
+    this.onArrived,
+  });
+  final Function onClose;
+  final Function onArrived;
   @override
   _ReservationMgmtState createState() => _ReservationMgmtState();
 }
@@ -61,6 +69,10 @@ class _ReservationMgmtState extends State<ReservationMgmt> {
       tID,
       DateFormat('yyyy-MM-dd HH:mm:ss').format(fromDateTime),
       DateFormat('yyyy-MM-dd HH:mm:ss').format(toDateTime),
+    );
+
+    resList.sort(
+      (Reservation a, Reservation b) => a.resFrom.compareTo(b.resFrom),
     );
     setState(() {
       terminalID = tID;
@@ -133,7 +145,20 @@ class _ReservationMgmtState extends State<ReservationMgmt> {
             },
           );
         } else {
-          return ReservationDetail(isUpdate: false);
+          return ReservationDetail(
+            isUpdate: false,
+            onClose: (Reservation res) {
+              if (this.mounted) {
+                setState(() {
+                  reservationList.add(res);
+                  reservationList.sort(
+                    (Reservation a, Reservation b) =>
+                        a.resFrom.compareTo(b.resFrom),
+                  );
+                });
+              }
+            },
+          );
         }
       },
     );
@@ -194,12 +219,14 @@ class _ReservationMgmtState extends State<ReservationMgmt> {
                     ? () {
                         int indexOf =
                             reservationList.indexOf(selectedReservation);
-                        if (sampleRes[indexOf].isArr) {
-                        } else {
+                        if (sampleRes[indexOf].isArr && this.mounted) {
                           setState(() {
                             selectedReservation = null;
-                            sampleRes[indexOf].isArr = true;
+                            sampleRes[indexOf].isArr = false;
                           });
+                        } else if (selectedReservation != null) {
+                          widget.onArrived(selectedReservation);
+                          Navigator.of(context).pop();
                         }
                       }
                     : null,
@@ -227,7 +254,12 @@ class _ReservationMgmtState extends State<ReservationMgmt> {
                 color: Colors.orange,
                 icon: Icon(Icons.close),
                 label: Text('Close'),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  if (widget.onClose != null) {
+                    widget.onClose(reservationList);
+                  }
+                  Navigator.of(context).pop();
+                },
               ),
             ],
           )
@@ -385,10 +417,6 @@ class _ReservationMgmtState extends State<ReservationMgmt> {
                       rows: reservationList.map((Reservation reservation) {
                         TablesDetails table = tableList.firstWhere(
                             (ele) => ele.tableId == reservation.tableID);
-                        print((DateTime.tryParse(reservation.resTo).toLocal()));
-                        print(formatter
-                            .format((DateTime.tryParse(reservation.resTo))));
-                        print(reservation.resTo);
                         return DataRow(
                           cells: [
                             DataCell(Text(reservation.resNo)),
@@ -410,7 +438,7 @@ class _ReservationMgmtState extends State<ReservationMgmt> {
                                   ),
                                 ))),
                             DataCell(Checkbox(
-                              value: reservation.isArr,
+                              value: reservation.isArr ?? false,
                               onChanged: (val) {},
                             )),
                           ],

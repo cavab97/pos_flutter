@@ -348,7 +348,7 @@ class CommunFun {
     );
   }
 
-  static compareTable(context) async {
+  static compareandUpdateTable(context) async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     String versionString =
         packageInfo.version.split(" ")[0] + '+' + packageInfo.buildNumber;
@@ -365,6 +365,12 @@ class CommunFun {
       //await databaseHelper.getTableExist(tableObject['table_name']);
       List<Map<String, dynamic>> dataList =
           await SyncAPICalls.getTableData(context, tableObject['table_name']);
+      String text = "update " +
+          dataList.length.toString() +
+          " records to table " +
+          tableObject['table_name'];
+
+      await SyncAPICalls.logActivity("update Database", text, "sync", 1);
       if (dataList != null && dataList.length > 0) {
         for (Map<String, dynamic> data in dataList) {
           await databaseHelper.insertData(tableObject['table_name'], data);
@@ -379,7 +385,7 @@ class CommunFun {
   }
 
   static syncOrdersANDStore(context, isClose) async {
-    await compareTable(context);
+    await compareandUpdateTable(context);
     await CommunFun.getsetWebOrders(context);
     await SyncAPICalls.sendCustomerTable(context);
     await SyncAPICalls.syncOrderstoDatabase(context);
@@ -523,7 +529,7 @@ class CommunFun {
   static getAssetsData(context, isOpen) async {
     var offset = await CommunFun.getOffset();
     var aceets = await SyncAPICalls.getAssets(context);
-    if (aceets != null && aceets["status"] == 500) {
+    if (aceets != null && aceets["status"] is int && aceets["status"] == 500) {
       print("Error when getting product image data");
       await checkUserDeleted(context);
       await checkpermission();

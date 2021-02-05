@@ -1045,6 +1045,7 @@ class SyncAPICalls {
   }
 
   static getCompareTableQuery(context, String packageVersion) async {
+    List<Map<String, String>> listMapObject = [];
     try {
       String apiurl = Configrations.getTableUpdate;
       String terminalId = await CommunFun.getTeminalKey();
@@ -1058,12 +1059,10 @@ class SyncAPICalls {
       if (res == null) {
         return [];
       } else if (res.length > 0 && res["status"] == Constant.STATUS200) {
-        List<Map<String, String>> listMapObject = [];
         for (var data in res["data"]) {
           Map<String, String> myMap = new Map<String, String>.from(data);
           listMapObject.add(myMap);
         }
-        return listMapObject;
       } else {
         print('get Comparing Table api error');
       }
@@ -1071,6 +1070,7 @@ class SyncAPICalls {
       print(e);
       CommunFun.showToast(context, e.message);
     }
+    return listMapObject;
   }
 
   static getTableData(context, String tableName) async {

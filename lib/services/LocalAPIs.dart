@@ -577,10 +577,9 @@ class LocalAPI {
 
   Future<int> addsubCartData(MSTSubCartdetails data) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
-    var result1 = await db.insert("mst_cart_sub_detail", data.toJson());
+    return await db.insert("mst_cart_sub_detail", data.toJson());
     /* await SyncAPICalls.logActivity(
         "product", "insert sub cart details", "mst_cart_sub_detail", result1); */
-    return result1;
   }
 
   Future<List<MSTSubCartdetails>> itemmodifireList(detailid) async {
@@ -1609,6 +1608,15 @@ class LocalAPI {
     List<Table_order> list = tableList.isNotEmpty
         ? tableList.map((c) => Table_order.fromJson(c)).toList()
         : [];
+    return list;
+  }
+
+  Future<List<User>> getUser() async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    String query = "SELECT * from users";
+    List<Map<String, dynamic>> user = await db.rawQuery(query);
+    List<User> list =
+        user.isNotEmpty ? user.map((c) => User.fromJson(c)).toList() : [];
     return list;
   }
 
@@ -2974,5 +2982,15 @@ class LocalAPI {
     var result = await db
         .query("customer", where: "memeber_id=?", whereArgs: [memberID]);
     return Customer.fromJson(result[0]);
+  }
+
+  Future<String> getLastReservationID() async {
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    List<Map<String, dynamic>> result = await db.query("reservation");
+    if (result.length > 0) {
+      Reservation res = Reservation.fromJson(result[result.length - 1]);
+      return res.resNo;
+    }
+    return '1';
   }
 }

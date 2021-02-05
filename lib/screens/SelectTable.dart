@@ -540,7 +540,22 @@ class _SelectTablePageState extends State<SelectTablePage>
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return ReservationMgmt();
+        return ReservationMgmt(onClose: (List<Reservation> resList) {
+          if (this.mounted) {
+            setState(() {
+              reservationList = resList;
+            });
+          }
+        }, onArrived: (Reservation res) {
+          TablesDetails table =
+              tableList.firstWhere((ele) => ele.tableId == res.tableID);
+          if (this.mounted) {
+            setState(() {
+              selectedTable = table;
+            });
+            reservationToOrder(res);
+          }
+        });
       },
     );
   }
@@ -1175,22 +1190,32 @@ class _SelectTablePageState extends State<SelectTablePage>
         ],
       );
     }
-    if (selectedTable.numberofpax == null &&
+    if (selectedTable != null &&
+        selectedTable.numberofpax == null &&
+        reservationList.length > 0 &&
         reservationList.any((ele) =>
             ele.tableID == selectedTable.tableId && ele.isArr != true)) {
-      Reservation reservation = reservationList.firstWhere((ele) =>
-          ele.tableID == selectedTable.tableId &&
-          ele.isArr != true &&
-          DateTime.now().difference(DateTime.tryParse(ele.resFrom)).inMinutes <
-              30);
-      tableOptionWidget.add(
-        tableButton(
-          FontAwesomeIcons.utensils,
-          Strings.reservationArrived,
-          context,
-          () => reservationToOrder(reservation),
-        ),
-      );
+      Reservation reservation = reservationList.firstWhere(
+          (ele) =>
+              ele.tableID == selectedTable.tableId &&
+              ele.isArr != true &&
+              DateTime.now()
+                      .difference(DateTime.tryParse(ele.resFrom))
+                      .inMinutes <
+                  30, orElse: () {
+        print('no element');
+        return new Reservation();
+      });
+      if (reservation.id != null) {
+        tableOptionWidget.add(
+          tableButton(
+            FontAwesomeIcons.utensils,
+            Strings.reservationArrived,
+            context,
+            () => reservationToOrder(reservation),
+          ),
+        );
+      }
     }
     if (selectedTable.status == 1) {
       tableOptionWidget.add(

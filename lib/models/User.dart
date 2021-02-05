@@ -62,7 +62,7 @@ class User {
     uuid = json['uuid'];
     name = json['name'];
     email = json['email'];
-    role = json['role'];
+    role = json['role'] is String ? int.tryParse(json['role']) : json['role'];
     username = json['username'];
     countryCode = json['country_code'];
     mobile = json['mobile'];

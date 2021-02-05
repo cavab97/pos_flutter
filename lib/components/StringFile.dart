@@ -36,9 +36,9 @@ class Strings {
   static String pinValidationMessage = "Please enter your PIN number";
   static String alreadyClockinMsg = "User Already checkedIN.";
   static String alreadyClockoutMsg = "User Already checkedOUT.";
+  static String noUserClockIn = "No User Check In";
   static String titlePay = "PAY";
   static String checkout = "Clock Out";
-  static String terminalKeyBtn = "Set Terminal Key";
   static String add = "Add";
   static String update = "Update";
   static String addNew = "Add New";
