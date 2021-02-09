@@ -352,32 +352,45 @@ class CommunFun {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     String versionString =
         packageInfo.version.split(" ")[0] + '+' + packageInfo.buildNumber;
-    String lastAppVersion =
-        await Preferences.getStringValuesSF(Constant.lastAppVersion);
+    var result = await Preferences.getStringValuesSF(Constant.lastAppVersion);
+    String lastAppVersion = result ?? "";
     if (lastAppVersion == versionString) return;
     List<Map<String, String>> updateTableMaps =
         await SyncAPICalls.getCompareTableQuery(context, versionString);
     int excuted = 0;
+    int gotError = 0;
     for (Map<String, String> tableObject in updateTableMaps) {
       print("update table : " + tableObject['table_name']);
       excuted = await databaseHelper.runQuery(tableObject["delete"]);
       excuted = await databaseHelper.runQuery(tableObject["create"]);
       //await databaseHelper.getTableExist(tableObject['table_name']);
-      List<Map<String, dynamic>> dataList =
-          await SyncAPICalls.getTableData(context, tableObject['table_name']);
-      String text = "update " +
-          dataList.length.toString() +
-          " records to table " +
-          tableObject['table_name'];
-
-      await SyncAPICalls.logActivity("update Database", text, "sync", 1);
-      if (dataList != null && dataList.length > 0) {
-        for (Map<String, dynamic> data in dataList) {
-          await databaseHelper.insertData(tableObject['table_name'], data);
+      if (excuted == 1) {
+        print("update table : " + tableObject['table_name'] + ' Success');
+        List<Map<String, dynamic>> dataList =
+            await SyncAPICalls.getTableData(context, tableObject['table_name']);
+        List result = [];
+        if (tableObject['table_name'] == "users") {
+          print('update users');
         }
+        String text = "update " +
+            dataList.length.toString() +
+            " records to table " +
+            tableObject['table_name'];
+
+        await SyncAPICalls.logActivity("update Database", text, "sync", 1);
+        if (dataList != null && dataList.length > 0) {
+          for (Map<String, dynamic> data in dataList) {
+            result.add(await databaseHelper.insertData(
+                tableObject['table_name'], data));
+          }
+        }
+        print(result);
+      } else {
+        gotError = 1;
+        print("update table : " + tableObject['table_name'] + ' Failed');
       }
     }
-    if (excuted == 1) {
+    if (gotError == 0) {
       Preferences.setStringToSF(Constant.lastAppVersion, versionString);
     } else {
       Preferences.removeSinglePref(Constant.lastAppVersion);

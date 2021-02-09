@@ -1076,34 +1076,41 @@ class SyncAPICalls {
   static getTableData(context, String tableName) async {
     try {
       String apiurl = Configrations.getTableData;
-      String terminalId = await CommunFun.getTeminalKey();
-      String branchid = await CommunFun.getbranchId();
+      var result = await CommunFun.getTeminalKey();
+      int terminalId = int.tryParse(result);
+      result = await CommunFun.getbranchId();
+      int branchid = int.tryParse(result);
       User userdata = await CommunFun.getuserDetails();
       Map<String, Object> stringParams = {
         'branch_id': branchid,
         'terminal_id': terminalId,
         'pin': userdata.userPin,
         'user_uuid': userdata.uuid,
-        'table': tableName
+        'table': tableName,
+        'is_init': (tableName.toLowerCase() == "users" && userdata.uuid == null)
       };
       var res = await APICalls.getDataCall(apiurl, context, stringParams, 15);
-      if (res == null) {
-        return [];
-      } else if (res.length > 0 && res["status"] == Constant.STATUS200) {
+      List<Map<String, dynamic>> listMapObject = [];
+      if (res == null || res.length == 0) {
+        return listMapObject;
+      } else if (res.length > 0 &&
+          res["status"] is int &&
+          res["status"] == Constant.STATUS200) {
         List<Map<String, dynamic>> listMapObject = [];
         for (var data in res["data"]) {
           Map<String, dynamic> myMap = new Map<String, dynamic>.from(data);
           listMapObject.add(myMap);
         }
         return listMapObject;
-      } else if (res["status"] != 200) {
+      } else if (res["status"] is int && res["status"] != 200) {
         CommunFun.showToast(context, res["message"]);
       } else {
         print('get Comparing Table api error');
       }
     } catch (e) {
-      print(e);
-      CommunFun.showToast(context, e.message);
+      if (e["message"] && !e.message is String) {
+      } else if (e["message"]) CommunFun.showToast(context, e.message);
+      print(e.toString());
     }
   }
 }

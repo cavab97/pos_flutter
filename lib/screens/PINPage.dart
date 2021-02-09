@@ -13,6 +13,7 @@ import 'package:mcncashier/models/User.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/theme/Sized_Config.dart';
 import 'package:mcncashier/services/allTablesSync.dart';
+import 'package:mcncashier/services/Config.dart' as repo;
 
 class PINPage extends StatefulWidget {
   // PIN Enter PAGE
@@ -61,6 +62,30 @@ class _PINPageState extends State<PINPage> {
     setState(() {
       pinNumber = "";
     });
+  }
+
+  syncAllTables() async {
+    await Preferences.removeSinglePref(Constant.LastSync_Table);
+    await Preferences.removeSinglePref(Constant.OFFSET);
+    await CommunFun.openSyncPop(context);
+    await CommunFun.syncOrdersANDStore(context, false);
+    await CommunFun.syncAfterSuccess(context, false);
+    getconfigdata();
+
+    await SyncAPICalls.logActivity(
+        "Sync tables", "Cashier click sync", "all tables", 1);
+  }
+
+  getconfigdata() async {
+    var res = await repo.getCongigData();
+    if (res["status"] == Constant.STATUS200) {
+      await Preferences.setStringToSF(
+          Constant.SYNC_TIMER, res["data"]["sync_timer"]);
+      await Preferences.setStringToSF(
+          Constant.CURRENCY, res["data"]["currency"]);
+    } else {
+      CommunFun.showToast(context, res["message"]);
+    }
   }
 
   clockInwithPIN() async {
@@ -146,9 +171,9 @@ class _PINPageState extends State<PINPage> {
         checkIn.status = "OUT";
         checkIn.timeInOut = date.toString();
         checkIn.sync = 0;
-        var result = await localAPI.userCheckInOut(checkIn);
-        await SyncAPICalls.logActivity("Check OUT",
-            user.name.toString() + " checked Out", "user_checkinout", 1);
+        await SyncAPICalls.logActivity(
+            "Check OUT", user["name"] + " checked Out", "user_checkinout", 1);
+        await localAPI.userCheckInOut(checkIn);
         clearAfterCheckout();
       } else {
         if (pinNumber.length >= 6) {
@@ -167,7 +192,12 @@ class _PINPageState extends State<PINPage> {
     await Preferences.removeSinglePref(Constant.SHIFT_ID);
     await Preferences.removeSinglePref(Constant.LOIGN_USER);
     await Preferences.removeSinglePref(Constant.USER_PERMISSION);
-    await Navigator.pushNamed(context, Constant.PINScreen);
+
+    await Navigator.pushNamedAndRemoveUntil(
+      context,
+      Constant.PINScreen,
+      (Route<dynamic> route) => false,
+    );
     setState(() {
       isLoading = false;
     });
@@ -298,34 +328,69 @@ class _PINPageState extends State<PINPage> {
                   : SizedBox(),*/
 
             Container(
-                child: new Stack(children: [
-              Container(
-                margin: EdgeInsets.only(top: SizeConfig.safeBlockVertical * 3),
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    Strings.pinNumber,
-                    style: Styles.communBlack(),
+              child: new Stack(
+                children: [
+                  Container(
+                    margin:
+                        EdgeInsets.only(top: SizeConfig.safeBlockVertical * 3),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        Strings.pinNumber,
+                        style: Styles.communBlack(),
+                      ),
+                    ),
                   ),
-                ),
+                  isCheckIn
+                      ? Align(
+                          alignment: Alignment.topRight,
+                          child: IconButton(
+                              padding: EdgeInsets.only(
+                                  right: SizeConfig.safeBlockVertical * 5),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              icon: Icon(
+                                Icons.close,
+                                color: StaticColor.colorBlack,
+                                size: SizeConfig.safeBlockVertical * 7,
+                              )),
+                        )
+                      : Align(
+                          alignment: Alignment.topRight,
+                          child: IconButton(
+                              padding: EdgeInsets.only(
+                                  right: SizeConfig.safeBlockVertical * 5),
+                              onPressed: () async {
+                                await Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  Constant.TerminalScreen,
+                                  (Route<dynamic> route) => false,
+                                );
+                              },
+                              icon: Icon(
+                                Icons.close,
+                                color: StaticColor.colorBlack,
+                                size: SizeConfig.safeBlockVertical * 7,
+                              )),
+                        ),
+                  isCheckIn
+                      ? Positioned(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: SizeConfig.safeBlockVertical * 3 * .5,
+                              horizontal: SizeConfig.safeBlockVertical * 3,
+                            ),
+                            child: IconButton(
+                              icon: Icon(Icons.sync),
+                              onPressed: syncAllTables,
+                            ),
+                          ),
+                        )
+                      : Container(),
+                ],
               ),
-              isCheckIn
-                  ? Align(
-                      alignment: Alignment.topRight,
-                      child: IconButton(
-                          padding: EdgeInsets.only(
-                              right: SizeConfig.safeBlockVertical * 5),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          icon: Icon(
-                            Icons.close,
-                            color: StaticColor.colorBlack,
-                            size: SizeConfig.safeBlockVertical * 7,
-                          )),
-                    )
-                  : SizedBox(),
-            ])),
+            ),
             /* mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Text(

@@ -35,7 +35,7 @@ class TerminalLog {
     id = json["id"];
     uuid = json["uuid"];
     terminal_id = json["terminal_id"];
-    isSync = json["isSync"];
+    isSync = json["is_sync"];
     branch_id = json["branch_id"];
     module_name = json["module_name"];
     description = json["description"];
@@ -53,7 +53,7 @@ class TerminalLog {
     data["id"] = this.id;
     data["uuid"] = this.uuid;
     data["terminal_id"] = this.terminal_id;
-    data["isSync"] = this.isSync;
+    data["is_sync"] = this.isSync;
     data["branch_id"] = this.branch_id;
     data["module_name"] = this.module_name;
     data["description"] = this.description;

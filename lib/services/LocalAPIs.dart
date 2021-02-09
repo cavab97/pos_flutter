@@ -2735,7 +2735,7 @@ class LocalAPI {
         branchid.toString() +
         " AND terminal_id = " +
         termianlId.toString() +
-        " AND isSync = 0";
+        " AND is_sync = 0";
     var shiftList = await db.rawQuery(qry);
     List<TerminalLog> list = shiftList.length > 0
         ? shiftList.map((c) => TerminalLog.fromJson(c)).toList()

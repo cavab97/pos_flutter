@@ -37,7 +37,9 @@ class Terminal {
     uuid = json['uuid'];
     terminalDeviceId = json['terminal_device_id'];
     terminalDeviceToken = json["terminal_device_token"];
-    branchId = json['branch_id'];
+    branchId = json['branch_id'] is String
+        ? int.tryParse(json['branch_id'])
+        : json['branch_id'];
     terminalName = json['terminal_name'];
     terminalKey = json['terminal_key'];
     terminalType = json['terminal_type'];

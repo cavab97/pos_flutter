@@ -57,6 +57,7 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
         terminal.deviceid = deviceinfo["deviceId"];
         terminal.terDeviceToken = deviceinfo["deviceToken"];
         await repo.sendTerminalKey(terminal).then((value) async {
+          Preferences.removeSinglePref(Constant.lastAppVersion);
           if (value != null && value["status"] == Constant.STATUS200) {
             Preferences.setStringToSF(
                 Constant.TERMINAL_KEY, value["terminal_id"].toString());
@@ -74,7 +75,9 @@ class _TerminalKeyPageState extends State<TerminalKeyPage> {
             CommunFun.showToast(context, value["message"]);
           }
         }).catchError((e) {
+          print(e);
           CommunFun.showToast(context, e.message);
+
           setState(() {
             isLoading = false;
           });
