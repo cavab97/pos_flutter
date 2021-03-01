@@ -102,10 +102,10 @@ class ServerModel {
       try {
         
         final client = new http.Client();
-        final _responce = await client.get('$_address/ping').timeout(Duration(seconds: (1)));
+        final _responce = await client.get('$_address：4040/ping').timeout(Duration(seconds: (1)));
         if (_responce.statusCode == 200) {  
           http.post(
-            '$_address/$apiURL',
+            '$_address：4040/$apiURL',
             body: json.encode(params),
           );
         }
