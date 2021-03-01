@@ -13,6 +13,7 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/styles.dart';
 import 'package:mcncashier/components/preferences.dart';
+import 'package:mcncashier/httpServer/master.dart';
 import 'package:mcncashier/models/Customer.dart';
 import 'package:mcncashier/models/Printer.dart';
 import 'package:mcncashier/models/Reservation.dart';
@@ -940,6 +941,8 @@ class _SelectTablePageState extends State<SelectTablePage>
       isShiftOpen = true;
     });
     Preferences.setStringToSF(Constant.IS_SHIFT_OPEN, isShiftOpen.toString());
+    Map<String, dynamic> params = {"shift": isShiftOpen.toString()};
+    ServerModel.broadcastByURL('shift', params);
     var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();

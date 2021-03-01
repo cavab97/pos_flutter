@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/helpers/sqlDatahelper.dart';
+import 'package:mcncashier/httpServer/master.dart';
+import 'package:mcncashier/httpServer/slave.dart';
 import 'package:mcncashier/routes.dart';
 import 'package:mcncashier/screens/SplashScreen.dart';
 import 'package:mcncashier/theme/theme.dart';
+import 'package:wifi/wifi.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +31,14 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     databaseHelper.initializeDatabase();
+    Future.delayed(Duration(seconds: 3), () {
+      serverStart();
+    });
+  }
+  void serverStart() async {
+    final String address = await Wifi.ip;
+    print('enter Server started:');
+    ServerModel.start(address);
   }
 
   @override
