@@ -12,11 +12,10 @@ class SlaveModel {
   static Future<void> start(String deviceIp) async {
     try {
      
-    final server = await createServer(deviceIp);
-    print('Server started: ${server.address} port ${server.port}');
-    await handleRequests(server); 
+      final server = await createServer(deviceIp);
+      print('Slave Server started: ${server.address} port ${server.port}');
+      await handleRequests(server); 
     } catch (e) {
-      var abc = e;
     }
   }
 

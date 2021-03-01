@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:async';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:wifi/wifi.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/src/response.dart';
 
 class ServerModel {
   static Future<void> start(String deviceIp) async {
@@ -98,11 +100,21 @@ class ServerModel {
     }
     for (String _address in addressList) {
       try {
-        http.post(
-          '$_address/$apiURL',
-          body: json.encode(params),
-        );
-      } catch (e) {}
+        
+        final client = new http.Client();
+        final _responce = await client.get('$_address/ping').timeout(Duration(seconds: (1)));
+        if (_responce.statusCode == 200) {  
+          http.post(
+            '$_address/$apiURL',
+            body: json.encode(params),
+          );
+        }
+      } on TimeoutException catch (_) {
+        print('request timeout');
+        continue;
+      } catch (e) {
+        continue;
+      }
     }
   }
 }
