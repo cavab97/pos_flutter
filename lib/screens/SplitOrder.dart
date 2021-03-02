@@ -923,7 +923,7 @@ class _SplitBillDialog extends State<SplitBillDialog> {
 
   getbranch() async {
     var branchid = await CommunFun.getbranchId();
-    var branch = await localAPI.getbranchData(branchid);
+    var branch = await localAPI.getBranchData(branchid);
     return branch;
   }
 

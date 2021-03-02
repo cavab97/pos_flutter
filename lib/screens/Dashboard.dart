@@ -1333,10 +1333,12 @@ class _DashboradPageState extends State<DashboradPage>
 
   getbranch() async {
     var branchid = await CommunFun.getbranchId();
-    var branch = await localAPI.getbranchData(branchid);
-    setState(() {
-      branchData = branch;
-    });
+    Branch branch = await localAPI.getBranchData(branchid);
+    if (branch.branchId != null) {
+      setState(() {
+        branchData = branch;
+      });
+    }
     return branch;
   }
 
@@ -3722,7 +3724,8 @@ class _DashboradPageState extends State<DashboradPage>
                       children: <Widget>[
                         Text(
                             cart.productName.toUpperCase() +
-                                (cart.discountAmount != null && cart.discountAmount > 0
+                                (cart.discountAmount != null &&
+                                        cart.discountAmount > 0
                                     ? ' ' +
                                         (cart.discountType == 1
                                             ? '(' +

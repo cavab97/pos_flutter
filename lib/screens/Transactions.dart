@@ -100,7 +100,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
   getbranch() async {
     var branchid = await CommunFun.getbranchId();
-    var branch = await localAPI.getbranchData(branchid);
+    var branch = await localAPI.getBranchData(branchid);
     var curre = await Preferences.getStringValuesSF(Constant.CURRENCY);
     setState(() {
       currency = curre;

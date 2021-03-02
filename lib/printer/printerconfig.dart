@@ -176,7 +176,7 @@ class PrintReceipt {
                   )),
               PosColumn(
                   text: " " +
-                      element.quantity.toStringAsFixed(0) +
+                      element.qty.toStringAsFixed(0) +
                       " x " +
                       element.name.toString().trim(),
                   width: 10,
@@ -597,7 +597,7 @@ class PrintReceipt {
         setMealProducts.forEach((element) {
           ticket.text(
             " " +
-                element.quantity.toStringAsFixed(0) +
+                element.qty.toStringAsFixed(0) +
                 " x " +
                 element.name.toString().trim(),
             styles: PosStyles(
@@ -1203,7 +1203,7 @@ class PrintReceipt {
         setMealProducts.forEach((element) {
           ticket.text(
               " " +
-                  element.quantity.toStringAsFixed(0) +
+                  element.qty.toStringAsFixed(0) +
                   " x " +
                   element.name.toString().trim(),
               styles: PosStyles(
@@ -1830,7 +1830,7 @@ class PrintReceipt {
         setMealProducts.forEach((element) {
           ticket.text(
               " " +
-                  element.quantity.toStringAsFixed(0) +
+                  element.qty.toStringAsFixed(0) +
                   " x " +
                   element.name.toString().trim(),
               styles: PosStyles(

@@ -354,6 +354,9 @@ class CommunFun {
         packageInfo.version.split(" ")[0] + '+' + packageInfo.buildNumber;
     var result = await Preferences.getStringValuesSF(Constant.lastAppVersion);
     String lastAppVersion = result ?? "";
+    print(versionString);
+    print(lastAppVersion);
+    print(lastAppVersion == versionString);
     if (lastAppVersion == versionString) return;
     List<Map<String, String>> updateTableMaps =
         await SyncAPICalls.getCompareTableQuery(context, versionString);
@@ -512,9 +515,9 @@ class CommunFun {
       CommunFun.showToast(context, "something want wrong!");
     }
 
-    var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
-    if (countrys != null) {
-      var result = await databaseHelper.insertAddressData(countrys["data"]);
+    var countries = await SyncAPICalls.getDataServerBulkAddressData(context);
+    if (countries != null && countries.length > 0) {
+      var result = await databaseHelper.insertAddressData(countries["data"]);
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {
@@ -525,7 +528,7 @@ class CommunFun {
     }
 
     var wineStorageData = await SyncAPICalls.getWineStorageData(context);
-    if (wineStorageData != null) {
+    if (wineStorageData != null && wineStorageData.length > 0) {
       var result =
           await databaseHelper.insertWineStoragedata(wineStorageData["data"]);
       if (result == 1) {
@@ -789,9 +792,9 @@ class CommunFun {
       print("Error when getting data4_2");
     }
     var countrys = await SyncAPICalls.getDataServerBulkAddressData(context);
-    if (countrys != null) {
-      var result = await databaseHelper.insertAddressData(countrys["data"]);
-      print('counry state city' + result);
+    if (countrys != null && countrys.length > 0) {
+      int result = await databaseHelper.insertAddressData(countrys["data"]);
+      print('counry state city' + result.toString());
       if (result == 1) {
         CommunFun.setServerTime(null, "5");
       } else {

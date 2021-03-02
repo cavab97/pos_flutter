@@ -116,9 +116,11 @@ class _SelectTablePageState extends State<SelectTablePage>
             .toString(),
       );
     }
-    setState(() {
-      reservationList = _resList;
-    });
+    if (this.mounted) {
+      setState(() {
+        reservationList = _resList;
+      });
+    }
   }
 
   checkISlogin() async {
@@ -1598,12 +1600,14 @@ class _SelectTablePageState extends State<SelectTablePage>
                   tag: table.tableId,
                   child: Container(
                     decoration: new BoxDecoration(
-                        color: selected != null
-                            ? colorConvert(selected.colorCode)
-                            : StaticColor.colorWhite,
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8.0),
-                            topRight: Radius.circular(8.0))),
+                      color: selected != null
+                          ? colorConvert(selected.colorCode)
+                          : StaticColor.colorWhite,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(8.0),
+                        topRight: Radius.circular(8.0),
+                      ),
+                    ),
                     width: MediaQuery.of(context).size.width,
                     height: itemHeight / 2,
                     child: Column(
@@ -1629,21 +1633,23 @@ class _SelectTablePageState extends State<SelectTablePage>
                   width: MediaQuery.of(context).size.width,
                   //height: itemHeight / 5,
                   decoration: BoxDecoration(
-                      color: table.is_merge_table != null
-                          ? Colors.blue
-                          : ((isMergeing || isChangingTable) &&
-                                  selectedTable != null &&
-                                  selectedTable.tableId == table.tableId)
-                              ? tableSelectedColor
-                              : (selectedTable != null &&
-                                      selectedTable.tableId == table.tableId)
-                                  ? Colors.orange
-                                  : table.numberofpax != null
-                                      ? StaticColor.deepOrange
-                                      : StaticColor.colorGrey600,
-                      borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(8.0),
-                          bottomRight: Radius.circular(8.0))),
+                    color: table.is_merge_table != null
+                        ? Colors.blue
+                        : ((isMergeing || isChangingTable) &&
+                                selectedTable != null &&
+                                selectedTable.tableId == table.tableId)
+                            ? tableSelectedColor
+                            : (selectedTable != null &&
+                                    selectedTable.tableId == table.tableId)
+                                ? Colors.orange
+                                : table.numberofpax != null
+                                    ? StaticColor.deepOrange
+                                    : StaticColor.colorGrey600,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(8.0),
+                      bottomRight: Radius.circular(8.0),
+                    ),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -1661,7 +1667,8 @@ class _SelectTablePageState extends State<SelectTablePage>
                                   (table.currentAmount == null
                                       ? "0.00"
                                       : table.currentAmount.toStringAsFixed(2)),
-                              style: Styles.whiteSimpleSmall())
+                              style: Styles.whiteSimpleSmall(),
+                            )
                       /* Text(
                                   Strings.vacant +
                                       "0" +
@@ -1671,28 +1678,31 @@ class _SelectTablePageState extends State<SelectTablePage>
                     ],
                   ),
                 ),
-                Positioned(
-                  top: 10,
-                  left: 10,
-                  child: Text(
-                    table.numberofpax != null
-                        ? Strings.orders + " 1 "
-                        : Strings.orders + " 0 ",
-                    style: Styles.blackMediumBold(),
-                  ),
-                ),
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: Text(
-                    time != null ? time.toString() : "",
-                    style: TextStyle(
-                        // White text
-                        color: Color(0xFF000000),
-                        fontWeight: FontWeight.w600,
-                        fontFamily: Strings.fontFamily),
-                  ),
-                )
+                /* time == null
+                    ? Container()
+                    : Positioned(
+                        top: 10,
+                        left: 10,
+                        child: Text(
+                          "Occupied",
+                          style: Styles.blackBoldsmall(),
+                        ),
+                      ), */
+                time == null
+                    ? Container()
+                    : Positioned(
+                        top: 10,
+                        right: 10,
+                        child: Text(
+                          time != null ? time.toString() : "",
+                          style: TextStyle(
+                              // White text
+                              color: Color(0xFF000000),
+                              fontSize: SizeConfig.safeBlockVertical * 3,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: Strings.fontFamily),
+                        ),
+                      )
               ],
             ),
           ),

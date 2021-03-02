@@ -95,10 +95,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       cartitem = widget.cartItem;
     });
     if (!isSetMeal &&
-        widget.selproduct.qty != null &&
-        widget.selproduct.qty > 0) {
+        widget.selproduct.quantity != null &&
+        widget.selproduct.quantity > 0) {
       setState(() {
-        productQty = widget.selproduct.qty;
+        productQty = widget.selproduct.quantity;
       });
     } else if (!isSetMeal &&
         widget.cartItem != null &&
@@ -179,7 +179,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     if (isEditing) {
       subCartDetails = await localAPI.getItemModifire(cartitem.id);
     }
-    if (mealProductList.length > 0) {
+    if (mealProductList != null && mealProductList.length > 0) {
       setState(() {
         mealProducts = isEditing ? mealCartList : mealProductList;
       });
@@ -265,16 +265,20 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   getSetMealAttributeList(List<SetMealProduct> mealProductList,
       List<MSTSubCartdetails> subCartDetails) {
     for (SetMealProduct product in mealProductList) {
-      var attrData = jsonDecode(product.attributeDetails);
-      attrData.removeWhere((attr) =>
-          attr['attributeId'] == "null" || attr['attributeId'] == null);
-      List<Attribute_Data> attributeList =
-          (attrData != null && attrData.isNotEmpty)
+      List<Attribute_Data> attributeList = [];
+      if (product.attributeDetails != null) {
+        var attrData = jsonDecode(product.attributeDetails);
+        if (attrData != null) {
+          attrData.removeWhere((attr) =>
+              attr['attributeId'] == "null" || attr['attributeId'] == null);
+          attributeList = (attrData != null && attrData.isNotEmpty)
               ? attrData
                   .map((c) => Attribute_Data.fromJson(c))
                   .whereType<Attribute_Data>()
                   .toList()
               : [];
+        }
+      }
       if (!isEditing) {
         for (Attribute_Data attribute in attributeList) {
           List<String> optionIds = attribute.attributeId.split(',');
@@ -953,7 +957,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     await SyncAPICalls.logActivity(
         "product details", "Added items to cart", "cart", 1);
     Navigator.of(context).pop();
-    widget.addReservation(cartdetails, modifierSelected, attrSelected);
+    if (widget.addReservation != null) {
+      widget.addReservation(cartdetails, modifierSelected, attrSelected);
+    }
   }
 
   produtAddTocart() async {
@@ -1358,7 +1364,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                         SizedBox(
                                           width: 8,
                                         ),
-                                        Text(product.quantity.toString(),
+                                        Text(product.qty.toString(),
                                             style: Styles.smallBlack()),
                                         SizedBox(width: 90),
                                         Icon(
@@ -1464,7 +1470,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
                                         SizedBox(
                                           width: 8,
                                         ),
-                                        Text(product.quantity.toString(),
+                                        Text(product.qty.toString(),
                                             style: Styles.smallBlack()),
                                         SizedBox(width: 90),
                                         Icon(

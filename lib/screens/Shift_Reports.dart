@@ -82,7 +82,7 @@ class _ShiftReportsState extends State<ShiftReports> {
 
   getbranch() async {
     var branchid = await CommunFun.getbranchId();
-    var branch = await localAPI.getbranchData(branchid);
+    var branch = await localAPI.getBranchData(branchid);
     setState(() {
       branchData = branch;
     });
@@ -113,7 +113,7 @@ class _ShiftReportsState extends State<ShiftReports> {
     var terminalid = await CommunFun.getTeminalKey();
     var currentDay = await CommunFun.getCurrentDateTime(DateTime.now());
     var formatter = new DateFormat('yyyy-MM-dd');
-    var branch = await localAPI.getbranchData(branchid);
+    var branch = await localAPI.getBranchData(branchid);
     String formattedDate = formatter.format(DateTime.parse(currentDay));
     if (DateTime.parse(formattedDate + ' ' + branch.openFrom).hour > 18) {
       formattedDate = formatter.format(
@@ -165,13 +165,19 @@ class _ShiftReportsState extends State<ShiftReports> {
   }
 
   getShiftData() async {
-    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
-    if (shiftid != null) {
-      List<Shift> shift = await localAPI.getShiftData(shiftid);
-      setState(() {
-        shifittem = shift[0];
-      });
-      getpayInOutAmmount();
+    try {
+      var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+      if (shiftid != null) {
+        List<Shift> shift = await localAPI.getShiftData(shiftid);
+        if (shift != null && shift.isNotEmpty) {
+          setState(() {
+            shifittem = shift[0];
+          });
+          getpayInOutAmmount();
+        }
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -986,7 +992,7 @@ class AddOtherReasonState extends State<AddOtherReason> {
 
   getbranch() async {
     var branchid = await CommunFun.getbranchId();
-    var branch = await localAPI.getbranchData(branchid);
+    var branch = await localAPI.getBranchData(branchid);
     setState(() {
       branchData = branch;
     });

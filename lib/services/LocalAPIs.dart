@@ -90,30 +90,34 @@ class LocalAPI {
   }
 
   Future<List<ProductDetails>> getProduct(String id, String branchID) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,product_store_inventory.qty,box.product_id as box_pId, category_attribute.name as attr_cat ,modifier.name as modifire_Name, product_branch.out_of_stock FROM `product` " +
-        " LEFT JOIN product_category on product_category.product_id = product.product_id AND product_category.status = 1" +
-        " LEFT JOIN product_branch on product_branch.product_id = product.product_id AND product_branch.status = 1" +
-        " LEFT JOIN price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
-        " LEFT JOIN asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id AND asset.status = 1" +
-        " LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1" +
-        " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1" +
-        " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1" +
-        " LEFT JOIN product_modifier on  product_modifier.product_id = product.product_id AND product_modifier.status = 1 " +
-        " LEFT JOIN modifier on modifier.modifier_id = product_modifier.modifier_id AND modifier.status = 1 " +
-        " LEFT JOIN product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
-        " LEFT JOIN box ON box.product_id = product.product_id and box.status = 1 " +
-        " where product_category.category_id = " +
-        id.toString() +
-        " AND product_branch.branch_id = " +
-        branchID.toString() +
-        " AND product.status = 1 AND product.has_setmeal = 0 GROUP By product.product_id";
-    var res = await db.rawQuery(query);
-    List<ProductDetails> list = res.length > 0
-        ? res.map((c) => ProductDetails.fromJson(c)).toList()
-        : [];
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      var query = "SELECT product.*,price_type.name as price_type_Name,asset.base64,product_store_inventory.qty,box.product_id as box_pId, category_attribute.name as attr_cat ,modifier.name as modifire_Name, product_branch.out_of_stock FROM `product` " +
+          " LEFT JOIN product_category on product_category.product_id = product.product_id AND product_category.status = 1" +
+          " LEFT JOIN product_branch on product_branch.product_id = product.product_id AND product_branch.status = 1" +
+          " LEFT JOIN price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
+          " LEFT JOIN asset on asset.asset_type = 1 AND asset.asset_type_id = product.product_id AND asset.status = 1" +
+          " LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1" +
+          " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1" +
+          " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1" +
+          " LEFT JOIN product_modifier on  product_modifier.product_id = product.product_id AND product_modifier.status = 1 " +
+          " LEFT JOIN modifier on modifier.modifier_id = product_modifier.modifier_id AND modifier.status = 1 " +
+          " LEFT JOIN product_store_inventory  ON  product_store_inventory.product_id = product.product_id and product_store_inventory.status = 1 " +
+          " LEFT JOIN box ON box.product_id = product.product_id and box.status = 1 " +
+          " where product_category.category_id = " +
+          id +
+          " AND product_branch.branch_id = " +
+          branchID +
+          " AND product.status = 1 AND product.has_setmeal = 0 GROUP By product.product_id";
+      var res = await db.rawQuery(query);
+      List<ProductDetails> list = res.length > 0
+          ? res.map<ProductDetails>((c) => ProductDetails.fromJson(c)).toList()
+          : [];
 
-    return list;
+      return list;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<List<ProductDetails>> getAllProduct(String branchID) async {
@@ -274,19 +278,22 @@ class LocalAPI {
   }
 
   Future<int> insertTableOrder(Table_order tableOrder) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    String qry = "SELECT * from table_order where table_id =" +
-        tableOrder.table_id.toString();
-    var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    List<Table_order> list =
-        res.isNotEmpty ? res.map((c) => Table_order.fromJson(c)).toList() : [];
     var result;
-    if (list.length > 0) {
-      result = await db.update("table_order", tableOrder.toJson(),
-          where: 'table_id = ?', whereArgs: [tableOrder.table_id]);
-    } else {
-      result = await db.insert("table_order", tableOrder.toJson());
-    }
+    Database db = DatabaseHelper.dbHelper.getDatabse();
+    try {
+      String qry = "SELECT * from table_order where table_id =" +
+          tableOrder.table_id.toString();
+      var res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+      List<Table_order> list = res.isNotEmpty
+          ? res.map<Table_order>((c) => Table_order.fromJson(c)).toList()
+          : [];
+      if (list.length > 0) {
+        result = await db.update("table_order", tableOrder.toJson(),
+            where: 'table_id = ?', whereArgs: [tableOrder.table_id]);
+      } else {
+        result = await db.insert("table_order", tableOrder.toJson());
+      }
+    } catch (e) {}
     /* await SyncAPICalls.logActivity(
         "Tables",
         list.length > 0 ? "Update table Order" : "Insert table Order",
@@ -1214,14 +1221,24 @@ class LocalAPI {
     return list;
   }
 
-  Future<List<ProductCategory>> getProductCategory(ids) async {
-    String qry =
-        "SELECT * from product_category WHERE product_id =  " + ids.toString();
-    var voucherList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    List<ProductCategory> list = voucherList.isNotEmpty
-        ? voucherList.map((c) => ProductCategory.fromJson(c)).toList()
-        : [];
-    return list;
+  Future<List<ProductCategory>> getProductCategory([int ids]) async {
+    try {
+      String qry = "SELECT * from product_category";
+      if (ids != null) {
+        qry += " WHERE product_id =  " + ids.toString();
+      }
+
+      var voucherList =
+          await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+      List<ProductCategory> list = voucherList.isNotEmpty
+          ? voucherList
+              .map<ProductCategory>((c) => ProductCategory.fromJson(c))
+              .toList()
+          : [];
+      return list;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<dynamic> addVoucherIndetail(MSTCartdetails details, voucherId) async {
@@ -1235,10 +1252,9 @@ class LocalAPI {
     return data;
   }
 
-  Future<dynamic> addVoucherInOrder(
-      MST_Cart details, Voucher voucherDetail) async {
+  Future<int> addVoucherInOrder(MST_Cart details, Voucher voucherDetail) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
-    var data1 = await db.update("mst_cart", details.toJson(),
+    int data1 = await db.update("mst_cart", details.toJson(),
         where: "id =?", whereArgs: [details.id]);
     return data1;
   }
@@ -1269,15 +1285,20 @@ class LocalAPI {
       return new MST_Cart();
   }
 
-  Future<Branch> getbranchData(branchID) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    var cartdata = await db.query('branch',
-        where: 'branch_id = ?', whereArgs: [branchID.toString()]);
-    List<Branch> list = cartdata.isNotEmpty
-        ? cartdata.map((c) => Branch.fromJson(c)).toList()
-        : [];
-    return list[0];
-  }
+  /* Future<Branch> getbranchData(String branchID) async {
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      var cartdata = await db.query('branch',
+          where: 'branch_id = ?', whereArgs: [branchID.toString()]);
+      var check = await db.query('branch');
+      List<Branch> list = cartdata.isNotEmpty
+          ? cartdata.map<Branch>((c) => Branch.fromJson(c)).toList()
+          : [];
+      return list.length > 0 ? list[0] : [];
+    } catch (e) {
+      rethrow;
+    }
+  } */
 
   Future<Voucher> getvoucher(voucherid) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
@@ -1392,7 +1413,7 @@ class LocalAPI {
 
   Future<List<OrderDetail>> getOrderDetailTable(orderid, terminalId) async {
     String qry =
-        "SELECT * from order_detail where isSync = 0 AND terminal_id = " +
+        "SELECT * from order_detail where is_sync = 0 AND terminal_id = " +
             terminalId.toString() +
             " AND order_app_id = " +
             orderid.toString();
@@ -1556,13 +1577,17 @@ class LocalAPI {
   }
 
   Future<Branch> getBranchData(branchID) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    var result =
-        await db.query("branch", where: 'branch_id = ?', whereArgs: [branchID]);
-    List<Branch> list =
-        result.isNotEmpty ? result.map((c) => Branch.fromJson(c)).toList() : [];
-
-    return list[0];
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      var cartdata = await db.query('branch',
+          where: 'branch_id = ?', whereArgs: [branchID.toString()]);
+      List<Branch> list = cartdata.isNotEmpty
+          ? cartdata.map<Branch>((c) => Branch.fromJson(c)).toList()
+          : [];
+      return list.length > 0 ? list[0] : null;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   // 1 For New,2 For Ongoing,3 For cancelled,4 For Completed,5 For Refunded
@@ -2197,40 +2222,44 @@ class LocalAPI {
 
   Future<List<SetMealProduct>> getMealsProductData(setmealid) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
-    String qry =
-        "SELECT setmeal_product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name  FROM setmeal_product " +
-            " LEFT JOIN product ON product.product_id = setmeal_product.product_id AND product.status = 1 " +
-            " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id AND asset.status = 1 " +
-            " WHERE setmeal_product.setmeal_id = " +
-            setmealid.toString() +
-            " AND setmeal_product.status = 1 " +
-            " GROUP by setmeal_product.setmeal_product_id";
+    try {
+      String qry =
+          "SELECT setmeal_product.*,replace(asset.base64,'data:image/jpg;base64,','') as base64,product.name  FROM setmeal_product " +
+              " LEFT JOIN product ON product.product_id = setmeal_product.product_id AND product.status = 1 " +
+              " LEFT join asset on asset.asset_type = 1 AND asset.asset_type_id = setmeal_product.product_id AND asset.status = 1 " +
+              " WHERE setmeal_product.setmeal_id = " +
+              setmealid.toString() +
+              " AND setmeal_product.status = 1 " +
+              " GROUP by setmeal_product.setmeal_product_id";
 
-    var mealList = await db.rawQuery(qry);
-    List<SetMealProduct> list = mealList.isNotEmpty
-        ? mealList.map((c) => SetMealProduct.fromJson(c)).toList()
-        : [];
-    /* await SyncAPICalls.logActivity(
+      var mealList = await db.rawQuery(qry);
+      List<SetMealProduct> list = mealList.isNotEmpty
+          ? mealList.map((c) => SetMealProduct.fromJson(c)).toList()
+          : null;
+      if (list == null) return null;
+      /* await SyncAPICalls.logActivity(
         "Meals product List", "get Meals product List", "setmeal", setmealid); */
-    for (var i = 0; i < list.length; i++) {
-      var attrQry = "SELECT product.product_id, category_attribute.name as attr_name,attributes.ca_id, " +
-          " group_concat(product_attribute.price) as attr_types_price,group_concat(attributes.name) as attr_types ,group_concat(attributes.attribute_id) as attributeId,group_concat(attributes.is_default) as is_default " +
-          " FROM product LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1 " +
-          " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1 " +
-          " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1 " +
-          " WHERE product.product_id =  " +
-          list[i].productId.toString() +
-          " GROUP by category_attribute.ca_id";
-      List<Map> res = await db.rawQuery(attrQry);
-      List<Attribute_Data> attrlist = res.length > 0
-          ? res.map((c) => Attribute_Data.fromJson(c)).toList()
-          : [];
-      if (attrlist.length > 0) {
-        list[i].attributeDetails = jsonEncode(attrlist);
+      for (var i = 0; i < list.length; i++) {
+        var attrQry = "SELECT product.product_id, category_attribute.name as attr_name,attributes.ca_id, " +
+            " group_concat(product_attribute.price) as attr_types_price,group_concat(attributes.name) as attr_types ,group_concat(attributes.attribute_id) as attributeId,group_concat(attributes.is_default) as is_default " +
+            " FROM product LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1 " +
+            " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1 " +
+            " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1 " +
+            " WHERE product.product_id =  " +
+            list[i].productId.toString() +
+            " GROUP by category_attribute.ca_id";
+        List<Map> res = await db.rawQuery(attrQry);
+        List<Attribute_Data> attrlist = (res != null && res.length > 0)
+            ? res.map((c) => Attribute_Data.fromJson(c)).toList()
+            : [];
+        if (attrlist != null && attrlist.length > 0) {
+          list[i].attributeDetails = jsonEncode(attrlist);
+        }
+        return list;
       }
+    } catch (e) {
+      rethrow;
     }
-
-    return list;
   }
 
   Future<List<Drawerdata>> getPayinOutammount(shiftid, [filtertime]) async {

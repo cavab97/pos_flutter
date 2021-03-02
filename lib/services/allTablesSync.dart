@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'package:mcncashier/models/Branch.dart';
+import 'package:mcncashier/models/PorductDetails.dart';
+import 'package:mcncashier/models/Product_Categroy.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/ShiftInvoice.dart';
 import 'package:flutter/cupertino.dart';
@@ -53,11 +56,19 @@ class SyncAPICalls {
     var apiurl = Configrations.appdata1;
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
-    var serverTime =
-        await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
 
     var permission =
         await Preferences.getStringValuesSF(Constant.USER_PERMISSION);
+    LocalAPI _localAPI = new LocalAPI();
+    String _branchid = await CommunFun.getbranchId();
+    Branch _branches = await _localAPI.getBranchData(_branchid);
+    var serverTime;
+    if (_branches == null) {
+      serverTime = '';
+    } else {
+      serverTime =
+          await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+    }
     var stringParams = {
       'datetime': serverTime != null && (permission != null && permission != '')
           ? serverTime
@@ -72,8 +83,16 @@ class SyncAPICalls {
     var apiurl = Configrations.appdata2_1;
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
-    var serverTime =
-        await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+    LocalAPI _localAPI = new LocalAPI();
+    var serverTime;
+    List<ProductCategory> _productCategories =
+        await _localAPI.getProductCategory();
+    if (_productCategories.length < 1) {
+      serverTime = '';
+    } else {
+      serverTime =
+          await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+    }
     var stringParams = {
       'datetime': serverTime != null ? serverTime : '',
       'branch_id': branchid,
@@ -83,13 +102,20 @@ class SyncAPICalls {
   }
 
   static getDataServerBulk2_2(context) async {
+    LocalAPI _localAPI = new LocalAPI();
     var apiurl = Configrations.appdata2_2;
     var terminalId = await CommunFun.getTeminalKey();
     var branchid = await CommunFun.getbranchId();
-    var serverTime =
-        await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+    List<ProductDetails> _products = await _localAPI.getAllProduct(branchid);
+    var serverTime;
+    if (_products.length == 0) {
+      serverTime = '';
+    } else {
+      serverTime =
+          await Preferences.getStringValuesSF(Constant.SERVER_DATE_TIME);
+    }
     var stringParams = {
-      'datetime': serverTime != null ? serverTime : '',
+      'datetime': serverTime ?? '',
       'branch_id': branchid,
       'terminal_id': terminalId
     };
@@ -1055,8 +1081,10 @@ class SyncAPICalls {
         'terminal_id': terminalId,
         'version': packageVersion
       };
+      print('enter');
       var res = await APICalls.getDataCall(apiurl, context, stringParams, 10);
       if (res == null) {
+        print('enter');
         return [];
       } else if (res.length > 0 && res["status"] == Constant.STATUS200) {
         for (var data in res["data"]) {

@@ -1,3 +1,5 @@
+import 'package:deep_pick/deep_pick.dart';
+
 class Table_order {
   int table_id;
   String is_merge_table;
@@ -25,17 +27,17 @@ class Table_order {
       this.assignTime});
 
   Table_order.fromJson(Map<String, dynamic> json) {
-    table_id = json["table_id"];
-    is_merge_table = json["is_merge_table"];
-    merged_table_id = json["merged_table_id"];
-    number_of_pax = json["number_of_pax"];
-    table_seat = json["table_seat"];
-    save_order_id = json["save_order_id"];
-    merged_pax = json["merged_pax"];
-    table_locked_by = json["table_locked_by"];
-    is_order_merged = json["is_order_merge"];
-    service_charge = json["service_charge"];
-    assignTime = json["assing_time"];
+    table_id = pick(json, "table_id").asIntOrNull();
+    is_merge_table = pick(json, "is_merge_table").asStringOrNull();
+    merged_table_id = pick(json, "merged_table_id").asIntOrNull();
+    number_of_pax = pick(json, "number_of_pax").asIntOrNull();
+    table_seat = pick(json, "table_seat").asStringOrNull();
+    save_order_id = pick(json, "save_order_id").asIntOrNull();
+    merged_pax = pick(json, "merged_pax").asStringOrNull();
+    table_locked_by = pick(json, "table_locked_by").asIntOrNull();
+    is_order_merged = pick(json, "is_order_merge").asIntOrNull();
+    service_charge = pick(json, "service_charge").asDoubleOrNull();
+    assignTime = pick(json, "assing_time").asStringOrNull();
   }
 
   Map<String, dynamic> toJson() {

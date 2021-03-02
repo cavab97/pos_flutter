@@ -91,9 +91,10 @@ class _ClosingPageState extends State<ClosingPage> {
 
   getShift() async {
     String shiftID = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
+    List<Shift> _shiftList = await localAPI.getShiftData(shiftID);
     Shift cShift;
-    if (shiftID != null) {
-      cShift = (await localAPI.getShiftData(shiftID))[0];
+    if (shiftID != null && _shiftList.length > 0) {
+      cShift = _shiftList[0];
     }
     if (this.mounted) {
       currentShift = cShift;
@@ -103,7 +104,7 @@ class _ClosingPageState extends State<ClosingPage> {
 
   getBranch() async {
     String brandID = await CommunFun.getbranchId();
-    Branch currentBranch = await localAPI.getbranchData(brandID);
+    Branch currentBranch = await localAPI.getBranchData(brandID);
     String lastCreatedAt =
         DateTime.parse(currentShift.createdAt ?? currentShift.updatedAt)
             .toString();
@@ -840,205 +841,213 @@ class _ClosingPageState extends State<ClosingPage> {
               Container(
                 height: defaultHeight * .1,
                 padding: EdgeInsets.symmetric(horizontal: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Closing',
-                      style: TextStyle(
-                        fontSize: defaultFontSize * 2,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Closing',
+                        style: TextStyle(
+                          fontSize: defaultFontSize * 2,
+                        ),
                       ),
-                    ),
-                    Container(
-                      child: Row(
-                        children: [
-                          Material(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18.0),
-                              side: BorderSide(color: Colors.green),
-                            ),
-                            color: isClosing ? Colors.grey : Colors.green[400],
-                            child: InkWell(
-                              onTap: isClosing
-                                  ? null
-                                  : () {
-                                      closedShift();
-                                    },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.save),
-                                    Text(
-                                      'Confirm',
-                                      style:
-                                          TextStyle(fontSize: defaultFontSize),
-                                    ),
-                                  ],
+                      Container(
+                        child: Row(
+                          children: [
+                            Material(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                                side: BorderSide(color: Colors.green),
+                              ),
+                              color:
+                                  isClosing ? Colors.grey : Colors.green[400],
+                              child: InkWell(
+                                onTap: isClosing
+                                    ? null
+                                    : () {
+                                        closedShift();
+                                      },
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 10),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.save),
+                                      Text(
+                                        'Confirm',
+                                        style: TextStyle(
+                                            fontSize: defaultFontSize),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(width: 8),
-                          Material(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18.0),
-                              side: BorderSide(color: Colors.green),
-                            ),
-                            color: Colors.brown[200],
-                            child: InkWell(
-                              onTap: () async {
-                                await SyncAPICalls.logActivity("transaction",
-                                    "Click view Transaction", "transaction", 1);
-                                Navigator.pushNamed(
-                                    context, Constant.TransactionScreen);
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.art_track),
-                                    Text(
-                                      Strings.transaction,
-                                      style:
-                                          TextStyle(fontSize: defaultFontSize),
-                                    ),
-                                  ],
+                            SizedBox(width: 8),
+                            Material(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                                side: BorderSide(color: Colors.green),
+                              ),
+                              color: Colors.brown[200],
+                              child: InkWell(
+                                onTap: () async {
+                                  await SyncAPICalls.logActivity(
+                                      "transaction",
+                                      "Click view Transaction",
+                                      "transaction",
+                                      1);
+                                  Navigator.pushNamed(
+                                      context, Constant.TransactionScreen);
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 10),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.art_track),
+                                      Text(
+                                        Strings.transaction,
+                                        style: TextStyle(
+                                            fontSize: defaultFontSize),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(width: 8),
-                          Material(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18.0),
-                              side: BorderSide(color: Colors.green),
-                            ),
-                            color: isClosing ? Colors.grey : Colors.blue[200],
-                            child: InkWell(
-                              onTap: () async {
-                                await SyncAPICalls.logActivity("open drawer",
-                                    "Cashier click open drawer", "drawer", 1);
-                                if (printerreceiptList.length == 0) {
-                                  return CommunFun.showToast(
-                                      context, Strings.printerNotAvailable);
-                                }
-                                PrintReceipt printKOT = PrintReceipt();
-                                Function printReceipt = () =>
-                                    printKOT.testReceiptPrint(
-                                        printerreceiptList[0]
-                                            .printerIp
-                                            .toString(),
-                                        context,
-                                        "",
-                                        Strings.openDrawer,
-                                        true);
-                                if (permissions
-                                    .contains(Constant.OPEN_DRAWER)) {
-                                  printReceipt();
-                                } else {
-                                  await CommonUtils.openPermissionPop(
-                                      context, Constant.OPEN_DRAWER, () async {
-                                    await SyncAPICalls.logActivity(
-                                        "open drawer",
-                                        "Manager given permission for open drawer",
-                                        "drawer",
-                                        1);
+                            SizedBox(width: 8),
+                            Material(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                                side: BorderSide(color: Colors.green),
+                              ),
+                              color: isClosing ? Colors.grey : Colors.blue[200],
+                              child: InkWell(
+                                onTap: () async {
+                                  await SyncAPICalls.logActivity("open drawer",
+                                      "Cashier click open drawer", "drawer", 1);
+                                  if (printerreceiptList.length == 0) {
+                                    return CommunFun.showToast(
+                                        context, Strings.printerNotAvailable);
+                                  }
+                                  PrintReceipt printKOT = PrintReceipt();
+                                  Function printReceipt = () =>
+                                      printKOT.testReceiptPrint(
+                                          printerreceiptList[0]
+                                              .printerIp
+                                              .toString(),
+                                          context,
+                                          "",
+                                          Strings.openDrawer,
+                                          true);
+                                  if (permissions
+                                      .contains(Constant.OPEN_DRAWER)) {
                                     printReceipt();
-                                  }, () {});
-                                }
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.all_inbox_outlined),
-                                    Text(
-                                      "Open Cash Drawer",
-                                      style:
-                                          TextStyle(fontSize: defaultFontSize),
-                                    ),
-                                  ],
+                                  } else {
+                                    await CommonUtils.openPermissionPop(
+                                        context, Constant.OPEN_DRAWER,
+                                        () async {
+                                      await SyncAPICalls.logActivity(
+                                          "open drawer",
+                                          "Manager given permission for open drawer",
+                                          "drawer",
+                                          1);
+                                      printReceipt();
+                                    }, () {});
+                                  }
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 10),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.all_inbox_outlined),
+                                      Text(
+                                        "Open Cash Drawer",
+                                        style: TextStyle(
+                                            fontSize: defaultFontSize),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(width: 8),
-                          Material(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18.0),
-                              side: BorderSide(color: Colors.green),
-                            ),
-                            color: isClosing ? Colors.white : Colors.grey,
-                            child: InkWell(
-                              onTap: () {
-                                if (this.mounted) {
-                                  setState(() {
-                                    isClosing = false;
-                                  });
-                                }
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.undo),
-                                    Text(
-                                      'Redo Closing',
-                                      style:
-                                          TextStyle(fontSize: defaultFontSize),
-                                    ),
-                                  ],
+                            SizedBox(width: 8),
+                            Material(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                                side: BorderSide(color: Colors.green),
+                              ),
+                              color: isClosing ? Colors.white : Colors.grey,
+                              child: InkWell(
+                                onTap: () {
+                                  if (this.mounted) {
+                                    setState(() {
+                                      isClosing = false;
+                                    });
+                                  }
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 10),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.undo),
+                                      Text(
+                                        'Redo Closing',
+                                        style: TextStyle(
+                                            fontSize: defaultFontSize),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(width: 8),
-                          Material(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18.0),
-                              side: BorderSide(color: Colors.green),
-                            ),
-                            color: Colors.red[400],
-                            child: InkWell(
-                              onTap: () {
-                                if (isClosing) {
-                                  Navigator.of(context).popAndPushNamed(
-                                      Constant.SelectTableScreen,
-                                      arguments: {"isAssign": false});
-                                } else {
-                                  Navigator.of(context).pop();
-                                }
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.close),
-                                    Text(
-                                      'Close',
-                                      style:
-                                          TextStyle(fontSize: defaultFontSize),
-                                    ),
-                                  ],
+                            SizedBox(width: 8),
+                            Material(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                                side: BorderSide(color: Colors.green),
+                              ),
+                              color: Colors.red[400],
+                              child: InkWell(
+                                onTap: () {
+                                  if (isClosing) {
+                                    Navigator.of(context).popAndPushNamed(
+                                        Constant.SelectTableScreen,
+                                        arguments: {"isAssign": false});
+                                  } else {
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 10),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.close),
+                                      Text(
+                                        'Close',
+                                        style: TextStyle(
+                                            fontSize: defaultFontSize),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ),
               Expanded(

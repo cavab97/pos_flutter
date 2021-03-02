@@ -848,7 +848,7 @@ class CreateTables {
         "id INTEGER PRIMARY KEY AUTOINCREMENT," +
         "uuid INTEGER," +
         "terminal_id INTEGER," +
-        "is_sync NUMERIC," +
+        "isync NUMERIC," +
         "branch_id INTEGER," +
         "module_name TEXT," +
         "description TEXT," +

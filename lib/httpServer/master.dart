@@ -7,11 +7,14 @@ import 'package:mcncashier/components/communText.dart';
 import 'package:mcncashier/components/constant.dart';
 import 'package:mcncashier/components/preferences.dart';
 import 'package:mcncashier/models/CheckInout.dart';
+import 'package:mcncashier/models/MST_Cart.dart';
 import 'package:mcncashier/models/Reservation.dart';
+import 'package:mcncashier/models/SetMeal.dart';
 import 'package:mcncashier/models/Shift.dart';
 import 'package:mcncashier/models/TableDetails.dart';
 import 'package:mcncashier/models/Table_order.dart';
 import 'package:mcncashier/models/TerminalLog.dart';
+import 'package:mcncashier/models/Voucher.dart';
 import 'package:mcncashier/services/LocalAPIs.dart';
 import 'package:mcncashier/models/User.dart';
 import 'package:wifi/wifi.dart';
@@ -40,6 +43,9 @@ class ServerModel {
         case 'POST':
           handlePost(request);
           break;
+        case 'DELETE':
+          handleDelete(request);
+          break;
         default:
           handleDefault(request);
       }
@@ -54,7 +60,7 @@ class ServerModel {
           ..statusCode = HttpStatus.ok
           ..close();
         break;
-      case '/shift':
+      case '/shifts':
         var _getShiftOpen = await getShiftOpen();
         request.response
           ..statusCode = HttpStatus.ok
@@ -62,6 +68,12 @@ class ServerModel {
           ..close();
         break;
 
+      case '/api/marslab/terminal/id':
+        request.response
+          ..statusCode = HttpStatus.ok
+          ..write(await Preferences.getStringValuesSF(Constant.TERMINAL_KEY))
+          ..close();
+        break;
       case '/api/marslab/auth/me':
         try {
           Map<String, String> queryParameters = request.uri.queryParameters;
@@ -83,34 +95,6 @@ class ServerModel {
           request.response
             ..statusCode = HttpStatus.ok
             ..write(jsonEncode(await _localAPI.getTablesColor()))
-            ..close();
-        } catch (e) {
-          request.response
-            ..statusCode = HttpStatus.unprocessableEntity
-            ..write(e)
-            ..close();
-        }
-        break;
-      case '/api/marslab/tables':
-        try {
-          var branchid = await CommunFun.getbranchId();
-          request.response
-            ..statusCode = HttpStatus.ok
-            ..write(jsonEncode(await _localAPI.getTables(branchid)))
-            ..close();
-        } catch (e) {
-          request.response
-            ..statusCode = HttpStatus.unprocessableEntity
-            ..write(e)
-            ..close();
-        }
-        break;
-      case '/api/marslab/tables':
-        try {
-          var branchid = await CommunFun.getbranchId();
-          request.response
-            ..statusCode = HttpStatus.ok
-            ..write(jsonEncode(await _localAPI.getTables(branchid)))
             ..close();
         } catch (e) {
           request.response
@@ -150,6 +134,21 @@ class ServerModel {
           request.response
             ..statusCode = HttpStatus.ok
             ..write(jsonEncode(await _localAPI.getAllPrinterForecipt()))
+            ..close();
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/printers':
+        try {
+          Map<String, String> queryParameters = request.uri.queryParameters;
+          int _productID = pick(queryParameters, "productid").asIntOrNull();
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write(jsonEncode(await _localAPI.getPrinter(_productID)))
             ..close();
         } catch (e) {
           request.response
@@ -203,6 +202,47 @@ class ServerModel {
             ..close();
         }
         break;
+      case '/api/marslab/tables':
+        try {
+          Map<String, String> queryParameters = request.uri.queryParameters;
+          String _tableID =
+              pick(queryParameters, "id").asStringOrNull()?.trim();
+          String _branchID = await CommunFun.getbranchId();
+          if (_tableID != null) {
+            request.response
+              ..statusCode = HttpStatus.ok
+              ..write(
+                  jsonEncode(await localAPI.getTableData(_branchID, _tableID)))
+              ..close();
+          } else {
+            request.response
+              ..statusCode = HttpStatus.ok
+              ..write(jsonEncode(await _localAPI.getTables(_branchID)))
+              ..close();
+          }
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/tableorders':
+        try {
+          Map<String, String> queryParameters = request.uri.queryParameters;
+          String _tableID =
+              pick(queryParameters, "tableid").asStringOrNull()?.trim();
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write(jsonEncode(await localAPI.getTableOrders(_tableID)))
+            ..close();
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
       case '/api/marslab/categories':
         try {
           request.response
@@ -216,15 +256,34 @@ class ServerModel {
             ..close();
         }
         break;
-      case '/api/marslab/categories':
+      case '/api/marslab/taxes':
         try {
           Map<String, String> queryParameters = request.uri.queryParameters;
-          int _tableID = pick(queryParameters, "tableid").asIntOrNull();
-          var branchID = await CommunFun.getbranchId();
+          String _taxID = pick(queryParameters, "id").asStringOrNull()?.trim();
+          if (_taxID != null) {
+            request.response
+              ..statusCode = HttpStatus.ok
+              ..write(jsonEncode(await _localAPI.getTaxName(_taxID)))
+              ..close();
+          } else {
+            String _branchID = await CommunFun.getbranchId();
+            request.response
+              ..statusCode = HttpStatus.ok
+              ..write(jsonEncode(await _localAPI.getTaxList(_branchID)))
+              ..close();
+          }
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/paymentmethods':
+        try {
           request.response
             ..statusCode = HttpStatus.ok
-            ..write(
-                jsonEncode(await _localAPI.getTableData(branchID, _tableID)))
+            ..write(jsonEncode(await localAPI.getPaymentMethods()))
             ..close();
         } catch (e) {
           request.response
@@ -233,7 +292,237 @@ class ServerModel {
             ..close();
         }
         break;
-      //await localAPI.getAllCategory()
+
+      case '/api/marslab/productcategory':
+        try {
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write(jsonEncode(await localAPI.getProductCategory()))
+            ..close();
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/products':
+        try {
+          Map<String, String> queryParameters = request.uri.queryParameters;
+          String _searchText =
+              pick(queryParameters, "search").asStringOrNull()?.trim();
+          String _branchID = await CommunFun.getbranchId();
+          if (_searchText == null) {
+            request.response
+              ..statusCode = HttpStatus.ok
+              ..write(jsonEncode(await localAPI.getAllProduct(_branchID)))
+              ..close();
+          } else {
+            request.response
+              ..statusCode = HttpStatus.ok
+              ..write(jsonEncode(
+                  await localAPI.getSeachProduct(_searchText, _branchID)))
+              ..close();
+          }
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/product/details':
+        try {
+          Map<String, String> queryParameters = request.uri.queryParameters;
+          String _productID =
+              pick(queryParameters, "productid").asStringOrNull()?.trim();
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write(jsonEncode(await localAPI.getProductDetails(_productID)))
+            ..close();
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/setmeal':
+        try {
+          Map<String, String> queryParameters = request.uri.queryParameters;
+          String _searchText =
+              pick(queryParameters, "search").asStringOrNull()?.trim();
+          String _branchID = await CommunFun.getbranchId();
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write(jsonEncode(
+                await localAPI.getSearchSetMealsData(_searchText, _branchID)))
+            ..close();
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/meals':
+        try {
+          String _branchID = await CommunFun.getbranchId();
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write(jsonEncode(await localAPI.getMealsData(_branchID)))
+            ..close();
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/mealproducts':
+        try {
+          Map<String, String> queryParameters = request.uri.queryParameters;
+          String _setMealID =
+              pick(queryParameters, "id").asStringOrNull()?.trim();
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write(jsonEncode(await localAPI.getMealsProductData(_setMealID)))
+            ..close();
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/categoryproducts':
+        try {
+          Map<String, String> queryParameters = request.uri.queryParameters;
+          String _categoryID =
+              pick(queryParameters, "categoryid").asStringOrNull()?.trim();
+          String _branchID = await CommunFun.getbranchId();
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write(
+                jsonEncode(await localAPI.getProduct(_categoryID, _branchID)))
+            ..close();
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/categoryproducts':
+        try {
+          Map<String, String> queryParameters = request.uri.queryParameters;
+          String _categoryID =
+              pick(queryParameters, "categoryid").asStringOrNull()?.trim();
+          String _branchID = await CommunFun.getbranchId();
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write(
+                jsonEncode(await localAPI.getProduct(_categoryID, _branchID)))
+            ..close();
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/saveorders':
+        try {
+          Map<String, String> queryParameters = request.uri.queryParameters;
+          String _saveOrderID =
+              pick(queryParameters, "id").asStringOrNull()?.trim();
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write(jsonEncode(await localAPI.getSaveOrder(_saveOrderID)))
+            ..close();
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/carts':
+        try {
+          Map<String, String> queryParameters = request.uri.queryParameters;
+          String _cartID = pick(queryParameters, "id").asStringOrNull()?.trim();
+          if (_cartID != null && _cartID.isNotEmpty) {
+            request.response
+              ..statusCode = HttpStatus.ok
+              ..write(jsonEncode(await localAPI.getCartData(_cartID)))
+              ..close();
+          } else {
+            String _branchID = await CommunFun.getbranchId();
+            List<MST_Cart> _cartList = [];
+            if (_branchID != null) {
+              _cartList = await localAPI.getCartList(_branchID);
+            }
+            request.response
+              ..statusCode = HttpStatus.ok
+              ..write(jsonEncode(_cartList))
+              ..close();
+          }
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/branches/current':
+        try {
+          String _branchID = await CommunFun.getbranchId();
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write(jsonEncode(await _localAPI.getBranchData(_branchID)))
+            ..close();
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
+      case '/api/marslab/apply/voucher':
+        try {
+          String _inputString = await utf8.decoder.bind(request).join();
+          if (_inputString.isEmpty) {
+            request.response
+              ..statusCode = HttpStatus.unprocessableEntity
+              ..write('parameter empty')
+              ..close();
+            break;
+          }
+          MST_Cart _cartData =
+              MST_Cart.fromJson(jsonDecode(_inputString)["cartData"]);
+          Voucher _voucher =
+              Voucher.fromJson(jsonDecode(_inputString)["voucher"]);
+
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write(await _localAPI.addVoucherInOrder(_cartData, _voucher))
+            ..close();
+          /* Table_order tableOrder =
+              Table_order.fromJson(jsonDecode(_inputString));
+          tableOrder.assignTime =
+              await CommunFun.getCurrentDateTime(DateTime.now());
+          int _tableOrderID = await localAPI.addVoucherInOrder(tableOrder);
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write(_tableOrderID)
+            ..close(); */
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
       default:
         handleGetOther(request);
     }
@@ -333,6 +622,7 @@ class ServerModel {
           }
           Table_order tableOrder =
               Table_order.fromJson(jsonDecode(_inputString));
+          tableOrder.number_of_pax = 0;
           tableOrder.assignTime =
               await CommunFun.getCurrentDateTime(DateTime.now());
           int _tableOrderID = await localAPI.insertTableOrder(tableOrder);
@@ -347,8 +637,7 @@ class ServerModel {
             ..close();
         }
         break;
-
-      case '/api/marslab/insertorder':
+      case '/api/marslab/tableorders':
         try {
           String _inputString = await utf8.decoder.bind(request).join();
           if (_inputString.isEmpty) {
@@ -374,7 +663,35 @@ class ServerModel {
             ..close();
         }
         break;
+      default:
+        request.response
+          ..statusCode = HttpStatus.notFound
+          ..write('path no found')
+          ..close();
+    }
+  }
 
+  static void handleDelete(HttpRequest request) async {
+    final path = request.uri.path;
+    print(path);
+    switch (path) {
+      case '/api/marslab/tableorders':
+        try {
+          Map<String, String> queryParameters = request.uri.queryParameters;
+          int _tableID = pick(queryParameters["id"]).asIntOrNull();
+          if (_tableID != null) {
+            await localAPI.deleteTableOrder(_tableID);
+          }
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..close();
+        } catch (e) {
+          request.response
+            ..statusCode = HttpStatus.unprocessableEntity
+            ..write(e)
+            ..close();
+        }
+        break;
       default:
         request.response
           ..statusCode = HttpStatus.notFound
