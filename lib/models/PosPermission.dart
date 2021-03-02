@@ -1,3 +1,5 @@
+import 'package:deep_pick/deep_pick.dart';
+
 class PosPermission {
   int posPermissionId;
   String posPermissionName;
@@ -11,10 +13,12 @@ class PosPermission {
       this.posPermissionUpdatedBy});
 
   PosPermission.fromJson(Map<String, dynamic> json) {
-    posPermissionId = json['pos_permission_id'];
-    posPermissionName = json['pos_permission_name'];
-    posPermissionUpdatedAt = json['pos_permission_updated_at'];
-    posPermissionUpdatedBy = json['pos_permission_updated_by'];
+    posPermissionId = pick(json, 'pos_permission_id').asIntOrNull();
+    posPermissionName = pick(json, 'pos_permission_name').asStringOrNull();
+    posPermissionUpdatedAt =
+        pick(json, 'pos_permission_updated_at').asStringOrNull();
+    posPermissionUpdatedBy =
+        pick(json, 'pos_permission_updated_by').asIntOrNull();
   }
 
   Map<String, dynamic> toJson() {

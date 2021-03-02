@@ -1,3 +1,5 @@
+import 'package:deep_pick/deep_pick.dart';
+
 class TerminalLog {
   int id;
   String uuid;
@@ -32,20 +34,20 @@ class TerminalLog {
   });
 
   TerminalLog.fromJson(Map<String, dynamic> json) {
-    id = json["id"];
-    uuid = json["uuid"];
-    terminal_id = json["terminal_id"];
-    isSync = json["is_sync"];
-    branch_id = json["branch_id"];
-    module_name = json["module_name"];
-    description = json["description"];
-    activity_date = json["activity_date"];
-    activity_time = json["activity_time"];
-    table_name = json["table_name"];
-    entity_id = json["entity_id"];
-    status = json["status"];
-    updated_at = json["updated_at"];
-    updated_by = json["updated_by"];
+    id = pick(json, "id").asIntOrNull();
+    uuid = pick(json, "uuid").asStringOrNull();
+    terminal_id = pick(json, "terminal_id").asIntOrNull();
+    isSync = pick(json, "is_sync").asIntOrNull();
+    branch_id = pick(json, "branch_id").asIntOrNull();
+    module_name = pick(json, "module_name").asStringOrNull();
+    description = pick(json, "description").asStringOrNull();
+    activity_date = pick(json, "activity_date").asStringOrNull();
+    activity_time = pick(json, "activity_time").asStringOrNull();
+    table_name = pick(json, "table_name").asStringOrNull();
+    entity_id = pick(json, "entity_id").asIntOrNull();
+    status = pick(json, "status").asIntOrNull();
+    updated_at = pick(json, "updated_at").asStringOrNull();
+    updated_by = pick(json, "updated_by").asIntOrNull();
   }
 
   Map<String, dynamic> toJson() {

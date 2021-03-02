@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
+import 'package:deep_pick/deep_pick.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -98,31 +99,25 @@ class _SelectTablePageState extends State<SelectTablePage>
   }
 
   getReservationList() async {
-    var shiftid = await Preferences.getStringValuesSF(Constant.DASH_SHIFT);
-    List<Shift> shift = [];
-    if (shiftid != null) {
-      shift = await localAPI.getShiftData(shiftid);
-    }
-    DateTime today;
     String dateFrom;
-    if (shift.length > 0) {
-      Shift shiftItem = shift[0];
-      dateFrom = shiftItem.createdAt ?? shiftItem.updatedAt;
-    }
+    DateTime today;
     if (dateFrom == null) {
       today = DateTime.now();
       dateFrom = DateTime(today.year, today.month, 1).toString();
     }
-    int tID = int.tryParse(await CommunFun.getTeminalKey());
-    List<Reservation> resList = await localAPI.getReservationList(
-      tID,
-      dateFrom,
-      (today != null ? today : DateTime.tryParse(dateFrom))
-          .add(Duration(days: 1))
-          .toString(),
-    );
+    int terminalID = pick(await CommunFun.getTeminalKey()).asIntOrNull();
+    List<Reservation> _resList = [];
+    if (terminalID != null) {
+      _resList = await localAPI.getReservationList(
+        terminalID,
+        dateFrom,
+        (today != null ? today : DateTime.tryParse(dateFrom))
+            .add(Duration(days: 1))
+            .toString(),
+      );
+    }
     setState(() {
-      reservationList = resList;
+      reservationList = _resList;
     });
   }
 

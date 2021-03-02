@@ -1,3 +1,5 @@
+import 'package:deep_pick/deep_pick.dart';
+
 class Printer {
   int printerId;
   String uuid;
@@ -25,17 +27,17 @@ class Printer {
       this.deletedBy});
 
   Printer.fromJson(Map<String, dynamic> json) {
-    printerId = json['printer_id'];
-    uuid = json['uuid'];
-    branchId = json['branch_id'];
-    printerName = json['printer_name'];
-    printerIp = json['printer_ip'];
-    printerIsCashier = json['printer_is_cashier'];
-    status = json['status'];
-    updatedAt = json['updated_at'];
-    updatedBy = json['updated_by'];
-    deletedAt = json['deleted_at'];
-    deletedBy = json['deleted_by'];
+    printerId = pick(json, 'printer_id').asIntOrNull();
+    uuid = pick(json, 'uuid').asStringOrNull();
+    branchId = pick(json, 'branch_id').asIntOrNull();
+    printerName = pick(json, 'printer_name').asStringOrNull();
+    printerIp = pick(json, 'printer_ip').asStringOrNull();
+    printerIsCashier = pick(json, 'printer_is_cashier').asIntOrNull();
+    status = pick(json, 'status').asIntOrNull();
+    updatedAt = pick(json, 'updated_at').asStringOrNull();
+    updatedBy = pick(json, 'updated_by').asIntOrNull();
+    deletedAt = pick(json, 'deleted_at').asStringOrNull();
+    deletedBy = pick(json, 'deleted_by').asIntOrNull();
   }
 
   Map<String, dynamic> toJson() {

@@ -35,13 +35,13 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       serverStart();
     });
   }
+
   void serverStart() async {
     final String address = await Wifi.ip;
     print('enter Server started:');
     ServerModel.start(address);
     //SlaveModel.start(address);
   }
-
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {

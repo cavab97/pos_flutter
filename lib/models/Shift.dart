@@ -1,3 +1,5 @@
+import 'package:deep_pick/deep_pick.dart';
+
 class Shift {
   int shiftId;
   String uuid;
@@ -29,23 +31,19 @@ class Shift {
       this.createdAt});
 
   Shift.fromJson(Map<String, dynamic> json) {
-    shiftId = json['shift_id'];
-    uuid = json['uuid'];
-    terminalId = json['terminal_id'];
-    appId = json['app_id'] != null ? json['app_id'] : 0;
-    userId = json['user_id'];
-    branchId = json['branch_id'];
-    startAmount = json['start_amount'] is int
-        ? (json['start_amount'] as int).toDouble()
-        : json['start_amount'];
-    endAmount = json['end_amount'] is int
-        ? (json['end_amount'] as int).toDouble()
-        : json['end_amount'];
-    status = json['status'];
-    updatedAt = json['updated_at'];
-    updatedBy = json['updated_by'];
-    createdAt = json['created_at'];
-    serverId = json['server_id'];
+    shiftId = pick(json, 'shift_id').asIntOrNull();
+    uuid = pick(json, 'uuid').asStringOrNull();
+    terminalId = pick(json, 'terminal_id').asIntOrNull();
+    appId = pick(json, 'app_id').asIntOrNull() ?? 0;
+    userId = pick(json, 'user_id').asIntOrNull();
+    branchId = pick(json, 'branch_id').asIntOrNull();
+    startAmount = pick(json, 'start_amount').asDoubleOrNull();
+    endAmount = pick(json, 'end_amount').asDoubleOrNull();
+    status = pick(json, 'status').asIntOrNull();
+    updatedAt = pick(json, 'updated_at').asStringOrNull();
+    updatedBy = pick(json, 'updated_by').asIntOrNull();
+    createdAt = pick(json, 'created_at').asStringOrNull();
+    serverId = pick(json, 'server_id').asIntOrNull();
   }
 
   Map<String, dynamic> toJson() {

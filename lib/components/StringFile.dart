@@ -109,7 +109,7 @@ class Strings {
   static String assetsBG = "assets/bg.jpg";
   static String noImageAsset = 'assets/no_image.png';
   static String enter = "E\nn\nt\ne\nr";
-  static String invalidPinMsg = "Authorization Access";
+  static String invalidPinMsg = "PIN Invalid";
   static String clear = "Clear";
   static String storeValidationMessage =
       "selected qty is not available in store";

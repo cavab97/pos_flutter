@@ -1,3 +1,5 @@
+import 'package:deep_pick/deep_pick.dart';
+
 class CheckinOut {
   int id;
   String localID;
@@ -21,15 +23,19 @@ class CheckinOut {
       this.sync});
 
   CheckinOut.fromJson(Map<String, dynamic> json) {
-    id = json["id"];
-    localID = json["localID"];
-    userId = json["user_id"];
-    branchId = json["branch_id"];
-    status = json["status"];
-    timeInOut = json["timeinout"];
-    createdAt = json["create"];
-    terminalId = json["terminalid"];
-    sync = json["sync"];
+    try {
+      id = pick(json, "id").asIntOrNull();
+      localID = pick(json, "localID").asStringOrNull();
+      userId = pick(json, "user_id").asIntOrNull();
+      branchId = pick(json, "branch_id").asIntOrNull();
+      status = pick(json, "status").asStringOrNull();
+      timeInOut = pick(json, "timeinout").asStringOrNull();
+      createdAt = pick(json, "create").asStringOrNull();
+      terminalId = pick(json, "terminalid").asIntOrNull();
+      sync = pick(json, "sync").asIntOrNull();
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {

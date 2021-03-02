@@ -241,7 +241,7 @@ class LocalAPI {
     return result;
   }
 
-  Future<List<TablesDetails>> getTables(branchid) async {
+  Future<List<TablesDetails>> getTables(String branchid) async {
     Database db = DatabaseHelper.dbHelper.getDatabse();
     String ctime = await CommunFun.getCurrentDateTime(DateTime.now());
     var query = "SELECT tables.*, table_order.save_order_id,table_order.assing_time as assignTime,table_order.number_of_pax ,table_order.is_merge_table " +
@@ -442,14 +442,19 @@ class LocalAPI {
   }
 
   Future<List<Shift>> getShiftData(shiftId) async {
-    if (shiftId == null) return [];
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    var result =
-        await db.query('shift', where: "app_id = ?", whereArgs: [shiftId]);
-    List<Shift> list =
-        result.isNotEmpty ? result.map((c) => Shift.fromJson(c)).toList() : [];
-    /* await SyncAPICalls.logActivity("shift", "shift data", "shift", shiftId); */
-    return list;
+    try {
+      if (shiftId == null) return [];
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      var result =
+          await db.query('shift', where: "app_id = ?", whereArgs: [shiftId]);
+      List<Shift> list = result.isNotEmpty
+          ? result.map<Shift>((c) => Shift.fromJson(c)).toList()
+          : [];
+      /* await SyncAPICalls.logActivity("shift", "shift data", "shift", shiftId); */
+      return list;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<List<Attribute_Data>> getProductDetails(productId) async {
@@ -1672,24 +1677,33 @@ class LocalAPI {
   }
 
   Future<List<Printer>> getAllPrinterForKOT() async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    String qry = "SELECT * from printer where status = 1 ";
-    var result = await db.rawQuery(qry);
-    List<Printer> list = result.isNotEmpty
-        ? result.map((c) => Printer.fromJson(c)).toList()
-        : [];
-    return list;
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      String qry = "SELECT * from printer where status = 1 ";
+      var result = await db.rawQuery(qry);
+      List<Printer> list = result.isNotEmpty
+          ? result.map<Printer>((c) => Printer.fromJson(c)).toList()
+          : [];
+      return list;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<List<Printer>> getAllPrinterForecipt() async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    String qry =
-        "SELECT * from printer where printer_is_cashier = 1 AND status = 1";
-    var result = await db.rawQuery(qry);
-    List<Printer> list = result.isNotEmpty
-        ? result.map((c) => Printer.fromJson(c)).toList()
-        : [];
-    return list;
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      var result;
+      String qry =
+          "SELECT * from printer where printer_is_cashier = 1 AND status = 1";
+      result = await db.rawQuery(qry);
+      List<Printer> list = result.isNotEmpty
+          ? result.map<Printer>((c) => Printer.fromJson(c)).toList()
+          : [];
+      return list;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future updateWebCart(MST_Cart cart) async {
@@ -2011,20 +2025,26 @@ class LocalAPI {
   }
 
   Future<List<PosPermission>> getUserPermissions(userid) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    String qry =
-        " SELECT  group_concat(pos_permission.pos_permission_name) as pos_permission_name  from users" +
-            " Left join user_pos_permission on user_pos_permission.user_id = users.id  AND user_pos_permission.status = 1" +
-            " left join pos_permission on pos_permission.pos_permission_id = user_pos_permission.pos_permission_id" +
-            " WHERE user_id  =" +
-            userid.toString();
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      String qry =
+          " SELECT  group_concat(pos_permission.pos_permission_name) as pos_permission_name  from users" +
+              " Left join user_pos_permission on user_pos_permission.user_id = users.id  AND user_pos_permission.status = 1" +
+              " left join pos_permission on pos_permission.pos_permission_id = user_pos_permission.pos_permission_id" +
+              " WHERE user_id  =" +
+              userid.toString();
 
-    var permissionList = await db.rawQuery(qry);
-    List<PosPermission> list = permissionList.length > 0
-        ? permissionList.map((c) => PosPermission.fromJson(c)).toList()
-        : [];
+      var permissionList = await db.rawQuery(qry);
+      List<PosPermission> list = permissionList.length > 0
+          ? permissionList
+              .map<PosPermission>((c) => PosPermission.fromJson(c))
+              .toList()
+          : [];
 
-    return list;
+      return list;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<List<ProductStoreInventory>> getProductStoreInventoryTable(
@@ -2801,7 +2821,7 @@ class LocalAPI {
       }
       query += " ORDER BY updated_at DESC";
       var result = await db.rawQuery(query);
-      List<Reservation> list = result.length > 0
+      List<Reservation> list = result.isNotEmpty
           ? result.map((c) => Reservation.fromJson(c)).toList()
           : [];
       return list;
