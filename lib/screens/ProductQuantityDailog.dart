@@ -95,10 +95,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
       cartitem = widget.cartItem;
     });
     if (!isSetMeal &&
-        widget.selproduct.quantity != null &&
-        widget.selproduct.quantity > 0) {
+        widget.selproduct.qty != null &&
+        widget.selproduct.qty > 0) {
       setState(() {
-        productQty = widget.selproduct.quantity;
+        productQty = widget.selproduct.qty;
       });
     } else if (!isSetMeal &&
         widget.cartItem != null &&
@@ -400,8 +400,16 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     List<ModifireData> productModifeir =
         await localAPI.getProductModifeir(productid);
     if (productModifeir.length > 0 && this.mounted) {
+      for (ModifireData modifier in productModifeir) {
+        if (modifier.isDefault == 1 && selectedModifier.length == 0) {
+          selectedModifier.add(modifier);
+        }
+      }
       setState(() {
         modifireList = productModifeir;
+        selectedModifier = selectedModifier;
+        isFirstMod = true;
+        setPrice();
       });
     }
     /* for (var item in productAttr) {
@@ -453,7 +461,7 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         for (var m = 0; m < myModels.length; m++) {
           List<MSTSubCartdetails> details =
               await localAPI.getItemModifire(myModels[m].id);
-          if (details.length > 0) {
+          if (details != null && details.length > 0) {
             for (var p = 0; p < details.length; p++) {
               var item = details[p];
               if (item.caId != null) {
@@ -744,12 +752,9 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
   }
 
   setModifire(ModifireData mod) async {
-    var isSelected = selectedModifier.any((item) => item.pmId == mod.pmId);
+    bool isSelected = selectedModifier.any((item) => item.pmId == mod.pmId);
     if (isSelected) {
       selectedModifier.removeWhere((item) => item.pmId == mod.pmId);
-      setState(() {
-        selectedModifier = selectedModifier;
-      });
       await SyncAPICalls.logActivity(
           "change modifire", "removed selected product modifire", "product", 1);
     } else {
@@ -850,10 +855,10 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     double taxvalue = taxvalues;
     if (taxlist.length > 0) {
       for (var i = 0; i < taxlist.length; i++) {
-        var taxlistitem = taxlist[i];
+        BranchTax taxlistitem = taxlist[i];
         // List<Tax> tax = await localAPI.getTaxName(taxlistitem.taxId);
         var taxval = taxlistitem.rate != null
-            ? subtNServ * double.parse(taxlistitem.rate) / 100
+            ? ((subtNServ + subT) * (double.parse(taxlistitem.rate) / 100))
             : 0.0;
         taxval = double.parse(taxval.toStringAsFixed(2));
         taxvalue += taxval;
@@ -957,13 +962,11 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
     await SyncAPICalls.logActivity(
         "product details", "Added items to cart", "cart", 1);
     Navigator.of(context).pop();
-    if (widget.addReservation != null) {
-      widget.addReservation(cartdetails, modifierSelected, attrSelected);
-    }
+    widget.addReservation(cartdetails, modifierSelected, attrSelected);
   }
 
   produtAddTocart() async {
-    if (widget.cartID == null) {
+    if (widget.cartID == null && widget.addReservation != null) {
       return addToReservation();
     }
     MST_Cart cart = new MST_Cart();
@@ -1799,13 +1802,6 @@ class _ProductQuantityDailogState extends State<ProductQuantityDailog> {
         children: modifireList.map(
           (modifier) {
             //bool isadded = selectedModifier.any((item) => item.pmId == modifier.pmId);
-            if (modifier.isDefault == 1 && selectedModifier.length == 0) {
-              setState(() {
-                setPrice();
-                selectedModifier.add(modifier);
-                isFirstMod = true;
-              });
-            }
             return Padding(
               padding: EdgeInsets.all(5),
               child: MaterialButton(

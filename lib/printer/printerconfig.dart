@@ -2453,7 +2453,9 @@ class PrintReceipt {
             bold: false,
           )),
       PosColumn(
-          text: (netsale / ordersCount).toStringAsFixed(2),
+          text: netsale != null && ordersCount != null
+              ? (netsale / ordersCount).toStringAsFixed(2)
+              : 0.00,
           width: 4,
           styles: PosStyles(
             align: PosAlign.right,

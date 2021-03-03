@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:deep_pick/deep_pick.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
@@ -252,6 +253,9 @@ class _DashboradPageState extends State<DashboradPage>
       List<TablesDetails> tabledata =
           await localAPI.getTableData(branchid, table.table_id);
       table.save_order_id = tabledata[0].saveorderid;
+      if (table.number_of_pax == null) {
+        table.number_of_pax = 0;
+      }
 
       setState(() {
         isTableSelected = true;
@@ -1903,7 +1907,7 @@ class _DashboradPageState extends State<DashboradPage>
         cart.discountAmount = disc;
         cart.serviceCharge =
             await CommunFun.countServiceCharge(cart.serviceChargePercent, subt);
-        cart.total_qty = allcartData.total_qty - cartitemdata.productQty;
+        cart.total_qty = (allcartData.total_qty ?? 0) - cartitemdata.productQty;
         cart.grand_total = (subt - disc) + taxvalues;
         cart.tax_json = json.encode(taxjson);
       }
@@ -1949,7 +1953,9 @@ class _DashboradPageState extends State<DashboradPage>
         });
       }
     } catch (e) {
-      CommunFun.showToast(context, e.message.toString());
+      if (pick(e, "message").asStringOrNull() != null) {
+        CommunFun.showToast(context, e.message.toString());
+      }
     }
   }
 
@@ -2092,6 +2098,7 @@ class _DashboradPageState extends State<DashboradPage>
       }
       localAPI.deleteTableOrder(selectedTable.table_id);
       Preferences.removeSinglePref(Constant.TABLE_DATA);
+      Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     } else {
       await localAPI.updateCartListDetails(
           originalCartList, originalCartList[0].cartId);

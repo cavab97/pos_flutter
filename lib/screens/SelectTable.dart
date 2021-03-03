@@ -597,6 +597,7 @@ class _SelectTablePageState extends State<SelectTablePage>
       await localAPI.deleteTableOrder(selectedTable.tableId);
     }
     await Preferences.removeSinglePref(Constant.TABLE_DATA);
+    Preferences.removeSinglePref(Constant.CUSTOMER_DATA);
     setState(() {
       isLoading = false;
       isMenuopen = true;

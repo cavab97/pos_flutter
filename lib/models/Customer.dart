@@ -1,3 +1,5 @@
+import 'package:deep_pick/deep_pick.dart';
+
 class Customer {
   int customerId;
   String uuid;
@@ -70,8 +72,8 @@ class Customer {
     name = json['name'];
     username = json['username'];
     email = json['email'];
-    role = json['role'] != "" ? json['role'] : 0;
-    phonecode = json['phonecode'] != "" ? json['role'] : 0;
+    role = json['role'] != null ? pick(json['role']).asIntOrNull() : 0;
+    phonecode = json['phonecode'] != "" ? json['phonecode'] : 0;
     mobile = json['mobile'];
     password = json['password'];
     address = json['address'];

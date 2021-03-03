@@ -465,37 +465,46 @@ class LocalAPI {
   }
 
   Future<List<Attribute_Data>> getProductDetails(productId) async {
-    String qry = " SELECT product.product_id, category_attribute.name as attr_name,attributes.ca_id, " +
-        " group_concat(product_attribute.price) as attr_types_price,group_concat(attributes.name) as attr_types ,group_concat(attributes.attribute_id) as attributeId , group_concat(attributes.is_default) as is_default" +
-        " FROM product LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1" +
-        " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1" +
-        " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1 " +
-        " WHERE product.product_id = " +
-        productId.toString() +
-        " AND product_attribute.product_id = " +
-        productId.toString() +
-        " GROUP by category_attribute.ca_id";
-    List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    List<Attribute_Data> list = res.length > 0
-        ? res.map((c) => Attribute_Data.fromJson(c)).toList()
-        : [];
+    try {
+      String qry = " SELECT product.product_id, category_attribute.name as attr_name,attributes.ca_id, " +
+          " group_concat(product_attribute.price) as attr_types_price,group_concat(attributes.name) as attr_types ,group_concat(attributes.attribute_id) as attributeId , group_concat(attributes.is_default) as is_default" +
+          " FROM product LEFT JOIN product_attribute on product_attribute.product_id = product.product_id and product_attribute.status = 1" +
+          " LEFT JOIN category_attribute on category_attribute.ca_id = product_attribute.ca_id and category_attribute.status = 1" +
+          " LEFT JOIN attributes on attributes.attribute_id = product_attribute.attribute_id and attributes.status = 1 " +
+          " WHERE product.product_id = " +
+          productId.toString() +
+          " AND product_attribute.product_id = " +
+          productId.toString() +
+          " GROUP by category_attribute.ca_id";
+      List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+      List<Attribute_Data> list = res.length > 0
+          ? res.map((c) => Attribute_Data.fromJson(c)).toList()
+          : [];
 
-    return list;
+      return list;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<List<ModifireData>> getProductModifeir(productId) async {
-    String qry =
-        "SELECT modifier.name,modifier.modifier_id,modifier.is_default,product_modifier.pm_id,product_modifier.price FROM  product_modifier " +
-            " LEFT JOIN modifier on modifier.modifier_id = product_modifier.modifier_id " +
-            " WHERE product_modifier.product_id = " +
-            productId.toString() +
-            " AND product_modifier.status = 1" +
-            " GROUP by product_modifier.pm_id";
-    List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    List<ModifireData> list =
-        res.isNotEmpty ? res.map((c) => ModifireData.fromJson(c)).toList() : [];
+    try {
+      String qry =
+          "SELECT modifier.name,modifier.modifier_id,modifier.is_default,product_modifier.pm_id,product_modifier.price FROM  product_modifier " +
+              " LEFT JOIN modifier on modifier.modifier_id = product_modifier.modifier_id " +
+              " WHERE product_modifier.product_id = " +
+              productId.toString() +
+              " AND product_modifier.status = 1" +
+              " GROUP by product_modifier.pm_id";
+      List<Map> res = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+      List<ModifireData> list = res.isNotEmpty
+          ? res.map((c) => ModifireData.fromJson(c)).toList()
+          : [];
 
-    return list;
+      return list;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<int> insertItemTocart(cartidd, MST_Cart cartData,
@@ -555,41 +564,65 @@ class LocalAPI {
     return 1;
   }
 
-  Future<int> addintoCartDetails(cartdetails) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    var cartdetailid;
-    var newObj = cartdetails.toJson();
-    newObj.remove("attr_name");
-    newObj.remove("modi_name");
-    if (cartdetails.id != null) {
-      cartdetailid = await db.update("mst_cart_detail", newObj,
-          where: 'id = ?', whereArgs: [cartdetails.id]);
-      cartdetailid = cartdetails.id;
-    } else {
-      try {
-        cartdetailid = await db.insert("mst_cart_detail", newObj);
-      } catch (e) {
-        print(e);
-      }
+  Future<int> updateCartDetailsPrice(int detailID, double amount) async {
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      Map<String, dynamic> updateObj = new Map();
+      updateObj["product_detail_amount"] = amount;
+      return await db.update("mst_cart_detail", updateObj,
+          where: 'id=?', whereArgs: [detailID]);
+    } catch (e) {
+      rethrow;
     }
-    /* 
+  }
+
+  Future<int> addintoCartDetails(cartdetails) async {
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      var cartdetailid;
+      var newObj = cartdetails.toJson();
+      newObj.remove("attr_name");
+      newObj.remove("modi_name");
+      if (cartdetails.id != null) {
+        cartdetailid = await db.update("mst_cart_detail", newObj,
+            where: 'id = ?', whereArgs: [cartdetails.id]);
+        cartdetailid = cartdetails.id;
+      } else {
+        try {
+          cartdetailid = await db.insert("mst_cart_detail", newObj);
+        } catch (e) {
+          print(e);
+        }
+      }
+      /* 
     await SyncAPICalls.logActivity(
         "product", "insert  cart details", "mst_cart_detail", cartdetailid); */
-    return cartdetailid;
+      return cartdetailid;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<int> deletesubcartDetail(cartdetailsId) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    var result = await db.delete("mst_cart_sub_detail",
-        where: "cart_details_id =?", whereArgs: [cartdetailsId]);
-    /* await SyncAPICalls.logActivity(
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      var result = await db.delete("mst_cart_sub_detail",
+          where: "cart_details_id =?", whereArgs: [cartdetailsId]);
+      /* await SyncAPICalls.logActivity(
         "cart", "delete sub cart Detail", "mst_sub_cart_detail", cartdetailsId); */
-    return result;
+      return result;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<int> addsubCartData(MSTSubCartdetails data) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    return await db.insert("mst_cart_sub_detail", data.toJson());
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      return await db.insert("mst_cart_sub_detail", data.toJson());
+    } catch (e) {
+      rethrow;
+    }
     /* await SyncAPICalls.logActivity(
         "product", "insert sub cart details", "mst_cart_sub_detail", result1); */
   }
@@ -609,9 +642,27 @@ class LocalAPI {
   }
 
   Future<List<MSTCartdetails>> getCartItem(cartId) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      List<MSTCartdetails> list = [];
+      String qry = " SELECT mst_cart_detail.* ,group_concat(attributes.name) as attrName ,group_concat(modifier.name) as modiName from mst_cart_detail " +
+          " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  (mst_cart_sub_detail.attribute_id != '' OR mst_cart_sub_detail.modifier_id != '' )" +
+          " LEFT JOIN attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != " +
+          " '' " +
+          " LEFT JOIN modifier on modifier.modifier_id = mst_cart_sub_detail.modifier_id AND mst_cart_sub_detail.modifier_id != " +
+          " '' " +
+          " where cart_id =" +
+          cartId.toString() +
+          " group by mst_cart_detail.id";
+      var res = await db.rawQuery(qry);
+      list = res.isNotEmpty
+          ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
+          : [];
+      return list;
+    } catch (e) {
+      rethrow;
+    }
     //var isjoin = await CommunFun.checkIsJoinServer();
-    List<MSTCartdetails> list = [];
     /* if (isjoin == true) {
       var apiurl = await Configrations.ipAddress() + Configrations.cart_items;
       var stringParams = {"cart_id": cartId};
@@ -623,20 +674,6 @@ class LocalAPI {
             : [];
       }
     } else { */
-    String qry = " SELECT mst_cart_detail.* ,group_concat(attributes.name) as attrName ,group_concat(modifier.name) as modiName from mst_cart_detail " +
-        " LEFT JOIN mst_cart_sub_detail on mst_cart_sub_detail.cart_details_id = mst_cart_detail.id AND  (mst_cart_sub_detail.attribute_id != '' OR mst_cart_sub_detail.modifier_id != '' )" +
-        " LEFT JOIN attributes on attributes.attribute_id = mst_cart_sub_detail.attribute_id  AND  mst_cart_sub_detail.attribute_id != " +
-        " '' " +
-        " LEFT JOIN modifier on modifier.modifier_id = mst_cart_sub_detail.modifier_id AND mst_cart_sub_detail.modifier_id != " +
-        " '' " +
-        " where cart_id =" +
-        cartId.toString() +
-        " group by mst_cart_detail.id";
-    var res = await db.rawQuery(qry);
-    list = res.isNotEmpty
-        ? res.map((c) => MSTCartdetails.fromJson(c)).toList()
-        : [];
-    return list;
   }
 
   Future<bool> updateItemDiscount(MSTCartdetails product, int cartID,
@@ -1328,14 +1365,18 @@ class LocalAPI {
   }
 
   Future<List<BranchTax>> getTaxList(branchid) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    String qry = "SELECT * from branch_tax WHERE branch_id = " +
-        branchid.toString() +
-        " AND status = 1";
-    var tax = await db.rawQuery(qry);
-    List<BranchTax> list =
-        tax.isNotEmpty ? tax.map((c) => BranchTax.fromJson(c)).toList() : [];
-    return list;
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      String qry = "SELECT * from branch_tax WHERE branch_id = " +
+          branchid.toString() +
+          " AND status = 1";
+      var tax = await db.rawQuery(qry);
+      List<BranchTax> list =
+          tax.isNotEmpty ? tax.map((c) => BranchTax.fromJson(c)).toList() : [];
+      return list;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<List<Tax>> getTaxName(taxId) async {
@@ -1632,13 +1673,17 @@ class LocalAPI {
   }
 
   Future<List<Table_order>> getTableOrders(tableid) async {
-    String qry =
-        "SELECT * from table_order where table_id = " + tableid.toString();
-    var tableList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
-    List<Table_order> list = tableList.isNotEmpty
-        ? tableList.map((c) => Table_order.fromJson(c)).toList()
-        : [];
-    return list;
+    try {
+      String qry =
+          "SELECT * from table_order where table_id = " + tableid.toString();
+      var tableList = await DatabaseHelper.dbHelper.getDatabse().rawQuery(qry);
+      List<Table_order> list = tableList.isNotEmpty
+          ? tableList.map((c) => Table_order.fromJson(c)).toList()
+          : [];
+      return list;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<List<User>> getUser() async {
@@ -1681,14 +1726,18 @@ class LocalAPI {
   }
 
   Future<List<Printer>> getPrinter(productID) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    String qry =
-        "SELECT * from printer where printer.printer_id = (Select printer_id from product_branch WHERE product_branch.product_id = $productID)";
-    var result = await db.rawQuery(qry);
-    List<Printer> list = result.isNotEmpty
-        ? result.map((c) => Printer.fromJson(c)).toList()
-        : [];
-    return list;
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      String qry =
+          "SELECT * from printer where printer.printer_id = (Select printer_id from product_branch WHERE product_branch.product_id = $productID)";
+      var result = await db.rawQuery(qry);
+      List<Printer> list = result.isNotEmpty
+          ? result.map((c) => Printer.fromJson(c)).toList()
+          : [];
+      return list;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<List<Printer>> getAllPrinter() async {
@@ -1781,7 +1830,7 @@ class LocalAPI {
       try {
         await db.rawQuery(deleteQry); //action delete new item added
       } catch (e) {
-        print(e.toString());
+        rethrow;
       }
       return true;
     }
@@ -1851,36 +1900,44 @@ class LocalAPI {
   }
 
   Future<List<ProductDetails>> productdData(productid) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    String qry =
-        " SELECT product.*, price_type.name as price_type_Name , base64   from product " +
-            " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
-            " LEFT join asset on asset.asset_type_id = product.product_id " +
-            " where product_id = " +
-            productid.toString();
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      String qry =
+          " SELECT product.*, price_type.name as price_type_Name , base64   from product " +
+              " LEFT join price_type on price_type.pt_id = product.price_type_id AND price_type.status = 1 " +
+              " LEFT join asset on asset.asset_type_id = product.product_id " +
+              " where product_id = " +
+              productid.toString();
 
-    var res = await db.rawQuery(qry);
-    List<ProductDetails> list = res.length > 0
-        ? res.map((c) => ProductDetails.fromJson(c)).toList()
-        : [];
+      var res = await db.rawQuery(qry);
+      List<ProductDetails> list = res.length > 0
+          ? res.map((c) => ProductDetails.fromJson(c)).toList()
+          : [];
 
-    return list;
+      return list;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<List<SetMeal>> setmealData(mealid) async {
-    Database db = DatabaseHelper.dbHelper.getDatabse();
-    String qry = "select setmeal.* ,  base64  from setmeal " +
-        " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
-        " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id " +
-        " WHERE setmeal.setmeal_id = " +
-        mealid.toString() +
-        " AND setmeal.status = 1 GROUP by setmeal.setmeal_id ";
-    var mealList = await db.rawQuery(qry);
-    List<SetMeal> list = mealList.isNotEmpty
-        ? mealList.map((c) => SetMeal.fromJson(c)).toList()
-        : [];
+    try {
+      Database db = DatabaseHelper.dbHelper.getDatabse();
+      String qry = "select setmeal.* ,  base64  from setmeal " +
+          " LEFT join setmeal_product on setmeal_product.setmeal_id = setmeal.setmeal_id " +
+          " LEFT join asset on asset.asset_type = 2 AND asset.asset_type_id = setmeal.setmeal_id " +
+          " WHERE setmeal.setmeal_id = " +
+          mealid.toString() +
+          " AND setmeal.status = 1 GROUP by setmeal.setmeal_id ";
+      var mealList = await db.rawQuery(qry);
+      List<SetMeal> list = mealList.isNotEmpty
+          ? mealList.map((c) => SetMeal.fromJson(c)).toList()
+          : [];
 
-    return list;
+      return list;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<List<Role>> getRoldata(roleID) async {
